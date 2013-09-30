@@ -1,17 +1,39 @@
+//                   In the name of GOD
+/*
+ * Twinner: An unpacker which utilizes concolic execution.
+ * Copyright © 2013  Behnam Momeni
+ *
+ * This program comes with ABSOLUTELY NO WARRANTY.
+ * See the COPYING file distributed with this work for information
+ * regarding copyright ownership.
+ *
+ * This file is part of Twinner project.
+ */
+
 #include "Expression.h"
 
-void edu::sharif::twinner::trace::Expression::toString() {
-	throw "Not yet implemented";
+namespace edu {
+namespace sharif {
+namespace twinner {
+namespace trace {
+
+void Expression::toString () {
+  throw "Not yet implemented";
 }
 
-void edu::sharif::twinner::trace::Expression::unaryOperation(edu::sharif::twinner::trace::Operator op, edu::sharif::twinner::trace::Expression exp) {
-	throw "Not yet implemented";
+void Expression::unaryOperation (Operator op, Expression exp) {
+  throw "Not yet implemented";
 }
 
-void edu::sharif::twinner::trace::Expression::binaryOperation(edu::sharif::twinner::trace::Operator op, edu::sharif::twinner::trace::Expression exp) {
-	throw "Not yet implemented";
+void Expression::binaryOperation (Operator op, Expression exp) {
+  throw "Not yet implemented";
 }
 
-edu::sharif::twinner::trace::Expression edu::sharif::twinner::trace::Expression::clone() {
-	throw "Not yet implemented";
+Expression Expression::clone () {
+  throw "Not yet implemented";
+}
+
+}
+}
+}
 }
