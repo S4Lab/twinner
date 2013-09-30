@@ -12,6 +12,10 @@
 
 #include "Trace.h"
 
+#include "Expression.h"
+#include "Constraint.h"
+#include "Syscall.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -21,19 +25,19 @@ void getCurrentTraceSegment () {
   throw "Not yet implemented";
 }
 
-edu::sharif::twinner::trace::Expression getSymbolicExpression (int address) {
+Expression getSymbolicExpression (int address) {
   throw "Not yet implemented";
 }
 
-void addPathConstraint (edu::sharif::twinner::trace::Constraint c) {
+void addPathConstraint (Constraint c) {
   throw "Not yet implemented";
 }
 
-void setSymbolicExpression (int address, edu::sharif::twinner::trace::Expression exp) {
+void setSymbolicExpression (int address, Expression exp) {
   throw "Not yet implemented";
 }
 
-void syscallInvoked (edu::sharif::twinner::trace::Syscall s) {
+void syscallInvoked (Syscall s) {
   throw "Not yet implemented";
 }
 

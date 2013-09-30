@@ -10,6 +10,8 @@
  * This file is part of Twinner project.
  */
 
+#include "Operator.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -24,13 +26,11 @@ private:
 public:
   void toString ();
 
-  void unaryOperation (edu::sharif::twinner::trace::Operator op,
-      edu::sharif::twinner::trace::Expression exp);
+  void unaryOperation (Operator op, Expression exp);
 
-  void binaryOperation (edu::sharif::twinner::trace::Operator op,
-      edu::sharif::twinner::trace::Expression exp);
+  void binaryOperation (Operator op, Expression exp);
 
-  edu::sharif::twinner::trace::Expression clone ();
+  Expression clone ();
 };
 
 }

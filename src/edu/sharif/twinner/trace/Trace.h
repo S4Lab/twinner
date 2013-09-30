@@ -15,19 +15,23 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+class Expression;
+class Constraint;
+class Syscall;
+
 class Trace {
 
 private:
   void getCurrentTraceSegment ();
 
 public:
-  edu::sharif::twinner::trace::Expression getSymbolicExpression (int address);
+  Expression getSymbolicExpression (int address);
 
-  void addPathConstraint (edu::sharif::twinner::trace::Constraint c);
+  void addPathConstraint (Constraint c);
 
-  void setSymbolicExpression (int address, edu::sharif::twinner::trace::Expression exp);
+  void setSymbolicExpression (int address, Expression exp);
 
-  void syscallInvoked (edu::sharif::twinner::trace::Syscall s);
+  void syscallInvoked (Syscall s);
 
   void saveToFile ();
 

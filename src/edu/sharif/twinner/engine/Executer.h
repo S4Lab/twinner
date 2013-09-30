@@ -13,6 +13,10 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace trace {
+
+class Trace;
+}
 namespace engine {
 
 class Executer {

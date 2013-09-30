@@ -23,7 +23,7 @@ Executer::Executer (int pinLauncher, int inputBinary) {
   throw "Not yet implemented";
 }
 
-void edu::sharif::twinner::engine::Executer::setSymbolsValues () {
+void Executer::setSymbolsValues () {
   throw "Not yet implemented";
 }
 
