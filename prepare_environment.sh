@@ -1,5 +1,12 @@
-cp -l -a -u src/* "../pin-2.13-61206-gcc.4.4.7-linux/source/tools/Twinner/"
+cp -l -a -u src/* "deploy/"
 ptracescope=$(cat /proc/sys/kernel/yama/ptrace_scope)
-if [ ! "$ptracescope" = "0" ]; then
-	echo 0 | sudo -k tee /proc/sys/kernel/yama/ptrace_scope > /dev/null
+aslrstate=$(cat /proc/sys/kernel/randomize_va_space)
+if [ ! "$ptracescope$aslrstate" = "00" ]; then
+	if [ ! "$ptracescope" = "0" ]; then
+		echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope > /dev/null
+	fi
+	if [ ! "$aslrstate" = "0" ]; then
+		echo 0 | sudo tee /proc/sys/kernel/randomize_va_space > /dev/null
+	fi
+	sudo -k
 fi
