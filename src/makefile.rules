@@ -17,10 +17,10 @@
 # This defines tests which run tools of the same name.  This is simply for convenience to avoid
 # defining the test name twice (once in TOOL_ROOTS and again in TEST_ROOTS).
 # Tests defined here should not be defined in TOOL_ROOTS and TEST_ROOTS.
-TEST_TOOL_ROOTS := MyPinTool
+TEST_TOOL_ROOTS := TwinTool
 
 # This defines the tests to be run that were not already defined in TEST_TOOL_ROOTS.
-TEST_ROOTS :=
+TEST_ROOTS := engine trace
 
 # This defines a list of tests that should run in the "short" sanity. Tests in this list must also
 # appear either in the TEST_TOOL_ROOTS or the TEST_ROOTS list.
@@ -72,3 +72,37 @@ LIB_ROOTS :=
 
 # This section contains the build rules for all binaries that have special build rules.
 # See makefile.default.rules for the default build rules.
+
+TOOL_CXXFLAGS += -I.
+APP_CXXFLAGS += -I.
+
+
+MY_FILTER = $(foreach p,$(2),$(if $(findstring $(1),$(p)),$(p),))
+
+TWINNER_SRC := $(shell find edu -name \*.cpp; find edu -type d -exec mkdir -p $(OBJDIR)'{}' \;)
+TWINNER_OBJ := $(patsubst %.cpp,$(OBJDIR)%$(OBJ_SUFFIX), $(TWINNER_SRC))
+TWINNER_SUB_TRACE_OBJ := $(call MY_FILTER,/trace/,$(TWINNER_OBJ))
+TWINNER_SUB_TWINTOOL_OBJ := $(call MY_FILTER,/twintool/,$(TWINNER_OBJ))
+TWINNER_SUB_ENGINE_OBJ := $(call MY_FILTER,/engine/,$(TWINNER_OBJ)) $(OBJDIR)edu/sharif/twinner/main$(OBJ_SUFFIX)
+TWINNER_DEP := $(TWINNER_OBJ:.o=.d)
+
+$(OBJDIR)%.d: %.cpp
+	./depends.sh $@ $(TOOL_CXXFLAGS) $*.cpp > $@
+
+include $(TWINNER_DEP)
+
+
+$(OBJDIR)Trace$(LIB_SUFFIX): $(TWINNER_SUB_TRACE_OBJ)
+	rm -f $@
+	ar cq $@ $(TWINNER_SUB_TRACE_OBJ)
+
+$(OBJDIR)TwinTool$(PINTOOL_SUFFIX): $(TWINNER_SUB_TWINTOOL_OBJ) $(OBJDIR)Trace$(LIB_SUFFIX)
+	$(LINKER) $(TOOL_LDFLAGS_NOOPT) $(LINK_EXE)$@ $(^:%.h=) $(TOOL_LPATHS) $(TOOL_LIBS)
+
+$(OBJDIR)Twinner$(EXE_SUFFIX): $(TWINNER_SUB_ENGINE_OBJ) $(OBJDIR)Trace$(LIB_SUFFIX)
+	$(LINKER) $(COMP_EXE)$@ $(TWINNER_SUB_ENGINE_OBJ) $(OBJDIR)Trace$(LIB_SUFFIX) $(APP_LDFLAGS) $(APP_LIBS)
+
+twinner: $(OBJDIR)TwinTool$(PINTOOL_SUFFIX) $(OBJDIR)Twinner$(EXE_SUFFIX)
+
+.PHONY: twinner
+
