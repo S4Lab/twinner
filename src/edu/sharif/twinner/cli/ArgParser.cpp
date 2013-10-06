@@ -40,7 +40,11 @@ namespace cli {
 
 ArgParser::ArgParser (const int argc, const char * const argv[], const Option options[],
     const bool inOrder) {
-  if (argc < 2 || !argv || !options) {
+  if (!options) {
+    return;
+  }
+  if (argc < 2 || !argv) {
+    checkMandatoryOptionsPresence (options);
     return;
   }
 
@@ -77,13 +81,18 @@ ArgParser::ArgParser (const int argc, const char * const argv[], const Option op
   if (err.size ()) {
     data.clear ();
   } else {
-    for (unsigned i = 0; i < non_options.size (); ++i) {
-      data.push_back (Record ());
-      data.back ().argument.swap (non_options[i]);
-    }
-    while (argind < argc) {
-      data.push_back (Record ());
-      data.back ().argument = argv[argind++];
+    checkMandatoryOptionsPresence (options);
+    if (err.size ()) {
+      data.clear ();
+    } else {
+      for (unsigned i = 0; i < non_options.size (); ++i) {
+        data.push_back (Record ());
+        data.back ().argument.swap (non_options[i]);
+      }
+      while (argind < argc) {
+        data.push_back (Record ());
+        data.back ().argument = argv[argind++];
+      }
     }
   }
 }
@@ -98,18 +107,41 @@ ArgParser::ArgParser (const char * const opt, const char * const arg,
     int argind = 1;     // dummy
     if (opt[1] == '-') {
       if (opt[2]) {
-        parseLongOption (opt, arg, options, argind);
+        if (parseLongOption (opt, arg, options, argind)) {
+          checkMandatoryOptionsPresence (options);
+        }
       }
     } else {
-      parseShortOption (opt, arg, options, argind);
+      if (parseShortOption (opt, arg, options, argind)) {
+        checkMandatoryOptionsPresence (options);
+      }
     }
-    if (err.size ()) {
-      data.clear ();
-    }
+
   } else {
     data.push_back (Record ());
     data.back ().argument = opt;
+    checkMandatoryOptionsPresence (options);
   }
+  if (err.size ()) {
+    data.clear ();
+  }
+}
+
+bool ArgParser::checkMandatoryOptionsPresence (const Option options[]) {
+  for (int i = 0; options[i].code != 0; ++i) {
+    if (options[i].mandatory) {
+      if (options[i].name) {
+        err = "option '--";
+        err += options[i].name;
+        err += "' is mandatory.";
+      } else {
+        err = "option is mandatory -- ";
+        err += (char) (options[i].code);
+      }
+      return false;
+    }
+  }
+  return true;
 }
 
 bool ArgParser::parseLongOption (const char * const opt, const char * const arg,
@@ -153,6 +185,8 @@ bool ArgParser::parseLongOption (const char * const opt, const char * const arg,
 
   ++argind;
   data.push_back (Record (options[index].code));
+
+  options[index].mandatory = false; // this option is visited, so it's not required anymore!
 
   if (opt[len + 2]) { // '--<long_option>=<argument>' syntax
     if (options[index].hasArg == NO) {
@@ -214,6 +248,8 @@ bool ArgParser::parseShortOption (const char * const opt, const char * const arg
       ++argind;
       cind = 0;
     }	// opt finished
+
+    options[index].mandatory = false; // this option is visited, so it's not required anymore!
 
     if (options[index].hasArg != NO && cind > 0 && opt[cind]) {
       data.back ().argument = &opt[cind];

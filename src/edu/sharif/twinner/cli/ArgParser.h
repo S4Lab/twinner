@@ -66,8 +66,10 @@ public:
 
   struct Option {
     int code;			// Short option letter or code ( code != 0 )
-    const char * name;		// Long option name (maybe null)
+    const char *name;		// Long option name (maybe null)
     HasArg hasArg;
+    const char *description; // Long description about this option (to be used as the help message)
+    mutable bool mandatory; // true indicates that this option must be present
   };
 
 private:
@@ -81,6 +83,8 @@ private:
 
   std::string err;
   std::vector < Record > data;
+
+  bool checkMandatoryOptionsPresence (const Option options[]);
 
   bool parseLongOption (const char * const opt, const char * const arg,
       const Option options[], int & argind);
