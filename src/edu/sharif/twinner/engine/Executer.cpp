@@ -13,6 +13,7 @@
 #include "Executer.h"
 
 #include <stdlib.h>
+#include <iostream>
 
 #include "edu/sharif/twinner/trace/Trace.h"
 
@@ -22,6 +23,8 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace engine {
+
+const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/trace.dat";
 
 Executer::Executer (string pinLauncher, string inputBinary, bool _verbose) :
     verbose (_verbose), command (pinLauncher + " -t TwinTool.so -- " + inputBinary) {
@@ -53,7 +56,8 @@ edu::sharif::twinner::trace::Trace *Executer::executeSingleTrace () {
   if (verbose) {
     cout << "The system(...) call returns code: " << ret << endl;
   }
-  return edu::sharif::twinner::trace::Trace::loadFromFile ("/tmp/twinner/trace.dat");
+  return edu::sharif::twinner::trace::Trace::loadFromFile (
+      EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
 }
 
 }

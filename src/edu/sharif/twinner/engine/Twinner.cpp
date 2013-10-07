@@ -12,6 +12,8 @@
 
 #include "Twinner.h"
 
+#include <iostream>
+
 #include "Executer.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"

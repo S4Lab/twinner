@@ -17,6 +17,8 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
+const char *TwinTool::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/trace.dat";
+
 void TwinTool::run () {
   throw "Not yet implemented";
 }
