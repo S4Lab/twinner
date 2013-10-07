@@ -13,21 +13,25 @@
 #ifndef EXECUTER_H
 #define EXECUTER_H
 
+#include <string>
+#include <set>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
 class Trace;
+class Symbol;
 }
 namespace engine {
 
 class Executer {
 
 public:
-  Executer (int pinLauncher, int inputBinary);
+  Executer (std::string pinLauncher, std::string inputBinary);
 
-  void setSymbolsValues ();
+  void setSymbolsValues (const std::set < edu::sharif::twinner::trace::Symbol > &symbols);
 
   edu::sharif::twinner::trace::Trace executeSingleTrace ();
 };

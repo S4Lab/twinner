@@ -12,7 +12,10 @@
 
 #include "Twinner.h"
 
-#include <string>
+#include "Executer.h"
+
+#include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/Symbol.h"
 
 using namespace std;
 
@@ -22,23 +25,41 @@ namespace twinner {
 namespace engine {
 
 void Twinner::setInputBinaryPath (string input) {
-  throw "Not yet implemented";
+  this->input = input;
 }
 
 void Twinner::setPinLauncherPath (string pin) {
-  throw "Not yet implemented";
+  this->pin = pin;
 }
 
 void Twinner::setTwinBinaryPath (string twin) {
-  throw "Not yet implemented";
+  this->twin = twin;
 }
 
 void Twinner::generateTwinBinary () {
+  Executer ex (pin, input);
+  set < edu::sharif::twinner::trace::Symbol > symbols;
+  bool somePathsAreNotCovered = true;
+  while (somePathsAreNotCovered) {
+    ex.setSymbolsValues (symbols);
+
+    edu::sharif::twinner::trace::Trace trace = ex.executeSingleTrace ();
+    addExecutionTrace (trace);
+
+    symbols.clear ();
+    somePathsAreNotCovered = calculateSymbolsValuesForCoveringNextPath (trace, symbols);
+  }
+  codeTracesIntoTwinBinary ();
+}
+
+void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace &trace) {
   throw "Not yet implemented";
 }
 
-void Twinner::calculateSymbolsValuesForCoveringNextPath () {
-  throw "Not yet implemented";
+bool Twinner::calculateSymbolsValuesForCoveringNextPath (
+    const edu::sharif::twinner::trace::Trace &trace,
+    set < edu::sharif::twinner::trace::Symbol > &symbols) {
+  return false;
 }
 
 void Twinner::codeTracesIntoTwinBinary () {

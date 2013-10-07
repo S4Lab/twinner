@@ -14,13 +14,23 @@
 #define TWINNER_H
 
 #include <string>
+#include <set>
 
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace trace {
+
+class Trace;
+class Symbol;
+}
 namespace engine {
 
 class Twinner {
+private:
+  std::string input;
+  std::string pin;
+  std::string twin;
 
 public:
   void setInputBinaryPath (std::string input);
@@ -30,7 +40,11 @@ public:
   void generateTwinBinary ();
 
 private:
-  void calculateSymbolsValuesForCoveringNextPath ();
+  void addExecutionTrace (const edu::sharif::twinner::trace::Trace &trace);
+
+  bool calculateSymbolsValuesForCoveringNextPath (
+      const edu::sharif::twinner::trace::Trace &trace,
+      std::set < edu::sharif::twinner::trace::Symbol > &symbols);
 
   void codeTracesIntoTwinBinary ();
 };

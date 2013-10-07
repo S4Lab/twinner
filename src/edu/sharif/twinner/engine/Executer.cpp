@@ -14,16 +14,19 @@
 
 #include "edu/sharif/twinner/trace/Trace.h"
 
+using namespace std;
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace engine {
 
-Executer::Executer (int pinLauncher, int inputBinary) {
+Executer::Executer (string pinLauncher, string inputBinary) {
   throw "Not yet implemented";
 }
 
-void Executer::setSymbolsValues () {
+void Executer::setSymbolsValues (
+    const set < edu::sharif::twinner::trace::Symbol > &symbols) {
   throw "Not yet implemented";
 }
 
