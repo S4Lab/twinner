@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef CONSTRAINT_H
+#define CONSTRAINT_H
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -25,3 +28,5 @@ public:
 }
 }
 }
+
+#endif /* Constraint.h */

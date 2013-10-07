@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef OPERATOR_H
+#define OPERATOR_H
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -23,3 +26,5 @@ enum Operator {
 }
 }
 }
+
+#endif /* Operator.h */

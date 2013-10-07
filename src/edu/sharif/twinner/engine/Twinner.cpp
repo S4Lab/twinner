@@ -12,20 +12,24 @@
 
 #include "Twinner.h"
 
+#include <string>
+
+using namespace std;
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace engine {
 
-void Twinner::setPinLauncherPath () {
+void Twinner::setInputBinaryPath (string input) {
   throw "Not yet implemented";
 }
 
-void Twinner::setInputBinaryPath () {
+void Twinner::setPinLauncherPath (string pin) {
   throw "Not yet implemented";
 }
 
-void Twinner::setTwinBinaryPath () {
+void Twinner::setTwinBinaryPath (string twin) {
   throw "Not yet implemented";
 }
 

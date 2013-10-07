@@ -10,6 +10,11 @@
  * This file is part of Twinner project.
  */
 
+#ifndef TWINNER_H
+#define TWINNER_H
+
+#include <string>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -18,11 +23,9 @@ namespace engine {
 class Twinner {
 
 public:
-  void setPinLauncherPath ();
-
-  void setInputBinaryPath ();
-
-  void setTwinBinaryPath ();
+  void setInputBinaryPath (std::string input);
+  void setPinLauncherPath (std::string pin);
+  void setTwinBinaryPath (std::string twin);
 
   void generateTwinBinary ();
 
@@ -36,3 +39,5 @@ private:
 }
 }
 }
+
+#endif /* Twinner.h */

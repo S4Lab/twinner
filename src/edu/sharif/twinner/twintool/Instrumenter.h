@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef INSTRUMENTER_H
+#define INSTRUMENTER_H
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -27,3 +30,5 @@ public:
 }
 }
 }
+
+#endif /* Instrumenter.h */

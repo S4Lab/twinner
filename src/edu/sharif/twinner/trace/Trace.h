@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef TRACE_H
+#define TRACE_H
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -42,3 +45,5 @@ public:
 }
 }
 }
+
+#endif /* Trace.h */

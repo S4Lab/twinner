@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef EXPRESSION_H
+#define EXPRESSION_H
+
 #include "Operator.h"
 
 namespace edu {
@@ -37,3 +40,5 @@ public:
 }
 }
 }
+
+#endif /* Expression.h */

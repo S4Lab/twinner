@@ -16,6 +16,8 @@
 
 #include "ArgParser.h"
 
+#include "edu/sharif/twinner/engine/Twinner.h"
+
 using namespace std;
 
 using namespace edu::sharif::twinner::cli;

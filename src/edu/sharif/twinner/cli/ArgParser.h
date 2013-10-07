@@ -27,6 +27,9 @@
  Public License.
  */
 
+#ifndef ARG_PARSER_H
+#define ARG_PARSER_H
+
 #include <string>
 #include <vector>
 
@@ -132,3 +135,5 @@ public:
 }
 }
 }
+
+#endif /* ArgParser.h */

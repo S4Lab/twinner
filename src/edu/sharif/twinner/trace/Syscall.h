@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef SYSCALL_H
+#define SYSCALL_H
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -22,3 +25,5 @@ class Syscall {
 }
 }
 }
+
+#endif /* Syscall.h */

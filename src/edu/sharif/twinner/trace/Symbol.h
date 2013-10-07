@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef SYMBOL_H
+#define SYMBOL_H
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -28,3 +31,5 @@ private:
 }
 }
 }
+
+#endif /* Symbol.h */

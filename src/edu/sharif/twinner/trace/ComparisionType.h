@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef COMPARISON_TYPE_H
+#define COMPARISON_TYPE_H
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -23,3 +26,5 @@ enum ComparisionType {
 }
 }
 }
+
+#endif /* ComparisionType.h */

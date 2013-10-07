@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef EXECUTER_H
+#define EXECUTER_H
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -33,3 +36,5 @@ public:
 }
 }
 }
+
+#endif /* Executer.h */

@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef EXECUTION_TRACE_SEGMENT_H
+#define EXECUTION_TRACE_SEGMENT_H
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -22,3 +25,5 @@ class ExecutionTraceSegment {
 }
 }
 }
+
+#endif /* ExecutionTraceSegment.h */

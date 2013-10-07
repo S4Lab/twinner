@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef TWIN_TOOL_H
+#define TWIN_TOOL_H
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -28,3 +31,5 @@ private:
 }
 }
 }
+
+#endif /* TwinTool.h */

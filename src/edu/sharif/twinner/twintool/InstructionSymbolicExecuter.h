@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#ifndef INSTRUCTION_SYMBOLIC_EXECUTER_H
+#define INSTRUCTION_SYMBOLIC_EXECUTER_H
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -29,3 +32,5 @@ public:
 }
 }
 }
+
+#endif /* InstructionSymbolicExecuter.h */
