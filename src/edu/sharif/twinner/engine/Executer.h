@@ -27,13 +27,16 @@ class Symbol;
 namespace engine {
 
 class Executer {
+private:
+  bool verbose;
+  std::string command;
 
 public:
-  Executer (std::string pinLauncher, std::string inputBinary);
+  Executer (std::string pinLauncher, std::string inputBinary, bool verbose);
 
   void setSymbolsValues (const std::set < edu::sharif::twinner::trace::Symbol > &symbols);
 
-  edu::sharif::twinner::trace::Trace executeSingleTrace ();
+  edu::sharif::twinner::trace::Trace *executeSingleTrace ();
 };
 
 }

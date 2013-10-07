@@ -21,31 +21,36 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-void getCurrentTraceSegment () {
+void Trace::getCurrentTraceSegment () {
   throw "Not yet implemented";
 }
 
-Expression getSymbolicExpression (int address) {
+Expression Trace::getSymbolicExpression (int address) {
   throw "Not yet implemented";
 }
 
-void addPathConstraint (Constraint c) {
+void Trace::addPathConstraint (Constraint c) {
   throw "Not yet implemented";
 }
 
-void setSymbolicExpression (int address, Expression exp) {
+void Trace::setSymbolicExpression (int address, Expression exp) {
   throw "Not yet implemented";
 }
 
-void syscallInvoked (Syscall s) {
+void Trace::syscallInvoked (Syscall s) {
   throw "Not yet implemented";
 }
 
-void saveToFile () {
+void Trace::saveToFile (const char *path) const {
   throw "Not yet implemented";
 }
 
-void loadFromFile () {
+/**
+ * Check for existence of path and loads a Trace from it. The Trace is newed
+ * and the caller must delete it. If path does not exist, an exception will be raised.
+ * @return A newed Trace object loaded from file "path".
+ */
+Trace *Trace::loadFromFile (const char *path) {
   throw "Not yet implemented";
 }
 

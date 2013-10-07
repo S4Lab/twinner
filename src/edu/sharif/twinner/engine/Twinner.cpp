@@ -24,6 +24,10 @@ namespace sharif {
 namespace twinner {
 namespace engine {
 
+Twinner::Twinner (bool _verbose) :
+    verbose (_verbose) {
+}
+
 void Twinner::setInputBinaryPath (string input) {
   this->input = input;
 }
@@ -37,22 +41,26 @@ void Twinner::setTwinBinaryPath (string twin) {
 }
 
 void Twinner::generateTwinBinary () {
-  Executer ex (pin, input);
+  Executer ex (pin, input, verbose);
   set < edu::sharif::twinner::trace::Symbol > symbols;
   bool somePathsAreNotCovered = true;
+  int i = 1;
   while (somePathsAreNotCovered) {
+    if (verbose) {
+      cout << "Executing trace # " << i++ << endl;
+    }
     ex.setSymbolsValues (symbols);
 
-    edu::sharif::twinner::trace::Trace trace = ex.executeSingleTrace ();
+    edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTrace ();
     addExecutionTrace (trace);
 
     symbols.clear ();
-    somePathsAreNotCovered = calculateSymbolsValuesForCoveringNextPath (trace, symbols);
+    somePathsAreNotCovered = calculateSymbolsValuesForCoveringNextPath (*trace, symbols);
   }
   codeTracesIntoTwinBinary ();
 }
 
-void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace &trace) {
+void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace) {
   throw "Not yet implemented";
 }
 

@@ -36,9 +36,9 @@ public:
 
   void syscallInvoked (Syscall s);
 
-  void saveToFile ();
+  void saveToFile (const char *path) const;
 
-  void loadFromFile ();
+  static Trace *loadFromFile (const char *path);
 };
 
 }

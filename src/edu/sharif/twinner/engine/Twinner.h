@@ -28,11 +28,15 @@ namespace engine {
 
 class Twinner {
 private:
+  bool verbose;
+
   std::string input;
   std::string pin;
   std::string twin;
 
 public:
+  Twinner (bool verbose);
+
   void setInputBinaryPath (std::string input);
   void setPinLauncherPath (std::string pin);
   void setTwinBinaryPath (std::string twin);
@@ -40,7 +44,7 @@ public:
   void generateTwinBinary ();
 
 private:
-  void addExecutionTrace (const edu::sharif::twinner::trace::Trace &trace);
+  void addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace);
 
   bool calculateSymbolsValuesForCoveringNextPath (
       const edu::sharif::twinner::trace::Trace &trace,

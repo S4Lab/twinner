@@ -71,7 +71,7 @@ int run (bool &verbose, string &input, string &pin, string &twin) {
     cout << "Pin launcher: " << pin << endl;
     cout << "Output twin file: " << twin << endl;
   }
-  edu::sharif::twinner::engine::Twinner tw;
+  edu::sharif::twinner::engine::Twinner tw (verbose);
   tw.setInputBinaryPath (input);
   tw.setPinLauncherPath (pin);
   tw.setTwinBinaryPath (twin);
