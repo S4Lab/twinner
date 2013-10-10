@@ -14,5 +14,6 @@ if [ "a$fullpreparation" = "afull" ]; then
 		fi
 		sudo -k
 	fi
+	mkdir -p /tmp/twinner
 fi
 
