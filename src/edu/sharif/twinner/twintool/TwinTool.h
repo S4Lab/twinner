@@ -13,25 +13,32 @@
 #ifndef TWIN_TOOL_H
 #define TWIN_TOOL_H
 
+#include "pin.H"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace twintool {
 
-class TwinTool {
-public:
-  /**
-   * Indicating name of the temp file, being used to communicate with Executer about the last execution trace.
-   *
-   * This must be kept in sync with edu::sharif::twinner::engine::Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE field.
-   * As this (TwinTool package) and the Engine package are not linked together in anyway, this code should be written
-   * redundantly and be kept in sync manually.
-   */
-  static const char *EXECUTION_TRACE_COMMUNICATION_TEMP_FILE;
+class Instrumenter;
 
-  void run ();
+class TwinTool {
+private:
+  Instrumenter *im;
+
+public:
+  TwinTool ();
+  ~TwinTool ();
+
+  INT32 run (int argc, char *argv[]);
 
 private:
+  INT32 printError (std::string msg) const;
+  INT32 printError (const char *msg) const;
+  INT32 printUsage () const;
+
+  bool parseArgumentsAndInitializeTool ();
+
   void registerInstrumentationRoutines ();
 };
 

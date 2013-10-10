@@ -128,6 +128,9 @@ ArgParser::ArgParser (const char * const opt, const char * const arg,
 }
 
 bool ArgParser::checkMandatoryOptionsPresence (const Option options[]) {
+  if (err.size ()) { // already an error is set
+    return false;
+  }
   for (int i = 0; options[i].code != 0; ++i) {
     if (options[i].mandatory) {
       if (options[i].name) {

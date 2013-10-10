@@ -31,6 +31,7 @@ private:
   bool verbose;
 
   std::string input;
+  std::string twintool;
   std::string pin;
   std::string twin;
 
@@ -38,6 +39,7 @@ public:
   Twinner (bool verbose);
 
   void setInputBinaryPath (std::string input);
+  void setTwinToolPath (std::string twintool);
   void setPinLauncherPath (std::string pin);
   void setTwinBinaryPath (std::string twin);
 

@@ -24,15 +24,22 @@ namespace sharif {
 namespace twinner {
 namespace engine {
 
+const char *Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE = "/tmp/twinner/symbols.dat";
 const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/trace.dat";
 
-Executer::Executer (string pinLauncher, string inputBinary, bool _verbose) :
-    verbose (_verbose), command (pinLauncher + " -t TwinTool.so -- " + inputBinary) {
+Executer::Executer (std::string pinLauncher, std::string twintool,
+    std::string inputBinary, bool _verbose) :
+    verbose (_verbose), command (
+        pinLauncher + " -t " + twintool + " -symbols "
+            + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE + " -trace "
+            + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
+            + (_verbose ? " -verbose -- " : " -- ") + inputBinary) {
 }
 
 void Executer::setSymbolsValues (
     const set < edu::sharif::twinner::trace::Symbol > &symbols) {
-  throw "Not yet implemented";
+  //FIXME:
+  //throw "Not yet implemented";
 }
 
 /**

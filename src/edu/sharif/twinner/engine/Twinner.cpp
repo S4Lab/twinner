@@ -34,6 +34,10 @@ void Twinner::setInputBinaryPath (string input) {
   this->input = input;
 }
 
+void Twinner::setTwinToolPath (string twintool) {
+  this->twintool = twintool;
+}
+
 void Twinner::setPinLauncherPath (string pin) {
   this->pin = pin;
 }
@@ -43,7 +47,7 @@ void Twinner::setTwinBinaryPath (string twin) {
 }
 
 void Twinner::generateTwinBinary () {
-  Executer ex (pin, input, verbose);
+  Executer ex (pin, twintool, input, verbose);
   set < edu::sharif::twinner::trace::Symbol > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;

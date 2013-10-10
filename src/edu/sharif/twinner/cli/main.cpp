@@ -34,25 +34,27 @@ enum ArgumentsParsingStatus {
 };
 
 ArgumentsParsingStatus parseArguments (int argc, char *argv[], bool &verbose,
-    string &input, string &pin, string &twin);
-int run (bool &verbose, string &input, string &pin, string &twin);
+    string &input, string &twintool, string &pin, string &twin);
+int run (bool verbose, string input, string twintool, string pin, string twin);
 
 int main (int argc, char *argv[]) {
   bool verbose = false;
-  string input, pin, twin;
-  switch (parseArguments (argc, argv, verbose, input, pin, twin)) {
+  string input, twintool, pin, twin;
+  switch (parseArguments (argc, argv, verbose, input, twintool, pin, twin)) {
   case CONTINUE_NORMALLY:
     // checking mandatory arguments...
 
     if (access (input.c_str (), R_OK) != 0) {
       printError (argv[0], "permission denied: can not read input binary file!");
+    } else if (access (twintool.c_str (), X_OK) != 0) {
+      printError (argv[0], "permission denied: can not execute twintool pintool!");
     } else if (access (pin.c_str (), X_OK) != 0) {
       printError (argv[0], "permission denied: can not execute pin launcher!");
     } else if (access (twin.c_str (), F_OK) == 0 && access (twin.c_str (), W_OK) != 0) {
       printError (argv[0], "permission denied: can not write to output twin binary!");
     } else {
       // all files are OK...
-      return run (verbose, input, pin, twin);
+      return run (verbose, input, twintool, pin, twin);
     }
     return -2;
 
@@ -64,15 +66,17 @@ int main (int argc, char *argv[]) {
   }
 }
 
-int run (bool &verbose, string &input, string &pin, string &twin) {
+int run (bool verbose, string input, string twintool, string pin, string twin) {
   if (verbose) {
     cout << "[Verbose mode]" << endl;
     cout << "Input binary file: " << input << endl;
+    cout << "TwinTool pintool: " << twintool << endl;
     cout << "Pin launcher: " << pin << endl;
     cout << "Output twin file: " << twin << endl;
   }
   edu::sharif::twinner::engine::Twinner tw (verbose);
   tw.setInputBinaryPath (input);
+  tw.setTwinToolPath (twintool);
   tw.setPinLauncherPath (pin);
   tw.setTwinBinaryPath (twin);
 
@@ -82,7 +86,7 @@ int run (bool &verbose, string &input, string &pin, string &twin) {
 }
 
 ArgumentsParsingStatus parseArguments (int argc, char *argv[], bool &verbose,
-    string &input, string &pin, string &twin) {
+    string &input, string &twintool, string &pin, string &twin) {
   char *progName = argv[0];
 
   const ArgParser::Option options[] = { //
@@ -92,6 +96,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[], bool &verbose,
           { 'v', "verbose", ArgParser::NO, "verbose operation", false }, //
           { 'L', "license", ArgParser::NO, "output license information and exit", false }, //
           { 'i', "input", ArgParser::YES, "input obfuscated binary file", true }, //
+          { 't', "tool", ArgParser::YES, "twintool executable/library file", true }, //
           { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true }, //
           { 'o', "output", ArgParser::YES, "path/name of the generated twin binary", true }, //
           { 0, 0, ArgParser::NO, 0 } //
@@ -121,6 +126,9 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[], bool &verbose,
       return EXIT_NORMALLY;
     case 'i':
       input = parser.argument (argind);
+      break;
+    case 't':
+      twintool = parser.argument (argind);
       break;
     case 'p':
       pin = parser.argument (argind);
