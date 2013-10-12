@@ -1,6 +1,7 @@
 fullpreparation=$1
 
 cp -l -a -u src/* "deploy/"
+cp -l -a -u test/simple-condition-test.out deploy/obj-intel64/
 
 if [ "a$fullpreparation" = "afull" ]; then
 	ptracescope=$(cat /proc/sys/kernel/yama/ptrace_scope)
