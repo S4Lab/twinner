@@ -33,7 +33,7 @@ Executer::Executer (std::string pinLauncher, std::string twintool,
         pinLauncher + " -t " + twintool + " -symbols "
             + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE + " -trace "
             + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
-            + (_verbose ? " -verbose -- " : " -- ") + inputBinary) {
+            + (_verbose ? " -verbose info -- " : " -- ") + inputBinary) {
 }
 
 void Executer::setSymbolsValues (

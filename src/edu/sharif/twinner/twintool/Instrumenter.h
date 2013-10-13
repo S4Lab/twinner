@@ -20,21 +20,33 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
+class InstructionSymbolicExecuter;
+
 class Instrumenter {
+public:
+  enum VerbosenessLevel {
+    QUIET, ERROR, WARNING, INFO, DEBUG
+  };
+
 private:
-  bool verbose;
+  VerbosenessLevel verbose;
+
   std::string symbolsFilePath; // read initial symbols from this file
   std::string traceFilePath; // save final execution trace into this file
 
+  InstructionSymbolicExecuter *ise;
+
 public:
-  Instrumenter (std::string symbolsFilePath, std::string traceFilePath, bool verbose);
+  Instrumenter (std::string symbolsFilePath, std::string traceFilePath,
+      VerbosenessLevel verbose);
+  ~Instrumenter ();
 
-  void instrumentSingleInstruction ();
+  void instrumentSingleInstruction (INS ins);
 
-  void syscallEntryPoint ();
-  void syscallExitPoint ();
+  void syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std);
+  void syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std);
 
-  void aboutToExit ();
+  void aboutToExit (INT32 code);
 };
 
 VOID instrumentSingleInstruction (INS ins, VOID *v);

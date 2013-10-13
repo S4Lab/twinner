@@ -13,6 +13,8 @@
 #ifndef INSTRUCTION_SYMBOLIC_EXECUTER_H
 #define INSTRUCTION_SYMBOLIC_EXECUTER_H
 
+#include "pin.H"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -21,12 +23,19 @@ namespace twintool {
 class InstructionSymbolicExecuter {
 
 public:
-  void readMemory ();
-
-  void writeMemory ();
-
-  void branch ();
+  void movToRegisterFromMemoryAddress (REG reg, ADDRINT memoryEa);
+  void movToMemoryAddressFromRegister (ADDRINT memoryEa, REG reg);
+  void movToMemoryAddressFromImmediateValue (ADDRINT memoryEa, ADDRINT immediate);
+  void movToRegisterFromImmediateValue (REG reg, ADDRINT immediate);
+  void movToRegisterFromRegister (REG dreg, REG sreg);
 };
+
+VOID movToRegisterFromMemoryAddress (VOID *iseptr, UINT32 regi32, ADDRINT memoryEa);
+VOID movToMemoryAddressFromRegister (VOID *iseptr, ADDRINT memoryEa, UINT32 regi32);
+VOID movToMemoryAddressFromImmediateValue (VOID *iseptr, ADDRINT memoryEa,
+    ADDRINT immediate);
+VOID movToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT immediate);
+VOID movToRegisterFromRegister (VOID *iseptr, UINT32 regdsti32, UINT32 regsrci32);
 
 }
 }

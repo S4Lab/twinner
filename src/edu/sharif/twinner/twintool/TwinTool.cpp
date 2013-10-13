@@ -33,8 +33,8 @@ KNOB < string > traceOutputFilePath (KNOB_MODE_WRITEONCE, "pintool", "trace",
     "/tmp/twinner/trace.dat", //
     "specify file path for saving execution trace");
 
-KNOB < BOOL > verbose (KNOB_MODE_WRITEONCE, "pintool", "verbose", "",
-    "enables verbose output");
+KNOB < string > verbose (KNOB_MODE_WRITEONCE, "pintool", "verbose", "warning",
+    "specify the level of verboseness: { quiet, error, warning, info, debug }");
 
 TwinTool::TwinTool () :
     im (0) {
@@ -54,6 +54,10 @@ INT32 TwinTool::run (int argc, char *argv[]) {
   if (PIN_Init (argc, argv)) {
     return printUsage ();
   }
+  // AT&T syntax is the one which is used by GDB
+  //PIN_SetSyntaxATT ();
+  // But order of operands matchs with Intel syntax (destination on the left side). So this mode is better for debugging.
+  PIN_SetSyntaxIntel ();
 
   if (!parseArgumentsAndInitializeTool ()) {
     return -2;
@@ -93,9 +97,25 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
       && access (traceFilePath.c_str (), W_OK) != 0) {
     printError (
         "permission denied: can not write to execution trace file: " + traceFilePath);
+    return false;
   }
   // At the end, traceFilePath will be opened and execution trace will be saved in it.
-  im = new Instrumenter (symbolsFilePath, traceFilePath, verbose.Value ());
+  Instrumenter::VerbosenessLevel vl;
+  if (verbose.Value () == "quiet") {
+    vl = Instrumenter::QUIET;
+  } else if (verbose.Value () == "error") {
+    vl = Instrumenter::ERROR;
+  } else if (verbose.Value () == "warning") {
+    vl = Instrumenter::WARNING;
+  } else if (verbose.Value () == "info") {
+    vl = Instrumenter::INFO;
+  } else if (verbose.Value () == "debug") {
+    vl = Instrumenter::DEBUG;
+  } else {
+    printError ("undefined verboseness level: " + verbose.Value ());
+    return false;
+  }
+  im = new Instrumenter (symbolsFilePath, traceFilePath, vl);
   return true;
 }
 
