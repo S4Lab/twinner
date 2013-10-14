@@ -15,6 +15,8 @@
 
 #include "Operator.h"
 
+#include "pin.H"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -23,8 +25,8 @@ namespace trace {
 class Expression {
 
 private:
-  int stack;
-  int lastConcreteValue;
+  int stack; // TODO: change to a stack of symbols and operators
+  UINT64 lastConcreteValue;
 
 public:
   void toString ();

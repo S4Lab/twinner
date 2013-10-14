@@ -15,25 +15,41 @@
 #include "Expression.h"
 #include "Constraint.h"
 #include "Syscall.h"
+#include "ExecutionTraceSegment.h"
 
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-void Trace::getCurrentTraceSegment () {
+Trace::Trace () {
+  segments.push_front (new ExecutionTraceSegment ());
+}
+
+Trace::~Trace () {
+  while (!segments.empty ()) {
+    delete segments.front ();
+    segments.pop_front ();
+  }
+}
+
+Expression Trace::getSymbolicExpressionByRegister (REG reg) {
   throw "Not yet implemented";
 }
 
-Expression Trace::getSymbolicExpression (int address) {
+Expression Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) {
+  throw "Not yet implemented";
+}
+
+void Trace::setSymbolicExpressionByRegister (REG reg, Expression exp) {
+  throw "Not yet implemented";
+}
+
+void Trace::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa, Expression exp) {
   throw "Not yet implemented";
 }
 
 void Trace::addPathConstraint (Constraint c) {
-  throw "Not yet implemented";
-}
-
-void Trace::setSymbolicExpression (int address, Expression exp) {
   throw "Not yet implemented";
 }
 
@@ -52,6 +68,10 @@ void Trace::saveToFile (const char *path) const {
  */
 Trace *Trace::loadFromFile (const char *path) {
   throw "Not yet implemented";
+}
+
+ExecutionTraceSegment *Trace::getCurrentTraceSegment () const {
+  return segments.front ();
 }
 
 }

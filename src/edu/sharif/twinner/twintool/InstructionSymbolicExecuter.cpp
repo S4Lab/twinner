@@ -12,19 +12,34 @@
 
 #include "InstructionSymbolicExecuter.h"
 
+#include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/Expression.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace twintool {
 
+InstructionSymbolicExecuter::InstructionSymbolicExecuter () :
+    trace (new edu::sharif::twinner::trace::Trace ()) {
+}
+
+edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () const {
+  return trace;
+}
+
 void InstructionSymbolicExecuter::movToRegisterFromMemoryAddress (REG reg,
     ADDRINT memoryEa) {
-  throw "Not yet implemented";
+  edu::sharif::twinner::trace::Expression srcexp =
+      trace->getSymbolicExpressionByMemoryAddress (memoryEa);
+  trace->setSymbolicExpressionByRegister (reg, srcexp);
 }
 
 void InstructionSymbolicExecuter::movToMemoryAddressFromRegister (ADDRINT memoryEa,
     REG reg) {
-  throw "Not yet implemented";
+  edu::sharif::twinner::trace::Expression srcexp =
+      trace->getSymbolicExpressionByRegister (reg);
+  trace->setSymbolicExpressionByMemoryAddress (memoryEa, srcexp);
 }
 
 void InstructionSymbolicExecuter::movToMemoryAddressFromImmediateValue (ADDRINT memoryEa,
@@ -38,7 +53,9 @@ void InstructionSymbolicExecuter::movToRegisterFromImmediateValue (REG reg,
 }
 
 void InstructionSymbolicExecuter::movToRegisterFromRegister (REG dreg, REG sreg) {
-  throw "Not yet implemented";
+  edu::sharif::twinner::trace::Expression srcexp =
+      trace->getSymbolicExpressionByRegister (sreg);
+  trace->setSymbolicExpressionByRegister (dreg, srcexp);
 }
 
 VOID movToRegisterFromMemoryAddress (VOID *iseptr, UINT32 regi32, ADDRINT memoryEa) {

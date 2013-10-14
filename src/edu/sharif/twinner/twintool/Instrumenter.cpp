@@ -42,6 +42,8 @@ Instrumenter::~Instrumenter () {
 
 static int countOfMemoryReadInstructions = 0;
 static int countOfMemoryWriteInstructions = 0;
+static int countOfMOVInstructions = 0;
+static int totalCountOfInstructions = 0;
 
 void Instrumenter::instrumentSingleInstruction (INS ins) {
   if (verbose == DEBUG) {
@@ -59,6 +61,8 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
     bool isOriginal = INS_IsOriginal (ins);
     if (!isOriginal) {
       cout << "\t--> NON-ORIGINAL instruction!" << endl;
+    } else {
+      totalCountOfInstructions++;
     }
   }
   switch (INS_Opcode (ins)) { // Intel has 1024 opcodes. And each opcode has several types/models :)
@@ -72,6 +76,7 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
 
     if (verbose == DEBUG) {
       cout << "\t--> MOV instruction" << endl;
+      countOfMOVInstructions++;
       cout << "\t--> op0 is " << (destIsMem ? "mem" : (destIsReg ? "reg" : "unknown"))
           << endl;
       cout << "\t--> op1 is "
@@ -125,6 +130,8 @@ void Instrumenter::aboutToExit (INT32 code) {
   if (verbose == DEBUG) {
     cout << "countOfMemoryReadInstructions: " << countOfMemoryReadInstructions << endl;
     cout << "countOfMemoryWriteInstructions: " << countOfMemoryWriteInstructions << endl;
+    cout << "countOfMOVInstructions: " << countOfMOVInstructions << " ("
+        << (countOfMOVInstructions * 100.0 / totalCountOfInstructions) << " %)" << endl;
   }
 }
 

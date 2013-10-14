@@ -18,11 +18,21 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace trace {
+
+class Trace;
+}
 namespace twintool {
 
 class InstructionSymbolicExecuter {
+private:
+  edu::sharif::twinner::trace::Trace *trace;
 
 public:
+  InstructionSymbolicExecuter ();
+
+  edu::sharif::twinner::trace::Trace *getTrace () const;
+
   void movToRegisterFromMemoryAddress (REG reg, ADDRINT memoryEa);
   void movToMemoryAddressFromRegister (ADDRINT memoryEa, REG reg);
   void movToMemoryAddressFromImmediateValue (ADDRINT memoryEa, ADDRINT immediate);

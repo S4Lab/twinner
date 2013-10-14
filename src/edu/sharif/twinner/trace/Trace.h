@@ -13,6 +13,10 @@
 #ifndef TRACE_H
 #define TRACE_H
 
+#include "pin.H"
+
+#include <list>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -21,24 +25,38 @@ namespace trace {
 class Expression;
 class Constraint;
 class Syscall;
+class ExecutionTraceSegment;
 
 class Trace {
-
 private:
-  void getCurrentTraceSegment ();
+  std::list < ExecutionTraceSegment * > segments;
 
 public:
-  Expression getSymbolicExpression (int address);
+  Trace ();
+  ~Trace ();
+
+  /**
+   * The getter searches segments backwards and may allocate new symbols (side effects) if required.
+   * Returned expression is owned by Trace object.
+   */
+  Expression getSymbolicExpressionByRegister (REG reg);
+  Expression getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa);
+
+  /**
+   * The setters, clone input expression and take ownership of the newly allocated one.
+   */
+  void setSymbolicExpressionByRegister (REG reg, Expression exp);
+  void setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa, Expression exp);
 
   void addPathConstraint (Constraint c);
-
-  void setSymbolicExpression (int address, Expression exp);
 
   void syscallInvoked (Syscall s);
 
   void saveToFile (const char *path) const;
-
   static Trace *loadFromFile (const char *path);
+
+private:
+  ExecutionTraceSegment *getCurrentTraceSegment () const;
 };
 
 }
