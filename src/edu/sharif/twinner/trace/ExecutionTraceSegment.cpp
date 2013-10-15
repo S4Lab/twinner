@@ -15,6 +15,8 @@
 #include "Expression.h"
 #include "Constraint.h"
 
+#include <utility>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -38,48 +40,63 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
   memoryAddressToExpression.clear ();
 }
 
-const Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (
-    REG reg) const {
-  return tryToGetSymbolicExpressionImplementation (registerToExpression, reg);
+const Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg,
+    ADDRINT regval) const throw (WrongStateException) {
+  return tryToGetSymbolicExpressionImplementation (registerToExpression, reg, regval);
 }
 
 const Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (
-    ADDRINT memoryEa) const {
-  return tryToGetSymbolicExpressionImplementation (memoryAddressToExpression, memoryEa);
+    ADDRINT memoryEa, UINT64 memval) const throw (WrongStateException) {
+  return tryToGetSymbolicExpressionImplementation (memoryAddressToExpression, memoryEa,
+      memval);
 }
 
 template < typename KEY >
 const Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
-    const std::map < KEY, Expression * > &map, KEY key) const {
+    const std::map < KEY, Expression * > &map, const KEY key, UINT64 concreteVal) const
+        throw (WrongStateException) {
   typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
-    return it->second;
+    const Expression *exp = it->second;
+    if (exp->getLastConcreteValue () != concreteVal) {
+      throw WrongStateException ();
+    }
+    return exp;
   }
 }
 
-const Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg) {
-  return getSymbolicExpressionImplementation (registerToExpression, reg);
+const Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg,
+    UINT64 regval) {
+  return getSymbolicExpressionImplementation (registerToExpression, reg, regval);
 }
 
 const Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (
-    ADDRINT memoryEa) {
-  return getSymbolicExpressionImplementation (memoryAddressToExpression, memoryEa);
+    ADDRINT memoryEa, UINT64 memval) {
+  return getSymbolicExpressionImplementation (memoryAddressToExpression, memoryEa, memval);
 }
 
 template < typename KEY >
 const Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
-    std::map < KEY, Expression * > &map, KEY key) {
-  const Expression *exp = tryToGetSymbolicExpressionImplementation (map, key);
-  if (exp == 0) { // does not exist! instantiate a new one...
-    Expression *exp2 = new Expression ();
-    map.insert (make_pair (key, exp2));
-    return exp2;
-
-  } else {
-    return exp;
+    std::map < KEY, Expression * > &map, const KEY key, UINT64 currentConcreteValue) {
+  typedef typename std::map < KEY, Expression * >::iterator MapIterator;
+  try {
+    const Expression *exp = tryToGetSymbolicExpressionImplementation (map, key,
+        currentConcreteValue);
+    if (exp) {
+      return exp;
+    }
+  } catch (const WrongStateException &e) {
   }
+  Expression *exp = new Expression (currentConcreteValue);
+  std::pair < MapIterator, bool > res = map.insert (make_pair (key, exp));
+  if (!res.second) { // another expression already exists. overwriting...
+    MapIterator it = res.first;
+    delete it->second;
+    it->second = exp;
+  }
+  return exp;
 }
 
 void ExecutionTraceSegment::setSymbolicExpressionByRegister (REG reg,
@@ -94,9 +111,18 @@ void ExecutionTraceSegment::setSymbolicExpressionByMemoryAddress (ADDRINT memory
 
 template < typename KEY >
 void ExecutionTraceSegment::setSymbolicExpressionImplementation (
-    std::map < KEY, Expression * > &map, KEY key, const Expression *exp) {
-  // The exp is owned by caller. We must clone it and take ownership of the cloned object.
-  map.insert (make_pair (key, exp->clone ()));
+    std::map < KEY, Expression * > &map, const KEY key,
+    const Expression *nonOwnedExpression) {
+  typedef typename std::map < KEY, Expression * >::iterator MapIterator;
+  // The nonOwnedExpression is owned by caller. We must clone it and take ownership of the cloned object.
+  Expression *exp = nonOwnedExpression->clone ();
+  std::pair < MapIterator, bool > res = map.insert (make_pair (key, exp));
+  if (!res.second) { // another expression already exists. overwriting...
+    // old expression is owned by us; so it should be deleted before loosing its pointer!
+    MapIterator it = res.first;
+    delete it->second;
+    it->second = exp;
+  }
 }
 
 void ExecutionTraceSegment::addPathConstraint (Constraint c) {

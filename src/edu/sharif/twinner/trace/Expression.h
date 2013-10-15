@@ -31,7 +31,9 @@ public:
   /**
    * Instantiates an expression containing a new (yet unused) symbol.
    */
-  Expression ();
+  Expression (UINT64 concreteValue);
+
+  UINT64 getLastConcreteValue () const;
 
   void toString ();
 

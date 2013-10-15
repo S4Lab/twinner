@@ -17,8 +17,12 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-Expression::Expression () {
+Expression::Expression (UINT64 concreteValue) {
   // TODO: Instantiate a new expression containing a new symbol
+}
+
+UINT64 Expression::getLastConcreteValue () const {
+  return lastConcreteValue;
 }
 
 void Expression::toString () {
