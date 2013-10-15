@@ -13,12 +13,39 @@
 #ifndef EXECUTION_TRACE_SEGMENT_H
 #define EXECUTION_TRACE_SEGMENT_H
 
+#include "ExecutionState.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-class ExecutionTraceSegment {
+class ExecutionTraceSegment : public ExecutionState {
+public:
+  /**
+   * The getter searches segments backwards to find queries value.
+   */
+  virtual Expression getSymbolicExpressionByRegister (REG reg);
+
+  /**
+   * The getter searches segments backwards to find queries value.
+   */
+  virtual Expression getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa);
+
+  /**
+   * The setter, uses most recent trace segment for setting the new value.
+   */
+  virtual void setSymbolicExpressionByRegister (REG reg, Expression exp);
+
+  /**
+   * The setter, uses most recent trace segment for setting the new value.
+   */
+  virtual void setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa, Expression exp);
+
+  /**
+   * The constraint will be added to the most recent trace segment.
+   */
+  virtual void addPathConstraint (Constraint c);
 };
 
 }
