@@ -20,21 +20,32 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-Expression ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg) {
+const Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (
+    REG reg) const {
   throw "Not yet implemented";
 }
 
-Expression ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (
+const Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (
+    ADDRINT memoryEa) const {
+  throw "Not yet implemented";
+}
+
+const Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg) {
+  throw "Not yet implemented";
+}
+
+const Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (
     ADDRINT memoryEa) {
   throw "Not yet implemented";
 }
 
-void ExecutionTraceSegment::setSymbolicExpressionByRegister (REG reg, Expression exp) {
+void ExecutionTraceSegment::setSymbolicExpressionByRegister (REG reg,
+    const Expression *exp) {
   throw "Not yet implemented";
 }
 
 void ExecutionTraceSegment::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-    Expression exp) {
+    const Expression *exp) {
   throw "Not yet implemented";
 }
 
