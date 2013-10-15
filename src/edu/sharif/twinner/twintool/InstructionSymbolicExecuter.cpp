@@ -30,15 +30,18 @@ edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () con
 
 void InstructionSymbolicExecuter::movToRegisterFromMemoryAddress (REG reg,
     ADDRINT memoryEa) {
+  UINT64 currentConcreteValue;
+  PIN_SafeCopy (&currentConcreteValue, (const VOID *) memoryEa, sizeof(UINT64));
+
   const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByMemoryAddress (memoryEa);
+      trace->getSymbolicExpressionByMemoryAddress (memoryEa, currentConcreteValue);
   trace->setSymbolicExpressionByRegister (reg, srcexp);
 }
 
 void InstructionSymbolicExecuter::movToMemoryAddressFromRegister (ADDRINT memoryEa,
-    REG reg) {
+    REG reg, UINT64 regval) {
   const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByRegister (reg);
+      trace->getSymbolicExpressionByRegister (reg, regval);
   trace->setSymbolicExpressionByMemoryAddress (memoryEa, srcexp);
 }
 
@@ -52,9 +55,10 @@ void InstructionSymbolicExecuter::movToRegisterFromImmediateValue (REG reg,
   throw "Not yet implemented";
 }
 
-void InstructionSymbolicExecuter::movToRegisterFromRegister (REG dreg, REG sreg) {
+void InstructionSymbolicExecuter::movToRegisterFromRegister (REG dreg, REG sreg,
+    UINT64 regsrcval) {
   const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByRegister (sreg);
+      trace->getSymbolicExpressionByRegister (sreg, regsrcval);
   trace->setSymbolicExpressionByRegister (dreg, srcexp);
 }
 
@@ -63,9 +67,10 @@ VOID movToRegisterFromMemoryAddress (VOID *iseptr, UINT32 regi32, ADDRINT memory
   ise->movToRegisterFromMemoryAddress ((REG) regi32, memoryEa);
 }
 
-VOID movToMemoryAddressFromRegister (VOID *iseptr, ADDRINT memoryEa, UINT32 regi32) {
+VOID movToMemoryAddressFromRegister (VOID *iseptr, ADDRINT memoryEa, UINT32 regi32,
+    ADDRINT regval) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->movToMemoryAddressFromRegister (memoryEa, (REG) regi32);
+  ise->movToMemoryAddressFromRegister (memoryEa, (REG) regi32, regval);
 }
 
 VOID movToMemoryAddressFromImmediateValue (VOID *iseptr, ADDRINT memoryEa,
@@ -79,9 +84,10 @@ VOID movToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT immed
   ise->movToRegisterFromImmediateValue ((REG) regi32, immediate);
 }
 
-VOID movToRegisterFromRegister (VOID *iseptr, UINT32 regdsti32, UINT32 regsrci32) {
+VOID movToRegisterFromRegister (VOID *iseptr, UINT32 regdsti32, UINT32 regsrci32,
+    ADDRINT regsrcval) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->movToRegisterFromRegister ((REG) regdsti32, (REG) regsrci32);
+  ise->movToRegisterFromRegister ((REG) regdsti32, (REG) regsrci32, regsrcval);
 }
 
 }

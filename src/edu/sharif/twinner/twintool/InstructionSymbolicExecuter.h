@@ -34,18 +34,20 @@ public:
   edu::sharif::twinner::trace::Trace *getTrace () const;
 
   void movToRegisterFromMemoryAddress (REG reg, ADDRINT memoryEa);
-  void movToMemoryAddressFromRegister (ADDRINT memoryEa, REG reg);
+  void movToMemoryAddressFromRegister (ADDRINT memoryEa, REG reg, UINT64 regval);
   void movToMemoryAddressFromImmediateValue (ADDRINT memoryEa, ADDRINT immediate);
   void movToRegisterFromImmediateValue (REG reg, ADDRINT immediate);
-  void movToRegisterFromRegister (REG dreg, REG sreg);
+  void movToRegisterFromRegister (REG dreg, REG sreg, UINT64 regsrcval);
 };
 
 VOID movToRegisterFromMemoryAddress (VOID *iseptr, UINT32 regi32, ADDRINT memoryEa);
-VOID movToMemoryAddressFromRegister (VOID *iseptr, ADDRINT memoryEa, UINT32 regi32);
+VOID movToMemoryAddressFromRegister (VOID *iseptr, ADDRINT memoryEa, UINT32 regi32,
+    ADDRINT regval);
 VOID movToMemoryAddressFromImmediateValue (VOID *iseptr, ADDRINT memoryEa,
     ADDRINT immediate);
 VOID movToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT immediate);
-VOID movToRegisterFromRegister (VOID *iseptr, UINT32 regdsti32, UINT32 regsrci32);
+VOID movToRegisterFromRegister (VOID *iseptr, UINT32 regdsti32, UINT32 regsrci32,
+    ADDRINT regsrcval);
 
 }
 }

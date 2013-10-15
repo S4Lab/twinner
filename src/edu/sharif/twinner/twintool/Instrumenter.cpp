@@ -89,8 +89,9 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
           IARG_END);
 
     } else if (destIsMem && sourceIsReg) { // write to memory, e.g. mov dword ptr [rbp-0x10], eax
+      REG reg = INS_OperandReg (ins, 1);
       INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) movToMemoryAddressFromRegister,
-          IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_UINT32, INS_OperandReg (ins, 1),
+          IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_UINT32, reg, IARG_REG_VALUE, reg,
           IARG_END);
 
     } else if (destIsMem && sourceIsImmed) { // write immediate to memory, e.g. mov dword ptr [rbp-0xc], 0x5
@@ -104,9 +105,10 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
           INS_OperandImmediate (ins, 1), IARG_END);
 
     } else if (destIsReg && sourceIsReg) { // move data between registers, e.g. mov r13, rdx
+      REG srcreg = INS_OperandReg (ins, 1);
       INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) movToRegisterFromRegister, IARG_PTR,
-          ise, IARG_UINT32, INS_OperandReg (ins, 0), IARG_UINT32, INS_OperandReg (ins, 1),
-          IARG_END);
+          ise, IARG_UINT32, INS_OperandReg (ins, 0), IARG_UINT32, srcreg, IARG_REG_VALUE,
+          srcreg, IARG_END);
 
     } else { // unknown case!
       throw "Unknown MOV instruction";
