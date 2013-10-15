@@ -23,19 +23,23 @@ namespace twinner {
 namespace trace {
 
 class Expression {
-
 private:
   int stack; // TODO: change to a stack of symbols and operators
   UINT64 lastConcreteValue;
 
 public:
+  /**
+   * Instantiates an expression containing a new (yet unused) symbol.
+   */
+  Expression ();
+
   void toString ();
 
   void unaryOperation (Operator op, Expression exp);
 
   void binaryOperation (Operator op, Expression exp);
 
-  Expression clone ();
+  Expression *clone () const;
 };
 
 }

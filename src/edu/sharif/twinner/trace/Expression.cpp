@@ -17,6 +17,10 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+Expression::Expression () {
+  // TODO: Instantiate a new expression containing a new symbol
+}
+
 void Expression::toString () {
   throw "Not yet implemented";
 }
@@ -29,7 +33,7 @@ void Expression::binaryOperation (Operator op, Expression exp) {
   throw "Not yet implemented";
 }
 
-Expression Expression::clone () {
+Expression *Expression::clone () const {
   throw "Not yet implemented";
 }
 

@@ -15,13 +15,22 @@
 
 #include "ExecutionState.h"
 
+#include <map>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
 class ExecutionTraceSegment : public ExecutionState {
+private:
+  std::map < REG, Expression * > registerToExpression;
+  std::map < ADDRINT, Expression * > memoryAddressToExpression;
+
 public:
+  ExecutionTraceSegment ();
+  virtual ~ExecutionTraceSegment ();
+
   virtual const Expression *tryToGetSymbolicExpressionByRegister (REG reg) const;
   virtual const Expression *tryToGetSymbolicExpressionByMemoryAddress (
       ADDRINT memoryEa) const;
@@ -34,6 +43,17 @@ public:
       const Expression *exp);
 
   virtual void addPathConstraint (Constraint c);
+
+private:
+  template < typename KEY >
+  const Expression *tryToGetSymbolicExpressionImplementation (
+      const std::map < KEY, Expression * > &map, KEY key) const;
+  template < typename KEY >
+  const Expression *getSymbolicExpressionImplementation (
+      std::map < KEY, Expression * > &map, KEY key);
+  template < typename KEY >
+  void setSymbolicExpressionImplementation (std::map < KEY, Expression * > &map, KEY key,
+      const Expression *exp);
 };
 
 }
