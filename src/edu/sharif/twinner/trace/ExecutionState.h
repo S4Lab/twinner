@@ -39,7 +39,27 @@ public:
 
   /**
    * The getter returns current value stored in one register.
-   * It may allocate new symbols (~ has side effects) if required.
+   * Ownership of returned expression is kept and caller should clone it if required.
+   *
+   * @param reg The register which its value is returned.
+   * @return symbolic expression which is living in given register at current state.
+   */
+  virtual const Expression tryToGetSymbolicExpressionByRegister (REG reg) const = 0;
+
+  /**
+   * The getter returns current value stored in one memory address.
+   * Ownership of returned expression is kept and caller should clone it if required.
+   *
+   * @param memoryEa The memory effective address which its value will be returned.
+   * @return symbolic expression which is living at the given memory address at current state.
+   */
+  virtual const Expression tryToGetSymbolicExpressionByMemoryAddress (
+      ADDRINT memoryEa) const = 0;
+
+  /**
+   * The getter returns current value stored in one register.
+   * Despite tryToGetSymbolicExpressionByRegister, this method may allocate new
+   * symbols (i.e. has side effects) if there was not any kept value.
    * Ownership of returned expression is kept and caller should clone it if required.
    *
    * @param reg The register which its value is returned.
@@ -49,7 +69,8 @@ public:
 
   /**
    * The getter returns current value stored in one memory address.
-   * It may allocate new symbols (~ has side effects) if required.
+   * Despite tryToGetSymbolicExpressionByMemoryAddress, this method may allocate new
+   * symbols (i.e. has side effects) if there was not any kept value.
    * Ownership of returned expression is kept and caller should clone it if required.
    *
    * @param memoryEa The memory effective address which its value will be returned.
