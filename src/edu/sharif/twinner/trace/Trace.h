@@ -36,23 +36,25 @@ public:
   /**
    * Searches backwards to find queried values.
    */
-  virtual const Expression *tryToGetSymbolicExpressionByRegister (REG reg) const;
+  virtual const Expression *tryToGetSymbolicExpressionByRegister (REG reg,
+      UINT64 regval) const throw (WrongStateException);
 
   /**
    * Searches backwards to find queried values.
    */
-  virtual const Expression *tryToGetSymbolicExpressionByMemoryAddress (
-      ADDRINT memoryEa) const;
+  virtual const Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+      UINT64 memval) const throw (WrongStateException);
 
   /**
    * The getter searches segments backwards to find queried value.
    */
-  virtual const Expression *getSymbolicExpressionByRegister (REG reg);
+  virtual const Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval);
 
   /**
    * The getter searches segments backwards to find queried value.
    */
-  virtual const Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa);
+  virtual const Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+      UINT64 memval);
 
   /**
    * The setter, uses most recent trace segment for setting the new value.
