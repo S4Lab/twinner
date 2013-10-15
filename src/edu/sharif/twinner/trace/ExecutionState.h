@@ -44,7 +44,7 @@ public:
    * @param reg The register which its value is returned.
    * @return symbolic expression which is living in given register at current state.
    */
-  virtual const Expression tryToGetSymbolicExpressionByRegister (REG reg) const = 0;
+  virtual const Expression *tryToGetSymbolicExpressionByRegister (REG reg) const = 0;
 
   /**
    * The getter returns current value stored in one memory address.
@@ -53,7 +53,7 @@ public:
    * @param memoryEa The memory effective address which its value will be returned.
    * @return symbolic expression which is living at the given memory address at current state.
    */
-  virtual const Expression tryToGetSymbolicExpressionByMemoryAddress (
+  virtual const Expression *tryToGetSymbolicExpressionByMemoryAddress (
       ADDRINT memoryEa) const = 0;
 
   /**
@@ -65,7 +65,7 @@ public:
    * @param reg The register which its value is returned.
    * @return symbolic expression which is living in register at current state.
    */
-  virtual Expression getSymbolicExpressionByRegister (REG reg) = 0;
+  virtual const Expression *getSymbolicExpressionByRegister (REG reg) = 0;
 
   /**
    * The getter returns current value stored in one memory address.
@@ -76,7 +76,7 @@ public:
    * @param memoryEa The memory effective address which its value will be returned.
    * @return symbolic expression which is living at the given memory address at current state.
    */
-  virtual Expression getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) = 0;
+  virtual const Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) = 0;
 
   /**
    * The setter clones given expression and stores it as the new value living
@@ -85,7 +85,7 @@ public:
    * @param reg The register which its value is being set.
    * @param exp The expression which will be cloned and will determine new value of given register.
    */
-  virtual void setSymbolicExpressionByRegister (REG reg, Expression exp) = 0;
+  virtual void setSymbolicExpressionByRegister (REG reg, const Expression *exp) = 0;
 
   /**
    * The setter clones given expression and stores it as the new value living
@@ -95,7 +95,7 @@ public:
    * @param exp The expression which will be cloned and will determine new value of given memory address.
    */
   virtual void setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      Expression exp) = 0;
+      const Expression *exp) = 0;
 
   /**
    * Adds the given constraint to current series of path constraints.
