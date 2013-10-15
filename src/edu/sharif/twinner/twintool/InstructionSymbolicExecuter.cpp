@@ -30,14 +30,14 @@ edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () con
 
 void InstructionSymbolicExecuter::movToRegisterFromMemoryAddress (REG reg,
     ADDRINT memoryEa) {
-  edu::sharif::twinner::trace::Expression srcexp =
+  const edu::sharif::twinner::trace::Expression *srcexp =
       trace->getSymbolicExpressionByMemoryAddress (memoryEa);
   trace->setSymbolicExpressionByRegister (reg, srcexp);
 }
 
 void InstructionSymbolicExecuter::movToMemoryAddressFromRegister (ADDRINT memoryEa,
     REG reg) {
-  edu::sharif::twinner::trace::Expression srcexp =
+  const edu::sharif::twinner::trace::Expression *srcexp =
       trace->getSymbolicExpressionByRegister (reg);
   trace->setSymbolicExpressionByMemoryAddress (memoryEa, srcexp);
 }
@@ -53,7 +53,7 @@ void InstructionSymbolicExecuter::movToRegisterFromImmediateValue (REG reg,
 }
 
 void InstructionSymbolicExecuter::movToRegisterFromRegister (REG dreg, REG sreg) {
-  edu::sharif::twinner::trace::Expression srcexp =
+  const edu::sharif::twinner::trace::Expression *srcexp =
       trace->getSymbolicExpressionByRegister (sreg);
   trace->setSymbolicExpressionByRegister (dreg, srcexp);
 }

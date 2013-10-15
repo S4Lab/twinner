@@ -34,24 +34,36 @@ public:
   ~Trace ();
 
   /**
-   * The getter searches segments backwards to find queries value.
+   * Searches backwards to find queried values.
    */
-  virtual Expression getSymbolicExpressionByRegister (REG reg);
+  virtual const Expression *tryToGetSymbolicExpressionByRegister (REG reg) const;
 
   /**
-   * The getter searches segments backwards to find queries value.
+   * Searches backwards to find queried values.
    */
-  virtual Expression getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa);
+  virtual const Expression *tryToGetSymbolicExpressionByMemoryAddress (
+      ADDRINT memoryEa) const;
+
+  /**
+   * The getter searches segments backwards to find queried value.
+   */
+  virtual const Expression *getSymbolicExpressionByRegister (REG reg);
+
+  /**
+   * The getter searches segments backwards to find queried value.
+   */
+  virtual const Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa);
 
   /**
    * The setter, uses most recent trace segment for setting the new value.
    */
-  virtual void setSymbolicExpressionByRegister (REG reg, Expression exp);
+  virtual void setSymbolicExpressionByRegister (REG reg, const Expression *exp);
 
   /**
    * The setter, uses most recent trace segment for setting the new value.
    */
-  virtual void setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa, Expression exp);
+  virtual void setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+      const Expression *exp);
 
   /**
    * The constraint will be added to the most recent trace segment.

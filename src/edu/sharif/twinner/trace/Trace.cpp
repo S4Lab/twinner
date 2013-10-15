@@ -33,24 +33,60 @@ Trace::~Trace () {
   }
 }
 
-Expression Trace::getSymbolicExpressionByRegister (REG reg) {
-  throw "Not yet implemented";
+const Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg) const {
+  for (std::list < ExecutionTraceSegment * >::const_iterator it = segments.begin ();
+      it != segments.end (); ++it) { // searches segments starting from the most recent one
+    const ExecutionTraceSegment *seg = *it;
+    const Expression *exp = seg->tryToGetSymbolicExpressionByRegister (reg);
+    if (exp) {
+      return exp;
+    }
+  }
+  return 0;
 }
 
-Expression Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) {
-  throw "Not yet implemented";
+const Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (
+    ADDRINT memoryEa) const {
+  for (std::list < ExecutionTraceSegment * >::const_iterator it = segments.begin ();
+      it != segments.end (); ++it) { // searches segments starting from the most recent one
+    const ExecutionTraceSegment *seg = *it;
+    const Expression *exp = seg->tryToGetSymbolicExpressionByMemoryAddress (memoryEa);
+    if (exp) {
+      return exp;
+    }
+  }
+  return 0;
 }
 
-void Trace::setSymbolicExpressionByRegister (REG reg, Expression exp) {
-  throw "Not yet implemented";
+const Expression *Trace::getSymbolicExpressionByRegister (REG reg) {
+  const Expression *exp = tryToGetSymbolicExpressionByRegister (reg);
+  if (exp) {
+    return exp;
+  }
+  // instantiate and set a new expression in the most recent segment
+  return getCurrentTraceSegment ()->getSymbolicExpressionByRegister (reg);
 }
 
-void Trace::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa, Expression exp) {
-  throw "Not yet implemented";
+const Expression *Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) {
+  const Expression *exp = tryToGetSymbolicExpressionByMemoryAddress (memoryEa);
+  if (exp) {
+    return exp;
+  }
+  // instantiate and set a new expression in the most recent segment
+  return getCurrentTraceSegment ()->getSymbolicExpressionByMemoryAddress (memoryEa);
+}
+
+void Trace::setSymbolicExpressionByRegister (REG reg, const Expression *exp) {
+  getCurrentTraceSegment ()->setSymbolicExpressionByRegister (reg, exp);
+}
+
+void Trace::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+    const Expression *exp) {
+  getCurrentTraceSegment ()->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
 }
 
 void Trace::addPathConstraint (Constraint c) {
-  throw "Not yet implemented";
+  getCurrentTraceSegment ()->addPathConstraint (c);
 }
 
 void Trace::syscallInvoked (Syscall s) {
