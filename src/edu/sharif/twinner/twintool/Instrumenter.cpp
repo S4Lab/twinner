@@ -13,6 +13,7 @@
 #include "Instrumenter.h"
 
 #include <iostream>
+#include <stdexcept>
 
 #include "xed-iclass-enum.h"
 
@@ -50,6 +51,7 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
     bool isMemoryRead = INS_IsMemoryRead (ins);
     bool isMemoryWrite = INS_IsMemoryWrite (ins);
     cout << "Instrumenting assembly instruction: " << INS_Disassemble (ins) << endl;
+    cout << "\t--> Count of memory operands: " << INS_MemoryOperandCount (ins) << endl;
     if (isMemoryRead) {
       cout << "\t--> Reading from memory" << endl;
       countOfMemoryReadInstructions++;
@@ -85,7 +87,7 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
     }
     if (destIsReg && sourceIsMem) { // read from memory, e.g. mov eax, dword ptr [rbp-0x8]
       INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) movToRegisterFromMemoryAddress,
-          IARG_PTR, ise, IARG_UINT32, INS_OperandReg (ins, 0), IARG_MEMORYOP_EA, 1,
+          IARG_PTR, ise, IARG_UINT32, INS_OperandReg (ins, 0), IARG_MEMORYOP_EA, 0,
           IARG_END);
 
     } else if (destIsMem && sourceIsReg) { // write to memory, e.g. mov dword ptr [rbp-0x10], eax
@@ -111,7 +113,7 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
           srcreg, IARG_END);
 
     } else { // unknown case!
-      throw "Unknown MOV instruction";
+      throw std::runtime_error ("Unknown MOV instruction");
     }
     break;
   }
