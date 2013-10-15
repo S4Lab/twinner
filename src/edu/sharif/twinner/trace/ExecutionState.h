@@ -23,6 +23,16 @@ namespace trace {
 class Expression;
 class Constraint;
 
+/**
+ * This exception indicates that current execution state differs from the expected state.
+ */
+class WrongStateException : public std::exception {
+public:
+  const char *what () const throw () {
+    return "Execution state differ from what we expected (probably, user space memory is changed by a syscall).";
+  }
+};
+
 /*
  * @interface This interface, specifies that current execution state, including
  * symbolic expressions living in memory addresses or registers and path constraints,
@@ -42,41 +52,57 @@ public:
    * Ownership of returned expression is kept and caller should clone it if required.
    *
    * @param reg The register which its value is returned.
-   * @return symbolic expression which is living in given register at current state.
+   * @param regval The concrete value which currently lives in given register.
+   * @return symbolic expression which is living in given register at current state or 0 if there is no such expression.
+   *
+   * @except Throws a WrongStateException, if the last concrete value of the reg's corresponding expression differs from expected @c regval value.
    */
-  virtual const Expression *tryToGetSymbolicExpressionByRegister (REG reg) const = 0;
+  virtual const Expression *tryToGetSymbolicExpressionByRegister (REG reg,
+      UINT64 regval) const throw (WrongStateException) = 0;
 
   /**
    * The getter returns current value stored in one memory address.
    * Ownership of returned expression is kept and caller should clone it if required.
    *
    * @param memoryEa The memory effective address which its value will be returned.
+   * @param memval The concrete value which currently lives at given memory address.
    * @return symbolic expression which is living at the given memory address at current state.
    */
-  virtual const Expression *tryToGetSymbolicExpressionByMemoryAddress (
-      ADDRINT memoryEa) const = 0;
+  virtual const Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+      UINT64 memval) const throw (WrongStateException) = 0;
 
   /**
    * The getter returns current value stored in one register.
    * Despite tryToGetSymbolicExpressionByRegister, this method may allocate new
    * symbols (i.e. has side effects) if there was not any kept value.
+   * The regval indicates currently stored concrete value of the queried register and
+   * will be used for setting the concrete value of newly instantiated expression (or
+   * checking whether the currently stored expression, if any, reflects the real state
+   * of the program or not).
    * Ownership of returned expression is kept and caller should clone it if required.
    *
    * @param reg The register which its value is returned.
+   * @param regval The concrete value which currently lives in given register.
    * @return symbolic expression which is living in register at current state.
    */
-  virtual const Expression *getSymbolicExpressionByRegister (REG reg) = 0;
+  virtual const Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval) = 0;
 
   /**
    * The getter returns current value stored in one memory address.
    * Despite tryToGetSymbolicExpressionByMemoryAddress, this method may allocate new
    * symbols (i.e. has side effects) if there was not any kept value.
+   * The memval indicates currently stored concrete value of the queried memory address
+   * and will be used for setting the concrete value of newly instantiated expression (or
+   * checking whether the currently stored expression, if any, reflects the real state
+   * of the program or not).
    * Ownership of returned expression is kept and caller should clone it if required.
    *
    * @param memoryEa The memory effective address which its value will be returned.
+   * @param memval The concrete value which currently lives at given memory address.
    * @return symbolic expression which is living at the given memory address at current state.
    */
-  virtual const Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) = 0;
+  virtual const Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+      UINT64 memval) = 0;
 
   /**
    * The setter clones given expression and stores it as the new value living
