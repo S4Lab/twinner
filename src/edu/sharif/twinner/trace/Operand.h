@@ -4,14 +4,14 @@
  * Copyright © 2013  Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information
+ * See the COPYING file distributed with this work for information 
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
  */
 
-#ifndef OPERATOR_H
-#define OPERATOR_H
+#ifndef OPERAND_H_
+#define OPERAND_H_
 
 #include "ExpressionToken.h"
 
@@ -20,17 +20,7 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-class Operator : public ExpressionToken {
-public:
-  enum OperatorIdentifier {
-    ADD, MINUS, MULTIPLY, DIVIDE, NEGATE, XOR, BITWISE_AND
-  };
-
-private:
-  OperatorIdentifier oi;
-
-public:
-  Operator (OperatorIdentifier);
+class Operand : public ExpressionToken {
 };
 
 }
@@ -38,4 +28,4 @@ public:
 }
 }
 
-#endif /* Operator.h */
+#endif /* OPERAND_H_ */

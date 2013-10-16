@@ -13,18 +13,27 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+#include "Operand.h"
+
+#include "pin.H"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-class Symbol {
-
+class Symbol : public Operand {
 private:
-  int type;
-  int concreteValue;
-  int address;
+  ADDRINT address;
+  UINT64 concreteValue;
+  /**
+   * Different values can be stored at the same memory address (as they can be changed by syscalls).
+   * This index, starting from zero, indicates which symbol is stored there.
+   */
   int generationIndex;
+
+public:
+  Symbol (ADDRINT address, UINT64 concreteValue, int generationIndex);
 };
 
 }
