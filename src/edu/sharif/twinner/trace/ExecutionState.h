@@ -73,8 +73,9 @@ public:
 
   /**
    * The getter returns current value stored in one register.
-   * Despite tryToGetSymbolicExpressionByRegister, this method may allocate new
-   * symbols (i.e. has side effects) if there was not any kept value.
+   * Despite tryToGetSymbolicExpressionByRegister, this method may set a new
+   * expression (i.e. has side effects) if there was not any kept value. In this case,
+   * the @c newExpression is set as the new value.
    * The regval indicates currently stored concrete value of the queried register and
    * will be used for setting the concrete value of newly instantiated expression (or
    * checking whether the currently stored expression, if any, reflects the real state
@@ -83,14 +84,17 @@ public:
    *
    * @param reg The register which its value is returned.
    * @param regval The concrete value which currently lives in given register.
+   * @param newExpression The expression which will be set if there was no current value.
    * @return symbolic expression which is living in register at current state.
    */
-  virtual const Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval) = 0;
+  virtual const Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
+      Expression *newExpression) = 0;
 
   /**
    * The getter returns current value stored in one memory address.
-   * Despite tryToGetSymbolicExpressionByMemoryAddress, this method may allocate new
-   * symbols (i.e. has side effects) if there was not any kept value.
+   * Despite tryToGetSymbolicExpressionByMemoryAddress, this method may set a new
+   * expression (i.e. has side effects) if there was not any kept value. In this case,
+   * the @c newExpression is set as the new value.
    * The memval indicates currently stored concrete value of the queried memory address
    * and will be used for setting the concrete value of newly instantiated expression (or
    * checking whether the currently stored expression, if any, reflects the real state
@@ -99,10 +103,11 @@ public:
    *
    * @param memoryEa The memory effective address which its value will be returned.
    * @param memval The concrete value which currently lives at given memory address.
+   * @param newExpression The expression which will be set if there was no current value.
    * @return symbolic expression which is living at the given memory address at current state.
    */
   virtual const Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      UINT64 memval) = 0;
+      UINT64 memval, Expression *newExpression) = 0;
 
   /**
    * The setter clones given expression and stores it as the new value living
