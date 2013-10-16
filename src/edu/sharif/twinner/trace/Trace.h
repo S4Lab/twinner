@@ -16,6 +16,7 @@
 #include "ExecutionState.h"
 
 #include <list>
+#include <map>
 
 namespace edu {
 namespace sharif {
@@ -28,6 +29,16 @@ class ExecutionTraceSegment;
 class Trace : public ExecutionState {
 private:
   std::list < ExecutionTraceSegment * > segments;
+  /**
+   * The last used index (starting from one) for each symbol
+   * which was created at a given memory address is kept here.
+   */
+  std::map < ADDRINT, int > memoryResidentSymbolsGenerationIndices;
+  /**
+   * The last used index (starting from one) for each symbol
+   * which was created in a given register is kept here.
+   */
+  std::map < REG, int > registerResidentSymbolsGenerationIndices;
 
 public:
   Trace ();
@@ -48,13 +59,14 @@ public:
   /**
    * The getter searches segments backwards to find queried value.
    */
-  virtual const Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval);
+  virtual const Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
+      Expression *newExpression = 0);
 
   /**
    * The getter searches segments backwards to find queried value.
    */
   virtual const Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      UINT64 memval);
+      UINT64 memval, Expression *newExpression = 0);
 
   /**
    * The setter, uses most recent trace segment for setting the new value.
@@ -79,6 +91,33 @@ public:
 
 private:
   ExecutionTraceSegment *getCurrentTraceSegment () const;
+
+  template < typename T >
+  struct TryToGetSymbolicExpressionMethod {
+
+    typedef const Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address,
+        UINT64 val) const;
+    typedef const Expression *(Trace::*TraceType) (T address, UINT64 val) const;
+  };
+
+  template < typename T >
+  struct GetSymbolicExpressionMethod {
+
+    typedef const Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address,
+        UINT64 val, Expression *newExpression);
+  };
+
+  template < typename T >
+  const Expression *tryToGetSymbolicExpressionImplementation (T address, UINT64 val,
+      typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
+          throw (WrongStateException);
+
+  template < typename T >
+  const Expression *getSymbolicExpressionImplementation (T address, UINT64 val,
+      Expression *newExpression,
+      typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
+      std::map < T, int > &generationIndices,
+      typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod);
 };
 
 }

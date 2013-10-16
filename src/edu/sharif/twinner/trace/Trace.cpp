@@ -35,24 +35,24 @@ Trace::~Trace () {
 
 const Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg,
     UINT64 regval) const throw (WrongStateException) {
-  for (std::list < ExecutionTraceSegment * >::const_iterator it = segments.begin ();
-      it != segments.end (); ++it) { // searches segments starting from the most recent one
-    const ExecutionTraceSegment *seg = *it;
-    const Expression *exp = seg->tryToGetSymbolicExpressionByRegister (reg, regval);
-    if (exp) {
-      return exp;
-    }
-  }
-  return 0;
+  return tryToGetSymbolicExpressionImplementation (reg, regval,
+      &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
 }
 
 const Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
     UINT64 memval) const throw (WrongStateException) {
+  return tryToGetSymbolicExpressionImplementation (memoryEa, memval,
+      &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
+}
+
+template < typename T >
+const Expression *Trace::tryToGetSymbolicExpressionImplementation (T address, UINT64 val,
+    typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
+        throw (WrongStateException) {
   for (std::list < ExecutionTraceSegment * >::const_iterator it = segments.begin ();
       it != segments.end (); ++it) { // searches segments starting from the most recent one
     const ExecutionTraceSegment *seg = *it;
-    const Expression *exp = seg->tryToGetSymbolicExpressionByMemoryAddress (memoryEa,
-        memval);
+    const Expression *exp = (seg->*method) (address, val);
     if (exp) {
       return exp;
     }
@@ -60,30 +60,41 @@ const Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memo
   return 0;
 }
 
-const Expression *Trace::getSymbolicExpressionByRegister (REG reg, UINT64 regval) {
-  try {
-    const Expression *exp = tryToGetSymbolicExpressionByRegister (reg, regval);
-    if (exp) {
-      return exp;
-    }
-  } catch (const WrongStateException &e) {
-  }
-  // instantiate and set a new expression in the most recent segment
-  return getCurrentTraceSegment ()->getSymbolicExpressionByRegister (reg, regval);
+const Expression *Trace::getSymbolicExpressionByRegister (REG reg, UINT64 regval,
+    Expression *newExpression) {
+  return getSymbolicExpressionImplementation (reg, regval, newExpression,
+      &Trace::tryToGetSymbolicExpressionByRegister,
+      registerResidentSymbolsGenerationIndices,
+      &ExecutionTraceSegment::getSymbolicExpressionByRegister);
 }
 
 const Expression *Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-    UINT64 memval) {
+    UINT64 memval, Expression *newExpression) {
+  return getSymbolicExpressionImplementation (memoryEa, memval, newExpression,
+      &Trace::tryToGetSymbolicExpressionByMemoryAddress,
+      memoryResidentSymbolsGenerationIndices,
+      &ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress);
+}
+
+template < typename T >
+const Expression *Trace::getSymbolicExpressionImplementation (T address, UINT64 val,
+    Expression *newExpression,
+    typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
+    std::map < T, int > &generationIndices,
+    typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod) {
   try {
-    const Expression *exp = tryToGetSymbolicExpressionByMemoryAddress (memoryEa, memval);
+    const Expression *exp = (this->*tryToGetMethod) (address, val);
     if (exp) {
       return exp;
     }
   } catch (const WrongStateException &e) {
   }
   // instantiate and set a new expression in the most recent segment
-  return getCurrentTraceSegment ()->getSymbolicExpressionByMemoryAddress (memoryEa,
-      memval);
+  if (!newExpression) {
+    int index = ++generationIndices[address];
+    newExpression = new Expression (address, val, index);
+  }
+  return (getCurrentTraceSegment ()->*getMethod) (address, val, newExpression);
 }
 
 void Trace::setSymbolicExpressionByRegister (REG reg, const Expression *exp) {
