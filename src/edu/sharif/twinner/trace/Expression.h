@@ -17,6 +17,8 @@
 
 #include "pin.H"
 
+#include <stack>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -24,14 +26,15 @@ namespace trace {
 
 class Expression {
 private:
-  int stack; // TODO: change to a stack of symbols and operators
+  std::stack < ExpressionToken > stack;
   UINT64 lastConcreteValue;
 
 public:
   /**
    * Instantiates an expression containing a new (yet unused) symbol.
    */
-  Expression (UINT64 concreteValue);
+  Expression (REG reg, UINT64 concreteValue, int generationIndex);
+  Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex);
 
   UINT64 getLastConcreteValue () const;
 

@@ -12,12 +12,18 @@
 
 #include "Expression.h"
 
+#include <stdexcept>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-Expression::Expression (UINT64 concreteValue) {
+Expression::Expression (REG reg, UINT64 concreteValue, int generationIndex) {
+  // TODO: Instantiate a new expression containing a new symbol
+}
+
+Expression::Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex) {
   // TODO: Instantiate a new expression containing a new symbol
 }
 
@@ -38,7 +44,7 @@ void Expression::binaryOperation (Operator op, Expression exp) {
 }
 
 Expression *Expression::clone () const {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Not yet implemented");
 }
 
 }
