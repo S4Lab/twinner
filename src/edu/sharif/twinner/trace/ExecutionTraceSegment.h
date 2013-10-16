@@ -36,9 +36,10 @@ public:
   virtual const Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       UINT64 memval) const throw (WrongStateException);
 
-  virtual const Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval);
+  virtual const Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
+      Expression *newExpression);
   virtual const Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      UINT64 memval);
+      UINT64 memval, Expression *newExpression);
 
   virtual void setSymbolicExpressionByRegister (REG reg, const Expression *exp);
   virtual void setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
@@ -53,7 +54,8 @@ private:
           throw (WrongStateException);
   template < typename KEY >
   const Expression *getSymbolicExpressionImplementation (
-      std::map < KEY, Expression * > &map, const KEY key, UINT64 currentConcreteValue);
+      std::map < KEY, Expression * > &map, const KEY key, UINT64 currentConcreteValue,
+      Expression *newExpression);
   template < typename KEY >
   void setSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
       const KEY key, const Expression *exp);

@@ -16,6 +16,7 @@
 #include "Constraint.h"
 
 #include <utility>
+#include <stdexcept>
 
 namespace edu {
 namespace sharif {
@@ -68,18 +69,21 @@ const Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementatio
 }
 
 const Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg,
-    UINT64 regval) {
-  return getSymbolicExpressionImplementation (registerToExpression, reg, regval);
+    UINT64 regval, Expression *newExpression) {
+  return getSymbolicExpressionImplementation (registerToExpression, reg, regval,
+      newExpression);
 }
 
 const Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (
-    ADDRINT memoryEa, UINT64 memval) {
-  return getSymbolicExpressionImplementation (memoryAddressToExpression, memoryEa, memval);
+    ADDRINT memoryEa, UINT64 memval, Expression *newExpression) {
+  return getSymbolicExpressionImplementation (memoryAddressToExpression, memoryEa, memval,
+      newExpression);
 }
 
 template < typename KEY >
 const Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
-    std::map < KEY, Expression * > &map, const KEY key, UINT64 currentConcreteValue) {
+    std::map < KEY, Expression * > &map, const KEY key, UINT64 currentConcreteValue,
+    Expression *newExpression) {
   typedef typename std::map < KEY, Expression * >::iterator MapIterator;
   try {
     const Expression *exp = tryToGetSymbolicExpressionImplementation (map, key,
@@ -89,14 +93,17 @@ const Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
     }
   } catch (const WrongStateException &e) {
   }
-  Expression *exp = new Expression (currentConcreteValue);
-  std::pair < MapIterator, bool > res = map.insert (make_pair (key, exp));
+  if (!newExpression) {
+    throw std::runtime_error (
+        "ExecutionTraceSegment::getSymbolicExpressionImplementation method: newExpression is null!");
+  }
+  std::pair < MapIterator, bool > res = map.insert (make_pair (key, newExpression));
   if (!res.second) { // another expression already exists. overwriting...
     MapIterator it = res.first;
     delete it->second;
-    it->second = exp;
+    it->second = newExpression;
   }
-  return exp;
+  return newExpression;
 }
 
 void ExecutionTraceSegment::setSymbolicExpressionByRegister (REG reg,
