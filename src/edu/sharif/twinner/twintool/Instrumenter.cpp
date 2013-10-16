@@ -12,12 +12,13 @@
 
 #include "Instrumenter.h"
 
-#include <iostream>
 #include <stdexcept>
 
 #include "xed-iclass-enum.h"
 
 #include "InstructionSymbolicExecuter.h"
+
+#include "edu/sharif/twinner/util/Logger.h"
 
 using namespace std;
 
@@ -26,14 +27,13 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
-Instrumenter::Instrumenter (string _symbolsFilePath, string _traceFilePath,
-    VerbosenessLevel _verbose) :
-    verbose (_verbose), symbolsFilePath (_symbolsFilePath), traceFilePath (
-        _traceFilePath), ise (new InstructionSymbolicExecuter ()) {
-  if (verbose == INFO) {
-    cout << "Instrumenter class created [verboseness level: info]" << endl;
-  } else if (verbose == DEBUG) {
-    cout << "Instrumenter class created [verboseness level: debug]" << endl;
+Instrumenter::Instrumenter (string _symbolsFilePath, string _traceFilePath) :
+    symbolsFilePath (_symbolsFilePath), traceFilePath (_traceFilePath), ise (
+        new InstructionSymbolicExecuter ()) {
+  if (!(edu::sharif::twinner::util::Logger::debug ()
+      << "Instrumenter class created [verboseness level: debug]\n")) {
+    edu::sharif::twinner::util::Logger::info ()
+        << "Instrumenter class created [verboseness level: info]\n";
   }
 }
 
@@ -47,26 +47,29 @@ static int countOfMOVInstructions = 0;
 static int totalCountOfInstructions = 0;
 
 void Instrumenter::instrumentSingleInstruction (INS ins) {
-  if (verbose == DEBUG) {
-    bool isMemoryRead = INS_IsMemoryRead (ins);
-    bool isMemoryWrite = INS_IsMemoryWrite (ins);
-    cout << "Instrumenting assembly instruction: " << INS_Disassemble (ins) << endl;
-    cout << "\t--> Count of memory operands: " << INS_MemoryOperandCount (ins) << endl;
-    if (isMemoryRead) {
-      cout << "\t--> Reading from memory" << endl;
-      countOfMemoryReadInstructions++;
-    }
-    if (isMemoryWrite) {
-      cout << "\t--> Writing to memory" << endl;
-      countOfMemoryWriteInstructions++;
-    }
-    bool isOriginal = INS_IsOriginal (ins);
-    if (!isOriginal) {
-      cout << "\t--> NON-ORIGINAL instruction!" << endl;
-    } else {
-      totalCountOfInstructions++;
-    }
+  bool isMemoryRead = INS_IsMemoryRead (ins);
+  bool isMemoryWrite = INS_IsMemoryWrite (ins);
+  edu::sharif::twinner::util::Logger::debug () //
+  << "Instrumenting assembly instruction: " << INS_Disassemble (ins) << '\n'
+      << "\t--> Count of memory operands: " << INS_MemoryOperandCount (ins) << '\n';
+  if (isMemoryRead) {
+    edu::sharif::twinner::util::Logger::debug () //
+    << "\t--> Reading from memory\n";
+    countOfMemoryReadInstructions++;
   }
+  if (isMemoryWrite) {
+    edu::sharif::twinner::util::Logger::debug () //
+    << "\t--> Writing to memory\n";
+    countOfMemoryWriteInstructions++;
+  }
+  bool isOriginal = INS_IsOriginal (ins);
+  if (!isOriginal) {
+    edu::sharif::twinner::util::Logger::debug () //
+    << "\t--> NON-ORIGINAL instruction!\n";
+  } else {
+    totalCountOfInstructions++;
+  }
+
   switch (INS_Opcode (ins)) { // Intel has 1024 opcodes. And each opcode has several types/models :)
   case XED_ICLASS_MOV: // MOV instruction -- 5 models
     bool destIsReg = INS_OperandIsReg (ins, 0);
@@ -76,15 +79,14 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
     bool sourceIsMem = INS_OperandIsMemory (ins, 1);
     bool sourceIsImmed = INS_OperandIsImmediate (ins, 1);
 
-    if (verbose == DEBUG) {
-      cout << "\t--> MOV instruction" << endl;
-      countOfMOVInstructions++;
-      cout << "\t--> op0 is " << (destIsMem ? "mem" : (destIsReg ? "reg" : "unknown"))
-          << endl;
-      cout << "\t--> op1 is "
-          << (sourceIsMem ? "mem" :
-              (sourceIsReg ? "reg" : (sourceIsImmed ? "immediate" : "unknown"))) << endl;
-    }
+    countOfMOVInstructions++;
+    edu::sharif::twinner::util::Logger::debug () //
+    << "\t--> MOV instruction\n"
+        //
+        << "\t--> op0 is " << (destIsMem ? "mem" : (destIsReg ? "reg" : "unknown"))
+        << "\n\t--> op1 is "
+        << (sourceIsMem ? "mem" :
+            (sourceIsReg ? "reg" : (sourceIsImmed ? "immediate" : "unknown"))) << '\n';
     if (destIsReg && sourceIsMem) { // read from memory, e.g. mov eax, dword ptr [rbp-0x8]
       INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) movToRegisterFromMemoryAddress,
           IARG_PTR, ise, IARG_UINT32, INS_OperandReg (ins, 0), IARG_MEMORYOP_EA, 0,
@@ -131,12 +133,11 @@ void Instrumenter::syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt,
 
 void Instrumenter::aboutToExit (INT32 code) {
   //TODO: Implement...
-  if (verbose == DEBUG) {
-    cout << "countOfMemoryReadInstructions: " << countOfMemoryReadInstructions << endl;
-    cout << "countOfMemoryWriteInstructions: " << countOfMemoryWriteInstructions << endl;
-    cout << "countOfMOVInstructions: " << countOfMOVInstructions << " ("
-        << (countOfMOVInstructions * 100.0 / totalCountOfInstructions) << " %)" << endl;
-  }
+  edu::sharif::twinner::util::Logger::debug () //
+  << "countOfMemoryReadInstructions: " << countOfMemoryReadInstructions
+      << "\ncountOfMemoryWriteInstructions: " << countOfMemoryWriteInstructions
+      << "\ncountOfMOVInstructions: " << countOfMOVInstructions << " ("
+      << (countOfMOVInstructions * 100.0 / totalCountOfInstructions) << " %)\n";
 }
 
 VOID instrumentSingleInstruction (INS ins, VOID *v) {

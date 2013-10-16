@@ -13,10 +13,11 @@
 #include "TwinTool.h"
 
 #include <unistd.h>
-#include <iostream>
 #include <fstream>
 
 #include "Instrumenter.h"
+
+#include "edu/sharif/twinner/util/Logger.h"
 
 using namespace std;
 
@@ -100,22 +101,11 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     return false;
   }
   // At the end, traceFilePath will be opened and execution trace will be saved in it.
-  Instrumenter::VerbosenessLevel vl;
-  if (verbose.Value () == "quiet") {
-    vl = Instrumenter::QUIET;
-  } else if (verbose.Value () == "error") {
-    vl = Instrumenter::ERROR;
-  } else if (verbose.Value () == "warning") {
-    vl = Instrumenter::WARNING;
-  } else if (verbose.Value () == "info") {
-    vl = Instrumenter::INFO;
-  } else if (verbose.Value () == "debug") {
-    vl = Instrumenter::DEBUG;
-  } else {
+  if (!edu::sharif::twinner::util::Logger::setVerbosenessLevel (verbose.Value ())) {
     printError ("undefined verboseness level: " + verbose.Value ());
     return false;
   }
-  im = new Instrumenter (symbolsFilePath, traceFilePath, vl);
+  im = new Instrumenter (symbolsFilePath, traceFilePath);
   return true;
 }
 
@@ -129,22 +119,17 @@ void TwinTool::registerInstrumentationRoutines () {
   PIN_AddFiniFunction (applicationIsAboutToExit, im);
 }
 
-INT32 TwinTool::printError (string msg) const {
-  cerr << "TwinTool: " << msg << endl;
-  return -2;
-}
-
-INT32 TwinTool::printError (const char *msg) const {
-  cerr << "TwinTool: " << msg << endl;
+template < typename T >
+INT32 TwinTool::printError (const T &msg) const {
+  edu::sharif::twinner::util::Logger::error () << "TwinTool: " << msg << '\n';
   return -2;
 }
 
 INT32 TwinTool::printUsage () const {
-  cerr
-      << "This tool is not intended to be ran manually. Run it using \"Twinner\" application!"
-      << endl << endl;
+  edu::sharif::twinner::util::Logger::error ()
+      << "This tool is not intended to be ran manually. Run it using \"Twinner\" application!\n\n"
 
-  cerr << KNOB_BASE::StringKnobSummary () << endl;
+      << KNOB_BASE::StringKnobSummary () << '\n';
 
   return -1;
 }

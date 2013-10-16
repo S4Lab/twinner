@@ -15,6 +15,8 @@
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 
+#include <stdexcept>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -47,12 +49,12 @@ void InstructionSymbolicExecuter::movToMemoryAddressFromRegister (ADDRINT memory
 
 void InstructionSymbolicExecuter::movToMemoryAddressFromImmediateValue (ADDRINT memoryEa,
     ADDRINT immediate) {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Not yet implemented");
 }
 
 void InstructionSymbolicExecuter::movToRegisterFromImmediateValue (REG reg,
     ADDRINT immediate) {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Not yet implemented");
 }
 
 void InstructionSymbolicExecuter::movToRegisterFromRegister (REG dreg, REG sreg,

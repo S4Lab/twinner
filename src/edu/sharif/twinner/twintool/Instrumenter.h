@@ -15,6 +15,8 @@
 
 #include "pin.H"
 
+#include <string>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -23,22 +25,14 @@ namespace twintool {
 class InstructionSymbolicExecuter;
 
 class Instrumenter {
-public:
-  enum VerbosenessLevel {
-    QUIET, ERROR, WARNING, INFO, DEBUG
-  };
-
 private:
-  VerbosenessLevel verbose;
-
   std::string symbolsFilePath; // read initial symbols from this file
   std::string traceFilePath; // save final execution trace into this file
 
   InstructionSymbolicExecuter *ise;
 
 public:
-  Instrumenter (std::string symbolsFilePath, std::string traceFilePath,
-      VerbosenessLevel verbose);
+  Instrumenter (std::string symbolsFilePath, std::string traceFilePath);
   ~Instrumenter ();
 
   void instrumentSingleInstruction (INS ins);

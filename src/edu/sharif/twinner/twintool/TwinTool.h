@@ -33,8 +33,8 @@ public:
   INT32 run (int argc, char *argv[]);
 
 private:
-  INT32 printError (std::string msg) const;
-  INT32 printError (const char *msg) const;
+  template < typename T >
+  INT32 printError (const T &msg) const;
   INT32 printUsage () const;
 
   bool parseArgumentsAndInitializeTool ();
