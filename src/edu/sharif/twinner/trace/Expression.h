@@ -36,10 +36,25 @@ private:
 
 public:
   /**
-   * Instantiates an expression containing a new (yet unused) symbol.
+   * Instantiates an expression containing a new (yet unused) symbol,
+   * initiated from a register.
    */
   Expression (REG reg, UINT64 concreteValue, int generationIndex);
+
+  /**
+   * Instantiates an expression containing a new (yet unused) symbol,
+   * initiated from a memory address.
+   */
   Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex);
+
+  /**
+   * Instantiates an expression containing a constant value (non-symbolic).
+   */
+  Expression (UINT64 value);
+
+  /**
+   * Deletes all hold expression tokens and destruct the expression instance.
+   */
   ~Expression ();
 
   UINT64 getLastConcreteValue () const;

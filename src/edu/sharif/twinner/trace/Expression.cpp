@@ -16,6 +16,7 @@
 
 #include "RegisterEmergedSymbol.h"
 #include "MemoryEmergedSymbol.h"
+#include "Constant.h"
 
 namespace edu {
 namespace sharif {
@@ -39,6 +40,11 @@ Expression::Expression (const Expression &exp) :
     const ExpressionToken *et = *it;
     stack.push_back (et->clone ());
   }
+}
+
+Expression::Expression (UINT64 value) :
+    lastConcreteValue (value) {
+  stack.push_back (new Constant (value));
 }
 
 Expression::~Expression () {
