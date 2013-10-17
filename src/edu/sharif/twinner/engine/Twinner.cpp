@@ -13,6 +13,7 @@
 #include "Twinner.h"
 
 #include <iostream>
+#include <stdexcept>
 
 #include "Executer.h"
 
@@ -71,7 +72,7 @@ void Twinner::generateTwinBinary () {
 }
 
 void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace) {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Twinner::addExecutionTrace: Not yet implemented");
 }
 
 bool Twinner::calculateSymbolsValuesForCoveringNextPath (
@@ -81,7 +82,7 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
 }
 
 void Twinner::codeTracesIntoTwinBinary () {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Twinner::codeTracesIntoTwinBinary: Not yet implemented");
 }
 
 }

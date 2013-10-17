@@ -12,13 +12,15 @@
 
 #include "Constraint.h"
 
+#include <stdexcept>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
 void Constraint::addConstraint (Constraint c) {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Constraint:addConstraint: Not yet implemented");
 }
 
 }

@@ -53,15 +53,15 @@ UINT64 Expression::getLastConcreteValue () const {
 }
 
 void Expression::toString () const {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Expression::toString: Not yet implemented");
 }
 
 void Expression::unaryOperation (Operator op, Expression exp) {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Expression::unaryOperation: Not yet implemented");
 }
 
 void Expression::binaryOperation (Operator op, Expression exp) {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Expression::binaryOperation: Not yet implemented");
 }
 
 Expression *Expression::clone () const {

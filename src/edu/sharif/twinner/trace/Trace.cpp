@@ -12,6 +12,8 @@
 
 #include "Trace.h"
 
+#include <stdexcept>
+
 #include "Expression.h"
 #include "Constraint.h"
 #include "Syscall.h"
@@ -111,11 +113,11 @@ void Trace::addPathConstraint (Constraint c) {
 }
 
 void Trace::syscallInvoked (Syscall s) {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Trace::syscallInvoked: Not yet implemented");
 }
 
 void Trace::saveToFile (const char *path) const {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Trace::saveToFile: Not yet implemented");
 }
 
 /**
@@ -124,7 +126,7 @@ void Trace::saveToFile (const char *path) const {
  * @return A newed Trace object loaded from file "path".
  */
 Trace *Trace::loadFromFile (const char *path) {
-  throw "Not yet implemented";
+  throw std::runtime_error ("Trace::loadFromFile: Not yet implemented");
 }
 
 ExecutionTraceSegment *Trace::getCurrentTraceSegment () const {
