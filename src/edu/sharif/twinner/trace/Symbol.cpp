@@ -17,8 +17,12 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-Symbol::Symbol (ADDRINT _address, UINT64 _concreteValue, int _generationIndex) :
-    address (_address), concreteValue (_concreteValue), generationIndex (_generationIndex) {
+Symbol::Symbol (UINT64 _concreteValue, int _generationIndex) :
+    Operand (), concreteValue (_concreteValue), generationIndex (_generationIndex) {
+}
+
+Symbol::Symbol (const Symbol &s) :
+    Operand (s), concreteValue (s.concreteValue), generationIndex (s.generationIndex) {
 }
 
 }

@@ -22,9 +22,11 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+/**
+ * @abstract
+ */
 class Symbol : public Operand {
-private:
-  ADDRINT address;
+protected:
   UINT64 concreteValue;
   /**
    * Different values can be stored at the same memory address (as they can be changed by syscalls).
@@ -32,8 +34,9 @@ private:
    */
   int generationIndex;
 
-public:
-  Symbol (ADDRINT address, UINT64 concreteValue, int generationIndex);
+  Symbol (UINT64 concreteValue, int generationIndex);
+
+  Symbol (const Symbol &s);
 };
 
 }

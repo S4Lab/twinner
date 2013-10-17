@@ -10,26 +10,31 @@
  * This file is part of Twinner project.
  */
 
-#include "Operator.h"
+#ifndef MEMORYEMERGEDSYMBOL_H_
+#define MEMORYEMERGEDSYMBOL_H_
+
+#include "Symbol.h"
 
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-Operator::Operator (OperatorIdentifier _oi) :
-    ExpressionToken (), oi (_oi) {
+class MemoryEmergedSymbol : public Symbol {
+private:
+  ADDRINT address;
+
+  MemoryEmergedSymbol (const MemoryEmergedSymbol &s);
+
+public:
+  MemoryEmergedSymbol (ADDRINT address, UINT64 concreteValue, int generationIndex);
+
+  virtual MemoryEmergedSymbol *clone () const;
+};
+
+}
+}
+}
 }
 
-Operator::Operator (const Operator &op) :
-    ExpressionToken (op), oi (op.oi) {
-}
-
-Operator *Operator::clone () const {
-  return new Operator (*this);
-}
-
-}
-}
-}
-}
+#endif /* MEMORYEMERGEDSYMBOL_H_ */

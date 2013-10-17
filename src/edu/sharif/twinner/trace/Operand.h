@@ -20,7 +20,18 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+/**
+ * @interface
+ */
 class Operand : public ExpressionToken {
+protected:
+  Operand () :
+      ExpressionToken () {
+  }
+
+  Operand (const Operand &op) :
+      ExpressionToken (op) {
+  }
 };
 
 }

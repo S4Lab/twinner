@@ -29,8 +29,12 @@ public:
 private:
   OperatorIdentifier oi;
 
+  Operator (const Operator &op);
+
 public:
   Operator (OperatorIdentifier);
+
+  virtual Operator *clone () const;
 };
 
 }
