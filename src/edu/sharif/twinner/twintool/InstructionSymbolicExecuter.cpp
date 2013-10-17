@@ -49,14 +49,18 @@ void InstructionSymbolicExecuter::movToMemoryAddressFromRegister (ADDRINT memory
 
 void InstructionSymbolicExecuter::movToMemoryAddressFromImmediateValue (ADDRINT memoryEa,
     ADDRINT immediate) {
-  throw std::runtime_error (
-      "InstructionSymbolicExecuter::movToMemoryAddressFromImmediateValue: Not yet implemented");
+  edu::sharif::twinner::trace::Expression *exp =
+      new edu::sharif::twinner::trace::Expression (immediate);
+  trace->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
+  delete exp; // Above setter method, has cloned the expression object for itself.
 }
 
 void InstructionSymbolicExecuter::movToRegisterFromImmediateValue (REG reg,
     ADDRINT immediate) {
-  throw std::runtime_error (
-      "InstructionSymbolicExecuter::movToRegisterFromImmediateValue: Not yet implemented");
+  edu::sharif::twinner::trace::Expression *exp =
+      new edu::sharif::twinner::trace::Expression (immediate);
+  trace->setSymbolicExpressionByRegister (reg, exp);
+  delete exp; // Above setter method, has cloned the expression object for itself.
 }
 
 void InstructionSymbolicExecuter::movToRegisterFromRegister (REG dreg, REG sreg,
