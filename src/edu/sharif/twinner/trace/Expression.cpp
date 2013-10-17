@@ -14,24 +14,45 @@
 
 #include <stdexcept>
 
+#include "RegisterEmergedSymbol.h"
+#include "MemoryEmergedSymbol.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-Expression::Expression (REG reg, UINT64 concreteValue, int generationIndex) {
-  // TODO: Instantiate a new expression containing a new symbol
+Expression::Expression (REG reg, UINT64 concreteValue, int generationIndex) :
+    lastConcreteValue (concreteValue) {
+  stack.push_back (new RegisterEmergedSymbol (reg, concreteValue, generationIndex));
 }
 
-Expression::Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex) {
-  // TODO: Instantiate a new expression containing a new symbol
+Expression::Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex) :
+    lastConcreteValue (concreteValue) {
+  stack.push_back (new MemoryEmergedSymbol (memoryEa, concreteValue, generationIndex));
+}
+
+Expression::Expression (const Expression &exp) :
+    lastConcreteValue (exp.lastConcreteValue) {
+  for (std::list < ExpressionToken * >::const_iterator it = exp.stack.begin ();
+      it != exp.stack.end (); ++it) {
+    const ExpressionToken *et = *it;
+    stack.push_back (et->clone ());
+  }
+}
+
+Expression::~Expression () {
+  while (!stack.empty ()) {
+    delete stack.back ();
+    stack.pop_back ();
+  }
 }
 
 UINT64 Expression::getLastConcreteValue () const {
   return lastConcreteValue;
 }
 
-void Expression::toString () {
+void Expression::toString () const {
   throw "Not yet implemented";
 }
 
@@ -44,7 +65,7 @@ void Expression::binaryOperation (Operator op, Expression exp) {
 }
 
 Expression *Expression::clone () const {
-  throw std::runtime_error ("Not yet implemented");
+  return new Expression (*this);
 }
 
 }

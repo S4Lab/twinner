@@ -17,7 +17,7 @@
 
 #include "pin.H"
 
-#include <stack>
+#include <list>
 
 namespace edu {
 namespace sharif {
@@ -26,8 +26,13 @@ namespace trace {
 
 class Expression {
 private:
-  std::stack < ExpressionToken > stack;
+  /**
+   * Uses push_back and pop_back instead of push and pop to implement a stack.
+   */
+  std::list < ExpressionToken * > stack;
   UINT64 lastConcreteValue;
+
+  Expression (const Expression &exp);
 
 public:
   /**
@@ -35,13 +40,13 @@ public:
    */
   Expression (REG reg, UINT64 concreteValue, int generationIndex);
   Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex);
+  ~Expression ();
 
   UINT64 getLastConcreteValue () const;
 
-  void toString ();
+  void toString () const;
 
   void unaryOperation (Operator op, Expression exp);
-
   void binaryOperation (Operator op, Expression exp);
 
   Expression *clone () const;
