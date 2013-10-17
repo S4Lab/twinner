@@ -46,7 +46,8 @@ public:
   Executer (std::string pinLauncher, std::string twintool, std::string inputBinary,
       bool verbose);
 
-  void setSymbolsValues (const std::set < edu::sharif::twinner::trace::Symbol > &symbols);
+  void setSymbolsValues (
+      const std::set < edu::sharif::twinner::trace::Symbol * > &symbols);
 
   edu::sharif::twinner::trace::Trace *executeSingleTrace ();
 };

@@ -50,7 +50,7 @@ private:
 
   bool calculateSymbolsValuesForCoveringNextPath (
       const edu::sharif::twinner::trace::Trace &trace,
-      std::set < edu::sharif::twinner::trace::Symbol > &symbols);
+      std::set < edu::sharif::twinner::trace::Symbol * > &symbols);
 
   void codeTracesIntoTwinBinary ();
 };

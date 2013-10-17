@@ -37,7 +37,7 @@ Executer::Executer (std::string pinLauncher, std::string twintool,
 }
 
 void Executer::setSymbolsValues (
-    const set < edu::sharif::twinner::trace::Symbol > &symbols) {
+    const set < edu::sharif::twinner::trace::Symbol * > &symbols) {
   //FIXME:
   //throw "Not yet implemented";
 }

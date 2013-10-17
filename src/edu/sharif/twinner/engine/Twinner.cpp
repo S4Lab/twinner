@@ -48,7 +48,7 @@ void Twinner::setTwinBinaryPath (string twin) {
 
 void Twinner::generateTwinBinary () {
   Executer ex (pin, twintool, input, verbose);
-  set < edu::sharif::twinner::trace::Symbol > symbols;
+  set < edu::sharif::twinner::trace::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;
   while (somePathsAreNotCovered) {
@@ -60,6 +60,10 @@ void Twinner::generateTwinBinary () {
     edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTrace ();
     addExecutionTrace (trace);
 
+    for (set < edu::sharif::twinner::trace::Symbol * >::iterator it = symbols.begin ();
+        it != symbols.end (); ++it) {
+      delete *it;
+    }
     symbols.clear ();
     somePathsAreNotCovered = calculateSymbolsValuesForCoveringNextPath (*trace, symbols);
   }
@@ -72,7 +76,7 @@ void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace
 
 bool Twinner::calculateSymbolsValuesForCoveringNextPath (
     const edu::sharif::twinner::trace::Trace &trace,
-    set < edu::sharif::twinner::trace::Symbol > &symbols) {
+    set < edu::sharif::twinner::trace::Symbol * > &symbols) {
   return false;
 }
 
