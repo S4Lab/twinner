@@ -90,8 +90,8 @@ const Expression *Trace::getSymbolicExpressionImplementation (T address, UINT64 
   } catch (const WrongStateException &e) {
   }
   // instantiate and set a new expression in the most recent segment
+  int index = ++generationIndices[address];
   if (!newExpression) {
-    int index = ++generationIndices[address];
     newExpression = new Expression (address, val, index);
   }
   return (getCurrentTraceSegment ()->*getMethod) (address, val, newExpression);

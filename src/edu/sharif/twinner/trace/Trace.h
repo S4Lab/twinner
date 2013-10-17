@@ -28,6 +28,9 @@ class ExecutionTraceSegment;
 
 class Trace : public ExecutionState {
 private:
+  // TODO: Add an iterator pointing to current segment instead of depending on the head of the list.
+  // With an iterator, it's possible to create future segments and set symbols/expressions there, without
+  // being worried that which segment is representing the current execution state.
   std::list < ExecutionTraceSegment * > segments;
   /**
    * The last used index (starting from one) for each symbol
