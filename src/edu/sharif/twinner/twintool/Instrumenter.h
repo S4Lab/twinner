@@ -41,6 +41,9 @@ public:
   void syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std);
 
   void aboutToExit (INT32 code);
+
+private:
+  void instrumentMOVInstruction (INS ins);
 };
 
 VOID instrumentSingleInstruction (INS ins, VOID *v);
