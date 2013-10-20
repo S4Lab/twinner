@@ -16,6 +16,7 @@
 #include "pin.H"
 
 #include <string>
+#include <map>
 
 namespace edu {
 namespace sharif {
@@ -43,7 +44,11 @@ public:
   void aboutToExit (INT32 code);
 
 private:
+  typedef void (Instrumenter::*instrumentationMethod) (INS ins);
+
   void instrumentMOVInstruction (INS ins);
+
+  std::map < OPCODE, instrumentationMethod > instrumentationMethods;
 };
 
 VOID instrumentSingleInstruction (INS ins, VOID *v);

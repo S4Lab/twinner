@@ -13,7 +13,6 @@
 #include "Instrumenter.h"
 
 #include <stdexcept>
-#include <map>
 
 #include "xed-iclass-enum.h"
 
@@ -36,6 +35,14 @@ Instrumenter::Instrumenter (string _symbolsFilePath, string _traceFilePath) :
     edu::sharif::twinner::util::Logger::info ()
         << "Instrumenter class created [verboseness level: info]\n";
   }
+  const instrumentationMethod nullmethod = 0;
+  instrumentationMethods.insert (
+      make_pair (XED_ICLASS_MOV, &Instrumenter::instrumentMOVInstruction));
+  instrumentationMethods.insert (make_pair (XED_ICLASS_TEST, nullmethod));
+  instrumentationMethods.insert (make_pair (XED_ICLASS_JZ, nullmethod));
+  instrumentationMethods.insert (make_pair (XED_ICLASS_JNZ, nullmethod));
+  instrumentationMethods.insert (make_pair (XED_ICLASS_PUSH, nullmethod));
+  instrumentationMethods.insert (make_pair (XED_ICLASS_POP, nullmethod));
 }
 
 Instrumenter::~Instrumenter () {
@@ -103,34 +110,21 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
     totalCountOfInstructions++;
   }
 
-  switch (INS_Opcode (ins)) { // Intel has 1024 opcodes. And each opcode has several types/models :)
-#define CASE_OF_OPCODE(_OPC) CASE_OF_OPCODE_WITH_CALL(_OPC)
-
-#define CASE_OF_OPCODE_WITHOUT_CALL(_OPC) \
-  case XED_ICLASS_ ## _OPC: \
-    edu::sharif::twinner::util::Logger::debug () << "\t--> " # _OPC " instruction\n"; \
-    countOfInstructionsPerOpcode[XED_ICLASS_ ## _OPC]++;
-
-#define CASE_OF_OPCODE_WITH_CALL(_OPC) \
-  CASE_OF_OPCODE_WITHOUT_CALL(_OPC) \
-    instrument ## _OPC ## Instruction (ins);
-
-  CASE_OF_OPCODE(MOV)
-    break;
-  CASE_OF_OPCODE_WITHOUT_CALL(ADD)
-    break;
-  CASE_OF_OPCODE_WITHOUT_CALL(TEST)
-    break;
-  CASE_OF_OPCODE_WITHOUT_CALL(SUB)
-    break;
-  CASE_OF_OPCODE_WITHOUT_CALL(CMP)
-    break;
-  CASE_OF_OPCODE_WITHOUT_CALL(JZ)
-    break;
-  default:
+  OPCODE op = INS_Opcode (ins);
+  // Intel has 1024 opcodes. And each opcode has several types/models :)
+  std::map < OPCODE, instrumentationMethod >::iterator it = instrumentationMethods.find (
+      op);
+  if (it == instrumentationMethods.end ()) {
     edu::sharif::twinner::util::Logger::info ()    //
     << "Ignoring assembly instruction: " << INS_Disassemble (ins) << '\n';
-    break;
+  } else {
+    edu::sharif::twinner::util::Logger::debug () << "\t--> " << OPCODE_StringShort (op)
+        << " instruction\n";
+    countOfInstructionsPerOpcode[op]++;
+    instrumentationMethod method = it->second;
+    if (method) {
+      (this->*method) (ins);
+    }
   }
 }
 
