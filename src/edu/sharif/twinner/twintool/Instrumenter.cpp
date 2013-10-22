@@ -27,9 +27,10 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
-Instrumenter::Instrumenter (string _symbolsFilePath, string _traceFilePath) :
-    symbolsFilePath (_symbolsFilePath), traceFilePath (_traceFilePath), ise (
-        new InstructionSymbolicExecuter ()) {
+Instrumenter::Instrumenter (string _symbolsFilePath, string _traceFilePath,
+    bool _justAnalyzeMainRoutine) :
+    symbolsFilePath (_symbolsFilePath), traceFilePath (_traceFilePath), justAnalyzeMainRoutine (
+        _justAnalyzeMainRoutine), ise (new InstructionSymbolicExecuter ()) {
   if (!(edu::sharif::twinner::util::Logger::debug ()
       << "Instrumenter class created [verboseness level: debug]\n")) {
     edu::sharif::twinner::util::Logger::info ()
@@ -155,11 +156,29 @@ void Instrumenter::instrumentPOPInstruction (INS ins) {
 }
 
 void Instrumenter::instrumentSingleInstruction (INS ins) {
+  edu::sharif::twinner::util::Logger debug = edu::sharif::twinner::util::Logger::debug ();
+  if (justAnalyzeMainRoutine) {
+    RTN rtn = INS_Rtn (ins);
+    if (RTN_Valid (rtn) && RTN_Name (rtn) == "main") {
+      /*
+       * Routine is valid and is named main. Before this point all instructions are owned
+       * by RTLD and should be ignored. But after this point, all instructions are owned
+       * by instrumented program. So all of them should be analyzed. Either routine is main
+       * and instructions are within main routine or routine name is something different and
+       * instructions are called directly or indirectly by the main routine.
+       * In order to instrument all remaining instructions, we can simply
+       * turn the justAnalyzeMainRoutine flag off.
+       */
+      justAnalyzeMainRoutine = false;
+    } else {
+      return;
+    }
+  }
+
   bool isMemoryRead = INS_IsMemoryRead (ins);
   bool isMemoryWrite = INS_IsMemoryWrite (ins);
   bool isOriginal = INS_IsOriginal (ins);
   UINT32 countOfOperands = INS_OperandCount (ins);
-  edu::sharif::twinner::util::Logger debug = edu::sharif::twinner::util::Logger::debug ();
   debug << "Instrumenting assembly instruction: " << INS_Disassemble (ins) << '\n'
       << "\t--> Count of operands: " << countOfOperands << '\n'
       << "\t--> Count of memory operands: " << INS_MemoryOperandCount (ins) << '\n'

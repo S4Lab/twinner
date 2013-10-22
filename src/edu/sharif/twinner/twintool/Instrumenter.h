@@ -29,11 +29,13 @@ class Instrumenter {
 private:
   std::string symbolsFilePath; // read initial symbols from this file
   std::string traceFilePath; // save final execution trace into this file
+  bool justAnalyzeMainRoutine; // only instructions after the main() routine are analyzed
 
   InstructionSymbolicExecuter *ise;
 
 public:
-  Instrumenter (std::string symbolsFilePath, std::string traceFilePath);
+  Instrumenter (std::string symbolsFilePath, std::string traceFilePath,
+      bool justAnalyzeMainRoutine);
   ~Instrumenter ();
 
   void instrumentSingleInstruction (INS ins);

@@ -37,6 +37,9 @@ KNOB < string > traceOutputFilePath (KNOB_MODE_WRITEONCE, "pintool", "trace",
 KNOB < string > verbose (KNOB_MODE_WRITEONCE, "pintool", "verbose", "warning",
     "specify the level of verboseness: { quiet, error, warning, info, debug }");
 
+KNOB < BOOL > main (KNOB_MODE_WRITEONCE, "pintool", "main", "",
+    "if presents, only main() routine and what is called by it will be analyzed");
+
 TwinTool::TwinTool () :
     im (0) {
 }
@@ -48,6 +51,12 @@ TwinTool::~TwinTool () {
 }
 
 INT32 TwinTool::run (int argc, char *argv[]) {
+  /**
+   * This is required for -main option. That option commands instrumentation to start from the main() routine
+   * instead of RTLD start point. Finding the main() routine requires symbols (so it's not reliable and
+   * is not recommended for real malwares).
+   */
+  PIN_InitSymbols ();
   /*
    * Initialize PIN library. Print help message if -h(elp) is specified
    * in the command line or the command line is invalid.
@@ -105,7 +114,12 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     printError ("undefined verboseness level: " + verbose.Value ());
     return false;
   }
-  im = new Instrumenter (symbolsFilePath, traceFilePath);
+  bool justAnalyzeMainRoutine = main.Value ();
+  if (justAnalyzeMainRoutine) {
+    edu::sharif::twinner::util::Logger::info ()
+        << "Only main() routine will be analyzed.\n";
+  }
+  im = new Instrumenter (symbolsFilePath, traceFilePath, justAnalyzeMainRoutine);
   return true;
 }
 
