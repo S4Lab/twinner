@@ -38,6 +38,13 @@ public:
   void movToMemoryAddressFromImmediateValue (ADDRINT memoryEa, ADDRINT immediate);
   void movToRegisterFromImmediateValue (REG reg, ADDRINT immediate);
   void movToRegisterFromRegister (REG dreg, REG sreg, UINT64 regsrcval);
+
+  void pushToStackFromRegister (ADDRINT stackEa, REG reg, UINT64 regval);
+  void pushToStackFromImmediateValue (ADDRINT stackEa, ADDRINT immediate);
+  void pushToStackFromMemoryAddress (ADDRINT stackEa, ADDRINT memoryEa);
+
+private:
+  UINT64 readMemoryContent (ADDRINT memoryEa) const;
 };
 
 VOID movToRegisterFromMemoryAddress (VOID *iseptr, UINT32 regi32, ADDRINT memoryEa);
@@ -48,6 +55,11 @@ VOID movToMemoryAddressFromImmediateValue (VOID *iseptr, ADDRINT memoryEa,
 VOID movToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT immediate);
 VOID movToRegisterFromRegister (VOID *iseptr, UINT32 regdsti32, UINT32 regsrci32,
     ADDRINT regsrcval);
+
+VOID pushToStackFromRegister (VOID *iseptr, ADDRINT stackEa, UINT32 regi32,
+    ADDRINT regval);
+VOID pushToStackFromImmediateValue (VOID *iseptr, ADDRINT stackEa, ADDRINT immediate);
+VOID pushToStackFromMemoryAddress (VOID *iseptr, ADDRINT stackEa, ADDRINT memoryEa);
 
 }
 }

@@ -47,6 +47,7 @@ private:
   typedef void (Instrumenter::*instrumentationMethod) (INS ins);
 
   void instrumentMOVInstruction (INS ins);
+  void instrumentPUSHInstruction (INS ins);
 
   std::map < OPCODE, instrumentationMethod > instrumentationMethods;
 };

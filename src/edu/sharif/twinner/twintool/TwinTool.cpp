@@ -57,7 +57,7 @@ INT32 TwinTool::run (int argc, char *argv[]) {
   }
   // AT&T syntax is the one which is used by GDB
   //PIN_SetSyntaxATT ();
-  // But order of operands matchs with Intel syntax (destination on the left side). So this mode is better for debugging.
+  // But order of operands matches with Intel syntax (destination on the left side). So this mode is better for debugging.
   PIN_SetSyntaxIntel ();
 
   if (!parseArgumentsAndInitializeTool ()) {
