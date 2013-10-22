@@ -40,10 +40,11 @@ Instrumenter::Instrumenter (string _symbolsFilePath, string _traceFilePath) :
       make_pair (XED_ICLASS_MOV, &Instrumenter::instrumentMOVInstruction)); // 5 models
   instrumentationMethods.insert (
       make_pair (XED_ICLASS_PUSH, &Instrumenter::instrumentPUSHInstruction)); // 3 models
+  instrumentationMethods.insert (
+      make_pair (XED_ICLASS_POP, &Instrumenter::instrumentPOPInstruction)); // 2 models
   instrumentationMethods.insert (make_pair (XED_ICLASS_TEST, nullmethod));
   instrumentationMethods.insert (make_pair (XED_ICLASS_JZ, nullmethod));
   instrumentationMethods.insert (make_pair (XED_ICLASS_JNZ, nullmethod));
-  instrumentationMethods.insert (make_pair (XED_ICLASS_POP, nullmethod));
 }
 
 Instrumenter::~Instrumenter () {
@@ -122,6 +123,34 @@ void Instrumenter::instrumentPUSHInstruction (INS ins) {
   }
   default:
     throw std::runtime_error ("Unknown PUSH instruction");
+  }
+}
+
+void Instrumenter::instrumentPOPInstruction (INS ins) {
+  //TODO: Take care of ESP or RSP register too
+  switch (INS_MemoryOperandCount (ins)) {
+  case 1: { // pop into a register, e.g. pop rbp
+    bool destIsReg = INS_OperandIsReg (ins, 0);
+    if (destIsReg) {
+      INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) popToRegisterFromStack, IARG_PTR, ise,
+          IARG_UINT32, INS_OperandReg (ins, 0), IARG_MEMORYOP_EA, 0, IARG_END);
+    } else {
+      throw std::runtime_error ("Unknown POP instruction (with 1 mem operand)");
+    }
+    break;
+  }
+  case 2: { // pop into a memory address, e.g. pop qword ptr [rdx+0x200532]. First mem op is dest, second is src
+    bool destIsMem = INS_OperandIsMemory (ins, 0);
+    if (destIsMem) {
+      INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) popToMemoryAddressFromStack, IARG_PTR,
+          ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYOP_EA, 1, IARG_END);
+    } else {
+      throw std::runtime_error ("Unknown POP instruction (with 2 mem operands)");
+    }
+    break;
+  }
+  default:
+    throw std::runtime_error ("Unknown POP instruction");
   }
 }
 

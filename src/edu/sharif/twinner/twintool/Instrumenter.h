@@ -48,6 +48,7 @@ private:
 
   void instrumentMOVInstruction (INS ins);
   void instrumentPUSHInstruction (INS ins);
+  void instrumentPOPInstruction (INS ins);
 
   std::map < OPCODE, instrumentationMethod > instrumentationMethods;
 };

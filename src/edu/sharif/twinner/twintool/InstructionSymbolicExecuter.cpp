@@ -90,6 +90,19 @@ void InstructionSymbolicExecuter::pushToStackFromMemoryAddress (ADDRINT stackEa,
   trace->setSymbolicExpressionByMemoryAddress (stackEa, srcexp);
 }
 
+void InstructionSymbolicExecuter::popToRegisterFromStack (REG reg, ADDRINT stackEa) {
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      trace->getSymbolicExpressionByMemoryAddress (stackEa, readMemoryContent (stackEa));
+  trace->setSymbolicExpressionByRegister (reg, srcexp);
+}
+
+void InstructionSymbolicExecuter::popToMemoryAddressFromStack (ADDRINT memoryEa,
+    ADDRINT stackEa) {
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      trace->getSymbolicExpressionByMemoryAddress (stackEa, readMemoryContent (stackEa));
+  trace->setSymbolicExpressionByMemoryAddress (memoryEa, srcexp);
+}
+
 UINT64 InstructionSymbolicExecuter::readMemoryContent (ADDRINT memoryEa) const {
   UINT64 currentConcreteValue;
   PIN_SafeCopy (&currentConcreteValue, (const VOID*) (memoryEa), sizeof(UINT64));
@@ -138,6 +151,16 @@ VOID pushToStackFromImmediateValue (VOID *iseptr, ADDRINT stackEa, ADDRINT immed
 VOID pushToStackFromMemoryAddress (VOID *iseptr, ADDRINT stackEa, ADDRINT memoryEa) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->pushToStackFromMemoryAddress (stackEa, memoryEa);
+}
+
+VOID popToRegisterFromStack (VOID *iseptr, UINT32 regi32, ADDRINT stackEa) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->popToRegisterFromStack ((REG) regi32, stackEa);
+}
+
+VOID popToMemoryAddressFromStack (VOID *iseptr, ADDRINT memoryEa, ADDRINT stackEa) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->popToMemoryAddressFromStack (memoryEa, stackEa);
 }
 
 }
