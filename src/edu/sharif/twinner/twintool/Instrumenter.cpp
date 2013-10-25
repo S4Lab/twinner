@@ -50,9 +50,10 @@ ise (new InstructionSymbolicExecuter ()) {
   instrumentationMethods.insert
       (make_pair (XED_ICLASS_ADD, // 5 models (r += r/m/im OR m += r/im)
                   &Instrumenter::instrumentADDInstruction));
-  instrumentationMethods.insert (make_pair (XED_ICLASS_TEST, nullmethod));
-  instrumentationMethods.insert (make_pair (XED_ICLASS_JZ, nullmethod));
-  instrumentationMethods.insert (make_pair (XED_ICLASS_JNZ, nullmethod));
+  instrumentationMethods.insert (make_pair (XED_ICLASS_NOP, nullmethod));
+  //  instrumentationMethods.insert (make_pair (XED_ICLASS_TEST, nullmethod));
+  //  instrumentationMethods.insert (make_pair (XED_ICLASS_JZ, nullmethod));
+  //  instrumentationMethods.insert (make_pair (XED_ICLASS_JNZ, nullmethod));
 }
 
 Instrumenter::~Instrumenter () {
@@ -179,7 +180,7 @@ void Instrumenter::instrumentADDInstruction (INS ins) {
   // rflags are set too
   bool destIsReg = INS_OperandIsReg (ins, 0); // 3 models (r += r/m/im)
   //  bool destIsMem = INS_OperandIsMemory (ins, 0); // 2 models (m += r/im)
-  //  bool sourceIsReg = INS_OperandIsReg (ins, 1);
+  bool sourceIsReg = INS_OperandIsReg (ins, 1);
   //  bool sourceIsMem = INS_OperandIsMemory (ins, 1);
   bool sourceIsImmed = INS_OperandIsImmediate (ins, 1);
   if (destIsReg && sourceIsImmed) { // add an immediate value to a register, e.g. add rax, 0x8
@@ -187,6 +188,14 @@ void Instrumenter::instrumentADDInstruction (INS ins) {
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) addToRegisterFromImmediateValue,
                     IARG_PTR, ise, IARG_UINT32, reg, IARG_REG_VALUE, reg, IARG_ADDRINT,
                     INS_OperandImmediate (ins, 1),
+                    IARG_END);
+
+  } else if (destIsReg && sourceIsReg) {
+    REG dreg = INS_OperandReg (ins, 0);
+    REG sreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) addToRegisterFromRegister,
+                    IARG_PTR, ise, IARG_UINT32, dreg, IARG_REG_VALUE, dreg,
+                    IARG_UINT32, sreg, IARG_REG_VALUE, sreg,
                     IARG_END);
 
   } else { // unknown case!
