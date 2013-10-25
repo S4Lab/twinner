@@ -24,17 +24,17 @@ namespace twinner {
 namespace trace {
 
 Expression::Expression (REG reg, UINT64 concreteValue, int generationIndex) :
-    lastConcreteValue (concreteValue) {
+lastConcreteValue (concreteValue) {
   stack.push_back (new RegisterEmergedSymbol (reg, concreteValue, generationIndex));
 }
 
 Expression::Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex) :
-    lastConcreteValue (concreteValue) {
+lastConcreteValue (concreteValue) {
   stack.push_back (new MemoryEmergedSymbol (memoryEa, concreteValue, generationIndex));
 }
 
 Expression::Expression (const Expression &exp) :
-    lastConcreteValue (exp.lastConcreteValue) {
+lastConcreteValue (exp.lastConcreteValue) {
   for (std::list < ExpressionToken * >::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const ExpressionToken *et = *it;
@@ -43,7 +43,7 @@ Expression::Expression (const Expression &exp) :
 }
 
 Expression::Expression (UINT64 value) :
-    lastConcreteValue (value) {
+lastConcreteValue (value) {
   stack.push_back (new Constant (value));
 }
 

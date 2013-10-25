@@ -29,22 +29,27 @@ namespace twintool {
 
 Instrumenter::Instrumenter (string _symbolsFilePath, string _traceFilePath,
     bool _justAnalyzeMainRoutine) :
-    symbolsFilePath (_symbolsFilePath), traceFilePath (_traceFilePath), justAnalyzeMainRoutine (
-        _justAnalyzeMainRoutine), ise (new InstructionSymbolicExecuter ()) {
+symbolsFilePath (_symbolsFilePath), traceFilePath (_traceFilePath),
+justAnalyzeMainRoutine (_justAnalyzeMainRoutine),
+ise (new InstructionSymbolicExecuter ()) {
   if (!(edu::sharif::twinner::util::Logger::debug ()
       << "Instrumenter class created [verboseness level: debug]\n")) {
     edu::sharif::twinner::util::Logger::info ()
         << "Instrumenter class created [verboseness level: info]\n";
   }
   const instrumentationMethod nullmethod = 0;
-  instrumentationMethods.insert (
-      make_pair (XED_ICLASS_MOV, &Instrumenter::instrumentMOVInstruction)); // 5 models
-  instrumentationMethods.insert (
-      make_pair (XED_ICLASS_PUSH, &Instrumenter::instrumentPUSHInstruction)); // 3 models
-  instrumentationMethods.insert (
-      make_pair (XED_ICLASS_POP, &Instrumenter::instrumentPOPInstruction)); // 2 models
-  instrumentationMethods.insert (
-      make_pair (XED_ICLASS_ADD, &Instrumenter::instrumentADDInstruction)); // 5 models (r += r/m/im OR m += r/im)
+  instrumentationMethods.insert
+      (make_pair (XED_ICLASS_MOV, // 5 models
+                  &Instrumenter::instrumentMOVInstruction));
+  instrumentationMethods.insert
+      (make_pair (XED_ICLASS_PUSH, // 3 models
+                  &Instrumenter::instrumentPUSHInstruction));
+  instrumentationMethods.insert
+      (make_pair (XED_ICLASS_POP, // 2 models
+                  &Instrumenter::instrumentPOPInstruction));
+  instrumentationMethods.insert
+      (make_pair (XED_ICLASS_ADD, // 5 models (r += r/m/im OR m += r/im)
+                  &Instrumenter::instrumentADDInstruction));
   instrumentationMethods.insert (make_pair (XED_ICLASS_TEST, nullmethod));
   instrumentationMethods.insert (make_pair (XED_ICLASS_JZ, nullmethod));
   instrumentationMethods.insert (make_pair (XED_ICLASS_JNZ, nullmethod));
@@ -65,30 +70,34 @@ void Instrumenter::instrumentMOVInstruction (INS ins) {
   bool sourceIsImmed = INS_OperandIsImmediate (ins, 1);
   if (destIsReg && sourceIsMem) { // read from memory, e.g. mov eax, dword ptr [rbp-0x8]
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) movToRegisterFromMemoryAddress,
-        IARG_PTR, ise, IARG_UINT32, INS_OperandReg (ins, 0), IARG_MEMORYOP_EA, 0, IARG_END
-        );
+                    IARG_PTR, ise, IARG_UINT32, INS_OperandReg (ins, 0),
+                    IARG_MEMORYOP_EA, 0,
+                    IARG_END);
 
   } else if (destIsMem && sourceIsReg) { // write to memory, e.g. mov dword ptr [rbp-0x10], eax
     REG reg = INS_OperandReg (ins, 1);
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) movToMemoryAddressFromRegister,
-        IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_UINT32, reg, IARG_REG_VALUE, reg,
-        IARG_END);
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0,
+                    IARG_UINT32, reg, IARG_REG_VALUE, reg,
+                    IARG_END);
 
   } else if (destIsMem && sourceIsImmed) { // write immediate to memory, e.g. mov dword ptr [rbp-0xc], 0x5
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) movToMemoryAddressFromImmediateValue,
-        IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_ADDRINT, INS_OperandImmediate (ins, 1),
-        IARG_END);
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0,
+                    IARG_ADDRINT, INS_OperandImmediate (ins, 1),
+                    IARG_END);
 
   } else if (destIsReg && sourceIsImmed) { // load immediate to register, e.g. mov rbx, 0x3d8
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) movToRegisterFromImmediateValue,
-        IARG_PTR, ise, IARG_UINT32, INS_OperandReg (ins, 0), IARG_ADDRINT,
-        INS_OperandImmediate (ins, 1), IARG_END);
+                    IARG_PTR, ise, IARG_UINT32, INS_OperandReg (ins, 0), IARG_ADDRINT,
+                    INS_OperandImmediate (ins, 1), IARG_END);
 
   } else if (destIsReg && sourceIsReg) { // move data between registers, e.g. mov r13, rdx
     REG srcreg = INS_OperandReg (ins, 1);
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) movToRegisterFromRegister, IARG_PTR,
-        ise, IARG_UINT32, INS_OperandReg (ins, 0), IARG_UINT32, srcreg, IARG_REG_VALUE,
-        srcreg, IARG_END);
+                    ise, IARG_UINT32, INS_OperandReg (ins, 0),
+                    IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_END);
 
   } else { // unknown case!
     throw std::runtime_error ("Unknown MOV instruction");
@@ -98,27 +107,32 @@ void Instrumenter::instrumentMOVInstruction (INS ins) {
 void Instrumenter::instrumentPUSHInstruction (INS ins) {
   //TODO: Take care of ESP or RSP register too
   switch (INS_MemoryOperandCount (ins)) {
-  case 1: { // push a register, e.g. push rbp OR push an immediate value, e.g. push 0x0
+  case 1:
+  { // push a register, e.g. push rbp OR push an immediate value, e.g. push 0x0
     bool sourceIsReg = INS_OperandIsReg (ins, 0);
     bool sourceIsImmed = INS_OperandIsImmediate (ins, 0);
     if (sourceIsReg) {
       REG reg = INS_OperandReg (ins, 0);
       INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) pushToStackFromRegister, IARG_PTR,
-          ise, IARG_MEMORYOP_EA, 0, IARG_UINT32, reg, IARG_REG_VALUE, reg, IARG_END);
+                      ise, IARG_MEMORYOP_EA, 0, IARG_UINT32, reg, IARG_REG_VALUE, reg,
+                      IARG_END);
     } else if (sourceIsImmed) {
       INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) pushToStackFromImmediateValue,
-          IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_ADDRINT, INS_OperandImmediate (ins, 0),
-          IARG_END);
+                      IARG_PTR, ise, IARG_MEMORYOP_EA, 0,
+                      IARG_ADDRINT, INS_OperandImmediate (ins, 0),
+                      IARG_END);
     } else {
       throw std::runtime_error ("Unknown PUSH instruction (with 1 mem operand)");
     }
     break;
   }
-  case 2: { // push a memory cell's content, e.g. push qword ptr [rip+0x200532]. First mem op is src, second is dest
+  case 2:
+  { // push a memory cell's content, e.g. push qword ptr [rip+0x200532]. First mem op is src, second is dest
     bool sourceIsMem = INS_OperandIsMemory (ins, 0);
     if (sourceIsMem) {
       INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) pushToStackFromMemoryAddress,
-          IARG_PTR, ise, IARG_MEMORYOP_EA, 1, IARG_MEMORYOP_EA, 0, IARG_END);
+                      IARG_PTR, ise, IARG_MEMORYOP_EA, 1, IARG_MEMORYOP_EA, 0,
+                      IARG_END);
     } else {
       throw std::runtime_error ("Unknown PUSH instruction (with 2 mem operands)");
     }
@@ -132,21 +146,25 @@ void Instrumenter::instrumentPUSHInstruction (INS ins) {
 void Instrumenter::instrumentPOPInstruction (INS ins) {
   //TODO: Take care of ESP or RSP register too
   switch (INS_MemoryOperandCount (ins)) {
-  case 1: { // pop into a register, e.g. pop rbp
+  case 1:
+  { // pop into a register, e.g. pop rbp
     bool destIsReg = INS_OperandIsReg (ins, 0);
     if (destIsReg) {
       INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) popToRegisterFromStack, IARG_PTR, ise,
-          IARG_UINT32, INS_OperandReg (ins, 0), IARG_MEMORYOP_EA, 0, IARG_END);
+                      IARG_UINT32, INS_OperandReg (ins, 0), IARG_MEMORYOP_EA, 0,
+                      IARG_END);
     } else {
       throw std::runtime_error ("Unknown POP instruction (with 1 mem operand)");
     }
     break;
   }
-  case 2: { // pop into a memory address, e.g. pop qword ptr [rdx+0x200532]. First mem op is dest, second is src
+  case 2:
+  { // pop into a memory address, e.g. pop qword ptr [rdx+0x200532]. First mem op is dest, second is src
     bool destIsMem = INS_OperandIsMemory (ins, 0);
     if (destIsMem) {
       INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) popToMemoryAddressFromStack, IARG_PTR,
-          ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYOP_EA, 1, IARG_END);
+                      ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYOP_EA, 1,
+                      IARG_END);
     } else {
       throw std::runtime_error ("Unknown POP instruction (with 2 mem operands)");
     }
@@ -160,15 +178,16 @@ void Instrumenter::instrumentPOPInstruction (INS ins) {
 void Instrumenter::instrumentADDInstruction (INS ins) {
   // rflags are set too
   bool destIsReg = INS_OperandIsReg (ins, 0); // 3 models (r += r/m/im)
-//  bool destIsMem = INS_OperandIsMemory (ins, 0); // 2 models (m += r/im)
-//  bool sourceIsReg = INS_OperandIsReg (ins, 1);
-//  bool sourceIsMem = INS_OperandIsMemory (ins, 1);
+  //  bool destIsMem = INS_OperandIsMemory (ins, 0); // 2 models (m += r/im)
+  //  bool sourceIsReg = INS_OperandIsReg (ins, 1);
+  //  bool sourceIsMem = INS_OperandIsMemory (ins, 1);
   bool sourceIsImmed = INS_OperandIsImmediate (ins, 1);
   if (destIsReg && sourceIsImmed) { // add an immediate value to a register, e.g. add rax, 0x8
     REG reg = INS_OperandReg (ins, 0);
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) addToRegisterFromImmediateValue,
-        IARG_PTR, ise, IARG_UINT32, reg, IARG_REG_VALUE, reg, IARG_ADDRINT,
-        INS_OperandImmediate (ins, 1), IARG_END);
+                    IARG_PTR, ise, IARG_UINT32, reg, IARG_REG_VALUE, reg, IARG_ADDRINT,
+                    INS_OperandImmediate (ins, 1),
+                    IARG_END);
 
   } else { // unknown case!
     throw std::runtime_error ("Unknown ADD instruction or NOT yet implemented");
@@ -236,11 +255,11 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
 
   OPCODE op = INS_Opcode (ins);
   // Intel has 1024 opcodes. And each opcode has several types/models :)
-  std::map < OPCODE, instrumentationMethod >::iterator it = instrumentationMethods.find (
-      op);
+  std::map < OPCODE, instrumentationMethod >::iterator it =
+      instrumentationMethods.find (op);
   if (it == instrumentationMethods.end ()) {
-    edu::sharif::twinner::util::Logger::info ()    //
-    << "Ignoring assembly instruction: " << INS_Disassemble (ins) << '\n';
+    edu::sharif::twinner::util::Logger::info ()
+        << "Ignoring assembly instruction: " << INS_Disassemble (ins) << '\n';
   } else {
     edu::sharif::twinner::util::Logger::debug () << "\t--> " << OPCODE_StringShort (op)
         << " instruction\n";
@@ -269,13 +288,13 @@ void Instrumenter::aboutToExit (INT32 code) {
       it != countOfInstructionsPerOpcode.end (); ++it) {
     int op = it->first;
     int c = it->second;
-    edu::sharif::twinner::util::Logger::info () //
-    << "count of " << OPCODE_StringShort (op) << " instructions: " << c << " ("
+    edu::sharif::twinner::util::Logger::info ()
+        << "count of " << OPCODE_StringShort (op) << " instructions: " << c << " ("
         << (c * 100.0 / totalCountOfInstructions) << " %)\n";
     countOfIgnoredInstructions -= c;
   }
-  edu::sharif::twinner::util::Logger::info () //
-  << "count of ignored instructions: " << countOfIgnoredInstructions << " ("
+  edu::sharif::twinner::util::Logger::info ()
+      << "count of ignored instructions: " << countOfIgnoredInstructions << " ("
       << (countOfIgnoredInstructions * 100.0 / totalCountOfInstructions) << " %)\n";
 }
 

@@ -23,6 +23,7 @@ namespace twinner {
 namespace trace {
 
 class ExecutionTraceSegment : public ExecutionState {
+
 private:
   std::map < REG, Expression * > registerToExpression;
   std::map < ADDRINT, Expression * > memoryAddressToExpression;
@@ -32,7 +33,7 @@ public:
   virtual ~ExecutionTraceSegment ();
 
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
-      throw (WrongStateException);
+  throw (WrongStateException);
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       UINT64 memval) throw (WrongStateException);
 
@@ -51,7 +52,7 @@ private:
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
       std::map < KEY, Expression * > &map, const KEY key, UINT64 concreteVal) const
-          throw (WrongStateException);
+  throw (WrongStateException);
   template < typename KEY >
   Expression *getSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
       const KEY key, UINT64 currentConcreteValue, Expression *newExpression);

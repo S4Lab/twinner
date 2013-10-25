@@ -26,6 +26,7 @@ namespace twintool {
 class InstructionSymbolicExecuter;
 
 class Instrumenter {
+
 private:
   std::string symbolsFilePath; // read initial symbols from this file
   std::string traceFilePath; // save final execution trace into this file

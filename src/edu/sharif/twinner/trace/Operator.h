@@ -21,8 +21,11 @@ namespace twinner {
 namespace trace {
 
 class Operator : public ExpressionToken {
+
 public:
+
   enum OperatorIdentifier {
+
     ADD, MINUS, MULTIPLY, DIVIDE, NEGATE, XOR, BITWISE_AND
   };
 

@@ -30,6 +30,7 @@ void printHelp (string progName, const ArgParser::Option options[], bool verbose
 void printLicense (bool verbose);
 
 enum ArgumentsParsingStatus {
+
   EXIT_NORMALLY, ERROR_OCCURRED, CONTINUE_NORMALLY
 };
 
@@ -89,18 +90,17 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[], bool &verbose,
     string &input, string &twintool, string &pin, string &twin) {
   char *progName = argv[0];
 
-  const ArgParser::Option options[] = { //
-          //
-          { 'h', "help", ArgParser::NO, "display this help message and exit", false }, //
-          { 'V', "version", ArgParser::NO, "output version number string and exit", false }, //
-          { 'v', "verbose", ArgParser::NO, "verbose operation", false }, //
-          { 'L', "license", ArgParser::NO, "output license information and exit", false }, //
-          { 'i', "input", ArgParser::YES, "input obfuscated binary file", true }, //
-          { 't', "tool", ArgParser::YES, "twintool executable/library file", true }, //
-          { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true }, //
-          { 'o', "output", ArgParser::YES, "path/name of the generated twin binary", true }, //
-          { 0, 0, ArgParser::NO, 0 } //
-      };
+  const ArgParser::Option options[] = {
+    { 'h', "help", ArgParser::NO, "display this help message and exit", false},
+    { 'V', "version", ArgParser::NO, "output version number string and exit", false},
+    { 'v', "verbose", ArgParser::NO, "verbose operation", false},
+    { 'L', "license", ArgParser::NO, "output license information and exit", false},
+    { 'i', "input", ArgParser::YES, "input obfuscated binary file", true},
+    { 't', "tool", ArgParser::YES, "twintool executable/library file", true},
+    { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true},
+    { 'o', "output", ArgParser::YES, "path/name of the generated twin binary", true},
+    { 0, 0, ArgParser::NO, 0}
+  };
   const ArgParser parser (argc, argv, options);
   if (parser.error ().size ()) {
     printError (progName, parser.error ());

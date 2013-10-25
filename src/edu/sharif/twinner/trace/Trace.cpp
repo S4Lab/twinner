@@ -36,23 +36,26 @@ Trace::~Trace () {
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
-    throw (WrongStateException) {
-  return tryToGetSymbolicExpressionImplementation (reg, regval,
-      &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
+throw (WrongStateException) {
+  return tryToGetSymbolicExpressionImplementation
+      (reg, regval,
+       &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
     UINT64 memval) throw (WrongStateException) {
-  return tryToGetSymbolicExpressionImplementation (memoryEa, memval,
-      &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
+  return tryToGetSymbolicExpressionImplementation
+      (memoryEa, memval,
+       &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
 }
 
 template < typename T >
 Expression *Trace::tryToGetSymbolicExpressionImplementation (T address, UINT64 val,
     typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
-        throw (WrongStateException) {
+throw (WrongStateException) {
   for (std::list < ExecutionTraceSegment * >::iterator it = segments.begin ();
-      it != segments.end (); ++it) { // searches segments starting from the most recent one
+      it != segments.end (); ++it) {
+    // searches segments starting from the most recent one
     ExecutionTraceSegment *seg = *it;
     Expression *exp = (seg->*method) (address, val);
     if (exp) {
@@ -64,18 +67,20 @@ Expression *Trace::tryToGetSymbolicExpressionImplementation (T address, UINT64 v
 
 Expression *Trace::getSymbolicExpressionByRegister (REG reg, UINT64 regval,
     Expression *newExpression) {
-  return getSymbolicExpressionImplementation (reg, regval, newExpression,
-      &Trace::tryToGetSymbolicExpressionByRegister,
-      registerResidentSymbolsGenerationIndices,
-      &ExecutionTraceSegment::getSymbolicExpressionByRegister);
+  return getSymbolicExpressionImplementation
+      (reg, regval, newExpression,
+       &Trace::tryToGetSymbolicExpressionByRegister,
+       registerResidentSymbolsGenerationIndices,
+       &ExecutionTraceSegment::getSymbolicExpressionByRegister);
 }
 
 Expression *Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa, UINT64 memval,
     Expression *newExpression) {
-  return getSymbolicExpressionImplementation (memoryEa, memval, newExpression,
-      &Trace::tryToGetSymbolicExpressionByMemoryAddress,
-      memoryResidentSymbolsGenerationIndices,
-      &ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress);
+  return getSymbolicExpressionImplementation
+      (memoryEa, memval, newExpression,
+       &Trace::tryToGetSymbolicExpressionByMemoryAddress,
+       memoryResidentSymbolsGenerationIndices,
+       &ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress);
 }
 
 template < typename T >

@@ -21,6 +21,7 @@ namespace twinner {
 namespace trace {
 
 class MemoryEmergedSymbol : public Symbol {
+
 private:
   ADDRINT address;
 

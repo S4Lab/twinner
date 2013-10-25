@@ -18,11 +18,11 @@ namespace twinner {
 namespace trace {
 
 Constant::Constant (const Constant &c) :
-    value (c.value) {
+value (c.value) {
 }
 
 Constant::Constant (UINT64 val) :
-    value (val) {
+value (val) {
 }
 
 Constant *Constant::clone () const {

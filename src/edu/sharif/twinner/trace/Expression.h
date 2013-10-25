@@ -25,6 +25,7 @@ namespace twinner {
 namespace trace {
 
 class Expression {
+
 private:
   /**
    * Uses push_back and pop_back instead of push and pop to implement a stack.

@@ -22,7 +22,9 @@ namespace trace {
  * @interface
  */
 class ExpressionToken {
+
 protected:
+
   ExpressionToken () {
   }
 
@@ -30,6 +32,7 @@ protected:
   }
 
 public:
+
   virtual ~ExpressionToken () {
   }
 

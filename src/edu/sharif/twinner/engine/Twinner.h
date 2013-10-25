@@ -27,6 +27,7 @@ class Symbol;
 namespace engine {
 
 class Twinner {
+
 private:
   bool verbose;
 

@@ -28,7 +28,7 @@ namespace twinner {
 namespace engine {
 
 Twinner::Twinner (bool _verbose) :
-    verbose (_verbose) {
+verbose (_verbose) {
 }
 
 void Twinner::setInputBinaryPath (string input) {

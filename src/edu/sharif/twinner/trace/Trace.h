@@ -27,6 +27,7 @@ class Syscall;
 class ExecutionTraceSegment;
 
 class Trace : public ExecutionState {
+
 private:
   // TODO: Add an iterator pointing to current segment instead of depending on the head of the list.
   // With an iterator, it's possible to create future segments and set symbols/expressions there, without
@@ -51,7 +52,7 @@ public:
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
-      throw (WrongStateException);
+  throw (WrongStateException);
 
   /**
    * Searches backwards to find queried values.
@@ -113,7 +114,7 @@ private:
   template < typename T >
   Expression *tryToGetSymbolicExpressionImplementation (T address, UINT64 val,
       typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
-          throw (WrongStateException);
+  throw (WrongStateException);
 
   template < typename T >
   Expression *getSymbolicExpressionImplementation (T address, UINT64 val,

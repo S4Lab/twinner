@@ -23,7 +23,7 @@ namespace twinner {
 namespace twintool {
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter () :
-    trace (new edu::sharif::twinner::trace::Trace ()) {
+trace (new edu::sharif::twinner::trace::Trace ()) {
 }
 
 edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () const {
@@ -33,8 +33,8 @@ edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () con
 void InstructionSymbolicExecuter::movToRegisterFromMemoryAddress (REG reg,
     ADDRINT memoryEa) {
   const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByMemoryAddress (memoryEa,
-          readMemoryContent (memoryEa));
+      trace->getSymbolicExpressionByMemoryAddress
+      (memoryEa, readMemoryContent (memoryEa));
   trace->setSymbolicExpressionByRegister (reg, srcexp);
 }
 
@@ -85,8 +85,8 @@ void InstructionSymbolicExecuter::pushToStackFromImmediateValue (ADDRINT stackEa
 void InstructionSymbolicExecuter::pushToStackFromMemoryAddress (ADDRINT stackEa,
     ADDRINT memoryEa) {
   const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByMemoryAddress (memoryEa,
-          readMemoryContent (memoryEa));
+      trace->getSymbolicExpressionByMemoryAddress
+      (memoryEa, readMemoryContent (memoryEa));
   trace->setSymbolicExpressionByMemoryAddress (stackEa, srcexp);
 }
 
@@ -99,7 +99,8 @@ void InstructionSymbolicExecuter::popToRegisterFromStack (REG reg, ADDRINT stack
 void InstructionSymbolicExecuter::popToMemoryAddressFromStack (ADDRINT memoryEa,
     ADDRINT stackEa) {
   const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByMemoryAddress (stackEa, readMemoryContent (stackEa));
+      trace->getSymbolicExpressionByMemoryAddress
+      (stackEa, readMemoryContent (stackEa));
   trace->setSymbolicExpressionByMemoryAddress (memoryEa, srcexp);
 }
 
@@ -109,16 +110,16 @@ void InstructionSymbolicExecuter::addToRegisterFromImmediateValue (REG reg, UINT
       new edu::sharif::twinner::trace::Expression (immediate);
   edu::sharif::twinner::trace::Expression *dstexp =
       trace->getSymbolicExpressionByRegister (reg, regval);
-  dstexp->binaryOperation (
-      new edu::sharif::twinner::trace::Operator (
-          edu::sharif::twinner::trace::Operator::ADD), srcexp);
+  dstexp->binaryOperation
+      (new edu::sharif::twinner::trace::Operator
+       (edu::sharif::twinner::trace::Operator::ADD), srcexp);
   delete srcexp; // binary operation clones the expression contents
   //TODO: set rflags
 }
 
 UINT64 InstructionSymbolicExecuter::readMemoryContent (ADDRINT memoryEa) const {
   UINT64 currentConcreteValue;
-  PIN_SafeCopy (&currentConcreteValue, (const VOID*) (memoryEa), sizeof(UINT64));
+  PIN_SafeCopy (&currentConcreteValue, (const VOID*) (memoryEa), sizeof (UINT64));
   return currentConcreteValue;
 }
 

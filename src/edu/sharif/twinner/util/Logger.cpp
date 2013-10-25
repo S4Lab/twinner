@@ -20,7 +20,7 @@ namespace util {
 Logger::VerbosenessLevel Logger::verbose = Logger::WARNING;
 
 Logger::Logger (bool _enabled) :
-    enabled (_enabled) {
+enabled (_enabled) {
 }
 
 Logger::~Logger () {

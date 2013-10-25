@@ -26,6 +26,7 @@ namespace trace {
  * @abstract
  */
 class Symbol : public Operand {
+
 protected:
   UINT64 concreteValue;
   /**

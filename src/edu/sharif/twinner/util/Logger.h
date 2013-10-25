@@ -21,8 +21,11 @@ namespace twinner {
 namespace util {
 
 class Logger {
+
 private:
+
   enum VerbosenessLevel {
+
     QUIET, ERROR, WARNING, INFO, DEBUG
   };
 

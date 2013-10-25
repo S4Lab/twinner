@@ -62,23 +62,30 @@ namespace cli {
  */
 
 class ArgParser {
+
 public:
+
   enum HasArg {
+
     NO, YES, OPTIONAL
   };
 
   struct Option {
-    int code;			// Short option letter or code ( code != 0 )
-    const char *name;		// Long option name (maybe null)
+
+    int code; // Short option letter or code ( code != 0 )
+    const char *name; // Long option name (maybe null)
     HasArg hasArg;
     const char *description; // Long description about this option (to be used as the help message)
     mutable bool mandatory; // true indicates that this option must be present
   };
 
 private:
+
   struct Record {
+
     int code;
     std::string argument;
+
     explicit Record (const int c = 0) :
         code (c) {
     }
@@ -106,12 +113,14 @@ public:
   }
 
   // The number of arguments parsed (may be different from argc)
+
   int arguments () const {
     return data.size ();
   }
 
   // If code( i ) is 0, argument( i ) is a non-option.
   // Else argument( i ) is the option's argument (or empty).
+
   int code (const int i) const {
     if (i >= 0 && i < arguments ()) {
       const Record &r = data[i];

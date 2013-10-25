@@ -48,8 +48,8 @@ ArgParser::ArgParser (const int argc, const char * const argv[], const Option op
     return;
   }
 
-  std::vector < std::string > non_options;  // skipped non-options
-  int argind = 1;       // index in argv
+  std::vector < std::string > non_options; // skipped non-options
+  int argind = 1; // index in argv
 
   while (argind < argc) {
     const unsigned char ch1 = argv[argind][0];
@@ -62,7 +62,7 @@ ArgParser::ArgParser (const int argc, const char * const argv[], const Option op
         if (!argv[argind][2]) {
           ++argind;
           break;
-        } // we found "--"
+        }// we found "--"
         else if (!parseLongOption (opt, arg, options, argind)) {
           break;
         }
@@ -104,7 +104,7 @@ ArgParser::ArgParser (const char * const opt, const char * const arg,
   }
 
   if (opt[0] == '-' && opt[1]) { // we found an option
-    int argind = 1;     // dummy
+    int argind = 1; // dummy
     if (opt[1] == '-') {
       if (opt[2]) {
         if (parseLongOption (opt, arg, options, argind)) {
@@ -166,7 +166,8 @@ bool ArgParser::parseLongOption (const char * const opt, const char * const arg,
       } else if (index < 0) { // First nonexact match found
         index = i;
       } else if (options[index].code != options[i].code
-          || options[index].hasArg != options[i].hasArg) { // Second or later nonexact match found
+          || options[index].hasArg != options[i].hasArg) {
+        // Second or later nonexact match found
         ambig = true;
       }
     }
@@ -189,7 +190,8 @@ bool ArgParser::parseLongOption (const char * const opt, const char * const arg,
   ++argind;
   data.push_back (Record (options[index].code));
 
-  options[index].mandatory = false; // this option is visited, so it's not required anymore!
+  // this option is visited, so it's not required anymore!
+  options[index].mandatory = false;
 
   if (opt[len + 2]) { // '--<long_option>=<argument>' syntax
     if (options[index].hasArg == NO) {
@@ -225,7 +227,7 @@ bool ArgParser::parseLongOption (const char * const opt, const char * const arg,
 
 bool ArgParser::parseShortOption (const char * const opt, const char * const arg,
     const Option options[], int & argind) {
-  int cind = 1;			// character index in opt
+  int cind = 1; // character index in opt
 
   while (cind > 0) {
     int index = -1;
@@ -250,9 +252,10 @@ bool ArgParser::parseShortOption (const char * const opt, const char * const arg
     if (opt[++cind] == 0) {
       ++argind;
       cind = 0;
-    }	// opt finished
+    } // opt finished
 
-    options[index].mandatory = false; // this option is visited, so it's not required anymore!
+    // this option is visited, so it's not required anymore
+    options[index].mandatory = false;
 
     if (options[index].hasArg != NO && cind > 0 && opt[cind]) {
       data.back ().argument = &opt[cind];

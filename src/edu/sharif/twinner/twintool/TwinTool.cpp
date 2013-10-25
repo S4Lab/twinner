@@ -41,7 +41,7 @@ KNOB < BOOL > main (KNOB_MODE_WRITEONCE, "pintool", "main", "",
     "if presents, only main() routine and what is called by it will be analyzed");
 
 TwinTool::TwinTool () :
-    im (0) {
+im (0) {
 }
 
 TwinTool::~TwinTool () {
@@ -90,8 +90,8 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
   if (!symbolsFilePath.empty ()) { // optional
     if (access (symbolsFilePath.c_str (), F_OK) == 0) { // optional
       if (access (symbolsFilePath.c_str (), R_OK) != 0) {
-        printError (
-            "permission denied: can not read initial symbols: " + symbolsFilePath);
+        printError
+            ("permission denied: can not read initial symbols: " + symbolsFilePath);
         return false;
       }
     } else { // file does not exist
@@ -99,14 +99,14 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     }
   }
   if (traceFilePath.empty ()) {
-    printError (
-        "The execution trace must be saved somewhere. Use --trace to specify the path!");
+    printError
+        ("The execution trace must be saved somewhere. Use --trace to specify the path!");
     return false;
   }
   if (access (traceFilePath.c_str (), F_OK) == 0
       && access (traceFilePath.c_str (), W_OK) != 0) {
-    printError (
-        "permission denied: can not write to execution trace file: " + traceFilePath);
+    printError
+        ("permission denied: can not write to execution trace file: " + traceFilePath);
     return false;
   }
   // At the end, traceFilePath will be opened and execution trace will be saved in it.

@@ -21,6 +21,7 @@ namespace twinner {
 namespace trace {
 
 class RegisterEmergedSymbol : public Symbol {
+
 private:
   REG address;
 

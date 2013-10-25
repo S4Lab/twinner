@@ -23,6 +23,7 @@ namespace twintool {
 class Instrumenter;
 
 class TwinTool {
+
 private:
   Instrumenter *im;
 

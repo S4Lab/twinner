@@ -18,12 +18,12 @@ namespace twinner {
 namespace trace {
 
 MemoryEmergedSymbol::MemoryEmergedSymbol (const MemoryEmergedSymbol &s) :
-    Symbol (s), address (s.address) {
+Symbol (s), address (s.address) {
 }
 
 MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT _address, UINT64 concreteValue,
     int generationIndex) :
-    Symbol (concreteValue, generationIndex), address (_address) {
+Symbol (concreteValue, generationIndex), address (_address) {
 }
 
 MemoryEmergedSymbol *MemoryEmergedSymbol::clone () const {

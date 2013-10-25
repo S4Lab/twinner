@@ -18,11 +18,11 @@ namespace twinner {
 namespace trace {
 
 Symbol::Symbol (UINT64 _concreteValue, int _generationIndex) :
-    Operand (), concreteValue (_concreteValue), generationIndex (_generationIndex) {
+Operand (), concreteValue (_concreteValue), generationIndex (_generationIndex) {
 }
 
 Symbol::Symbol (const Symbol &s) :
-    Operand (s), concreteValue (s.concreteValue), generationIndex (s.generationIndex) {
+Operand (s), concreteValue (s.concreteValue), generationIndex (s.generationIndex) {
 }
 
 }

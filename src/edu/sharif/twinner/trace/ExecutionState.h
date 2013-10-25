@@ -27,7 +27,9 @@ class Constraint;
  * This exception indicates that current execution state differs from the expected state.
  */
 class WrongStateException : public std::exception {
+
 public:
+
   const char *what () const throw () {
     return "Execution state differ from what we expected (probably, user space memory is changed by a syscall).";
   }
@@ -39,7 +41,9 @@ public:
  * are kept and can be reported.
  */
 class ExecutionState {
+
 public:
+
   /**
    * Virtual destructor is required for pure virtual members.
    * Implementors must free all owned expressions/constraints.
@@ -59,7 +63,7 @@ public:
    * @except Throws a WrongStateException, if the last concrete value of the reg's corresponding expression differs from expected @c regval value.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
-      throw (WrongStateException) = 0;
+  throw (WrongStateException) = 0;
 
   /**
    * The getter returns current value stored in one memory address.

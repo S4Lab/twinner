@@ -25,6 +25,7 @@ class Trace;
 namespace twintool {
 
 class InstructionSymbolicExecuter {
+
 private:
   edu::sharif::twinner::trace::Trace *trace;
 

@@ -18,11 +18,11 @@ namespace twinner {
 namespace trace {
 
 Operator::Operator (OperatorIdentifier _oi) :
-    ExpressionToken (), oi (_oi) {
+ExpressionToken (), oi (_oi) {
 }
 
 Operator::Operator (const Operator &op) :
-    ExpressionToken (op), oi (op.oi) {
+ExpressionToken (op), oi (op.oi) {
 }
 
 Operator *Operator::clone () const {

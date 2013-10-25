@@ -24,7 +24,9 @@ namespace trace {
  * @interface
  */
 class Operand : public ExpressionToken {
+
 protected:
+
   Operand () :
       ExpressionToken () {
   }

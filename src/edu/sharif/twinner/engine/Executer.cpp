@@ -29,15 +29,16 @@ const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/tr
 
 Executer::Executer (std::string pinLauncher, std::string twintool,
     std::string inputBinary, bool _verbose) :
-    verbose (_verbose), command (
-        pinLauncher + " -t " + twintool + " -symbols "
-            + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE + " -trace "
-            + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
-            + (_verbose ? " -verbose info -- " : " -- ") + inputBinary) {
+verbose (_verbose),
+command (pinLauncher
++ " -t " + twintool
++ " -symbols " + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
++ " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
++ (_verbose ? " -verbose info -- " : " -- ")
++ inputBinary) {
 }
 
-void Executer::setSymbolsValues (
-    const set < edu::sharif::twinner::trace::Symbol * > &symbols) {
+void Executer::setSymbolsValues (const set < edu::sharif::twinner::trace::Symbol * > &symbols) {
   //FIXME:
   //throw "Not yet implemented";
 }
@@ -63,8 +64,8 @@ edu::sharif::twinner::trace::Trace *Executer::executeSingleTrace () {
   if (verbose) {
     cout << "The system(...) call returns code: " << ret << endl;
   }
-  return edu::sharif::twinner::trace::Trace::loadFromFile (
-      EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
+  return edu::sharif::twinner::trace::Trace::loadFromFile
+      (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
 }
 
 }
