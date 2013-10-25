@@ -50,25 +50,25 @@ public:
   /**
    * Searches backwards to find queried values.
    */
-  virtual const Expression *tryToGetSymbolicExpressionByRegister (REG reg,
-      UINT64 regval) const throw (WrongStateException);
+  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
+      throw (WrongStateException);
 
   /**
    * Searches backwards to find queried values.
    */
-  virtual const Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      UINT64 memval) const throw (WrongStateException);
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+      UINT64 memval) throw (WrongStateException);
 
   /**
    * The getter searches segments backwards to find queried value.
    */
-  virtual const Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
+  virtual Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
       Expression *newExpression = 0);
 
   /**
    * The getter searches segments backwards to find queried value.
    */
-  virtual const Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       UINT64 memval, Expression *newExpression = 0);
 
   /**
@@ -98,25 +98,25 @@ private:
   template < typename T >
   struct TryToGetSymbolicExpressionMethod {
 
-    typedef const Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address,
-        UINT64 val) const;
-    typedef const Expression *(Trace::*TraceType) (T address, UINT64 val) const;
+    typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address,
+        UINT64 val);
+    typedef Expression *(Trace::*TraceType) (T address, UINT64 val);
   };
 
   template < typename T >
   struct GetSymbolicExpressionMethod {
 
-    typedef const Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address,
-        UINT64 val, Expression *newExpression);
+    typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address, UINT64 val,
+        Expression *newExpression);
   };
 
   template < typename T >
-  const Expression *tryToGetSymbolicExpressionImplementation (T address, UINT64 val,
-      typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
+  Expression *tryToGetSymbolicExpressionImplementation (T address, UINT64 val,
+      typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
           throw (WrongStateException);
 
   template < typename T >
-  const Expression *getSymbolicExpressionImplementation (T address, UINT64 val,
+  Expression *getSymbolicExpressionImplementation (T address, UINT64 val,
       Expression *newExpression,
       typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
       std::map < T, int > &generationIndices,
