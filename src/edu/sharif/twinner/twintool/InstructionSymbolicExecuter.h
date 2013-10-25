@@ -51,6 +51,8 @@ public:
   void addToRegisterFromRegister (REG dstreg, UINT64 dstregval,
       REG srcreg, UINT64 srcregval);
 
+  void subToRegisterFromImmediateValue (REG reg, UINT64 regval, ADDRINT immediate);
+
 private:
   UINT64 readMemoryContent (ADDRINT memoryEa) const;
 };
@@ -76,6 +78,9 @@ VOID addToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT regva
     ADDRINT immediate);
 VOID addToRegisterFromRegister (VOID *iseptr, UINT32 dstregi32, ADDRINT dstregval,
     UINT32 srcregi32, ADDRINT srcregval);
+
+VOID subToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT regval,
+    ADDRINT immediate);
 
 }
 }

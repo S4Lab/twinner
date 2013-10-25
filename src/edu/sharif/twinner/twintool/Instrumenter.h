@@ -53,6 +53,7 @@ private:
   void instrumentPUSHInstruction (INS ins);
   void instrumentPOPInstruction (INS ins);
   void instrumentADDInstruction (INS ins);
+  void instrumentSUBInstruction (INS ins);
 
   std::map < OPCODE, instrumentationMethod > instrumentationMethods;
 };

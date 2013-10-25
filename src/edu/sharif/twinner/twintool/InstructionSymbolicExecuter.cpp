@@ -129,6 +129,19 @@ void InstructionSymbolicExecuter::addToRegisterFromRegister (REG dstreg,
   //TODO: set rflags
 }
 
+void InstructionSymbolicExecuter::subToRegisterFromImmediateValue (REG reg,
+    UINT64 regval, ADDRINT immediate) {
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      new edu::sharif::twinner::trace::Expression (immediate);
+  edu::sharif::twinner::trace::Expression *dstexp =
+      trace->getSymbolicExpressionByRegister (reg, regval);
+  dstexp->binaryOperation
+      (new edu::sharif::twinner::trace::Operator
+       (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
+  delete srcexp; // binary operation clones the expression contents
+  //TODO: set rflags
+}
+
 UINT64 InstructionSymbolicExecuter::readMemoryContent (ADDRINT memoryEa) const {
   UINT64 currentConcreteValue;
   PIN_SafeCopy (&currentConcreteValue, (const VOID*) (memoryEa), sizeof (UINT64));
@@ -200,6 +213,12 @@ VOID addToRegisterFromRegister (VOID *iseptr, UINT32 dstregi32, ADDRINT dstregva
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->addToRegisterFromRegister ((REG) dstregi32, dstregval,
                                   (REG) srcregi32, srcregval);
+}
+
+VOID subToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT regval,
+    ADDRINT immediate) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->subToRegisterFromImmediateValue ((REG) regi32, regval, immediate);
 }
 
 }
