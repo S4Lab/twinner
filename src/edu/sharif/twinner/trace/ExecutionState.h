@@ -50,6 +50,7 @@ public:
   /**
    * The getter returns current value stored in one register.
    * Ownership of returned expression is kept and caller should clone it if required.
+   * Returned expression can be changed if desired.
    *
    * @param reg The register which its value is returned.
    * @param regval The concrete value which currently lives in given register.
@@ -57,19 +58,20 @@ public:
    *
    * @except Throws a WrongStateException, if the last concrete value of the reg's corresponding expression differs from expected @c regval value.
    */
-  virtual const Expression *tryToGetSymbolicExpressionByRegister (REG reg,
-      UINT64 regval) const throw (WrongStateException) = 0;
+  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
+      throw (WrongStateException) = 0;
 
   /**
    * The getter returns current value stored in one memory address.
    * Ownership of returned expression is kept and caller should clone it if required.
+   * Returned expression can be changed if desired.
    *
    * @param memoryEa The memory effective address which its value will be returned.
    * @param memval The concrete value which currently lives at given memory address.
    * @return symbolic expression which is living at the given memory address at current state.
    */
-  virtual const Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      UINT64 memval) const throw (WrongStateException) = 0;
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+      UINT64 memval) throw (WrongStateException) = 0;
 
   /**
    * The getter returns current value stored in one register.
@@ -81,13 +83,14 @@ public:
    * checking whether the currently stored expression, if any, reflects the real state
    * of the program or not).
    * Ownership of returned expression is kept and caller should clone it if required.
+   * Returned expression can be changed if desired.
    *
    * @param reg The register which its value is returned.
    * @param regval The concrete value which currently lives in given register.
    * @param newExpression The expression which will be set if there was no current value.
    * @return symbolic expression which is living in register at current state.
    */
-  virtual const Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
+  virtual Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
       Expression *newExpression) = 0;
 
   /**
@@ -100,13 +103,14 @@ public:
    * checking whether the currently stored expression, if any, reflects the real state
    * of the program or not).
    * Ownership of returned expression is kept and caller should clone it if required.
+   * Returned expression can be changed if desired.
    *
    * @param memoryEa The memory effective address which its value will be returned.
    * @param memval The concrete value which currently lives at given memory address.
    * @param newExpression The expression which will be set if there was no current value.
    * @return symbolic expression which is living at the given memory address at current state.
    */
-  virtual const Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       UINT64 memval, Expression *newExpression) = 0;
 
   /**
