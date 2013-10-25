@@ -41,6 +41,13 @@ ise (new InstructionSymbolicExecuter ()) {
   instrumentationMethods.insert
       (make_pair (XED_ICLASS_MOV, // 5 models
                   &Instrumenter::instrumentMOVInstruction));
+  // TODO: handle more types (data ranges) and then add real support for sign/zero extension
+  instrumentationMethods.insert
+      (make_pair (XED_ICLASS_MOVZX, // 2 models (r <- zero-extend(r/m))
+                  &Instrumenter::instrumentMOVInstruction));
+  instrumentationMethods.insert
+      (make_pair (XED_ICLASS_MOVSX, // 2 models (r <- sign-extend(r/m))
+                  &Instrumenter::instrumentMOVInstruction));
   instrumentationMethods.insert
       (make_pair (XED_ICLASS_PUSH, // 3 models
                   &Instrumenter::instrumentPUSHInstruction));
