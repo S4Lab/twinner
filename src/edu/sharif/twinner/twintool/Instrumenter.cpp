@@ -43,6 +43,8 @@ Instrumenter::Instrumenter (string _symbolsFilePath, string _traceFilePath,
       make_pair (XED_ICLASS_PUSH, &Instrumenter::instrumentPUSHInstruction)); // 3 models
   instrumentationMethods.insert (
       make_pair (XED_ICLASS_POP, &Instrumenter::instrumentPOPInstruction)); // 2 models
+  instrumentationMethods.insert (
+      make_pair (XED_ICLASS_ADD, &Instrumenter::instrumentADDInstruction)); // 5 models (r += r/m/im OR m += r/im)
   instrumentationMethods.insert (make_pair (XED_ICLASS_TEST, nullmethod));
   instrumentationMethods.insert (make_pair (XED_ICLASS_JZ, nullmethod));
   instrumentationMethods.insert (make_pair (XED_ICLASS_JNZ, nullmethod));
@@ -152,6 +154,24 @@ void Instrumenter::instrumentPOPInstruction (INS ins) {
   }
   default:
     throw std::runtime_error ("Unknown POP instruction");
+  }
+}
+
+void Instrumenter::instrumentADDInstruction (INS ins) {
+  // rflags are set too
+  bool destIsReg = INS_OperandIsReg (ins, 0); // 3 models (r += r/m/im)
+//  bool destIsMem = INS_OperandIsMemory (ins, 0); // 2 models (m += r/im)
+//  bool sourceIsReg = INS_OperandIsReg (ins, 1);
+//  bool sourceIsMem = INS_OperandIsMemory (ins, 1);
+  bool sourceIsImmed = INS_OperandIsImmediate (ins, 1);
+  if (destIsReg && sourceIsImmed) { // add an immediate value to a register, e.g. add rax, 0x8
+    REG reg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) addToRegisterFromImmediateValue,
+        IARG_PTR, ise, IARG_UINT32, reg, IARG_REG_VALUE, reg, IARG_ADDRINT,
+        INS_OperandImmediate (ins, 1), IARG_END);
+
+  } else { // unknown case!
+    throw std::runtime_error ("Unknown ADD instruction or NOT yet implemented");
   }
 }
 

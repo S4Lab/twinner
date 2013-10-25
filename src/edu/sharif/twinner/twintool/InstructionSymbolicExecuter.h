@@ -46,6 +46,8 @@ public:
   void popToRegisterFromStack (REG reg, ADDRINT stackEa);
   void popToMemoryAddressFromStack (ADDRINT memoryEa, ADDRINT stackEa);
 
+  void addToRegisterFromImmediateValue (REG reg, UINT64 regval, ADDRINT immediate);
+
 private:
   UINT64 readMemoryContent (ADDRINT memoryEa) const;
 };
@@ -66,6 +68,9 @@ VOID pushToStackFromMemoryAddress (VOID *iseptr, ADDRINT stackEa, ADDRINT memory
 
 VOID popToRegisterFromStack (VOID *iseptr, UINT32 regi32, ADDRINT stackEa);
 VOID popToMemoryAddressFromStack (VOID *iseptr, ADDRINT memoryEa, ADDRINT stackEa);
+
+VOID addToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT regval,
+    ADDRINT immediate);
 
 }
 }
