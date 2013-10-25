@@ -66,8 +66,13 @@ void Expression::unaryOperation (Operator op, Expression exp) {
   throw std::runtime_error ("Expression::unaryOperation: Not yet implemented");
 }
 
-void Expression::binaryOperation (Operator op, Expression exp) {
-  throw std::runtime_error ("Expression::binaryOperation: Not yet implemented");
+void Expression::binaryOperation (Operator *op, const Expression *exp) {
+  for (std::list < ExpressionToken * >::const_iterator it = exp->stack.begin ();
+      it != exp->stack.end (); ++it) {
+    const ExpressionToken *token = *it;
+    stack.push_back (token->clone ());
+  }
+  stack.push_back (op);
 }
 
 Expression *Expression::clone () const {

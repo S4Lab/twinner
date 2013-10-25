@@ -62,7 +62,11 @@ public:
   void toString () const;
 
   void unaryOperation (Operator op, Expression exp);
-  void binaryOperation (Operator op, Expression exp);
+  /**
+   * The op operator is assumed to be owned by this expression object.
+   * But exp will be kept untouched and its inner expression tokens will be cloned.
+   */
+  void binaryOperation (Operator *op, const Expression *exp);
 
   Expression *clone () const;
 };
