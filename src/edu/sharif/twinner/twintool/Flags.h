@@ -31,6 +31,12 @@ public:
   Flags ();
   ~Flags ();
 
+  /**
+   * Sets all flags based on given expression. It's assumed that given
+   * expression is owned by this object.
+   * @param exp The expression which flags are set based on it.
+   */
+  void setFlags (edu::sharif::twinner::trace::Expression *exp);
 };
 
 }

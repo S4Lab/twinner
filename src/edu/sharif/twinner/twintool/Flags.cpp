@@ -29,6 +29,13 @@ Flags::~Flags () {
   }
 }
 
+void Flags::setFlags (edu::sharif::twinner::trace::Expression *_exp) {
+  if (exp) {
+    delete exp;
+  }
+  exp = _exp;
+}
+
 }
 }
 }

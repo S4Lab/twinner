@@ -61,6 +61,9 @@ ise (new InstructionSymbolicExecuter ()) {
   instrumentationMethods.insert
       (make_pair (XED_ICLASS_SUB, // 5 models (r += r/m/im OR m += r/im)
                   &Instrumenter::instrumentSUBInstruction));
+  instrumentationMethods.insert
+      (make_pair (XED_ICLASS_CMP, // 5 models (m vs. r/im OR r vs. r/m/im)
+                  &Instrumenter::instrumentCMPInstruction));
   //  instrumentationMethods.insert (make_pair (XED_ICLASS_TEST, nullmethod));
   //  instrumentationMethods.insert (make_pair (XED_ICLASS_JZ, nullmethod));
   //  instrumentationMethods.insert (make_pair (XED_ICLASS_JNZ, nullmethod));
@@ -227,6 +230,28 @@ void Instrumenter::instrumentSUBInstruction (INS ins) {
 
   } else { // unknown case!
     throw std::runtime_error ("Unknown SUB instruction or NOT yet implemented");
+  }
+}
+
+void Instrumenter::instrumentCMPInstruction (INS ins) {
+  // 5 models (m vs. r/im OR r vs. r/m/im)
+  // It's just like "SUB op0, op1" but instead of changing the op0, it ignores
+  // the subtraction result and just sets flags!
+  // EFLAGS == CF, OF, SF, ZF, AF, and PF
+  bool destIsReg = INS_OperandIsReg (ins, 0);
+  //  bool destIsMem = INS_OperandIsMemory (ins, 0);
+  //  bool sourceIsReg = INS_OperandIsReg (ins, 1);
+  bool sourceIsMem = INS_OperandIsMemory (ins, 1);
+  //  bool sourceIsImmed = INS_OperandIsImmediate (ins, 1);
+  if (destIsReg && sourceIsMem) { // compare reg and memory, e.g. cmp eax, dword ptr [rbp-0xc]
+    REG reg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) cmpToRegisterFromMemoryAddress,
+                    IARG_PTR, ise, IARG_UINT32, reg, IARG_REG_VALUE, reg,
+                    IARG_MEMORYOP_EA, 0,
+                    IARG_END);
+
+  } else { // unknown case!
+    throw std::runtime_error ("Unknown CMP instruction or NOT yet implemented");
   }
 }
 

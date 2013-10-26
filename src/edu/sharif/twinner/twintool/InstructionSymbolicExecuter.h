@@ -15,6 +15,8 @@
 
 #include "pin.H"
 
+#include "Flags.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -28,6 +30,7 @@ class InstructionSymbolicExecuter {
 
 private:
   edu::sharif::twinner::trace::Trace *trace;
+  Flags eflags;
 
 public:
   InstructionSymbolicExecuter ();
@@ -52,6 +55,8 @@ public:
       REG srcreg, UINT64 srcregval);
 
   void subToRegisterFromImmediateValue (REG reg, UINT64 regval, ADDRINT immediate);
+
+  void cmpToRegisterFromMemoryAddress (REG reg, UINT64 regval, ADDRINT memoryEa);
 
 private:
   UINT64 readMemoryContent (ADDRINT memoryEa) const;
@@ -81,6 +86,9 @@ VOID addToRegisterFromRegister (VOID *iseptr, UINT32 dstregi32, ADDRINT dstregva
 
 VOID subToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT regval,
     ADDRINT immediate);
+
+VOID cmpToRegisterFromMemoryAddress (VOID *iseptr, UINT32 regi32, ADDRINT regval,
+    ADDRINT memoryEa);
 
 }
 }

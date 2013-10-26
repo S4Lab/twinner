@@ -142,6 +142,21 @@ void InstructionSymbolicExecuter::subToRegisterFromImmediateValue (REG reg,
   //TODO: set rflags
 }
 
+void InstructionSymbolicExecuter::cmpToRegisterFromMemoryAddress (REG reg,
+    UINT64 regval, ADDRINT memoryEa) {
+  const edu::sharif::twinner::trace::Expression *dstexp =
+      trace->getSymbolicExpressionByRegister (reg, regval);
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      trace->getSymbolicExpressionByMemoryAddress
+      (memoryEa, readMemoryContent (memoryEa));
+
+  edu::sharif::twinner::trace::Expression *tmpexp = dstexp->clone ();
+  tmpexp->binaryOperation
+      (new edu::sharif::twinner::trace::Operator
+       (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
+  eflags.setFlags (tmpexp);
+}
+
 UINT64 InstructionSymbolicExecuter::readMemoryContent (ADDRINT memoryEa) const {
   UINT64 currentConcreteValue;
   PIN_SafeCopy (&currentConcreteValue, (const VOID*) (memoryEa), sizeof (UINT64));
@@ -219,6 +234,12 @@ VOID subToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT regva
     ADDRINT immediate) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->subToRegisterFromImmediateValue ((REG) regi32, regval, immediate);
+}
+
+VOID cmpToRegisterFromMemoryAddress (VOID *iseptr, UINT32 regi32, ADDRINT regval,
+    ADDRINT memoryEa) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->cmpToRegisterFromMemoryAddress ((REG) regi32, regval, memoryEa);
 }
 
 }

@@ -54,6 +54,7 @@ private:
   void instrumentPOPInstruction (INS ins);
   void instrumentADDInstruction (INS ins);
   void instrumentSUBInstruction (INS ins);
+  void instrumentCMPInstruction (INS ins);
 
   std::map < OPCODE, instrumentationMethod > instrumentationMethods;
 };
