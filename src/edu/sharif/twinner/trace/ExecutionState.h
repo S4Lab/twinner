@@ -42,6 +42,11 @@ public:
  */
 class ExecutionState {
 
+protected:
+
+  ExecutionState () {
+  }
+
 public:
 
   /**

@@ -28,6 +28,32 @@ class InstructionSymbolicExecuter;
 class Instrumenter {
 
 private:
+
+  enum InstructionModel {
+
+    NOP_INS_MODELS = 0x0000,
+
+    DST_REG_SRC_REG = 0x0001,
+    DST_REG_SRC_MEM = 0x0002,
+    DST_REG_SRC_IMD = 0x0004,
+    DST_MEM_SRC_REG = 0x0008,
+    DST_MEM_SRC_IMD = 0x0010,
+
+    DST_STK_SRC_REG = 0x0020,
+    DST_STK_SRC_IMD = 0x0040,
+    DST_STK_SRC_MEM = 0x0080,
+
+    DST_REG_SRC_STK = DST_REG_SRC_MEM,
+    DST_MEM_SRC_STK = 0x0100,
+
+    COMMON_INS_MODELS = DST_REG_SRC_REG | DST_REG_SRC_MEM | DST_REG_SRC_IMD
+    | DST_MEM_SRC_REG | DST_MEM_SRC_IMD,
+    PUSH_INS_MODELS = DST_STK_SRC_REG | DST_STK_SRC_IMD | DST_STK_SRC_MEM,
+    POP_INS_MODELS = DST_REG_SRC_STK | DST_MEM_SRC_STK,
+  };
+
+  std::map < OPCODE, InstructionModel > managedInstructions;
+
   std::string symbolsFilePath; // read initial symbols from this file
   std::string traceFilePath; // save final execution trace into this file
   bool justAnalyzeMainRoutine; // only instructions after the main() routine are analyzed
@@ -47,16 +73,16 @@ public:
   void aboutToExit (INT32 code);
 
 private:
-  typedef void (Instrumenter::*instrumentationMethod) (INS ins);
+  InstructionModel getInstructionModel (OPCODE op, INS ins) const;
+  InstructionModel getInstructionModelForPushInstruction (INS ins) const;
+  InstructionModel getInstructionModelForPopInstruction (INS ins) const;
+  InstructionModel getInstructionModelForNormalInstruction (INS ins) const;
+  void instrumentSingleInstruction (InstructionModel model, OPCODE op, INS ins) const;
 
-  void instrumentMOVInstruction (INS ins);
-  void instrumentPUSHInstruction (INS ins);
-  void instrumentPOPInstruction (INS ins);
-  void instrumentADDInstruction (INS ins);
-  void instrumentSUBInstruction (INS ins);
-  void instrumentCMPInstruction (INS ins);
+  void printDebugInformation (INS ins) const;
 
-  std::map < OPCODE, instrumentationMethod > instrumentationMethods;
+  std::map < OPCODE, int > countOfInstructionsPerOpcode;
+  int totalCountOfInstructions;
 };
 
 VOID instrumentSingleInstruction (INS ins, VOID *v);

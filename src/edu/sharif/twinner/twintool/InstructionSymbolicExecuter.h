@@ -37,58 +37,95 @@ public:
 
   edu::sharif::twinner::trace::Trace *getTrace () const;
 
-  void movToRegisterFromMemoryAddress (REG reg, ADDRINT memoryEa);
-  void movToMemoryAddressFromRegister (ADDRINT memoryEa, REG reg, UINT64 regval);
-  void movToMemoryAddressFromImmediateValue (ADDRINT memoryEa, ADDRINT immediate);
-  void movToRegisterFromImmediateValue (REG reg, ADDRINT immediate);
-  void movToRegisterFromRegister (REG dreg, REG sreg, UINT64 regsrcval);
+private:
 
-  void pushToStackFromRegister (ADDRINT stackEa, REG reg, UINT64 regval);
-  void pushToStackFromImmediateValue (ADDRINT stackEa, ADDRINT immediate);
-  void pushToStackFromMemoryAddress (ADDRINT stackEa, ADDRINT memoryEa);
+  typedef void (InstructionSymbolicExecuter::*AnalysisRoutine) (
+      MutableExpressionValueProxy dst, ExpressionValueProxy src);
 
-  void popToRegisterFromStack (REG reg, ADDRINT stackEa);
-  void popToMemoryAddressFromStack (ADDRINT memoryEa, ADDRINT stackEa);
-
-  void addToRegisterFromImmediateValue (REG reg, UINT64 regval, ADDRINT immediate);
-  void addToRegisterFromRegister (REG dstreg, UINT64 dstregval,
-      REG srcreg, UINT64 srcregval);
-
-  void subToRegisterFromImmediateValue (REG reg, UINT64 regval, ADDRINT immediate);
-
-  void cmpToRegisterFromMemoryAddress (REG reg, UINT64 regval, ADDRINT memoryEa);
+public:
+  void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
+      REG dstReg, UINT64 dstRegVal,
+      REG srcReg, UINT64 srcRegVal);
+  void analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
+      REG dstReg, UINT64 dstRegVal,
+      ADDRINT srcMemoryEa);
+  void analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
+      REG dstReg, UINT64 dstRegVal,
+      ADDRINT srcImmediateValue);
+  void analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
+      ADDRINT dstMemoryEa,
+      REG srcReg, UINT64 srcRegVal);
+  void analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
+      ADDRINT dstMemoryEa,
+      ADDRINT srcImmediateValue);
+  void analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
+      ADDRINT dstMemoryEa,
+      ADDRINT srcMemoryEa);
 
 private:
-  UINT64 readMemoryContent (ADDRINT memoryEa) const;
+
+  /**
+   * MOV has 5 models
+   * r <- r/m/i
+   * m <- r/i
+   */
+  void movAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+
+  /**
+   * PUSH has 3 models
+   * m <- r/m/i
+   */
+  void pushAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+
+  /**
+   * POP has 2 models
+   * r/m <- m
+   */
+  void popAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+
+  /**
+   * ADD has 5 models
+   * r += r/m/i
+   * m += r/i
+   */
+  void addAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+
+  /**
+   * SUB has 5 models
+   * r -= r/m/i
+   * m -= r/i
+   */
+  void subAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+
+  /**
+   * CMP is same as SUB else of not modifying dst operand's value
+   */
+  void cmpAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+
+public:
+  AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
+
+  static UINT64 readMemoryContent (ADDRINT memoryEa);
 };
 
-VOID movToRegisterFromMemoryAddress (VOID *iseptr, UINT32 regi32, ADDRINT memoryEa);
-VOID movToMemoryAddressFromRegister (VOID *iseptr, ADDRINT memoryEa, UINT32 regi32,
-    ADDRINT regval);
-VOID movToMemoryAddressFromImmediateValue (VOID *iseptr, ADDRINT memoryEa,
-    ADDRINT immediate);
-VOID movToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT immediate);
-VOID movToRegisterFromRegister (VOID *iseptr, UINT32 regdsti32, UINT32 regsrci32,
-    ADDRINT regsrcval);
-
-VOID pushToStackFromRegister (VOID *iseptr, ADDRINT stackEa, UINT32 regi32,
-    ADDRINT regval);
-VOID pushToStackFromImmediateValue (VOID *iseptr, ADDRINT stackEa, ADDRINT immediate);
-VOID pushToStackFromMemoryAddress (VOID *iseptr, ADDRINT stackEa, ADDRINT memoryEa);
-
-VOID popToRegisterFromStack (VOID *iseptr, UINT32 regi32, ADDRINT stackEa);
-VOID popToMemoryAddressFromStack (VOID *iseptr, ADDRINT memoryEa, ADDRINT stackEa);
-
-VOID addToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT regval,
-    ADDRINT immediate);
-VOID addToRegisterFromRegister (VOID *iseptr, UINT32 dstregi32, ADDRINT dstregval,
-    UINT32 srcregi32, ADDRINT srcregval);
-
-VOID subToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT regval,
-    ADDRINT immediate);
-
-VOID cmpToRegisterFromMemoryAddress (VOID *iseptr, UINT32 regi32, ADDRINT regval,
-    ADDRINT memoryEa);
+VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal);
+VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    ADDRINT srcMemoryEa);
+VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    ADDRINT srcImmediateValue);
+VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, ADDRINT srcRegVal);
+VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    ADDRINT srcImmediateValue);
+VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    ADDRINT srcMemoryEa);
 
 }
 }

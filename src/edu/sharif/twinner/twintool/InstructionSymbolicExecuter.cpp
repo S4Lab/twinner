@@ -30,6 +30,42 @@ edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () con
   return trace;
 }
 
+void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
+    REG dstReg, UINT64 dstRegVal,
+    REG srcReg, UINT64 srcRegVal) {
+  throw std::runtime_error ("Not yet implemented");
+}
+
+void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
+    REG dstReg, UINT64 dstRegVal,
+    ADDRINT srcMemoryEa) {
+  throw std::runtime_error ("Not yet implemented");
+}
+
+void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
+    REG dstReg, UINT64 dstRegVal,
+    ADDRINT srcImmediateValue) {
+  throw std::runtime_error ("Not yet implemented");
+}
+
+void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
+    ADDRINT dstMemoryEa,
+    REG srcReg, UINT64 srcRegVal) {
+  throw std::runtime_error ("Not yet implemented");
+}
+
+void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
+    ADDRINT dstMemoryEa,
+    ADDRINT srcImmediateValue) {
+  throw std::runtime_error ("Not yet implemented");
+}
+
+void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
+    ADDRINT dstMemoryEa,
+    ADDRINT srcMemoryEa) {
+  throw std::runtime_error ("Not yet implemented");
+}
+
 void InstructionSymbolicExecuter::movToRegisterFromMemoryAddress (REG reg,
     ADDRINT memoryEa) {
   const edu::sharif::twinner::trace::Expression *srcexp =
@@ -157,89 +193,74 @@ void InstructionSymbolicExecuter::cmpToRegisterFromMemoryAddress (REG reg,
   eflags.setFlags (tmpexp);
 }
 
-UINT64 InstructionSymbolicExecuter::readMemoryContent (ADDRINT memoryEa) const {
+InstructionSymbolicExecuter::AnalysisRoutine
+InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
+  switch (op) {
+  case XED_ICLASS_POP:
+    return &InstructionSymbolicExecuter::popAnalysisRoutine;
+  default:
+    throw std::runtime_error ("Unknown opcode given to analysis routine");
+  }
+}
+
+UINT64 InstructionSymbolicExecuter::readMemoryContent (ADDRINT memoryEa) {
   UINT64 currentConcreteValue;
   PIN_SafeCopy (&currentConcreteValue, (const VOID*) (memoryEa), sizeof (UINT64));
   return currentConcreteValue;
 }
 
-VOID movToRegisterFromMemoryAddress (VOID *iseptr, UINT32 regi32, ADDRINT memoryEa) {
+VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->movToRegisterFromMemoryAddress ((REG) regi32, memoryEa);
+  ise->analysisRoutineDstRegSrcReg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+                                    (REG) dstReg, dstRegVal,
+                                    (REG) srcReg, srcRegVal);
 }
 
-VOID movToMemoryAddressFromRegister (VOID *iseptr, ADDRINT memoryEa, UINT32 regi32,
-    ADDRINT regval) {
+VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    ADDRINT srcMemoryEa) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->movToMemoryAddressFromRegister (memoryEa, (REG) regi32, regval);
+  ise->analysisRoutineDstRegSrcMem (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+                                    (REG) dstReg, dstRegVal,
+                                    srcMemoryEa);
 }
 
-VOID movToMemoryAddressFromImmediateValue (VOID *iseptr, ADDRINT memoryEa,
-    ADDRINT immediate) {
+VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    ADDRINT srcImmediateValue) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->movToMemoryAddressFromImmediateValue (memoryEa, immediate);
+  ise->analysisRoutineDstRegSrcImd (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+                                    (REG) dstReg, dstRegVal,
+                                    srcImmediateValue);
 }
 
-VOID movToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT immediate) {
+VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, ADDRINT srcRegVal) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->movToRegisterFromImmediateValue ((REG) regi32, immediate);
+  ise->analysisRoutineDstMemSrcReg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+                                    dstMemoryEa,
+                                    (REG) srcReg, srcRegVal);
 }
 
-VOID movToRegisterFromRegister (VOID *iseptr, UINT32 regdsti32, UINT32 regsrci32,
-    ADDRINT regsrcval) {
+VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    ADDRINT srcImmediateValue) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->movToRegisterFromRegister ((REG) regdsti32, (REG) regsrci32, regsrcval);
+  ise->analysisRoutineDstMemSrcImd (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+                                    dstMemoryEa,
+                                    srcImmediateValue);
 }
 
-VOID pushToStackFromRegister (VOID *iseptr, ADDRINT stackEa, UINT32 regi32,
-    ADDRINT regval) {
+VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    ADDRINT srcMemoryEa) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->pushToStackFromRegister (stackEa, (REG) regi32, regval);
-}
-
-VOID pushToStackFromImmediateValue (VOID *iseptr, ADDRINT stackEa, ADDRINT immediate) {
-  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->pushToStackFromImmediateValue (stackEa, immediate);
-}
-
-VOID pushToStackFromMemoryAddress (VOID *iseptr, ADDRINT stackEa, ADDRINT memoryEa) {
-  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->pushToStackFromMemoryAddress (stackEa, memoryEa);
-}
-
-VOID popToRegisterFromStack (VOID *iseptr, UINT32 regi32, ADDRINT stackEa) {
-  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->popToRegisterFromStack ((REG) regi32, stackEa);
-}
-
-VOID popToMemoryAddressFromStack (VOID *iseptr, ADDRINT memoryEa, ADDRINT stackEa) {
-  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->popToMemoryAddressFromStack (memoryEa, stackEa);
-}
-
-VOID addToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT regval,
-    ADDRINT immediate) {
-  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->addToRegisterFromImmediateValue ((REG) regi32, regval, immediate);
-}
-
-VOID addToRegisterFromRegister (VOID *iseptr, UINT32 dstregi32, ADDRINT dstregval,
-    UINT32 srcregi32, ADDRINT srcregval) {
-  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->addToRegisterFromRegister ((REG) dstregi32, dstregval,
-                                  (REG) srcregi32, srcregval);
-}
-
-VOID subToRegisterFromImmediateValue (VOID *iseptr, UINT32 regi32, ADDRINT regval,
-    ADDRINT immediate) {
-  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->subToRegisterFromImmediateValue ((REG) regi32, regval, immediate);
-}
-
-VOID cmpToRegisterFromMemoryAddress (VOID *iseptr, UINT32 regi32, ADDRINT regval,
-    ADDRINT memoryEa) {
-  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->cmpToRegisterFromMemoryAddress ((REG) regi32, regval, memoryEa);
+  ise->analysisRoutineDstMemSrcMem (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+                                    dstMemoryEa,
+                                    srcMemoryEa);
 }
 
 }
