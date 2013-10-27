@@ -39,7 +39,7 @@ public:
   }
 
   virtual void setExpression (edu::sharif::twinner::trace::Trace *trace,
-      edu::sharif::twinner::trace::Expression *exp) = 0;
+      const edu::sharif::twinner::trace::Expression *exp) const = 0;
 };
 
 }

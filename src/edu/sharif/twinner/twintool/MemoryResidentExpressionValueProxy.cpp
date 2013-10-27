@@ -12,14 +12,31 @@
 
 #include "MemoryResidentExpressionValueProxy.h"
 
+#include "InstructionSymbolicExecuter.h"
+
+#include "edu/sharif/twinner/trace/Trace.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace twintool {
 
 MemoryResidentExpressionValueProxy::MemoryResidentExpressionValueProxy (
-    ADDRINT memoryEa) {
-  throw "Not yet implemented";
+    ADDRINT _memoryEa) :
+memoryEa (_memoryEa) {
+}
+
+edu::sharif::twinner::trace::Expression *
+MemoryResidentExpressionValueProxy::getExpression (
+    edu::sharif::twinner::trace::Trace *trace) const {
+  return trace->getSymbolicExpressionByMemoryAddress
+      (memoryEa, InstructionSymbolicExecuter::readMemoryContent (memoryEa));
+}
+
+void MemoryResidentExpressionValueProxy::setExpression (
+    edu::sharif::twinner::trace::Trace *trace,
+    const edu::sharif::twinner::trace::Expression *exp) const {
+  trace->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
 }
 
 }

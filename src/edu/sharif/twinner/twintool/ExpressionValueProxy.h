@@ -16,6 +16,11 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace trace {
+
+class Expression;
+class Trace;
+}
 namespace twintool {
 
 /**
@@ -45,7 +50,7 @@ public:
    * @return The expression object.
    */
   virtual edu::sharif::twinner::trace::Expression *getExpression (
-      edu::sharif::twinner::trace::Trace *trace) = 0;
+      edu::sharif::twinner::trace::Trace *trace) const = 0;
 };
 
 }

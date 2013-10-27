@@ -18,8 +18,13 @@ namespace twinner {
 namespace twintool {
 
 ConstantExpressionValueProxy::ConstantExpressionValueProxy (
-    edu::sharif::twinner::trace::Expression *exp) {
-  throw "Not yet implemented";
+    edu::sharif::twinner::trace::Expression *_exp) :
+exp (_exp) {
+}
+
+edu::sharif::twinner::trace::Expression *ConstantExpressionValueProxy::getExpression (
+    edu::sharif::twinner::trace::Trace *trace) const {
+  return exp;
 }
 
 }

@@ -32,6 +32,9 @@ public:
    * @param exp The expression which getter method will return upon requests.
    */
   ConstantExpressionValueProxy (edu::sharif::twinner::trace::Expression *exp);
+
+  virtual edu::sharif::twinner::trace::Expression *getExpression (
+      edu::sharif::twinner::trace::Trace *trace) const;
 };
 
 }

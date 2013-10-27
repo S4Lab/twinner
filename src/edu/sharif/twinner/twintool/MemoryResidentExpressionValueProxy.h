@@ -15,6 +15,8 @@
 
 #include "MutableExpressionValueProxy.h"
 
+#include "pin.H"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -26,6 +28,11 @@ public:
   ADDRINT memoryEa;
 
   MemoryResidentExpressionValueProxy (ADDRINT memoryEa);
+
+  virtual edu::sharif::twinner::trace::Expression *getExpression (
+      edu::sharif::twinner::trace::Trace *trace) const;
+  virtual void setExpression (edu::sharif::twinner::trace::Trace *trace,
+      const edu::sharif::twinner::trace::Expression *exp) const;
 };
 
 }
