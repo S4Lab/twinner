@@ -12,8 +12,15 @@
 
 #include "InstructionSymbolicExecuter.h"
 
+
+#include "RegisterResidentExpressionValueProxy.h"
+#include "MemoryResidentExpressionValueProxy.h"
+#include "ConstantExpressionValueProxy.h"
+
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Expression.h"
+
+#include "edu/sharif/twinner/util/Logger.h"
 
 #include <stdexcept>
 
@@ -33,158 +40,102 @@ edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () con
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     REG srcReg, UINT64 srcRegVal) {
-  throw std::runtime_error ("Not yet implemented");
+  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     ADDRINT srcMemoryEa) {
-  throw std::runtime_error ("Not yet implemented");
+  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+      MemoryResidentExpressionValueProxy (srcMemoryEa));
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     ADDRINT srcImmediateValue) {
-  throw std::runtime_error ("Not yet implemented");
+  edu::sharif::twinner::trace::Expression *srcexp =
+      new edu::sharif::twinner::trace::Expression (srcImmediateValue);
+  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+      ConstantExpressionValueProxy (srcexp));
+  delete srcexp;
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     REG srcReg, UINT64 srcRegVal) {
-  throw std::runtime_error ("Not yet implemented");
+  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
+      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     ADDRINT srcImmediateValue) {
-  throw std::runtime_error ("Not yet implemented");
+  edu::sharif::twinner::trace::Expression *srcexp =
+      new edu::sharif::twinner::trace::Expression (srcImmediateValue);
+  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
+      ConstantExpressionValueProxy (srcexp));
+  delete srcexp;
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     ADDRINT srcMemoryEa) {
-  throw std::runtime_error ("Not yet implemented");
+  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
+      MemoryResidentExpressionValueProxy (srcMemoryEa));
 }
 
-void InstructionSymbolicExecuter::movToRegisterFromMemoryAddress (REG reg,
-    ADDRINT memoryEa) {
+void InstructionSymbolicExecuter::movAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByMemoryAddress
-      (memoryEa, readMemoryContent (memoryEa));
-  trace->setSymbolicExpressionByRegister (reg, srcexp);
+      src.getExpression (trace);
+  dst.setExpression (trace, srcexp);
 }
 
-void InstructionSymbolicExecuter::movToMemoryAddressFromRegister (ADDRINT memoryEa,
-    REG reg, UINT64 regval) {
+void InstructionSymbolicExecuter::pushAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByRegister (reg, regval);
-  trace->setSymbolicExpressionByMemoryAddress (memoryEa, srcexp);
+      src.getExpression (trace);
+  dst.setExpression (trace, srcexp);
 }
 
-void InstructionSymbolicExecuter::movToMemoryAddressFromImmediateValue (ADDRINT memoryEa,
-    ADDRINT immediate) {
-  edu::sharif::twinner::trace::Expression *exp =
-      new edu::sharif::twinner::trace::Expression (immediate);
-  trace->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
-  delete exp; // Above setter method, has cloned the expression object for itself.
-}
-
-void InstructionSymbolicExecuter::movToRegisterFromImmediateValue (REG reg,
-    ADDRINT immediate) {
-  edu::sharif::twinner::trace::Expression *exp =
-      new edu::sharif::twinner::trace::Expression (immediate);
-  trace->setSymbolicExpressionByRegister (reg, exp);
-  delete exp; // Above setter method, has cloned the expression object for itself.
-}
-
-void InstructionSymbolicExecuter::movToRegisterFromRegister (REG dreg, REG sreg,
-    UINT64 regsrcval) {
+void InstructionSymbolicExecuter::popAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByRegister (sreg, regsrcval);
-  trace->setSymbolicExpressionByRegister (dreg, srcexp);
+      src.getExpression (trace);
+  dst.setExpression (trace, srcexp);
 }
 
-void InstructionSymbolicExecuter::pushToStackFromRegister (ADDRINT stackEa, REG reg,
-    UINT64 regval) {
+void InstructionSymbolicExecuter::addAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByRegister (reg, regval);
-  trace->setSymbolicExpressionByMemoryAddress (stackEa, srcexp);
-}
-
-void InstructionSymbolicExecuter::pushToStackFromImmediateValue (ADDRINT stackEa,
-    ADDRINT immediate) {
-  edu::sharif::twinner::trace::Expression *srcexp =
-      new edu::sharif::twinner::trace::Expression (immediate);
-  trace->setSymbolicExpressionByMemoryAddress (stackEa, srcexp);
-}
-
-void InstructionSymbolicExecuter::pushToStackFromMemoryAddress (ADDRINT stackEa,
-    ADDRINT memoryEa) {
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByMemoryAddress
-      (memoryEa, readMemoryContent (memoryEa));
-  trace->setSymbolicExpressionByMemoryAddress (stackEa, srcexp);
-}
-
-void InstructionSymbolicExecuter::popToRegisterFromStack (REG reg, ADDRINT stackEa) {
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByMemoryAddress (stackEa, readMemoryContent (stackEa));
-  trace->setSymbolicExpressionByRegister (reg, srcexp);
-}
-
-void InstructionSymbolicExecuter::popToMemoryAddressFromStack (ADDRINT memoryEa,
-    ADDRINT stackEa) {
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByMemoryAddress
-      (stackEa, readMemoryContent (stackEa));
-  trace->setSymbolicExpressionByMemoryAddress (memoryEa, srcexp);
-}
-
-void InstructionSymbolicExecuter::addToRegisterFromImmediateValue (REG reg, UINT64 regval,
-    ADDRINT immediate) {
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      new edu::sharif::twinner::trace::Expression (immediate);
+      src.getExpression (trace);
   edu::sharif::twinner::trace::Expression *dstexp =
-      trace->getSymbolicExpressionByRegister (reg, regval);
-  dstexp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::ADD), srcexp);
-  delete srcexp; // binary operation clones the expression contents
-  //TODO: set rflags
-}
-
-void InstructionSymbolicExecuter::addToRegisterFromRegister (REG dstreg,
-    UINT64 dstregval, REG srcreg, UINT64 srcregval) {
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByRegister (srcreg, srcregval);
-  edu::sharif::twinner::trace::Expression *dstexp =
-      trace->getSymbolicExpressionByRegister (dstreg, dstregval);
+      dst.getExpression (trace);
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::ADD), srcexp);
   //TODO: set rflags
 }
 
-void InstructionSymbolicExecuter::subToRegisterFromImmediateValue (REG reg,
-    UINT64 regval, ADDRINT immediate) {
+void InstructionSymbolicExecuter::subAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   const edu::sharif::twinner::trace::Expression *srcexp =
-      new edu::sharif::twinner::trace::Expression (immediate);
+      src.getExpression (trace);
   edu::sharif::twinner::trace::Expression *dstexp =
-      trace->getSymbolicExpressionByRegister (reg, regval);
+      dst.getExpression (trace);
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
-  delete srcexp; // binary operation clones the expression contents
   //TODO: set rflags
 }
 
-void InstructionSymbolicExecuter::cmpToRegisterFromMemoryAddress (REG reg,
-    UINT64 regval, ADDRINT memoryEa) {
-  const edu::sharif::twinner::trace::Expression *dstexp =
-      trace->getSymbolicExpressionByRegister (reg, regval);
+void InstructionSymbolicExecuter::cmpAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   const edu::sharif::twinner::trace::Expression *srcexp =
-      trace->getSymbolicExpressionByMemoryAddress
-      (memoryEa, readMemoryContent (memoryEa));
+      src.getExpression (trace);
+  const edu::sharif::twinner::trace::Expression *dstexp =
+      dst.getExpression (trace);
 
   edu::sharif::twinner::trace::Expression *tmpexp = dstexp->clone ();
   tmpexp->binaryOperation
@@ -196,9 +147,23 @@ void InstructionSymbolicExecuter::cmpToRegisterFromMemoryAddress (REG reg,
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
+  case XED_ICLASS_MOV:
+  case XED_ICLASS_MOVZX:
+  case XED_ICLASS_MOVSX:
+    return &InstructionSymbolicExecuter::movAnalysisRoutine;
+  case XED_ICLASS_PUSH:
+    return &InstructionSymbolicExecuter::pushAnalysisRoutine;
   case XED_ICLASS_POP:
     return &InstructionSymbolicExecuter::popAnalysisRoutine;
+  case XED_ICLASS_ADD:
+    return &InstructionSymbolicExecuter::addAnalysisRoutine;
+  case XED_ICLASS_SUB:
+    return &InstructionSymbolicExecuter::subAnalysisRoutine;
+  case XED_ICLASS_CMP:
+    return &InstructionSymbolicExecuter::cmpAnalysisRoutine;
   default:
+    edu::sharif::twinner::util::Logger::debug () << "Analysis routine: Unknown opcode: "
+        << OPCODE_StringShort (op) << '\n';
     throw std::runtime_error ("Unknown opcode given to analysis routine");
   }
 }

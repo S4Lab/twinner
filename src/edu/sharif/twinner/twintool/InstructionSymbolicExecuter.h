@@ -26,6 +26,9 @@ class Trace;
 }
 namespace twintool {
 
+class ExpressionValueProxy;
+class MutableExpressionValueProxy;
+
 class InstructionSymbolicExecuter {
 
 private:
@@ -40,7 +43,7 @@ public:
 private:
 
   typedef void (InstructionSymbolicExecuter::*AnalysisRoutine) (
-      MutableExpressionValueProxy dst, ExpressionValueProxy src);
+      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
 
 public:
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
@@ -69,38 +72,44 @@ private:
    * r <- r/m/i
    * m <- r/i
    */
-  void movAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+  void movAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
 
   /**
    * PUSH has 3 models
    * m <- r/m/i
    */
-  void pushAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+  void pushAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
 
   /**
    * POP has 2 models
    * r/m <- m
    */
-  void popAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+  void popAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
 
   /**
    * ADD has 5 models
    * r += r/m/i
    * m += r/i
    */
-  void addAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+  void addAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
 
   /**
    * SUB has 5 models
    * r -= r/m/i
    * m -= r/i
    */
-  void subAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+  void subAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
 
   /**
    * CMP is same as SUB else of not modifying dst operand's value
    */
-  void cmpAnalysisRoutine (MutableExpressionValueProxy dst, ExpressionValueProxy src);
+  void cmpAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
 
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;

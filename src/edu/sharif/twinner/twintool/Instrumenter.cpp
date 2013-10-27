@@ -43,10 +43,10 @@ totalCountOfInstructions (0) {
   // TODO: handle more types (data ranges), then add real support for sign/zero extension
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOVZX, // 2 models (r <- zero-extend(r/m))
-                  DST_REG_SRC_REG | DST_REG_SRC_MEM));
+                  MOV_ZX_AND_SX_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOVSX, // 2 models (r <- sign-extend(r/m))
-                  DST_REG_SRC_REG | DST_REG_SRC_MEM));
+                  MOV_ZX_AND_SX_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_PUSH, PUSH_INS_MODELS));
   managedInstructions.insert
