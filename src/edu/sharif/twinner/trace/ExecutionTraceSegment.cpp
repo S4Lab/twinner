@@ -133,7 +133,7 @@ void ExecutionTraceSegment::setSymbolicExpressionImplementation (
   }
 }
 
-void ExecutionTraceSegment::addPathConstraint (Constraint c) {
+void ExecutionTraceSegment::addPathConstraint (const Constraint *c) {
   throw std::runtime_error
       ("ExecutionTraceSegment::addPathConstraint: Not yet implemented");
 }

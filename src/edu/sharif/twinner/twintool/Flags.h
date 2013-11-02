@@ -37,6 +37,14 @@ public:
    * @param exp The expression which flags are set based on it.
    */
   void setFlags (edu::sharif::twinner::trace::Expression *exp);
+
+  /**
+   * Returns the underlying expression which currently, flags are set based on it. The
+   * returned expression is still owned by this object and caller must clone it
+   * if required.
+   * @return The underlying expression of flags object.
+   */
+  const edu::sharif::twinner::trace::Expression *getFlagsUnderlyingExpression () const;
 };
 
 }

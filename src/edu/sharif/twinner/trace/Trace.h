@@ -86,7 +86,7 @@ public:
   /**
    * The constraint will be added to the most recent trace segment.
    */
-  virtual void addPathConstraint (Constraint c);
+  virtual void addPathConstraint (const Constraint *c);
 
   void syscallInvoked (Syscall s);
 

@@ -46,7 +46,7 @@ public:
   virtual void setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       const Expression *exp);
 
-  virtual void addPathConstraint (Constraint c);
+  virtual void addPathConstraint (const Constraint *c);
 
 private:
   template < typename KEY >

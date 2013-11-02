@@ -151,7 +151,13 @@ void InstructionSymbolicExecuter::cmpAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
-  // TODO: Implement
+  edu::sharif::twinner::trace::Constraint *cc
+      = new edu::sharif::twinner::trace::Constraint
+      (eflags.getFlagsUnderlyingExpression (),
+       branchTaken ?
+       edu::sharif::twinner::trace::Constraint::NON_ZERO :
+       edu::sharif::twinner::trace::Constraint::ZERO);
+  trace->addPathConstraint (cc);
 }
 
 InstructionSymbolicExecuter::AnalysisRoutine

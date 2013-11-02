@@ -113,7 +113,7 @@ void Trace::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
   getCurrentTraceSegment ()->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
 }
 
-void Trace::addPathConstraint (Constraint c) {
+void Trace::addPathConstraint (const Constraint *c) {
   getCurrentTraceSegment ()->addPathConstraint (c);
 }
 

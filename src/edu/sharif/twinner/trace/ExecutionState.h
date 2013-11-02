@@ -148,7 +148,7 @@ public:
    *
    * @param c The constraint which is being added.
    */
-  virtual void addPathConstraint (Constraint c) = 0;
+  virtual void addPathConstraint (const Constraint *c) = 0;
 };
 
 }

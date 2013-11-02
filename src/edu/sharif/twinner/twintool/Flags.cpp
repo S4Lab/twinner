@@ -36,6 +36,11 @@ void Flags::setFlags (edu::sharif::twinner::trace::Expression *_exp) {
   exp = _exp;
 }
 
+const edu::sharif::twinner::trace::Expression *
+Flags::getFlagsUnderlyingExpression () const {
+  return exp;
+}
+
 }
 }
 }
