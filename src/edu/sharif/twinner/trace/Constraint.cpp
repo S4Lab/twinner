@@ -19,8 +19,12 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-void Constraint::addConstraint (Constraint c) {
-  throw std::runtime_error ("Constraint:addConstraint: Not yet implemented");
+Constraint::Constraint (const Expression *_exp, ComparisonType _type) :
+exp (_exp->clone ()), type (_type) {
+}
+
+Constraint::~Constraint () {
+  delete exp;
 }
 
 }

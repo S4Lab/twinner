@@ -13,6 +13,10 @@
 #ifndef CONSTRAINT_H
 #define CONSTRAINT_H
 
+#include "Expression.h"
+#include "Constant.h"
+
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -21,7 +25,32 @@ namespace trace {
 class Constraint {
 
 public:
-  void addConstraint (Constraint c);
+
+  enum ComparisonType {
+
+    POSITIVE, NEGATIVE, ZERO, NON_ZERO
+  };
+
+private:
+  Expression *exp;
+  ComparisonType type;
+
+  /**
+   * Disable copy constructor.
+   * @param c
+   */
+  Constraint (const Constraint &c);
+
+public:
+  /**
+   * Constructs a constraint indicating that given expression should obey the
+   * (in)equality which is specified by type. Expression is cloned and deleted upon
+   * destruction of constraint object.
+   * @param exp The expression which will be cloned and should satisfy (in)equality.
+   * @param type Indicates the (in)equality which exp should satisfy it.
+   */
+  Constraint (const Expression *exp, ComparisonType type);
+  ~Constraint ();
 };
 
 }
