@@ -19,6 +19,7 @@
 
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/Constraint.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 

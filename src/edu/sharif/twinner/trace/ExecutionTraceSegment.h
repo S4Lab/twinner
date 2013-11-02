@@ -14,6 +14,7 @@
 #define EXECUTION_TRACE_SEGMENT_H
 
 #include "ExecutionState.h"
+#include "Constraint.h"
 
 #include <map>
 
@@ -27,6 +28,7 @@ class ExecutionTraceSegment : public ExecutionState {
 private:
   std::map < REG, Expression * > registerToExpression;
   std::map < ADDRINT, Expression * > memoryAddressToExpression;
+  std::list< const Constraint * > pathConstraint;
 
 public:
   ExecutionTraceSegment ();

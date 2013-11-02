@@ -39,6 +39,10 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
     delete exp;
   }
   memoryAddressToExpression.clear ();
+  while (!pathConstraint.empty ()) {
+    delete pathConstraint.front ();
+    pathConstraint.pop_front ();
+  }
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg,
@@ -134,8 +138,7 @@ void ExecutionTraceSegment::setSymbolicExpressionImplementation (
 }
 
 void ExecutionTraceSegment::addPathConstraint (const Constraint *c) {
-  throw std::runtime_error
-      ("ExecutionTraceSegment::addPathConstraint: Not yet implemented");
+  pathConstraint.push_back (c);
 }
 
 }
