@@ -85,6 +85,12 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine r
       MemoryResidentExpressionValueProxy (srcMemoryEa));
 }
 
+void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
+    ConditionalBranchAnalysisRoutine routine,
+    BOOL branchTaken) {
+  (this->*routine) (branchTaken);
+}
+
 void InstructionSymbolicExecuter::movAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   const edu::sharif::twinner::trace::Expression *srcexp =
@@ -144,6 +150,10 @@ void InstructionSymbolicExecuter::cmpAnalysisRoutine (
   eflags.setFlags (tmpexp);
 }
 
+void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
+  // TODO: Implement
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -165,6 +175,19 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     edu::sharif::twinner::util::Logger::debug () << "Analysis routine: Unknown opcode: "
         << OPCODE_StringShort (op) << '\n';
     throw std::runtime_error ("Unknown opcode given to analysis routine");
+  }
+}
+
+InstructionSymbolicExecuter::ConditionalBranchAnalysisRoutine
+InstructionSymbolicExecuter::convertOpcodeToConditionalBranchAnalysisRoutine (
+    OPCODE op) const {
+  switch (op) {
+  case XED_ICLASS_JNZ:
+    return &InstructionSymbolicExecuter::jnzAnalysisRoutine;
+  default:
+    edu::sharif::twinner::util::Logger::debug () << "Analysis routine: "
+        "Conditional Branch: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
+    throw std::runtime_error ("Unknown opcode (for Jcc) given to analysis routine");
   }
 }
 
@@ -226,6 +249,14 @@ VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineDstMemSrcMem (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     dstMemoryEa,
                                     srcMemoryEa);
+}
+
+VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
+    BOOL branchTaken) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineConditionalBranch
+      (ise->convertOpcodeToConditionalBranchAnalysisRoutine ((OPCODE) opcode),
+       branchTaken);
 }
 
 }

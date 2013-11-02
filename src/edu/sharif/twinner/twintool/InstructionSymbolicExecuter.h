@@ -44,6 +44,8 @@ private:
 
   typedef void (InstructionSymbolicExecuter::*AnalysisRoutine) (
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+  typedef void (InstructionSymbolicExecuter::*ConditionalBranchAnalysisRoutine) (
+      bool branchTaken);
 
 public:
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
@@ -64,6 +66,8 @@ public:
   void analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       ADDRINT srcMemoryEa);
+  void analysisRoutineConditionalBranch (ConditionalBranchAnalysisRoutine routine,
+      BOOL branchTaken);
 
 private:
 
@@ -111,8 +115,15 @@ private:
   void cmpAnalysisRoutine (const MutableExpressionValueProxy &dst,
       const ExpressionValueProxy &src);
 
+  /**
+   * JNZ jumps if ZF=0 which means that corresponding expression was not zero
+   */
+  void jnzAnalysisRoutine (bool branchTaken);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
+  ConditionalBranchAnalysisRoutine convertOpcodeToConditionalBranchAnalysisRoutine (
+      OPCODE op) const;
 
   static UINT64 readMemoryContent (ADDRINT memoryEa);
 };
@@ -135,6 +146,8 @@ VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
 VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     ADDRINT srcMemoryEa);
+VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
+    BOOL branchTaken);
 
 }
 }

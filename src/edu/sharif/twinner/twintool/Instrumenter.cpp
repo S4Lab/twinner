@@ -59,6 +59,8 @@ totalCountOfInstructions (0) {
       (make_pair (XED_ICLASS_SUB, COMMON_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_CMP, COMMON_INS_MODELS));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_JNZ, JMP_CC_INS_MODELS));
 }
 
 Instrumenter::~Instrumenter () {
@@ -122,7 +124,11 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_NOP:
     return NOP_INS_MODELS;
   default:
-    return getInstructionModelForNormalInstruction (ins);
+    if (INS_Category (ins) == XED_CATEGORY_COND_BR) {
+      return JMP_CC_INS_MODELS;
+    } else {
+      return getInstructionModelForNormalInstruction (ins);
+    }
   }
 }
 
@@ -272,6 +278,14 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_MEMORYOP_EA, 1,
+                    IARG_END);
+    break;
+  }
+  case JMP_CC_INS_MODELS:
+  {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineConditionalBranch,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_BRANCH_TAKEN,
                     IARG_END);
     break;
   }
