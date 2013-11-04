@@ -41,6 +41,7 @@ edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () con
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     REG srcReg, UINT64 srcRegVal) {
+  edu::sharif::twinner::util::Logger::debug () << "analysisRoutineDstRegSrcReg (...)\n";
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
       RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
 }
@@ -48,6 +49,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     ADDRINT srcMemoryEa) {
+  edu::sharif::twinner::util::Logger::debug () << "analysisRoutineDstRegSrcMem (...)\n";
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
       MemoryResidentExpressionValueProxy (srcMemoryEa));
 }
@@ -55,6 +57,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     ADDRINT srcImmediateValue) {
+  edu::sharif::twinner::util::Logger::debug () << "analysisRoutineDstRegSrcImd (...)\n";
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::Expression (srcImmediateValue);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
@@ -65,6 +68,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     REG srcReg, UINT64 srcRegVal) {
+  edu::sharif::twinner::util::Logger::debug () << "analysisRoutineDstMemSrcReg (...)\n";
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
       RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
 }
@@ -72,6 +76,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     ADDRINT srcImmediateValue) {
+  edu::sharif::twinner::util::Logger::debug () << "analysisRoutineDstMemSrcImd (...)\n";
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::Expression (srcImmediateValue);
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
@@ -82,6 +87,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     ADDRINT srcMemoryEa) {
+  edu::sharif::twinner::util::Logger::debug () << "analysisRoutineDstMemSrcMem (...)\n";
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
       MemoryResidentExpressionValueProxy (srcMemoryEa));
 }
@@ -89,6 +95,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
     ConditionalBranchAnalysisRoutine routine,
     BOOL branchTaken) {
+  edu::sharif::twinner::util::Logger::debug () <<
+      "analysisRoutineConditionalBranch (...)\n";
   (this->*routine) (branchTaken);
 }
 
