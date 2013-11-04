@@ -18,7 +18,7 @@ if [ "a$fullpreparation" = "afull" ]; then
 			echo 0 | sudo tee /proc/sys/kernel/randomize_va_space > /dev/null
 		fi
 		echo "Disabling swap for memory loop safty..."
-		swapoff -a
+		sudo swapoff -a
 		sudo -k
 	fi
 	mkdir -p /tmp/twinner
