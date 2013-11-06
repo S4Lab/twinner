@@ -67,10 +67,23 @@ void Expression::unaryOperation (Operator op, Expression exp) {
 }
 
 void Expression::binaryOperation (Operator *op, const Expression *exp) {
-  for (std::list < ExpressionToken * >::const_iterator it = exp->stack.begin ();
-      it != exp->stack.end (); ++it) {
-    const ExpressionToken *token = *it;
-    stack.push_back (token->clone ());
+  /**
+   * It's possible that this object and given constant expression object be the same.
+   * In that case changing this object while searching the given expression can
+   * change the constant expression unexpectedly. To avoid such situations, it's important
+   * to take required non constant clone of the given constant expression atomically
+   * before applying any change to this object.
+   */
+  Expression *copy = exp->clone ();
+  for (std::list < ExpressionToken * >::iterator it = copy->stack.begin ();
+      it != copy->stack.end (); ++it) {
+    /**
+     * The token's ownership is taken by this object. So the copy temporary expression
+     * must not be deleted (to avoid deleting tokens which are currently owned by this
+     * object).
+     */
+    ExpressionToken *token = *it;
+    stack.push_back (token);
   }
   stack.push_back (op);
 }

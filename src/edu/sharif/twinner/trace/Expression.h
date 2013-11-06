@@ -63,9 +63,13 @@ public:
   void toString () const;
 
   void unaryOperation (Operator op, Expression exp);
+
   /**
    * The op operator is assumed to be owned by this expression object.
    * But exp will be kept untouched and its inner expression tokens will be cloned.
+   * The exp may or may not be the same as this object.
+   * @param op The owned operator which mediates between this and exp expression objects.
+   * @param exp The given constant expression which its clone should be applied by op.
    */
   void binaryOperation (Operator *op, const Expression *exp);
 
