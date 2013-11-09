@@ -26,7 +26,7 @@ private:
 
   enum VerbosenessLevel {
 
-    QUIET, ERROR, WARNING, INFO, DEBUG
+    QUIET, ERROR, WARNING, INFO, DEBUG, LOQUACIOUS
   };
 
   static VerbosenessLevel verbose;
@@ -61,8 +61,10 @@ public:
   static Logger warning ();
   static Logger info ();
   static Logger debug ();
+  static Logger loquacious ();
 
   static bool setVerbosenessLevel (const std::string &verboseStr);
+  static const char *getVerbosenessLevelAsString ();
 };
 
 }

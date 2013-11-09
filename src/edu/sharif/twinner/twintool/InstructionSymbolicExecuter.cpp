@@ -94,71 +94,121 @@ void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
 
 void InstructionSymbolicExecuter::movAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "movAnalysisRoutine(...)\n"
+      << "\tgetting src exp";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tsetting dst exp";
   dst.setExpression (trace, srcexp);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::pushAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "pushAnalysisRoutine(...)\n"
+      << "\tgetting src exp";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tsetting dst exp";
   dst.setExpression (trace, srcexp);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::popAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "popAnalysisRoutine(...)\n"
+      << "\tgetting src exp";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tsetting dst exp";
   dst.setExpression (trace, srcexp);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::addAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "addAnalysisRoutine(...)\n"
+      << "\tgetting src exp";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting dst exp";
   edu::sharif::twinner::trace::Expression *dstexp =
       dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tbinary operation";
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::ADD), srcexp);
   //TODO: set rflags
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::subAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "subAnalysisRoutine(...)\n"
+      << "\tgetting src exp";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting dst exp";
   edu::sharif::twinner::trace::Expression *dstexp =
       dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tbinary operation";
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
   //TODO: set rflags
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::cmpAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "cmpAnalysisRoutine(...)\n"
+      << "\tgetting src exp";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting dst exp";
   const edu::sharif::twinner::trace::Expression *dstexp =
       dst.getExpression (trace);
 
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tbinary operation";
   edu::sharif::twinner::trace::Expression *tmpexp = dstexp->clone ();
   tmpexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tsetting EFLAGS";
   eflags.setFlags (tmpexp);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::util::Logger::loquacious () << "jnzAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint";
   edu::sharif::twinner::trace::Constraint *cc
       = new edu::sharif::twinner::trace::Constraint
       (eflags.getFlagsUnderlyingExpression (),
        branchTaken ?
        edu::sharif::twinner::trace::Constraint::NON_ZERO :
        edu::sharif::twinner::trace::Constraint::ZERO);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tadding constraint";
   trace->addPathConstraint (cc);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
 }
 
 InstructionSymbolicExecuter::AnalysisRoutine
@@ -179,7 +229,7 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_CMP:
     return &InstructionSymbolicExecuter::cmpAnalysisRoutine;
   default:
-    edu::sharif::twinner::util::Logger::debug () << "Analysis routine: Unknown opcode: "
+    edu::sharif::twinner::util::Logger::error () << "Analysis routine: Unknown opcode: "
         << OPCODE_StringShort (op) << '\n';
     throw std::runtime_error ("Unknown opcode given to analysis routine");
   }
@@ -192,7 +242,7 @@ InstructionSymbolicExecuter::convertOpcodeToConditionalBranchAnalysisRoutine (
   case XED_ICLASS_JNZ:
     return &InstructionSymbolicExecuter::jnzAnalysisRoutine;
   default:
-    edu::sharif::twinner::util::Logger::debug () << "Analysis routine: "
+    edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Conditional Branch: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
     throw std::runtime_error ("Unknown opcode (for Jcc) given to analysis routine");
   }

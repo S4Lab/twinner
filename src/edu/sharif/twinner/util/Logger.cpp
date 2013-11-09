@@ -12,6 +12,8 @@
 
 #include "Logger.h"
 
+#include <stdexcept>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -43,6 +45,10 @@ Logger Logger::debug () {
   return Logger (Logger::verbose >= Logger::DEBUG);
 }
 
+Logger Logger::loquacious () {
+  return Logger (Logger::verbose >= Logger::LOQUACIOUS);
+}
+
 bool Logger::setVerbosenessLevel (const std::string &verboseStr) {
   if (verboseStr == "quiet") {
     verbose = QUIET;
@@ -54,10 +60,31 @@ bool Logger::setVerbosenessLevel (const std::string &verboseStr) {
     verbose = INFO;
   } else if (verboseStr == "debug") {
     verbose = DEBUG;
+  } else if (verboseStr == "loquacious") {
+    verbose = LOQUACIOUS;
   } else {
     return false;
   }
   return true;
+}
+
+const char *Logger::getVerbosenessLevelAsString () {
+  switch (verbose) {
+  case QUIET:
+    return "quiet";
+  case ERROR:
+    return "error";
+  case WARNING:
+    return "warning";
+  case INFO:
+    return "info";
+  case DEBUG:
+    return "debug";
+  case LOQUACIOUS:
+    return "loquacious";
+  default:
+    throw std::runtime_error ("Verboseness level is corrupted");
+  }
 }
 
 }
