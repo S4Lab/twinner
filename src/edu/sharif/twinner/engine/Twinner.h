@@ -29,15 +29,13 @@ namespace engine {
 class Twinner {
 
 private:
-  bool verbose;
-
   std::string input;
   std::string twintool;
   std::string pin;
   std::string twin;
 
 public:
-  Twinner (bool verbose);
+  Twinner ();
 
   void setInputBinaryPath (std::string input);
   void setTwinToolPath (std::string twintool);

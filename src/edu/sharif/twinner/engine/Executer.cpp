@@ -17,6 +17,8 @@
 
 #include "edu/sharif/twinner/trace/Trace.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
+
 using namespace std;
 
 namespace edu {
@@ -28,14 +30,13 @@ const char *Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE = "/tmp/twinner/sym
 const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/trace.dat";
 
 Executer::Executer (std::string pinLauncher, std::string twintool,
-    std::string inputBinary, bool _verbose) :
-verbose (_verbose),
+    std::string inputBinary) :
 command (pinLauncher
 + " -t " + twintool
 + " -symbols " + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
 + " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
-+ (_verbose ? " -verbose info -- " : " -- ")
-+ inputBinary) {
++ " -verbose " + edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString ()
++ " -main -- " + inputBinary) {
 }
 
 void Executer::setSymbolsValues (const set < edu::sharif::twinner::trace::Symbol * > &symbols) {
@@ -57,13 +58,11 @@ edu::sharif::twinner::trace::Trace *Executer::executeSingleTrace () {
    *  to timeout execution and exit after a while. In this way, this code does not
    *  need to change at all.
    */
-  if (verbose) {
-    cout << "Calling system (\"" << command << "\");" << endl;
-  }
+  edu::sharif::twinner::util::Logger::debug ()
+      << "Calling system (\"" << command << "\");\n";
   int ret = system (command.c_str ());
-  if (verbose) {
-    cout << "The system(...) call returns code: " << ret << endl;
-  }
+  edu::sharif::twinner::util::Logger::debug ()
+      << "The system(...) call returns code: " << ret << '\n';
   return edu::sharif::twinner::trace::Trace::loadFromFile
       (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
 }

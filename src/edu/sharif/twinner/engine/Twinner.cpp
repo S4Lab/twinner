@@ -20,6 +20,8 @@
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Symbol.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
+
 using namespace std;
 
 namespace edu {
@@ -27,8 +29,7 @@ namespace sharif {
 namespace twinner {
 namespace engine {
 
-Twinner::Twinner (bool _verbose) :
-verbose (_verbose) {
+Twinner::Twinner () {
 }
 
 void Twinner::setInputBinaryPath (string input) {
@@ -48,14 +49,12 @@ void Twinner::setTwinBinaryPath (string twin) {
 }
 
 void Twinner::generateTwinBinary () {
-  Executer ex (pin, twintool, input, verbose);
+  Executer ex (pin, twintool, input);
   set < edu::sharif::twinner::trace::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;
   while (somePathsAreNotCovered) {
-    if (verbose) {
-      cout << "Executing trace # " << i++ << endl;
-    }
+    edu::sharif::twinner::util::Logger::debug () << "Executing trace # " << i++ << '\n';
     ex.setSymbolsValues (symbols);
 
     edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTrace ();

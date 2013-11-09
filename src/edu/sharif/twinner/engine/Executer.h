@@ -40,12 +40,10 @@ public:
   static const char *EXECUTION_TRACE_COMMUNICATION_TEMP_FILE;
 
 private:
-  bool verbose;
   std::string command;
 
 public:
-  Executer (std::string pinLauncher, std::string twintool, std::string inputBinary,
-      bool verbose);
+  Executer (std::string pinLauncher, std::string twintool, std::string inputBinary);
 
   void setSymbolsValues (
       const std::set < edu::sharif::twinner::trace::Symbol * > &symbols);
