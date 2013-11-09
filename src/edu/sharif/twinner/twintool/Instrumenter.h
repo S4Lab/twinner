@@ -76,6 +76,8 @@ public:
   void aboutToExit (INT32 code);
 
 private:
+  void printInstructionsStatisticsInfo () const;
+
   InstructionModel getInstructionModel (OPCODE op, INS ins) const;
   InstructionModel getInstructionModelForPushInstruction (INS ins) const;
   InstructionModel getInstructionModelForPopInstruction (INS ins) const;

@@ -13,6 +13,7 @@
 #include "Trace.h"
 
 #include <stdexcept>
+#include <fstream>
 
 #include "Expression.h"
 #include "Constraint.h"
@@ -122,7 +123,14 @@ void Trace::syscallInvoked (Syscall s) {
 }
 
 void Trace::saveToFile (const char *path) const {
-  throw std::runtime_error ("Trace::saveToFile: Not yet implemented");
+  std::ofstream out;
+  out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
+  if (!out.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not write trace info:"
+        " (error in open function)\n";
+    return;
+  }
+  //TODO: Implement...
 }
 
 /**

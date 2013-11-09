@@ -344,7 +344,13 @@ void Instrumenter::syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt,
 }
 
 void Instrumenter::aboutToExit (INT32 code) {
-  //TODO: Implement...
+  printInstructionsStatisticsInfo ();
+  edu::sharif::twinner::util::Logger::debug () << "Saving trace info...";
+  ise->getTrace ()->saveToFile (traceFilePath.c_str ());
+  edu::sharif::twinner::util::Logger::debug () << "Done.\n";
+}
+
+void Instrumenter::printInstructionsStatisticsInfo () const {
   int countOfIgnoredInstructions = totalCountOfInstructions;
   for (std::map < OPCODE, int >::iterator it = countOfInstructionsPerOpcode.begin ();
       it != countOfInstructionsPerOpcode.end (); ++it) {
