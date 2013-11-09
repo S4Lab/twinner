@@ -18,6 +18,8 @@
 
 #include "edu/sharif/twinner/engine/Twinner.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
+
 using namespace std;
 
 using namespace edu::sharif::twinner::cli;
@@ -26,22 +28,21 @@ const char *VERSION_NUMBER = "0.1.0";
 
 void printError (string progName, string errorMessage);
 void printVersion ();
-void printHelp (string progName, const ArgParser::Option options[], bool verbose);
-void printLicense (bool verbose);
+void printHelp (string progName, const ArgParser::Option options[]);
+void printLicense ();
 
 enum ArgumentsParsingStatus {
 
   EXIT_NORMALLY, ERROR_OCCURRED, CONTINUE_NORMALLY
 };
 
-ArgumentsParsingStatus parseArguments (int argc, char *argv[], bool &verbose,
-    string &input, string &twintool, string &pin, string &twin);
-int run (bool verbose, string input, string twintool, string pin, string twin);
+ArgumentsParsingStatus parseArguments (int argc, char *argv[],
+    string &input, string &args, string &twintool, string &pin, string &twin);
+int run (string input, string args, string twintool, string pin, string twin);
 
 int main (int argc, char *argv[]) {
-  bool verbose = false;
-  string input, twintool, pin, twin;
-  switch (parseArguments (argc, argv, verbose, input, twintool, pin, twin)) {
+  string input, args, twintool, pin, twin;
+  switch (parseArguments (argc, argv, input, args, twintool, pin, twin)) {
   case CONTINUE_NORMALLY:
     // checking mandatory arguments...
 
@@ -55,7 +56,7 @@ int main (int argc, char *argv[]) {
       printError (argv[0], "permission denied: can not write to output twin binary!");
     } else {
       // all files are OK...
-      return run (verbose, input, twintool, pin, twin);
+      return run (input, args, twintool, pin, twin);
     }
     return -2;
 
@@ -67,16 +68,21 @@ int main (int argc, char *argv[]) {
   }
 }
 
-int run (bool verbose, string input, string twintool, string pin, string twin) {
-  if (verbose) {
-    cout << "[Verbose mode]" << endl;
-    cout << "Input binary file: " << input << endl;
-    cout << "TwinTool pintool: " << twintool << endl;
-    cout << "Pin launcher: " << pin << endl;
-    cout << "Output twin file: " << twin << endl;
+int run (string input, string args, string twintool, string pin, string twin) {
+  if (!(edu::sharif::twinner::util::Logger::debug ()
+      << "[verboseness level: debug]\n")) {
+    edu::sharif::twinner::util::Logger::info ()
+        << "[verboseness level: info]\n";
   }
-  edu::sharif::twinner::engine::Twinner tw (verbose);
-  tw.setInputBinaryPath (input);
+  edu::sharif::twinner::util::Logger::info () <<
+      "Input binary file: " << input << '\n'
+      << (args.empty () ? "" : ("Input binary arguments: " + args))
+      << "\nTwinTool pintool: " << twintool
+      << "\nPin launcher: " << pin
+      << "\nOutput twin file: " << twin << '\n';
+
+  edu::sharif::twinner::engine::Twinner tw;
+  tw.setInputBinaryPath (input + " " + args);
   tw.setTwinToolPath (twintool);
   tw.setPinLauncherPath (pin);
   tw.setTwinBinaryPath (twin);
@@ -86,16 +92,17 @@ int run (bool verbose, string input, string twintool, string pin, string twin) {
   return 0;
 }
 
-ArgumentsParsingStatus parseArguments (int argc, char *argv[], bool &verbose,
-    string &input, string &twintool, string &pin, string &twin) {
+ArgumentsParsingStatus parseArguments (int argc, char *argv[],
+    string &input, string &args, string &twintool, string &pin, string &twin) {
   char *progName = argv[0];
 
   const ArgParser::Option options[] = {
     { 'h', "help", ArgParser::NO, "display this help message and exit", false},
     { 'V', "version", ArgParser::NO, "output version number string and exit", false},
-    { 'v', "verbose", ArgParser::NO, "verbose operation", false},
+    { 'v', "verbose", ArgParser::YES, "verbose operation", false},
     { 'L', "license", ArgParser::NO, "output license information and exit", false},
     { 'i', "input", ArgParser::YES, "input obfuscated binary file", true},
+    { 'a', "args", ArgParser::YES, "arguments for input binary file", false},
     { 't', "tool", ArgParser::YES, "twintool executable/library file", true},
     { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true},
     { 'o', "output", ArgParser::YES, "path/name of the generated twin binary", true},
@@ -113,19 +120,26 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[], bool &verbose,
     }
     switch (code) {
     case 'h':
-      printHelp (progName, options, verbose);
+      printHelp (progName, options);
       return EXIT_NORMALLY;
     case 'V':
       printVersion ();
       return EXIT_NORMALLY;
     case 'v':
-      verbose = true;
+      if (!edu::sharif::twinner::util::Logger::setVerbosenessLevel
+          (parser.argument (argind))) {
+        printError (progName, "undefined verboseness level: " + parser.argument (argind));
+        return ERROR_OCCURRED;
+      }
       break;
     case 'L':
-      printLicense (verbose);
+      printLicense ();
       return EXIT_NORMALLY;
     case 'i':
       input = parser.argument (argind);
+      break;
+    case 'a':
+      args = parser.argument (argind);
       break;
     case 't':
       twintool = parser.argument (argind);
@@ -153,7 +167,7 @@ void printVersion () {
   cout << VERSION_NUMBER << endl;
 }
 
-void printHelp (string progName, const ArgParser::Option options[], bool verbose) {
+void printHelp (string progName, const ArgParser::Option options[]) {
   cout << "Twinner: An unpacker which utilizes concolic execution." << endl;
   cout << "Copyright © 2013  Behnam Momeni" << endl;
   cout << endl;
@@ -177,7 +191,7 @@ void printHelp (string progName, const ArgParser::Option options[], bool verbose
   }
 }
 
-void printLicense (bool verbose) {
+void printLicense () {
   cout << "Twinner: An unpacker which utilizes concolic execution." << endl;
   cout << "Copyright © 2013  Behnam Momeni" << endl;
   cout << endl;
