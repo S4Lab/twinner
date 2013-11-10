@@ -17,6 +17,8 @@
 
 #include <utility>
 #include <stdexcept>
+#include <fstream>
+#include <string.h>
 
 namespace edu {
 namespace sharif {
@@ -139,6 +141,32 @@ void ExecutionTraceSegment::setSymbolicExpressionImplementation (
 
 void ExecutionTraceSegment::addPathConstraint (const Constraint *c) {
   pathConstraint.push_back (c);
+}
+
+void ExecutionTraceSegment::saveToBinaryStream (std::ofstream &out) const {
+  const char *segmentMagicString = "SEG";
+  out.write (segmentMagicString, 3);
+
+  saveMapToBinaryStream (out, "REG", registerToExpression);
+  saveMapToBinaryStream (out, "MEM", memoryAddressToExpression);
+  saveListToBinaryStream (out, "CON", pathConstraint);
+}
+
+template <typename ADDRESS>
+void ExecutionTraceSegment::saveMapToBinaryStream (std::ofstream &out,
+    const char *magicString, const std::map < ADDRESS, Expression * > map) const {
+  out.write (magicString, strlen (magicString));
+
+  typename std::map < ADDRESS, Expression * >::size_type s = map.size ();
+  out.write ((const char *) &s, sizeof (s));
+  for (typename std::map < ADDRESS, Expression * >::const_iterator it = map.begin ();
+      it != map.end (); ++it) {
+    const ADDRESS a = it->first;
+    out.write ((const char *) &a, sizeof (a));
+
+    const Expression *exp = it->second;
+    exp->saveToBinaryStream (out);
+  }
 }
 
 }

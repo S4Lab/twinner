@@ -141,7 +141,16 @@ void Trace::saveToFile (const char *path) const {
         " (error in open function)\n";
     return;
   }
-  //TODO: Implement...
+  if (currentSegmentIterator != segments.begin ()) {
+    edu::sharif::twinner::util::Logger::warning () << "Some unvisited segments are found"
+        " at front of the segments list\n";
+  }
+  saveToBinaryStream (out);
+  out.close ();
+}
+
+void Trace::saveToBinaryStream (std::ofstream &out) const {
+  saveListToBinaryStream (out, "TRA", segments);
 }
 
 /**

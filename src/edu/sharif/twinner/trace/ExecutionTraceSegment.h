@@ -50,6 +50,8 @@ public:
 
   virtual void addPathConstraint (const Constraint *c);
 
+  virtual void saveToBinaryStream (std::ofstream &out) const;
+
 private:
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
@@ -61,6 +63,10 @@ private:
   template < typename KEY >
   void setSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
       const KEY key, const Expression *exp);
+
+  template <typename ADDRESS>
+  void saveMapToBinaryStream (std::ofstream &out,
+      const char *magicString, const std::map < ADDRESS, Expression * > map) const;
 };
 
 }

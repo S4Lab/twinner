@@ -117,6 +117,8 @@ public:
   void saveToFile (const char *path) const;
   static Trace *loadFromFile (const char *path);
 
+  virtual void saveToBinaryStream (std::ofstream &out) const;
+
 private:
   ExecutionTraceSegment *getCurrentTraceSegment () const;
 

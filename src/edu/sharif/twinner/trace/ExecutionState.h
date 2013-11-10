@@ -15,6 +15,8 @@
 
 #include "pin.H"
 
+#include "Savable.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -40,7 +42,7 @@ public:
  * symbolic expressions living in memory addresses or registers and path constraints,
  * are kept and can be reported.
  */
-class ExecutionState {
+class ExecutionState : public Savable {
 
 protected:
 
