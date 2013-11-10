@@ -30,8 +30,13 @@ class Symbol : public Operand {
 protected:
   UINT64 concreteValue;
   /**
-   * Different values can be stored at the same memory address (as they can be changed by syscalls).
-   * This index, starting from zero, indicates which symbol is stored there.
+   * Different values can be stored at the same memory address (as they can be changed
+   * by syscalls). This index, starting from zero, indicates which symbol is stored there.
+   * Value zero, means that symbol was generated before first syscall. Value one, means
+   * after first syscal but before second syscall.
+   * Generating more than one symbol, at the same address, without any intermediary
+   * syscall, is an error (indicating that some user space assembly instructions are not
+   * instrumented).
    */
   int generationIndex;
 

@@ -20,6 +20,8 @@
 #include "Syscall.h"
 #include "ExecutionTraceSegment.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -27,6 +29,8 @@ namespace trace {
 
 Trace::Trace () {
   segments.push_front (new ExecutionTraceSegment ());
+  currentSegmentIterator = segments.begin ();
+  currentSegmentIndex = 0;
 }
 
 Trace::~Trace () {
@@ -54,9 +58,9 @@ template < typename T >
 Expression *Trace::tryToGetSymbolicExpressionImplementation (T address, UINT64 val,
     typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
 throw (WrongStateException) {
-  for (std::list < ExecutionTraceSegment * >::iterator it = segments.begin ();
+  for (std::list < ExecutionTraceSegment * >::iterator it = currentSegmentIterator;
       it != segments.end (); ++it) {
-    // searches segments starting from the most recent one
+    // searches segments starting from the current towards the oldest one
     ExecutionTraceSegment *seg = *it;
     Expression *exp = (seg->*method) (address, val);
     if (exp) {
@@ -97,10 +101,17 @@ Expression *Trace::getSymbolicExpressionImplementation (T address, UINT64 val,
     }
   } catch (const WrongStateException &e) {
   }
-  // instantiate and set a new expression in the most recent segment
-  int index = ++generationIndices[address];
+  // instantiate and set a new expression in the current segment
+  typename std::map < T, int >::iterator it = generationIndices.find (address);
+  if (it == generationIndices.end () || it->second < currentSegmentIndex) {
+    generationIndices[address] = currentSegmentIndex;
+
+  } else {
+    throw std::runtime_error ("Value of an address changed unexpectedly"
+                              " without any interfering syscall");
+  }
   if (!newExpression) {
-    newExpression = new Expression (address, val, index);
+    newExpression = new Expression (address, val, currentSegmentIndex);
   }
   return (getCurrentTraceSegment ()->*getMethod) (address, val, newExpression);
 }
@@ -143,7 +154,7 @@ Trace *Trace::loadFromFile (const char *path) {
 }
 
 ExecutionTraceSegment *Trace::getCurrentTraceSegment () const {
-  return segments.front ();
+  return *currentSegmentIterator;
 }
 
 }

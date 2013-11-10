@@ -29,18 +29,42 @@ class ExecutionTraceSegment;
 class Trace : public ExecutionState {
 
 private:
-  // TODO: Add an iterator pointing to current segment instead of depending on the head of the list.
-  // With an iterator, it's possible to create future segments and set symbols/expressions there, without
-  // being worried that which segment is representing the current execution state.
-  std::list < ExecutionTraceSegment * > segments;
   /**
-   * The last used index (starting from one) for each symbol
+   * Most recent segment is kept at front of list.
+   * Newer segments should be push_front()ed.
+   */
+  std::list < ExecutionTraceSegment * > segments;
+
+  /*
+   * With an iterator, it's possible to create future segments and
+   * set symbols/expressions there, without being worried that which segment
+   * is representing the current execution state.
+   * The past is segments.last() -> current
+   * Future is current -> segments.front()
+   */
+  std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator;
+
+  /**
+   * This index indicates current generation starting from zero. This should not be
+   * confused with an index in segments list (as segments list is in reverse order).
+   * This generation index matches with values kept in
+   * memoryResidentSymbolsGenerationIndices and registerResidentSymbolsGenerationIndices.
+   */
+  int currentSegmentIndex;
+
+  /**
+   * The last used index (starting from zero) for each symbol
    * which was created at a given memory address is kept here.
+   * A new expression may emerge out of an address iff either there is no stored index
+   * for that address or the stored index is less than current generation/segment index.
    */
   std::map < ADDRINT, int > memoryResidentSymbolsGenerationIndices;
+
   /**
-   * The last used index (starting from one) for each symbol
+   * The last used index (starting from zero) for each symbol
    * which was created in a given register is kept here.
+   * A new expression may emerge out of an address iff either there is no stored index
+   * for that address or the stored index is less than current generation/segment index.
    */
   std::map < REG, int > registerResidentSymbolsGenerationIndices;
 

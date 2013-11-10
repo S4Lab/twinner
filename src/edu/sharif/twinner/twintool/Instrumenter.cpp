@@ -18,6 +18,8 @@
 
 #include "InstructionSymbolicExecuter.h"
 
+#include "edu/sharif/twinner/trace/Trace.h"
+
 #include "edu/sharif/twinner/util/Logger.h"
 
 using namespace std;
@@ -352,8 +354,9 @@ void Instrumenter::aboutToExit (INT32 code) {
 
 void Instrumenter::printInstructionsStatisticsInfo () const {
   int countOfIgnoredInstructions = totalCountOfInstructions;
-  for (std::map < OPCODE, int >::iterator it = countOfInstructionsPerOpcode.begin ();
-      it != countOfInstructionsPerOpcode.end (); ++it) {
+  for (std::map < OPCODE, int >::const_iterator it =
+      countOfInstructionsPerOpcode.begin (); it != countOfInstructionsPerOpcode.end ();
+      ++it) {
     int op = it->first;
     int c = it->second;
     edu::sharif::twinner::util::Logger::info ()

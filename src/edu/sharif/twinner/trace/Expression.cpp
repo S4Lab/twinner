@@ -86,6 +86,7 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
     stack.push_back (token);
   }
   stack.push_back (op);
+  // FIXME: Update lastConcreteValue
 }
 
 Expression *Expression::clone () const {
