@@ -13,6 +13,8 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 
+#include "Savable.h"
+
 #include "Operator.h"
 
 #include "pin.H"
@@ -24,7 +26,7 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-class Expression {
+class Expression : public Savable {
 
 private:
   /**
@@ -74,6 +76,8 @@ public:
   void binaryOperation (Operator *op, const Expression *exp);
 
   Expression *clone () const;
+
+  virtual void saveToBinaryStream (std::ofstream &out) const;
 };
 
 }

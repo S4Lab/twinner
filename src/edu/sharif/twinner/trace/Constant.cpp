@@ -29,6 +29,11 @@ Constant *Constant::clone () const {
   return new Constant (*this);
 }
 
+void Constant::saveToBinaryStream (std::ofstream &out) const {
+  out.write ("CONS", 4);
+  out.write ((const char *) &value, sizeof (value));
+}
+
 }
 }
 }

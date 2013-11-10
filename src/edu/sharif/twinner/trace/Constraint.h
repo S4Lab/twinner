@@ -13,16 +13,17 @@
 #ifndef CONSTRAINT_H
 #define CONSTRAINT_H
 
+#include "Savable.h"
+
 #include "Expression.h"
 #include "Constant.h"
-
 
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-class Constraint {
+class Constraint : public Savable {
 
 public:
 
@@ -50,7 +51,10 @@ public:
    * @param type Indicates the (in)equality which exp should satisfy it.
    */
   Constraint (const Expression *exp, ComparisonType type);
+
   ~Constraint ();
+
+  virtual void saveToBinaryStream (std::ofstream &out) const;
 };
 
 }

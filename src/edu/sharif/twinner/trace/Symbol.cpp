@@ -25,6 +25,12 @@ Symbol::Symbol (const Symbol &s) :
 Operand (s), concreteValue (s.concreteValue), generationIndex (s.generationIndex) {
 }
 
+void Symbol::saveToBinaryStream (std::ofstream &out) const {
+  out.write ("SYMB", 4);
+  out.write ((const char *) &concreteValue, sizeof (concreteValue));
+  out.write ((const char *) &generationIndex, sizeof (generationIndex));
+}
+
 }
 }
 }

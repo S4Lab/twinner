@@ -13,6 +13,7 @@
 #include "Expression.h"
 
 #include <stdexcept>
+#include <fstream>
 
 #include "RegisterEmergedSymbol.h"
 #include "MemoryEmergedSymbol.h"
@@ -91,6 +92,11 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
 
 Expression *Expression::clone () const {
   return new Expression (*this);
+}
+
+void Expression::saveToBinaryStream (std::ofstream &out) const {
+  saveListToBinaryStream (out, "EXP", stack);
+  out.write ((const char *) &lastConcreteValue, sizeof (lastConcreteValue));
 }
 
 }

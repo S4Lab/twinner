@@ -43,6 +43,8 @@ protected:
   Symbol (UINT64 concreteValue, int generationIndex);
 
   Symbol (const Symbol &s);
+
+  virtual void saveToBinaryStream (std::ofstream &out) const;
 };
 
 }

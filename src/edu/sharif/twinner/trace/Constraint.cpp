@@ -13,6 +13,7 @@
 #include "Constraint.h"
 
 #include <stdexcept>
+#include <fstream>
 
 namespace edu {
 namespace sharif {
@@ -25,6 +26,11 @@ exp (_exp->clone ()), type (_type) {
 
 Constraint::~Constraint () {
   delete exp;
+}
+
+void Constraint::saveToBinaryStream (std::ofstream &out) const {
+  exp->saveToBinaryStream (out);
+  out.write ((const char *) &type, sizeof (type));
 }
 
 }

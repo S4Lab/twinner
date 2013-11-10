@@ -38,6 +38,8 @@ public:
   Operator (OperatorIdentifier);
 
   virtual Operator *clone () const;
+
+  virtual void saveToBinaryStream (std::ofstream &out) const;
 };
 
 }

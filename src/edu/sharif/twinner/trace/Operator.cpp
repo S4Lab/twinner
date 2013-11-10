@@ -10,6 +10,8 @@
  * This file is part of Twinner project.
  */
 
+#include <fstream>
+
 #include "Operator.h"
 
 namespace edu {
@@ -27,6 +29,11 @@ ExpressionToken (op), oi (op.oi) {
 
 Operator *Operator::clone () const {
   return new Operator (*this);
+}
+
+void Operator::saveToBinaryStream (std::ofstream &out) const {
+  out.write ("OPR", 3);
+  out.write ((const char *) &oi, sizeof (oi));
 }
 
 }

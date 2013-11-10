@@ -35,6 +35,8 @@ public:
   Constant (UINT64 val);
 
   virtual Constant *clone () const;
+
+  virtual void saveToBinaryStream (std::ofstream &out) const;
 };
 
 }

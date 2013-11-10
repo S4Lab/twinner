@@ -13,6 +13,8 @@
 #ifndef EXPRESSIONTOKEN_H_
 #define EXPRESSIONTOKEN_H_
 
+#include "Savable.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -21,7 +23,7 @@ namespace trace {
 /**
  * @interface
  */
-class ExpressionToken {
+class ExpressionToken : public Savable {
 
 protected:
 
