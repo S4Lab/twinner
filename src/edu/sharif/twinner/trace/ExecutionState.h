@@ -20,6 +20,10 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace util {
+
+class Logger;
+}
 namespace trace {
 
 class Expression;
@@ -162,6 +166,39 @@ public:
    * @param c The constraint which is being added.
    */
   virtual void addPathConstraint (const Constraint *c) = 0;
+
+  /**
+   * Prints values of all registers (both symbolic and concrete values). Only registers
+   * which were get/set and so are being considered by this object will be printed.
+   * @param logger The logger which registers values will be printed in it.
+   */
+  virtual void printRegistersValues (
+      const edu::sharif::twinner::util::Logger &logger) const = 0;
+
+  /**
+   * Prints all values which are kept at any memory address (both symbolic and concrete
+   * values). Only memory addresses which were get/set and so are being considered by
+   * this object will be printed.
+   * @param logger The logger which memory addresses values will be printed in it.
+   */
+  virtual void printMemoryAddressesValues (
+      const edu::sharif::twinner::util::Logger &logger) const = 0;
+
+
+  /**
+   * Prints list of path constraints which are added to this object.
+   * @param logger The logger which added path constraints will be printed in it.
+   */
+  virtual void printPathConstraints (
+      const edu::sharif::twinner::util::Logger &logger) const = 0;
+
+  /**
+   * Prints complete state of this object, including registers, memory addresses, and
+   * path constraints into the logger.
+   * @param logger The logger which complete state of this object will be printed in it.
+   */
+  virtual void printCompleteState (
+      const edu::sharif::twinner::util::Logger &logger) const = 0;
 };
 
 }
