@@ -144,18 +144,23 @@ public:
    * in given register. It takes ownership of the cloned object.
    *
    * @param reg The register which its value is being set.
-   * @param exp The expression which will be cloned and will determine new value of given register.
+   * @param exp The expression which will be cloned and will determine new value of
+   * given register.
+   * @return The cloned expression which is set in given register will be returned.
    */
-  virtual void setSymbolicExpressionByRegister (REG reg, const Expression *exp) = 0;
+  virtual Expression *setSymbolicExpressionByRegister (REG reg,
+      const Expression *exp) = 0;
 
   /**
    * The setter clones given expression and stores it as the new value living
    * in given memory address. It takes ownership of the cloned object.
    *
    * @param memoryEa The memory effective address which its value is being set.
-   * @param exp The expression which will be cloned and will determine new value of given memory address.
+   * @param exp The expression which will be cloned and will determine new value of
+   * given memory address.
+   * @return The cloned expression which is set at given address will be returned.
    */
-  virtual void setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       const Expression *exp) = 0;
 
   /**

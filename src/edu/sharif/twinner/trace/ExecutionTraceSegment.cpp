@@ -115,22 +115,23 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
   return newExpression;
 }
 
-void ExecutionTraceSegment::setSymbolicExpressionByRegister (REG reg,
+Expression *ExecutionTraceSegment::setSymbolicExpressionByRegister (REG reg,
     const Expression *exp) {
-  setSymbolicExpressionImplementation (registerToExpression, reg, exp);
+  return setSymbolicExpressionImplementation (registerToExpression, reg, exp);
 }
 
-void ExecutionTraceSegment::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+Expression *ExecutionTraceSegment::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
     const Expression *exp) {
-  setSymbolicExpressionImplementation (memoryAddressToExpression, memoryEa, exp);
+  return setSymbolicExpressionImplementation (memoryAddressToExpression, memoryEa, exp);
 }
 
 template < typename KEY >
-void ExecutionTraceSegment::setSymbolicExpressionImplementation (
+Expression *ExecutionTraceSegment::setSymbolicExpressionImplementation (
     std::map < KEY, Expression * > &map, const KEY key,
     const Expression *nonOwnedExpression) {
   typedef typename std::map < KEY, Expression * >::iterator MapIterator;
-  // The nonOwnedExpression is owned by caller. We must clone it and take ownership of the cloned object.
+  // The nonOwnedExpression is owned by caller.
+  // We must clone it and take ownership of the cloned object.
   Expression *exp = nonOwnedExpression->clone ();
   std::pair < MapIterator, bool > res = map.insert (make_pair (key, exp));
   if (!res.second) { // another expression already exists. overwriting...
@@ -139,6 +140,7 @@ void ExecutionTraceSegment::setSymbolicExpressionImplementation (
     delete it->second;
     it->second = exp;
   }
+  return exp;
 }
 
 void ExecutionTraceSegment::addPathConstraint (const Constraint *c) {

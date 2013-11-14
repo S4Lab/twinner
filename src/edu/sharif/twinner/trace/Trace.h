@@ -99,12 +99,12 @@ public:
   /**
    * The setter, uses most recent trace segment for setting the new value.
    */
-  virtual void setSymbolicExpressionByRegister (REG reg, const Expression *exp);
+  virtual Expression *setSymbolicExpressionByRegister (REG reg, const Expression *exp);
 
   /**
    * The setter, uses most recent trace segment for setting the new value.
    */
-  virtual void setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       const Expression *exp);
 
   /**

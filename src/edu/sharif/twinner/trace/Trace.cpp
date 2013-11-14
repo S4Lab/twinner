@@ -125,13 +125,13 @@ Expression *Trace::getSymbolicExpressionImplementation (T address, UINT64 val,
   return (getCurrentTraceSegment ()->*getMethod) (address, val, newExpression);
 }
 
-void Trace::setSymbolicExpressionByRegister (REG reg, const Expression *exp) {
-  getCurrentTraceSegment ()->setSymbolicExpressionByRegister (reg, exp);
+Expression *Trace::setSymbolicExpressionByRegister (REG reg, const Expression *exp) {
+  return getCurrentTraceSegment ()->setSymbolicExpressionByRegister (reg, exp);
 }
 
-void Trace::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+Expression *Trace::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
     const Expression *exp) {
-  getCurrentTraceSegment ()->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
+  return getCurrentTraceSegment ()->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
 }
 
 void Trace::addPathConstraint (const Constraint *c) {

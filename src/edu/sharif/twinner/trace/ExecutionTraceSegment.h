@@ -44,8 +44,8 @@ public:
   virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       UINT64 memval, Expression *newExpression);
 
-  virtual void setSymbolicExpressionByRegister (REG reg, const Expression *exp);
-  virtual void setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *setSymbolicExpressionByRegister (REG reg, const Expression *exp);
+  virtual Expression *setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       const Expression *exp);
 
   virtual void addPathConstraint (const Constraint *c);
@@ -61,7 +61,7 @@ private:
   Expression *getSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
       const KEY key, UINT64 currentConcreteValue, Expression *newExpression);
   template < typename KEY >
-  void setSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
+  Expression *setSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
       const KEY key, const Expression *exp);
 
   template <typename ADDRESS>
