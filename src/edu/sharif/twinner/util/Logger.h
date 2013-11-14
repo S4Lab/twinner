@@ -13,12 +13,25 @@
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
+#include "pin.H"
+
 #include <iostream>
+#include <map>
+#include <list>
 
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace trace {
+
+class Expression;
+class Constraint;
+}
 namespace util {
+
+class Logger;
+
+extern const Logger &operator<< (const Logger &logger, REG reg);
 
 class Logger {
 
@@ -37,16 +50,45 @@ public:
   Logger (bool enabled);
   ~Logger ();
 
-  template < typename T >
-  Logger &operator<< (const T &t) {
-    if (enabled) {
-      std::cout << t;
-    }
-    return *this;
+  template <typename KEY, typename VALUE>
+  const Logger &operator<< (const std::map < KEY, VALUE > map) const;
+
+  template <typename VALUE>
+  const Logger &operator<< (const std::list < VALUE > map) const;
+
+  const Logger &operator<< (const edu::sharif::twinner::trace::Expression *exp) const;
+  const Logger &operator<< (const edu::sharif::twinner::trace::Constraint *c) const;
+
+  inline const Logger &operator<< (const std::string &t) const {
+    return actualWrite (t);
   }
 
-  template < typename T >
-  const Logger &operator<< (const T &t) const {
+  inline const Logger &operator<< (const char t) const {
+    return actualWrite (t);
+  }
+
+  inline const Logger &operator<< (const char *t) const {
+    return actualWrite (t);
+  }
+
+  inline const Logger &operator<< (const int t) const {
+    return actualWrite (t);
+  }
+
+  inline const Logger &operator<< (const unsigned int t) const {
+    return actualWrite (t);
+  }
+
+  inline const Logger &operator<< (const long unsigned int t) const {
+    return actualWrite (t);
+  }
+
+  inline const Logger &operator<< (const double t) const {
+    return actualWrite (t);
+  }
+
+  template <typename T>
+  const Logger &actualWrite (const T &t) const {
     if (enabled) {
       std::cout << t;
     }
@@ -66,6 +108,34 @@ public:
   static bool setVerbosenessLevel (const std::string &verboseStr);
   static const char *getVerbosenessLevelAsString ();
 };
+
+template <typename KEY, typename VALUE>
+const edu::sharif::twinner::util::Logger &Logger::operator<< (
+    const std::map < KEY, VALUE > map) const {
+  if (enabled) {
+    for (typename std::map < KEY, VALUE >::const_iterator it = map.begin ();
+        it != map.end (); ++it) {
+      const KEY k = it->first;
+      const VALUE v = it->second;
+
+      (*this) << "Key(" << k << ") => Value(" << v << ")\n";
+    }
+  }
+  return *this;
+}
+
+template <typename VALUE>
+const edu::sharif::twinner::util::Logger &Logger::operator<< (
+    const std::list < VALUE > map) const {
+  if (enabled) {
+    for (typename std::list < VALUE >::const_iterator it = map.begin ();
+        it != map.end (); ++it) {
+      const VALUE v = *it;
+      (*this) << v;
+    }
+  }
+  return *this;
+}
 
 }
 }

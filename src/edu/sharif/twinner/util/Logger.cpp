@@ -12,6 +12,9 @@
 
 #include "Logger.h"
 
+#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/Constraint.h"
+
 #include <stdexcept>
 
 namespace edu {
@@ -85,6 +88,16 @@ const char *Logger::getVerbosenessLevelAsString () {
   default:
     throw std::runtime_error ("Verboseness level is corrupted");
   }
+}
+
+const Logger &Logger::operator<< (
+    const edu::sharif::twinner::trace::Expression *exp) const {
+  return (*this) << "Expression(" << exp->toString () << ")";
+}
+
+const Logger &Logger::operator<< (
+    const edu::sharif::twinner::trace::Constraint *c) const {
+  return (*this) << c->toString ();
 }
 
 }
