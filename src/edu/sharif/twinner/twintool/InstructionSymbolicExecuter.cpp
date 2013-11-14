@@ -188,6 +188,7 @@ void InstructionSymbolicExecuter::addAnalysisRoutine (
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::ADD), srcexp);
+  dst.valueIsChanged ();
   //TODO: set rflags
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -208,6 +209,7 @@ void InstructionSymbolicExecuter::subAnalysisRoutine (
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
+  dst.valueIsChanged ();
   //TODO: set rflags
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
