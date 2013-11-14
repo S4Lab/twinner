@@ -35,11 +35,10 @@ symbolsFilePath (_symbolsFilePath), traceFilePath (_traceFilePath),
 justAnalyzeMainRoutine (_justAnalyzeMainRoutine),
 ise (new InstructionSymbolicExecuter ()),
 totalCountOfInstructions (0) {
-  if (!(edu::sharif::twinner::util::Logger::debug ()
-      << "Instrumenter class created [verboseness level: debug]\n")) {
-    edu::sharif::twinner::util::Logger::info ()
-        << "Instrumenter class created [verboseness level: info]\n";
-  }
+
+  edu::sharif::twinner::util::Logger::info ()
+      << "Instrumenter class created [verboseness level: "
+      << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n";
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOV, COMMON_INS_MODELS));
   // TODO: handle more types (data ranges), then add real support for sign/zero extension
@@ -202,6 +201,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
     break;
   }
@@ -212,6 +212,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_MEMORYOP_EA, 0,
+                    IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
     break;
   }
@@ -222,6 +223,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_ADDRINT, INS_OperandImmediate (ins, 1),
+                    IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
     break;
   }
@@ -232,6 +234,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
     break;
   }
@@ -241,6 +244,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_ADDRINT, INS_OperandImmediate (ins, 1),
+                    IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
 
     break;
@@ -252,6 +256,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
     break;
   }
@@ -261,6 +266,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_ADDRINT, INS_OperandImmediate (ins, 0),
+                    IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
 
     break;
@@ -271,6 +277,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 1,
                     IARG_MEMORYOP_EA, 0,
+                    IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
     break;
   }
@@ -280,6 +287,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_MEMORYOP_EA, 1,
+                    IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
     break;
   }
@@ -288,6 +296,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineConditionalBranch,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_BRANCH_TAKEN,
+                    IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
     break;
   }
@@ -302,9 +311,9 @@ void Instrumenter::printDebugInformation (INS ins) const {
   bool isMemoryWrite = INS_IsMemoryWrite (ins);
   bool isOriginal = INS_IsOriginal (ins);
   UINT32 countOfOperands = INS_OperandCount (ins);
-  debug << "Instrumenting assembly instruction: " << INS_Disassemble (ins) << '\n'
-      << "\t--> Count of operands: " << countOfOperands << '\n'
-      << "\t--> Count of memory operands: " << INS_MemoryOperandCount (ins) << '\n'
+  debug << "Instrumenting assembly instruction: " << INS_Disassemble (ins)
+      << "\n\t--> Count of operands: " << countOfOperands
+      << "\n\t--> Count of memory operands: " << INS_MemoryOperandCount (ins) << '\n'
       << (isMemoryRead ? "\t--> Reading from memory\n" : "")
       << (isMemoryWrite ? "\t--> Writing to memory\n" : "")
       << (!isOriginal ? "\t--> NON-ORIGINAL instruction!\n" : "");

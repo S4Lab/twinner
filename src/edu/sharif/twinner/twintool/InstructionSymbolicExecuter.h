@@ -50,24 +50,30 @@ private:
 public:
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
       REG dstReg, UINT64 dstRegVal,
-      REG srcReg, UINT64 srcRegVal);
+      REG srcReg, UINT64 srcRegVal,
+      INS ins);
   void analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
       REG dstReg, UINT64 dstRegVal,
-      ADDRINT srcMemoryEa);
+      ADDRINT srcMemoryEa,
+      INS ins);
   void analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
       REG dstReg, UINT64 dstRegVal,
-      ADDRINT srcImmediateValue);
+      ADDRINT srcImmediateValue,
+      INS ins);
   void analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
-      REG srcReg, UINT64 srcRegVal);
+      REG srcReg, UINT64 srcRegVal,
+      INS ins);
   void analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
-      ADDRINT srcImmediateValue);
+      ADDRINT srcImmediateValue,
+      INS ins);
   void analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
-      ADDRINT srcMemoryEa);
+      ADDRINT srcMemoryEa,
+      INS ins);
   void analysisRoutineConditionalBranch (ConditionalBranchAnalysisRoutine routine,
-      BOOL branchTaken);
+      BOOL branchTaken, INS ins);
 
 private:
 
@@ -130,24 +136,24 @@ public:
 
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
-    UINT32 srcReg, ADDRINT srcRegVal);
+    UINT32 srcReg, ADDRINT srcRegVal, UINT32 ins);
 VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
-    ADDRINT srcMemoryEa);
+    ADDRINT srcMemoryEa, UINT32 ins);
 VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
-    ADDRINT srcImmediateValue);
+    ADDRINT srcImmediateValue, UINT32 ins);
 VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
-    UINT32 srcReg, ADDRINT srcRegVal);
+    UINT32 srcReg, ADDRINT srcRegVal, UINT32 ins);
 VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
-    ADDRINT srcImmediateValue);
+    ADDRINT srcImmediateValue, UINT32 ins);
 VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
-    ADDRINT srcMemoryEa);
+    ADDRINT srcMemoryEa, UINT32 ins);
 VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
-    BOOL branchTaken);
+    BOOL branchTaken, UINT32 ins);
 
 }
 }
