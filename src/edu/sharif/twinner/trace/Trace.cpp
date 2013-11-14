@@ -47,6 +47,11 @@ throw (WrongStateException) {
        &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
 }
 
+Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg) {
+  return tryToGetSymbolicExpressionImplementation
+      (reg, &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
+}
+
 Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
     UINT64 memval) throw (WrongStateException) {
   return tryToGetSymbolicExpressionImplementation
@@ -70,10 +75,34 @@ throw (WrongStateException) {
   return 0;
 }
 
+template < typename T >
+Expression *Trace::tryToGetSymbolicExpressionImplementation (T address,
+    typename TryToGetSymbolicExpressionMethod < T >::
+    TraceSegmentTypeWithoutConcreteValue method) {
+  for (std::list < ExecutionTraceSegment * >::iterator it = currentSegmentIterator;
+      it != segments.end (); ++it) {
+    // searches segments starting from the current towards the oldest one
+    ExecutionTraceSegment *seg = *it;
+    Expression *exp = (seg->*method) (address);
+    if (exp) {
+      return exp;
+    }
+  }
+  return 0;
+}
+
 Expression *Trace::getSymbolicExpressionByRegister (REG reg, UINT64 regval,
     Expression *newExpression) {
   return getSymbolicExpressionImplementation
       (reg, regval, newExpression,
+       &Trace::tryToGetSymbolicExpressionByRegister,
+       registerResidentSymbolsGenerationIndices,
+       &ExecutionTraceSegment::getSymbolicExpressionByRegister);
+}
+
+Expression *Trace::getSymbolicExpressionByRegister (REG reg, Expression *newExpression) {
+  return getSymbolicExpressionImplementation
+      (reg, newExpression,
        &Trace::tryToGetSymbolicExpressionByRegister,
        registerResidentSymbolsGenerationIndices,
        &ExecutionTraceSegment::getSymbolicExpressionByRegister);
@@ -123,6 +152,39 @@ Expression *Trace::getSymbolicExpressionImplementation (T address, UINT64 val,
     newExpression = new Expression (address, val, currentSegmentIndex);
   }
   return (getCurrentTraceSegment ()->*getMethod) (address, val, newExpression);
+}
+
+template < typename T >
+Expression *Trace::getSymbolicExpressionImplementation (T address,
+    Expression *newExpression,
+    typename TryToGetSymbolicExpressionMethod < T >
+    ::TraceTypeWithoutConcreteValue tryToGetMethod,
+    std::map < T, int > &generationIndices,
+    typename GetSymbolicExpressionMethod < T >::
+    TraceSegmentTypeWithoutConcreteValue getMethod) {
+  Expression *exp = (this->*tryToGetMethod) (address);
+  if (exp) {
+    return exp;
+  }
+  // instantiate and set a new expression in the current segment
+  typename std::map < T, int >::iterator it = generationIndices.find (address);
+  if (it == generationIndices.end () || it->second < currentSegmentIndex) {
+    generationIndices[address] = currentSegmentIndex;
+
+  } else {
+    // as there was no expression (regardless of concrete value), this case is impossible!
+    throw std::runtime_error ("Trace::getSymbolicExpressionImplementation (...) method: "
+                              "generation index is set while there is no expression!");
+  }
+  if (!newExpression) {
+    /*
+     * This getter, which ignores concrete value, is only called when the returned
+     * expression is going to be set immediately. So previous value was random and
+     * not significant. Thus we can use 0 as concrete value of instantiated expression.
+     */
+    newExpression = new Expression (address, 0, currentSegmentIndex);
+  }
+  return (getCurrentTraceSegment ()->*getMethod) (address, newExpression);
 }
 
 Expression *Trace::setSymbolicExpressionByRegister (REG reg, const Expression *exp) {

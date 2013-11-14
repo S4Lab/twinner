@@ -80,12 +80,24 @@ public:
    *
    * @param reg The register which its value is returned.
    * @param regval The concrete value which currently lives in given register.
-   * @return symbolic expression which is living in given register at current state or 0 if there is no such expression.
+   * @return symbolic expression which is living in given register at current state
+   * or 0/null if there is no such expression.
    *
-   * @except Throws a WrongStateException, if the last concrete value of the reg's corresponding expression differs from expected @c regval value.
+   * @except Throws a WrongStateException, if the last concrete value of the reg's
+   * corresponding expression differs from expected @c regval value.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
   throw (WrongStateException) = 0;
+
+  /**
+   * Overload of tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval) method.
+   * This overload does not take care of concrete values.
+   * 
+   * @param reg The register which its value is returned.
+   * @return symbolic expression which is living in given register at current state
+   * or 0/null if there is no such expression.
+   */
+  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg) = 0;
 
   /**
    * The getter returns current value stored in one memory address.
@@ -117,6 +129,20 @@ public:
    * @return symbolic expression which is living in register at current state.
    */
   virtual Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
+      Expression *newExpression) = 0;
+
+  /**
+   * Overload of getSymbolicExpressionByRegister (REG reg, UINT64 regval, Expression *newExpression)
+   * method. This overload is used when the regval is irrelevant. So if there is any
+   * expression kept in asked register, it will be returned and only when no expression,
+   * regardless of its last concrete value, were being kept in asked register, a new
+   * symbol will be created.
+   * 
+   * @param reg The register which its value is returned.
+   * @param newExpression The expression which will be set if there was no current value.
+   * @return symbolic expression which is living in register at current state.
+   */
+  virtual Expression *getSymbolicExpressionByRegister (REG reg,
       Expression *newExpression) = 0;
 
   /**

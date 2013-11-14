@@ -81,6 +81,11 @@ public:
   /**
    * Searches backwards to find queried values.
    */
+  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg);
+
+  /**
+   * Searches backwards to find queried values.
+   */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       UINT64 memval) throw (WrongStateException);
 
@@ -88,6 +93,12 @@ public:
    * The getter searches segments backwards to find queried value.
    */
   virtual Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
+      Expression *newExpression = 0);
+
+  /**
+   * The getter searches segments backwards to find queried value.
+   */
+  virtual Expression *getSymbolicExpressionByRegister (REG reg,
       Expression *newExpression = 0);
 
   /**
@@ -127,7 +138,10 @@ private:
 
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address,
         UINT64 val);
+    typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
+        T address);
     typedef Expression *(Trace::*TraceType) (T address, UINT64 val);
+    typedef Expression *(Trace::*TraceTypeWithoutConcreteValue) (T address);
   };
 
   template < typename T >
@@ -135,12 +149,18 @@ private:
 
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address, UINT64 val,
         Expression *newExpression);
+    typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
+        T address, Expression *newExpression);
   };
 
   template < typename T >
   Expression *tryToGetSymbolicExpressionImplementation (T address, UINT64 val,
       typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
   throw (WrongStateException);
+  template < typename T >
+  Expression *tryToGetSymbolicExpressionImplementation (T address,
+      typename TryToGetSymbolicExpressionMethod < T >::
+      TraceSegmentTypeWithoutConcreteValue method);
 
   template < typename T >
   Expression *getSymbolicExpressionImplementation (T address, UINT64 val,
@@ -148,6 +168,15 @@ private:
       typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
       std::map < T, int > &generationIndices,
       typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod);
+
+  template < typename T >
+  Expression *getSymbolicExpressionImplementation (T address,
+      Expression *newExpression,
+      typename TryToGetSymbolicExpressionMethod < T >::
+      TraceTypeWithoutConcreteValue tryToGetMethod,
+      std::map < T, int > &generationIndices,
+      typename GetSymbolicExpressionMethod < T >::
+      TraceSegmentTypeWithoutConcreteValue getMethod);
 
 public:
   virtual void printRegistersValues (

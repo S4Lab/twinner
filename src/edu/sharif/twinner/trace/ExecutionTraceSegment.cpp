@@ -54,6 +54,10 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg
   return tryToGetSymbolicExpressionImplementation (registerToExpression, reg, regval);
 }
 
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg) {
+  return tryToGetSymbolicExpressionImplementation (registerToExpression, reg);
+}
+
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (
     ADDRINT memoryEa, UINT64 memval) throw (WrongStateException) {
   return tryToGetSymbolicExpressionImplementation
@@ -76,9 +80,26 @@ throw (WrongStateException) {
   }
 }
 
+template < typename KEY >
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
+    std::map < KEY, Expression * > &map, const KEY key) const {
+  typename std::map < KEY, Expression * >::iterator it = map.find (key);
+  if (it == map.end ()) { // not found!
+    return 0;
+  } else {
+    return it->second;
+  }
+}
+
 Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg,
     UINT64 regval, Expression *newExpression) {
   return getSymbolicExpressionImplementation (registerToExpression, reg, regval,
+                                              newExpression);
+}
+
+Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg,
+    Expression *newExpression) {
+  return getSymbolicExpressionImplementation (registerToExpression, reg,
                                               newExpression);
 }
 
@@ -111,6 +132,31 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
     MapIterator it = res.first;
     delete it->second;
     it->second = newExpression;
+  }
+  return newExpression;
+}
+
+template < typename KEY >
+Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
+    std::map < KEY, Expression * > &map, const KEY key,
+    Expression *newExpression) {
+  typedef typename std::map < KEY, Expression * >::iterator MapIterator;
+  Expression *exp = tryToGetSymbolicExpressionImplementation
+      (map, key);
+  if (exp) {
+    return exp;
+  }
+  if (!newExpression) {
+    throw std::runtime_error
+        ("ExecutionTraceSegment::getSymbolicExpressionImplementation method: "
+         "newExpression is null!");
+  }
+  std::pair < MapIterator, bool > res = map.insert (make_pair (key, newExpression));
+  if (!res.second) {
+    // as there was no expression (regardless of concrete value), this case is impossible!
+    throw std::runtime_error
+        ("ExecutionTraceSegment::getSymbolicExpressionImplementation method: "
+         "can not set expression, while there was no prior expression!");
   }
   return newExpression;
 }
