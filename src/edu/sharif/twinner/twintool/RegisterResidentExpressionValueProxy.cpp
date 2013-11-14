@@ -58,6 +58,8 @@ void RegisterResidentExpressionValueProxy::putExpressionInLeastSignificantBitsOf
 void RegisterResidentExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
     edu::sharif::twinner::trace::Expression *changedExp) const {
+  edu::sharif::twinner::util::Logger::loquacious () << "(register value is changed to "
+      << changedExp << ")\n";
   edu::sharif::twinner::trace::Expression *ax = changedExp;
   edu::sharif::twinner::trace::Expression *temp;
   switch (reg) {

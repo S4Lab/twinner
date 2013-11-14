@@ -54,7 +54,7 @@ public:
       INS ins);
   void analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
       REG dstReg, UINT64 dstRegVal,
-      ADDRINT srcMemoryEa,
+      ADDRINT srcMemoryEa, UINT32 memReadBytes,
       INS ins);
   void analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
       REG dstReg, UINT64 dstRegVal,
@@ -70,7 +70,7 @@ public:
       INS ins);
   void analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
-      ADDRINT srcMemoryEa,
+      ADDRINT srcMemoryEa, UINT32 memReadBytes,
       INS ins);
   void analysisRoutineConditionalBranch (ConditionalBranchAnalysisRoutine routine,
       BOOL branchTaken, INS ins);
@@ -136,24 +136,31 @@ public:
 
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
-    UINT32 srcReg, ADDRINT srcRegVal, UINT32 ins);
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 ins);
 VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
-    ADDRINT srcMemoryEa, UINT32 ins);
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    UINT32 ins);
 VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
-    ADDRINT srcImmediateValue, UINT32 ins);
+    ADDRINT srcImmediateValue,
+    UINT32 ins);
 VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
-    UINT32 srcReg, ADDRINT srcRegVal, UINT32 ins);
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 ins);
 VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
-    ADDRINT srcImmediateValue, UINT32 ins);
+    ADDRINT srcImmediateValue,
+    UINT32 ins);
 VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
-    ADDRINT srcMemoryEa, UINT32 ins);
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    UINT32 ins);
 VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
-    BOOL branchTaken, UINT32 ins);
+    BOOL branchTaken,
+    UINT32 ins);
 
 }
 }

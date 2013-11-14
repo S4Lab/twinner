@@ -10,11 +10,15 @@
  * This file is part of Twinner project.
  */
 
+#include <stdexcept>
+
 #include "MemoryResidentExpressionValueProxy.h"
 
 #include "InstructionSymbolicExecuter.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
+
+#include "edu/sharif/twinner/util/Logger.h"
 
 namespace edu {
 namespace sharif {
@@ -22,15 +26,35 @@ namespace twinner {
 namespace twintool {
 
 MemoryResidentExpressionValueProxy::MemoryResidentExpressionValueProxy (
-    ADDRINT _memoryEa) :
-memoryEa (_memoryEa) {
+    ADDRINT _memoryEa, int _memReadBytes) :
+memoryEa (_memoryEa), memReadBytes (_memReadBytes) {
 }
 
 edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::getExpression (
     edu::sharif::twinner::trace::Trace *trace) const {
-  return trace->getSymbolicExpressionByMemoryAddress
-      (memoryEa, InstructionSymbolicExecuter::readMemoryContent (memoryEa));
+  if (memReadBytes < 0) {
+    throw std::runtime_error
+        ("For getting an expression from memory, "
+         "memReadBytes must be provided to the constructor of expression proxy class.");
+  }
+  UINT64 val = InstructionSymbolicExecuter::readMemoryContent (memoryEa);
+  switch (memReadBytes) {
+  case 8:
+    break; // no cast is required in 64-bits mode
+  case 4:
+    val = (UINT32) val;
+    break;
+  case 2:
+    val = (UINT16) val;
+    break;
+  case 1:
+    val = (UINT8) val;
+    break;
+  default:
+    throw std::runtime_error ("Invalid mem read bytes size in expression proxy class");
+  }
+  return trace->getSymbolicExpressionByMemoryAddress (memoryEa, val);
 }
 
 void MemoryResidentExpressionValueProxy::setExpression (
@@ -44,6 +68,8 @@ void MemoryResidentExpressionValueProxy::setExpression (
 void MemoryResidentExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
     edu::sharif::twinner::trace::Expression *changedExp) const {
+  edu::sharif::twinner::util::Logger::loquacious () << "(memory value is changed to "
+      << changedExp << ")\n";
   // TODO: implement
 }
 

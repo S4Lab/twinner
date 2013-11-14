@@ -26,8 +26,9 @@ class MemoryResidentExpressionValueProxy : public MutableExpressionValueProxy {
 
 public:
   ADDRINT memoryEa;
+  int memReadBytes;
 
-  MemoryResidentExpressionValueProxy (ADDRINT memoryEa);
+  MemoryResidentExpressionValueProxy (ADDRINT memoryEa, int memReadBytes = -1);
 
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const;

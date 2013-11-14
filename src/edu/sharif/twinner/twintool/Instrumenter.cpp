@@ -211,7 +211,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMem,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
-                    IARG_MEMORYOP_EA, 0,
+                    IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
     break;
@@ -276,7 +276,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMem,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 1,
-                    IARG_MEMORYOP_EA, 0,
+                    IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
     break;
@@ -286,7 +286,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMem,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
-                    IARG_MEMORYOP_EA, 1,
+                    IARG_MEMORYOP_EA, 1, IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, (UINT32) ins.q (),
                     IARG_END);
     break;

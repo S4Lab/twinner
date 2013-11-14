@@ -53,14 +53,15 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
-    ADDRINT srcMemoryEa,
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
     INS ins) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcMem(INS: "
-      << INS_Disassemble (ins) << "): Registers:\n";
+      << INS_Disassemble (ins) << "): src mem addr: " << srcMemoryEa <<
+      ", mem read bytes: " << memReadBytes << ". Registers:\n";
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      MemoryResidentExpressionValueProxy (srcMemoryEa));
+      MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
   trace->printRegistersValues (logger);
 }
 
@@ -87,7 +88,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcReg(INS: "
-      << INS_Disassemble (ins) << "): Registers:\n";
+      << INS_Disassemble (ins) << "): dst mem addr: " << dstMemoryEa << ". Registers:\n";
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
       RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   trace->printRegistersValues (logger);
@@ -111,14 +112,14 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
 
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
-    ADDRINT srcMemoryEa,
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
     INS ins) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcMem(INS: "
       << INS_Disassemble (ins) << "): Registers:\n";
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
-      MemoryResidentExpressionValueProxy (srcMemoryEa));
+      MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
   trace->printRegistersValues (logger);
 }
 
@@ -137,11 +138,11 @@ void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
 void InstructionSymbolicExecuter::movAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "movAnalysisRoutine(...)\n"
-      << "\tgetting src exp";
+      << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting dst exp";
+      << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -150,11 +151,11 @@ void InstructionSymbolicExecuter::movAnalysisRoutine (
 void InstructionSymbolicExecuter::pushAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "pushAnalysisRoutine(...)\n"
-      << "\tgetting src exp";
+      << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting dst exp";
+      << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -163,11 +164,11 @@ void InstructionSymbolicExecuter::pushAnalysisRoutine (
 void InstructionSymbolicExecuter::popAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "popAnalysisRoutine(...)\n"
-      << "\tgetting src exp";
+      << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting dst exp";
+      << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -176,15 +177,15 @@ void InstructionSymbolicExecuter::popAnalysisRoutine (
 void InstructionSymbolicExecuter::addAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "addAnalysisRoutine(...)\n"
-      << "\tgetting src exp";
+      << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp";
+      << "\tgetting dst exp...";
   edu::sharif::twinner::trace::Expression *dstexp =
       dst.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tbinary operation";
+      << "\tbinary operation...";
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::ADD), srcexp);
@@ -197,15 +198,15 @@ void InstructionSymbolicExecuter::addAnalysisRoutine (
 void InstructionSymbolicExecuter::subAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "subAnalysisRoutine(...)\n"
-      << "\tgetting src exp";
+      << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp";
+      << "\tgetting dst exp...";
   edu::sharif::twinner::trace::Expression *dstexp =
       dst.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tbinary operation";
+      << "\tbinary operation...";
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
@@ -218,22 +219,22 @@ void InstructionSymbolicExecuter::subAnalysisRoutine (
 void InstructionSymbolicExecuter::cmpAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "cmpAnalysisRoutine(...)\n"
-      << "\tgetting src exp";
+      << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp";
+      << "\tgetting dst exp...";
   const edu::sharif::twinner::trace::Expression *dstexp =
       dst.getExpression (trace);
 
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tbinary operation";
+      << "\tbinary operation...";
   edu::sharif::twinner::trace::Expression *tmpexp = dstexp->clone ();
   tmpexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting EFLAGS";
+      << "\tsetting EFLAGS...";
   eflags.setFlags (tmpexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -241,7 +242,7 @@ void InstructionSymbolicExecuter::cmpAnalysisRoutine (
 
 void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jnzAnalysisRoutine(...)\n"
-      << "\tinstantiating constraint";
+      << "\tinstantiating constraint...";
   edu::sharif::twinner::trace::Constraint *cc
       = new edu::sharif::twinner::trace::Constraint
       (eflags.getFlagsUnderlyingExpression (),
@@ -249,7 +250,7 @@ void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
        edu::sharif::twinner::trace::Constraint::NON_ZERO :
        edu::sharif::twinner::trace::Constraint::ZERO);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tadding constraint";
+      << "\tadding constraint...";
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -294,13 +295,14 @@ InstructionSymbolicExecuter::convertOpcodeToConditionalBranchAnalysisRoutine (
 
 UINT64 InstructionSymbolicExecuter::readMemoryContent (ADDRINT memoryEa) {
   UINT64 currentConcreteValue;
-  PIN_SafeCopy (&currentConcreteValue, (const VOID*) (memoryEa), sizeof (UINT64));
+  PIN_SafeCopy (&currentConcreteValue, (const VOID *) (memoryEa), sizeof (UINT64));
   return currentConcreteValue;
 }
 
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
-    UINT32 srcReg, ADDRINT srcRegVal, UINT32 ins) {
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 ins) {
   INS inss;
   inss.q_set ((INT32) ins);
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
@@ -311,18 +313,21 @@ VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
 
 VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
-    ADDRINT srcMemoryEa, UINT32 ins) {
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    UINT32 ins) {
   INS inss;
   inss.q_set ((INT32) ins);
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcMem (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     (REG) dstReg, dstRegVal,
-                                    srcMemoryEa, inss);
+                                    srcMemoryEa, memReadBytes,
+                                    inss);
 }
 
 VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
-    ADDRINT srcImmediateValue, UINT32 ins) {
+    ADDRINT srcImmediateValue,
+    UINT32 ins) {
   INS inss;
   inss.q_set ((INT32) ins);
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
@@ -333,7 +338,8 @@ VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
 
 VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
-    UINT32 srcReg, ADDRINT srcRegVal, UINT32 ins) {
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 ins) {
   INS inss;
   inss.q_set ((INT32) ins);
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
@@ -344,7 +350,8 @@ VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
 
 VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
-    ADDRINT srcImmediateValue, UINT32 ins) {
+    ADDRINT srcImmediateValue,
+    UINT32 ins) {
   INS inss;
   inss.q_set ((INT32) ins);
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
@@ -355,17 +362,20 @@ VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
 
 VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
-    ADDRINT srcMemoryEa, UINT32 ins) {
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    UINT32 ins) {
   INS inss;
   inss.q_set ((INT32) ins);
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstMemSrcMem (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     dstMemoryEa,
-                                    srcMemoryEa, inss);
+                                    srcMemoryEa, memReadBytes,
+                                    inss);
 }
 
 VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
-    BOOL branchTaken, UINT32 ins) {
+    BOOL branchTaken,
+    UINT32 ins) {
   INS inss;
   inss.q_set ((INT32) ins);
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
