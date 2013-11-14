@@ -55,6 +55,8 @@ public:
   ~Constraint ();
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
+
+  std::string toString () const;
 };
 
 }

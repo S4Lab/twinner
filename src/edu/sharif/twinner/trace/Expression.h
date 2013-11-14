@@ -24,6 +24,10 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace util {
+
+class Logger;
+}
 namespace trace {
 
 class Expression : public Savable {
@@ -62,7 +66,9 @@ public:
 
   UINT64 getLastConcreteValue () const;
 
-  void toString () const;
+  std::string toString () const;
+  void convertToInfixExpression (std::list < ExpressionToken * > &st,
+      std::stringstream &ss) const;
 
   void unaryOperation (Operator op, Expression exp);
 

@@ -12,6 +12,8 @@
 
 #include "Constraint.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
+
 #include <stdexcept>
 #include <fstream>
 
@@ -31,6 +33,24 @@ Constraint::~Constraint () {
 void Constraint::saveToBinaryStream (std::ofstream &out) const {
   exp->saveToBinaryStream (out);
   out.write ((const char *) &type, sizeof (type));
+}
+
+std::string Constraint::toString () const {
+  const char *t;
+  switch (type) {
+  case POSITIVE:
+    t = " > 0";
+  case NEGATIVE:
+    t = " < 0";
+  case ZERO:
+    t = " = 0";
+  case NON_ZERO:
+    t = " != 0";
+  default:
+    return "Unknown comparison type";
+  }
+  std::string str = exp->toString () + t;
+  return str;
 }
 
 }

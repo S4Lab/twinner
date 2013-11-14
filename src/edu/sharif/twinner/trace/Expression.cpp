@@ -14,6 +14,9 @@
 
 #include <stdexcept>
 #include <fstream>
+#include <sstream>
+
+#include "edu/sharif/twinner/util/Logger.h"
 
 #include "RegisterEmergedSymbol.h"
 #include "MemoryEmergedSymbol.h"
@@ -59,8 +62,17 @@ UINT64 Expression::getLastConcreteValue () const {
   return lastConcreteValue;
 }
 
-void Expression::toString () const {
-  throw std::runtime_error ("Expression::toString: Not yet implemented");
+std::string Expression::toString () const {
+  std::list < ExpressionToken * > st = std::list < ExpressionToken * > (stack);
+  std::stringstream ss;
+  convertToInfixExpression (st, ss);
+  ss << "/*0x" << std::hex << lastConcreteValue << "*/";
+  return ss.str ();
+}
+
+void Expression::convertToInfixExpression (std::list < ExpressionToken * > &st,
+    std::stringstream &ss) const {
+  ss << "not-implemented";
 }
 
 void Expression::unaryOperation (Operator op, Expression exp) {
