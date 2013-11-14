@@ -29,7 +29,9 @@ edu::sharif::twinner::trace::Expression *ConstantExpressionValueProxy::getExpres
   return exp;
 }
 
-void ConstantExpressionValueProxy::valueIsChanged () const {
+void ConstantExpressionValueProxy::valueIsChanged (
+    edu::sharif::twinner::trace::Trace *trace,
+    edu::sharif::twinner::trace::Expression *changedExp) const {
   throw std::runtime_error ("Constant expression is not supposed to be changed");
 }
 

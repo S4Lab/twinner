@@ -33,11 +33,14 @@ RegisterResidentExpressionValueProxy::getExpression (
 void RegisterResidentExpressionValueProxy::setExpression (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression *exp) const {
-  trace->setSymbolicExpressionByRegister (reg, exp);
-  valueIsChanged ();
+  edu::sharif::twinner::trace::Expression *newExp =
+      trace->setSymbolicExpressionByRegister (reg, exp);
+  valueIsChanged (trace, newExp);
 }
 
-void RegisterResidentExpressionValueProxy::valueIsChanged () const {
+void RegisterResidentExpressionValueProxy::valueIsChanged (
+    edu::sharif::twinner::trace::Trace *trace,
+    edu::sharif::twinner::trace::Expression *changedExp) const {
   // TODO: Implement
 }
 

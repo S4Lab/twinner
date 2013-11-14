@@ -34,7 +34,9 @@ public:
   virtual void setExpression (edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const;
 
-  virtual void valueIsChanged () const;
+  virtual void valueIsChanged (
+      edu::sharif::twinner::trace::Trace *trace,
+      edu::sharif::twinner::trace::Expression *changedExp) const;
 };
 
 }

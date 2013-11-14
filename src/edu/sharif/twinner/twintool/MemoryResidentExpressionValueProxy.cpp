@@ -36,11 +36,14 @@ MemoryResidentExpressionValueProxy::getExpression (
 void MemoryResidentExpressionValueProxy::setExpression (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression *exp) const {
-  trace->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
-  valueIsChanged ();
+  edu::sharif::twinner::trace::Expression *newExp =
+      trace->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
+  valueIsChanged (trace, newExp);
 }
 
-void MemoryResidentExpressionValueProxy::valueIsChanged () const {
+void MemoryResidentExpressionValueProxy::valueIsChanged (
+    edu::sharif::twinner::trace::Trace *trace,
+    edu::sharif::twinner::trace::Expression *changedExp) const {
   // TODO: implement
 }
 
