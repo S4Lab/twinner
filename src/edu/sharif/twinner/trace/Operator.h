@@ -15,6 +15,8 @@
 
 #include "ExpressionToken.h"
 
+#include "pin.H"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -40,6 +42,8 @@ public:
   virtual Operator *clone () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
+
+  UINT64 apply (UINT64 a, UINT64 b) const;
 };
 
 }
