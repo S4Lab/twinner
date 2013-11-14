@@ -38,6 +38,12 @@ public:
   virtual ~MutableExpressionValueProxy () {
   }
 
+  /**
+   * Sets the proxied expression as the given exp value within the given execution trace.
+   * This method will call valueIsChanged method by itself.
+   * @param trace The execution trace which changing expression will be saved there.
+   * @param exp The new expression which should be set over the proxied expression.
+   */
   virtual void setExpression (edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const = 0;
 };

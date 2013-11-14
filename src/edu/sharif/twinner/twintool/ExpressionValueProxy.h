@@ -46,11 +46,17 @@ public:
   /**
    * Returns expression. This call may have side-effects.
    * Returned expression can be changed (dependent on logic of proxied expression).
+   * BTW, if returned expression get changed, the caller must call valueIsChanged method.
    * @param trace Trace object which this expression will be resolved upon it.
    * @return The expression object.
    */
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const = 0;
+
+  /**
+   * This method should be called whenever the proxied expression undergoes any change.
+   */
+  virtual void valueIsChanged () const = 0;
 };
 
 }

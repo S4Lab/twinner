@@ -10,6 +10,8 @@
  * This file is part of Twinner project.
  */
 
+#include <stdexcept>
+
 #include "ConstantExpressionValueProxy.h"
 
 namespace edu {
@@ -25,6 +27,10 @@ exp (_exp) {
 edu::sharif::twinner::trace::Expression *ConstantExpressionValueProxy::getExpression (
     edu::sharif::twinner::trace::Trace *trace) const {
   return exp;
+}
+
+void ConstantExpressionValueProxy::valueIsChanged () const {
+  throw std::runtime_error ("Constant expression is not supposed to be changed");
 }
 
 }

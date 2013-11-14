@@ -37,6 +37,11 @@ void MemoryResidentExpressionValueProxy::setExpression (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression *exp) const {
   trace->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
+  valueIsChanged ();
+}
+
+void MemoryResidentExpressionValueProxy::valueIsChanged () const {
+  // TODO: implement
 }
 
 }
