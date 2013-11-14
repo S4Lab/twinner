@@ -87,6 +87,10 @@ public:
     return actualWrite (t);
   }
 
+  inline const Logger &operator<< (ios_base &(*func)(ios_base &)) const {
+    return actualWrite (func);
+  }
+
   template <typename T>
   const Logger &actualWrite (const T &t) const {
     if (enabled) {
