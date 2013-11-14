@@ -68,7 +68,7 @@ throw (WrongStateException) {
   } else {
     Expression *exp = it->second;
     if (exp->getLastConcreteValue () != concreteVal) {
-      throw WrongStateException ();
+      throw WrongStateException (exp->getLastConcreteValue ());
     }
     return exp;
   }

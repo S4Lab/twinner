@@ -88,18 +88,25 @@ Expression *Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa, UINT6
        &ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress);
 }
 
+extern void throw_exception_about_unexpected_change_in_memory_or_register_address
+(REG reg, UINT64 expectedVal, UINT64 currentVal);
+extern void throw_exception_about_unexpected_change_in_memory_or_register_address
+(ADDRINT address, UINT64 expectedVal, UINT64 currentVal);
+
 template < typename T >
 Expression *Trace::getSymbolicExpressionImplementation (T address, UINT64 val,
     Expression *newExpression,
     typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
     std::map < T, int > &generationIndices,
     typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod) {
+  UINT64 currentValue = -1;
   try {
     Expression *exp = (this->*tryToGetMethod) (address, val);
     if (exp) {
       return exp;
     }
   } catch (const WrongStateException &e) {
+    currentValue = e.getCurrentStateValue ();
   }
   // instantiate and set a new expression in the current segment
   typename std::map < T, int >::iterator it = generationIndices.find (address);
@@ -107,8 +114,8 @@ Expression *Trace::getSymbolicExpressionImplementation (T address, UINT64 val,
     generationIndices[address] = currentSegmentIndex;
 
   } else {
-    throw std::runtime_error ("Value of an address changed unexpectedly"
-                              " without any interfering syscall");
+    throw_exception_about_unexpected_change_in_memory_or_register_address
+        (address, val, currentValue);
   }
   if (!newExpression) {
     newExpression = new Expression (address, val, currentSegmentIndex);

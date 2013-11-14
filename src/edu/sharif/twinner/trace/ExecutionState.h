@@ -30,10 +30,21 @@ class Constraint;
  */
 class WrongStateException : public std::exception {
 
+private:
+  UINT64 currentValue;
+
 public:
+
+  WrongStateException (UINT64 _currentValue) :
+      currentValue (_currentValue) {
+  }
 
   const char *what () const throw () {
     return "Execution state differ from what we expected (probably, user space memory is changed by a syscall).";
+  }
+
+  UINT64 getCurrentStateValue () const {
+    return currentValue;
   }
 };
 
