@@ -28,7 +28,7 @@ class ExecutionTraceSegment : public ExecutionState {
 private:
   std::map < REG, Expression * > registerToExpression;
   std::map < ADDRINT, Expression * > memoryAddressToExpression;
-  std::list< const Constraint * > pathConstraint;
+  std::list < const Constraint * > pathConstraint;
 
 public:
   ExecutionTraceSegment ();
@@ -67,6 +67,16 @@ private:
   template <typename ADDRESS>
   void saveMapToBinaryStream (std::ofstream &out,
       const char *magicString, const std::map < ADDRESS, Expression * > map) const;
+
+public:
+  virtual void printRegistersValues (
+      const edu::sharif::twinner::util::Logger &logger) const;
+  virtual void printMemoryAddressesValues (
+      const edu::sharif::twinner::util::Logger &logger) const;
+  virtual void printPathConstraints (
+      const edu::sharif::twinner::util::Logger &logger) const;
+  virtual void printCompleteState (
+      const edu::sharif::twinner::util::Logger &logger) const;
 };
 
 }

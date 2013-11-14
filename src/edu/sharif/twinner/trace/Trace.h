@@ -148,6 +148,16 @@ private:
       typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
       std::map < T, int > &generationIndices,
       typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod);
+
+public:
+  virtual void printRegistersValues (
+      const edu::sharif::twinner::util::Logger &logger) const;
+  virtual void printMemoryAddressesValues (
+      const edu::sharif::twinner::util::Logger &logger) const;
+  virtual void printPathConstraints (
+      const edu::sharif::twinner::util::Logger &logger) const;
+  virtual void printCompleteState (
+      const edu::sharif::twinner::util::Logger &logger) const;
 };
 
 }

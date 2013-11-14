@@ -114,6 +114,8 @@ Expression *Trace::getSymbolicExpressionImplementation (T address, UINT64 val,
     generationIndices[address] = currentSegmentIndex;
 
   } else {
+    getCurrentTraceSegment ()->printRegistersValues
+        (edu::sharif::twinner::util::Logger::loquacious ());
     throw_exception_about_unexpected_change_in_memory_or_register_address
         (address, val, currentValue);
   }
@@ -171,6 +173,50 @@ Trace *Trace::loadFromFile (const char *path) {
 
 ExecutionTraceSegment *Trace::getCurrentTraceSegment () const {
   return *currentSegmentIterator;
+}
+
+void Trace::printRegistersValues (
+    const edu::sharif::twinner::util::Logger &logger) const {
+  int i = 0;
+  for (std::list < ExecutionTraceSegment * >::const_iterator it = currentSegmentIterator;
+      it != segments.end (); ++it) {
+    const ExecutionTraceSegment *seg = *it;
+    logger << "Segment #" << i++ << '\n';
+    seg->printRegistersValues (logger);
+  }
+}
+
+void Trace::printMemoryAddressesValues (
+    const edu::sharif::twinner::util::Logger &logger) const {
+  int i = 0;
+  for (std::list < ExecutionTraceSegment * >::const_iterator it = currentSegmentIterator;
+      it != segments.end (); ++it) {
+    const ExecutionTraceSegment *seg = *it;
+    logger << "Segment #" << i++;
+    seg->printMemoryAddressesValues (logger);
+  }
+}
+
+void Trace::printPathConstraints (
+    const edu::sharif::twinner::util::Logger &logger) const {
+  int i = 0;
+  for (std::list < ExecutionTraceSegment * >::const_iterator it = currentSegmentIterator;
+      it != segments.end (); ++it) {
+    const ExecutionTraceSegment *seg = *it;
+    logger << "Segment #" << i++;
+    seg->printPathConstraints (logger);
+  }
+}
+
+void Trace::printCompleteState (
+    const edu::sharif::twinner::util::Logger &logger) const {
+  int i = 0;
+  for (std::list < ExecutionTraceSegment * >::const_iterator it = currentSegmentIterator;
+      it != segments.end (); ++it) {
+    const ExecutionTraceSegment *seg = *it;
+    logger << "Segment #" << i++;
+    seg->printCompleteState (logger);
+  }
 }
 
 }

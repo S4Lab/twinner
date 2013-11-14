@@ -15,6 +15,8 @@
 #include "Expression.h"
 #include "Constraint.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
+
 #include <utility>
 #include <stdexcept>
 #include <fstream>
@@ -168,6 +170,32 @@ void ExecutionTraceSegment::saveMapToBinaryStream (std::ofstream &out,
     exp->saveToBinaryStream (out);
   }
 }
+
+void ExecutionTraceSegment::printRegistersValues (
+    const edu::sharif::twinner::util::Logger &logger) const {
+  logger << registerToExpression;
+}
+
+void ExecutionTraceSegment::printMemoryAddressesValues (
+    const edu::sharif::twinner::util::Logger &logger) const {
+  logger << memoryAddressToExpression;
+}
+
+void ExecutionTraceSegment::printPathConstraints (
+    const edu::sharif::twinner::util::Logger &logger) const {
+  logger << pathConstraint;
+}
+
+void ExecutionTraceSegment::printCompleteState (
+    const edu::sharif::twinner::util::Logger &logger) const {
+  logger << "Registers:\n";
+  printRegistersValues (logger);
+  logger << "Memory:\n";
+  printMemoryAddressesValues (logger);
+  logger << "Constraints:\n";
+  printPathConstraints (logger);
+}
+
 
 }
 }
