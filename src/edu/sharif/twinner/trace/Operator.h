@@ -28,7 +28,11 @@ public:
 
   enum OperatorIdentifier {
 
-    ADD, MINUS, MULTIPLY, DIVIDE, NEGATE, XOR, BITWISE_AND
+    ADD, MINUS,
+    MULTIPLY, DIVIDE,
+    NEGATE,
+    XOR,
+    BITWISE_AND, BITWISE_OR
   };
 
 private:

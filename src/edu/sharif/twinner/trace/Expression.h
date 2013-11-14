@@ -81,6 +81,30 @@ public:
    */
   void binaryOperation (Operator *op, const Expression *exp);
 
+  /**
+   * Truncates the expression to occupy at most a given count of bits.
+   * @param bits Count of bits that this expression should be truncated to be fitted in.
+   */
+  void truncate (int bits);
+
+  /**
+   * Shifts the expression to right as much as the given count of bits.
+   * @param bits Count of bits that this expression should be shifted upon to right.
+   */
+  void shiftToRight (int bits);
+
+  /**
+   * Shifts the expression to left as much as the given count of bits.
+   * @param bits Count of bits that this expression should be shifted upon to left.
+   */
+  void shiftToLeft (int bits);
+
+  /**
+   * Sets the given count of bits, from least significant bits, to zero.
+   * @param bits Count of least significant bits which should be set to zero.
+   */
+  void makeLeastSignificantBitsZero (int bits);
+
   Expression *clone () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;

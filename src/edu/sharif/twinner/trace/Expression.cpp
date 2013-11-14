@@ -102,6 +102,40 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
   lastConcreteValue = op->apply (lastConcreteValue, exp->lastConcreteValue);
 }
 
+void Expression::truncate (int bits) {
+  UINT64 mask = 1;
+  mask <<= bits;
+  mask--;
+  stack.push_back (new Constant (mask));
+  stack.push_back (new Operator (Operator::BITWISE_AND));
+  lastConcreteValue &= mask;
+}
+
+void Expression::shiftToRight (int bits) {
+  UINT64 val = 1;
+  val <<= bits; // shift-to-right by n bits is equivalent to division by 2^n
+  stack.push_back (new Constant (val));
+  stack.push_back (new Operator (Operator::DIVIDE));
+  lastConcreteValue >>= bits;
+}
+
+void Expression::shiftToLeft (int bits) {
+  UINT64 val = 1;
+  val <<= bits; // shift-to-left by n bits is equivalent to multiplication by 2^n
+  stack.push_back (new Constant (val));
+  stack.push_back (new Operator (Operator::MULTIPLY));
+  lastConcreteValue <<= bits;
+}
+
+void Expression::makeLeastSignificantBitsZero (int bits) {
+  UINT64 mask = 1;
+  mask <<= bits;
+  mask = ~(mask - 1);
+  stack.push_back (new Constant (mask));
+  stack.push_back (new Operator (Operator::BITWISE_AND));
+  lastConcreteValue &= mask;
+}
+
 Expression *Expression::clone () const {
   return new Expression (*this);
 }

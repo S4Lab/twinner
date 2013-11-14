@@ -39,6 +39,12 @@ public:
   virtual void valueIsChanged (
       edu::sharif::twinner::trace::Trace *trace,
       edu::sharif::twinner::trace::Expression *changedExp) const;
+
+private:
+  void putExpressionInLeastSignificantBitsOfRegister (
+      edu::sharif::twinner::trace::Trace *trace,
+      REG r, int bits,
+      edu::sharif::twinner::trace::Expression *exp) const;
 };
 
 }
