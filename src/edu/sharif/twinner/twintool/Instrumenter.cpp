@@ -67,7 +67,11 @@ totalCountOfInstructions (0) {
   managedInstructions.insert
       (make_pair (XED_ICLASS_CALL_NEAR, CALL_INS_MODELS));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_RET_NEAR, RET_INS_MODELS));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_CALL_FAR, CALL_INS_MODELS));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_RET_FAR, RET_INS_MODELS));
 }
 
 Instrumenter::~Instrumenter () {
@@ -150,7 +154,8 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
     case XED_CATEGORY_COND_BR:
       return JMP_CC_INS_MODELS;
     case XED_CATEGORY_CALL:
-      return CALL_INS_MODELS;
+    case XED_CATEGORY_RET:
+      return DST_RSP_SRC_CALL;
     default:
       return getInstructionModelForNormalInstruction (ins);
     }
@@ -341,9 +346,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_END);
     break;
   }
-  case CALL_INS_MODELS:
+  case DST_RSP_SRC_CALL:
   {
-    INS_InsertCall (ins, IPOINT_TAKEN_BRANCH, (AFUNPTR) analysisRoutineWhenCallIsInvoked,
+    INS_InsertCall (ins, IPOINT_TAKEN_BRANCH, (AFUNPTR) analysisRoutineWhenRegIsChanged,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_REG_VALUE, REG_RSP,
                     IARG_PTR, insAssembly,

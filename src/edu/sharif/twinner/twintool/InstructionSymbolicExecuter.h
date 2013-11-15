@@ -46,6 +46,8 @@ private:
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
   typedef void (InstructionSymbolicExecuter::*ConditionalBranchAnalysisRoutine) (
       bool branchTaken);
+  typedef void (InstructionSymbolicExecuter::*SuddenlyChangedRegAnalysisRoutine) (
+      UINT64 regVal);
 
 public:
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
@@ -80,7 +82,8 @@ public:
   void analysisRoutineDstRegSrcAdg (AnalysisRoutine routine,
       REG dstReg, UINT64 dstRegVal,
       std::string *insAssembly);
-  void analysisRoutineWhenCallIsInvoked (UINT64 rspRegVal, std::string *insAssembly);
+  void analysisRoutineWhenRegIsChanged (SuddenlyChangedRegAnalysisRoutine routine,
+      UINT64 regVal, std::string *insAssembly);
 
 private:
 
@@ -142,9 +145,23 @@ private:
    */
   void jnzAnalysisRoutine (bool branchTaken);
 
+  /**
+   * CALL instruction is executed and RSP is changed. This method will synchronize its
+   * symbolic value with its concrete value.
+   */
+  void callAnalysisRoutine (UINT64 rspRegVal);
+
+  /**
+   * RET instruction is executed and RSP is changed. This method will synchronize its
+   * symbolic value with its concrete value.
+   */
+  void retAnalysisRoutine (UINT64 rspRegVal);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
   ConditionalBranchAnalysisRoutine convertOpcodeToConditionalBranchAnalysisRoutine (
+      OPCODE op) const;
+  SuddenlyChangedRegAnalysisRoutine convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
       OPCODE op) const;
 
   static UINT64 readMemoryContent (ADDRINT memoryEa);
@@ -183,8 +200,8 @@ VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
 VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     VOID *insAssembly);
-VOID analysisRoutineWhenCallIsInvoked (VOID *iseptr, UINT32 opcode,
-    ADDRINT rspRegVal,
+VOID analysisRoutineWhenRegIsChanged (VOID *iseptr, UINT32 opcode,
+    ADDRINT regVal,
     VOID *insAssembly);
 
 }

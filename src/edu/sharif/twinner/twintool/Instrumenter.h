@@ -50,7 +50,10 @@ private:
 
     DST_REG_SRC_ADG = 0x0400,
 
-    CALL_INS_MODELS = 0x0800,
+    DST_RSP_SRC_CALL = 0x0800, // instructions who update RSP due to routine calls
+
+    RET_INS_MODELS = DST_RSP_SRC_CALL,
+    CALL_INS_MODELS = DST_RSP_SRC_CALL,
 
     COMMON_INS_MODELS = DST_REG_SRC_REG | DST_REG_SRC_MEM | DST_REG_SRC_IMD
     | DST_MEM_SRC_REG | DST_MEM_SRC_IMD,

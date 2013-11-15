@@ -168,27 +168,15 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
   trace->printRegistersValues (logger);
 }
 
-void InstructionSymbolicExecuter::analysisRoutineWhenCallIsInvoked (UINT64 rspRegVal,
-    std::string *insAssembly) {
+void InstructionSymbolicExecuter::analysisRoutineWhenRegIsChanged (
+    SuddenlyChangedRegAnalysisRoutine routine,
+    UINT64 regVal, std::string *insAssembly) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
-  logger << "analysisRoutineWhenCallIsInvoked(INS: "
-      << *insAssembly << ") [AFTER execution of instruction]: rsp reg value: 0x"
-      << std::hex << rspRegVal << '\n';
-  edu::sharif::twinner::trace::Expression *rsp =
-      trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
-  if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
-    UINT64 oldVal = rsp->getLastConcreteValue ();
-    if (oldVal > rspRegVal) {
-      // some items have been pushed into stack by CALL and so RSP is decremented
-      rsp->minus (oldVal - rspRegVal);
-      // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
-
-    } else {
-      edu::sharif::twinner::util::Logger::warning ()
-          << "RSP is not decremented at all after CALL instruction!\n";
-    }
-  }
+  logger << "analysisRoutineWhenRegIsChanged(INS: "
+      << *insAssembly << ") [AFTER execution of instruction]: reg value: 0x"
+      << std::hex << regVal << '\n';
+  (this->*routine) (regVal);
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -345,6 +333,40 @@ void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::callAnalysisRoutine (UINT64 rspRegVal) {
+  edu::sharif::twinner::trace::Expression *rsp =
+      trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
+  if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
+    UINT64 oldVal = rsp->getLastConcreteValue ();
+    if (oldVal > rspRegVal) {
+      // some items have been pushed into stack by CALL and so RSP is decremented
+      rsp->minus (oldVal - rspRegVal);
+      // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
+
+    } else {
+      edu::sharif::twinner::util::Logger::warning ()
+          << "RSP is not decremented at all after CALL instruction!\n";
+    }
+  }
+}
+
+void InstructionSymbolicExecuter::retAnalysisRoutine (UINT64 rspRegVal) {
+  edu::sharif::twinner::trace::Expression *rsp =
+      trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
+  if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
+    UINT64 oldVal = rsp->getLastConcreteValue ();
+    if (oldVal < rspRegVal) {
+      // some items have been popped out from the stack by RET and so RSP is incremented
+      rsp->add (rspRegVal - oldVal);
+      // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
+
+    } else {
+      edu::sharif::twinner::util::Logger::warning ()
+          << "RSP is not incremented at all after RET instruction!\n";
+    }
+  }
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -381,6 +403,24 @@ InstructionSymbolicExecuter::convertOpcodeToConditionalBranchAnalysisRoutine (
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Conditional Branch: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
     throw std::runtime_error ("Unknown opcode (for Jcc) given to analysis routine");
+  }
+}
+
+InstructionSymbolicExecuter::SuddenlyChangedRegAnalysisRoutine
+InstructionSymbolicExecuter::convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
+    OPCODE op) const {
+  switch (op) {
+  case XED_ICLASS_CALL_FAR:
+  case XED_ICLASS_CALL_NEAR:
+    return &InstructionSymbolicExecuter::callAnalysisRoutine;
+  case XED_ICLASS_RET_FAR:
+  case XED_ICLASS_RET_NEAR:
+    return &InstructionSymbolicExecuter::retAnalysisRoutine;
+  default:
+    edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
+        "Suddenly Changed Register: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
+    throw std::runtime_error
+        ("Unknown opcode (for changedReg) given to analysis routine");
   }
 }
 
@@ -506,13 +546,15 @@ VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
                                     insAssemblyStr);
 }
 
-VOID analysisRoutineWhenCallIsInvoked (VOID *iseptr, UINT32 opcode,
-    ADDRINT rspRegVal,
+VOID analysisRoutineWhenRegIsChanged (VOID *iseptr, UINT32 opcode,
+    ADDRINT regVal,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
-  ise->analysisRoutineWhenCallIsInvoked (rspRegVal,
-                                         insAssemblyStr);
+  ise->analysisRoutineWhenRegIsChanged
+      (ise->convertOpcodeToSuddenlyChangedRegAnalysisRoutine ((OPCODE) opcode),
+       regVal,
+       insAssemblyStr);
 }
 
 }
