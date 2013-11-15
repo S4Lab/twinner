@@ -166,6 +166,31 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineWhenCallIsInvoked (UINT64 rspRegVal,
+    std::string *insAssembly) {
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineWhenCallIsInvoked(INS: "
+      << *insAssembly << ") [AFTER execution of instruction]: rsp reg value: 0x"
+      << std::hex << rspRegVal << '\n';
+  edu::sharif::twinner::trace::Expression *rsp =
+      trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
+  if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
+    UINT64 oldVal = rsp->getLastConcreteValue ();
+    if (oldVal > rspRegVal) {
+      // some items have been pushed into stack by CALL and so RSP is decremented
+      rsp->minus (oldVal - rspRegVal);
+      // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
+
+    } else {
+      edu::sharif::twinner::util::Logger::warning ()
+          << "RSP is not decremented at all after CALL instruction!\n";
+    }
+  }
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::movAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "movAnalysisRoutine(...)\n"
@@ -473,6 +498,15 @@ VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineDstRegSrcAdg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     (REG) dstReg, dstRegVal,
                                     insAssemblyStr);
+}
+
+VOID analysisRoutineWhenCallIsInvoked (VOID *iseptr, UINT32 opcode,
+    ADDRINT rspRegVal,
+    VOID *insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  std::string *insAssemblyStr = (std::string *) insAssembly;
+  ise->analysisRoutineWhenCallIsInvoked (rspRegVal,
+                                         insAssemblyStr);
 }
 
 }

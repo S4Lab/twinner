@@ -78,6 +78,7 @@ public:
   void analysisRoutineDstRegSrcAdg (AnalysisRoutine routine,
       REG dstReg, UINT64 dstRegVal,
       std::string *insAssembly);
+  void analysisRoutineWhenCallIsInvoked (UINT64 rspRegVal, std::string *insAssembly);
 
 private:
 
@@ -177,6 +178,9 @@ VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
     VOID *insAssembly);
 VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
+    VOID *insAssembly);
+VOID analysisRoutineWhenCallIsInvoked (VOID *iseptr, UINT32 opcode,
+    ADDRINT rspRegVal,
     VOID *insAssembly);
 
 }
