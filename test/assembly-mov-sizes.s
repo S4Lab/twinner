@@ -4,6 +4,8 @@
 	.string	"Testing with RAX => 0x%llX\n"
 .LC1:
 	.string	"Testing with R12 => 0x%llX\n"
+.LC2:
+	.string	"Testing with RDI => 0x%llX\n"
 	.text
 	.globl	main
 	.type	main, @function
@@ -61,6 +63,25 @@ main:
 	movq	-24(%rbp), %rax
 	movq	%rax, %rsi
 	movl	$.LC1, %edi
+	movl	$0, %eax
+	call	printf
+	movabsq	$72623859790382856, %rax
+	movq	%rax, -24(%rbp)
+	movq	-24(%rbp), %rax
+	movq	%rax, %rbx
+#APP
+# 28 "assembly-mov-sizes.c" 1
+	movq %rbx, %rdi
+	movl -28(%rbp), %edi
+	movq %rdi, %rbx
+	
+# 0 "" 2
+#NO_APP
+	movq	%rbx, %rax
+	movq	%rax, -24(%rbp)
+	movq	-24(%rbp), %rax
+	movq	%rax, %rsi
+	movl	$.LC2, %edi
 	movl	$0, %eax
 	call	printf
 	movl	$0, %eax

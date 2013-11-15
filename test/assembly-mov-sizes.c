@@ -24,6 +24,14 @@ int main () {
 			: "+b" (tt) : "m" (dd), "m" (ee), "m" (ff) : "memory"
 	    );
 	printf ("Testing with R12 => 0x%llX\n", tt);
+	tt = 0x0102030405060708;
+	asm (
+			"movq %0, %%rdi\n\t"
+			"movl %1, %%edi\n\t"
+			"movq %%rdi, %0\n\t"
+			: "+b" (tt) : "m" (dd), "m" (ee), "m" (ff) : "memory"
+	    );
+	printf ("Testing with RDI => 0x%llX\n", tt);
 	return 0;
 }
 
