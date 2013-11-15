@@ -286,6 +286,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_MEMORYREAD_SIZE,
                     IARG_PTR, insAssembly,
                     IARG_END);
     break;
