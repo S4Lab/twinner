@@ -158,7 +158,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcAdg(INS: "
       << *insAssembly << ") [AFTER execution of instruction]: dst reg: "
-      << REG_StringShort (dstReg) << ", dst reg value: " << dstRegVal << '\n';
+      << REG_StringShort (dstReg) << ", dst reg value: 0x"
+      << std::hex << dstRegVal << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::Expression (dstRegVal);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
@@ -334,9 +335,13 @@ void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::callAnalysisRoutine (UINT64 rspRegVal) {
+  edu::sharif::twinner::util::Logger::loquacious () << "callAnalysisRoutine(...)\n"
+      << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
       trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tadjusting rsp...";
     UINT64 oldVal = rsp->getLastConcreteValue ();
     if (oldVal > rspRegVal) {
       // some items have been pushed into stack by CALL and so RSP is decremented
@@ -348,12 +353,17 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (UINT64 rspRegVal) {
           << "RSP is not decremented at all after CALL instruction!\n";
     }
   }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::retAnalysisRoutine (UINT64 rspRegVal) {
+  edu::sharif::twinner::util::Logger::loquacious () << "retAnalysisRoutine(...)\n"
+      << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
       trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tadjusting rsp...";
     UINT64 oldVal = rsp->getLastConcreteValue ();
     if (oldVal < rspRegVal) {
       // some items have been popped out from the stack by RET and so RSP is incremented
@@ -365,6 +375,7 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (UINT64 rspRegVal) {
           << "RSP is not incremented at all after RET instruction!\n";
     }
   }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 InstructionSymbolicExecuter::AnalysisRoutine
