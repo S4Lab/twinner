@@ -90,13 +90,14 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     REG srcReg, UINT64 srcRegVal,
+    UINT32 memReadBytes,
     std::string *insAssembly) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcReg(INS: "
       << *insAssembly << "): dst mem addr: " << dstMemoryEa
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
+  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
       RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
@@ -105,6 +106,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     ADDRINT srcImmediateValue,
+    UINT32 memReadBytes,
     std::string *insAssembly) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
@@ -113,7 +115,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
       << ", src imd: " << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::Expression (srcImmediateValue);
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
+  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
       ConstantExpressionValueProxy (srcexp));
   delete srcexp;
   logger << "Registers:\n";
@@ -446,24 +448,28 @@ VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
 VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 memReadBytes,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstMemSrcReg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     dstMemoryEa,
                                     (REG) srcReg, srcRegVal,
+                                    memReadBytes,
                                     insAssemblyStr);
 }
 
 VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     ADDRINT srcImmediateValue,
+    UINT32 memReadBytes,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstMemSrcImd (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     dstMemoryEa,
                                     srcImmediateValue,
+                                    memReadBytes,
                                     insAssemblyStr);
 }
 

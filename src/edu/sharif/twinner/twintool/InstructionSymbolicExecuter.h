@@ -63,10 +63,12 @@ public:
   void analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       REG srcReg, UINT64 srcRegVal,
+      UINT32 memReadBytes,
       std::string *insAssembly);
   void analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       ADDRINT srcImmediateValue,
+      UINT32 memReadBytes,
       std::string *insAssembly);
   void analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
@@ -164,10 +166,12 @@ VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
 VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 memReadBytes,
     VOID *insAssembly);
 VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     ADDRINT srcImmediateValue,
+    UINT32 memReadBytes,
     VOID *insAssembly);
 VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
