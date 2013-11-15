@@ -42,12 +42,21 @@ private:
     QUIET, ERROR, WARNING, INFO, DEBUG, LOQUACIOUS
   };
 
+  static const char *NORMAL_COLOR;
+  static const char *TYPE_COLOR;
+  static const char *ERROR_COLOR;
+  static const char *WARNING_COLOR;
+  static const char *INFO_COLOR;
+  static const char *DEBUG_COLOR;
+  static const char *LOQUACIOUS_COLOR;
+
   static VerbosenessLevel verbose;
 
   const bool enabled;
+  const char *color;
 
 public:
-  Logger (bool enabled);
+  Logger (bool enabled, const char *type, const char *_color);
   ~Logger ();
 
   template <typename KEY, typename VALUE>
@@ -94,7 +103,7 @@ public:
   template <typename T>
   const Logger &actualWrite (const T &t) const {
     if (enabled) {
-      std::cout << t;
+      std::cout << color << t << NORMAL_COLOR;
     }
     return *this;
   }

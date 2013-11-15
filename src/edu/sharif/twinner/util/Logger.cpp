@@ -24,8 +24,19 @@ namespace util {
 
 Logger::VerbosenessLevel Logger::verbose = Logger::WARNING;
 
-Logger::Logger (bool _enabled) :
-enabled (_enabled) {
+const char *Logger::NORMAL_COLOR = "\x1B[0m";
+const char *Logger::TYPE_COLOR = "\x1B[37;45m"; // BLACK on WHITE
+const char *Logger::ERROR_COLOR = "\x1B[31m"; // RED
+const char *Logger::WARNING_COLOR = "\x1B[33;1m"; // BOLD YELLOW
+const char *Logger::INFO_COLOR = "\x1B[33m"; // YELLOW
+const char *Logger::DEBUG_COLOR = "\x1B[32m"; // GREEN
+const char *Logger::LOQUACIOUS_COLOR = "\x1B[34m"; // BLUE
+
+Logger::Logger (bool _enabled, const char *type, const char *_color) :
+enabled (_enabled), color (_color) {
+  if (enabled) {
+    std::cout << '[' << TYPE_COLOR << type << NORMAL_COLOR << "]: ";
+  }
 }
 
 Logger::~Logger () {
@@ -33,23 +44,23 @@ Logger::~Logger () {
 }
 
 Logger Logger::error () {
-  return Logger (Logger::verbose >= Logger::ERROR);
+  return Logger (Logger::verbose >= Logger::ERROR, "ERROR", ERROR_COLOR);
 }
 
 Logger Logger::warning () {
-  return Logger (Logger::verbose >= Logger::WARNING);
+  return Logger (Logger::verbose >= Logger::WARNING, "WARNING", WARNING_COLOR);
 }
 
 Logger Logger::info () {
-  return Logger (Logger::verbose >= Logger::INFO);
+  return Logger (Logger::verbose >= Logger::INFO, "INFO", INFO_COLOR);
 }
 
 Logger Logger::debug () {
-  return Logger (Logger::verbose >= Logger::DEBUG);
+  return Logger (Logger::verbose >= Logger::DEBUG, "DEBUG", DEBUG_COLOR);
 }
 
 Logger Logger::loquacious () {
-  return Logger (Logger::verbose >= Logger::LOQUACIOUS);
+  return Logger (Logger::verbose >= Logger::LOQUACIOUS, "LOQUACIOUS", LOQUACIOUS_COLOR);
 }
 
 bool Logger::setVerbosenessLevel (const std::string &verboseStr) {

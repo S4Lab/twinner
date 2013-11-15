@@ -116,6 +116,14 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     printError ("undefined verboseness level: " + verbose.Value ());
     return false;
   }
+  /*{
+    // testing logger
+    edu::sharif::twinner::util::Logger::error () << "Testing error messages\n";
+    edu::sharif::twinner::util::Logger::warning () << "Testing warning messages\n";
+    edu::sharif::twinner::util::Logger::info () << "Testing info messages\n";
+    edu::sharif::twinner::util::Logger::debug () << "Testing debug messages\n";
+    edu::sharif::twinner::util::Logger::loquacious () << "Testing loquacious messages\n";
+  }*/
   bool justAnalyzeMainRoutine = main.Value ();
   if (justAnalyzeMainRoutine) {
     edu::sharif::twinner::util::Logger::info ()
