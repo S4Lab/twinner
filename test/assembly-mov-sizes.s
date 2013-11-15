@@ -1,7 +1,9 @@
 	.file	"assembly-mov-sizes.c"
 	.section	.rodata
 .LC0:
-	.string	"0x%llX\n"
+	.string	"Testing with RAX => 0x%llX\n"
+.LC1:
+	.string	"Testing with R12 => 0x%llX\n"
 	.text
 	.globl	main
 	.type	main, @function
@@ -38,6 +40,27 @@ main:
 	movq	-24(%rbp), %rax
 	movq	%rax, %rsi
 	movl	$.LC0, %edi
+	movl	$0, %eax
+	call	printf
+	movabsq	$72623859790382856, %rax
+	movq	%rax, -24(%rbp)
+	movq	-24(%rbp), %rax
+	movq	%rax, %rbx
+#APP
+# 18 "assembly-mov-sizes.c" 1
+	movq %rbx, %r12
+	movl -28(%rbp), %r12d
+	movw -32(%rbp), %r12w
+	movb -36(%rbp), %r12b
+	movq %r12, %rbx
+	
+# 0 "" 2
+#NO_APP
+	movq	%rbx, %rax
+	movq	%rax, -24(%rbp)
+	movq	-24(%rbp), %rax
+	movq	%rax, %rsi
+	movl	$.LC1, %edi
 	movl	$0, %eax
 	call	printf
 	movl	$0, %eax
