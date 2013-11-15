@@ -100,6 +100,18 @@ public:
   void shiftToLeft (int bits);
 
   /**
+   * Decrement this expression as much as the given immediate value.
+   * @param immediate The value which its value will be decremented from this expression.
+   */
+  void minus (UINT64 immediate);
+
+  /**
+   * Increment this expression as much as the given immediate value.
+   * @param immediate The value which its value will be added to this expression.
+   */
+  void add (UINT64 immediate);
+
+  /**
    * Sets the given count of bits, from least significant bits, to zero.
    * @param bits Count of least significant bits which should be set to zero.
    */

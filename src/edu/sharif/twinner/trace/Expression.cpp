@@ -125,6 +125,19 @@ void Expression::shiftToLeft (int bits) {
   stack.push_back (new Constant (val));
   stack.push_back (new Operator (Operator::MULTIPLY));
   lastConcreteValue <<= bits;
+
+}
+
+void Expression::minus (UINT64 immediate) {
+  stack.push_back (new Constant (immediate));
+  stack.push_back (new Operator (Operator::MINUS));
+  lastConcreteValue -= immediate;
+}
+
+void Expression::add (UINT64 immediate) {
+  stack.push_back (new Constant (immediate));
+  stack.push_back (new Operator (Operator::ADD));
+  lastConcreteValue += immediate;
 }
 
 void Expression::makeLeastSignificantBitsZero (int bits) {

@@ -172,6 +172,15 @@ void InstructionSymbolicExecuter::pushAnalysisRoutine (
       << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
   edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tadjusting rsp...";
+  //TODO: check for current value of RSP too
+  edu::sharif::twinner::trace::Expression *rsp =
+      trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
+  if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
+    // When check for current value of RSP get added, this condition can be removed.
+    rsp->minus (8);
+  }
+  edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
 
@@ -184,6 +193,15 @@ void InstructionSymbolicExecuter::popAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tadjusting rsp...";
+  //TODO: check for current value of RSP too
+  edu::sharif::twinner::trace::Expression *rsp =
+      trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
+  if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
+    // When check for current value of RSP get added, this condition can be removed.
+    rsp->add (8);
+  }
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
