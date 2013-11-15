@@ -45,6 +45,7 @@ private:
       edu::sharif::twinner::trace::Trace *trace,
       REG r, int bits,
       edu::sharif::twinner::trace::Expression *exp) const;
+  REG getOverlappingRegisterByIndex (REG reg, int index) const;
 };
 
 }

@@ -60,18 +60,21 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Expression *changedExp) const {
   edu::sharif::twinner::util::Logger::loquacious () << "(register value is changed to "
       << changedExp << ")\n";
-  edu::sharif::twinner::trace::Expression *ax = changedExp;
+  edu::sharif::twinner::trace::Expression *reg16 = changedExp;
   edu::sharif::twinner::trace::Expression *temp;
   switch (reg) {
   case REG_EAX:
-    trace->setSymbolicExpressionByRegister (REG_RAX, changedExp);
+  case REG_R12D:
+    trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (reg, 1),
+                                            changedExp);
     break;
   case REG_AH:
-    ax = trace->getSymbolicExpressionByRegister (REG_AX);
-    ax->truncate (8);
+    reg16 = trace->getSymbolicExpressionByRegister
+        (getOverlappingRegisterByIndex (reg, 3));
+    reg16->truncate (8);
     temp = changedExp->clone ();
     temp->shiftToLeft (8);
-    ax->binaryOperation
+    reg16->binaryOperation
         (new edu::sharif::twinner::trace::Operator
          (edu::sharif::twinner::trace::Operator::BITWISE_OR), temp);
     delete temp;
@@ -81,24 +84,39 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
   }
   switch (reg) {
   case REG_RAX:
-    trace->setSymbolicExpressionByRegister (REG_EAX, changedExp)->truncate (32);
+  case REG_R12:
+    trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (reg, 2),
+                                            changedExp)->truncate (32);
   case REG_EAX:
-    ax = trace->setSymbolicExpressionByRegister (REG_AX, changedExp);
-    ax->truncate (16);
+  case REG_R12D:
+    reg16 = trace->setSymbolicExpressionByRegister
+        (getOverlappingRegisterByIndex (reg, 3), changedExp);
+    reg16->truncate (16);
   case REG_AX:
-    trace->setSymbolicExpressionByRegister (REG_AH, ax)->shiftToRight (8);
-    trace->setSymbolicExpressionByRegister (REG_AL, changedExp)->truncate (8);
-    if (reg != REG_AX) {
+  case REG_R12W:
+    if (getOverlappingRegisterByIndex (reg, 4) != REG_INVALID_) {
+      trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (reg, 4),
+                                              reg16)->shiftToRight (8);
+    }
+    trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (reg, 5),
+                                            changedExp)->truncate (8);
+    if (!REG_is_gr16 (reg)) {
       break;
     }
   case REG_AH:
-    putExpressionInLeastSignificantBitsOfRegister (trace, REG_RAX, 16, ax);
-    putExpressionInLeastSignificantBitsOfRegister (trace, REG_EAX, 16, ax);
+    putExpressionInLeastSignificantBitsOfRegister
+        (trace, getOverlappingRegisterByIndex (reg, 1), 16, reg16);
+    putExpressionInLeastSignificantBitsOfRegister
+        (trace, getOverlappingRegisterByIndex (reg, 2), 16, reg16);
     break;
   case REG_AL:
-    putExpressionInLeastSignificantBitsOfRegister (trace, REG_RAX, 8, changedExp);
-    putExpressionInLeastSignificantBitsOfRegister (trace, REG_EAX, 8, changedExp);
-    putExpressionInLeastSignificantBitsOfRegister (trace, REG_AX, 8, changedExp);
+  case REG_R12B:
+    putExpressionInLeastSignificantBitsOfRegister
+        (trace, getOverlappingRegisterByIndex (reg, 1), 8, changedExp);
+    putExpressionInLeastSignificantBitsOfRegister
+        (trace, getOverlappingRegisterByIndex (reg, 2), 8, changedExp);
+    putExpressionInLeastSignificantBitsOfRegister
+        (trace, getOverlappingRegisterByIndex (reg, 3), 8, changedExp);
     break;
   default:
     edu::sharif::twinner::util::Logger::warning ()
@@ -106,6 +124,52 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
         " Unhandled register: " << REG_StringShort (reg) << '\n';
     break;
   }
+}
+
+REG RegisterResidentExpressionValueProxy::getOverlappingRegisterByIndex (REG reg,
+    int index) const {
+  switch (reg) {
+  case REG_RAX:
+  case REG_EAX:
+  case REG_AX:
+  case REG_AH:
+  case REG_AL:
+    switch (index) {
+    case 1:
+      return REG_RAX;
+    case 2:
+      return REG_EAX;
+    case 3:
+      return REG_AX;
+    case 4:
+      return REG_AH;
+    case 5:
+      return REG_AL;
+    default:
+      break;
+    }
+    break;
+  case REG_R12:
+  case REG_R12D:
+  case REG_R12W:
+  case REG_R12B:
+    switch (index) {
+    case 1:
+      return REG_R12;
+    case 2:
+      return REG_R12D;
+    case 3:
+      return REG_R12W;
+    case 5:
+      return REG_R12B;
+    default:
+      break;
+    }
+    break;
+  default:
+    break;
+  }
+  return REG_INVALID_;
 }
 
 }
