@@ -41,97 +41,111 @@ edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () con
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     REG srcReg, UINT64 srcRegVal,
-    INS ins) {
+    std::string *insAssembly) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcReg(INS: "
-      << INS_Disassemble (ins) << "): Registers:\n";
+      << *insAssembly << "): dst reg: " << REG_StringShort (dstReg)
+      << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
       RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
-    INS ins) {
+    std::string *insAssembly) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcMem(INS: "
-      << INS_Disassemble (ins) << "): src mem addr: " << srcMemoryEa <<
-      ", mem read bytes: " << memReadBytes << ". Registers:\n";
+      << *insAssembly << "): dst reg: " << REG_StringShort (dstReg)
+      << ", src mem addr: " << srcMemoryEa << ", mem read bytes: " << memReadBytes
+      << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
       MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
+  logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     ADDRINT srcImmediateValue,
-    INS ins) {
+    std::string *insAssembly) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcImd(INS: "
-      << INS_Disassemble (ins) << "): Registers:\n";
+      << *insAssembly << "): dst reg: " << REG_StringShort (dstReg)
+      << ", src imd: " << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::Expression (srcImmediateValue);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
       ConstantExpressionValueProxy (srcexp));
   delete srcexp;
+  logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     REG srcReg, UINT64 srcRegVal,
-    INS ins) {
+    std::string *insAssembly) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcReg(INS: "
-      << INS_Disassemble (ins) << "): dst mem addr: " << dstMemoryEa << ". Registers:\n";
+      << *insAssembly << "): dst mem addr: " << dstMemoryEa
+      << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
       RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     ADDRINT srcImmediateValue,
-    INS ins) {
+    std::string *insAssembly) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcImd(INS: "
-      << INS_Disassemble (ins) << "): Registers:\n";
+      << *insAssembly << "): dst mem addr: " << dstMemoryEa
+      << ", src imd: " << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::Expression (srcImmediateValue);
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
       ConstantExpressionValueProxy (srcexp));
   delete srcexp;
+  logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
-    INS ins) {
+    std::string *insAssembly) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcMem(INS: "
-      << INS_Disassemble (ins) << "): Registers:\n";
+      << *insAssembly << "): dst mem addr: " << dstMemoryEa
+      << ", src mem addr: " << srcMemoryEa << ", mem read bytes: " << memReadBytes
+      << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
       MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
+  logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
 
 void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
     ConditionalBranchAnalysisRoutine routine,
     BOOL branchTaken,
-    INS ins) {
+    std::string *insAssembly) {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineConditionalBranch(INS: "
-      << INS_Disassemble (ins) << "): Registers:\n";
+      << *insAssembly << "): branch taken: " << branchTaken << '\n';
   (this->*routine) (branchTaken);
+  logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
 
@@ -302,86 +316,84 @@ UINT64 InstructionSymbolicExecuter::readMemoryContent (ADDRINT memoryEa) {
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     UINT32 srcReg, ADDRINT srcRegVal,
-    UINT32 ins) {
-  INS inss;
-  inss.q_set ((INT32) ins);
+    VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstRegSrcReg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     (REG) dstReg, dstRegVal,
-                                    (REG) srcReg, srcRegVal, inss);
+                                    (REG) srcReg, srcRegVal,
+                                    insAssemblyStr);
 }
 
 VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
-    UINT32 ins) {
-  INS inss;
-  inss.q_set ((INT32) ins);
+    VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstRegSrcMem (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     (REG) dstReg, dstRegVal,
                                     srcMemoryEa, memReadBytes,
-                                    inss);
+                                    insAssemblyStr);
 }
 
 VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcImmediateValue,
-    UINT32 ins) {
-  INS inss;
-  inss.q_set ((INT32) ins);
+    VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstRegSrcImd (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     (REG) dstReg, dstRegVal,
-                                    srcImmediateValue, inss);
+                                    srcImmediateValue,
+                                    insAssemblyStr);
 }
 
 VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     UINT32 srcReg, ADDRINT srcRegVal,
-    UINT32 ins) {
-  INS inss;
-  inss.q_set ((INT32) ins);
+    VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstMemSrcReg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     dstMemoryEa,
-                                    (REG) srcReg, srcRegVal, inss);
+                                    (REG) srcReg, srcRegVal,
+                                    insAssemblyStr);
 }
 
 VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     ADDRINT srcImmediateValue,
-    UINT32 ins) {
-  INS inss;
-  inss.q_set ((INT32) ins);
+    VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstMemSrcImd (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     dstMemoryEa,
-                                    srcImmediateValue, inss);
+                                    srcImmediateValue,
+                                    insAssemblyStr);
 }
 
 VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
-    UINT32 ins) {
-  INS inss;
-  inss.q_set ((INT32) ins);
+    VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstMemSrcMem (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     dstMemoryEa,
                                     srcMemoryEa, memReadBytes,
-                                    inss);
+                                    insAssemblyStr);
 }
 
 VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
     BOOL branchTaken,
-    UINT32 ins) {
-  INS inss;
-  inss.q_set ((INT32) ins);
+    VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineConditionalBranch
       (ise->convertOpcodeToConditionalBranchAnalysisRoutine ((OPCODE) opcode),
-       branchTaken, inss);
+       branchTaken,
+       insAssemblyStr);
 }
 
 }

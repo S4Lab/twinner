@@ -95,9 +95,22 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
   // Intel has 1024 opcodes. And each opcode has several types/models :)
   std::map < OPCODE, InstructionModel >::iterator it =
       managedInstructions.find (op);
+  /*
+   * The INS_Disassemble does not disassemble ins correctly when it is passed to
+   * analysis routines. So we must disassemble it here and then pass the string there.
+   * But we only can pass pointers, so we must new this string object.
+   * Unfortunately there is no clean way to delete these strings as it's not possible to
+   * detect when analysis routine is called for the last time. However, it's possible
+   * to keep a collection of these string objects and delete them at the Fini call
+   * from PIN (the applicationIsAboutToExit(...) method).
+   * As that point of time is too near to exit(), I'm not going to implement it
+   * right now.
+   * TODO: Keep pointers of instantiated strings and delete them in Fini call.
+   */
+  std::string *insAssembly = new std::string (INS_Disassemble (ins));
   if (it == managedInstructions.end ()) {
     edu::sharif::twinner::util::Logger::info ()
-        << "Ignoring assembly instruction: " << INS_Disassemble (ins) << '\n';
+        << "Ignoring assembly instruction: " << *insAssembly << '\n';
   } else {
     edu::sharif::twinner::util::Logger::debug () << "\t--> " << OPCODE_StringShort (op)
         << " instruction\n";
@@ -106,13 +119,15 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
     InstructionModel model = getInstructionModel (op, ins);
     if (model) {
       if (expectedModels & model) {
-        instrumentSingleInstruction (model, op, ins);
+        instrumentSingleInstruction (model, op, ins, insAssembly);
+        return;
 
       } else {
         throw std::runtime_error ("UnExpected instruction model");
       }
     }
   }
+  delete insAssembly;
 }
 
 Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
@@ -191,7 +206,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
 }
 
 void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE op,
-    INS ins) const {
+    INS ins, std::string *insAssembly) const {
   switch (model) {
   case DST_REG_SRC_REG:
   {
@@ -201,7 +216,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
-                    IARG_UINT32, (UINT32) ins.q (),
+                    IARG_PTR, insAssembly,
                     IARG_END);
     break;
   }
@@ -212,7 +227,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
-                    IARG_UINT32, (UINT32) ins.q (),
+                    IARG_PTR, insAssembly,
                     IARG_END);
     break;
   }
@@ -223,7 +238,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_ADDRINT, INS_OperandImmediate (ins, 1),
-                    IARG_UINT32, (UINT32) ins.q (),
+                    IARG_PTR, insAssembly,
                     IARG_END);
     break;
   }
@@ -234,7 +249,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
-                    IARG_UINT32, (UINT32) ins.q (),
+                    IARG_PTR, insAssembly,
                     IARG_END);
     break;
   }
@@ -244,7 +259,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_ADDRINT, INS_OperandImmediate (ins, 1),
-                    IARG_UINT32, (UINT32) ins.q (),
+                    IARG_PTR, insAssembly,
                     IARG_END);
 
     break;
@@ -256,7 +271,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
-                    IARG_UINT32, (UINT32) ins.q (),
+                    IARG_PTR, insAssembly,
                     IARG_END);
     break;
   }
@@ -266,7 +281,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_ADDRINT, INS_OperandImmediate (ins, 0),
-                    IARG_UINT32, (UINT32) ins.q (),
+                    IARG_PTR, insAssembly,
                     IARG_END);
 
     break;
@@ -277,7 +292,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 1,
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
-                    IARG_UINT32, (UINT32) ins.q (),
+                    IARG_PTR, insAssembly,
                     IARG_END);
     break;
   }
@@ -287,7 +302,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_MEMORYOP_EA, 1, IARG_MEMORYREAD_SIZE,
-                    IARG_UINT32, (UINT32) ins.q (),
+                    IARG_PTR, insAssembly,
                     IARG_END);
     break;
   }
@@ -296,7 +311,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineConditionalBranch,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_BRANCH_TAKEN,
-                    IARG_UINT32, (UINT32) ins.q (),
+                    IARG_PTR, insAssembly,
                     IARG_END);
     break;
   }

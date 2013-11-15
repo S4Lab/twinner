@@ -82,7 +82,8 @@ private:
   InstructionModel getInstructionModelForPushInstruction (INS ins) const;
   InstructionModel getInstructionModelForPopInstruction (INS ins) const;
   InstructionModel getInstructionModelForNormalInstruction (INS ins) const;
-  void instrumentSingleInstruction (InstructionModel model, OPCODE op, INS ins) const;
+  void instrumentSingleInstruction (InstructionModel model, OPCODE op, INS ins,
+      std::string *insAssembly) const;
 
   void printDebugInformation (INS ins) const;
 

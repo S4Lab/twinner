@@ -136,7 +136,7 @@ Expression *Trace::getSymbolicExpressionImplementation (T address, UINT64 val,
     }
   } catch (const WrongStateException &e) {
     currentValue = e.getCurrentStateValue ();
-    edu::sharif::twinner::util::Logger::loquacious () << "Unexpected value (0x"
+    edu::sharif::twinner::util::Logger::debug () << "Unexpected value (0x"
         << std::hex << currentValue
         << ") was found (instead of 0x" << val << "). "
         "Probably, a new symbol is required to describe it.\n";
