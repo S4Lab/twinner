@@ -39,21 +39,8 @@ MemoryResidentExpressionValueProxy::getExpression (
          "memReadBytes must be provided to the constructor of expression proxy class.");
   }
   UINT64 val = InstructionSymbolicExecuter::readMemoryContent (memoryEa);
-  switch (memReadBytes) {
-  case 8:
-    break; // no cast is required in 64-bits mode
-  case 4:
-    val = (UINT32) val;
-    break;
-  case 2:
-    val = (UINT16) val;
-    break;
-  case 1:
-    val = (UINT8) val;
-    break;
-  default:
-    throw std::runtime_error ("Invalid mem read bytes size in expression proxy class");
-  }
+  val = InstructionSymbolicExecuter::truncateValue (val, memReadBytes);
+
   return trace->getSymbolicExpressionByMemoryAddress (memoryEa, val);
 }
 

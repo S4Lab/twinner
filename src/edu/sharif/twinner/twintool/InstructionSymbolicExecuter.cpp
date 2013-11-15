@@ -149,6 +149,23 @@ void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine routine,
+    REG dstReg, UINT64 dstRegVal,
+    std::string *insAssembly) {
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineDstRegSrcAdg(INS: "
+      << *insAssembly << ") [AFTER execution of instruction]: dst reg: "
+      << REG_StringShort (dstReg) << ", dst reg value: " << dstRegVal << '\n';
+  edu::sharif::twinner::trace::Expression *srcexp =
+      new edu::sharif::twinner::trace::Expression (dstRegVal);
+  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+      ConstantExpressionValueProxy (srcexp));
+  delete srcexp;
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::movAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "movAnalysisRoutine(...)\n"
@@ -272,6 +289,19 @@ void InstructionSymbolicExecuter::cmpAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::leaAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "leaAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tsetting dst exp...";
+  dst.setExpression (trace, srcexp);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jnzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -305,6 +335,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::subAnalysisRoutine;
   case XED_ICLASS_CMP:
     return &InstructionSymbolicExecuter::cmpAnalysisRoutine;
+  case XED_ICLASS_LEA:
+    return &InstructionSymbolicExecuter::leaAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: Unknown opcode: "
         << OPCODE_StringShort (op) << '\n';
@@ -329,6 +361,25 @@ UINT64 InstructionSymbolicExecuter::readMemoryContent (ADDRINT memoryEa) {
   UINT64 currentConcreteValue;
   PIN_SafeCopy (&currentConcreteValue, (const VOID *) (memoryEa), sizeof (UINT64));
   return currentConcreteValue;
+}
+
+UINT64 InstructionSymbolicExecuter::truncateValue (UINT64 value, int countOfBytes) {
+  switch (countOfBytes) {
+  case 8:
+    break; // no cast is required in 64-bits mode
+  case 4:
+    value = (UINT32) value;
+    break;
+  case 2:
+    value = (UINT16) value;
+    break;
+  case 1:
+    value = (UINT8) value;
+    break;
+  default:
+    throw std::runtime_error ("Can not truncate value to given count of bytes");
+  }
+  return value;
 }
 
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
@@ -412,6 +463,16 @@ VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
       (ise->convertOpcodeToConditionalBranchAnalysisRoutine ((OPCODE) opcode),
        branchTaken,
        insAssemblyStr);
+}
+
+VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    VOID *insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  std::string *insAssemblyStr = (std::string *) insAssembly;
+  ise->analysisRoutineDstRegSrcAdg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+                                    (REG) dstReg, dstRegVal,
+                                    insAssemblyStr);
 }
 
 }

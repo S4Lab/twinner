@@ -62,6 +62,8 @@ totalCountOfInstructions (0) {
       (make_pair (XED_ICLASS_CMP, COMMON_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_JNZ, JMP_CC_INS_MODELS));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_LEA, LEA_INS_MODELS));
 }
 
 Instrumenter::~Instrumenter () {
@@ -184,6 +186,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
   bool sourceIsReg = INS_OperandIsReg (ins, 1);
   bool sourceIsMem = INS_OperandIsMemory (ins, 1);
   bool sourceIsImmed = INS_OperandIsImmediate (ins, 1);
+  bool sourceIsAdg = INS_OperandIsAddressGenerator (ins, 1);
 
   if (destIsReg && sourceIsReg) {
     return DST_REG_SRC_REG;
@@ -199,6 +202,9 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
 
   } else if (destIsMem && sourceIsImmed) {
     return DST_MEM_SRC_IMD;
+
+  } else if (destIsReg && sourceIsAdg) {
+    return DST_REG_SRC_ADG;
 
   } else {
     throw std::runtime_error ("Unknown instruction model");
@@ -315,6 +321,16 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_END);
     break;
   }
+  case DST_REG_SRC_ADG:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_AFTER, (AFUNPTR) analysisRoutineDstRegSrcAdg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                    IARG_PTR, insAssembly,
+                    IARG_END);
+    break;
+  }
   default:
     throw std::runtime_error ("Unknown instruction model");
   }
@@ -338,6 +354,8 @@ void Instrumenter::printDebugInformation (INS ins) const {
     bool isMem = INS_OperandIsMemory (ins, i);
     bool isFixedMem = INS_OperandIsFixedMemop (ins, i);
     bool isImplicit = INS_OperandIsImplicit (ins, i);
+    bool isBranchDisp = INS_OperandIsBranchDisplacement (ins, i);
+    bool isAddrGen = INS_OperandIsAddressGenerator (ins, i);
     bool isRead = INS_OperandRead (ins, i);
     bool isWritten = INS_OperandWritten (ins, i);
     REG reg = INS_OperandReg (ins, i);
@@ -352,6 +370,10 @@ void Instrumenter::printDebugInformation (INS ins) const {
       debug << "fixed-mem";
     } else if (isImplicit) {
       debug << "implicit";
+    } else if (isBranchDisp) {
+      debug << "branch-displacement";
+    } else if (isAddrGen) {
+      debug << "address-generator";
     } else {
       debug << "unknown";
     }

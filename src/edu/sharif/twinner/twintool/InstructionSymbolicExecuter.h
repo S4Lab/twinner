@@ -75,6 +75,9 @@ public:
   void analysisRoutineConditionalBranch (ConditionalBranchAnalysisRoutine routine,
       BOOL branchTaken,
       std::string *insAssembly);
+  void analysisRoutineDstRegSrcAdg (AnalysisRoutine routine,
+      REG dstReg, UINT64 dstRegVal,
+      std::string *insAssembly);
 
 private:
 
@@ -123,6 +126,15 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * LEA loads an address into a register. This analysis routine is called after execution
+   * of the instruction. The dst parameter should be set, without getting its value, since
+   * value of register has been changed by the instruction and we must synch its symbolic
+   * value (as a constant value) now.
+   */
+  void leaAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * JNZ jumps if ZF=0 which means that corresponding expression was not zero
    */
   void jnzAnalysisRoutine (bool branchTaken);
@@ -133,6 +145,7 @@ public:
       OPCODE op) const;
 
   static UINT64 readMemoryContent (ADDRINT memoryEa);
+  static UINT64 truncateValue (UINT64 value, int countOfBytes);
 };
 
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
@@ -161,6 +174,9 @@ VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     VOID *insAssembly);
 VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
     BOOL branchTaken,
+    VOID *insAssembly);
+VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
     VOID *insAssembly);
 
 }
