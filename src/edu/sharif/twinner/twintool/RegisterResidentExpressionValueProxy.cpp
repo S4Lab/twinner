@@ -172,6 +172,11 @@ REG RegisterResidentExpressionValueProxy::getOverlappingRegisterByIndex (REG reg
   return REG_INVALID_;
 }
 
+void RegisterResidentExpressionValueProxy::truncate (
+    edu::sharif::twinner::trace::Expression *exp) const {
+  exp->truncate (REG_Size (reg) * 8);
+}
+
 }
 }
 }

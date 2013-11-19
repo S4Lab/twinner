@@ -17,6 +17,7 @@
 #include "InstructionSymbolicExecuter.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/Expression.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 
@@ -58,6 +59,11 @@ void MemoryResidentExpressionValueProxy::valueIsChanged (
   edu::sharif::twinner::util::Logger::loquacious () << "(memory value is changed to "
       << changedExp << ")\n";
   // TODO: implement
+}
+
+void MemoryResidentExpressionValueProxy::truncate (
+    edu::sharif::twinner::trace::Expression *exp) const {
+  exp->truncate (memReadBytes * 8);
 }
 
 }

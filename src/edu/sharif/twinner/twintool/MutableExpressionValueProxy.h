@@ -46,6 +46,13 @@ public:
    */
   virtual void setExpression (edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const = 0;
+
+  /**
+   * Truncates the given expression, so it can be fitted in the underlying expression.
+   * Underlying expression won't be touched at all.
+   * @param exp The expression who should be truncated to be fitted in this expression.
+   */
+  virtual void truncate (edu::sharif::twinner::trace::Expression *exp) const = 0;
 };
 
 }
