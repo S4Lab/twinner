@@ -125,7 +125,11 @@ void Expression::shiftToLeft (int bits) {
   stack.push_back (new Constant (val));
   stack.push_back (new Operator (Operator::MULTIPLY));
   lastConcreteValue <<= bits;
+}
 
+void Expression::shiftToLeft (const Expression *bits) {
+  throw std::runtime_error
+      ("Expression::shiftToLeft: symbolic-shift: Not yet implemented!");
 }
 
 void Expression::minus (UINT64 immediate) {

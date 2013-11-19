@@ -157,6 +157,12 @@ private:
    */
   void retAnalysisRoutine (UINT64 rspRegVal);
 
+  /**
+   * SHL shifts dst to left as much as indicated by src.
+   */
+  void shlAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
   ConditionalBranchAnalysisRoutine convertOpcodeToConditionalBranchAnalysisRoutine (

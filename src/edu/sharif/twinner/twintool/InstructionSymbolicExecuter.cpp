@@ -378,6 +378,33 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (UINT64 rspRegVal) {
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::shlAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "shlAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp =
+      dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tshifting operation...";
+  if (dynamic_cast<const ConstantExpressionValueProxy *> (&src) != 0) {
+    // src was an immediate value
+    dstexp->shiftToLeft (srcexp->getLastConcreteValue ());
+  } else {
+    // src was CL register
+    dstexp->shiftToLeft (srcexp);
+  }
+  // truncate bits which are shifted left, outside of dst boundaries
+  dst.truncate (dstexp);
+  dst.valueIsChanged (trace, dstexp);
+  //TODO: set rflags
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -397,6 +424,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::cmpAnalysisRoutine;
   case XED_ICLASS_LEA:
     return &InstructionSymbolicExecuter::leaAnalysisRoutine;
+  case XED_ICLASS_SHL:
+    return &InstructionSymbolicExecuter::shlAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: Unknown opcode: "
         << OPCODE_StringShort (op) << '\n';
