@@ -65,6 +65,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
   switch (reg) {
   case REG_EAX:
   case REG_R12D:
+  case REG_EDI:
     trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (reg, 1),
                                             changedExp);
     break;
@@ -85,15 +86,18 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
   switch (reg) {
   case REG_RAX:
   case REG_R12:
+  case REG_RDI:
     trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (reg, 2),
                                             changedExp)->truncate (32);
   case REG_EAX:
   case REG_R12D:
+  case REG_EDI:
     reg16 = trace->setSymbolicExpressionByRegister
         (getOverlappingRegisterByIndex (reg, 3), changedExp);
     reg16->truncate (16);
   case REG_AX:
   case REG_R12W:
+  case REG_DI:
     if (getOverlappingRegisterByIndex (reg, 4) != REG_INVALID_) {
       trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (reg, 4),
                                               reg16)->shiftToRight (8);
@@ -111,6 +115,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
     break;
   case REG_AL:
   case REG_R12B:
+  case REG_DIL:
     putExpressionInLeastSignificantBitsOfRegister
         (trace, getOverlappingRegisterByIndex (reg, 1), 8, changedExp);
     putExpressionInLeastSignificantBitsOfRegister
@@ -162,6 +167,23 @@ REG RegisterResidentExpressionValueProxy::getOverlappingRegisterByIndex (REG reg
       return REG_R12W;
     case 5:
       return REG_R12B;
+    default:
+      break;
+    }
+    break;
+  case REG_RDI:
+  case REG_EDI:
+  case REG_DI:
+  case REG_DIL:
+    switch (index) {
+    case 1:
+      return REG_RDI;
+    case 2:
+      return REG_EDI;
+    case 3:
+      return REG_DI;
+    case 5:
+      return REG_DIL;
     default:
       break;
     }
