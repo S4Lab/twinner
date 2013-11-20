@@ -64,6 +64,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
   edu::sharif::twinner::trace::Expression *temp;
   switch (reg) {
   case REG_EAX:
+  case REG_EBX:
   case REG_R12D:
   case REG_EDI:
   case REG_ESI:
@@ -71,6 +72,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
                                             changedExp);
     break;
   case REG_AH:
+  case REG_BH:
     reg16 = trace->getSymbolicExpressionByRegister
         (getOverlappingRegisterByIndex (reg, 3));
     reg16->truncate (8);
@@ -86,12 +88,14 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
   }
   switch (reg) {
   case REG_RAX:
+  case REG_RBX:
   case REG_R12:
   case REG_RDI:
   case REG_RSI:
     trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (reg, 2),
                                             changedExp)->truncate (32);
   case REG_EAX:
+  case REG_EBX:
   case REG_R12D:
   case REG_EDI:
   case REG_ESI:
@@ -99,6 +103,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
         (getOverlappingRegisterByIndex (reg, 3), changedExp);
     reg16->truncate (16);
   case REG_AX:
+  case REG_BX:
   case REG_R12W:
   case REG_DI:
   case REG_SI:
@@ -112,12 +117,14 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
       break;
     }
   case REG_AH:
+  case REG_BH:
     putExpressionInLeastSignificantBitsOfRegister
         (trace, getOverlappingRegisterByIndex (reg, 1), 16, reg16);
     putExpressionInLeastSignificantBitsOfRegister
         (trace, getOverlappingRegisterByIndex (reg, 2), 16, reg16);
     break;
   case REG_AL:
+  case REG_BL:
   case REG_R12B:
   case REG_DIL:
   case REG_SIL:
@@ -155,6 +162,26 @@ REG RegisterResidentExpressionValueProxy::getOverlappingRegisterByIndex (REG reg
       return REG_AH;
     case 5:
       return REG_AL;
+    default:
+      break;
+    }
+    break;
+  case REG_RBX:
+  case REG_EBX:
+  case REG_BX:
+  case REG_BH:
+  case REG_BL:
+    switch (index) {
+    case 1:
+      return REG_RBX;
+    case 2:
+      return REG_EBX;
+    case 3:
+      return REG_BX;
+    case 4:
+      return REG_BH;
+    case 5:
+      return REG_BL;
     default:
       break;
     }
