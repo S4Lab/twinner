@@ -180,6 +180,12 @@ private:
   void shlAnalysisRoutine (const MutableExpressionValueProxy &dst,
       const ExpressionValueProxy &src);
 
+  /**
+   * AND bitwise ands dst with src as its mask.
+   */
+  void andAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
   ConditionalBranchAnalysisRoutine convertOpcodeToConditionalBranchAnalysisRoutine (

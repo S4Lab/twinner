@@ -435,6 +435,27 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::andAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "andAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp =
+      dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tbinary operation...";
+  dstexp->binaryOperation
+      (new edu::sharif::twinner::trace::Operator
+       (edu::sharif::twinner::trace::Operator::BITWISE_AND), srcexp);
+  dst.valueIsChanged (trace, dstexp);
+  //TODO: set rflags
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -456,6 +477,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::leaAnalysisRoutine;
   case XED_ICLASS_SHL:
     return &InstructionSymbolicExecuter::shlAnalysisRoutine;
+  case XED_ICLASS_AND:
+    return &InstructionSymbolicExecuter::andAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: Unknown opcode: "
         << OPCODE_StringShort (op) << '\n';

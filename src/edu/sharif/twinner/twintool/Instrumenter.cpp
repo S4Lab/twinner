@@ -74,6 +74,8 @@ totalCountOfInstructions (0) {
       (make_pair (XED_ICLASS_RET_FAR, RET_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_SHL, SHL_INS_MODELS));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_AND, COMMON_INS_MODELS));
 }
 
 Instrumenter::~Instrumenter () {
