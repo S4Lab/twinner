@@ -186,6 +186,12 @@ private:
   void andAnalysisRoutine (const MutableExpressionValueProxy &dst,
       const ExpressionValueProxy &src);
 
+  /**
+   * XOR calculates exclusive or of dst with src.
+   */
+  void xorAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
   ConditionalBranchAnalysisRoutine convertOpcodeToConditionalBranchAnalysisRoutine (
