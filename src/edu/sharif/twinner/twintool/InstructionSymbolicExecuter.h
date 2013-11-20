@@ -32,15 +32,6 @@ class MutableExpressionValueProxy;
 class InstructionSymbolicExecuter {
 
 private:
-  edu::sharif::twinner::trace::Trace *trace;
-  Flags eflags;
-
-public:
-  InstructionSymbolicExecuter ();
-
-  edu::sharif::twinner::trace::Trace *getTrace () const;
-
-private:
 
   typedef void (InstructionSymbolicExecuter::*AnalysisRoutine) (
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
@@ -49,43 +40,69 @@ private:
   typedef void (InstructionSymbolicExecuter::*SuddenlyChangedRegAnalysisRoutine) (
       UINT64 regVal);
 
+  edu::sharif::twinner::trace::Trace *trace;
+  Flags eflags;
+
+  REG trackedReg;
+  SuddenlyChangedRegAnalysisRoutine hook;
+
+public:
+  InstructionSymbolicExecuter ();
+
+  edu::sharif::twinner::trace::Trace *getTrace () const;
+
 public:
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
       REG dstReg, UINT64 dstRegVal,
       REG srcReg, UINT64 srcRegVal,
+      const CONTEXT *context,
       std::string *insAssembly);
   void analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
       REG dstReg, UINT64 dstRegVal,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
+      const CONTEXT *context,
       std::string *insAssembly);
   void analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
       REG dstReg, UINT64 dstRegVal,
       ADDRINT srcImmediateValue,
+      const CONTEXT *context,
       std::string *insAssembly);
   void analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       REG srcReg, UINT64 srcRegVal,
       UINT32 memReadBytes,
+      const CONTEXT *context,
       std::string *insAssembly);
   void analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       ADDRINT srcImmediateValue,
       UINT32 memReadBytes,
+      const CONTEXT *context,
       std::string *insAssembly);
   void analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
+      const CONTEXT *context,
       std::string *insAssembly);
   void analysisRoutineConditionalBranch (ConditionalBranchAnalysisRoutine routine,
       BOOL branchTaken,
+      const CONTEXT *context,
       std::string *insAssembly);
   void analysisRoutineDstRegSrcAdg (AnalysisRoutine routine,
       REG dstReg, UINT64 dstRegVal,
+      const CONTEXT *context,
       std::string *insAssembly);
-  void analysisRoutineWhenRegIsChanged (SuddenlyChangedRegAnalysisRoutine routine,
-      UINT64 regVal, std::string *insAssembly);
+  void analysisRoutineBeforeChangeOfReg (SuddenlyChangedRegAnalysisRoutine routine,
+      REG reg,
+      const CONTEXT *context,
+      std::string *insAssembly);
 
 private:
+
+  /**
+   * Run hooks from last instruction (if any) and reset them afterwards.
+   */
+  void runHooks (const CONTEXT *context);
 
   /**
    * MOV has 5 models
@@ -170,6 +187,7 @@ public:
   SuddenlyChangedRegAnalysisRoutine convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
       OPCODE op) const;
 
+  static UINT64 readRegisterContent (const CONTEXT *context, REG reg);
   static UINT64 readMemoryContent (ADDRINT memoryEa);
   static UINT64 truncateValue (UINT64 value, int countOfBytes);
 };
@@ -177,37 +195,46 @@ public:
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     UINT32 srcReg, ADDRINT srcRegVal,
+    const CONTEXT *context,
     VOID *insAssembly);
 VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    const CONTEXT *context,
     VOID *insAssembly);
 VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcImmediateValue,
+    const CONTEXT *context,
     VOID *insAssembly);
 VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     UINT32 srcReg, ADDRINT srcRegVal,
     UINT32 memReadBytes,
+    const CONTEXT *context,
     VOID *insAssembly);
 VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     ADDRINT srcImmediateValue,
     UINT32 memReadBytes,
+    const CONTEXT *context,
     VOID *insAssembly);
 VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    const CONTEXT *context,
     VOID *insAssembly);
 VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
     BOOL branchTaken,
+    const CONTEXT *context,
     VOID *insAssembly);
 VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
+    const CONTEXT *context,
     VOID *insAssembly);
-VOID analysisRoutineWhenRegIsChanged (VOID *iseptr, UINT32 opcode,
-    ADDRINT regVal,
+VOID analysisRoutineBeforeChangeOfReg (VOID *iseptr, UINT32 opcode,
+    UINT32 reg,
+    const CONTEXT *context,
     VOID *insAssembly);
 
 }

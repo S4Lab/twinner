@@ -31,7 +31,8 @@ namespace twinner {
 namespace twintool {
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter () :
-trace (new edu::sharif::twinner::trace::Trace ()) {
+trace (new edu::sharif::twinner::trace::Trace ()),
+trackedReg (REG_INVALID_), hook (0) {
 }
 
 edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () const {
@@ -41,7 +42,9 @@ edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () con
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     REG srcReg, UINT64 srcRegVal,
+    const CONTEXT *context,
     std::string *insAssembly) {
+  runHooks (context);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcReg(INS: "
@@ -56,7 +59,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    const CONTEXT *context,
     std::string *insAssembly) {
+  runHooks (context);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcMem(INS: "
@@ -72,7 +77,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
     ADDRINT srcImmediateValue,
+    const CONTEXT *context,
     std::string *insAssembly) {
+  runHooks (context);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcImd(INS: "
@@ -91,7 +98,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
     ADDRINT dstMemoryEa,
     REG srcReg, UINT64 srcRegVal,
     UINT32 memReadBytes,
+    const CONTEXT *context,
     std::string *insAssembly) {
+  runHooks (context);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcReg(INS: "
@@ -107,7 +116,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
     ADDRINT dstMemoryEa,
     ADDRINT srcImmediateValue,
     UINT32 memReadBytes,
+    const CONTEXT *context,
     std::string *insAssembly) {
+  runHooks (context);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcImd(INS: "
@@ -125,7 +136,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    const CONTEXT *context,
     std::string *insAssembly) {
+  runHooks (context);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcMem(INS: "
@@ -141,7 +154,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
     ConditionalBranchAnalysisRoutine routine,
     BOOL branchTaken,
+    const CONTEXT *context,
     std::string *insAssembly) {
+  runHooks (context);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineConditionalBranch(INS: "
@@ -153,7 +168,9 @@ void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine routine,
     REG dstReg, UINT64 dstRegVal,
+    const CONTEXT *context,
     std::string *insAssembly) {
+  runHooks (context);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcAdg(INS: "
@@ -169,17 +186,30 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
   trace->printRegistersValues (logger);
 }
 
-void InstructionSymbolicExecuter::analysisRoutineWhenRegIsChanged (
+void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfReg (
     SuddenlyChangedRegAnalysisRoutine routine,
-    UINT64 regVal, std::string *insAssembly) {
+    REG reg,
+    const CONTEXT *context,
+    std::string *insAssembly) {
+  runHooks (context);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
-  logger << "analysisRoutineWhenRegIsChanged(INS: "
-      << *insAssembly << ") [AFTER execution of instruction]: reg value: 0x"
-      << std::hex << regVal << '\n';
-  (this->*routine) (regVal);
+  logger << "analysisRoutineBeforeChangeOfReg(INS: "
+      << *insAssembly << ")\n"
+      "\tregistering register to be tracked...";
+  trackedReg = reg;
+  hook = routine;
+  logger << "done\n";
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
+}
+
+void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
+  if (trackedReg != REG_INVALID_) {
+    (this->*hook) (readRegisterContent (context, trackedReg));
+    trackedReg = REG_INVALID_;
+    hook = 0;
+  }
 }
 
 void InstructionSymbolicExecuter::movAnalysisRoutine (
@@ -464,6 +494,15 @@ InstructionSymbolicExecuter::convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
   }
 }
 
+UINT64 InstructionSymbolicExecuter::readRegisterContent (const CONTEXT *context,
+    REG reg) {
+  REGVAL regVal;
+  PIN_GetContextRegval (context, reg, &regVal);
+  UINT64 value;
+  PIN_ReadRegvalQWord (&regVal, &value, 0);
+  return value;
+}
+
 UINT64 InstructionSymbolicExecuter::readMemoryContent (ADDRINT memoryEa) {
   UINT64 currentConcreteValue;
   PIN_SafeCopy (&currentConcreteValue, (const VOID *) (memoryEa), sizeof (UINT64));
@@ -492,36 +531,42 @@ UINT64 InstructionSymbolicExecuter::truncateValue (UINT64 value, int countOfByte
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     UINT32 srcReg, ADDRINT srcRegVal,
+    const CONTEXT *context,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstRegSrcReg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     (REG) dstReg, dstRegVal,
                                     (REG) srcReg, srcRegVal,
+                                    context,
                                     insAssemblyStr);
 }
 
 VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    const CONTEXT *context,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstRegSrcMem (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     (REG) dstReg, dstRegVal,
                                     srcMemoryEa, memReadBytes,
+                                    context,
                                     insAssemblyStr);
 }
 
 VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcImmediateValue,
+    const CONTEXT *context,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstRegSrcImd (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     (REG) dstReg, dstRegVal,
                                     srcImmediateValue,
+                                    context,
                                     insAssemblyStr);
 }
 
@@ -529,6 +574,7 @@ VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     UINT32 srcReg, ADDRINT srcRegVal,
     UINT32 memReadBytes,
+    const CONTEXT *context,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
@@ -536,6 +582,7 @@ VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
                                     dstMemoryEa,
                                     (REG) srcReg, srcRegVal,
                                     memReadBytes,
+                                    context,
                                     insAssemblyStr);
 }
 
@@ -543,6 +590,7 @@ VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     ADDRINT srcImmediateValue,
     UINT32 memReadBytes,
+    const CONTEXT *context,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
@@ -550,50 +598,59 @@ VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
                                     dstMemoryEa,
                                     srcImmediateValue,
                                     memReadBytes,
+                                    context,
                                     insAssemblyStr);
 }
 
 VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    const CONTEXT *context,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstMemSrcMem (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     dstMemoryEa,
                                     srcMemoryEa, memReadBytes,
+                                    context,
                                     insAssemblyStr);
 }
 
 VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
     BOOL branchTaken,
+    const CONTEXT *context,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineConditionalBranch
       (ise->convertOpcodeToConditionalBranchAnalysisRoutine ((OPCODE) opcode),
        branchTaken,
+       context,
        insAssemblyStr);
 }
 
 VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
+    const CONTEXT *context,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
   ise->analysisRoutineDstRegSrcAdg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
                                     (REG) dstReg, dstRegVal,
+                                    context,
                                     insAssemblyStr);
 }
 
-VOID analysisRoutineWhenRegIsChanged (VOID *iseptr, UINT32 opcode,
-    ADDRINT regVal,
+VOID analysisRoutineBeforeChangeOfReg (VOID *iseptr, UINT32 opcode,
+    UINT32 reg,
+    const CONTEXT *context,
     VOID *insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   std::string *insAssemblyStr = (std::string *) insAssembly;
-  ise->analysisRoutineWhenRegIsChanged
+  ise->analysisRoutineBeforeChangeOfReg
       (ise->convertOpcodeToSuddenlyChangedRegAnalysisRoutine ((OPCODE) opcode),
-       regVal,
+       (REG) reg,
+       context,
        insAssemblyStr);
 }
 

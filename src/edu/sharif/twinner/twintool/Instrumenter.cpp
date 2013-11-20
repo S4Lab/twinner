@@ -236,6 +236,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
     break;
@@ -247,6 +248,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
     break;
@@ -258,6 +260,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_ADDRINT, INS_OperandImmediate (ins, 1),
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
     break;
@@ -270,6 +273,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
                     IARG_MEMORYREAD_SIZE,
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
     break;
@@ -281,6 +285,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_MEMORYOP_EA, 0,
                     IARG_ADDRINT, INS_OperandImmediate (ins, 1),
                     IARG_MEMORYREAD_SIZE,
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
 
@@ -294,6 +299,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
                     IARG_MEMORYREAD_SIZE,
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
     break;
@@ -304,6 +310,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_ADDRINT, INS_OperandImmediate (ins, 0),
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
 
@@ -315,6 +322,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 1,
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
     break;
@@ -325,6 +333,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_MEMORYOP_EA, 1, IARG_MEMORYREAD_SIZE,
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
     break;
@@ -334,6 +343,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineConditionalBranch,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_BRANCH_TAKEN,
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
     break;
@@ -344,15 +354,17 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_AFTER, (AFUNPTR) analysisRoutineDstRegSrcAdg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
     break;
   }
   case DST_RSP_SRC_CALL:
   {
-    INS_InsertCall (ins, IPOINT_TAKEN_BRANCH, (AFUNPTR) analysisRoutineWhenRegIsChanged,
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineBeforeChangeOfReg,
                     IARG_PTR, ise, IARG_UINT32, op,
-                    IARG_REG_VALUE, REG_RSP,
+                    IARG_UINT32, REG_RSP,
+                    IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);
     break;
