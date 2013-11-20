@@ -65,6 +65,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
   switch (reg) {
   case REG_EAX:
   case REG_EBX:
+  case REG_R14D:
   case REG_R12D:
   case REG_EDI:
   case REG_ESI:
@@ -89,6 +90,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
   switch (reg) {
   case REG_RAX:
   case REG_RBX:
+  case REG_R14:
   case REG_R12:
   case REG_RDI:
   case REG_RSI:
@@ -96,6 +98,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
                                             changedExp)->truncate (32);
   case REG_EAX:
   case REG_EBX:
+  case REG_R14D:
   case REG_R12D:
   case REG_EDI:
   case REG_ESI:
@@ -104,6 +107,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
     reg16->truncate (16);
   case REG_AX:
   case REG_BX:
+  case REG_R14W:
   case REG_R12W:
   case REG_DI:
   case REG_SI:
@@ -125,6 +129,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
     break;
   case REG_AL:
   case REG_BL:
+  case REG_R14B:
   case REG_R12B:
   case REG_DIL:
   case REG_SIL:
@@ -182,6 +187,23 @@ REG RegisterResidentExpressionValueProxy::getOverlappingRegisterByIndex (REG reg
       return REG_BH;
     case 5:
       return REG_BL;
+    default:
+      break;
+    }
+    break;
+  case REG_R14:
+  case REG_R14D:
+  case REG_R14W:
+  case REG_R14B:
+    switch (index) {
+    case 1:
+      return REG_R14;
+    case 2:
+      return REG_R14D;
+    case 3:
+      return REG_R14W;
+    case 5:
+      return REG_R14B;
     default:
       break;
     }
