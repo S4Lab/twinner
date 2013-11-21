@@ -125,10 +125,15 @@ void Expression::shiftToRight (int bits) {
 }
 
 void Expression::shiftToLeft (int bits) {
-  UINT64 val = 1;
-  val <<= bits; // shift-to-left by n bits is equivalent to multiplication by 2^n
-  stack.push_back (new Constant (val));
-  stack.push_back (new Operator (Operator::MULTIPLY));
+  if (bits >= 64) {
+    stack.push_back (new Constant (bits));
+    stack.push_back (new Operator (Operator::SHIFT_LEFT));
+  } else {
+    UINT64 val = 1;
+    val <<= bits; // shift-to-left by n bits is equivalent to multiplication by 2^n
+    stack.push_back (new Constant (val));
+    stack.push_back (new Operator (Operator::MULTIPLY));
+  }
   lastConcreteValue <<= bits;
 }
 
