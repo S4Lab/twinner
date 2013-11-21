@@ -103,13 +103,14 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
 }
 
 void Expression::truncate (int bits) {
+  UINT64 mask;
   if (bits == 64) {
-    //TODO: Handle overflow in symbolic value by introducing cast-operators.
-    return;
+    mask = (UINT64) (-1);
+  } else {
+    mask = 1;
+    mask <<= bits;
+    mask--;
   }
-  UINT64 mask = 1;
-  mask <<= bits;
-  mask--;
   stack.push_back (new Constant (mask));
   stack.push_back (new Operator (Operator::BITWISE_AND));
   lastConcreteValue &= mask;
