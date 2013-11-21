@@ -51,6 +51,12 @@ UINT64 Operator::apply (UINT64 a, UINT64 b) const {
     return a ^ b;
   case BITWISE_AND:
     return a & b;
+  case BITWISE_OR:
+    return a | b;
+  case SHIFT_LEFT:
+    return a << b;
+  case SHIFT_RIGHT:
+    return a >> b;
   default:
     throw std::runtime_error ("Operator::apply(...): Non-handled operator identifier");
   }

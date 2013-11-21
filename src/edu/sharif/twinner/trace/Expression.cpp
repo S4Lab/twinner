@@ -133,8 +133,7 @@ void Expression::shiftToLeft (int bits) {
 }
 
 void Expression::shiftToLeft (const Expression *bits) {
-  throw std::runtime_error
-      ("Expression::shiftToLeft: symbolic-shift: Not yet implemented!");
+  binaryOperation (new Operator (Operator::SHIFT_LEFT), bits);
 }
 
 void Expression::minus (UINT64 immediate) {

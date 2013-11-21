@@ -32,7 +32,8 @@ public:
     MULTIPLY, DIVIDE,
     NEGATE,
     XOR,
-    BITWISE_AND, BITWISE_OR
+    BITWISE_AND, BITWISE_OR,
+    SHIFT_LEFT, SHIFT_RIGHT,
   };
 
 private:
