@@ -37,6 +37,7 @@ public:
   virtual Constant *clone () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
+  static Constant *loadFromBinaryStream (std::ifstream &in);
 };
 
 }

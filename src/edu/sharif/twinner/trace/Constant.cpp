@@ -30,8 +30,14 @@ Constant *Constant::clone () const {
 }
 
 void Constant::saveToBinaryStream (std::ofstream &out) const {
-  out.write ("CONS", 4);
+  out.write ("C", 1);
   out.write ((const char *) &value, sizeof (value));
+}
+
+Constant *Constant::loadFromBinaryStream (std::ifstream &in) {
+  UINT64 value;
+  in.read ((char *) &value, sizeof (value));
+  return new Constant (value);
 }
 
 }

@@ -27,6 +27,11 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+Expression::Expression (const std::list < ExpressionToken * > &stk,
+    UINT64 concreteValue) :
+stack (stk), lastConcreteValue (concreteValue) {
+}
+
 Expression::Expression (REG reg, UINT64 concreteValue, int generationIndex) :
 lastConcreteValue (concreteValue) {
   stack.push_back (new RegisterEmergedSymbol (reg, concreteValue, generationIndex));
@@ -173,6 +178,14 @@ Expression *Expression::clone () const {
 void Expression::saveToBinaryStream (std::ofstream &out) const {
   saveListToBinaryStream (out, "EXP", stack);
   out.write ((const char *) &lastConcreteValue, sizeof (lastConcreteValue));
+}
+
+Expression *Expression::loadFromBinaryStream (std::ifstream &in) {
+  std::list < ExpressionToken * > stack;
+  loadListFromBinaryStream (in, "EXP", stack);
+  UINT64 concreteValue;
+  in.read ((char *) &concreteValue, sizeof (concreteValue));
+  return new Expression (stack, concreteValue);
 }
 
 }

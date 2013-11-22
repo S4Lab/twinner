@@ -30,6 +30,10 @@ private:
   std::map < ADDRINT, Expression * > memoryAddressToExpression;
   std::list < const Constraint * > pathConstraint;
 
+  ExecutionTraceSegment (const std::map < REG, Expression * > &regi,
+      const std::map < ADDRINT, Expression * > &memo,
+      const std::list < const Constraint * > &cnrt);
+
 public:
   ExecutionTraceSegment ();
   virtual ~ExecutionTraceSegment ();
@@ -54,6 +58,7 @@ public:
   virtual void addPathConstraint (const Constraint *c);
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
+  static ExecutionTraceSegment *loadFromBinaryStream (std::ifstream &in);
 
 private:
   template < typename KEY >
@@ -75,7 +80,10 @@ private:
 
   template <typename ADDRESS>
   void saveMapToBinaryStream (std::ofstream &out,
-      const char *magicString, const std::map < ADDRESS, Expression * > map) const;
+      const char *magicString, const std::map < ADDRESS, Expression * > &map) const;
+  template <typename ADDRESS>
+  static void loadMapFromBinaryStream (std::ifstream &in,
+      const char *expectedMagicString, std::map < ADDRESS, Expression * > &map);
 
 public:
   virtual void printRegistersValues (

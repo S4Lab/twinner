@@ -21,6 +21,10 @@ MemoryEmergedSymbol::MemoryEmergedSymbol (const MemoryEmergedSymbol &s) :
 Symbol (s), address (s.address) {
 }
 
+MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT addr) :
+Symbol (), address (addr) {
+}
+
 MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT _address, UINT64 concreteValue,
     int generationIndex) :
 Symbol (concreteValue, generationIndex), address (_address) {
@@ -28,6 +32,20 @@ Symbol (concreteValue, generationIndex), address (_address) {
 
 MemoryEmergedSymbol *MemoryEmergedSymbol::clone () const {
   return new MemoryEmergedSymbol (*this);
+}
+
+void MemoryEmergedSymbol::saveToBinaryStream (std::ofstream &out) const {
+  out.write ("M", 1);
+  out.write ((const char *) &address, sizeof (address));
+  Symbol::saveToBinaryStream (out);
+}
+
+MemoryEmergedSymbol *MemoryEmergedSymbol::loadFromBinaryStream (std::ifstream &in) {
+  ADDRINT address;
+  in.read ((char *) &address, sizeof (address));
+  MemoryEmergedSymbol *symbol = new MemoryEmergedSymbol (address);
+  symbol->Symbol::loadFromBinaryStream (in);
+  return symbol;
 }
 
 }

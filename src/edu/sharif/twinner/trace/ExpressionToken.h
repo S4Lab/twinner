@@ -27,18 +27,17 @@ class ExpressionToken : public Savable {
 
 protected:
 
-  ExpressionToken () {
-  }
+  ExpressionToken ();
 
-  ExpressionToken (const ExpressionToken &et) {
-  }
+  ExpressionToken (const ExpressionToken &et);
 
 public:
 
-  virtual ~ExpressionToken () {
-  }
+  virtual ~ExpressionToken ();
 
   virtual ExpressionToken *clone () const = 0;
+
+  static ExpressionToken *loadFromBinaryStream (std::ifstream &in);
 };
 
 }

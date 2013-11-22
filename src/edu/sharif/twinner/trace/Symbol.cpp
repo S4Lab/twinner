@@ -25,10 +25,17 @@ Symbol::Symbol (const Symbol &s) :
 Operand (s), concreteValue (s.concreteValue), generationIndex (s.generationIndex) {
 }
 
+Symbol::Symbol () {
+}
+
 void Symbol::saveToBinaryStream (std::ofstream &out) const {
-  out.write ("SYMB", 4);
   out.write ((const char *) &concreteValue, sizeof (concreteValue));
   out.write ((const char *) &generationIndex, sizeof (generationIndex));
+}
+
+void Symbol::loadFromBinaryStream (std::ifstream &in) {
+  in.read ((char *) &concreteValue, sizeof (concreteValue));
+  in.read ((char *) &generationIndex, sizeof (generationIndex));
 }
 
 }

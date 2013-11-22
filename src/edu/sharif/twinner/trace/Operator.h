@@ -48,6 +48,7 @@ public:
   virtual Operator *clone () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
+  static Operator *loadFromBinaryStream (std::ifstream &in);
 
   UINT64 apply (UINT64 a, UINT64 b) const;
 };

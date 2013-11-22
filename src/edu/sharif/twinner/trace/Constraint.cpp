@@ -13,6 +13,7 @@
 #include "Constraint.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "ExecutionState.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -21,6 +22,10 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+
+Constraint::Constraint (ComparisonType _type) :
+type (_type) {
+}
 
 Constraint::Constraint (const Expression *_exp, ComparisonType _type) :
 exp (_exp->clone ()), type (_type) {
@@ -33,6 +38,15 @@ Constraint::~Constraint () {
 void Constraint::saveToBinaryStream (std::ofstream &out) const {
   exp->saveToBinaryStream (out);
   out.write ((const char *) &type, sizeof (type));
+}
+
+Constraint *Constraint::loadFromBinaryStream (std::ifstream &in) {
+  Expression *exp = Expression::loadFromBinaryStream (in);
+  ComparisonType type;
+  in.read ((char *) &type, sizeof (type));
+  Constraint *cnrt = new Constraint (type);
+  cnrt->exp = exp;
+  return cnrt;
 }
 
 std::string Constraint::toString () const {

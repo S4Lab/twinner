@@ -41,6 +41,8 @@ private:
 
   Expression (const Expression &exp);
 
+  Expression (const std::list < ExpressionToken * > &stk, UINT64 concreteValue);
+
 public:
   /**
    * Instantiates an expression containing a new (yet unused) symbol,
@@ -128,6 +130,7 @@ public:
   Expression *clone () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
+  static Expression *loadFromBinaryStream (std::ifstream &in);
 };
 
 }

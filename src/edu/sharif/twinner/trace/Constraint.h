@@ -42,6 +42,13 @@ private:
    */
   Constraint (const Constraint &c);
 
+  /**
+   * Instantiate a constraint with the given comparison type. Its expression should
+   * be set manually later.
+   * @param type The comparison type of this constraint.
+   */
+  Constraint (ComparisonType type);
+
 public:
   /**
    * Constructs a constraint indicating that given expression should obey the
@@ -55,6 +62,7 @@ public:
   ~Constraint ();
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
+  static Constraint *loadFromBinaryStream (std::ifstream &in);
 
   std::string toString () const;
 };

@@ -27,6 +27,12 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+ExecutionTraceSegment::ExecutionTraceSegment (const std::map < REG, Expression * > &regi,
+    const std::map < ADDRINT, Expression * > &memo,
+    const std::list < const Constraint * > &cnrt) :
+registerToExpression (regi), memoryAddressToExpression (memo), pathConstraint (cnrt) {
+}
+
 ExecutionTraceSegment::ExecutionTraceSegment () {
 }
 
@@ -204,7 +210,7 @@ void ExecutionTraceSegment::saveToBinaryStream (std::ofstream &out) const {
 
 template <typename ADDRESS>
 void ExecutionTraceSegment::saveMapToBinaryStream (std::ofstream &out,
-    const char *magicString, const std::map < ADDRESS, Expression * > map) const {
+    const char *magicString, const std::map < ADDRESS, Expression * > &map) const {
   out.write (magicString, strlen (magicString));
 
   typename std::map < ADDRESS, Expression * >::size_type s = map.size ();
@@ -216,6 +222,47 @@ void ExecutionTraceSegment::saveMapToBinaryStream (std::ofstream &out,
 
     const Expression *exp = it->second;
     exp->saveToBinaryStream (out);
+  }
+}
+
+ExecutionTraceSegment *ExecutionTraceSegment::loadFromBinaryStream (std::ifstream &in) {
+  char segmentMagicString[3];
+  in.read (segmentMagicString, 3);
+  if (strncmp (segmentMagicString, "SEG", 3) != 0) {
+    throw std::runtime_error
+        ("Unexpected magic string while loading trace segment from binary stream");
+  }
+  std::map < REG, Expression * > regi;
+  std::map < ADDRINT, Expression * > memo;
+  std::list < const Constraint * > cnrt;
+  loadMapFromBinaryStream (in, "REG", regi);
+  loadMapFromBinaryStream (in, "MEM", memo);
+  loadListFromBinaryStream (in, "CON", cnrt);
+
+  return new ExecutionTraceSegment (regi, memo, cnrt);
+}
+
+template <typename ADDRESS>
+void ExecutionTraceSegment::loadMapFromBinaryStream (std::ifstream &in,
+    const char *expectedMagicString, std::map < ADDRESS, Expression * > &map) {
+  typedef typename std::map < ADDRESS, Expression * >::iterator MapIterator;
+  char magicString[3];
+  in.read (magicString, 3);
+  if (strncmp (magicString, expectedMagicString, 3) != 0) {
+    throw std::runtime_error
+        ("Unexpected magic string while loading map from binary stream");
+  }
+  typename std::map < ADDRESS, Expression * >::size_type s;
+  in.read ((char *) &s, sizeof (s));
+  for (int i = 0; i < s; ++i) {
+    ADDRESS a;
+    in.read ((char *) &a, sizeof (a));
+
+    Expression *exp = Expression::loadFromBinaryStream (in);
+    std::pair < MapIterator, bool > res = map.insert (make_pair (a, exp));
+    if (!res.second) {
+      throw std::runtime_error ("Can not read map's entry from binary stream");
+    }
   }
 }
 

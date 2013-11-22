@@ -33,8 +33,14 @@ Operator *Operator::clone () const {
 }
 
 void Operator::saveToBinaryStream (std::ofstream &out) const {
-  out.write ("OPR", 3);
+  out.write ("O", 1);
   out.write ((const char *) &oi, sizeof (oi));
+}
+
+Operator *Operator::loadFromBinaryStream (std::ifstream &in) {
+  OperatorIdentifier oi;
+  in.read ((char *) &oi, sizeof (oi));
+  return new Operator (oi);
 }
 
 UINT64 Operator::apply (UINT64 a, UINT64 b) const {

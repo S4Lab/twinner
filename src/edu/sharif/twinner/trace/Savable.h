@@ -16,6 +16,7 @@
 #include <list>
 #include <fstream>
 #include <string.h>
+#include <stdexcept>
 
 namespace edu {
 namespace sharif {
@@ -55,8 +56,8 @@ public:
  */
 template < typename SAVABLE >
 void saveListToBinaryStream (std::ofstream &out,
-    const char *magicString, const std::list< SAVABLE * > list) {
-  out.write (magicString, strlen (magicString));
+    const char *magicString, const std::list< SAVABLE * > &list) {
+  out.write (magicString, 3);
 
   typename std::list< SAVABLE * >::size_type s = list.size ();
   out.write ((const char *) &s, sizeof (s));
@@ -64,6 +65,23 @@ void saveListToBinaryStream (std::ofstream &out,
       it != list.end (); ++it) {
     const Savable *con = *it;
     con->saveToBinaryStream (out);
+  }
+}
+
+template < typename SAVABLE >
+void loadListFromBinaryStream (std::ifstream &in,
+    const char *expectedMagicString, std::list< SAVABLE * > &list) {
+  char magicString[3];
+  in.read (magicString, 3);
+  if (strncmp (magicString, expectedMagicString, 3) != 0) {
+    throw std::runtime_error
+        ("Unexpected magic string while loading list from binary stream");
+  }
+  typename std::list< SAVABLE * >::size_type s;
+  in.read ((char *) &s, sizeof (s));
+  for (int i = 0; i < s; ++i) {
+    SAVABLE *con = SAVABLE::loadFromBinaryStream (in);
+    list.push_back (con);
   }
 }
 

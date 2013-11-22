@@ -27,10 +27,15 @@ private:
 
   RegisterEmergedSymbol (const RegisterEmergedSymbol &s);
 
+  RegisterEmergedSymbol (REG address);
+
 public:
   RegisterEmergedSymbol (REG address, UINT64 concreteValue, int generationIndex);
 
   virtual RegisterEmergedSymbol *clone () const;
+
+  virtual void saveToBinaryStream (std::ofstream &out) const;
+  static RegisterEmergedSymbol *loadFromBinaryStream (std::ifstream &in);
 };
 
 }

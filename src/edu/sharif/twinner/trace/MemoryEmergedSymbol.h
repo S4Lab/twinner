@@ -27,10 +27,15 @@ private:
 
   MemoryEmergedSymbol (const MemoryEmergedSymbol &s);
 
+  MemoryEmergedSymbol (ADDRINT address);
+
 public:
   MemoryEmergedSymbol (ADDRINT address, UINT64 concreteValue, int generationIndex);
 
   virtual MemoryEmergedSymbol *clone () const;
+
+  virtual void saveToBinaryStream (std::ofstream &out) const;
+  static MemoryEmergedSymbol *loadFromBinaryStream (std::ifstream &in);
 };
 
 }

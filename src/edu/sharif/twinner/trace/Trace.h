@@ -68,6 +68,8 @@ private:
    */
   std::map < REG, int > registerResidentSymbolsGenerationIndices;
 
+  Trace (const std::list < ExecutionTraceSegment * > &list);
+
 public:
   Trace ();
   ~Trace ();
@@ -127,6 +129,7 @@ public:
 
   bool saveToFile (const char *path) const;
   static Trace *loadFromFile (const char *path);
+  static Trace *loadFromBinaryStream (std::ifstream &in);
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
 
