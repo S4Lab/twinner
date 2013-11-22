@@ -204,6 +204,27 @@ void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfReg (
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
+    DoubleDestinationsAnalysisRoutine routine,
+    REG dstLeftReg, UINT64 dstLeftRegVal,
+    REG dstRightReg, UINT64 dstRightRegVal,
+    REG srcReg, UINT64 srcRegVal,
+    const CONTEXT *context,
+    std::string *insAssembly) {
+  runHooks (context);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineTwoDstRegOneSrcReg(INS: "
+      << *insAssembly << "): left dst reg: " << REG_StringShort (dstLeftReg)
+      << ", right dst reg: " << REG_StringShort (dstRightReg)
+      << ", src reg: " << REG_StringShort (srcReg) << '\n';
+  (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
+      RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
+      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
     (this->*hook) (readRegisterContent (context, trackedReg));
@@ -477,6 +498,47 @@ void InstructionSymbolicExecuter::xorAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::divAnalysisRoutine (
+    const MutableExpressionValueProxy &leftDst,
+    const MutableExpressionValueProxy &rightDst,
+    const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "divAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting left dst exp...";
+  edu::sharif::twinner::trace::Expression *leftDstExp =
+      leftDst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting right dst exp...";
+  edu::sharif::twinner::trace::Expression *rightDstExp =
+      rightDst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tpreparing left-right in both dst regs...";
+  divisionSize = leftDst.getSize ();
+  leftDstExp->shiftToLeft (divisionSize);
+  leftDstExp->binaryOperation
+      (new edu::sharif::twinner::trace::Operator
+       (edu::sharif::twinner::trace::Operator::BITWISE_OR), rightDstExp);
+  rightDstExp = rightDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tcalculating quotient (right) and remainder (left) of division...";
+  leftDstExp->binaryOperation
+      (new edu::sharif::twinner::trace::Operator
+       (edu::sharif::twinner::trace::Operator::REMAINDER), srcexp);
+  rightDstExp->binaryOperation
+      (new edu::sharif::twinner::trace::Operator
+       (edu::sharif::twinner::trace::Operator::DIVIDE), srcexp);
+  // At this point, symbolic quotient and remainder are calculated correctly.
+  // but concrete values are not! So we need to register a hook to synchronize concrete
+  // values too (we can also calculate them in assembly, but it's not required).
+
+  // TODO: Register hook for updating concrete values of two destination registers
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -506,6 +568,20 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: Unknown opcode: "
         << OPCODE_StringShort (op) << '\n';
     throw std::runtime_error ("Unknown opcode given to analysis routine");
+  }
+}
+
+InstructionSymbolicExecuter::DoubleDestinationsAnalysisRoutine
+InstructionSymbolicExecuter::convertOpcodeToDoubleDestinationsAnalysisRoutine (
+    OPCODE op) const {
+  switch (op) {
+  case XED_ICLASS_DIV:
+    return &InstructionSymbolicExecuter::divAnalysisRoutine;
+  default:
+    edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
+        "Double Destinations: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
+    throw std::runtime_error
+        ("Unknown opcode (for double dests) given to analysis routine");
   }
 }
 
@@ -696,6 +772,23 @@ VOID analysisRoutineBeforeChangeOfReg (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineBeforeChangeOfReg
       (ise->convertOpcodeToSuddenlyChangedRegAnalysisRoutine ((OPCODE) opcode),
        (REG) reg,
+       context,
+       insAssemblyStr);
+}
+
+VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstLeftReg, ADDRINT dstLeftRegVal,
+    UINT32 dstRightReg, ADDRINT dstRightRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    const CONTEXT *context,
+    VOID *insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  std::string *insAssemblyStr = (std::string *) insAssembly;
+  ise->analysisRoutineTwoDstRegOneSrcReg
+      (ise->convertOpcodeToDoubleDestinationsAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstLeftReg, dstLeftRegVal,
+       (REG) dstRightReg, dstRightRegVal,
+       (REG) srcReg, srcRegVal,
        context,
        insAssemblyStr);
 }

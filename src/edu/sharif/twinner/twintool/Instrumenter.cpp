@@ -78,6 +78,8 @@ totalCountOfInstructions (0) {
       (make_pair (XED_ICLASS_AND, COMMON_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_XOR, COMMON_INS_MODELS));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_DIV, DIV_INS_MODELS));
 }
 
 Instrumenter::~Instrumenter () {
@@ -155,6 +157,8 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
     return getInstructionModelForPopInstruction (ins);
   case XED_ICLASS_NOP:
     return NOP_INS_MODELS;
+  case XED_ICLASS_DIV:
+    return DIV_INS_MODELS;
   default:
     switch (INS_Category (ins)) {
     case XED_CATEGORY_COND_BR:
@@ -368,6 +372,21 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineBeforeChangeOfReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, REG_RSP,
+                    IARG_CONST_CONTEXT,
+                    IARG_PTR, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DIV_INS_MODELS:
+  {
+    REG srcreg = INS_OperandReg (ins, 0);
+    REG dstRightReg = INS_OperandReg (ins, 1);
+    REG dstLeftReg = INS_OperandReg (ins, 2);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineTwoDstRegOneSrcReg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstLeftReg, IARG_REG_VALUE, dstLeftReg,
+                    IARG_UINT32, dstRightReg, IARG_REG_VALUE, dstRightReg,
+                    IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
                     IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);

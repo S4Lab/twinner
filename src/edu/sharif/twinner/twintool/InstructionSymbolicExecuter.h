@@ -35,6 +35,10 @@ private:
 
   typedef void (InstructionSymbolicExecuter::*AnalysisRoutine) (
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+  typedef void (InstructionSymbolicExecuter::*DoubleDestinationsAnalysisRoutine) (
+      const MutableExpressionValueProxy &leftDst,
+      const MutableExpressionValueProxy &rightDst,
+      const ExpressionValueProxy &src);
   typedef void (InstructionSymbolicExecuter::*ConditionalBranchAnalysisRoutine) (
       bool branchTaken);
   typedef void (InstructionSymbolicExecuter::*SuddenlyChangedRegAnalysisRoutine) (
@@ -45,6 +49,7 @@ private:
 
   REG trackedReg;
   SuddenlyChangedRegAnalysisRoutine hook;
+  int divisionSize;
 
 public:
   InstructionSymbolicExecuter ();
@@ -94,6 +99,12 @@ public:
       std::string *insAssembly);
   void analysisRoutineBeforeChangeOfReg (SuddenlyChangedRegAnalysisRoutine routine,
       REG reg,
+      const CONTEXT *context,
+      std::string *insAssembly);
+  void analysisRoutineTwoDstRegOneSrcReg (DoubleDestinationsAnalysisRoutine routine,
+      REG dstLeftReg, UINT64 dstLeftRegVal,
+      REG dstRightReg, UINT64 dstRightRegVal,
+      REG srcReg, UINT64 srcRegVal,
       const CONTEXT *context,
       std::string *insAssembly);
 
@@ -192,8 +203,21 @@ private:
   void xorAnalysisRoutine (const MutableExpressionValueProxy &dst,
       const ExpressionValueProxy &src);
 
+  /**
+   * DIV unsigned divide left-right regs by src reg putting quotient in right, remainder
+   * in left. This method only calculate symbolic values of operands (concrete values
+   * will be wrong) and also ignores propagating new values to overlapping registers.
+   * Instead, it registers a hook to adjust concrete values and propagate to overlapping
+   * registers at the beginning of next executed instruction.
+   */
+  void divAnalysisRoutine (const MutableExpressionValueProxy &leftDst,
+      const MutableExpressionValueProxy &rightDst,
+      const ExpressionValueProxy &src);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
+  DoubleDestinationsAnalysisRoutine convertOpcodeToDoubleDestinationsAnalysisRoutine (
+      OPCODE op) const;
   ConditionalBranchAnalysisRoutine convertOpcodeToConditionalBranchAnalysisRoutine (
       OPCODE op) const;
   SuddenlyChangedRegAnalysisRoutine convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
@@ -246,6 +270,12 @@ VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
     VOID *insAssembly);
 VOID analysisRoutineBeforeChangeOfReg (VOID *iseptr, UINT32 opcode,
     UINT32 reg,
+    const CONTEXT *context,
+    VOID *insAssembly);
+VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstLeftReg, ADDRINT dstLeftRegVal,
+    UINT32 dstRightReg, ADDRINT dstRightRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal,
     const CONTEXT *context,
     VOID *insAssembly);
 
