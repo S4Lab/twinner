@@ -41,15 +41,16 @@ private:
       const ExpressionValueProxy &src);
   typedef void (InstructionSymbolicExecuter::*ConditionalBranchAnalysisRoutine) (
       bool branchTaken);
-  typedef void (InstructionSymbolicExecuter::*SuddenlyChangedRegAnalysisRoutine) (
-      UINT64 regVal);
+  typedef void (InstructionSymbolicExecuter::*Hook) (const CONTEXT *context,
+      UINT64 value);
+  typedef Hook SuddenlyChangedRegAnalysisRoutine;
 
   edu::sharif::twinner::trace::Trace *trace;
   Flags eflags;
 
   REG trackedReg;
-  SuddenlyChangedRegAnalysisRoutine hook;
   int divisionSize;
+  Hook hook;
 
 public:
   InstructionSymbolicExecuter ();
@@ -177,13 +178,13 @@ private:
    * CALL instruction is executed and RSP is changed. This method will synchronize its
    * symbolic value with its concrete value.
    */
-  void callAnalysisRoutine (UINT64 rspRegVal);
+  void callAnalysisRoutine (const CONTEXT *context, UINT64 rspRegVal);
 
   /**
    * RET instruction is executed and RSP is changed. This method will synchronize its
    * symbolic value with its concrete value.
    */
-  void retAnalysisRoutine (UINT64 rspRegVal);
+  void retAnalysisRoutine (const CONTEXT *context, UINT64 rspRegVal);
 
   /**
    * SHL shifts dst to left as much as indicated by src.
@@ -213,6 +214,12 @@ private:
   void divAnalysisRoutine (const MutableExpressionValueProxy &leftDst,
       const MutableExpressionValueProxy &rightDst,
       const ExpressionValueProxy &src);
+
+  /**
+   * This hook adjusts concrete values of division operands and also propagates their
+   * values to overlapping registers.
+   */
+  void adjustDivisionInstructionOperands (const CONTEXT *context, UINT64 operandSize);
 
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;

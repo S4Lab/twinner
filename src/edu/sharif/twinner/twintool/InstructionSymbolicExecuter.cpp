@@ -32,7 +32,7 @@ namespace twintool {
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter () :
 trace (new edu::sharif::twinner::trace::Trace ()),
-trackedReg (REG_INVALID_), hook (0) {
+trackedReg (REG_INVALID_), divisionSize (-1), hook (0) {
 }
 
 edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () const {
@@ -227,10 +227,14 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
 
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
-    (this->*hook) (readRegisterContent (context, trackedReg));
+    (this->*hook) (context, readRegisterContent (context, trackedReg));
     trackedReg = REG_INVALID_;
-    hook = 0;
+
+  } else if (divisionSize > 0) {
+    (this->*hook) (context, (UINT64) divisionSize);
+    divisionSize = -1;
   }
+  hook = 0;
 }
 
 void InstructionSymbolicExecuter::movAnalysisRoutine (
@@ -385,7 +389,8 @@ void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
       << "\tdone\n";
 }
 
-void InstructionSymbolicExecuter::callAnalysisRoutine (UINT64 rspRegVal) {
+void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
+    UINT64 rspRegVal) {
   edu::sharif::twinner::util::Logger::loquacious () << "callAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
@@ -407,7 +412,8 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (UINT64 rspRegVal) {
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
-void InstructionSymbolicExecuter::retAnalysisRoutine (UINT64 rspRegVal) {
+void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
+    UINT64 rspRegVal) {
   edu::sharif::twinner::util::Logger::loquacious () << "retAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
@@ -534,9 +540,66 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
   // but concrete values are not! So we need to register a hook to synchronize concrete
   // values too (we can also calculate them in assembly, but it's not required).
 
-  // TODO: Register hook for updating concrete values of two destination registers
+  hook = &InstructionSymbolicExecuter::adjustDivisionInstructionOperands;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
+}
+
+void InstructionSymbolicExecuter::adjustDivisionInstructionOperands (
+    const CONTEXT *context, UINT64 operandSize) {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "adjustDivisionInstructionOperands(...) hook...";
+  REG remainderReg, quotientReg;
+  switch (operandSize) {
+  case 8:
+    remainderReg = REG_AH;
+    quotientReg = REG_AL;
+  case 16:
+    remainderReg = REG_DX;
+    quotientReg = REG_AX;
+    break;
+  case 32:
+    remainderReg = REG_EDX;
+    quotientReg = REG_EAX;
+    break;
+  case 64:
+    remainderReg = REG_RDX;
+    quotientReg = REG_RAX;
+    break;
+  default:
+    edu::sharif::twinner::util::Logger::error ()
+        << "adjustDivisionInstructionOperands(...) hook: "
+        "unsupported operand size: " << operandSize << '\n';
+    throw std::runtime_error ("Unsupported operand size in division instruction");
+  }
+  const UINT64 remainderVal = readRegisterContent (context, remainderReg);
+  const UINT64 quotientVal = readRegisterContent (context, quotientReg);
+  edu::sharif::twinner::trace::Expression *remainderExp =
+      trace->getSymbolicExpressionByRegister (remainderReg);
+  edu::sharif::twinner::trace::Expression *quotientExp =
+      trace->getSymbolicExpressionByRegister (quotientReg);
+  remainderExp->setLastConcreteValue (remainderVal);
+  quotientExp->setLastConcreteValue (quotientVal);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tconcrete values are adjusted...";
+  if (operandSize == 8) { // AX == AH:AL
+    remainderExp->shiftToLeft (8);
+    remainderExp->binaryOperation
+        (new edu::sharif::twinner::trace::Operator
+         (edu::sharif::twinner::trace::Operator::BITWISE_OR), quotientExp);
+    const MutableExpressionValueProxy &ax =
+        RegisterResidentExpressionValueProxy (REG_AX, 0);
+    ax.valueIsChanged (trace, remainderExp); // this deletes unused expressions by itself
+  } else {
+    const MutableExpressionValueProxy &remainder =
+        RegisterResidentExpressionValueProxy (remainderReg, remainderVal);
+    const MutableExpressionValueProxy &quotient =
+        RegisterResidentExpressionValueProxy (quotientReg, quotientVal);
+    remainder.valueIsChanged (trace, remainderExp);
+    quotient.valueIsChanged (trace, quotientExp);
+  }
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\toverlapping registers are updated.\n";
 }
 
 InstructionSymbolicExecuter::AnalysisRoutine
