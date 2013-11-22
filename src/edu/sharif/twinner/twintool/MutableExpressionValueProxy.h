@@ -75,6 +75,13 @@ public:
    * @param exp The expression who should be truncated to be fitted in this expression.
    */
   virtual void truncate (edu::sharif::twinner::trace::Expression *exp) const = 0;
+
+  /**
+   * Finds size of the underlying expression container. For example memory read/write
+   * bits or register's size in bits.
+   * @return Size of the container of the underlying expression (mem or reg) in bits.
+   */
+  virtual int getSize () const = 0;
 };
 
 }

@@ -62,7 +62,11 @@ void MemoryResidentExpressionValueProxy::valueIsChanged (
 
 void MemoryResidentExpressionValueProxy::truncate (
     edu::sharif::twinner::trace::Expression *exp) const {
-  exp->truncate (memReadBytes * 8);
+  exp->truncate (getSize ());
+}
+
+int MemoryResidentExpressionValueProxy::getSize () const {
+  return memReadBytes * 8;
 }
 
 }
