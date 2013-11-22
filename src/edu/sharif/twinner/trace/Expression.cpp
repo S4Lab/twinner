@@ -62,6 +62,10 @@ UINT64 Expression::getLastConcreteValue () const {
   return lastConcreteValue;
 }
 
+void Expression::setLastConcreteValue (UINT64 value) {
+  lastConcreteValue = value;
+}
+
 std::string Expression::toString () const {
   std::list < ExpressionToken * > st = std::list < ExpressionToken * > (stack);
   std::stringstream ss;

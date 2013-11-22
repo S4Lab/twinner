@@ -65,6 +65,7 @@ public:
   ~Expression ();
 
   UINT64 getLastConcreteValue () const;
+  void setLastConcreteValue (UINT64 value);
 
   std::string toString () const;
   void convertToInfixExpression (std::list < ExpressionToken * > &st,
