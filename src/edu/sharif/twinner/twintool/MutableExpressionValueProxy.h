@@ -39,12 +39,34 @@ public:
   }
 
   /**
-   * Sets the proxied expression as the given exp value within the given execution trace.
-   * This method will call valueIsChanged method by itself.
+   * Same as setExpressionWithoutChangeNotification() method, but also calls the
+   * valueIsChanged() method to notify about changes.
    * @param trace The execution trace which changing expression will be saved there.
-   * @param exp The new expression which should be set over the proxied expression.
+   * @param exp The new expression which should be cloned and set over the proxied
+   * expression.
+   * 
+   * @return The newly cloned expression which is set by this method.
    */
-  virtual void setExpression (edu::sharif::twinner::trace::Trace *trace,
+  virtual edu::sharif::twinner::trace::Expression *setExpression (
+      edu::sharif::twinner::trace::Trace *trace,
+      const edu::sharif::twinner::trace::Expression *exp) const {
+    edu::sharif::twinner::trace::Expression *newExp =
+        setExpressionWithoutChangeNotification (trace, exp);
+    valueIsChanged (trace, newExp);
+    return newExp;
+  }
+
+  /**
+   * Sets the proxied expression as the given exp value within the given execution trace.
+   * @param trace The execution trace which changing expression will be saved there.
+   * @param exp The new expression which should be cloned and set over the proxied
+   * expression.
+   * 
+   * @return The newly cloned expression which is set by this method.
+   */
+  virtual edu::sharif::twinner::trace::Expression *
+  setExpressionWithoutChangeNotification (
+      edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const = 0;
 
   /**

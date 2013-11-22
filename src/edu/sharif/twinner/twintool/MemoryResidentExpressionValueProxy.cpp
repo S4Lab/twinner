@@ -45,12 +45,11 @@ MemoryResidentExpressionValueProxy::getExpression (
   return trace->getSymbolicExpressionByMemoryAddress (memoryEa, val);
 }
 
-void MemoryResidentExpressionValueProxy::setExpression (
+edu::sharif::twinner::trace::Expression *
+MemoryResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression *exp) const {
-  edu::sharif::twinner::trace::Expression *newExp =
-      trace->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
-  valueIsChanged (trace, newExp);
+  return trace->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
 }
 
 void MemoryResidentExpressionValueProxy::valueIsChanged (
