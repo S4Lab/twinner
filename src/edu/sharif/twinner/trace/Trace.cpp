@@ -299,10 +299,10 @@ void Trace::printPathConstraints (
 void Trace::printCompleteState (
     const edu::sharif::twinner::util::Logger &logger) const {
   int i = 0;
-  for (std::list < ExecutionTraceSegment * >::const_iterator it = currentSegmentIterator;
+  for (std::list < ExecutionTraceSegment * >::const_iterator it = segments.begin ();
       it != segments.end (); ++it) {
     const ExecutionTraceSegment *seg = *it;
-    logger << "Segment #" << i++;
+    logger << "Segment #" << i++ << ":\n";
     seg->printCompleteState (logger);
   }
 }

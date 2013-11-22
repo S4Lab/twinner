@@ -71,6 +71,7 @@ void Twinner::generateTwinBinary () {
 }
 
 void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace) {
+  trace->printCompleteState (edu::sharif::twinner::util::Logger::debug ());
   throw std::runtime_error ("Twinner::addExecutionTrace: Not yet implemented");
 }
 
