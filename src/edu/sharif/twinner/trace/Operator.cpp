@@ -47,6 +47,8 @@ UINT64 Operator::apply (UINT64 a, UINT64 b) const {
     return a * b;
   case DIVIDE:
     return a / b;
+  case REMAINDER:
+    return a % b;
   case XOR:
     return a ^ b;
   case BITWISE_AND:

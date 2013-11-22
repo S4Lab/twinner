@@ -30,6 +30,7 @@ public:
 
     ADD, MINUS,
     MULTIPLY, DIVIDE,
+    REMAINDER,
     NEGATE,
     XOR,
     BITWISE_AND, BITWISE_OR,
