@@ -21,7 +21,7 @@ if [ "a$fullpreparation" = "afull" ]; then
 		sudo swapoff -a
 		sudo -k
 	fi
-	mkdir -p /tmp/twinner
+	sudo su sandbox -c 'mkdir -p /tmp/twinner'
 fi
 echo "Done."
 
