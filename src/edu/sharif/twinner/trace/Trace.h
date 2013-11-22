@@ -125,7 +125,7 @@ public:
 
   void syscallInvoked (Syscall s);
 
-  void saveToFile (const char *path) const;
+  bool saveToFile (const char *path) const;
   static Trace *loadFromFile (const char *path);
 
   virtual void saveToBinaryStream (std::ofstream &out) const;

@@ -455,8 +455,11 @@ void Instrumenter::syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt,
 void Instrumenter::aboutToExit (INT32 code) {
   printInstructionsStatisticsInfo ();
   edu::sharif::twinner::util::Logger::debug () << "Saving trace info...";
-  ise->getTrace ()->saveToFile (traceFilePath.c_str ());
-  edu::sharif::twinner::util::Logger::debug () << "Done.\n";
+  if (ise->getTrace ()->saveToFile (traceFilePath.c_str ())) {
+    edu::sharif::twinner::util::Logger::debug () << "Done.\n";
+  } else {
+    edu::sharif::twinner::util::Logger::debug () << "Failed.\n";
+  }
 }
 
 void Instrumenter::printInstructionsStatisticsInfo () const {
@@ -467,8 +470,8 @@ void Instrumenter::printInstructionsStatisticsInfo () const {
     int op = it->first;
     int c = it->second;
     edu::sharif::twinner::util::Logger::info ()
-        << "count of " << OPCODE_StringShort (op) << " instructions: " << c << " ("
-        << (c * 100.0 / totalCountOfInstructions) << " %)\n";
+        << "count of " << OPCODE_StringShort (op) << " instructions: "
+        << std::dec << c << " (" << (c * 100.0 / totalCountOfInstructions) << " %)\n";
     countOfIgnoredInstructions -= c;
   }
   edu::sharif::twinner::util::Logger::info ()

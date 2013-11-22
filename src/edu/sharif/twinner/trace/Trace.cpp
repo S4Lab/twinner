@@ -208,13 +208,13 @@ void Trace::syscallInvoked (Syscall s) {
   throw std::runtime_error ("Trace::syscallInvoked: Not yet implemented");
 }
 
-void Trace::saveToFile (const char *path) const {
+bool Trace::saveToFile (const char *path) const {
   std::ofstream out;
   out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
   if (!out.is_open ()) {
     edu::sharif::twinner::util::Logger::error () << "Can not write trace info:"
-        " (error in open function)\n";
-    return;
+        " Error in open function: " << path << '\n';
+    return false;
   }
   if (currentSegmentIterator != segments.begin ()) {
     edu::sharif::twinner::util::Logger::warning () << "Some unvisited segments are found"
@@ -222,6 +222,7 @@ void Trace::saveToFile (const char *path) const {
   }
   saveToBinaryStream (out);
   out.close ();
+  return true;
 }
 
 void Trace::saveToBinaryStream (std::ofstream &out) const {
