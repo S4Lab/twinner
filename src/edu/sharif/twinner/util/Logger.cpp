@@ -103,13 +103,19 @@ const char *Logger::getVerbosenessLevelAsString () {
 
 const Logger &Logger::operator<< (
     const edu::sharif::twinner::trace::Expression *exp) const {
-  return (*this) << "Expression(" << exp->toString () << ")";
+  return (*this) << "Expression(" << exp->toString () << ')';
 }
 
 const Logger &Logger::operator<< (
     const edu::sharif::twinner::trace::Constraint *c) const {
-  return (*this) << c->toString ();
+  return (*this) << "Constraint(" << c->toString () << ')';
 }
+
+const Logger &Logger::operator<< (
+    const edu::sharif::twinner::trace::ExpressionToken *token) const {
+  return (*this) << "Token(" << token->toString () << ')';
+}
+
 
 }
 }

@@ -25,6 +25,7 @@ namespace twinner {
 namespace trace {
 
 class Expression;
+class ExpressionToken;
 class Constraint;
 }
 namespace util {
@@ -67,6 +68,8 @@ public:
 
   const Logger &operator<< (const edu::sharif::twinner::trace::Expression *exp) const;
   const Logger &operator<< (const edu::sharif::twinner::trace::Constraint *c) const;
+  const Logger &operator<< (
+      const edu::sharif::twinner::trace::ExpressionToken *token) const;
 
   inline const Logger &operator<< (const std::string &t) const {
     return actualWrite (t);
