@@ -205,6 +205,13 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * TEST performs AND between arguments, temporarily, and sets ZF, SF, and PF based
+   * on result. Also CF and OF are set to zero. AF is undefined.
+   */
+  void testAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * DIV unsigned divide left-right regs by src reg putting quotient in right, remainder
    * in left. This method only calculate symbolic values of operands (concrete values
    * will be wrong) and also ignores propagating new values to overlapping registers.

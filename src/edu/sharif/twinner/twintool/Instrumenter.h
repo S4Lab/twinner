@@ -65,6 +65,8 @@ private:
     LEA_INS_MODELS = DST_REG_SRC_ADG,
     SHL_INS_MODELS = DST_REG_SRC_IMD | DST_REG_SRC_REG
     | DST_MEM_SRC_IMD | DST_MEM_SRC_REG,
+    TEST_INS_MODELS = DST_REG_SRC_IMD | DST_MEM_SRC_IMD
+    | DST_REG_SRC_REG | DST_MEM_SRC_REG,
   };
 
   std::map < OPCODE, InstructionModel > managedInstructions;

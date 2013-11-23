@@ -500,6 +500,31 @@ void InstructionSymbolicExecuter::xorAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::testAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "testAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexp =
+      dst.getExpression (trace);
+
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tbinary operation...";
+  edu::sharif::twinner::trace::Expression *tmpexp = dstexp->clone ();
+  tmpexp->binaryOperation
+      (new edu::sharif::twinner::trace::Operator
+       (edu::sharif::twinner::trace::Operator::BITWISE_AND), srcexp);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tsetting EFLAGS...";
+  eflags.setFlags (tmpexp);
+  // TODO: Inform eflags about CF and OF which must be zero.
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::divAnalysisRoutine (
     const MutableExpressionValueProxy &leftDst,
     const MutableExpressionValueProxy &rightDst,
@@ -623,6 +648,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::andAnalysisRoutine;
   case XED_ICLASS_XOR:
     return &InstructionSymbolicExecuter::xorAnalysisRoutine;
+  case XED_ICLASS_TEST:
+    return &InstructionSymbolicExecuter::testAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: Unknown opcode: "
         << OPCODE_StringShort (op) << '\n';
