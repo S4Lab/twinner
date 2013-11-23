@@ -377,11 +377,7 @@ void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jnzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   edu::sharif::twinner::trace::Constraint *cc
-      = new edu::sharif::twinner::trace::Constraint
-      (eflags.getFlagsUnderlyingExpression (),
-       branchTaken ?
-       edu::sharif::twinner::trace::Constraint::NON_ZERO :
-       edu::sharif::twinner::trace::Constraint::ZERO);
+      = eflags.instantiateConstraintForZeroFlag (!branchTaken);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tadding constraint...";
   trace->addPathConstraint (cc);

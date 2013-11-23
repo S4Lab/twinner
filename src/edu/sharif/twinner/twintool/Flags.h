@@ -19,6 +19,7 @@ namespace twinner {
 namespace trace {
 
 class Expression;
+class Constraint;
 }
 namespace twintool {
 
@@ -38,6 +39,17 @@ public:
    */
   void setFlags (edu::sharif::twinner::trace::Expression *exp);
 
+  /**
+   * Instantiates a new constraint object denoting ZF's (zero flag) state. The concrete
+   * status of the ZF should be provided as argument.
+   * @param zfIsSet The concrete status of the ZF in processor.
+   * 
+   * @return A new constraint instance denoting current zero flag's state.
+   */
+  edu::sharif::twinner::trace::Constraint *
+  instantiateConstraintForZeroFlag (bool zfIsSet) const;
+
+private:
   /**
    * Returns the underlying expression which currently, flags are set based on it. The
    * returned expression is still owned by this object and caller must clone it

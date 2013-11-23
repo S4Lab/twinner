@@ -13,6 +13,7 @@
 #include "Flags.h"
 
 #include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/Constraint.h"
 
 namespace edu {
 namespace sharif {
@@ -39,6 +40,15 @@ void Flags::setFlags (edu::sharif::twinner::trace::Expression *_exp) {
 const edu::sharif::twinner::trace::Expression *
 Flags::getFlagsUnderlyingExpression () const {
   return exp;
+}
+
+edu::sharif::twinner::trace::Constraint *
+Flags::instantiateConstraintForZeroFlag (bool zfIsSet) const {
+  return new edu::sharif::twinner::trace::Constraint
+      (getFlagsUnderlyingExpression (),
+       zfIsSet ?
+       edu::sharif::twinner::trace::Constraint::ZERO :
+       edu::sharif::twinner::trace::Constraint::NON_ZERO);
 }
 
 }
