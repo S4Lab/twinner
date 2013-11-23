@@ -175,6 +175,11 @@ private:
   void jnzAnalysisRoutine (bool branchTaken);
 
   /**
+   * JZ jumps if ZF=1 which means that corresponding expression was zero
+   */
+  void jzAnalysisRoutine (bool branchTaken);
+
+  /**
    * CALL instruction is executed and RSP is changed. This method will synchronize its
    * symbolic value with its concrete value.
    */

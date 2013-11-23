@@ -385,6 +385,18 @@ void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::jzAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::util::Logger::loquacious () << "jzAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  edu::sharif::twinner::trace::Constraint *cc
+      = eflags.instantiateConstraintForZeroFlag (branchTaken);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tadding constraint...";
+  trace->addPathConstraint (cc);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
     UINT64 rspRegVal) {
   edu::sharif::twinner::util::Logger::loquacious () << "callAnalysisRoutine(...)\n"
@@ -677,6 +689,8 @@ InstructionSymbolicExecuter::convertOpcodeToConditionalBranchAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_JNZ:
     return &InstructionSymbolicExecuter::jnzAnalysisRoutine;
+  case XED_ICLASS_JZ:
+    return &InstructionSymbolicExecuter::jzAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Conditional Branch: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
