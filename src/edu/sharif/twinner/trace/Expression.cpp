@@ -93,8 +93,9 @@ void Expression::convertToInfixExpression (std::list < ExpressionToken * > &st,
       break;
     case Operator::Binary:
       convertToInfixExpression (st, operand); // right operand
+      ss << '(';
       convertToInfixExpression (st, ss); // left operand
-      ss << ' ' << op->toString () << ' ' << operand.str ();
+      ss << ' ' << op->toString () << ' ' << operand.str () << ')';
       break;
     default:
       edu::sharif::twinner::util::Logger::error () << "Unknown operator type\n";
