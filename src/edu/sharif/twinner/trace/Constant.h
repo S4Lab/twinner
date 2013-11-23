@@ -38,6 +38,8 @@ public:
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static Constant *loadFromBinaryStream (std::ifstream &in);
+
+  virtual std::string toString () const;
 };
 
 }

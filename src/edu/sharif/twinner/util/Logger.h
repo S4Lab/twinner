@@ -131,7 +131,7 @@ const edu::sharif::twinner::util::Logger &Logger::operator<< (
       const KEY k = it->first;
       const VALUE v = it->second;
 
-      (*this) << "Key(" << k << ") => Value(" << v << ")\n";
+      (*this) << std::hex << "Key(" << k << ") => Value(" << v << ")\n";
     }
   }
   return *this;
@@ -144,7 +144,7 @@ const edu::sharif::twinner::util::Logger &Logger::operator<< (
     for (typename std::list < VALUE >::const_iterator it = map.begin ();
         it != map.end (); ++it) {
       const VALUE v = *it;
-      (*this) << v;
+      (*this) << std::hex << v << '\n';
     }
   }
   return *this;

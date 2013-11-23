@@ -10,6 +10,8 @@
  * This file is part of Twinner project.
  */
 
+#include <sstream>
+
 #include "MemoryEmergedSymbol.h"
 
 namespace edu {
@@ -46,6 +48,12 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::loadFromBinaryStream (std::ifstream &i
   MemoryEmergedSymbol *symbol = new MemoryEmergedSymbol (address);
   symbol->Symbol::loadFromBinaryStream (in);
   return symbol;
+}
+
+std::string MemoryEmergedSymbol::toString () const {
+  std::stringstream ss;
+  ss << 'm' << std::hex << address << '_' << generationIndex;
+  return ss.str ();
 }
 
 }

@@ -38,6 +38,8 @@ public:
   virtual ExpressionToken *clone () const = 0;
 
   static ExpressionToken *loadFromBinaryStream (std::ifstream &in);
+
+  virtual std::string toString () const = 0;
 };
 
 }

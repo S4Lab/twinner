@@ -59,7 +59,7 @@ std::string Constraint::toString () const {
     t = " < 0";
     break;
   case ZERO:
-    t = " = 0";
+    t = " == 0";
     break;
   case NON_ZERO:
     t = " != 0";

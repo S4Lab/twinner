@@ -10,6 +10,8 @@
  * This file is part of Twinner project.
  */
 
+#include <sstream>
+
 #include "Constant.h"
 
 namespace edu {
@@ -38,6 +40,12 @@ Constant *Constant::loadFromBinaryStream (std::ifstream &in) {
   UINT64 value;
   in.read ((char *) &value, sizeof (value));
   return new Constant (value);
+}
+
+std::string Constant::toString () const {
+  std::stringstream ss;
+  ss << "0x" << std::hex << value;
+  return ss.str ();
 }
 
 }

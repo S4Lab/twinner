@@ -10,6 +10,8 @@
  * This file is part of Twinner project.
  */
 
+#include <sstream>
+
 #include "RegisterEmergedSymbol.h"
 
 namespace edu {
@@ -46,6 +48,12 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::loadFromBinaryStream (std::ifstrea
   RegisterEmergedSymbol *symbol = new RegisterEmergedSymbol (address);
   symbol->Symbol::loadFromBinaryStream (in);
   return symbol;
+}
+
+std::string RegisterEmergedSymbol::toString () const {
+  std::stringstream ss;
+  ss << "r" << std::hex << address << '_' << generationIndex;
+  return ss.str ();
 }
 
 }

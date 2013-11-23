@@ -36,6 +36,8 @@ public:
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static MemoryEmergedSymbol *loadFromBinaryStream (std::ifstream &in);
+
+  virtual std::string toString () const;
 };
 
 }

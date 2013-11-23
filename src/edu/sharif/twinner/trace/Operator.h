@@ -58,6 +58,8 @@ public:
 
   UINT64 apply (UINT64 a, UINT64 b) const;
 
+  virtual std::string toString () const;
+
   OperatorType getType () const;
 };
 

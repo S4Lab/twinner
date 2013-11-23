@@ -70,6 +70,35 @@ UINT64 Operator::apply (UINT64 a, UINT64 b) const {
   }
 }
 
+std::string Operator::toString () const {
+  switch (oi) {
+  case ADD:
+    return "+";
+  case MINUS:
+    return "-";
+  case MULTIPLY:
+    return "*";
+  case DIVIDE:
+    return "/";
+  case REMAINDER:
+    return "%";
+  case NEGATE:
+    return "-";
+  case XOR:
+    return "^";
+  case BITWISE_AND:
+    return "&";
+  case BITWISE_OR:
+    return "|";
+  case SHIFT_LEFT:
+    return "<<";
+  case SHIFT_RIGHT:
+    return ">>";
+  default:
+    throw std::runtime_error ("Operator::toString(...): Non-handled operator identifier");
+  }
+}
+
 Operator::OperatorType Operator::getType () const {
   if (oi == NEGATE) {
     return Unary;

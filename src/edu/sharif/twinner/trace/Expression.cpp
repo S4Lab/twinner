@@ -75,13 +75,36 @@ std::string Expression::toString () const {
   std::list < ExpressionToken * > st = std::list < ExpressionToken * > (stack);
   std::stringstream ss;
   convertToInfixExpression (st, ss);
-  ss << "/*0x" << std::hex << lastConcreteValue << "*/";
+  ss << " /*0x" << std::hex << lastConcreteValue << "*/";
   return ss.str ();
 }
 
 void Expression::convertToInfixExpression (std::list < ExpressionToken * > &st,
     std::stringstream &ss) const {
-  ss << "not-implemented";
+  const ExpressionToken *token = st.back ();
+  st.pop_back ();
+  const Operator *op = dynamic_cast<const Operator *> (token);
+  if (op) {
+    std::stringstream operand;
+    switch (op->getType ()) {
+    case Operator::Unary:
+      convertToInfixExpression (st, operand);
+      ss << op->toString () << operand;
+      break;
+    case Operator::Binary:
+      convertToInfixExpression (st, operand); // right operand
+      convertToInfixExpression (st, ss); // left operand
+      ss << ' ' << op->toString () << ' ' << operand;
+      break;
+    default:
+      edu::sharif::twinner::util::Logger::error () << "Unknown operator type\n";
+      break;
+    }
+  } else if (token) {
+    ss << token->toString (); // single operand
+  } else {
+    edu::sharif::twinner::util::Logger::error () << "Missing expression token\n";
+  }
 }
 
 void Expression::unaryOperation (Operator op, Expression exp) {
