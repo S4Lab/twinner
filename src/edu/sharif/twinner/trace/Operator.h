@@ -37,6 +37,12 @@ public:
     SHIFT_LEFT, SHIFT_RIGHT,
   };
 
+  enum OperatorType {
+
+    Unary,
+    Binary,
+  };
+
 private:
   OperatorIdentifier oi;
 
@@ -51,6 +57,8 @@ public:
   static Operator *loadFromBinaryStream (std::ifstream &in);
 
   UINT64 apply (UINT64 a, UINT64 b) const;
+
+  OperatorType getType () const;
 };
 
 }

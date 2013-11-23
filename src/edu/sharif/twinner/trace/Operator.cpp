@@ -70,6 +70,14 @@ UINT64 Operator::apply (UINT64 a, UINT64 b) const {
   }
 }
 
+Operator::OperatorType Operator::getType () const {
+  if (oi == NEGATE) {
+    return Unary;
+  } else {
+    return Binary;
+  }
+}
+
 }
 }
 }
