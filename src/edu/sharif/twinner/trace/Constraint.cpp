@@ -54,12 +54,16 @@ std::string Constraint::toString () const {
   switch (type) {
   case POSITIVE:
     t = " > 0";
+    break;
   case NEGATIVE:
     t = " < 0";
+    break;
   case ZERO:
     t = " = 0";
+    break;
   case NON_ZERO:
     t = " != 0";
+    break;
   default:
     return "Unknown comparison type";
   }
