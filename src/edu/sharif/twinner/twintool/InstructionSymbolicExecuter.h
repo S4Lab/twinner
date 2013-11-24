@@ -52,10 +52,15 @@ private:
   int divisionSize;
   Hook hook;
 
+  bool disabled;
+
 public:
-  InstructionSymbolicExecuter ();
+  InstructionSymbolicExecuter (bool disabled);
 
   edu::sharif::twinner::trace::Trace *getTrace () const;
+
+  void disable ();
+  void enable ();
 
 public:
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,

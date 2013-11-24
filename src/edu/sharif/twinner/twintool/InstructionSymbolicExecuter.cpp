@@ -30,13 +30,22 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
-InstructionSymbolicExecuter::InstructionSymbolicExecuter () :
+InstructionSymbolicExecuter::InstructionSymbolicExecuter (bool _disabled) :
 trace (new edu::sharif::twinner::trace::Trace ()),
-trackedReg (REG_INVALID_), divisionSize (-1), hook (0) {
+trackedReg (REG_INVALID_), divisionSize (-1), hook (0),
+disabled (_disabled) {
 }
 
 edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () const {
   return trace;
+}
+
+void InstructionSymbolicExecuter::disable () {
+  disabled = true;
+}
+
+void InstructionSymbolicExecuter::enable () {
+  disabled = false;
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
@@ -45,6 +54,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
     const CONTEXT *context,
     std::string *insAssembly) {
   runHooks (context);
+  if (disabled) {
+    return;
+  }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcReg(INS: "
@@ -62,6 +74,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine r
     const CONTEXT *context,
     std::string *insAssembly) {
   runHooks (context);
+  if (disabled) {
+    return;
+  }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcMem(INS: "
@@ -80,6 +95,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
     const CONTEXT *context,
     std::string *insAssembly) {
   runHooks (context);
+  if (disabled) {
+    return;
+  }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcImd(INS: "
@@ -101,6 +119,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
     const CONTEXT *context,
     std::string *insAssembly) {
   runHooks (context);
+  if (disabled) {
+    return;
+  }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcReg(INS: "
@@ -119,6 +140,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
     const CONTEXT *context,
     std::string *insAssembly) {
   runHooks (context);
+  if (disabled) {
+    return;
+  }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcImd(INS: "
@@ -139,6 +163,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine r
     const CONTEXT *context,
     std::string *insAssembly) {
   runHooks (context);
+  if (disabled) {
+    return;
+  }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstMemSrcMem(INS: "
@@ -157,6 +184,9 @@ void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
     const CONTEXT *context,
     std::string *insAssembly) {
   runHooks (context);
+  if (disabled) {
+    return;
+  }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineConditionalBranch(INS: "
@@ -171,6 +201,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
     const CONTEXT *context,
     std::string *insAssembly) {
   runHooks (context);
+  if (disabled) {
+    return;
+  }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcAdg(INS: "
@@ -192,6 +225,9 @@ void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfReg (
     const CONTEXT *context,
     std::string *insAssembly) {
   runHooks (context);
+  if (disabled) {
+    return;
+  }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineBeforeChangeOfReg(INS: "
@@ -212,6 +248,9 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
     const CONTEXT *context,
     std::string *insAssembly) {
   runHooks (context);
+  if (disabled) {
+    return;
+  }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineTwoDstRegOneSrcReg(INS: "
