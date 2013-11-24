@@ -15,6 +15,7 @@
 
 #include <string>
 #include <set>
+#include <list>
 
 namespace edu {
 namespace sharif {
@@ -33,6 +34,8 @@ private:
   std::string twintool;
   std::string pin;
   std::string twin;
+
+  std::list < const edu::sharif::twinner::trace::Trace * > traces;
 
 public:
   Twinner ();

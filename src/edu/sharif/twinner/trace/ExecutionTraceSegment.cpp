@@ -30,7 +30,7 @@ namespace trace {
 ExecutionTraceSegment::ExecutionTraceSegment (const std::map < REG, Expression * > &regi,
     const std::map < ADDRINT, Expression * > &memo,
     const std::list < const Constraint * > &cnrt) :
-registerToExpression (regi), memoryAddressToExpression (memo), pathConstraint (cnrt) {
+registerToExpression (regi), memoryAddressToExpression (memo), pathConstraints (cnrt) {
 }
 
 ExecutionTraceSegment::ExecutionTraceSegment () {
@@ -49,9 +49,9 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
     delete exp;
   }
   memoryAddressToExpression.clear ();
-  while (!pathConstraint.empty ()) {
-    delete pathConstraint.front ();
-    pathConstraint.pop_front ();
+  while (!pathConstraints.empty ()) {
+    delete pathConstraints.front ();
+    pathConstraints.pop_front ();
   }
 }
 
@@ -196,7 +196,7 @@ Expression *ExecutionTraceSegment::setSymbolicExpressionImplementation (
 }
 
 void ExecutionTraceSegment::addPathConstraint (const Constraint *c) {
-  pathConstraint.push_back (c);
+  pathConstraints.push_back (c);
 }
 
 void ExecutionTraceSegment::saveToBinaryStream (std::ofstream &out) const {
@@ -205,7 +205,7 @@ void ExecutionTraceSegment::saveToBinaryStream (std::ofstream &out) const {
 
   saveMapToBinaryStream (out, "REG", registerToExpression);
   saveMapToBinaryStream (out, "MEM", memoryAddressToExpression);
-  saveListToBinaryStream (out, "CON", pathConstraint);
+  saveListToBinaryStream (out, "CON", pathConstraints);
 }
 
 template <typename ADDRESS>
@@ -278,7 +278,7 @@ void ExecutionTraceSegment::printMemoryAddressesValues (
 
 void ExecutionTraceSegment::printPathConstraints (
     const edu::sharif::twinner::util::Logger &logger) const {
-  logger << pathConstraint;
+  logger << pathConstraints;
 }
 
 void ExecutionTraceSegment::printCompleteState (
@@ -291,6 +291,20 @@ void ExecutionTraceSegment::printCompleteState (
   printPathConstraints (logger);
 }
 
+const std::map < REG, Expression * > &
+ExecutionTraceSegment::getRegisterToExpression () const {
+  return registerToExpression;
+}
+
+const std::map < ADDRINT, Expression * > &
+ExecutionTraceSegment::getMemoryAddressToExpression () const {
+  return memoryAddressToExpression;
+}
+
+const std::list < const Constraint * > &
+ExecutionTraceSegment::getPathConstraints () const {
+  return pathConstraints;
+}
 
 }
 }

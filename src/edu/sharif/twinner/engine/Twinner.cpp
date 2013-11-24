@@ -14,10 +14,12 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 #include "Executer.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 #include "edu/sharif/twinner/trace/Symbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
@@ -71,8 +73,10 @@ void Twinner::generateTwinBinary () {
 }
 
 void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace) {
-  trace->printCompleteState (edu::sharif::twinner::util::Logger::debug ());
-  throw std::runtime_error ("Twinner::addExecutionTrace: Not yet implemented");
+  edu::sharif::twinner::util::Logger log = edu::sharif::twinner::util::Logger::debug ();
+  log << "Adding execution trace:\n";
+  trace->printCompleteState (log);
+  traces.push_back (trace);
 }
 
 bool Twinner::calculateSymbolsValuesForCoveringNextPath (
@@ -81,8 +85,49 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
   return false;
 }
 
+#define for_each_lst_base(TYPE, CONST_TYPE, LIST, VAR) \
+  for (std::list < TYPE >::const_iterator it = LIST.begin (); it != LIST.end (); ++it) \
+    for (CONST_TYPE VAR = *it; VAR; VAR = 0)
+
+#define for_each_lst_const(TYPE, LIST, VAR) \
+  for_each_lst_base (TYPE, TYPE, LIST, VAR)
+
+#define for_each_lst(TYPE, LIST, VAR) \
+  for_each_lst_base (TYPE, const TYPE, LIST, VAR)
+
+#define repeat(N) \
+  for (int nn = 0; nn < N; ++nn)
+
 void Twinner::codeTracesIntoTwinBinary () {
-  throw std::runtime_error ("Twinner::codeTracesIntoTwinBinary: Not yet implemented");
+  std::stringstream out;
+  out << '\n';
+
+  for_each_lst_const (const edu::sharif::twinner::trace::Trace *,
+                      traces, trace) {
+
+    for_each_lst (edu::sharif::twinner::trace::ExecutionTraceSegment *,
+                  trace->getTraceSegments (), segment) {
+      int depth = 1;
+
+      for_each_lst_const (const edu::sharif::twinner::trace::Constraint *,
+                          segment->getPathConstraints (), constraint) {
+
+        repeat (depth) {
+          out << '\t';
+        }
+        out << "if (" << constraint->toString () << ") {\n";
+        ++depth;
+      }
+      for (int j = depth - 1; j > 0; --j) {
+
+        repeat (j) {
+          out << '\t';
+        }
+        out << "}\n";
+      }
+    }
+  }
+  edu::sharif::twinner::util::Logger::info () << out.str ();
 }
 
 }

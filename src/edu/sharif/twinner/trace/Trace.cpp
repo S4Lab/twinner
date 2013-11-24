@@ -259,6 +259,10 @@ Trace *Trace::loadFromBinaryStream (std::ifstream &in) {
   return new Trace (list);
 }
 
+const std::list < ExecutionTraceSegment * > &Trace::getTraceSegments () const {
+  return segments;
+}
+
 ExecutionTraceSegment *Trace::getCurrentTraceSegment () const {
   return *currentSegmentIterator;
 }

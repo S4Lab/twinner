@@ -28,7 +28,7 @@ class ExecutionTraceSegment : public ExecutionState {
 private:
   std::map < REG, Expression * > registerToExpression;
   std::map < ADDRINT, Expression * > memoryAddressToExpression;
-  std::list < const Constraint * > pathConstraint;
+  std::list < const Constraint * > pathConstraints;
 
   ExecutionTraceSegment (const std::map < REG, Expression * > &regi,
       const std::map < ADDRINT, Expression * > &memo,
@@ -94,6 +94,10 @@ public:
       const edu::sharif::twinner::util::Logger &logger) const;
   virtual void printCompleteState (
       const edu::sharif::twinner::util::Logger &logger) const;
+
+  const std::map < REG, Expression * > &getRegisterToExpression () const;
+  const std::map < ADDRINT, Expression * > &getMemoryAddressToExpression () const;
+  const std::list < const Constraint * > &getPathConstraints () const;
 };
 
 }

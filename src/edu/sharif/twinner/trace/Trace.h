@@ -133,6 +133,8 @@ public:
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
 
+  const std::list < ExecutionTraceSegment * > &getTraceSegments () const;
+
 private:
   ExecutionTraceSegment *getCurrentTraceSegment () const;
 
