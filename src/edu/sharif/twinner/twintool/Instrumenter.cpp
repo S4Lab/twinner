@@ -30,10 +30,10 @@ namespace twinner {
 namespace twintool {
 
 Instrumenter::Instrumenter (string _symbolsFilePath, string _traceFilePath,
-    bool _justAnalyzeMainRoutine) :
+    bool _disabled) :
 symbolsFilePath (_symbolsFilePath), traceFilePath (_traceFilePath),
-justAnalyzeMainRoutine (_justAnalyzeMainRoutine),
-ise (new InstructionSymbolicExecuter ()),
+ise (new InstructionSymbolicExecuter (_disabled)),
+disabled (_disabled),
 totalCountOfInstructions (0) {
 
   edu::sharif::twinner::util::Logger::info ()
@@ -91,19 +91,10 @@ Instrumenter::~Instrumenter () {
 }
 
 void Instrumenter::instrumentSingleInstruction (INS ins) {
-  if (justAnalyzeMainRoutine) {
+  if (disabled) {
     RTN rtn = INS_Rtn (ins);
     if (RTN_Valid (rtn) && RTN_Name (rtn) == "main") {
-      /*
-       * Routine is valid and is named main. Before this point all instructions are owned
-       * by RTLD and should be ignored. But after this point, all instructions are owned
-       * by instrumented program. So all of them should be analyzed. Either routine is main
-       * and instructions are within main routine or routine name is something different and
-       * instructions are called directly or indirectly by the main routine.
-       * In order to instrument all remaining instructions, we can simply
-       * turn the justAnalyzeMainRoutine flag off.
-       */
-      justAnalyzeMainRoutine = false;
+      enable ();
     } else {
       return;
     }
@@ -466,6 +457,16 @@ void Instrumenter::aboutToExit (INT32 code) {
   }
 }
 
+void Instrumenter::disable () {
+  disabled = true;
+  ise->disable ();
+}
+
+void Instrumenter::enable () {
+  disabled = false;
+  ise->enable ();
+}
+
 void Instrumenter::printInstructionsStatisticsInfo () const {
   int countOfIgnoredInstructions = totalCountOfInstructions;
   for (std::map < OPCODE, int >::const_iterator it =
@@ -488,6 +489,45 @@ VOID instrumentSingleInstruction (INS ins, VOID * v) {
   im->instrumentSingleInstruction (ins);
 }
 
+VOID imageIsLoaded (IMG img, VOID *v) {
+  edu::sharif::twinner::util::Logger log = edu::sharif::twinner::util::Logger::debug ();
+  log << "Instrumenting image...";
+  for (SEC section = IMG_SecHead (img); SEC_Valid (section);
+      section = SEC_Next (section)) {
+    for (RTN routine = SEC_RtnHead (section); RTN_Valid (routine);
+        routine = RTN_Next (routine)) {
+      std::string name = RTN_Name (routine);
+      if (name == "main") {
+        log << " routine: " << name;
+        RTN_Open (routine);
+        /*
+         * All instructions before main() routine are owned by RTLD. So we should start
+         * instrumenting instructions after when main() routine is called. Also
+         * instructions after returning from main() are owned by RTLD and so, instrumenter
+         * and analysis routines should be disabled when main() returns.
+         */
+        RTN_InsertCall (routine, IPOINT_BEFORE, (AFUNPTR) startAnalysis,
+                        IARG_PTR, v,
+                        IARG_END);
+        RTN_InsertCall (routine, IPOINT_AFTER, (AFUNPTR) terminateAnalysis,
+                        IARG_PTR, v,
+                        IARG_END);
+        RTN_Close (routine);
+        log << '\n';
+        return;
+      }
+    }
+  }
+  log << '\n';
+}
+
+VOID startAnalysis (VOID *v) {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "********** startAnalysis(...) **********\n";
+  Instrumenter *im = (Instrumenter *) v;
+  im->enable ();
+}
+
 VOID syscallIsAboutToBeCalled (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std,
     VOID * v) {
   Instrumenter *im = (Instrumenter *) v;
@@ -503,6 +543,13 @@ VOID syscallIsReturned (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD st
 VOID applicationIsAboutToExit (INT32 code, VOID * v) {
   Instrumenter *im = (Instrumenter *) v;
   im->aboutToExit (code);
+}
+
+VOID terminateAnalysis (VOID *imptr) {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "********** terminateAnalysis(...) **********\n";
+  Instrumenter *im = (Instrumenter *) imptr;
+  im->disable ();
 }
 
 }

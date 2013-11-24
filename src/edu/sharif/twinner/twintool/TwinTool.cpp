@@ -53,12 +53,6 @@ TwinTool::~TwinTool () {
 }
 
 INT32 TwinTool::run (int argc, char *argv[]) {
-  /**
-   * This is required for -main option. That option commands instrumentation to start from the main() routine
-   * instead of RTLD start point. Finding the main() routine requires symbols (so it's not reliable and
-   * is not recommended for real malwares).
-   */
-  PIN_InitSymbols ();
   /*
    * Initialize PIN library. Print help message if -h(elp) is specified
    * in the command line or the command line is invalid.
@@ -134,6 +128,17 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
 }
 
 void TwinTool::registerInstrumentationRoutines () {
+  bool justAnalyzeMainRoutine = main.Value ();
+  if (justAnalyzeMainRoutine) {
+    /**
+     * This is required for -main option. That option commands instrumentation to start
+     * from the main() routine instead of RTLD start point. Finding the main() routine
+     * requires symbols (so it's not reliable and is not recommended for real malwares).
+     */
+    PIN_InitSymbols ();
+
+    IMG_AddInstrumentFunction ((IMAGECALLBACK) imageIsLoaded, im);
+  }
   //TODO: Consider instrumenting at higher granularity for more performance
   INS_AddInstrumentFunction (instrumentSingleInstruction, im);
 

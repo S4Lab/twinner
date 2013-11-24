@@ -73,13 +73,13 @@ private:
 
   std::string symbolsFilePath; // read initial symbols from this file
   std::string traceFilePath; // save final execution trace into this file
-  bool justAnalyzeMainRoutine; // only instructions after the main() routine are analyzed
 
   InstructionSymbolicExecuter *ise;
 
+  bool disabled;
+
 public:
-  Instrumenter (std::string symbolsFilePath, std::string traceFilePath,
-      bool justAnalyzeMainRoutine);
+  Instrumenter (std::string symbolsFilePath, std::string traceFilePath, bool disabled);
   ~Instrumenter ();
 
   void instrumentSingleInstruction (INS ins);
@@ -88,6 +88,8 @@ public:
   void syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std);
 
   void aboutToExit (INT32 code);
+  void disable ();
+  void enable ();
 
 private:
   void printInstructionsStatisticsInfo () const;
@@ -106,11 +108,14 @@ private:
 };
 
 VOID instrumentSingleInstruction (INS ins, VOID *v);
+VOID imageIsLoaded (IMG img, VOID *v);
+VOID startAnalysis (VOID *v);
 VOID syscallIsAboutToBeCalled (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std,
     VOID *v);
 VOID syscallIsReturned (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std,
     VOID *v);
 VOID applicationIsAboutToExit (INT32 code, VOID *v);
+VOID terminateAnalysis (VOID *imptr);
 
 }
 }
