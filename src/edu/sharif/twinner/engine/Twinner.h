@@ -17,6 +17,7 @@
 
 #include <string>
 #include <set>
+#include <map>
 #include <list>
 
 namespace edu {
@@ -36,8 +37,10 @@ private:
   std::string twintool;
   std::string pin;
   std::string twin;
+  std::string arguments;
 
   std::list < const edu::sharif::twinner::trace::Trace * > traces;
+  std::map < ADDRINT, const edu::sharif::twinner::trace::Symbol * > firstSegmentSymbols;
   std::set < ADDRINT > userInputAddresses;
 
 public:
@@ -47,15 +50,21 @@ public:
   void setTwinToolPath (std::string twintool);
   void setPinLauncherPath (std::string pin);
   void setTwinBinaryPath (std::string twin);
+  void setInputBinaryArguments (std::string arguments);
 
   void generateTwinBinary ();
 
 private:
   void addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace);
+  set < const edu::sharif::twinner::trace::Symbol * >
+  retrieveSymbolsWithoutValueInFirstSegment () const;
 
   bool calculateSymbolsValuesForCoveringNextPath (
       const edu::sharif::twinner::trace::Trace &trace,
-      std::set < edu::sharif::twinner::trace::Symbol * > &symbols);
+      std::set < const edu::sharif::twinner::trace::Symbol * > &symbols);
+
+  void addToFirstSegmentSymbols (
+      const set < const edu::sharif::twinner::trace::Symbol * > &symbols);
 
   void codeTracesIntoTwinBinary ();
 };

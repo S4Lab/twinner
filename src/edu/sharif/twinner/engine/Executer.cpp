@@ -30,16 +30,18 @@ const char *Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE = "/tmp/twinner/sym
 const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/trace.dat";
 
 Executer::Executer (std::string pinLauncher, std::string twintool,
-    std::string inputBinary) :
-command (pinLauncher
+    std::string inputBinary, std::string _inputArguments) :
+baseCommand (pinLauncher
 + " -t " + twintool
 + " -symbols " + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
 + " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
 + " -verbose " + edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString ()
-+ " -main -- " + inputBinary) {
++ " -main -- " + inputBinary),
+inputArguments (_inputArguments) {
 }
 
-void Executer::setSymbolsValues (const set < edu::sharif::twinner::trace::Symbol * > &symbols) {
+void Executer::setSymbolsValues (ExecutionMode mode,
+    const set < const edu::sharif::twinner::trace::Symbol * > &symbols) {
   //FIXME:
   //throw "Not yet implemented";
 }
@@ -49,7 +51,8 @@ void Executer::setSymbolsValues (const set < edu::sharif::twinner::trace::Symbol
  * trace will be communicated with twintool through file interface.
  * @return The execution trace, recorded by twintool
  */
-edu::sharif::twinner::trace::Trace *Executer::executeSingleTrace () {
+edu::sharif::twinner::trace::Trace *
+Executer::executeSingleTraceInInitializedMode () const {
   /*
    *  TODO: Run command through another thread and set a timeout for execution.
    *  Also tune twintool, so it saves its progress incrementally. After a timeout,
@@ -58,6 +61,7 @@ edu::sharif::twinner::trace::Trace *Executer::executeSingleTrace () {
    *  to timeout execution and exit after a while. In this way, this code does not
    *  need to change at all.
    */
+  const std::string command = baseCommand + inputArguments;
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
   int ret = system (command.c_str ());
@@ -65,6 +69,17 @@ edu::sharif::twinner::trace::Trace *Executer::executeSingleTrace () {
       << "The system(...) call returns code: " << ret << '\n';
   return edu::sharif::twinner::trace::Trace::loadFromFile
       (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
+}
+
+std::set < ADDRINT > Executer::executeSingleTraceInChangeDetectionMode () const {
+  throw std::runtime_error
+      ("Executer::executeSingleTraceInChangeDetectionMode (): Not yet implemented");
+}
+
+set < const edu::sharif::twinner::trace::Symbol * >
+Executer::executeSingleTraceInInitialStateDetectionMode () const {
+  throw std::runtime_error
+      ("Executer::executeSingleTraceInInitialStateDetectionMode (): Not yet implemented");
 }
 
 }

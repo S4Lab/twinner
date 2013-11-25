@@ -51,6 +51,13 @@ void Twinner::setTwinBinaryPath (string twin) {
   this->twin = twin;
 }
 
+void Twinner::setInputBinaryArguments (string arguments) {
+  this->arguments = arguments;
+}
+
+template < typename KEY, typename VALUE >
+std::set < const VALUE * > getValuesSet (const std::map < KEY, const VALUE * > &m);
+
 /**
  * Generates twin code and twin binary.
  * Steps:
@@ -76,30 +83,41 @@ void Twinner::setTwinBinaryPath (string twin) {
  * no symbols at that address in 1st segment, it should be added to first segment symbols
  * too (to have it initialized in the final twin code by its pre-syscall value),
  * 7. To obtain step-6's values, run program again (just one time for all symbols who are
- * tracked) at the end in initial-value-finding mode and look for values of those symbols
- * before first syscall. It's possible that a later trace, removes a symbol from the set
- * of non-initialized-in-1st-segment symbols. So search for those symbols just at the end
- * and then do that last/final run to look for their pre-1st-syscall values,
+ * tracked) at the end in initial-state-detection mode and look for values of those
+ * symbols before first syscall. It's possible that a later trace, removes a symbol from
+ * the set of non-initialized-in-1st-segment symbols. So search for those symbols just at
+ * the end and then do that last/final run to look for their pre-1st-syscall values.
  */
 void Twinner::generateTwinBinary () {
-  Executer ex (pin, twintool, input);
-  set < edu::sharif::twinner::trace::Symbol * > symbols;
+  Executer ex (pin, twintool, input, arguments);
+  set < const edu::sharif::twinner::trace::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;
   while (somePathsAreNotCovered) {
     edu::sharif::twinner::util::Logger::debug () << "Executing trace # " << i++ << '\n';
-    ex.setSymbolsValues (symbols);
+    ex.setSymbolsValues (Executer::INITIALIZED_MODE, symbols);
+    edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTraceInInitializedMode ();
 
-    edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTrace ();
-    addExecutionTrace (trace);
-
-    for (set < edu::sharif::twinner::trace::Symbol * >::iterator it = symbols.begin ();
-        it != symbols.end (); ++it) {
-      delete *it;
+    for_each_set_const (const edu::sharif::twinner::trace::Symbol, symbols, symbol) {
+      delete symbol;
     }
     symbols.clear ();
+    addExecutionTrace (trace);
+    if (userInputAddresses.empty ()) { // step 2
+      ex.setSymbolsValues (Executer::CHANGE_DETECTION_MODE,
+                           getValuesSet (firstSegmentSymbols));
+      userInputAddresses = ex.executeSingleTraceInChangeDetectionMode ();
+    }
+    // step 5
+    // symbols will be filled with newly instantiated objects and should be deleted...
     somePathsAreNotCovered = calculateSymbolsValuesForCoveringNextPath (*trace, symbols);
   }
+  // step 7
+  // symbols are pointing to traces' symbols and should not be deleted
+  symbols = retrieveSymbolsWithoutValueInFirstSegment ();
+  ex.setSymbolsValues (Executer::INITIAL_STATE_DETECTION_MODE, symbols);
+  symbols = ex.executeSingleTraceInInitialStateDetectionMode ();
+  addToFirstSegmentSymbols (symbols);
   codeTracesIntoTwinBinary ();
 }
 
@@ -108,14 +126,26 @@ void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace
   log << "Adding execution trace:\n";
   trace->printCompleteState (log);
   traces.push_back (trace);
+  // TODO: Update firstSegmentSymbols field...
+}
+
+set < const edu::sharif::twinner::trace::Symbol * >
+Twinner::retrieveSymbolsWithoutValueInFirstSegment () const {
+  throw std::runtime_error
+      ("Twinner::retrieveSymbolsWithoutValueInFirstSegment (): Not yet implemented");
 }
 
 bool Twinner::calculateSymbolsValuesForCoveringNextPath (
     const edu::sharif::twinner::trace::Trace &trace,
-    set < edu::sharif::twinner::trace::Symbol * > &symbols) {
+    set < const edu::sharif::twinner::trace::Symbol * > &symbols) {
   return false;
 }
 
+void Twinner::addToFirstSegmentSymbols (
+    const set < const edu::sharif::twinner::trace::Symbol * > &symbols) {
+  throw std::runtime_error
+      ("Twinner::addToFirstSegmentSymbols (): Not yet implemented");
+}
 
 void Twinner::codeTracesIntoTwinBinary () {
   std::stringstream out;
@@ -147,6 +177,17 @@ void Twinner::codeTracesIntoTwinBinary () {
     }
   }
   edu::sharif::twinner::util::Logger::info () << out.str ();
+}
+
+template < typename KEY, typename VALUE >
+std::set < const VALUE * > getValuesSet (const std::map < KEY, const VALUE * > &m) {
+  std::set < const VALUE * > s;
+
+  for_each_map_const_t (KEY, const VALUE, m, key, value) {
+    UNUSED_VARIABLE (key);
+    s.insert (value);
+  }
+  return s;
 }
 
 }

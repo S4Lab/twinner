@@ -13,6 +13,8 @@
 #ifndef EXECUTER_H
 #define EXECUTER_H
 
+#include "pin.H"
+
 #include <string>
 #include <set>
 
@@ -29,6 +31,14 @@ namespace engine {
 class Executer {
 
 public:
+
+  enum ExecutionMode {
+
+    INITIALIZED_MODE = 0x1,
+    CHANGE_DETECTION_MODE = 0x2,
+    INITIAL_STATE_DETECTION_MODE = 0x4,
+  };
+
   /**
    * Indicating name of the temp file, being used to communicate with TwinTool about the initial symbols values.
    */
@@ -40,15 +50,20 @@ public:
   static const char *EXECUTION_TRACE_COMMUNICATION_TEMP_FILE;
 
 private:
-  std::string command;
+  const std::string baseCommand;
+  const std::string inputArguments;
 
 public:
-  Executer (std::string pinLauncher, std::string twintool, std::string inputBinary);
+  Executer (std::string pinLauncher, std::string twintool, std::string inputBinary,
+      std::string inputArguments);
 
-  void setSymbolsValues (
-      const std::set < edu::sharif::twinner::trace::Symbol * > &symbols);
+  void setSymbolsValues (ExecutionMode mode,
+      const std::set < const edu::sharif::twinner::trace::Symbol * > &symbols);
 
-  edu::sharif::twinner::trace::Trace *executeSingleTrace ();
+  edu::sharif::twinner::trace::Trace *executeSingleTraceInInitializedMode () const;
+  std::set < ADDRINT > executeSingleTraceInChangeDetectionMode () const;
+  set < const edu::sharif::twinner::trace::Symbol * >
+  executeSingleTraceInInitialStateDetectionMode () const;
 };
 
 }

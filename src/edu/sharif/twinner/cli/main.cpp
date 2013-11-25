@@ -82,10 +82,11 @@ int run (string input, string args, string twintool, string pin, string twin) {
       << "\nOutput twin file: " << twin << '\n';
 
   edu::sharif::twinner::engine::Twinner tw;
-  tw.setInputBinaryPath (input + " " + args);
+  tw.setInputBinaryPath (input);
   tw.setTwinToolPath (twintool);
   tw.setPinLauncherPath (pin);
   tw.setTwinBinaryPath (twin);
+  tw.setInputBinaryArguments (args);
 
   tw.generateTwinBinary ();
 
