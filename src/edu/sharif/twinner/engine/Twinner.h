@@ -13,6 +13,8 @@
 #ifndef TWINNER_H
 #define TWINNER_H
 
+#include "pin.H"
+
 #include <string>
 #include <set>
 #include <list>
@@ -36,6 +38,7 @@ private:
   std::string twin;
 
   std::list < const edu::sharif::twinner::trace::Trace * > traces;
+  std::set < ADDRINT > userInputAddresses;
 
 public:
   Twinner ();

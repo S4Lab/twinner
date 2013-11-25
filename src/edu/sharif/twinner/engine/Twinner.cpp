@@ -50,6 +50,36 @@ void Twinner::setTwinBinaryPath (string twin) {
   this->twin = twin;
 }
 
+/**
+ * Generates twin code and twin binary.
+ * Steps:
+ * 1. Without any special initialization (just giving as much arguments as possible,
+ * to the program; indeed we do not need to reach even near max limits, just we must be
+ * sure to use a lot of bytes to find places whom are used by user input to ignore
+ * initializing them while generating the twin code), run program and obtain first trace,
+ * 2. With completely different arguments, run program in change-detection mode for the
+ * second trace,
+ * 3. Find all symbols who change their initial values and mark them as user inputs (do
+ * not store 2nd trace as it has no info else of position of user inputs),
+ * 4. While generating twin code, initialize all symbols who were visited in first trace
+ * segment, else of user inputs (user inputs and next trace segments' symbols remain
+ * uninitialized to obtain and keep their values from user and syscalls),
+ * 5. Since now (3rd execution and so on) use DFS or another search strategy to obtain a
+ * set of new values for symbols to follow a new execution path and run program in
+ * initialized mode (which despite change-detection mode, enforces symbols values)
+ * with those symbols' values (initializing user inputs is not required when generating
+ * twin code, but they should be initialized while running program as different execution
+ * traces may be obtained with different user inputs),
+ * 6. By each run, some new (surely non-user-input) symbols may be added to first
+ * segment. If there was a symbol (at an address) in 2nd or later segments while there was
+ * no symbols at that address in 1st segment, it should be added to first segment symbols
+ * too (to have it initialized in the final twin code by its pre-syscall value),
+ * 7. To obtain step-6's values, run program again (just one time for all symbols who are
+ * tracked) at the end in initial-value-finding mode and look for values of those symbols
+ * before first syscall. It's possible that a later trace, removes a symbol from the set
+ * of non-initialized-in-1st-segment symbols. So search for those symbols just at the end
+ * and then do that last/final run to look for their pre-1st-syscall values,
+ */
 void Twinner::generateTwinBinary () {
   Executer ex (pin, twintool, input);
   set < edu::sharif::twinner::trace::Symbol * > symbols;
@@ -86,8 +116,8 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
 }
 
 #define for_each_lst_base(TYPE, CONST_TYPE, LIST, VAR) \
-  for (std::list < TYPE >::const_iterator it = LIST.begin (); it != LIST.end (); ++it) \
-    for (CONST_TYPE VAR = *it; VAR; VAR = 0)
+  for (std::list < TYPE * >::const_iterator it = LIST.begin (); it != LIST.end (); ++it) \
+    for (CONST_TYPE *VAR = *it; VAR; VAR = 0)
 
 #define for_each_lst_const(TYPE, LIST, VAR) \
   for_each_lst_base (TYPE, TYPE, LIST, VAR)
@@ -102,14 +132,14 @@ void Twinner::codeTracesIntoTwinBinary () {
   std::stringstream out;
   out << '\n';
 
-  for_each_lst_const (const edu::sharif::twinner::trace::Trace *,
+  for_each_lst_const (const edu::sharif::twinner::trace::Trace,
                       traces, trace) {
 
-    for_each_lst (edu::sharif::twinner::trace::ExecutionTraceSegment *,
+    for_each_lst (edu::sharif::twinner::trace::ExecutionTraceSegment,
                   trace->getTraceSegments (), segment) {
       int depth = 1;
 
-      for_each_lst_const (const edu::sharif::twinner::trace::Constraint *,
+      for_each_lst_const (const edu::sharif::twinner::trace::Constraint,
                           segment->getPathConstraints (), constraint) {
 
         repeat (depth) {
