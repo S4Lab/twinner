@@ -23,6 +23,7 @@
 #include "edu/sharif/twinner/trace/Symbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/iterationtools.h"
 
 using namespace std;
 
@@ -115,18 +116,6 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
   return false;
 }
 
-#define for_each_lst_base(TYPE, CONST_TYPE, LIST, VAR) \
-  for (std::list < TYPE * >::const_iterator it = LIST.begin (); it != LIST.end (); ++it) \
-    for (CONST_TYPE *VAR = *it; VAR; VAR = 0)
-
-#define for_each_lst_const(TYPE, LIST, VAR) \
-  for_each_lst_base (TYPE, TYPE, LIST, VAR)
-
-#define for_each_lst(TYPE, LIST, VAR) \
-  for_each_lst_base (TYPE, const TYPE, LIST, VAR)
-
-#define repeat(N) \
-  for (int nn = 0; nn < N; ++nn)
 
 void Twinner::codeTracesIntoTwinBinary () {
   std::stringstream out;
