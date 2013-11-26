@@ -131,7 +131,7 @@ Executer::executeSingleTraceInInitializedMode () const {
    *  partial trace can be read and twintool will be killed. Malwares are not
    *  required to finish execution! Another possible approach is to tune twintool
    *  to timeout execution and exit after a while. In this way, this code does not
-   *  need to change at all.
+   *  need to be changed at all.
    */
   const std::string command = baseCommand + " " + inputArguments;
   edu::sharif::twinner::util::Logger::debug ()
@@ -144,8 +144,36 @@ Executer::executeSingleTraceInInitializedMode () const {
 }
 
 std::set < ADDRINT > Executer::executeSingleTraceInChangeDetectionMode () const {
+  const char * const str = inputArguments.c_str ();
+  char * const buffer = new char [inputArguments.size () + 51];
+  *buffer = ' ';
+  const char *lastArg = buffer;
+  const char *args = str;
+  char *ptr = buffer + 1;
+  for (; *args; ++args, ++ptr) {
+    if (*args == ' ') {
+      lastArg = ptr;
+      *ptr = ' ';
+    } else {
+      *ptr = (*args) + 1;
+    }
+  }
+  const char * const end = ptr;
+  for (int i = 0; lastArg < end && i < 50; ++lastArg, ++ptr, ++i) {
+    *ptr = (*lastArg) + 1;
+  }
+  const std::string command = baseCommand + buffer;
+  edu::sharif::twinner::util::Logger::debug ()
+      << "Calling system (\"" << command << "\");\n";
+  int ret = system (command.c_str ());
+  edu::sharif::twinner::util::Logger::debug ()
+      << "The system(...) call returns code: " << ret << '\n';
+  return loadChangedAddressesFromFile (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
+}
+
+std::set < ADDRINT > Executer::loadChangedAddressesFromFile (const char *path) const {
   throw std::runtime_error
-      ("Executer::executeSingleTraceInChangeDetectionMode (): Not yet implemented");
+      ("Executer::loadChangedAddressesFromFile (): Not yet implemented");
 }
 
 set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * >

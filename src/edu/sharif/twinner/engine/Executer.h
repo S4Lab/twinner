@@ -76,6 +76,8 @@ private:
       std::map < int, std::list < Record > > records) const;
   void saveSymbolRecordsToBinaryStream (std::ofstream &out,
       ExecutionMode mode, std::map < int, std::list < Record > > records) const;
+
+  std::set < ADDRINT > loadChangedAddressesFromFile (const char *path) const;
 };
 
 }
