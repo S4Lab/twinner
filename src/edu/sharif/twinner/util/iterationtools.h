@@ -18,43 +18,64 @@ namespace sharif {
 namespace twinner {
 namespace util {
 
-#define for_each_lst_base(TYPE, CONST_TYPE, LIST, VAR) \
-  for (std::list < TYPE * >::const_iterator it = LIST.begin (); it != LIST.end (); ++it) \
-    for (CONST_TYPE *VAR = *it; VAR; VAR = 0)
+template <typename Key, typename Value, typename Aux = void * >
+class ForEach {
 
-#define for_each_lst_const(TYPE, LIST, VAR) \
-  for_each_lst_base (TYPE, TYPE, LIST, VAR)
+public:
+  typedef void (*ItemVisitor) (const Value &item);
+  typedef void (*ItemVisitorWithAux) (Aux &aux, const Value &item);
+  typedef void (*PairVisitor) (const Key &key, const Value &value);
+  typedef void (*PairVisitorWithAux) (Aux &aux, const Key &key, const Value &value);
 
-#define for_each_lst(TYPE, LIST, VAR) \
-  for_each_lst_base (TYPE, const TYPE, LIST, VAR)
+  typedef std::list < Value > ListType;
+  typedef std::set < Value > SetType;
+  typedef std::map < Key, Value > MapType;
 
-#define for_each_set_base(TYPE, CONST_TYPE, LIST, VAR) \
-  for (std::set < TYPE * >::const_iterator it = LIST.begin (); it != LIST.end (); ++it) \
-    for (CONST_TYPE *VAR = *it; VAR; VAR = 0)
+  static inline void iterate (const ListType &list, ItemVisitor visitor) {
+    for (typename ListType::const_iterator it = list.begin (); it != list.end (); ++it) {
+      const Value &item = *it;
+      visitor (item);
+    }
+  }
 
-#define for_each_set_const(TYPE, LIST, VAR) \
-  for_each_set_base (TYPE, TYPE, LIST, VAR)
+  static inline void iterate (const ListType &list, ItemVisitorWithAux visitor,
+      Aux &aux) {
+    for (typename ListType::const_iterator it = list.begin (); it != list.end (); ++it) {
+      const Value &item = *it;
+      visitor (aux, item);
+    }
+  }
 
-#define for_each_set(TYPE, LIST, VAR) \
-  for_each_set_base (TYPE, const TYPE, LIST, VAR)
+  static inline void iterate (const SetType &set, ItemVisitor visitor) {
+    for (typename SetType::const_iterator it = set.begin (); it != set.end (); ++it) {
+      const Value &item = *it;
+      visitor (item);
+    }
+  }
 
-#define for_each_map_base(PRE, KEY_TYPE, VAL_TYPE, CONST_VAL_TYPE, MAP, KEY, VAL) \
-  for (PRE std::map < KEY_TYPE, VAL_TYPE * >::const_iterator it = MAP.begin (); \
-       it != MAP.end (); ++it) \
-    for (CONST_VAL_TYPE *VAL = it->second; VAL; VAL = 0) \
-      for (const KEY_TYPE &KEY = it->first; VAL; VAL = 0)
+  static inline void iterate (const SetType &set, ItemVisitorWithAux visitor, Aux &aux) {
+    for (typename SetType::const_iterator it = set.begin (); it != set.end (); ++it) {
+      const Value &item = *it;
+      visitor (aux, item);
+    }
+  }
 
-#define for_each_map_const(KEY_TYPE, VAL_TYPE, MAP, KEY, VAL) \
-  for_each_map_base (, KEY_TYPE, VAL_TYPE, VAL_TYPE, MAP, KEY, VAL)
+  static inline void iterate (const MapType &map, PairVisitor visitor) {
+    for (typename MapType::const_iterator it = map.begin (); it != map.end (); ++it) {
+      const Key &key = it->first;
+      const Value &value = it->second;
+      visitor (key, value);
+    }
+  }
 
-#define for_each_map(KEY_TYPE, VAL_TYPE, MAP, KEY, VAL) \
-  for_each_map_base (, KEY_TYPE, VAL_TYPE, const VAL_TYPE, MAP, KEY, VAL)
-
-#define for_each_map_const_t(KEY_TYPE, VAL_TYPE, MAP, KEY, VAL) \
-  for_each_map_base (typename, KEY_TYPE, VAL_TYPE, VAL_TYPE, MAP, KEY, VAL)
-
-#define for_each_map_t(KEY_TYPE, VAL_TYPE, MAP, KEY, VAL) \
-  for_each_map_base (typename, KEY_TYPE, VAL_TYPE, const VAL_TYPE, MAP, KEY, VAL)
+  static inline void iterate (const MapType &map, PairVisitorWithAux visitor, Aux &aux) {
+    for (typename MapType::const_iterator it = map.begin (); it != map.end (); ++it) {
+      const Key &key = it->first;
+      const Value &value = it->second;
+      visitor (aux, key, value);
+    }
+  }
+};
 
 #define repeat(N) \
   for (int nn = 0; nn < N; ++nn)

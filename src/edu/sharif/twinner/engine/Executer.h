@@ -17,6 +17,8 @@
 
 #include <string>
 #include <set>
+#include <map>
+#include <list>
 
 namespace edu {
 namespace sharif {
@@ -24,7 +26,8 @@ namespace twinner {
 namespace trace {
 
 class Trace;
-class Symbol;
+class MemoryEmergedSymbol;
+struct SymbolRecord;
 }
 namespace engine {
 
@@ -58,12 +61,21 @@ public:
       std::string inputArguments);
 
   void setSymbolsValues (ExecutionMode mode,
-      const std::set < const edu::sharif::twinner::trace::Symbol * > &symbols);
+      const std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &
+      symbols);
 
   edu::sharif::twinner::trace::Trace *executeSingleTraceInInitializedMode () const;
   std::set < ADDRINT > executeSingleTraceInChangeDetectionMode () const;
-  set < const edu::sharif::twinner::trace::Symbol * >
+  set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
   executeSingleTraceInInitialStateDetectionMode () const;
+
+private:
+  typedef edu::sharif::twinner::trace::SymbolRecord Record;
+
+  bool saveSymbolRecordsToFile (ExecutionMode mode,
+      std::map < int, std::list < Record > > records) const;
+  void saveSymbolRecordsToBinaryStream (std::ofstream &out,
+      ExecutionMode mode, std::map < int, std::list < Record > > records) const;
 };
 
 }

@@ -20,7 +20,7 @@
 
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
-#include "edu/sharif/twinner/trace/Symbol.h"
+#include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
@@ -31,6 +31,28 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace engine {
+
+struct TwinCodeGenerationAux {
+
+  int depth;
+  std::stringstream &out;
+};
+
+inline void code_trace_into_twin_code (std::stringstream &out,
+    const edu::sharif::twinner::trace::Trace * const &trace);
+inline void code_segment_into_twin_code (std::stringstream &out,
+    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
+inline void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
+    const edu::sharif::twinner::trace::Constraint * const &constraint);
+
+inline void delete_symbol (
+    const edu::sharif::twinner::trace::MemoryEmergedSymbol * const &symbol);
+
+template < typename Key, typename Value >
+inline std::set < Value > getValuesSet (const std::map < Key, Value > &map);
+template < typename Key, typename Value >
+inline void add_value_to_set (std::set < Value > &set,
+    const Key &key, const Value &value);
 
 Twinner::Twinner () {
 }
@@ -54,9 +76,6 @@ void Twinner::setTwinBinaryPath (string twin) {
 void Twinner::setInputBinaryArguments (string arguments) {
   this->arguments = arguments;
 }
-
-template < typename KEY, typename VALUE >
-std::set < const VALUE * > getValuesSet (const std::map < KEY, const VALUE * > &m);
 
 /**
  * Generates twin code and twin binary.
@@ -90,7 +109,7 @@ std::set < const VALUE * > getValuesSet (const std::map < KEY, const VALUE * > &
  */
 void Twinner::generateTwinBinary () {
   Executer ex (pin, twintool, input, arguments);
-  set < const edu::sharif::twinner::trace::Symbol * > symbols;
+  set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;
   while (somePathsAreNotCovered) {
@@ -98,9 +117,9 @@ void Twinner::generateTwinBinary () {
     ex.setSymbolsValues (Executer::INITIALIZED_MODE, symbols);
     edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTraceInInitializedMode ();
 
-    for_each_set_const (const edu::sharif::twinner::trace::Symbol, symbols, symbol) {
-      delete symbol;
-    }
+    edu::sharif::twinner::util::ForEach
+        < int, const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
+        ::iterate (symbols, &delete_symbol);
     symbols.clear ();
     addExecutionTrace (trace);
     if (userInputAddresses.empty ()) { // step 2
@@ -121,6 +140,11 @@ void Twinner::generateTwinBinary () {
   codeTracesIntoTwinBinary ();
 }
 
+void delete_symbol (
+    const edu::sharif::twinner::trace::MemoryEmergedSymbol * const &symbol) {
+  delete symbol;
+}
+
 void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace) {
   edu::sharif::twinner::util::Logger log = edu::sharif::twinner::util::Logger::debug ();
   log << "Adding execution trace:\n";
@@ -129,7 +153,7 @@ void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace
   // TODO: Update firstSegmentSymbols field...
 }
 
-set < const edu::sharif::twinner::trace::Symbol * >
+set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
 Twinner::retrieveSymbolsWithoutValueInFirstSegment () const {
   throw std::runtime_error
       ("Twinner::retrieveSymbolsWithoutValueInFirstSegment (): Not yet implemented");
@@ -137,12 +161,12 @@ Twinner::retrieveSymbolsWithoutValueInFirstSegment () const {
 
 bool Twinner::calculateSymbolsValuesForCoveringNextPath (
     const edu::sharif::twinner::trace::Trace &trace,
-    set < const edu::sharif::twinner::trace::Symbol * > &symbols) {
+    set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols) {
   return false;
 }
 
 void Twinner::addToFirstSegmentSymbols (
-    const set < const edu::sharif::twinner::trace::Symbol * > &symbols) {
+    const set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols) {
   throw std::runtime_error
       ("Twinner::addToFirstSegmentSymbols (): Not yet implemented");
 }
@@ -151,44 +175,60 @@ void Twinner::codeTracesIntoTwinBinary () {
   std::stringstream out;
   out << '\n';
 
-  for_each_lst_const (const edu::sharif::twinner::trace::Trace,
-                      traces, trace) {
-
-    for_each_lst (edu::sharif::twinner::trace::ExecutionTraceSegment,
-                  trace->getTraceSegments (), segment) {
-      int depth = 1;
-
-      for_each_lst_const (const edu::sharif::twinner::trace::Constraint,
-                          segment->getPathConstraints (), constraint) {
-
-        repeat (depth) {
-          out << '\t';
-        }
-        out << "if (" << constraint->toString () << ") {\n";
-        ++depth;
-      }
-      for (int j = depth - 1; j > 0; --j) {
-
-        repeat (j) {
-          out << '\t';
-        }
-        out << "}\n";
-      }
-    }
-  }
+  edu::sharif::twinner::util::ForEach
+      < int, const edu::sharif::twinner::trace::Trace *, std::stringstream >
+      ::iterate (traces, &code_trace_into_twin_code, out);
   edu::sharif::twinner::util::Logger::info () << out.str ();
 }
 
-template < typename KEY, typename VALUE >
-std::set < const VALUE * > getValuesSet (const std::map < KEY, const VALUE * > &m) {
-  std::set < const VALUE * > s;
-
-  for_each_map_const_t (KEY, const VALUE, m, key, value) {
-    UNUSED_VARIABLE (key);
-    s.insert (value);
-  }
-  return s;
+void code_trace_into_twin_code (std::stringstream &out,
+    const edu::sharif::twinner::trace::Trace * const &trace) {
+  edu::sharif::twinner::util::ForEach
+      < int, edu::sharif::twinner::trace::ExecutionTraceSegment *, std::stringstream >
+      ::iterate (trace->getTraceSegments (), &code_segment_into_twin_code, out);
 }
+
+void code_segment_into_twin_code (std::stringstream &out,
+    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
+  TwinCodeGenerationAux aux = {1, out};
+  edu::sharif::twinner::util::ForEach
+      < int, const edu::sharif::twinner::trace::Constraint *, TwinCodeGenerationAux >
+      ::iterate (segment->getPathConstraints (), &code_constraint_into_twin_code, aux);
+  for (int j = aux.depth - 1; j > 0; --j) {
+
+    repeat (j) {
+      out << '\t';
+    }
+    out << "}\n";
+  }
+}
+
+void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
+    const edu::sharif::twinner::trace::Constraint * const &constraint) {
+
+  repeat (aux.depth) {
+    aux.out << '\t';
+  }
+  aux.out << "if (" << constraint->toString () << ") {\n";
+  aux.depth++;
+}
+
+template < typename Key, typename Value >
+std::set < Value > getValuesSet (const std::map < Key, Value > &map) {
+  std::set < Value > set;
+  edu::sharif::twinner::util::ForEach
+      < Key, Value, std::set < Value > >
+      ::iterate (map, &add_value_to_set, set);
+
+  return set;
+}
+
+template < typename Key, typename Value >
+void add_value_to_set (std::set < Value > &set,
+    const Key &key, const Value &value) {
+  set.insert (value);
+}
+
 
 }
 namespace trace {

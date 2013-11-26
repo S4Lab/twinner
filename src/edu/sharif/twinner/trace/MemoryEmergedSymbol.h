@@ -20,6 +20,12 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+struct SymbolRecord {
+
+  ADDRINT address;
+  UINT64 concreteValue;
+};
+
 class MemoryEmergedSymbol : public Symbol {
 
 private:
@@ -38,6 +44,8 @@ public:
   static MemoryEmergedSymbol *loadFromBinaryStream (std::ifstream &in);
 
   virtual std::string toString () const;
+
+  std::pair < int, SymbolRecord > toSymbolRecord () const;
 };
 
 }

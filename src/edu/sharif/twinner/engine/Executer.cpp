@@ -16,8 +16,10 @@
 #include <iostream>
 
 #include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/iterationtools.h"
 
 using namespace std;
 
@@ -25,6 +27,15 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace engine {
+
+inline void add_symbol_to_map (
+    std::map < int, std::list < edu::sharif::twinner::trace::SymbolRecord > > &records,
+    const edu::sharif::twinner::trace::MemoryEmergedSymbol * const &symbol);
+inline void save_records_list (std::ofstream &out, const int &segmentIndex,
+    const std::list < edu::sharif::twinner::trace::SymbolRecord > &recordsList);
+inline void save_record (std::ofstream &out,
+    const edu::sharif::twinner::trace::SymbolRecord &record);
+
 
 const char *Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE = "/tmp/twinner/symbols.dat";
 const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/trace.dat";
@@ -41,9 +52,70 @@ inputArguments (_inputArguments) {
 }
 
 void Executer::setSymbolsValues (ExecutionMode mode,
-    const set < const edu::sharif::twinner::trace::Symbol * > &symbols) {
-  //FIXME:
-  //throw "Not yet implemented";
+    const std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &
+    symbols) {
+  std::map < int, std::list < Record > > records;
+  edu::sharif::twinner::util::ForEach
+      < int, const edu::sharif::twinner::trace::MemoryEmergedSymbol *,
+      std::map < int, std::list < Record > > >
+      ::iterate (symbols, &add_symbol_to_map, records);
+
+  if (!saveSymbolRecordsToFile (mode, records)) {
+    throw std::runtime_error ("Error in saving symbols in binary file");
+  }
+}
+
+void add_symbol_to_map (
+    std::map < int, std::list < edu::sharif::twinner::trace::SymbolRecord > > &records,
+    const edu::sharif::twinner::trace::MemoryEmergedSymbol * const &symbol) {
+  std::pair < int, edu::sharif::twinner::trace::SymbolRecord > pair =
+      symbol->toSymbolRecord ();
+  records[pair.first].push_back (pair.second);
+}
+
+bool Executer::saveSymbolRecordsToFile (ExecutionMode mode,
+    std::map < int, std::list < Record > > records) const {
+  std::ofstream out;
+  out.open (SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE,
+            ios_base::out | ios_base::trunc | ios_base::binary);
+  if (!out.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not write symbols to file:"
+        " Error in open function: " << SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE << '\n';
+    return false;
+  }
+  saveSymbolRecordsToBinaryStream (out, mode, records);
+  out.close ();
+  return true;
+}
+
+void Executer::saveSymbolRecordsToBinaryStream (std::ofstream &out,
+    ExecutionMode mode, std::map < int, std::list < Record > > records) const {
+  out.write ("SYM", 3);
+  out.write ((const char *) &mode, sizeof (ExecutionMode));
+
+  typename std::map < int, std::list < Record > >::size_type s = records.size ();
+  out.write ((const char *) &s, sizeof (s));
+
+  edu::sharif::twinner::util::ForEach
+      < int, std::list < Record >, std::ofstream >
+      ::iterate (records, &save_records_list, out);
+}
+
+void save_records_list (std::ofstream &out, const int &segmentIndex,
+    const std::list < edu::sharif::twinner::trace::SymbolRecord > &recordsList) {
+  out.write ((const char *) &segmentIndex, sizeof (segmentIndex));
+  std::list < edu::sharif::twinner::trace::SymbolRecord >::size_type s =
+      recordsList.size ();
+  out.write ((const char *) &s, sizeof (s));
+  edu::sharif::twinner::util::ForEach
+      < int, edu::sharif::twinner::trace::SymbolRecord, std::ofstream >
+      ::iterate (recordsList, &save_record, out);
+}
+
+void save_record (std::ofstream &out,
+    const edu::sharif::twinner::trace::SymbolRecord &record) {
+  out.write ((const char *) &record.address, sizeof (record.address));
+  out.write ((const char *) &record.concreteValue, sizeof (record.concreteValue));
 }
 
 /**
@@ -76,7 +148,7 @@ std::set < ADDRINT > Executer::executeSingleTraceInChangeDetectionMode () const 
       ("Executer::executeSingleTraceInChangeDetectionMode (): Not yet implemented");
 }
 
-set < const edu::sharif::twinner::trace::Symbol * >
+set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
 Executer::executeSingleTraceInInitialStateDetectionMode () const {
   throw std::runtime_error
       ("Executer::executeSingleTraceInInitialStateDetectionMode (): Not yet implemented");

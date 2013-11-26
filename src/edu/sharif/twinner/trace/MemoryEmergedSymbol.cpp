@@ -56,6 +56,14 @@ std::string MemoryEmergedSymbol::toString () const {
   return ss.str ();
 }
 
+std::pair < int, SymbolRecord >
+MemoryEmergedSymbol::toSymbolRecord () const {
+  SymbolRecord record;
+  record.address = address;
+  record.concreteValue = concreteValue;
+  return make_pair (generationIndex, record);
+}
+
 }
 }
 }

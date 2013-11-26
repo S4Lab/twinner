@@ -26,7 +26,7 @@ namespace twinner {
 namespace trace {
 
 class Trace;
-class Symbol;
+class MemoryEmergedSymbol;
 }
 namespace engine {
 
@@ -40,7 +40,8 @@ private:
   std::string arguments;
 
   std::list < const edu::sharif::twinner::trace::Trace * > traces;
-  std::map < ADDRINT, const edu::sharif::twinner::trace::Symbol * > firstSegmentSymbols;
+  std::map < ADDRINT,
+  const edu::sharif::twinner::trace::MemoryEmergedSymbol * > firstSegmentSymbols;
   std::set < ADDRINT > userInputAddresses;
 
 public:
@@ -56,15 +57,15 @@ public:
 
 private:
   void addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace);
-  set < const edu::sharif::twinner::trace::Symbol * >
+  set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
   retrieveSymbolsWithoutValueInFirstSegment () const;
 
   bool calculateSymbolsValuesForCoveringNextPath (
       const edu::sharif::twinner::trace::Trace &trace,
-      std::set < const edu::sharif::twinner::trace::Symbol * > &symbols);
+      std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols);
 
   void addToFirstSegmentSymbols (
-      const set < const edu::sharif::twinner::trace::Symbol * > &symbols);
+      const set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols);
 
   void codeTracesIntoTwinBinary ();
 };
