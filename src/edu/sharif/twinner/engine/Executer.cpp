@@ -133,7 +133,7 @@ Executer::executeSingleTraceInInitializedMode () const {
    *  to timeout execution and exit after a while. In this way, this code does not
    *  need to change at all.
    */
-  const std::string command = baseCommand + inputArguments;
+  const std::string command = baseCommand + " " + inputArguments;
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
   int ret = system (command.c_str ());

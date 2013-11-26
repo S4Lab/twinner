@@ -30,6 +30,9 @@ namespace trace {
 Trace::Trace (const std::list < ExecutionTraceSegment * > &list) :
 segments (list) {
   currentSegmentIterator = segments.end ();
+  if (currentSegmentIterator != segments.begin ()) {
+    currentSegmentIterator--;
+  }
   currentSegmentIndex = 0;
 }
 

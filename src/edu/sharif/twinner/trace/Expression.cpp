@@ -212,6 +212,10 @@ Expression *Expression::loadFromBinaryStream (std::ifstream &in) {
   return new Expression (stack, concreteValue);
 }
 
+const std::list < ExpressionToken * > &Expression::getStack () const {
+  return stack;
+}
+
 }
 }
 }

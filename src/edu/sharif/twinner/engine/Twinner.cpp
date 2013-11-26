@@ -49,10 +49,17 @@ inline void delete_symbol (
     const edu::sharif::twinner::trace::MemoryEmergedSymbol * const &symbol);
 
 template < typename Key, typename Value >
-inline std::set < Value > getValuesSet (const std::map < Key, Value > &map);
+inline std::set < Value > get_values_set (const std::map < Key, Value > &map);
 template < typename Key, typename Value >
 inline void add_value_to_set (std::set < Value > &set,
     const Key &key, const Value &value);
+
+inline void extract_symbols_and_add_them_to_map (
+    std::map < ADDRINT, const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &map,
+    const ADDRINT &key, edu::sharif::twinner::trace::Expression * const &value);
+inline void check_symbol_type_and_add_it_to_map (
+    std::map < ADDRINT, const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &map,
+    edu::sharif::twinner::trace::ExpressionToken * const &token);
 
 Twinner::Twinner () {
 }
@@ -124,7 +131,7 @@ void Twinner::generateTwinBinary () {
     addExecutionTrace (trace);
     if (userInputAddresses.empty ()) { // step 2
       ex.setSymbolsValues (Executer::CHANGE_DETECTION_MODE,
-                           getValuesSet (firstSegmentSymbols));
+                           get_values_set (firstSegmentSymbols));
       userInputAddresses = ex.executeSingleTraceInChangeDetectionMode ();
     }
     // step 5
@@ -134,9 +141,11 @@ void Twinner::generateTwinBinary () {
   // step 7
   // symbols are pointing to traces' symbols and should not be deleted
   symbols = retrieveSymbolsWithoutValueInFirstSegment ();
-  ex.setSymbolsValues (Executer::INITIAL_STATE_DETECTION_MODE, symbols);
-  symbols = ex.executeSingleTraceInInitialStateDetectionMode ();
-  addToFirstSegmentSymbols (symbols);
+  if (!symbols.empty ()) {
+    ex.setSymbolsValues (Executer::INITIAL_STATE_DETECTION_MODE, symbols);
+    symbols = ex.executeSingleTraceInInitialStateDetectionMode ();
+    addToFirstSegmentSymbols (symbols);
+  }
   codeTracesIntoTwinBinary ();
 }
 
@@ -150,7 +159,34 @@ void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace
   log << "Adding execution trace:\n";
   trace->printCompleteState (log);
   traces.push_back (trace);
-  // TODO: Update firstSegmentSymbols field...
+  const std::map < ADDRINT, edu::sharif::twinner::trace::Expression * > &
+      firstSegmentExpressions =
+      trace->getTraceSegments ().back ()->getMemoryAddressToExpression ();
+  edu::sharif::twinner::util::ForEach
+      < ADDRINT, edu::sharif::twinner::trace::Expression *,
+      std::map < ADDRINT, const edu::sharif::twinner::trace::MemoryEmergedSymbol * > >
+      ::iterate (firstSegmentExpressions, &extract_symbols_and_add_them_to_map,
+                 firstSegmentSymbols);
+  log << "First segment symbols:\n" << firstSegmentSymbols;
+}
+
+void extract_symbols_and_add_them_to_map (
+    std::map < ADDRINT, const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &map,
+    const ADDRINT &key, edu::sharif::twinner::trace::Expression * const &value) {
+  edu::sharif::twinner::util::ForEach
+      < int, edu::sharif::twinner::trace::ExpressionToken *,
+      std::map < ADDRINT, const edu::sharif::twinner::trace::MemoryEmergedSymbol * > >
+      ::iterate (value->getStack (), &check_symbol_type_and_add_it_to_map, map);
+}
+
+void check_symbol_type_and_add_it_to_map (
+    std::map < ADDRINT, const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &map,
+    edu::sharif::twinner::trace::ExpressionToken * const &token) {
+  const edu::sharif::twinner::trace::MemoryEmergedSymbol *symbol =
+      dynamic_cast<edu::sharif::twinner::trace::MemoryEmergedSymbol *> (token);
+  if (symbol) {
+    map[symbol->toSymbolRecord ().second.address] = symbol;
+  }
 }
 
 set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
@@ -214,7 +250,7 @@ void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
 }
 
 template < typename Key, typename Value >
-std::set < Value > getValuesSet (const std::map < Key, Value > &map) {
+std::set < Value > get_values_set (const std::map < Key, Value > &map) {
   std::set < Value > set;
   edu::sharif::twinner::util::ForEach
       < Key, Value, std::set < Value > >
