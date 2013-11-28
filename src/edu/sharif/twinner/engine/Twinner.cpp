@@ -113,31 +113,35 @@ void Twinner::generateTwinBinary () {
   int i = 1;
   while (somePathsAreNotCovered) {
     edu::sharif::twinner::util::Logger::debug () << "Executing trace # " << i++ << '\n';
-    ex.setSymbolsValues (Executer::INITIALIZED_MODE, symbols);
-    edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTraceInInitializedMode ();
+    // steps 1, 2, and 3
+    ex.setSymbolsValues (symbols);
+    edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTraceInNormalMode ();
 
     edu::sharif::twinner::util::ForEach
         < int, const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
         ::iterate (symbols, &delete_symbol);
     symbols.clear ();
+
     addExecutionTrace (trace);
-    if (userInputAddresses.empty ()) { // step 2
-      ex.setSymbolsValues (Executer::CHANGE_DETECTION_MODE,
-                           get_values_set (firstSegmentSymbols));
-      userInputAddresses = ex.executeSingleTraceInChangeDetectionMode ();
-    }
-    // step 5
+
     // symbols will be filled with newly instantiated objects and should be deleted...
     somePathsAreNotCovered = calculateSymbolsValuesForCoveringNextPath (*trace, symbols);
   }
+  edu::sharif::twinner::util::ForEach
+      < int, const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
+      ::iterate (symbols, &delete_symbol);
+  symbols.clear ();
+  // step 4: `addresses` field holds candidate addresses
+  ex.setCandidateAddresses (addresses);
+  // step 5
+  std::map < ADDRINT, UINT64 > initialValues1 =
+      ex.executeSingleTraceInInitialStateDetectionMode ();
+  // step 6
+  ex.changeArguments ();
+  std::map < ADDRINT, UINT64 > initialValues2 =
+      ex.executeSingleTraceInInitialStateDetectionMode ();
   // step 7
-  // symbols are pointing to traces' symbols and should not be deleted
-  symbols = retrieveSymbolsWithoutValueInFirstSegment ();
-  if (!symbols.empty ()) {
-    ex.setSymbolsValues (Executer::INITIAL_STATE_DETECTION_MODE, symbols);
-    symbols = ex.executeSingleTraceInInitialStateDetectionMode ();
-    addToFirstSegmentSymbols (symbols);
-  }
+  // TODO: for on initialValues1 and initialValues2 and remove changes
   codeTracesIntoTwinBinary ();
 }
 

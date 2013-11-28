@@ -40,9 +40,7 @@ private:
   std::string arguments;
 
   std::list < const edu::sharif::twinner::trace::Trace * > traces;
-  std::map < ADDRINT,
-  const edu::sharif::twinner::trace::MemoryEmergedSymbol * > firstSegmentSymbols;
-  std::set < ADDRINT > userInputAddresses;
+  std::set < ADDRINT > addresses;
 
 public:
   Twinner ();
