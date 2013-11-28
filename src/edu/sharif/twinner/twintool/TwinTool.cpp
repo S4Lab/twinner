@@ -16,10 +16,12 @@
 #include <fstream>
 #include <list>
 #include <stdexcept>
+#include <string.h>
 
 #include "Instrumenter.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/iterationtools.h"
 
 using namespace std;
 
@@ -81,6 +83,7 @@ INT32 TwinTool::run (int argc, char *argv[]) {
  * @return true iff arguments are parsed without any problem.
  */
 bool TwinTool::parseArgumentsAndInitializeTool () {
+  bool hasSymbolsInputFile = false;
   string symbolsFilePath = symbolsInputFilePath.Value ();
   string traceFilePath = traceOutputFilePath.Value ();
   if (!symbolsFilePath.empty ()) { // optional
@@ -90,6 +93,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
             ("permission denied: can not read initial symbols: " + symbolsFilePath);
         return false;
       }
+      hasSymbolsInputFile = true;
     } else { // file does not exist
       symbolsFilePath.clear ();
     }
@@ -123,8 +127,63 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     edu::sharif::twinner::util::Logger::info ()
         << "Only main() routine will be analyzed.\n";
   }
-  im = new Instrumenter (symbolsFilePath, traceFilePath, justAnalyzeMainRoutine);
+  if (hasSymbolsInputFile) {
+    std::ifstream in;
+    openFileForReading (in, symbolsFilePath);
+    ExecutionMode mode = readExecutionModeFromBinaryStream (in);
+    switch (mode) {
+    case NORMAL_MODE:
+      im = new Instrumenter (in, traceFilePath, justAnalyzeMainRoutine);
+      break;
+    case INITIAL_STATE_DETECTION_MODE:
+      im = new Instrumenter (readSetOfAddressesFromBinaryStream (in),
+                             traceFilePath, justAnalyzeMainRoutine);
+      break;
+    default:
+      in.close ();
+      throw std::runtime_error ("Unknown execution mode");
+    }
+    in.close ();
+  } else {
+    im = new Instrumenter (traceFilePath, justAnalyzeMainRoutine);
+  }
   return true;
+}
+
+void TwinTool::openFileForReading (std::ifstream &in, const std::string &path) const {
+  in.open (path.c_str (), ios_base::in | ios_base::binary);
+  if (!in.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not read from binary file:"
+        " Error in open function: " << path << '\n';
+    throw std::runtime_error ("Can not read from binary file");
+  }
+}
+
+TwinTool::ExecutionMode TwinTool::readExecutionModeFromBinaryStream (
+    std::ifstream &in) const {
+  char magicString[3];
+  in.read (magicString, 3);
+  if (strncmp (magicString, "SYM", 3) != 0) {
+    throw std::runtime_error
+        ("Unexpected magic string while reading symbols input file from binary stream");
+  }
+  ExecutionMode mode;
+  in.read ((char *) &mode, sizeof (mode));
+  return mode;
+}
+
+std::set < ADDRINT > TwinTool::readSetOfAddressesFromBinaryStream (
+    std::ifstream &in) const {
+  std::set < ADDRINT > addresses;
+  std::set < ADDRINT >::size_type s;
+  in.read ((char *) &s, sizeof (s));
+
+  repeat (s) {
+    ADDRINT address;
+    in.read ((char *) &address, sizeof (address));
+    addresses.insert (address);
+  }
+  return addresses;
 }
 
 void TwinTool::registerInstrumentationRoutines () {

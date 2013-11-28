@@ -15,6 +15,8 @@
 
 #include "pin.H"
 
+#include <set>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -25,6 +27,18 @@ class Instrumenter;
 class TwinTool {
 
 private:
+
+  /**
+   * This enum must be kept in synch with Executer::ExecutionMode from Twinner.
+   * We can not use the same enum, as TwinTool is supposed to be independent of Twinner's
+   * binary and object codes.
+   */
+  enum ExecutionMode {
+
+    NORMAL_MODE = 0x1,
+    INITIAL_STATE_DETECTION_MODE = 0x4,
+  };
+
   Instrumenter *im;
 
 public:
@@ -39,6 +53,9 @@ private:
   INT32 printUsage () const;
 
   bool parseArgumentsAndInitializeTool ();
+  void openFileForReading (std::ifstream &in, const std::string &path) const;
+  ExecutionMode readExecutionModeFromBinaryStream (std::ifstream &in) const;
+  std::set < ADDRINT > readSetOfAddressesFromBinaryStream (std::ifstream &in) const;
 
   void registerInstrumentationRoutines ();
 };

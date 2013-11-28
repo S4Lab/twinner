@@ -29,13 +29,37 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
-Instrumenter::Instrumenter (const string &symbolsFilePath, const string &_traceFilePath,
-    bool _disabled) :
+Instrumenter::Instrumenter (std::ifstream &symbolsFileInputStream,
+    const string &_traceFilePath, bool _disabled) :
 traceFilePath (_traceFilePath),
-ise (new InstructionSymbolicExecuter (symbolsFilePath, _disabled)),
+ise (new InstructionSymbolicExecuter (symbolsFileInputStream, _disabled)),
+isWithinInitialStateDetectionMode (false),
 disabled (_disabled),
 totalCountOfInstructions (0) {
+  initialize ();
+}
 
+Instrumenter::Instrumenter (const std::set < ADDRINT > &_candidateAddresses,
+    const std::string &_traceFilePath, bool _disabled) :
+traceFilePath (_traceFilePath),
+ise (new InstructionSymbolicExecuter (_disabled)),
+candidateAddresses (_candidateAddresses),
+isWithinInitialStateDetectionMode (true),
+disabled (_disabled),
+totalCountOfInstructions (0) {
+  initialize ();
+}
+
+Instrumenter::Instrumenter (const string &_traceFilePath, bool _disabled) :
+traceFilePath (_traceFilePath),
+ise (new InstructionSymbolicExecuter (_disabled)),
+isWithinInitialStateDetectionMode (false),
+disabled (_disabled),
+totalCountOfInstructions (0) {
+  initialize ();
+}
+
+void Instrumenter::initialize () {
   edu::sharif::twinner::util::Logger::info ()
       << "Instrumenter class created [verboseness level: "
       << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n";
@@ -439,11 +463,18 @@ void Instrumenter::printDebugInformation (INS ins) const {
 
 void Instrumenter::syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt,
     SYSCALL_STANDARD std) {
+  edu::sharif::twinner::util::Logger::loquacious () << "***** syscallEntryPoint *****\n";
   //TODO: Implement...
+  if (isWithinInitialStateDetectionMode) {
+    edu::sharif::twinner::util::Logger::debug () << "Gathering initial contents of"
+        " requested memory addresses, right before first syscall\n";
+    //TODO: Gather memory contents of candidate addresses, save them in file, and exit program
+  }
 }
 
 void Instrumenter::syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt,
     SYSCALL_STANDARD std) {
+  edu::sharif::twinner::util::Logger::loquacious () << "*** syscallExitPoint ***\n";
   //TODO: Implement...
 }
 

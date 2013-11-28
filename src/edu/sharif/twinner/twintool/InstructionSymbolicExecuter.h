@@ -55,7 +55,8 @@ private:
   bool disabled;
 
 public:
-  InstructionSymbolicExecuter (const std::string &symbolsFilePath, bool disabled);
+  InstructionSymbolicExecuter (std::ifstream &symbolsFileInputStream, bool disabled);
+  InstructionSymbolicExecuter (bool disabled);
 
   edu::sharif::twinner::trace::Trace *getTrace () const;
 

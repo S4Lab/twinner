@@ -32,8 +32,14 @@ namespace twinner {
 namespace twintool {
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
-    const std::string &symbolsFilePath, bool _disabled) :
-trace (new edu::sharif::twinner::trace::Trace (symbolsFilePath)),
+    std::ifstream &symbolsFileInputStream, bool _disabled) :
+trace (new edu::sharif::twinner::trace::Trace (symbolsFileInputStream)),
+trackedReg (REG_INVALID_), divisionSize (-1), hook (0),
+disabled (_disabled) {
+}
+
+InstructionSymbolicExecuter::InstructionSymbolicExecuter (bool _disabled) :
+trace (new edu::sharif::twinner::trace::Trace ()),
 trackedReg (REG_INVALID_), divisionSize (-1), hook (0),
 disabled (_disabled) {
 }

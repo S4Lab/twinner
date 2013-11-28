@@ -40,12 +40,18 @@ segments (list) {
   currentSegmentIndex = 0;
 }
 
-Trace::Trace (const std::string &symbolsFilePath) {
-  loadInitializedSymbolsFromFile (symbolsFilePath); // may throw exception on IO errors
+Trace::Trace (std::ifstream &symbolsFileInputStream) {
+  loadInitializedSymbolsFromBinaryStream (symbolsFileInputStream);
   currentSegmentIterator = segments.end ();
   if (currentSegmentIterator != segments.begin ()) {
     currentSegmentIterator--;
   }
+  currentSegmentIndex = 0;
+}
+
+Trace::Trace () {
+  segments.push_front (new ExecutionTraceSegment ());
+  currentSegmentIterator = segments.begin ();
   currentSegmentIndex = 0;
 }
 
@@ -318,33 +324,7 @@ ExecutionTraceSegment *Trace::getCurrentTraceSegment () const {
   return *currentSegmentIterator;
 }
 
-void Trace::loadInitializedSymbolsFromFile (const std::string &symbolsFilePath) {
-  std::ifstream in;
-  in.open (edu::sharif::twinner::engine::Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE,
-           ios_base::in | ios_base::binary);
-  if (!in.is_open ()) {
-    edu::sharif::twinner::util::Logger::error () << "Can not read symbols from binary"
-        " file: Error in open function: "
-        << edu::sharif::twinner::engine::Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
-        << '\n';
-    throw std::runtime_error ("Can not read symbols from binary file");
-  }
-  loadInitializedSymbolsFromBinaryStream (in);
-  in.close ();
-}
-
 void Trace::loadInitializedSymbolsFromBinaryStream (std::ifstream &in) {
-  char magicString[3];
-  in.read (magicString, 3);
-  if (strncmp (magicString, "SYM", 3) != 0) {
-    throw std::runtime_error
-        ("Unexpected magic string while loading initialized symbols from binary stream");
-  }
-  edu::sharif::twinner::engine::Executer::ExecutionMode mode;
-  in.read ((char *) &mode, sizeof (mode));
-  if (mode != edu::sharif::twinner::engine::Executer::NORMAL_MODE) {
-    throw std::runtime_error ("Only Executer::NORMAL_MODE is currently implemented");
-  }
   std::map < int, std::list < SymbolRecord > >::size_type s;
   in.read ((char *) &s, sizeof (s));
   int index = 0;

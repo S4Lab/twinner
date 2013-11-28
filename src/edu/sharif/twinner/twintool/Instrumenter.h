@@ -17,6 +17,7 @@
 
 #include <string>
 #include <map>
+#include <set>
 
 namespace edu {
 namespace sharif {
@@ -75,11 +76,17 @@ private:
 
   InstructionSymbolicExecuter *ise;
 
+  const std::set < ADDRINT > candidateAddresses;
+  bool isWithinInitialStateDetectionMode;
+
   bool disabled;
 
 public:
-  Instrumenter (const std::string &symbolsFilePath,
+  Instrumenter (std::ifstream &symbolsFileInputStream,
       const std::string &traceFilePath, bool disabled);
+  Instrumenter (const std::set < ADDRINT > &candidateAddresses,
+      const std::string &traceFilePath, bool disabled);
+  Instrumenter (const std::string &traceFilePath, bool disabled);
   ~Instrumenter ();
 
   void instrumentSingleInstruction (INS ins);
@@ -92,6 +99,8 @@ public:
   void enable ();
 
 private:
+  void initialize ();
+
   void printInstructionsStatisticsInfo () const;
 
   InstructionModel getInstructionModel (OPCODE op, INS ins) const;

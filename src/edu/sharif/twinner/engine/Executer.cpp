@@ -66,7 +66,7 @@ void Executer::setCandidateAddresses (const std::set < ADDRINT > &addresses) con
   ExecutionMode mode = INITIAL_STATE_DETECTION_MODE;
   out.write ((const char *) &mode, sizeof (ExecutionMode));
 
-  typename std::set < ADDRINT >::size_type s = addresses.size ();
+  std::set < ADDRINT >::size_type s = addresses.size ();
   out.write ((const char *) &s, sizeof (s));
 
   edu::sharif::twinner::util::ForEach

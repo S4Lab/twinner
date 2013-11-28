@@ -71,7 +71,8 @@ private:
   Trace (const std::list < ExecutionTraceSegment * > &list);
 
 public:
-  Trace (const std::string &symbolsFilePath);
+  Trace (std::ifstream &symbolsFileInputStream);
+  Trace ();
   ~Trace ();
 
   /**
@@ -186,7 +187,6 @@ private:
       typename GetSymbolicExpressionMethod < T >::
       TraceSegmentTypeWithoutConcreteValue getMethod);
 
-  void loadInitializedSymbolsFromFile (const std::string &symbolsFilePath);
   void loadInitializedSymbolsFromBinaryStream (std::ifstream &in);
   ExecutionTraceSegment *loadSingleSegmentSymbolsRecordsFromBinaryStream (int index,
       std::ifstream &in);
