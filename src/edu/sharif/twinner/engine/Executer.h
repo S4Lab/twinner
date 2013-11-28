@@ -37,8 +37,7 @@ public:
 
   enum ExecutionMode {
 
-    INITIALIZED_MODE = 0x1,
-    CHANGE_DETECTION_MODE = 0x2,
+    NORMAL_MODE = 0x1,
     INITIAL_STATE_DETECTION_MODE = 0x4,
   };
 
@@ -54,20 +53,21 @@ public:
 
 private:
   const std::string baseCommand;
-  const std::string inputArguments;
+  std::string inputArguments;
 
 public:
   Executer (std::string pinLauncher, std::string twintool, std::string inputBinary,
       std::string inputArguments);
 
-  void setSymbolsValues (ExecutionMode mode,
+  void setCandidateAddresses (const std::set < ADDRINT > &addresses) const;
+  void setSymbolsValues (
       const std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &
-      symbols);
+      symbols) const;
 
-  edu::sharif::twinner::trace::Trace *executeSingleTraceInInitializedMode () const;
-  std::set < ADDRINT > executeSingleTraceInChangeDetectionMode () const;
-  set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
-  executeSingleTraceInInitialStateDetectionMode () const;
+  edu::sharif::twinner::trace::Trace *executeSingleTraceInNormalMode () const;
+
+  void changeArguments ();
+  map < ADDRINT, UINT64 > executeSingleTraceInInitialStateDetectionMode () const;
 
 private:
   typedef edu::sharif::twinner::trace::SymbolRecord Record;

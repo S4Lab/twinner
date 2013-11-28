@@ -262,6 +262,46 @@ Trace *Trace::loadFromBinaryStream (std::ifstream &in) {
   return new Trace (list);
 }
 
+map < ADDRINT, UINT64 > Trace::loadAddressToValueMapFromFile (const char *path) {
+  map < ADDRINT, UINT64 > map;
+  std::ifstream in;
+  in.open (path, ios_base::in | ios_base::binary);
+  if (!in.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not read address-to-value map:"
+        " Error in open function: " << path << '\n';
+    return map;
+  }
+  map = Trace::loadAddressToValueMapFromBinaryStream (in);
+  in.close ();
+  return map;
+}
+
+std::map < ADDRINT, UINT64 > Trace::loadAddressToValueMapFromBinaryStream (
+    std::ifstream &in) {
+  std::map < ADDRINT, UINT64 > map;
+  char magicString[3];
+  in.read (magicString, 3);
+  if (strncmp (magicString, "TRA", 3) != 0) {
+    throw std::runtime_error
+        ("Unexpected magic string while loading map from binary stream");
+  }
+  typename std::map < ADDRINT, UINT64 >::size_type s;
+  in.read ((char *) &s, sizeof (s));
+  for (int i = 0; i < s; ++i) {
+    ADDRINT a;
+    in.read ((char *) &a, sizeof (a));
+    UINT64 b;
+    in.read ((char *) &b, sizeof (b));
+
+    std::pair < std::map < ADDRINT, UINT64 >::iterator, bool > res =
+        map.insert (make_pair (a, b));
+    if (!res.second) {
+      throw std::runtime_error ("Can not read map's entry from binary stream");
+    }
+  }
+  return map;
+}
+
 const std::list < ExecutionTraceSegment * > &Trace::getTraceSegments () const {
   return segments;
 }

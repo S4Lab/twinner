@@ -28,6 +28,7 @@ namespace sharif {
 namespace twinner {
 namespace engine {
 
+inline void save_address (std::ofstream &out, const ADDRINT &address);
 inline void add_symbol_to_map (
     std::map < int, std::list < edu::sharif::twinner::trace::SymbolRecord > > &records,
     const edu::sharif::twinner::trace::MemoryEmergedSymbol * const &symbol);
@@ -51,16 +52,42 @@ baseCommand (pinLauncher
 inputArguments (_inputArguments) {
 }
 
-void Executer::setSymbolsValues (ExecutionMode mode,
+void Executer::setCandidateAddresses (const std::set < ADDRINT > &addresses) const {
+  std::ofstream out;
+  out.open (SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE,
+            ios_base::out | ios_base::trunc | ios_base::binary);
+  if (!out.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not write memory addresses"
+        " to file: Error in open function: "
+        << SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE << '\n';
+    throw std::runtime_error ("Error in saving memory addresses in binary file");
+  }
+  out.write ("SYM", 3);
+  out.write ((const char *) &INITIAL_STATE_DETECTION_MODE, sizeof (ExecutionMode));
+
+  typename std::set < ADDRINT >::size_type s = addresses.size ();
+  out.write ((const char *) &s, sizeof (s));
+
+  edu::sharif::twinner::util::ForEach
+      < int, ADDRINT, std::ofstream >
+      ::iterate (addresses, &save_address, out);
+  out.close ();
+}
+
+void save_address (std::ofstream &out, const ADDRINT &address) {
+  out.write ((const char *) &address, sizeof (address));
+}
+
+void Executer::setSymbolsValues (
     const std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &
-    symbols) {
+    symbols) const {
   std::map < int, std::list < Record > > records;
   edu::sharif::twinner::util::ForEach
       < int, const edu::sharif::twinner::trace::MemoryEmergedSymbol *,
       std::map < int, std::list < Record > > >
       ::iterate (symbols, &add_symbol_to_map, records);
 
-  if (!saveSymbolRecordsToFile (mode, records)) {
+  if (!saveSymbolRecordsToFile (NORMAL_MODE, records)) {
     throw std::runtime_error ("Error in saving symbols in binary file");
   }
 }
@@ -124,7 +151,7 @@ void save_record (std::ofstream &out,
  * @return The execution trace, recorded by twintool
  */
 edu::sharif::twinner::trace::Trace *
-Executer::executeSingleTraceInInitializedMode () const {
+Executer::executeSingleTraceInNormalMode () const {
   /*
    *  TODO: Run command through another thread and set a timeout for execution.
    *  Also tune twintool, so it saves its progress incrementally. After a timeout,
@@ -143,9 +170,9 @@ Executer::executeSingleTraceInInitializedMode () const {
       (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
 }
 
-std::set < ADDRINT > Executer::executeSingleTraceInChangeDetectionMode () const {
+void Executer::changeArguments () {
   const char * const str = inputArguments.c_str ();
-  char * const buffer = new char [inputArguments.size () + 51];
+  char * const buffer = new char [inputArguments.size () + 52];
   *buffer = ' ';
   const char *lastArg = buffer;
   const char *args = str;
@@ -162,24 +189,20 @@ std::set < ADDRINT > Executer::executeSingleTraceInChangeDetectionMode () const 
   for (int i = 0; lastArg < end && i < 50; ++lastArg, ++ptr, ++i) {
     *ptr = (*lastArg) + 1;
   }
-  const std::string command = baseCommand + buffer;
+  *ptr = '\0';
+  inputArguments = std::string (buffer + 1); // ignoring the first space character
+}
+
+map < ADDRINT, UINT64 >
+Executer::executeSingleTraceInInitialStateDetectionMode () const {
+  const std::string command = baseCommand + " " + inputArguments;
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
   int ret = system (command.c_str ());
   edu::sharif::twinner::util::Logger::debug ()
       << "The system(...) call returns code: " << ret << '\n';
-  return loadChangedAddressesFromFile (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
-}
-
-std::set < ADDRINT > Executer::loadChangedAddressesFromFile (const char *path) const {
-  throw std::runtime_error
-      ("Executer::loadChangedAddressesFromFile (): Not yet implemented");
-}
-
-set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
-Executer::executeSingleTraceInInitialStateDetectionMode () const {
-  throw std::runtime_error
-      ("Executer::executeSingleTraceInInitialStateDetectionMode (): Not yet implemented");
+  return edu::sharif::twinner::trace::Trace::loadAddressToValueMapFromFile
+      (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
 }
 
 }

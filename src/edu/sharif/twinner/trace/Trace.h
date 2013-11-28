@@ -130,6 +130,9 @@ public:
   bool saveToFile (const char *path) const;
   static Trace *loadFromFile (const char *path);
   static Trace *loadFromBinaryStream (std::ifstream &in);
+  static map < ADDRINT, UINT64 > loadAddressToValueMapFromFile (const char *path);
+  static map < ADDRINT, UINT64 > loadAddressToValueMapFromBinaryStream (
+      std::ifstream &in);
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
 
