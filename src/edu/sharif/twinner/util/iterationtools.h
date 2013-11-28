@@ -78,7 +78,7 @@ public:
 };
 
 #define repeat(N) \
-  for (int nn = 0; nn < N; ++nn)
+  for (unsigned int nn = 0; nn < N; ++nn)
 
 #define UNUSED_VARIABLE(VAR) (void) VAR
 

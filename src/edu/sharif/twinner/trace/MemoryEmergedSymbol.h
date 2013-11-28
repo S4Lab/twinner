@@ -45,6 +45,7 @@ public:
 
   virtual std::string toString () const;
 
+  ADDRINT getAddress () const;
   std::pair < int, SymbolRecord > toSymbolRecord () const;
 };
 

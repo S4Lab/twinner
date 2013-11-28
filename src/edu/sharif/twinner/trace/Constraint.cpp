@@ -71,6 +71,10 @@ std::string Constraint::toString () const {
   return str;
 }
 
+const Expression *Constraint::getExpression () const {
+  return exp;
+}
+
 }
 }
 }

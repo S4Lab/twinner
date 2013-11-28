@@ -63,7 +63,8 @@ void Executer::setCandidateAddresses (const std::set < ADDRINT > &addresses) con
     throw std::runtime_error ("Error in saving memory addresses in binary file");
   }
   out.write ("SYM", 3);
-  out.write ((const char *) &INITIAL_STATE_DETECTION_MODE, sizeof (ExecutionMode));
+  ExecutionMode mode = INITIAL_STATE_DETECTION_MODE;
+  out.write ((const char *) &mode, sizeof (ExecutionMode));
 
   typename std::set < ADDRINT >::size_type s = addresses.size ();
   out.write ((const char *) &s, sizeof (s));

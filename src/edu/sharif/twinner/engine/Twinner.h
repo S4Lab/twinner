@@ -30,6 +30,8 @@ class MemoryEmergedSymbol;
 }
 namespace engine {
 
+class Executer;
+
 class Twinner {
 
 private:
@@ -55,17 +57,13 @@ public:
 
 private:
   void addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace);
-  set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
-  retrieveSymbolsWithoutValueInFirstSegment () const;
 
   bool calculateSymbolsValuesForCoveringNextPath (
       const edu::sharif::twinner::trace::Trace &trace,
       std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols);
 
-  void addToFirstSegmentSymbols (
-      const set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols);
-
-  void codeTracesIntoTwinBinary ();
+  std::map < ADDRINT, UINT64 > obtainInitializedMemoryValues (Executer &ex) const;
+  void codeTracesIntoTwinBinary (const std::map < ADDRINT, UINT64 > &initialValues);
 };
 
 }

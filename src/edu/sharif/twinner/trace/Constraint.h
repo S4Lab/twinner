@@ -65,6 +65,8 @@ public:
   static Constraint *loadFromBinaryStream (std::ifstream &in);
 
   std::string toString () const;
+
+  const Expression *getExpression () const;
 };
 
 }

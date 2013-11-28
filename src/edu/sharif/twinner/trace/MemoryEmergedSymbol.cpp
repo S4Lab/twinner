@@ -56,6 +56,10 @@ std::string MemoryEmergedSymbol::toString () const {
   return ss.str ();
 }
 
+ADDRINT MemoryEmergedSymbol::getAddress () const {
+  return address;
+}
+
 std::pair < int, SymbolRecord >
 MemoryEmergedSymbol::toSymbolRecord () const {
   SymbolRecord record;
