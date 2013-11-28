@@ -13,6 +13,7 @@
 #include "Trace.h"
 
 #include <stdexcept>
+#include <set>
 #include <fstream>
 
 #include "Expression.h"
@@ -20,7 +21,10 @@
 #include "Syscall.h"
 #include "ExecutionTraceSegment.h"
 
+#include "edu/sharif/twinner/engine/Executer.h"
+
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/iterationtools.h"
 
 namespace edu {
 namespace sharif {
@@ -36,9 +40,12 @@ segments (list) {
   currentSegmentIndex = 0;
 }
 
-Trace::Trace () {
-  segments.push_front (new ExecutionTraceSegment ());
-  currentSegmentIterator = segments.begin ();
+Trace::Trace (const std::string &symbolsFilePath) {
+  loadInitializedSymbolsFromFile (symbolsFilePath); // may throw exception on IO errors
+  currentSegmentIterator = segments.end ();
+  if (currentSegmentIterator != segments.begin ()) {
+    currentSegmentIterator--;
+  }
   currentSegmentIndex = 0;
 }
 
@@ -287,7 +294,8 @@ std::map < ADDRINT, UINT64 > Trace::loadAddressToValueMapFromBinaryStream (
   }
   typename std::map < ADDRINT, UINT64 >::size_type s;
   in.read ((char *) &s, sizeof (s));
-  for (int i = 0; i < s; ++i) {
+
+  repeat (s) {
     ADDRINT a;
     in.read ((char *) &a, sizeof (a));
     UINT64 b;
@@ -308,6 +316,72 @@ const std::list < ExecutionTraceSegment * > &Trace::getTraceSegments () const {
 
 ExecutionTraceSegment *Trace::getCurrentTraceSegment () const {
   return *currentSegmentIterator;
+}
+
+void Trace::loadInitializedSymbolsFromFile (const std::string &symbolsFilePath) {
+  std::ifstream in;
+  in.open (edu::sharif::twinner::engine::Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE,
+           ios_base::in | ios_base::binary);
+  if (!in.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not read symbols from binary"
+        " file: Error in open function: "
+        << edu::sharif::twinner::engine::Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
+        << '\n';
+    throw std::runtime_error ("Can not read symbols from binary file");
+  }
+  loadInitializedSymbolsFromBinaryStream (in);
+  in.close ();
+}
+
+void Trace::loadInitializedSymbolsFromBinaryStream (std::ifstream &in) {
+  char magicString[3];
+  in.read (magicString, 3);
+  if (strncmp (magicString, "SYM", 3) != 0) {
+    throw std::runtime_error
+        ("Unexpected magic string while loading initialized symbols from binary stream");
+  }
+  edu::sharif::twinner::engine::Executer::ExecutionMode mode;
+  in.read ((char *) &mode, sizeof (mode));
+  if (mode != edu::sharif::twinner::engine::Executer::NORMAL_MODE) {
+    throw std::runtime_error ("Only Executer::NORMAL_MODE is currently implemented");
+  }
+  std::map < int, std::list < SymbolRecord > >::size_type s;
+  in.read ((char *) &s, sizeof (s));
+  int index = 0;
+
+  repeat (s) {
+    int segmentIndex;
+    in.read ((char *) &segmentIndex, sizeof (segmentIndex));
+    ExecutionTraceSegment *segment =
+        loadSingleSegmentSymbolsRecordsFromBinaryStream (segmentIndex, in);
+    while (index++ < segmentIndex) {
+      segments.push_front (new ExecutionTraceSegment ());
+    }
+    segments.push_front (segment);
+  }
+}
+
+ExecutionTraceSegment *Trace::loadSingleSegmentSymbolsRecordsFromBinaryStream (int index,
+    std::ifstream &in) {
+  std::map < ADDRINT, Expression * > map;
+  std::list < SymbolRecord >::size_type s;
+  in.read ((char *) &s, sizeof (s));
+
+  repeat (s) {
+    SymbolRecord record;
+    in.read ((char *) &record.address, sizeof (record.address));
+    in.read ((char *) &record.concreteValue, sizeof (record.concreteValue));
+    memoryResidentSymbolsGenerationIndices[record.address] = index;
+    Expression *exp = new Expression (record.address, record.concreteValue, index, true);
+    std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
+        map.insert (make_pair (record.address, exp));
+    if (!res.second) {
+      throw std::runtime_error
+          ("Duplicate symbols are read for one memory address"
+           " from symbols binary stream");
+    }
+  }
+  return new ExecutionTraceSegment (map);
 }
 
 void Trace::printRegistersValues (

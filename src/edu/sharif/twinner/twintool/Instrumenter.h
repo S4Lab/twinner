@@ -71,7 +71,6 @@ private:
 
   std::map < OPCODE, InstructionModel > managedInstructions;
 
-  std::string symbolsFilePath; // read initial symbols from this file
   std::string traceFilePath; // save final execution trace into this file
 
   InstructionSymbolicExecuter *ise;
@@ -79,7 +78,8 @@ private:
   bool disabled;
 
 public:
-  Instrumenter (std::string symbolsFilePath, std::string traceFilePath, bool disabled);
+  Instrumenter (const std::string &symbolsFilePath,
+      const std::string &traceFilePath, bool disabled);
   ~Instrumenter ();
 
   void instrumentSingleInstruction (INS ins);

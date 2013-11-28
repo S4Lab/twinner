@@ -29,10 +29,10 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
-Instrumenter::Instrumenter (string _symbolsFilePath, string _traceFilePath,
+Instrumenter::Instrumenter (const string &symbolsFilePath, const string &_traceFilePath,
     bool _disabled) :
-symbolsFilePath (_symbolsFilePath), traceFilePath (_traceFilePath),
-ise (new InstructionSymbolicExecuter (_disabled)),
+traceFilePath (_traceFilePath),
+ise (new InstructionSymbolicExecuter (symbolsFilePath, _disabled)),
 disabled (_disabled),
 totalCountOfInstructions (0) {
 
