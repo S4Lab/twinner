@@ -14,12 +14,11 @@
 
 #include "MemoryResidentExpressionValueProxy.h"
 
-#include "InstructionSymbolicExecuter.h"
-
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/memory.h"
 
 namespace edu {
 namespace sharif {
@@ -39,8 +38,8 @@ MemoryResidentExpressionValueProxy::getExpression (
         ("For getting an expression from memory, "
          "memReadBytes must be provided to the constructor of expression proxy class.");
   }
-  UINT64 val = InstructionSymbolicExecuter::readMemoryContent (memoryEa);
-  val = InstructionSymbolicExecuter::truncateValue (val, memReadBytes);
+  UINT64 val = edu::sharif::twinner::util::readMemoryContent (memoryEa);
+  val = edu::sharif::twinner::util::truncateValue (val, memReadBytes);
 
   return trace->getSymbolicExpressionByMemoryAddress (memoryEa, val);
 }

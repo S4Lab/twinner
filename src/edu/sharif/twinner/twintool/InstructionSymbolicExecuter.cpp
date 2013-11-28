@@ -22,6 +22,7 @@
 #include "edu/sharif/twinner/trace/Constraint.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/memory.h"
 
 #include <stdexcept>
 
@@ -266,7 +267,8 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
 
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
-    (this->*hook) (context, readRegisterContent (context, trackedReg));
+    (this->*hook) (context,
+        edu::sharif::twinner::util::readRegisterContent (context, trackedReg));
     trackedReg = REG_INVALID_;
 
   } else if (divisionSize > 0) {
@@ -644,8 +646,10 @@ void InstructionSymbolicExecuter::adjustDivisionInstructionOperands (
         "unsupported operand size: " << operandSize << '\n';
     throw std::runtime_error ("Unsupported operand size in division instruction");
   }
-  const UINT64 remainderVal = readRegisterContent (context, remainderReg);
-  const UINT64 quotientVal = readRegisterContent (context, quotientReg);
+  const UINT64 remainderVal =
+      edu::sharif::twinner::util::readRegisterContent (context, remainderReg);
+  const UINT64 quotientVal =
+      edu::sharif::twinner::util::readRegisterContent (context, quotientReg);
   edu::sharif::twinner::trace::Expression *remainderExp =
       trace->getSymbolicExpressionByRegister (remainderReg);
   edu::sharif::twinner::trace::Expression *quotientExp =
@@ -753,40 +757,6 @@ InstructionSymbolicExecuter::convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
     throw std::runtime_error
         ("Unknown opcode (for changedReg) given to analysis routine");
   }
-}
-
-UINT64 InstructionSymbolicExecuter::readRegisterContent (const CONTEXT *context,
-    REG reg) {
-  REGVAL regVal;
-  PIN_GetContextRegval (context, reg, &regVal);
-  UINT64 value;
-  PIN_ReadRegvalQWord (&regVal, &value, 0);
-  return value;
-}
-
-UINT64 InstructionSymbolicExecuter::readMemoryContent (ADDRINT memoryEa) {
-  UINT64 currentConcreteValue;
-  PIN_SafeCopy (&currentConcreteValue, (const VOID *) (memoryEa), sizeof (UINT64));
-  return currentConcreteValue;
-}
-
-UINT64 InstructionSymbolicExecuter::truncateValue (UINT64 value, int countOfBytes) {
-  switch (countOfBytes) {
-  case 8:
-    break; // no cast is required in 64-bits mode
-  case 4:
-    value = (UINT32) value;
-    break;
-  case 2:
-    value = (UINT16) value;
-    break;
-  case 1:
-    value = (UINT8) value;
-    break;
-  default:
-    throw std::runtime_error ("Can not truncate value to given count of bytes");
-  }
-  return value;
 }
 
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,

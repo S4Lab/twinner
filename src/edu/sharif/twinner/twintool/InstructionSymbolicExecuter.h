@@ -246,10 +246,6 @@ public:
       OPCODE op) const;
   SuddenlyChangedRegAnalysisRoutine convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
       OPCODE op) const;
-
-  static UINT64 readRegisterContent (const CONTEXT *context, REG reg);
-  static UINT64 readMemoryContent (ADDRINT memoryEa);
-  static UINT64 truncateValue (UINT64 value, int countOfBytes);
 };
 
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,

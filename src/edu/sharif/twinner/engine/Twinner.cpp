@@ -314,6 +314,27 @@ const Logger &operator<< (const Logger &logger, REG reg) {
   return logger << (UINT32) reg;
 }
 
+UINT64 readRegisterContent (const CONTEXT *context, REG reg) {
+  const char *msg = "The readRegisterContent(...) method is only supported in TwinTool:"
+      " Calling error from Twinner.\n";
+  edu::sharif::twinner::util::Logger::error () << msg;
+  throw std::runtime_error (msg);
+}
+
+UINT64 readMemoryContent (ADDRINT memoryEa) {
+  const char *msg = "The readMemoryContent(...) method is only supported in TwinTool:"
+      " Calling error from Twinner.\n";
+  edu::sharif::twinner::util::Logger::error () << msg;
+  throw std::runtime_error (msg);
+}
+
+VOID writeMemoryContent (ADDRINT memoryEa, UINT64 value) {
+  const char *msg = "The writeMemoryContent(...) method is only supported in TwinTool:"
+      " Calling error from Twinner.\n";
+  edu::sharif::twinner::util::Logger::error () << msg;
+  throw std::runtime_error (msg);
+}
+
 }
 }
 }

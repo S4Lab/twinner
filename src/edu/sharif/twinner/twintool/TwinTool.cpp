@@ -199,6 +199,25 @@ const Logger &operator<< (const Logger &logger, REG reg) {
   return logger << "Reg(" << REG_StringShort (reg) << ")";
 }
 
+UINT64 readRegisterContent (const CONTEXT *context,
+    REG reg) {
+  REGVAL regVal;
+  PIN_GetContextRegval (context, reg, &regVal);
+  UINT64 value;
+  PIN_ReadRegvalQWord (&regVal, &value, 0);
+  return value;
+}
+
+UINT64 readMemoryContent (ADDRINT memoryEa) {
+  UINT64 currentConcreteValue;
+  PIN_SafeCopy (&currentConcreteValue, (const VOID *) (memoryEa), sizeof (UINT64));
+  return currentConcreteValue;
+}
+
+VOID writeMemoryContent (ADDRINT memoryEa, UINT64 value) {
+  PIN_SafeCopy ((VOID *) memoryEa, (const VOID *) &value, sizeof (value));
+}
+
 }
 }
 }
