@@ -36,6 +36,11 @@ registerToExpression (regi), memoryAddressToExpression (memo), pathConstraints (
 ExecutionTraceSegment::ExecutionTraceSegment () {
 }
 
+ExecutionTraceSegment::ExecutionTraceSegment (
+    const std::map < ADDRINT, Expression * > &memo) :
+memoryAddressToExpression (memo) {
+}
+
 ExecutionTraceSegment::~ExecutionTraceSegment () {
   for (std::map < REG, Expression * >::iterator it = registerToExpression.begin ();
       it != registerToExpression.end (); ++it) {
@@ -70,6 +75,17 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (
       (memoryAddressToExpression, memoryEa, memval);
 }
 
+template < typename Address >
+void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
+    Address address, UINT64 concreteVal);
+
+template < >
+void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
+    REG reg, UINT64 concreteVal);
+template < >
+void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
+    ADDRINT address, UINT64 concreteVal);
+
 template < typename KEY >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
     std::map < KEY, Expression * > &map, const KEY key, UINT64 concreteVal) const
@@ -79,11 +95,23 @@ throw (WrongStateException) {
     return 0;
   } else {
     Expression *exp = it->second;
-    if (exp->getLastConcreteValue () != concreteVal) {
-      throw WrongStateException (exp->getLastConcreteValue ());
-    }
+    check_concrete_value_and_throw_wrong_state_exception_on_mismatch (exp, key,
+                                                                      concreteVal);
+
     return exp;
   }
+}
+
+template < >
+void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
+    REG reg, UINT64 concreteVal) {
+  exp->checkConcreteValueReg (reg, concreteVal);
+}
+
+template < >
+void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
+    ADDRINT memoryEa, UINT64 concreteVal) {
+  exp->checkConcreteValueMemory (memoryEa, concreteVal);
 }
 
 template < typename KEY >

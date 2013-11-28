@@ -19,6 +19,7 @@
 
 #include "pin.H"
 #include "MemoryEmergedSymbol.h"
+#include "ExecutionState.h"
 
 #include <list>
 
@@ -40,6 +41,8 @@ private:
   std::list < ExpressionToken * > stack;
   UINT64 lastConcreteValue;
 
+  bool isOverwriting;
+
   Expression (const Expression &exp);
 
   Expression (const std::list < ExpressionToken * > &stk, UINT64 concreteValue);
@@ -55,7 +58,8 @@ public:
    * Instantiates an expression containing a new (yet unused) symbol,
    * initiated from a memory address.
    */
-  Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex);
+  Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex,
+      bool isOverwriting = false);
 
   /**
    * Instantiates an expression containing a constant value (non-symbolic).
@@ -134,6 +138,11 @@ public:
   static Expression *loadFromBinaryStream (std::ifstream &in);
 
   const std::list < ExpressionToken * > &getStack () const;
+
+  void checkConcreteValueReg (REG reg,
+      UINT64 concreteVal) const throw (WrongStateException);
+  void checkConcreteValueMemory (ADDRINT memoryEa,
+      UINT64 concreteVal) throw (WrongStateException);
 };
 
 }

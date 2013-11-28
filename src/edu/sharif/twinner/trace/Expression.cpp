@@ -17,6 +17,7 @@
 #include <sstream>
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/memory.h"
 
 #include "RegisterEmergedSymbol.h"
 #include "MemoryEmergedSymbol.h"
@@ -29,21 +30,22 @@ namespace trace {
 
 Expression::Expression (const std::list < ExpressionToken * > &stk,
     UINT64 concreteValue) :
-stack (stk), lastConcreteValue (concreteValue) {
+stack (stk), lastConcreteValue (concreteValue), isOverwriting (false) {
 }
 
 Expression::Expression (REG reg, UINT64 concreteValue, int generationIndex) :
-lastConcreteValue (concreteValue) {
+lastConcreteValue (concreteValue), isOverwriting (false) {
   stack.push_back (new RegisterEmergedSymbol (reg, concreteValue, generationIndex));
 }
 
-Expression::Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex) :
-lastConcreteValue (concreteValue) {
+Expression::Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex,
+    bool _isOverwriting) :
+lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
   stack.push_back (new MemoryEmergedSymbol (memoryEa, concreteValue, generationIndex));
 }
 
 Expression::Expression (const Expression &exp) :
-lastConcreteValue (exp.lastConcreteValue) {
+lastConcreteValue (exp.lastConcreteValue), isOverwriting (false) {
   for (std::list < ExpressionToken * >::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const ExpressionToken *et = *it;
@@ -52,7 +54,7 @@ lastConcreteValue (exp.lastConcreteValue) {
 }
 
 Expression::Expression (UINT64 value) :
-lastConcreteValue (value) {
+lastConcreteValue (value), isOverwriting (false) {
   stack.push_back (new Constant (value));
 }
 
@@ -214,6 +216,28 @@ Expression *Expression::loadFromBinaryStream (std::ifstream &in) {
 
 const std::list < ExpressionToken * > &Expression::getStack () const {
   return stack;
+}
+
+void Expression::checkConcreteValueReg (REG reg, UINT64 concreteVal) const
+throw (WrongStateException) {
+  if (lastConcreteValue == concreteVal) {
+    return;
+  }
+  // for reg case, isOverwriting is false for sure
+  throw WrongStateException (lastConcreteValue);
+}
+
+void Expression::checkConcreteValueMemory (ADDRINT memoryEa, UINT64 concreteVal)
+throw (WrongStateException) {
+  if (lastConcreteValue == concreteVal) {
+    isOverwriting = false; // overwriting just works at first getting/synchronization
+    return;
+  }
+  if (!isOverwriting) {
+    throw WrongStateException (lastConcreteValue);
+  }
+  isOverwriting = false;
+  edu::sharif::twinner::util::writeMemoryContent (memoryEa, lastConcreteValue);
 }
 
 }
