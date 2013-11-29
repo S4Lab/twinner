@@ -130,16 +130,20 @@ public:
 
   bool saveToFile (const char *path) const;
   static Trace *loadFromFile (const char *path);
-  static Trace *loadFromBinaryStream (std::ifstream &in);
+  static bool saveAddressToValueMapToFile (const std::map < ADDRINT, UINT64 > &map,
+      const char *path);
   static map < ADDRINT, UINT64 > loadAddressToValueMapFromFile (const char *path);
-  static map < ADDRINT, UINT64 > loadAddressToValueMapFromBinaryStream (
-      std::ifstream &in);
-
-  virtual void saveToBinaryStream (std::ofstream &out) const;
 
   const std::list < ExecutionTraceSegment * > &getTraceSegments () const;
 
 private:
+  void saveToBinaryStream (std::ofstream &out) const;
+  static Trace *loadFromBinaryStream (std::ifstream &in);
+  static void saveAddressToValueMapToBinaryStream (
+      const std::map < ADDRINT, UINT64 > &map, std::ofstream &out);
+  static map < ADDRINT, UINT64 > loadAddressToValueMapFromBinaryStream (
+      std::ifstream &in);
+
   ExecutionTraceSegment *getCurrentTraceSegment () const;
 
   template < typename T >

@@ -13,6 +13,7 @@
 #include "Instrumenter.h"
 
 #include <stdexcept>
+#include <stdlib.h>
 
 #include "xed-iclass-enum.h"
 
@@ -21,6 +22,8 @@
 #include "edu/sharif/twinner/trace/Trace.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/iterationtools.h"
+#include "edu/sharif/twinner/util/memory.h"
 
 using namespace std;
 
@@ -28,6 +31,9 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace twintool {
+
+inline void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > &map,
+    const ADDRINT &address);
 
 Instrumenter::Instrumenter (std::ifstream &symbolsFileInputStream,
     const string &_traceFilePath, bool _disabled) :
@@ -468,7 +474,9 @@ void Instrumenter::syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt,
   if (isWithinInitialStateDetectionMode) {
     edu::sharif::twinner::util::Logger::debug () << "Gathering initial contents of"
         " requested memory addresses, right before first syscall\n";
-    //TODO: Gather memory contents of candidate addresses, save them in file, and exit program
+    saveMemoryContentsToFile (traceFilePath.c_str ());
+    edu::sharif::twinner::util::Logger::debug () << "Done.\tExiting...\n";
+    exit (0); // think about probably acquired locks of application
   }
 }
 
@@ -476,6 +484,22 @@ void Instrumenter::syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt,
     SYSCALL_STANDARD std) {
   edu::sharif::twinner::util::Logger::loquacious () << "*** syscallExitPoint ***\n";
   //TODO: Implement...
+}
+
+void Instrumenter::saveMemoryContentsToFile (const char *path) const {
+  std::map < ADDRINT, UINT64 > map;
+  edu::sharif::twinner::util::ForEach
+      < int, ADDRINT, std::map < ADDRINT, UINT64 > >
+      ::iterate (candidateAddresses, &read_memory_content_and_add_it_to_map, map);
+  if (!ise->getTrace ()->saveAddressToValueMapToFile (map, path)) {
+    throw std::runtime_error ("Can not save address-to-value map into binary file");
+  }
+}
+
+void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > &map,
+    const ADDRINT &address) {
+  map.insert (make_pair (address,
+                         edu::sharif::twinner::util::readMemoryContent (address)));
 }
 
 void Instrumenter::aboutToExit (INT32 code) {

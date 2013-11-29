@@ -101,6 +101,8 @@ public:
 private:
   void initialize ();
 
+  void saveMemoryContentsToFile (const char *path) const;
+
   void printInstructionsStatisticsInfo () const;
 
   InstructionModel getInstructionModel (OPCODE op, INS ins) const;

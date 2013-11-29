@@ -31,6 +31,9 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+inline void write_map_entry (std::ofstream &out,
+    const ADDRINT &addr, const UINT64 &content);
+
 Trace::Trace (const std::list < ExecutionTraceSegment * > &list) :
 segments (list) {
   currentSegmentIterator = segments.end ();
@@ -275,6 +278,36 @@ Trace *Trace::loadFromBinaryStream (std::ifstream &in) {
   return new Trace (list);
 }
 
+bool Trace::saveAddressToValueMapToFile (const std::map < ADDRINT, UINT64 > &map,
+    const char *path) {
+  std::ofstream out;
+  out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
+  if (!out.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not write addr-to-val map:"
+        " Error in open function: " << path << '\n';
+    return false;
+  }
+  saveAddressToValueMapToBinaryStream (map, out);
+  out.close ();
+  return true;
+}
+
+void Trace::saveAddressToValueMapToBinaryStream (const std::map < ADDRINT, UINT64 > &map,
+    std::ofstream &out) {
+  out.write ("TRA", 3);
+
+  std::map < ADDRINT, UINT64 >::size_type s = map.size ();
+  out.write ((const char *) &s, sizeof (s));
+  edu::sharif::twinner::util::ForEach
+      < ADDRINT, UINT64, std::ofstream >
+      ::iterate (map, &write_map_entry, out);
+}
+
+void write_map_entry (std::ofstream &out, const ADDRINT &addr, const UINT64 &content) {
+  out.write ((const char *) &addr, sizeof (addr));
+  out.write ((const char *) &content, sizeof (content));
+}
+
 map < ADDRINT, UINT64 > Trace::loadAddressToValueMapFromFile (const char *path) {
   map < ADDRINT, UINT64 > map;
   std::ifstream in;
@@ -298,7 +331,7 @@ std::map < ADDRINT, UINT64 > Trace::loadAddressToValueMapFromBinaryStream (
     throw std::runtime_error
         ("Unexpected magic string while loading map from binary stream");
   }
-  typename std::map < ADDRINT, UINT64 >::size_type s;
+  std::map < ADDRINT, UINT64 >::size_type s;
   in.read ((char *) &s, sizeof (s));
 
   repeat (s) {
