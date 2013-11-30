@@ -539,6 +539,27 @@ void InstructionSymbolicExecuter::andAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::orAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "orAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp =
+      dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tbinary operation...";
+  dstexp->binaryOperation
+      (new edu::sharif::twinner::trace::Operator
+       (edu::sharif::twinner::trace::Operator::BITWISE_OR), srcexp);
+  dst.valueIsChanged (trace, dstexp);
+  //TODO: set rflags
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::xorAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "xorAnalysisRoutine(...)\n"
@@ -708,6 +729,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::shlAnalysisRoutine;
   case XED_ICLASS_AND:
     return &InstructionSymbolicExecuter::andAnalysisRoutine;
+  case XED_ICLASS_OR:
+    return &InstructionSymbolicExecuter::orAnalysisRoutine;
   case XED_ICLASS_XOR:
     return &InstructionSymbolicExecuter::xorAnalysisRoutine;
   case XED_ICLASS_TEST:

@@ -210,6 +210,12 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * OR bitwise ores dst with src as its complement.
+   */
+  void orAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * XOR calculates exclusive or of dst with src.
    */
   void xorAnalysisRoutine (const MutableExpressionValueProxy &dst,
