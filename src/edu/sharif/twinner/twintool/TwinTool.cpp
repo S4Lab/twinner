@@ -238,6 +238,7 @@ void throw_exception_about_unexpected_change_in_memory_or_register_address
             " without any interfering syscall\n"
             "\tExpected 0x%lX, Got 0x%lX; at register %s (code: 0x%X)",
             expectedVal, currentVal, addr.c_str (), (unsigned int) reg);
+  edu::sharif::twinner::util::Logger::error () << errorMessage << '\n';
   throw std::runtime_error (errorMessage);
 }
 
@@ -248,6 +249,7 @@ void throw_exception_about_unexpected_change_in_memory_or_register_address
             " without any interfering syscall\n"
             "\tExpected 0x%lX, Got 0x%lX; at address 0x%lX",
             expectedVal, currentVal, address);
+  edu::sharif::twinner::util::Logger::error () << errorMessage << '\n';
   throw std::runtime_error (errorMessage);
 }
 

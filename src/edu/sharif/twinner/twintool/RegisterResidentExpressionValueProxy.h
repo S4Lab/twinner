@@ -50,7 +50,19 @@ private:
       edu::sharif::twinner::trace::Trace *trace,
       REG r, int bits,
       edu::sharif::twinner::trace::Expression *exp) const;
-  REG getOverlappingRegisterByIndex (REG reg, int index) const;
+
+  enum RegisterType {
+
+    REG_64_BITS_TYPE = 8,
+    REG_32_BITS_TYPE = 4,
+    REG_16_BITS_TYPE = 2,
+    REG_8_BITS_LOWER_HALF_TYPE = 1,
+    REG_8_BITS_UPPER_HALF_TYPE = 3,
+  };
+
+  RegisterType getRegisterType (REG reg) const;
+  REG getOverlappingRegisterByIndex (int external, int internal) const;
+  int getRegisterIndex (REG reg) const;
 };
 
 }
