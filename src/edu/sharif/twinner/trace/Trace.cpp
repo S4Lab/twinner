@@ -361,6 +361,9 @@ void Trace::loadInitializedSymbolsFromBinaryStream (std::ifstream &in) {
   std::map < int, std::list < SymbolRecord > >::size_type s;
   in.read ((char *) &s, sizeof (s));
   int index = 0;
+  if (s == 0) {
+    segments.push_front (new ExecutionTraceSegment ());
+  }
 
   repeat (s) {
     int segmentIndex;

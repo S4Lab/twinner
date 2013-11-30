@@ -174,24 +174,24 @@ Executer::executeSingleTraceInNormalMode () const {
 void Executer::changeArguments () {
   const char * const str = inputArguments.c_str ();
   char * const buffer = new char [inputArguments.size () + 52];
-  *buffer = ' ';
   const char *lastArg = buffer;
   const char *args = str;
-  char *ptr = buffer + 1;
+  char *ptr = buffer;
   for (; *args; ++args, ++ptr) {
     if (*args == ' ') {
-      lastArg = ptr;
+      lastArg = ptr + 1;
       *ptr = ' ';
     } else {
       *ptr = (*args) + 1;
     }
   }
   const char * const end = ptr;
+  *ptr++ = ' ';
   for (int i = 0; lastArg < end && i < 50; ++lastArg, ++ptr, ++i) {
     *ptr = (*lastArg) + 1;
   }
   *ptr = '\0';
-  inputArguments = std::string (buffer + 1); // ignoring the first space character
+  inputArguments = std::string (buffer);
 }
 
 map < ADDRINT, UINT64 >

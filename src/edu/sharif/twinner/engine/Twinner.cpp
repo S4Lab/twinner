@@ -66,6 +66,11 @@ inline void extract_memory_addresses_of_expression (std::set < ADDRINT > &addres
 inline void check_symbol_type_and_add_it_to_set (std::set < ADDRINT > &addresses,
     edu::sharif::twinner::trace::ExpressionToken * const &token);
 
+inline void remove_mismatches_from_map (std::map < ADDRINT, UINT64 > &initialValues,
+    const ADDRINT &address, const UINT64 &content);
+inline void code_initial_value_into_twin_code (std::stringstream &out,
+    const ADDRINT &address, const UINT64 &content);
+
 Twinner::Twinner () {
 }
 
@@ -149,8 +154,22 @@ std::map < ADDRINT, UINT64 > Twinner::obtainInitializedMemoryValues (Executer &e
   std::map < ADDRINT, UINT64 > initialValues2 =
       ex.executeSingleTraceInInitialStateDetectionMode ();
   // step 7
-  // TODO: for on initialValues1 and initialValues2 and remove changes
+  edu::sharif::twinner::util::ForEach
+      < ADDRINT, UINT64, std::map < ADDRINT, UINT64 > >
+      ::iterate (initialValues2, &remove_mismatches_from_map, initialValues1);
   return initialValues1;
+}
+
+void remove_mismatches_from_map (std::map < ADDRINT, UINT64 > &initialValues,
+    const ADDRINT &address, const UINT64 &content) {
+  std::map < ADDRINT, UINT64 >::iterator it = initialValues.find (address);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "at address: 0x" << std::hex << address
+      << "\tfirst map: 0x" << it->second
+      << "\tsecond map: 0x" << content << "\n";
+  if (it->second != content) {
+    initialValues.erase (it);
+  }
 }
 
 void delete_symbol (
@@ -223,11 +242,24 @@ void Twinner::codeTracesIntoTwinBinary (
     const std::map < ADDRINT, UINT64 > &initialValues) {
   std::stringstream out;
   out << '\n';
-
+  codeInitialValuesIntoTwinCode (out, initialValues);
   edu::sharif::twinner::util::ForEach
       < int, const edu::sharif::twinner::trace::Trace *, std::stringstream >
       ::iterate (traces, &code_trace_into_twin_code, out);
   edu::sharif::twinner::util::Logger::info () << out.str ();
+}
+
+void Twinner::codeInitialValuesIntoTwinCode (std::stringstream &out,
+    const std::map < ADDRINT, UINT64 > &initialValues) const {
+  edu::sharif::twinner::util::ForEach
+      < ADDRINT, UINT64, std::stringstream >
+      ::iterate (initialValues, &code_initial_value_into_twin_code, out);
+}
+
+void code_initial_value_into_twin_code (std::stringstream &out,
+    const ADDRINT &address, const UINT64 &content) {
+  out << "UINT64 &m" << std::hex << address << " = *((UINT64 *) 0x" << address << ");\n"
+      << "m" << address << " = 0x" << content << ";\n";
 }
 
 void code_trace_into_twin_code (std::stringstream &out,
