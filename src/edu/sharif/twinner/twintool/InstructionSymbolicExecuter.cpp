@@ -693,7 +693,7 @@ void InstructionSymbolicExecuter::adjustDivisionInstructionOperands (
          (edu::sharif::twinner::trace::Operator::BITWISE_OR), quotientExp);
     const MutableExpressionValueProxy &ax =
         RegisterResidentExpressionValueProxy (REG_AX, 0);
-    ax.valueIsChanged (trace, remainderExp); // this deletes unused expressions by itself
+    ax.setExpression (trace, remainderExp); // this deletes unused expressions by itself
   } else {
     const MutableExpressionValueProxy &remainder =
         RegisterResidentExpressionValueProxy (remainderReg, remainderVal);
