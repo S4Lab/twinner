@@ -105,7 +105,9 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_RET_FAR, RET_INS_MODELS));
   managedInstructions.insert
-      (make_pair (XED_ICLASS_SHL, SHL_INS_MODELS));
+      (make_pair (XED_ICLASS_SHL, SHIFT_INS_MODELS));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_SHR, SHIFT_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_AND, COMMON_INS_MODELS));
   managedInstructions.insert

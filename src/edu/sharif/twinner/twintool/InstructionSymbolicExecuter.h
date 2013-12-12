@@ -204,6 +204,12 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * SHR shifts dst to right as much as indicated by src.
+   */
+  void shrAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * AND bitwise ands dst with src as its mask.
    */
   void andAnalysisRoutine (const MutableExpressionValueProxy &dst,
