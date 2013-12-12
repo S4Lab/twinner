@@ -34,13 +34,13 @@ namespace twintool {
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     std::ifstream &symbolsFileInputStream, bool _disabled) :
 trace (new edu::sharif::twinner::trace::Trace (symbolsFileInputStream)),
-trackedReg (REG_INVALID_), divisionSize (-1), hook (0),
+trackedReg (REG_INVALID_), operandSize (-1), hook (0),
 disabled (_disabled) {
 }
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (bool _disabled) :
 trace (new edu::sharif::twinner::trace::Trace ()),
-trackedReg (REG_INVALID_), divisionSize (-1), hook (0),
+trackedReg (REG_INVALID_), operandSize (-1), hook (0),
 disabled (_disabled) {
 }
 
@@ -278,9 +278,9 @@ void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
         edu::sharif::twinner::util::readRegisterContent (context, trackedReg));
     trackedReg = REG_INVALID_;
 
-  } else if (divisionSize > 0) {
-    (this->*hook) (context, (UINT64) divisionSize);
-    divisionSize = -1;
+  } else if (operandSize > 0) {
+    (this->*hook) (context, (UINT64) operandSize);
+    operandSize = -1;
   }
   hook = 0;
 }
@@ -624,8 +624,8 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
       rightDst.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tpreparing left-right in both dst regs...";
-  divisionSize = leftDst.getSize ();
-  leftDstExp->shiftToLeft (divisionSize);
+  operandSize = leftDst.getSize ();
+  leftDstExp->shiftToLeft (operandSize);
   leftDstExp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::BITWISE_OR), rightDstExp);
@@ -642,65 +642,66 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
   // but concrete values are not! So we need to register a hook to synchronize concrete
   // values too (we can also calculate them in assembly, but it's not required).
 
-  hook = &InstructionSymbolicExecuter::adjustDivisionInstructionOperands;
+  hook = &InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
 
-void InstructionSymbolicExecuter::adjustDivisionInstructionOperands (
+void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
     const CONTEXT *context, UINT64 operandSize) {
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "adjustDivisionInstructionOperands(...) hook...";
-  REG remainderReg, quotientReg;
+      << "adjustDivisionMultiplicationOperands(...) hook...";
+  REG leftReg, rightReg;
   switch (operandSize) {
   case 8:
-    remainderReg = REG_AH;
-    quotientReg = REG_AL;
+    leftReg = REG_AH;
+    rightReg = REG_AL;
   case 16:
-    remainderReg = REG_DX;
-    quotientReg = REG_AX;
+    leftReg = REG_DX;
+    rightReg = REG_AX;
     break;
   case 32:
-    remainderReg = REG_EDX;
-    quotientReg = REG_EAX;
+    leftReg = REG_EDX;
+    rightReg = REG_EAX;
     break;
   case 64:
-    remainderReg = REG_RDX;
-    quotientReg = REG_RAX;
+    leftReg = REG_RDX;
+    rightReg = REG_RAX;
     break;
   default:
     edu::sharif::twinner::util::Logger::error ()
-        << "adjustDivisionInstructionOperands(...) hook: "
+        << "adjustDivisionMultiplicationOperands(...) hook: "
         "unsupported operand size: " << operandSize << '\n';
-    throw std::runtime_error ("Unsupported operand size in division instruction");
+    throw std::runtime_error
+        ("Unsupported operand size in division/multiplication instruction");
   }
-  const UINT64 remainderVal =
-      edu::sharif::twinner::util::readRegisterContent (context, remainderReg);
-  const UINT64 quotientVal =
-      edu::sharif::twinner::util::readRegisterContent (context, quotientReg);
-  edu::sharif::twinner::trace::Expression *remainderExp =
-      trace->getSymbolicExpressionByRegister (remainderReg);
-  edu::sharif::twinner::trace::Expression *quotientExp =
-      trace->getSymbolicExpressionByRegister (quotientReg);
-  remainderExp->setLastConcreteValue (remainderVal);
-  quotientExp->setLastConcreteValue (quotientVal);
+  const UINT64 leftVal =
+      edu::sharif::twinner::util::readRegisterContent (context, leftReg);
+  const UINT64 rightVal =
+      edu::sharif::twinner::util::readRegisterContent (context, rightReg);
+  edu::sharif::twinner::trace::Expression *leftExp =
+      trace->getSymbolicExpressionByRegister (leftReg);
+  edu::sharif::twinner::trace::Expression *rightExp =
+      trace->getSymbolicExpressionByRegister (rightReg);
+  leftExp->setLastConcreteValue (leftVal);
+  rightExp->setLastConcreteValue (rightVal);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tconcrete values are adjusted...";
   if (operandSize == 8) { // AX == AH:AL
-    remainderExp->shiftToLeft (8);
-    remainderExp->binaryOperation
+    leftExp->shiftToLeft (8);
+    leftExp->binaryOperation
         (new edu::sharif::twinner::trace::Operator
-         (edu::sharif::twinner::trace::Operator::BITWISE_OR), quotientExp);
+         (edu::sharif::twinner::trace::Operator::BITWISE_OR), rightExp);
     const MutableExpressionValueProxy &ax =
         RegisterResidentExpressionValueProxy (REG_AX, 0);
-    ax.setExpression (trace, remainderExp); // this deletes unused expressions by itself
+    ax.setExpression (trace, leftExp); // this deletes unused expressions by itself
   } else {
-    const MutableExpressionValueProxy &remainder =
-        RegisterResidentExpressionValueProxy (remainderReg, remainderVal);
-    const MutableExpressionValueProxy &quotient =
-        RegisterResidentExpressionValueProxy (quotientReg, quotientVal);
-    remainder.valueIsChanged (trace, remainderExp);
-    quotient.valueIsChanged (trace, quotientExp);
+    const MutableExpressionValueProxy &left =
+        RegisterResidentExpressionValueProxy (leftReg, leftVal);
+    const MutableExpressionValueProxy &right =
+        RegisterResidentExpressionValueProxy (rightReg, rightVal);
+    left.valueIsChanged (trace, leftExp);
+    right.valueIsChanged (trace, rightExp);
   }
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\toverlapping registers are updated.\n";

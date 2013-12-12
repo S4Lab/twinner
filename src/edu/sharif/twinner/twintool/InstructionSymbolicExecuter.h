@@ -49,7 +49,7 @@ private:
   Flags eflags;
 
   REG trackedReg;
-  int divisionSize;
+  int operandSize;
   Hook hook;
 
   bool disabled;
@@ -230,7 +230,7 @@ private:
 
   /**
    * DIV unsigned divide left-right regs by src reg putting quotient in right, remainder
-   * in left. This method only calculate symbolic values of operands (concrete values
+   * in left. This method only calculates symbolic values of operands (concrete values
    * will be wrong) and also ignores propagating new values to overlapping registers.
    * Instead, it registers a hook to adjust concrete values and propagate to overlapping
    * registers at the beginning of next executed instruction.
@@ -240,10 +240,10 @@ private:
       const ExpressionValueProxy &src);
 
   /**
-   * This hook adjusts concrete values of division operands and also propagates their
-   * values to overlapping registers.
+   * This hook adjusts concrete values of division/multiplication operands
+   * and also propagates their values to overlapping registers.
    */
-  void adjustDivisionInstructionOperands (const CONTEXT *context, UINT64 operandSize);
+  void adjustDivisionMultiplicationOperands (const CONTEXT *context, UINT64 operandSize);
 
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
