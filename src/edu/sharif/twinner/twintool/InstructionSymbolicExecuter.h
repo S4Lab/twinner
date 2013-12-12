@@ -240,6 +240,17 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * MUL unsigned multiply right reg by src and puts result in left-right regs.
+   * This method only calculates symbolic values of operands (concrete values
+   * will be wrong) and also ignores propagating new values to overlapping registers.
+   * Instead, it registers a hook to adjust concrete values and propagate to overlapping
+   * registers at the beginning of next executed instruction.
+   */
+  void mulAnalysisRoutine (const MutableExpressionValueProxy &leftDst,
+      const MutableExpressionValueProxy &rightDst,
+      const ExpressionValueProxy &src);
+
+  /**
    * This hook adjusts concrete values of division/multiplication operands
    * and also propagates their values to overlapping registers.
    */

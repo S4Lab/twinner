@@ -113,7 +113,9 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_XOR, COMMON_INS_MODELS));
   managedInstructions.insert
-      (make_pair (XED_ICLASS_DIV, DIV_INS_MODELS));
+      (make_pair (XED_ICLASS_DIV, DST_REG_REG_SRC_REG));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_MUL, DST_REG_REG_SRC_REG));
   managedInstructions.insert
       (make_pair (XED_ICLASS_TEST, TEST_INS_MODELS));
 }
@@ -185,7 +187,8 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_NOP:
     return NOP_INS_MODELS;
   case XED_ICLASS_DIV:
-    return DIV_INS_MODELS;
+  case XED_ICLASS_MUL:
+    return DST_REG_REG_SRC_REG;
   default:
     switch (INS_Category (ins)) {
     case XED_CATEGORY_COND_BR:
@@ -404,7 +407,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_END);
     break;
   }
-  case DIV_INS_MODELS:
+  case DST_REG_REG_SRC_REG:
   {
     REG srcreg = INS_OperandReg (ins, 0);
     REG dstRightReg = INS_OperandReg (ins, 1);

@@ -53,7 +53,7 @@ private:
 
     DST_RSP_SRC_CALL = 0x0800, // instructions who update RSP due to routine calls
 
-    DIV_INS_MODELS = 0x1000,
+    DST_REG_REG_SRC_REG = 0x1000, // there are two (left and right) destinations
 
     RET_INS_MODELS = DST_RSP_SRC_CALL,
     CALL_INS_MODELS = DST_RSP_SRC_CALL,

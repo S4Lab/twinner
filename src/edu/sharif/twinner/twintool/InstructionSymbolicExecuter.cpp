@@ -707,6 +707,40 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
       << "\toverlapping registers are updated.\n";
 }
 
+void InstructionSymbolicExecuter::mulAnalysisRoutine (
+    const MutableExpressionValueProxy &leftDst,
+    const MutableExpressionValueProxy &rightDst,
+    const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "mulAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting left dst exp...";
+  edu::sharif::twinner::trace::Expression *leftDstExp =
+      leftDst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting right dst exp...";
+  edu::sharif::twinner::trace::Expression *rightDstExp =
+      rightDst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tmultiplying (left-right = right * src)...";
+  operandSize = leftDst.getSize ();
+  rightDstExp->binaryOperation
+      (new edu::sharif::twinner::trace::Operator
+       (edu::sharif::twinner::trace::Operator::MULTIPLY), srcexp);
+  leftDstExp = leftDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
+  leftDstExp->shiftToRight (operandSize);
+  rightDstExp->truncate (operandSize);
+  // At this point, symbolic multiplication result is calculated correctly.
+  // but concrete values are not! So we need to register a hook to synchronize concrete
+  // values too (we can also calculate them in assembly, but it's not required).
+
+  hook = &InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands;
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -749,6 +783,8 @@ InstructionSymbolicExecuter::convertOpcodeToDoubleDestinationsAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_DIV:
     return &InstructionSymbolicExecuter::divAnalysisRoutine;
+  case XED_ICLASS_MUL:
+    return &InstructionSymbolicExecuter::mulAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Double Destinations: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
