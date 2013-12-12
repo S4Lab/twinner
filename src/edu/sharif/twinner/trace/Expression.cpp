@@ -152,10 +152,15 @@ void Expression::truncate (int bits) {
 }
 
 void Expression::shiftToRight (int bits) {
-  UINT64 val = 1;
-  val <<= bits; // shift-to-right by n bits is equivalent to division by 2^n
-  stack.push_back (new Constant (val));
-  stack.push_back (new Operator (Operator::DIVIDE));
+  if (bits >= 64) {
+    stack.push_back (new Constant (bits));
+    stack.push_back (new Operator (Operator::SHIFT_RIGHT));
+  } else {
+    UINT64 val = 1;
+    val <<= bits; // shift-to-right by n bits is equivalent to division by 2^n
+    stack.push_back (new Constant (val));
+    stack.push_back (new Operator (Operator::DIVIDE));
+  }
   lastConcreteValue >>= bits;
 }
 

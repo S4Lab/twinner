@@ -723,9 +723,10 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
       << "\tgetting right dst exp...";
   edu::sharif::twinner::trace::Expression *rightDstExp =
       rightDst.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tmultiplying (left-right = right * src)...";
   operandSize = leftDst.getSize ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tmultiplying (left-right = right * src; size=0x"
+      << std::hex << operandSize << ")...";
   rightDstExp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::MULTIPLY), srcexp);
