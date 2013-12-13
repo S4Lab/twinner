@@ -72,11 +72,23 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOV, COMMON_INS_MODELS));
   // TODO: handle more types (data ranges), then add real support for sign/zero extension
+  /*
+   * Zero extension <=> no changes
+   *    | the value which is in 8bits is in 16bits too.
+   */
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOVZX, // 2 models (r <- zero-extend(r/m))
                   MOV_ZX_AND_SX_INS_MODELS));
+  /*
+   * Sign extension <=> add dummy conditions
+   *    | small value => without change
+   *    | large value => minus half of max value (to become signed)
+   */
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOVSX, // 2 models (r <- sign-extend(r/m))
+                  MOV_ZX_AND_SX_INS_MODELS));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_MOVSXD, // 2 models (r <- sign-extend(r/m))
                   MOV_ZX_AND_SX_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_PUSH, PUSH_INS_MODELS));

@@ -131,6 +131,13 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * MOV with Sign extension
+   * r <- sign-extend (r/m)
+   */
+  void movsxAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * PUSH has 3 models
    * m <- r/m/i
    */

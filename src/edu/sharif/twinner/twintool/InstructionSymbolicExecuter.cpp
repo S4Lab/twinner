@@ -298,6 +298,35 @@ void InstructionSymbolicExecuter::movAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::movsxAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "movsxAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp =
+      dst.setExpressionWithoutChangeNotification (trace, srcexp);
+  // src is either reg or mem. So src is mutable
+  const int size = static_cast<const MutableExpressionValueProxy &> (src).getSize ();
+  // size is at most 32 bits
+  edu::sharif::twinner::trace::Constraint *cc;
+  if (srcexp->getLastConcreteValue () >= (1ull << (size - 1))) {
+    edu::sharif::twinner::util::Logger::loquacious () << "\tdummy negative condition...";
+    cc = new edu::sharif::twinner::trace::Constraint
+        (srcexp, edu::sharif::twinner::trace::Constraint::NEGATIVE);
+    edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operations...";
+    dstexp->truncate (size);
+    dstexp->minus (1ull << size);
+  } else {
+    edu::sharif::twinner::util::Logger::loquacious () << "\tdummy positive condition...";
+    cc = new edu::sharif::twinner::trace::Constraint
+        (srcexp, edu::sharif::twinner::trace::Constraint::POSITIVE);
+  }
+  trace->addPathConstraint (cc);
+  dst.valueIsChanged (trace, dstexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::pushAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "pushAnalysisRoutine(...)\n"
@@ -772,8 +801,10 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
   case XED_ICLASS_MOV:
   case XED_ICLASS_MOVZX:
-  case XED_ICLASS_MOVSX:
     return &InstructionSymbolicExecuter::movAnalysisRoutine;
+  case XED_ICLASS_MOVSX:
+  case XED_ICLASS_MOVSXD:
+    return &InstructionSymbolicExecuter::movsxAnalysisRoutine;
   case XED_ICLASS_PUSH:
     return &InstructionSymbolicExecuter::pushAnalysisRoutine;
   case XED_ICLASS_POP:
