@@ -55,6 +55,8 @@ private:
 
     DST_REG_REG_SRC_REG = 0x1000, // there are two (left and right) destinations
 
+    OPERAND_LESS = 0x2000,
+
     RET_INS_MODELS = DST_RSP_SRC_CALL,
     CALL_INS_MODELS = DST_RSP_SRC_CALL,
 

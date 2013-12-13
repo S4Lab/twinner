@@ -132,6 +132,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_MUL, DST_REG_REG_SRC_REG));
   managedInstructions.insert
       (make_pair (XED_ICLASS_TEST, TEST_INS_MODELS));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_RDTSC, OPERAND_LESS)); // read time-stamp counter
 }
 
 Instrumenter::~Instrumenter () {
@@ -200,6 +202,8 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
     return getInstructionModelForPopInstruction (ins);
   case XED_ICLASS_NOP:
     return NOP_INS_MODELS;
+  case XED_ICLASS_RDTSC:
+    return OPERAND_LESS;
   case XED_ICLASS_DIV:
   case XED_ICLASS_MUL:
     return DST_REG_REG_SRC_REG;
@@ -431,6 +435,15 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_UINT32, dstLeftReg, IARG_REG_VALUE, dstLeftReg,
                     IARG_UINT32, dstRightReg, IARG_REG_VALUE, dstRightReg,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_CONST_CONTEXT,
+                    IARG_PTR, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case OPERAND_LESS:
+  {
+    INS_InsertCall (ins, IPOINT_AFTER, (AFUNPTR) analysisRoutineAfterOperandLess,
+                    IARG_PTR, ise, IARG_UINT32, op,
                     IARG_CONST_CONTEXT,
                     IARG_PTR, insAssembly,
                     IARG_END);

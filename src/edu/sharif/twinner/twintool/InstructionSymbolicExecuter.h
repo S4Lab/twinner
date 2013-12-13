@@ -44,6 +44,8 @@ private:
   typedef void (InstructionSymbolicExecuter::*Hook) (const CONTEXT *context,
       UINT64 value);
   typedef Hook SuddenlyChangedRegAnalysisRoutine;
+  typedef void (InstructionSymbolicExecuter::*OperandLessAnalysisRoutine) (
+      const CONTEXT *context);
 
   edu::sharif::twinner::trace::Trace *trace;
   Flags eflags;
@@ -112,6 +114,9 @@ public:
       REG dstLeftReg, UINT64 dstLeftRegVal,
       REG dstRightReg, UINT64 dstRightRegVal,
       REG srcReg, UINT64 srcRegVal,
+      const CONTEXT *context,
+      std::string *insAssembly);
+  void analysisRoutineAfterOperandLessInstruction (OperandLessAnalysisRoutine routine,
       const CONTEXT *context,
       std::string *insAssembly);
 
@@ -269,6 +274,11 @@ private:
    */
   void adjustDivisionMultiplicationOperands (const CONTEXT *context, UINT64 operandSize);
 
+  /**
+   * read time-stamp counter and put it in EDX:EAX
+   */
+  void rdtscAnalysisRoutine (const CONTEXT *context);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
   DoubleDestinationsAnalysisRoutine convertOpcodeToDoubleDestinationsAnalysisRoutine (
@@ -276,6 +286,8 @@ public:
   ConditionalBranchAnalysisRoutine convertOpcodeToConditionalBranchAnalysisRoutine (
       OPCODE op) const;
   SuddenlyChangedRegAnalysisRoutine convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
+      OPCODE op) const;
+  OperandLessAnalysisRoutine convertOpcodeToOperandLessAnalysisRoutine (
       OPCODE op) const;
 };
 
@@ -327,6 +339,9 @@ VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstLeftReg, ADDRINT dstLeftRegVal,
     UINT32 dstRightReg, ADDRINT dstRightRegVal,
     UINT32 srcReg, ADDRINT srcRegVal,
+    const CONTEXT *context,
+    VOID *insAssembly);
+VOID analysisRoutineAfterOperandLess (VOID *iseptr, UINT32 opcode,
     const CONTEXT *context,
     VOID *insAssembly);
 

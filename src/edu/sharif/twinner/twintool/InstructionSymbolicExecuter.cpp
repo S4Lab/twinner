@@ -272,6 +272,27 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineAfterOperandLessInstruction (
+    OperandLessAnalysisRoutine routine,
+    const CONTEXT *context,
+    std::string *insAssembly) {
+  /*
+   * All current hooks in combination with current instructions won't cause any bug if
+   * get executed after instruction. On addition of new hooks, this should be checked
+   */
+  runHooks (context);
+  if (disabled) {
+    return;
+  }
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineAfterOperandLessInstruction(INS: "
+      << *insAssembly << "): [AFTER execution of instruction]: operand-less ins\n";
+  (this->*routine) (context);
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
     (this->*hook) (context,
@@ -796,6 +817,32 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) {
+  edu::sharif::twinner::util::Logger::loquacious () << "rdtscAnalysisRoutine(...)\n";
+  /**
+   * Now, we are right after the RDTSC instruction and time-stamp is loaded in
+   * the edx:eax registers. These registers should be loaded as immediate values
+   * in symbolic expressions.
+   */
+  const UINT64 edxVal =
+      edu::sharif::twinner::util::readRegisterContent (context, REG_EDX);
+  const UINT64 eaxVal =
+      edu::sharif::twinner::util::readRegisterContent (context, REG_EAX);
+  edu::sharif::twinner::trace::Expression *edxNewExp =
+      new edu::sharif::twinner::trace::Expression (edxVal);
+  edu::sharif::twinner::trace::Expression *eaxNewExp =
+      new edu::sharif::twinner::trace::Expression (eaxVal);
+
+  const MutableExpressionValueProxy &edx =
+      RegisterResidentExpressionValueProxy (REG_EDX, edxVal);
+  const MutableExpressionValueProxy &eax =
+      RegisterResidentExpressionValueProxy (REG_EAX, eaxVal);
+  edx.setExpression (trace, edxNewExp);
+  eax.setExpression (trace, eaxNewExp);
+  delete edxNewExp; // expressions are cloned by above setter methods
+  delete eaxNewExp;
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -882,6 +929,20 @@ InstructionSymbolicExecuter::convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
         "Suddenly Changed Register: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
     throw std::runtime_error
         ("Unknown opcode (for changedReg) given to analysis routine");
+  }
+}
+
+InstructionSymbolicExecuter::OperandLessAnalysisRoutine
+InstructionSymbolicExecuter::convertOpcodeToOperandLessAnalysisRoutine (
+    OPCODE op) const {
+  switch (op) {
+  case XED_ICLASS_RDTSC:
+    return &InstructionSymbolicExecuter::rdtscAnalysisRoutine;
+  default:
+    edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
+        "Operand Less: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
+    throw std::runtime_error
+        ("Unknown opcode (for operand-less) given to analysis routine");
   }
 }
 
@@ -1024,6 +1085,17 @@ VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,
        (REG) dstLeftReg, dstLeftRegVal,
        (REG) dstRightReg, dstRightRegVal,
        (REG) srcReg, srcRegVal,
+       context,
+       insAssemblyStr);
+}
+
+VOID analysisRoutineAfterOperandLess (VOID *iseptr, UINT32 opcode,
+    const CONTEXT *context,
+    VOID *insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  std::string *insAssemblyStr = (std::string *) insAssembly;
+  ise->analysisRoutineAfterOperandLessInstruction
+      (ise->convertOpcodeToOperandLessAnalysisRoutine ((OPCODE) opcode),
        context,
        insAssemblyStr);
 }
