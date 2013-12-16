@@ -12,6 +12,18 @@
 
 #include "Cvc4SmtSolver.h"
 
+#if 1 // inclusion of CVC4 header
+/*
+ * Of course, Twinner is not supposed to fix warnings of CVC4. Also it does not like
+ * to disable -Werror. So we need to disable warnings in CVC4 temporarily. CVC4 is
+ * using deprecated code which defining following macro, will prevent its related warning
+ * to be raised while compiling following included header file.
+ */
+#define _BACKWARD_BACKWARD_WARNING_H 1
+#include <cvc4/cvc4.h>
+#undef _BACKWARD_BACKWARD_WARNING_H
+#endif // end of inclusion of CVC4 header
+
 namespace edu {
 namespace sharif {
 namespace twinner {
