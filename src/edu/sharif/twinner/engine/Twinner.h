@@ -42,6 +42,7 @@ private:
   std::string arguments;
 
   std::list < const edu::sharif::twinner::trace::Trace * > traces;
+  std::list < const edu::sharif::twinner::trace::Constraint * > constraints;
   std::set < ADDRINT > addresses;
 
 public:
@@ -59,7 +60,6 @@ private:
   void addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace);
 
   bool calculateSymbolsValuesForCoveringNextPath (
-      const edu::sharif::twinner::trace::Trace &trace,
       std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols);
 
   std::map < ADDRINT, UINT64 > obtainInitializedMemoryValues (Executer &ex) const;

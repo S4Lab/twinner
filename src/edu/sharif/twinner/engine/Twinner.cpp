@@ -71,6 +71,10 @@ inline void remove_mismatches_from_map (std::map < ADDRINT, UINT64 > &initialVal
 inline void code_initial_value_into_twin_code (std::stringstream &out,
     const ADDRINT &address, const UINT64 &content);
 
+inline void gather_constraints_of_trace_segment (
+    std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
+    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
+
 Twinner::Twinner () {
 }
 
@@ -133,7 +137,7 @@ void Twinner::generateTwinBinary () {
     symbols.clear ();
     addExecutionTrace (trace);
     // symbols will be filled with newly instantiated objects and should be deleted...
-    somePathsAreNotCovered = calculateSymbolsValuesForCoveringNextPath (*trace, symbols);
+    somePathsAreNotCovered = calculateSymbolsValuesForCoveringNextPath (symbols);
   }
   edu::sharif::twinner::util::ForEach
       < int, const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
@@ -182,11 +186,26 @@ void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace
   log << "Adding execution trace:\n";
   trace->printCompleteState (log);
   traces.push_back (trace);
+  //TODO: Add (refactor out of this class) constraints to a search strategy class
+  constraints.clear ();
+  edu::sharif::twinner::util::ForEach
+      < int, edu::sharif::twinner::trace::ExecutionTraceSegment *,
+      std::list < const edu::sharif::twinner::trace::Constraint * > >
+      ::iterate (trace->getTraceSegments (), &gather_constraints_of_trace_segment,
+                 constraints);
   edu::sharif::twinner::util::ForEach
       < int, edu::sharif::twinner::trace::ExecutionTraceSegment *, std::set < ADDRINT > >
       ::iterate (trace->getTraceSegments (), &extract_memory_addresses_of_trace_segment,
                  addresses);
   log << "Done.\n";
+}
+
+void gather_constraints_of_trace_segment (
+    std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
+    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
+  constraints.insert (constraints.end (),
+                      segment->getPathConstraints ().begin (),
+                      segment->getPathConstraints ().end ());
 }
 
 void extract_memory_addresses_of_trace_segment (std::set < ADDRINT > &addresses,
@@ -233,8 +252,15 @@ void check_symbol_type_and_add_it_to_set (std::set < ADDRINT > &addresses,
 }
 
 bool Twinner::calculateSymbolsValuesForCoveringNextPath (
-    const edu::sharif::twinner::trace::Trace &trace,
     set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols) {
+  static bool first = true;
+  if (first) {
+    first = false;
+    const edu::sharif::twinner::trace::Constraint *cns = constraints.back ();
+    edu::sharif::twinner::trace::Constraint *cc = cns->instantiateNegatedConstraint ();
+    constraints.pop_back ();
+    constraints.push_back (cc);
+  }
   return false;
 }
 

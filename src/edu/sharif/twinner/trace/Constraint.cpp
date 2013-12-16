@@ -75,6 +75,12 @@ const Expression *Constraint::getExpression () const {
   return exp;
 }
 
+Constraint *Constraint::instantiateNegatedConstraint () const {
+  Constraint *cc = new Constraint (exp, type);
+  cc->exp->negate ();
+  return cc;
+}
+
 }
 }
 }
