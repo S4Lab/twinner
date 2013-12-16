@@ -25,6 +25,8 @@
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 
+#include "edu/sharif/twinner/engine/smt/SmtSolver.h"
+
 using namespace std;
 
 namespace edu {
@@ -260,6 +262,13 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
     edu::sharif::twinner::trace::Constraint *cc = cns->instantiateNegatedConstraint ();
     constraints.pop_back ();
     constraints.push_back (cc);
+    try {
+      edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->solveConstraints
+          (constraints, symbols);
+      return true;
+    } catch (
+        const edu::sharif::twinner::engine::smt::UnsatisfiableConstraintsException &e) {
+    }
   }
   return false;
 }

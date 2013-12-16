@@ -26,6 +26,7 @@ namespace twinner {
 namespace trace {
 
 class Trace;
+class Constraint;
 class MemoryEmergedSymbol;
 }
 namespace engine {
