@@ -26,6 +26,7 @@
 #include "edu/sharif/twinner/util/iterationtools.h"
 
 #include "edu/sharif/twinner/engine/smt/SmtSolver.h"
+#include "smt/Cvc4SmtSolver.h"
 
 using namespace std;
 
@@ -78,6 +79,8 @@ inline void gather_constraints_of_trace_segment (
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
 
 Twinner::Twinner () {
+  edu::sharif::twinner::engine::smt::SmtSolver::init
+      (new edu::sharif::twinner::engine::smt::Cvc4SmtSolver ());
 }
 
 void Twinner::setInputBinaryPath (string input) {

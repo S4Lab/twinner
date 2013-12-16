@@ -10,8 +10,8 @@
  * This file is part of Twinner project.
  */
 
-#ifndef SMTSOLVER_H
-#define	SMTSOLVER_H
+#ifndef SMT_SOLVER_H
+#define SMT_SOLVER_H
 
 #include <list>
 #include <set>
