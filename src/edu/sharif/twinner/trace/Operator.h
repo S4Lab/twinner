@@ -61,6 +61,7 @@ public:
   virtual std::string toString () const;
 
   OperatorType getType () const;
+  OperatorIdentifier getIdentifier () const;
 };
 
 }

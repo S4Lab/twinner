@@ -107,6 +107,10 @@ Operator::OperatorType Operator::getType () const {
   }
 }
 
+Operator::OperatorIdentifier Operator::getIdentifier () const {
+  return oi;
+}
+
 }
 }
 }

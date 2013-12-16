@@ -206,11 +206,24 @@ void Expression::makeLeastSignificantBitsZero (int bits) {
   lastConcreteValue &= mask;
 }
 
+void Expression::negate () {
+  Operator *op = dynamic_cast<Operator *> (stack.back ());
+  if (op) {
+    if (op->getIdentifier () == Operator::NEGATE) {
+      stack.pop_back ();
+      return;
+    }
+  }
+  stack.push_back (new Operator (Operator::NEGATE));
+}
+
 Expression *Expression::clone () const {
+
   return new Expression (*this);
 }
 
 void Expression::saveToBinaryStream (std::ofstream &out) const {
+
   saveListToBinaryStream (out, "EXP", stack);
   out.write ((const char *) &lastConcreteValue, sizeof (lastConcreteValue));
 }
@@ -220,16 +233,19 @@ Expression *Expression::loadFromBinaryStream (std::ifstream &in) {
   loadListFromBinaryStream (in, "EXP", stack);
   UINT64 concreteValue;
   in.read ((char *) &concreteValue, sizeof (concreteValue));
+
   return new Expression (stack, concreteValue);
 }
 
 const std::list < ExpressionToken * > &Expression::getStack () const {
+
   return stack;
 }
 
 void Expression::checkConcreteValueReg (REG reg, UINT64 concreteVal) const
 throw (WrongStateException) {
   if (lastConcreteValue == concreteVal) {
+
     return;
   }
   // for reg case, isOverwriting is false for sure

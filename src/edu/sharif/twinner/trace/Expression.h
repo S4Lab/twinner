@@ -139,6 +139,13 @@ public:
    */
   void makeLeastSignificantBitsZero (int bits);
 
+  /**
+   * Negates this expression. If this expression has a negation operator on top of its
+   * stack, it will be removed and redundant negation operators won't be pushed onto
+   * the stack.
+   */
+  void negate ();
+
   Expression *clone () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
