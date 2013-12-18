@@ -238,7 +238,6 @@ Expression *Expression::loadFromBinaryStream (std::ifstream &in) {
 }
 
 const std::list < ExpressionToken * > &Expression::getStack () const {
-
   return stack;
 }
 

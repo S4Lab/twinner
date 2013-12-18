@@ -67,6 +67,7 @@ public:
   std::string toString () const;
 
   const Expression *getExpression () const;
+  ComparisonType getComparisonType () const;
 
   Constraint *instantiateNegatedConstraint () const;
 };

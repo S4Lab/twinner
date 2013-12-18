@@ -24,13 +24,40 @@
 #undef _BACKWARD_BACKWARD_WARNING_H
 #endif // end of inclusion of CVC4 header
 
+#include "edu/sharif/twinner/trace/Constant.h"
+#include "edu/sharif/twinner/trace/Symbol.h"
+#include "edu/sharif/twinner/trace/Operator.h"
+#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/Constraint.h"
+
+#include "edu/sharif/twinner/util/Logger.h"
+
 using namespace CVC4;
 
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace util {
+
+inline const edu::sharif::twinner::util::Logger &operator<< (
+    const edu::sharif::twinner::util::Logger &log, const Expr &exp);
+}
 namespace engine {
 namespace smt {
+
+Expr convertConstraintToCvc4Expr (ExprManager &em, Type &type,
+    std::map<std::string, Expr> &symbols, std::map<UINT64, Expr> &constants,
+    Expr &zero, const edu::sharif::twinner::trace::Constraint *constraint);
+
+Expr convertExpressionToCvc4Expr (ExprManager &em, Type &type,
+    std::map<std::string, Expr> &symbols, std::map<UINT64, Expr> &constants,
+    const edu::sharif::twinner::trace::Expression *exp);
+Expr convertExpressionToCvc4Expr (ExprManager &em, Type &type,
+    std::map<std::string, Expr> &symbols, std::map<UINT64, Expr> &constants,
+    std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator &top);
+
+Kind convertOperatorIdentifierToCvc4Kind (
+    edu::sharif::twinner::trace::Operator::OperatorIdentifier oi);
 
 Cvc4SmtSolver::Cvc4SmtSolver () :
 SmtSolver () {
@@ -41,69 +68,166 @@ Cvc4SmtSolver::~Cvc4SmtSolver () {
 
 void Cvc4SmtSolver::solveConstraints (
     const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-    std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols)
+    std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &satSolution)
 throw (UnsatisfiableConstraintsException) {
   ExprManager em;
   SmtEngine smt (&em);
-  smt.setLogic ("QF_BV"); // Set the logic
+  /*
+   * QF_ means disable quantifiers
+   * BV means enable bit-vectors
+   */
+  smt.setLogic ("QF_BV");
 
-  Type bitvector32 = em.mkBitVectorType (32);
-
-  Expr x = em.mkVar ("x", bitvector32);
-  Expr a = em.mkVar ("a", bitvector32);
-  Expr b = em.mkVar ("b", bitvector32);
-
-  Expr x_eq_a = em.mkExpr (kind::EQUAL, x, a);
-  Expr x_eq_b = em.mkExpr (kind::EQUAL, x, b);
-  Expr assumption = em.mkExpr (kind::OR, x_eq_a, x_eq_b);
-
-  smt.assertFormula (assumption);
-
-  // Introduce a new variable for the new value of x after assignment.
-  Expr new_x = em.mkVar ("new_x", bitvector32); // x after executing code (0)
-  Expr new_x_ = em.mkVar ("new_x_", bitvector32); // x after executing code (1) or (2)
-
-  // Encoding code (0)
-  // new_x = x == a ? b : a;
-  Expr ite = em.mkExpr (kind::ITE, x_eq_a, b, a);
-  Expr assignment0 = em.mkExpr (kind::EQUAL, new_x, ite);
-
-  smt.assertFormula (assignment0);
-  std::cout << "Pushing a new context." << std::endl;
-  smt.push ();
-
-  // Encoding code (1)
-  // new_x_ = a xor b xor x
-  Expr a_xor_b_xor_x = em.mkExpr (kind::BITVECTOR_XOR, a, b, x);
-  Expr assignment1 = em.mkExpr (kind::EQUAL, new_x_, a_xor_b_xor_x);
-
-  std::cout << "Asserting " << assignment1 << " to CVC4 " << std::endl;
-  smt.assertFormula (assignment1);
-  Expr new_x_eq_new_x_ = em.mkExpr (kind::EQUAL, new_x, new_x_);
-
-  std::cout << " Querying: " << new_x_eq_new_x_ << std::endl;
-  std::cout << " Expect valid. " << std::endl;
-  std::cout << " CVC4: " << smt.query (new_x_eq_new_x_) << std::endl;
-  std::cout << " Popping context. " << std::endl;
-  smt.pop ();
-
-  // Encoding code (2)
-  // new_x_ = a + b - x
-  Expr a_plus_b = em.mkExpr (kind::BITVECTOR_PLUS, a, b);
-  Expr a_plus_b_minus_x = em.mkExpr (kind::BITVECTOR_SUB, a_plus_b, x);
-  Expr assignment2 = em.mkExpr (kind::EQUAL, new_x_, a_plus_b_minus_x);
-
-  std::cout << "Asserting " << assignment2 << " to CVC4 " << std::endl;
-  smt.assertFormula (assignment1);
-
-  std::cout << " Querying: " << new_x_eq_new_x_ << std::endl;
-  std::cout << " Expect valid. " << std::endl;
-  std::cout << " CVC4: " << smt.query (new_x_eq_new_x_) << std::endl;
-
+  Type bitvector64 = em.mkBitVectorType (64);
+  std::map<std::string, Expr> symbols;
+  std::map<UINT64, Expr> constants;
+  Expr zero = em.mkConst (BitVector (64, UINT64 (0)));
+  constants.insert (std::make_pair (0, zero));
+  Expr totalConstraint;
+  for (std::list < const edu::sharif::twinner::trace::Constraint * >::const_iterator it =
+      constraints.begin (); it != constraints.end (); ++it) {
+    Expr exp = convertConstraintToCvc4Expr (em, bitvector64,
+                                            symbols, constants, zero, *it);
+    totalConstraint = totalConstraint.andExpr (exp);
+  }
+  try {
+    Result res = smt.checkSat (totalConstraint);
+    if (res.isSat ()) {
+      totalConstraint = smt.getValue (totalConstraint);
+      edu::sharif::twinner::util::Logger::loquacious () << totalConstraint << '\n';
+      // TODO: fill satSolution with values found by SmtEngine
+      return;
+    }
+  } catch (const Exception &e) {
+  }
   throw UnsatisfiableConstraintsException ();
 }
 
+Expr convertConstraintToCvc4Expr (ExprManager &em, Type &type,
+    std::map<std::string, Expr> &symbols, std::map<UINT64, Expr> &constants,
+    Expr &zero, const edu::sharif::twinner::trace::Constraint *constraint) {
+  Expr exp = convertExpressionToCvc4Expr (em, type, symbols, constants,
+                                          constraint->getExpression ());
+  switch (constraint->getComparisonType ()) {
+  case edu::sharif::twinner::trace::Constraint::POSITIVE:
+    return em.mkExpr (kind::GT, exp, zero);
+  case edu::sharif::twinner::trace::Constraint::NEGATIVE:
+    return em.mkExpr (kind::LT, exp, zero);
+  case edu::sharif::twinner::trace::Constraint::ZERO:
+    return em.mkExpr (kind::EQUAL, exp, zero);
+  case edu::sharif::twinner::trace::Constraint::NON_ZERO:
+    return em.mkExpr (kind::EQUAL, exp, zero).notExpr ();
+  default:
+    throw std::runtime_error ("Unknown Comparison Type");
+  }
 }
+
+Expr convertExpressionToCvc4Expr (ExprManager &em, Type &type,
+    std::map<std::string, Expr> &symbols, std::map<UINT64, Expr> &constants,
+    const edu::sharif::twinner::trace::Expression *exp) {
+  const std::list < edu::sharif::twinner::trace::ExpressionToken * > &stack
+      = exp->getStack ();
+  std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator top
+      = stack.end ();
+  return convertExpressionToCvc4Expr (em, type, symbols, constants, --top);
+}
+
+Expr convertExpressionToCvc4Expr (ExprManager &em, Type &type,
+    std::map<std::string, Expr> &symbols, std::map<UINT64, Expr> &constants,
+    std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator &top) {
+  const edu::sharif::twinner::trace::ExpressionToken *token = *top;
+  const edu::sharif::twinner::trace::Operator *op =
+      dynamic_cast<const edu::sharif::twinner::trace::Operator *> (token);
+  if (op) {
+    switch (op->getType ()) {
+    case edu::sharif::twinner::trace::Operator::Unary:
+    {
+      Expr operand = convertExpressionToCvc4Expr (em, type, symbols, constants, --top);
+      return em.mkExpr
+          (convertOperatorIdentifierToCvc4Kind (op->getIdentifier ()), operand);
+    }
+    case edu::sharif::twinner::trace::Operator::Binary:
+    {
+      Expr rightOperand =
+          convertExpressionToCvc4Expr (em, type, symbols, constants, --top);
+      Expr leftOperand =
+          convertExpressionToCvc4Expr (em, type, symbols, constants, --top);
+      return em.mkExpr
+          (convertOperatorIdentifierToCvc4Kind (op->getIdentifier ()),
+           leftOperand, rightOperand);
+    }
+    default:
+      throw std::runtime_error ("Unknown operator type");
+    }
+
+  } else if (dynamic_cast<const edu::sharif::twinner::trace::Symbol *> (token)) {
+    std::string name =
+        static_cast<const edu::sharif::twinner::trace::Symbol *> (token)->toString ();
+    std::map<std::string, Expr>::const_iterator it = symbols.find (name);
+    if (it != symbols.end ()) {
+      return it->second;
+    } else {
+      Expr sym = em.mkVar (name, type);
+      symbols.insert (std::make_pair (name, sym));
+      return sym;
+    }
+
+  } else if (dynamic_cast<const edu::sharif::twinner::trace::Constant *> (token)) {
+    UINT64 value =
+        static_cast<const edu::sharif::twinner::trace::Constant *> (token)->getValue ();
+    std::map<UINT64, Expr>::const_iterator it = constants.find (value);
+    if (it != constants.end ()) {
+      return it->second;
+    } else {
+      Expr cc = em.mkConst (BitVector (64, value));
+      constants.insert (std::make_pair (value, cc));
+      return cc;
+    }
+
+  } else {
+    throw std::runtime_error ("Missing expression token");
+  }
+}
+
+Kind convertOperatorIdentifierToCvc4Kind (
+    edu::sharif::twinner::trace::Operator::OperatorIdentifier oi) {
+  switch (oi) {
+  case edu::sharif::twinner::trace::Operator::ADD:
+    return kind::BITVECTOR_PLUS;
+  case edu::sharif::twinner::trace::Operator::MINUS:
+    return kind::BITVECTOR_SUB;
+  case edu::sharif::twinner::trace::Operator::MULTIPLY:
+    return kind::BITVECTOR_MULT;
+  case edu::sharif::twinner::trace::Operator::DIVIDE:
+    return kind::BITVECTOR_UDIV;
+  case edu::sharif::twinner::trace::Operator::REMAINDER:
+    return kind::BITVECTOR_UREM;
+  case edu::sharif::twinner::trace::Operator::NEGATE:
+    return kind::BITVECTOR_NEG;
+  case edu::sharif::twinner::trace::Operator::XOR:
+    return kind::BITVECTOR_XOR;
+  case edu::sharif::twinner::trace::Operator::BITWISE_AND:
+    return kind::BITVECTOR_AND;
+  case edu::sharif::twinner::trace::Operator::BITWISE_OR:
+    return kind::BITVECTOR_OR;
+  case edu::sharif::twinner::trace::Operator::SHIFT_LEFT:
+    return kind::BITVECTOR_SHL;
+  case edu::sharif::twinner::trace::Operator::SHIFT_RIGHT:
+    return kind::BITVECTOR_ASHR;
+  default:
+    throw std::runtime_error ("Unknown Operator Identifier");
+  }
+}
+
+}
+}
+namespace util {
+
+const edu::sharif::twinner::util::Logger &operator<< (
+    const edu::sharif::twinner::util::Logger &log, const Expr &exp) {
+  return log.actualWrite (exp);
+}
+
 }
 }
 }

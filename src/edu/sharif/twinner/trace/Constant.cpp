@@ -48,6 +48,10 @@ std::string Constant::toString () const {
   return ss.str ();
 }
 
+UINT64 Constant::getValue () const {
+  return value;
+}
+
 }
 }
 }

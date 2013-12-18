@@ -40,6 +40,8 @@ public:
   static Constant *loadFromBinaryStream (std::ifstream &in);
 
   virtual std::string toString () const;
+
+  UINT64 getValue () const;
 };
 
 }

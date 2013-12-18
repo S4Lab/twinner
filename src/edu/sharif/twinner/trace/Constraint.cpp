@@ -75,6 +75,10 @@ const Expression *Constraint::getExpression () const {
   return exp;
 }
 
+Constraint::ComparisonType Constraint::getComparisonType () const {
+  return type;
+}
+
 Constraint *Constraint::instantiateNegatedConstraint () const {
   Constraint *cc = new Constraint (exp, type);
   cc->exp->negate ();

@@ -86,7 +86,7 @@ TWINNER_SUB_TWINTOOL_OBJ := $(call MY_FILTER,/twintool/,$(TWINNER_OBJ))
 TWINNER_SUB_ENGINE_OBJ := $(call MY_FILTER,/engine/,$(TWINNER_OBJ)) $(call MY_FILTER,/cli/,$(TWINNER_OBJ))
 TWINNER_DEP := $(TWINNER_OBJ:.o=.d)
 
-TWINNER_LIBS := -lcvc4
+TWINNER_LIBS := -lcvc4 -lgmp
 
 $(OBJDIR)%.d: %.cpp
 	./depends.sh $@ $(TOOL_CXXFLAGS) $*.cpp > $@
