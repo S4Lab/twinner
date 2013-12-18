@@ -41,6 +41,8 @@ namespace util {
 
 inline const edu::sharif::twinner::util::Logger &operator<< (
     const edu::sharif::twinner::util::Logger &log, const Expr &exp);
+inline const edu::sharif::twinner::util::Logger &operator<< (
+    const edu::sharif::twinner::util::Logger &log, const Result &res);
 }
 namespace engine {
 namespace smt {
@@ -70,6 +72,8 @@ void Cvc4SmtSolver::solveConstraints (
     const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
     std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &satSolution)
 throw (UnsatisfiableConstraintsException) {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "Cvc4SmtSolver::solveConstraints (...)\n";
   ExprManager em;
   SmtEngine smt (&em);
   /*
@@ -83,23 +87,34 @@ throw (UnsatisfiableConstraintsException) {
   std::map<UINT64, Expr> constants;
   Expr zero = em.mkConst (BitVector (64, UINT64 (0)));
   constants.insert (std::make_pair (0, zero));
-  Expr totalConstraint;
-  for (std::list < const edu::sharif::twinner::trace::Constraint * >::const_iterator it =
-      constraints.begin (); it != constraints.end (); ++it) {
+  std::list < const edu::sharif::twinner::trace::Constraint * >::const_iterator it =
+      constraints.begin ();
+  Expr totalConstraint = convertConstraintToCvc4Expr (em, bitvector64,
+                                                      symbols, constants, zero, *it);
+  while (++it != constraints.end ()) {
     Expr exp = convertConstraintToCvc4Expr (em, bitvector64,
                                             symbols, constants, zero, *it);
     totalConstraint = totalConstraint.andExpr (exp);
   }
   try {
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "starting SmtEngine::checkSat(" << totalConstraint << ")\n";
     Result res = smt.checkSat (totalConstraint);
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "checkSat(...) returned: " << res << '\n';
     if (res.isSat ()) {
       totalConstraint = smt.getValue (totalConstraint);
       edu::sharif::twinner::util::Logger::loquacious () << totalConstraint << '\n';
+      edu::sharif::twinner::util::Logger::loquacious ()
+          << "Constraints are satisfiable. Filling satSolution with memory symbols\n";
       // TODO: fill satSolution with values found by SmtEngine
       return;
     }
   } catch (const Exception &e) {
+    edu::sharif::twinner::util::Logger::warning () << e.what () << '\n';
   }
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "throwing UnsatisfiableConstraintsException...\n";
   throw UnsatisfiableConstraintsException ();
 }
 
@@ -109,6 +124,10 @@ Expr convertConstraintToCvc4Expr (ExprManager &em, Type &type,
   Expr exp = convertExpressionToCvc4Expr (em, type, symbols, constants,
                                           constraint->getExpression ());
   switch (constraint->getComparisonType ()) {
+  case edu::sharif::twinner::trace::Constraint::NON_POSITIVE:
+    return em.mkExpr (kind::LEQ, exp, zero);
+  case edu::sharif::twinner::trace::Constraint::NON_NEGATIVE:
+    return em.mkExpr (kind::GEQ, exp, zero);
   case edu::sharif::twinner::trace::Constraint::POSITIVE:
     return em.mkExpr (kind::GT, exp, zero);
   case edu::sharif::twinner::trace::Constraint::NEGATIVE:
@@ -226,6 +245,11 @@ namespace util {
 const edu::sharif::twinner::util::Logger &operator<< (
     const edu::sharif::twinner::util::Logger &log, const Expr &exp) {
   return log.actualWrite (exp);
+}
+
+const edu::sharif::twinner::util::Logger &operator<< (
+    const edu::sharif::twinner::util::Logger &log, const Result &res) {
+  return log.actualWrite (res);
 }
 
 }

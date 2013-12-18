@@ -29,6 +29,7 @@ public:
 
   enum ComparisonType {
 
+    NON_POSITIVE, NON_NEGATIVE,
     POSITIVE, NEGATIVE, ZERO, NON_ZERO
   };
 

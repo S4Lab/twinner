@@ -52,6 +52,12 @@ Constraint *Constraint::loadFromBinaryStream (std::ifstream &in) {
 std::string Constraint::toString () const {
   const char *t;
   switch (type) {
+  case NON_POSITIVE:
+    t = " <= 0";
+    break;
+  case NON_NEGATIVE:
+    t = " >= 0";
+    break;
   case POSITIVE:
     t = " > 0";
     break;
@@ -80,9 +86,22 @@ Constraint::ComparisonType Constraint::getComparisonType () const {
 }
 
 Constraint *Constraint::instantiateNegatedConstraint () const {
-  Constraint *cc = new Constraint (exp, type);
-  cc->exp->negate ();
-  return cc;
+  switch (type) {
+  case NON_POSITIVE:
+    return new Constraint (exp, POSITIVE);
+  case NON_NEGATIVE:
+    return new Constraint (exp, NEGATIVE);
+  case POSITIVE:
+    return new Constraint (exp, NON_POSITIVE);
+  case NEGATIVE:
+    return new Constraint (exp, NON_NEGATIVE);
+  case ZERO:
+    return new Constraint (exp, NON_ZERO);
+  case NON_ZERO:
+    return new Constraint (exp, ZERO);
+  default:
+    throw std::runtime_error ("Unknown ComparisonType");
+  }
 }
 
 }
