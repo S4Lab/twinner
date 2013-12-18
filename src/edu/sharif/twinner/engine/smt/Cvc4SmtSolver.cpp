@@ -81,6 +81,8 @@ throw (UnsatisfiableConstraintsException) {
    * BV means enable bit-vectors
    */
   smt.setLogic ("QF_BV");
+  smt.setOption ("produce-models", true);
+  //  smt.setOption ("trace", "smt");
 
   Type bitvector64 = em.mkBitVectorType (64);
   std::map<std::string, Expr> symbols;
@@ -125,17 +127,17 @@ Expr convertConstraintToCvc4Expr (ExprManager &em, Type &type,
                                           constraint->getExpression ());
   switch (constraint->getComparisonType ()) {
   case edu::sharif::twinner::trace::Constraint::NON_POSITIVE:
-    return em.mkExpr (kind::LEQ, exp, zero);
+    return em.mkExpr (kind::BITVECTOR_SLE, exp, zero);
   case edu::sharif::twinner::trace::Constraint::NON_NEGATIVE:
-    return em.mkExpr (kind::GEQ, exp, zero);
+    return em.mkExpr (kind::BITVECTOR_SGE, exp, zero);
   case edu::sharif::twinner::trace::Constraint::POSITIVE:
-    return em.mkExpr (kind::GT, exp, zero);
+    return em.mkExpr (kind::BITVECTOR_SGT, exp, zero);
   case edu::sharif::twinner::trace::Constraint::NEGATIVE:
-    return em.mkExpr (kind::LT, exp, zero);
+    return em.mkExpr (kind::BITVECTOR_SLT, exp, zero);
   case edu::sharif::twinner::trace::Constraint::ZERO:
     return em.mkExpr (kind::EQUAL, exp, zero);
   case edu::sharif::twinner::trace::Constraint::NON_ZERO:
-    return em.mkExpr (kind::EQUAL, exp, zero).notExpr ();
+    return em.mkExpr (kind::DISTINCT, exp, zero);
   default:
     throw std::runtime_error ("Unknown Comparison Type");
   }
