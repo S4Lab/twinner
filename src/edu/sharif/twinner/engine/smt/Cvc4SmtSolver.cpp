@@ -61,6 +61,9 @@ Expr convertExpressionToCvc4Expr (ExprManager &em, Type &type,
 Kind convertOperatorIdentifierToCvc4Kind (
     edu::sharif::twinner::trace::Operator::OperatorIdentifier oi);
 
+void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
+    std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &satSolution);
+
 Cvc4SmtSolver::Cvc4SmtSolver () :
 SmtSolver () {
 }
@@ -105,11 +108,7 @@ throw (UnsatisfiableConstraintsException) {
     edu::sharif::twinner::util::Logger::loquacious ()
         << "checkSat(...) returned: " << res << '\n';
     if (res.isSat ()) {
-      totalConstraint = smt.getValue (totalConstraint);
-      edu::sharif::twinner::util::Logger::loquacious () << totalConstraint << '\n';
-      edu::sharif::twinner::util::Logger::loquacious ()
-          << "Constraints are satisfiable. Filling satSolution with memory symbols\n";
-      // TODO: fill satSolution with values found by SmtEngine
+      fillSatSolution (smt, symbols, satSolution);
       return;
     }
   } catch (const Exception &e) {
@@ -118,6 +117,29 @@ throw (UnsatisfiableConstraintsException) {
   edu::sharif::twinner::util::Logger::loquacious ()
       << "throwing UnsatisfiableConstraintsException...\n";
   throw UnsatisfiableConstraintsException ();
+}
+
+void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
+    std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &satSolution) {
+  edu::sharif::twinner::util::Logger log =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  log << "Constraints are satisfiable. Filling satSolution with memory symbols...";
+  for (std::map<std::string, Expr>::const_iterator it = symbols.begin ();
+      it != symbols.end (); ++it) {
+    if (it->first.at (0) == 'm') { // memory symbol
+      Expr exp = smt.getValue (it->second); // assigned value by SMT solver
+      const BitVector &bv = exp.getConst< BitVector > ();
+      const Integer &val = bv.getValue ();
+      const UINT64 high = UINT32 (val.divByPow2 (32).getUnsignedLong ());
+      const UINT64 low = UINT32 (val.modByPow2 (32).getUnsignedLong ());
+      UINT64 value = (high << 32) | low;
+      log << "\tsetting " << it->first << " -> 0x" << std::hex << value << "...";
+      satSolution.insert
+          (edu::sharif::twinner::trace::MemoryEmergedSymbol::fromNameAndValue
+           (it->first, value));
+    }
+  }
+  log << '\n';
 }
 
 Expr convertConstraintToCvc4Expr (ExprManager &em, Type &type,

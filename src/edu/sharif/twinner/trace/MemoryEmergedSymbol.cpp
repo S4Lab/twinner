@@ -50,6 +50,16 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::loadFromBinaryStream (std::ifstream &i
   return symbol;
 }
 
+MemoryEmergedSymbol *MemoryEmergedSymbol::fromNameAndValue (const std::string &name,
+    UINT64 value) {
+  std::stringstream ss (name);
+  char dummy;
+  ADDRINT address;
+  int generationIndex;
+  ss >> dummy >> std::hex >> address >> dummy >> generationIndex;
+  return new MemoryEmergedSymbol (address, value, generationIndex);
+}
+
 std::string MemoryEmergedSymbol::toString () const {
   std::stringstream ss;
   ss << 'm' << std::hex << address << '_' << generationIndex;
