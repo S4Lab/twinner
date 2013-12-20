@@ -330,19 +330,23 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   // src is either reg or mem. So src is mutable
   const int size = static_cast<const MutableExpressionValueProxy &> (src).getSize ();
   // size is at most 32 bits
+  edu::sharif::twinner::trace::Expression *conditionExp = srcexp->clone ();
+  conditionExp->minus (1ull << (size - 1));
   edu::sharif::twinner::trace::Constraint *cc;
   if (srcexp->getLastConcreteValue () >= (1ull << (size - 1))) {
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy negative condition...";
     cc = new edu::sharif::twinner::trace::Constraint
-        (srcexp, edu::sharif::twinner::trace::Constraint::NEGATIVE);
+        (conditionExp, edu::sharif::twinner::trace::Constraint::NON_NEGATIVE);
     edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operations...";
     dstexp->truncate (size);
     dstexp->minus (1ull << size);
+    dstexp->truncate (dst.getSize ());
   } else {
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy positive condition...";
     cc = new edu::sharif::twinner::trace::Constraint
-        (srcexp, edu::sharif::twinner::trace::Constraint::POSITIVE);
+        (conditionExp, edu::sharif::twinner::trace::Constraint::NEGATIVE);
   }
+  delete conditionExp; // this is cloned by cc and is not required anymore
   trace->addPathConstraint (cc);
   dst.valueIsChanged (trace, dstexp);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
