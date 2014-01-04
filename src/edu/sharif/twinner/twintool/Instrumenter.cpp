@@ -520,9 +520,8 @@ void Instrumenter::syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt,
 
 void Instrumenter::saveMemoryContentsToFile (const char *path) const {
   std::map < ADDRINT, UINT64 > map;
-  edu::sharif::twinner::util::ForEach
-      < int, ADDRINT, std::map < ADDRINT, UINT64 > >
-      ::iterate (candidateAddresses, &read_memory_content_and_add_it_to_map, map);
+  edu::sharif::twinner::util::foreach (candidateAddresses,
+                                       &read_memory_content_and_add_it_to_map, map);
   if (!ise->getTrace ()->saveAddressToValueMapToFile (map, path)) {
     throw std::runtime_error ("Can not save address-to-value map into binary file");
   }

@@ -82,6 +82,51 @@ public:
 
 #define UNUSED_VARIABLE(VAR) (void) VAR
 
+template < typename Key, typename Value, typename Aux >
+void foreach (const std::map < Key, Value > &map,
+    typename edu::sharif::twinner::util::ForEach < Key, Value, Aux >
+    ::PairVisitorWithAux visitor,
+    Aux &aux) {
+  edu::sharif::twinner::util::ForEach < Key, Value, Aux >::iterate (map, visitor, aux);
+}
+
+template < typename Value, typename Aux >
+void foreach (const std::list < Value > &list,
+    typename edu::sharif::twinner::util::ForEach < int, Value, Aux >
+    ::ItemVisitorWithAux visitor,
+    Aux &aux) {
+  edu::sharif::twinner::util::ForEach < int, Value, Aux >::iterate (list, visitor, aux);
+}
+
+template < typename Value, typename Aux >
+void foreach (const std::set < Value > &set,
+    typename edu::sharif::twinner::util::ForEach < int, Value, Aux >
+    ::ItemVisitorWithAux visitor,
+    Aux &aux) {
+  edu::sharif::twinner::util::ForEach < int, Value, Aux >::iterate (set, visitor, aux);
+}
+
+template < typename Key, typename Value >
+void foreach (const std::map < Key, Value > &map,
+    typename edu::sharif::twinner::util::ForEach < Key, Value >
+    ::PairVisitor visitor) {
+  edu::sharif::twinner::util::ForEach < Key, Value >::iterate (map, visitor);
+}
+
+template < typename Value >
+void foreach (const std::list < Value > &list,
+    typename edu::sharif::twinner::util::ForEach < int, Value >
+    ::ItemVisitor visitor) {
+  edu::sharif::twinner::util::ForEach < int, Value >::iterate (list, visitor);
+}
+
+template < typename Value >
+void foreach (const std::set < Value > &set,
+    typename edu::sharif::twinner::util::ForEach < int, Value >
+    ::ItemVisitor visitor) {
+  edu::sharif::twinner::util::ForEach < int, Value >::iterate (set, visitor);
+}
+
 }
 }
 }

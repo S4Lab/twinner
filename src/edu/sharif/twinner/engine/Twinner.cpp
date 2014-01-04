@@ -136,17 +136,13 @@ void Twinner::generateTwinBinary () {
     ex.setSymbolsValues (symbols);
     edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTraceInNormalMode ();
 
-    edu::sharif::twinner::util::ForEach
-        < int, const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
-        ::iterate (symbols, &delete_symbol);
+    edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
     symbols.clear ();
     addExecutionTrace (trace);
     // symbols will be filled with newly instantiated objects and should be deleted...
     somePathsAreNotCovered = calculateSymbolsValuesForCoveringNextPath (symbols);
   }
-  edu::sharif::twinner::util::ForEach
-      < int, const edu::sharif::twinner::trace::MemoryEmergedSymbol * >
-      ::iterate (symbols, &delete_symbol);
+  edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
   symbols.clear ();
   std::map < ADDRINT, UINT64 > initialValues = obtainInitializedMemoryValues (ex);
   codeTracesIntoTwinBinary (initialValues);
@@ -163,9 +159,8 @@ std::map < ADDRINT, UINT64 > Twinner::obtainInitializedMemoryValues (Executer &e
   std::map < ADDRINT, UINT64 > initialValues2 =
       ex.executeSingleTraceInInitialStateDetectionMode ();
   // step 7
-  edu::sharif::twinner::util::ForEach
-      < ADDRINT, UINT64, std::map < ADDRINT, UINT64 > >
-      ::iterate (initialValues2, &remove_mismatches_from_map, initialValues1);
+  edu::sharif::twinner::util::foreach (initialValues2,
+                                       &remove_mismatches_from_map, initialValues1);
   return initialValues1;
 }
 
@@ -193,15 +188,12 @@ void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace
   traces.push_back (trace);
   //TODO: Add (refactor out of this class) constraints to a search strategy class
   constraints.clear ();
-  edu::sharif::twinner::util::ForEach
-      < int, edu::sharif::twinner::trace::ExecutionTraceSegment *,
-      std::list < const edu::sharif::twinner::trace::Constraint * > >
-      ::iterate (trace->getTraceSegments (), &gather_constraints_of_trace_segment,
-                 constraints);
-  edu::sharif::twinner::util::ForEach
-      < int, edu::sharif::twinner::trace::ExecutionTraceSegment *, std::set < ADDRINT > >
-      ::iterate (trace->getTraceSegments (), &extract_memory_addresses_of_trace_segment,
-                 addresses);
+  edu::sharif::twinner::util::foreach (trace->getTraceSegments (),
+                                       &gather_constraints_of_trace_segment,
+                                       constraints);
+  edu::sharif::twinner::util::foreach (trace->getTraceSegments (),
+                                       &extract_memory_addresses_of_trace_segment,
+                                       addresses);
   log << "Done.\n";
 }
 
@@ -215,18 +207,15 @@ void gather_constraints_of_trace_segment (
 
 void extract_memory_addresses_of_trace_segment (std::set < ADDRINT > &addresses,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
-  edu::sharif::twinner::util::ForEach
-      < ADDRINT, edu::sharif::twinner::trace::Expression *, std::set < ADDRINT > >
-      ::iterate (segment->getMemoryAddressToExpression (),
-                 &extract_memory_addresses_of_expression, addresses);
-  edu::sharif::twinner::util::ForEach
-      < REG, edu::sharif::twinner::trace::Expression *, std::set < ADDRINT > >
-      ::iterate (segment->getRegisterToExpression (),
-                 &extract_memory_addresses_of_expression, addresses);
-  edu::sharif::twinner::util::ForEach
-      < int, const edu::sharif::twinner::trace::Constraint *, std::set < ADDRINT > >
-      ::iterate (segment->getPathConstraints (),
-                 &extract_memory_addresses_of_constraint, addresses);
+  edu::sharif::twinner::util::foreach (segment->getMemoryAddressToExpression (),
+                                       &extract_memory_addresses_of_expression,
+                                       addresses);
+  edu::sharif::twinner::util::foreach (segment->getRegisterToExpression (),
+                                       &extract_memory_addresses_of_expression,
+                                       addresses);
+  edu::sharif::twinner::util::foreach (segment->getPathConstraints (),
+                                       &extract_memory_addresses_of_constraint,
+                                       addresses);
 }
 
 void extract_memory_addresses_of_constraint (std::set < ADDRINT > &addresses,
@@ -242,9 +231,8 @@ void extract_memory_addresses_of_expression (std::set < ADDRINT > &addresses,
 
 void extract_memory_addresses_of_expression (std::set < ADDRINT > &addresses,
     const edu::sharif::twinner::trace::Expression *exp) {
-  edu::sharif::twinner::util::ForEach
-      < int, edu::sharif::twinner::trace::ExpressionToken *, std::set < ADDRINT > >
-      ::iterate (exp->getStack (), &check_symbol_type_and_add_it_to_set, addresses);
+  edu::sharif::twinner::util::foreach (exp->getStack (),
+                                       &check_symbol_type_and_add_it_to_set, addresses);
 }
 
 void check_symbol_type_and_add_it_to_set (std::set < ADDRINT > &addresses,
@@ -281,17 +269,14 @@ void Twinner::codeTracesIntoTwinBinary (
   std::stringstream out;
   out << '\n';
   codeInitialValuesIntoTwinCode (out, initialValues);
-  edu::sharif::twinner::util::ForEach
-      < int, const edu::sharif::twinner::trace::Trace *, std::stringstream >
-      ::iterate (traces, &code_trace_into_twin_code, out);
+  edu::sharif::twinner::util::foreach (traces, &code_trace_into_twin_code, out);
   edu::sharif::twinner::util::Logger::info () << out.str ();
 }
 
 void Twinner::codeInitialValuesIntoTwinCode (std::stringstream &out,
     const std::map < ADDRINT, UINT64 > &initialValues) const {
-  edu::sharif::twinner::util::ForEach
-      < ADDRINT, UINT64, std::stringstream >
-      ::iterate (initialValues, &code_initial_value_into_twin_code, out);
+  edu::sharif::twinner::util::foreach (initialValues,
+                                       &code_initial_value_into_twin_code, out);
 }
 
 void code_initial_value_into_twin_code (std::stringstream &out,
@@ -302,17 +287,15 @@ void code_initial_value_into_twin_code (std::stringstream &out,
 
 void code_trace_into_twin_code (std::stringstream &out,
     const edu::sharif::twinner::trace::Trace * const &trace) {
-  edu::sharif::twinner::util::ForEach
-      < int, edu::sharif::twinner::trace::ExecutionTraceSegment *, std::stringstream >
-      ::iterate (trace->getTraceSegments (), &code_segment_into_twin_code, out);
+  edu::sharif::twinner::util::foreach (trace->getTraceSegments (),
+                                       &code_segment_into_twin_code, out);
 }
 
 void code_segment_into_twin_code (std::stringstream &out,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
   TwinCodeGenerationAux aux = {1, out};
-  edu::sharif::twinner::util::ForEach
-      < int, const edu::sharif::twinner::trace::Constraint *, TwinCodeGenerationAux >
-      ::iterate (segment->getPathConstraints (), &code_constraint_into_twin_code, aux);
+  edu::sharif::twinner::util::foreach (segment->getPathConstraints (),
+                                       &code_constraint_into_twin_code, aux);
   for (unsigned int j = aux.depth - 1; j > 0; --j) {
 
     repeat (j) {
@@ -335,10 +318,7 @@ void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
 template < typename Key, typename Value >
 std::set < Value > get_values_set (const std::map < Key, Value > &map) {
   std::set < Value > set;
-  edu::sharif::twinner::util::ForEach
-      < Key, Value, std::set < Value > >
-      ::iterate (map, &add_value_to_set, set);
-
+  edu::sharif::twinner::util::foreach (map, &add_value_to_set, set);
   return set;
 }
 

@@ -298,9 +298,7 @@ void Trace::saveAddressToValueMapToBinaryStream (const std::map < ADDRINT, UINT6
 
   std::map < ADDRINT, UINT64 >::size_type s = map.size ();
   out.write ((const char *) &s, sizeof (s));
-  edu::sharif::twinner::util::ForEach
-      < ADDRINT, UINT64, std::ofstream >
-      ::iterate (map, &write_map_entry, out);
+  edu::sharif::twinner::util::foreach (map, &write_map_entry, out);
 }
 
 void write_map_entry (std::ofstream &out, const ADDRINT &addr, const UINT64 &content) {

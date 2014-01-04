@@ -69,9 +69,7 @@ void Executer::setCandidateAddresses (const std::set < ADDRINT > &addresses) con
   std::set < ADDRINT >::size_type s = addresses.size ();
   out.write ((const char *) &s, sizeof (s));
 
-  edu::sharif::twinner::util::ForEach
-      < int, ADDRINT, std::ofstream >
-      ::iterate (addresses, &save_address, out);
+  edu::sharif::twinner::util::foreach (addresses, &save_address, out);
   out.close ();
 }
 
@@ -83,10 +81,7 @@ void Executer::setSymbolsValues (
     const std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &
     symbols) const {
   std::map < int, std::list < Record > > records;
-  edu::sharif::twinner::util::ForEach
-      < int, const edu::sharif::twinner::trace::MemoryEmergedSymbol *,
-      std::map < int, std::list < Record > > >
-      ::iterate (symbols, &add_symbol_to_map, records);
+  edu::sharif::twinner::util::foreach (symbols, &add_symbol_to_map, records);
 
   if (!saveSymbolRecordsToFile (NORMAL_MODE, records)) {
     throw std::runtime_error ("Error in saving symbols in binary file");
@@ -124,9 +119,7 @@ void Executer::saveSymbolRecordsToBinaryStream (std::ofstream &out,
   typename std::map < int, std::list < Record > >::size_type s = records.size ();
   out.write ((const char *) &s, sizeof (s));
 
-  edu::sharif::twinner::util::ForEach
-      < int, std::list < Record >, std::ofstream >
-      ::iterate (records, &save_records_list, out);
+  edu::sharif::twinner::util::foreach (records, &save_records_list, out);
 }
 
 void save_records_list (std::ofstream &out, const int &segmentIndex,
@@ -135,9 +128,7 @@ void save_records_list (std::ofstream &out, const int &segmentIndex,
   std::list < edu::sharif::twinner::trace::SymbolRecord >::size_type s =
       recordsList.size ();
   out.write ((const char *) &s, sizeof (s));
-  edu::sharif::twinner::util::ForEach
-      < int, edu::sharif::twinner::trace::SymbolRecord, std::ofstream >
-      ::iterate (recordsList, &save_record, out);
+  edu::sharif::twinner::util::foreach (recordsList, &save_record, out);
 }
 
 void save_record (std::ofstream &out,
