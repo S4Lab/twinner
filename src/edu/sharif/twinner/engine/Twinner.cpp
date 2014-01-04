@@ -100,6 +100,8 @@ inline void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &o
 inline void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
     const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
 
+inline void code_symbol_initiation_into_twin_code (std::stringstream &out,
+    const ADDRINT &address);
 inline void code_memory_changes (IndentedStringStream &out,
     const ADDRINT &memoryEa, edu::sharif::twinner::trace::Expression * const &exp);
 
@@ -293,9 +295,17 @@ void Twinner::codeTracesIntoTwinBinary (
     const std::map < ADDRINT, UINT64 > &initialValues) {
   std::stringstream out;
   out << '\n';
+  edu::sharif::twinner::util::foreach (addresses,
+                                       &code_symbol_initiation_into_twin_code, out);
   codeInitialValuesIntoTwinCode (out, initialValues);
   edu::sharif::twinner::util::foreach (traces, &code_trace_into_twin_code, out);
   edu::sharif::twinner::util::Logger::info () << out.str ();
+}
+
+void code_symbol_initiation_into_twin_code (std::stringstream &out,
+    const ADDRINT &address) {
+  out << "const UINT64 m" << std::hex << address
+      << "_0 = *((UINT64 *) 0x" << address << ");\n";
 }
 
 void Twinner::codeInitialValuesIntoTwinCode (std::stringstream &out,
