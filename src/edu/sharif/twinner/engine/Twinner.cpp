@@ -95,6 +95,14 @@ inline void gather_constraints_of_trace_segment (
     std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
 
+inline void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &out,
+    const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
+inline void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
+    const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
+
+inline void code_memory_changes (IndentedStringStream &out,
+    const ADDRINT &memoryEa, edu::sharif::twinner::trace::Expression * const &exp);
+
 Twinner::Twinner () {
   edu::sharif::twinner::engine::smt::SmtSolver::init
       (new edu::sharif::twinner::engine::smt::Cvc4SmtSolver ());
@@ -313,6 +321,15 @@ void code_segment_into_twin_code (std::stringstream &out,
   TwinCodeGenerationAux aux = {1, out};
   edu::sharif::twinner::util::foreach (segment->getPathConstraints (),
                                        &code_constraint_into_twin_code, aux);
+  std::stringstream indentation;
+
+  repeat (aux.depth) {
+    indentation << '\t';
+  }
+  IndentedStringStream iss (indentation.str ());
+  code_memory_symbolic_changes_of_one_segment (iss, segment);
+  code_registers_symbolic_changes_of_one_segment (iss, segment);
+  out << iss.str ();
   for (unsigned int j = aux.depth - 1; j > 0; --j) {
 
     repeat (j) {
@@ -320,6 +337,27 @@ void code_segment_into_twin_code (std::stringstream &out,
     }
     out << "}\n";
   }
+}
+
+void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &out,
+    const edu::sharif::twinner::trace::ExecutionTraceSegment *segment) {
+  out.indented () << "/*Memory Changes*/\n";
+  const std::map < ADDRINT, edu::sharif::twinner::trace::Expression * > &memToExp =
+      segment->getMemoryAddressToExpression ();
+  edu::sharif::twinner::util::foreach (memToExp, &code_memory_changes, out);
+}
+
+void code_memory_changes (IndentedStringStream &out,
+    const ADDRINT &memoryEa, edu::sharif::twinner::trace::Expression * const &exp) {
+  out.indented () << "*((UINT64 *) 0x" << std::hex << memoryEa << ") = "
+      << exp->toString () << ";\n";
+}
+
+void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
+    const edu::sharif::twinner::trace::ExecutionTraceSegment *segment) {
+  out.indented () << "/*Registers Changes*/\n";
+  //  const std::map < REG, edu::sharif::twinner::trace::Expression * > &regToExp =
+  //      segment->getRegisterToExpression ();
 }
 
 void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
