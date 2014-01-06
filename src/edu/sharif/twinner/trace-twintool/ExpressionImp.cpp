@@ -27,7 +27,12 @@ Expression (exp) {
 
 ExpressionImp::ExpressionImp (REG reg, UINT64 concreteValue, int generationIndex) :
 Expression (concreteValue, false) {
-  stack.push_back (new RegisterEmergedSymbol (reg, concreteValue, generationIndex));
+  const REG enclosingReg = REG_FullRegName (reg);
+  stack.push_back (new RegisterEmergedSymbol
+                   (enclosingReg, concreteValue, generationIndex));
+  if (enclosingReg != reg) {
+    truncate (REG_Size (reg) * 8);
+  }
 }
 
 ExpressionImp::ExpressionImp (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex,
