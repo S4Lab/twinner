@@ -19,8 +19,6 @@
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/memory.h"
 
-#include "RegisterEmergedSymbol.h"
-#include "MemoryEmergedSymbol.h"
 #include "Constant.h"
 
 namespace edu {
@@ -33,17 +31,6 @@ Expression::Expression (const std::list < ExpressionToken * > &stk,
 stack (stk), lastConcreteValue (concreteValue), isOverwriting (false) {
 }
 
-Expression::Expression (REG reg, UINT64 concreteValue, int generationIndex) :
-lastConcreteValue (concreteValue), isOverwriting (false) {
-  stack.push_back (new RegisterEmergedSymbol (reg, concreteValue, generationIndex));
-}
-
-Expression::Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex,
-    bool _isOverwriting) :
-lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
-  stack.push_back (new MemoryEmergedSymbol (memoryEa, concreteValue, generationIndex));
-}
-
 Expression::Expression (const Expression &exp) :
 lastConcreteValue (exp.lastConcreteValue), isOverwriting (false) {
   for (std::list < ExpressionToken * >::const_iterator it = exp.stack.begin ();
@@ -53,9 +40,8 @@ lastConcreteValue (exp.lastConcreteValue), isOverwriting (false) {
   }
 }
 
-Expression::Expression (UINT64 value) :
-lastConcreteValue (value), isOverwriting (false) {
-  stack.push_back (new Constant (value));
+Expression::Expression (UINT64 concreteValue, bool _isOverwriting) :
+lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
 }
 
 Expression::~Expression () {
@@ -218,12 +204,10 @@ void Expression::negate () {
 }
 
 Expression *Expression::clone () const {
-
   return new Expression (*this);
 }
 
 void Expression::saveToBinaryStream (std::ofstream &out) const {
-
   saveListToBinaryStream (out, "EXP", stack);
   out.write ((const char *) &lastConcreteValue, sizeof (lastConcreteValue));
 }

@@ -395,35 +395,12 @@ void add_value_to_set (std::set < Value > &set,
 
 
 }
-namespace trace {
+namespace util {
 
 /*
  * Following functions implementations are specific to Twinner.
  * Similar but more advanced implementations are provided for TwinTool.
  */
-
-void throw_exception_about_unexpected_change_in_memory_or_register_address
-(REG reg, UINT64 expectedVal, UINT64 currentVal) {
-  char errorMessage[200];
-  snprintf (errorMessage, 200, "Value of an address changed unexpectedly"
-            " without any interfering syscall\n"
-            "\tExpected 0x%lX, Got 0x%lX; at register 0x%X",
-            expectedVal, currentVal, (unsigned int) reg);
-  throw std::runtime_error (errorMessage);
-}
-
-void throw_exception_about_unexpected_change_in_memory_or_register_address
-(ADDRINT address, UINT64 expectedVal, UINT64 currentVal) {
-  char errorMessage[200];
-  snprintf (errorMessage, 200, "Value of an address changed unexpectedly"
-            " without any interfering syscall\n"
-            "\tExpected 0x%lX, Got 0x%lX; at address 0x%lX",
-            expectedVal, currentVal, address);
-  throw std::runtime_error (errorMessage);
-}
-
-}
-namespace util {
 
 const Logger &operator<< (const Logger &logger, REG reg) {
   return logger << (UINT32) reg;

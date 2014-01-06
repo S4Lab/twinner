@@ -223,38 +223,12 @@ INT32 TwinTool::printUsage () const {
 }
 
 }
-namespace trace {
+namespace util {
 
 /*
  * Following functions implementations are specific to TwinTool and employ PIN calls.
  * Similar but more limited implementations are provided for Twinner.
  */
-
-void throw_exception_about_unexpected_change_in_memory_or_register_address
-(REG reg, UINT64 expectedVal, UINT64 currentVal) {
-  char errorMessage[200];
-  std::string addr = REG_StringShort (reg);
-  snprintf (errorMessage, 200, "Value of an address changed unexpectedly"
-            " without any interfering syscall\n"
-            "\tExpected 0x%lX, Got 0x%lX; at register %s (code: 0x%X)",
-            expectedVal, currentVal, addr.c_str (), (unsigned int) reg);
-  edu::sharif::twinner::util::Logger::error () << errorMessage << '\n';
-  throw std::runtime_error (errorMessage);
-}
-
-void throw_exception_about_unexpected_change_in_memory_or_register_address
-(ADDRINT address, UINT64 expectedVal, UINT64 currentVal) {
-  char errorMessage[200];
-  snprintf (errorMessage, 200, "Value of an address changed unexpectedly"
-            " without any interfering syscall\n"
-            "\tExpected 0x%lX, Got 0x%lX; at address 0x%lX",
-            expectedVal, currentVal, address);
-  edu::sharif::twinner::util::Logger::error () << errorMessage << '\n';
-  throw std::runtime_error (errorMessage);
-}
-
-}
-namespace util {
 
 const Logger &operator<< (const Logger &logger, REG reg) {
   return logger << "Reg(" << REG_StringShort (reg) << ")";

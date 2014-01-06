@@ -34,38 +34,25 @@ namespace trace {
 
 class Expression : public Savable {
 
-private:
+protected:
   /**
    * Uses push_back and pop_back instead of push and pop to implement a stack.
    */
   std::list < ExpressionToken * > stack;
+
+private:
   UINT64 lastConcreteValue;
 
   bool isOverwriting;
 
-  Expression (const Expression &exp);
-
   Expression (const std::list < ExpressionToken * > &stk, UINT64 concreteValue);
 
+protected:
+  Expression (const Expression &exp);
+
+  Expression (UINT64 lastConcreteValue, bool isOverwriting);
+
 public:
-  /**
-   * Instantiates an expression containing a new (yet unused) symbol,
-   * initiated from a register.
-   */
-  Expression (REG reg, UINT64 concreteValue, int generationIndex);
-
-  /**
-   * Instantiates an expression containing a new (yet unused) symbol,
-   * initiated from a memory address.
-   */
-  Expression (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex,
-      bool isOverwriting = false);
-
-  /**
-   * Instantiates an expression containing a constant value (non-symbolic).
-   */
-  Expression (UINT64 value);
-
   /**
    * Deletes all hold expression tokens and destruct the expression instance.
    */
@@ -146,7 +133,7 @@ public:
    */
   void negate ();
 
-  Expression *clone () const;
+  virtual Expression *clone () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static Expression *loadFromBinaryStream (std::ifstream &in);

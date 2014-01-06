@@ -17,8 +17,8 @@
 #include "MemoryResidentExpressionValueProxy.h"
 #include "ConstantExpressionValueProxy.h"
 
-#include "edu/sharif/twinner/trace/Trace.h"
-#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace-twintool/TraceImp.h"
+#include "edu/sharif/twinner/trace-twintool/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
@@ -33,7 +33,7 @@ namespace twintool {
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     std::ifstream &symbolsFileInputStream, bool _disabled) :
-trace (new edu::sharif::twinner::trace::Trace (symbolsFileInputStream)),
+trace (new edu::sharif::twinner::trace::TraceImp (symbolsFileInputStream)),
 trackedReg (REG_INVALID_), operandSize (-1), hook (0),
 disabled (_disabled) {
 }
@@ -112,7 +112,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
       << *insAssembly << "): dst reg: " << REG_StringShort (dstReg)
       << ", src imd: " << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
-      new edu::sharif::twinner::trace::Expression (srcImmediateValue);
+      new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
       ConstantExpressionValueProxy (srcexp));
   delete srcexp;
@@ -157,7 +157,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
       << *insAssembly << "): dst mem addr: " << dstMemoryEa
       << ", src imd: " << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
-      new edu::sharif::twinner::trace::Expression (srcImmediateValue);
+      new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
       ConstantExpressionValueProxy (srcexp));
   delete srcexp;
@@ -219,7 +219,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
       << REG_StringShort (dstReg) << ", dst reg value: 0x"
       << std::hex << dstRegVal << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
-      new edu::sharif::twinner::trace::Expression (dstRegVal);
+      new edu::sharif::twinner::trace::ExpressionImp (dstRegVal);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
       ConstantExpressionValueProxy (srcexp));
   delete srcexp;
@@ -833,9 +833,9 @@ void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) 
   const UINT64 eaxVal =
       edu::sharif::twinner::util::readRegisterContent (context, REG_EAX);
   edu::sharif::twinner::trace::Expression *edxNewExp =
-      new edu::sharif::twinner::trace::Expression (edxVal);
+      new edu::sharif::twinner::trace::ExpressionImp (edxVal);
   edu::sharif::twinner::trace::Expression *eaxNewExp =
-      new edu::sharif::twinner::trace::Expression (eaxVal);
+      new edu::sharif::twinner::trace::ExpressionImp (eaxVal);
 
   const MutableExpressionValueProxy &edx =
       RegisterResidentExpressionValueProxy (REG_EDX, edxVal);

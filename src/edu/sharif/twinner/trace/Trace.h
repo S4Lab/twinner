@@ -28,7 +28,7 @@ class ExecutionTraceSegment;
 
 class Trace : public ExecutionState {
 
-private:
+protected:
   /**
    * Most recent segment is kept at front of list.
    * Newer segments should be push_front()ed.
@@ -48,32 +48,17 @@ private:
    * This index indicates current generation starting from zero. This should not be
    * confused with an index in segments list (as segments list is in reverse order).
    * This generation index matches with values kept in
-   * memoryResidentSymbolsGenerationIndices and registerResidentSymbolsGenerationIndices.
+   * memoryResidentSymbolsGenerationIndices and registerResidentSymbolsGenerationIndices
+   * in TraceImp class.
    */
   int currentSegmentIndex;
 
-  /**
-   * The last used index (starting from zero) for each symbol
-   * which was created at a given memory address is kept here.
-   * A new expression may emerge out of an address iff either there is no stored index
-   * for that address or the stored index is less than current generation/segment index.
-   */
-  std::map < ADDRINT, int > memoryResidentSymbolsGenerationIndices;
-
-  /**
-   * The last used index (starting from zero) for each symbol
-   * which was created in a given register is kept here.
-   * A new expression may emerge out of an address iff either there is no stored index
-   * for that address or the stored index is less than current generation/segment index.
-   */
-  std::map < REG, int > registerResidentSymbolsGenerationIndices;
-
+private:
   Trace (const std::list < ExecutionTraceSegment * > &list);
 
 public:
-  Trace (std::ifstream &symbolsFileInputStream);
   Trace ();
-  ~Trace ();
+  virtual ~Trace ();
 
   /**
    * Searches backwards to find queried values.
@@ -144,56 +129,11 @@ private:
   static map < ADDRINT, UINT64 > loadAddressToValueMapFromBinaryStream (
       std::ifstream &in);
 
-  ExecutionTraceSegment *getCurrentTraceSegment () const;
+protected:
 
-  template < typename T >
-  struct TryToGetSymbolicExpressionMethod {
-
-    typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address,
-        UINT64 val);
-    typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
-        T address);
-    typedef Expression *(Trace::*TraceType) (T address, UINT64 val);
-    typedef Expression *(Trace::*TraceTypeWithoutConcreteValue) (T address);
-  };
-
-  template < typename T >
-  struct GetSymbolicExpressionMethod {
-
-    typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address, UINT64 val,
-        Expression *newExpression);
-    typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
-        T address, Expression *newExpression);
-  };
-
-  template < typename T >
-  Expression *tryToGetSymbolicExpressionImplementation (T address, UINT64 val,
-      typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
-  throw (WrongStateException);
-  template < typename T >
-  Expression *tryToGetSymbolicExpressionImplementation (T address,
-      typename TryToGetSymbolicExpressionMethod < T >::
-      TraceSegmentTypeWithoutConcreteValue method);
-
-  template < typename T >
-  Expression *getSymbolicExpressionImplementation (T address, UINT64 val,
-      Expression *newExpression,
-      typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
-      std::map < T, int > &generationIndices,
-      typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod);
-
-  template < typename T >
-  Expression *getSymbolicExpressionImplementation (T address,
-      Expression *newExpression,
-      typename TryToGetSymbolicExpressionMethod < T >::
-      TraceTypeWithoutConcreteValue tryToGetMethod,
-      std::map < T, int > &generationIndices,
-      typename GetSymbolicExpressionMethod < T >::
-      TraceSegmentTypeWithoutConcreteValue getMethod);
-
-  void loadInitializedSymbolsFromBinaryStream (std::ifstream &in);
-  ExecutionTraceSegment *loadSingleSegmentSymbolsRecordsFromBinaryStream (int index,
-      std::ifstream &in);
+  inline ExecutionTraceSegment *getCurrentTraceSegment () const {
+    return *currentSegmentIterator;
+  }
 
 public:
   virtual void printRegistersValues (
