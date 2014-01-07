@@ -311,7 +311,7 @@ void code_registers_symbols_initiation_into_twin_code (std::stringstream &out) {
   };
   out << "RegistersSet regs;\n";
   out << "SAVE_REGISTERS (regs);\n";
-  out << "UINT64 " << registersNames[0] << "_0 = regs." << registersNames[0];
+  out << "const UINT64 " << registersNames[0] << "_0 = regs." << registersNames[0];
   for (int i = 1; i < 16; ++i) {
     out << ", " << registersNames[i] << "_0 = regs." << registersNames[i];
   }
@@ -381,9 +381,43 @@ void code_memory_changes (IndentedStringStream &out,
 
 void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
     const edu::sharif::twinner::trace::ExecutionTraceSegment *segment) {
+
+  struct RegInfo {
+
+    const char *name;
+    REG id;
+  } const regs[] = {// count == 16
+    {"rax", REG_RAX},
+    {"rbx", REG_RBX},
+    {"rcx", REG_RCX},
+    {"rdx", REG_RDX},
+    {"rdi", REG_RDI},
+    {"rsi", REG_RSI},
+    {"rsp", REG_RSP},
+    {"rbp", REG_RBP},
+    {"r8", REG_R8},
+    {"r9", REG_R9},
+    {"r10", REG_R10},
+    {"r11", REG_R11},
+    {"r12", REG_R12},
+    {"r13", REG_R13},
+    {"r14", REG_R14},
+    {"r15", REG_R15}
+  };
   out.indented () << "/*Registers Changes*/\n";
-  //  const std::map < REG, edu::sharif::twinner::trace::Expression * > &regToExp =
-  //      segment->getRegisterToExpression ();
+  const std::map < REG, edu::sharif::twinner::trace::Expression * > &regToExp =
+      segment->getRegisterToExpression ();
+  for (int i = 0; i < 16; ++i) {
+    std::map < REG, edu::sharif::twinner::trace::Expression * >::const_iterator it =
+        regToExp.find (regs[i].id);
+    out.indented () << "regs." << regs[i].name << " = ";
+    if (it != regToExp.end ()) {
+      out << it->second->toString () << ";\n";
+    } else {
+      out << regs[i].name << "_0;\n";
+    }
+  }
+  out.indented () << "regs = setRegistersValuesAndInvokeSyscall (regs);\n";
 }
 
 void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
