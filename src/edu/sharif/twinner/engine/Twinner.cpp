@@ -100,6 +100,7 @@ inline void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &o
 inline void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
     const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
 
+inline void code_registers_symbols_initiation_into_twin_code (std::stringstream &out);
 inline void code_symbol_initiation_into_twin_code (std::stringstream &out,
     const ADDRINT &address);
 inline void code_memory_changes (IndentedStringStream &out,
@@ -295,11 +296,26 @@ void Twinner::codeTracesIntoTwinBinary (
     const std::map < ADDRINT, UINT64 > &initialValues) {
   std::stringstream out;
   out << '\n';
+  code_registers_symbols_initiation_into_twin_code (out);
   edu::sharif::twinner::util::foreach (addresses,
                                        &code_symbol_initiation_into_twin_code, out);
   codeInitialValuesIntoTwinCode (out, initialValues);
   edu::sharif::twinner::util::foreach (traces, &code_trace_into_twin_code, out);
   edu::sharif::twinner::util::Logger::info () << out.str ();
+}
+
+void code_registers_symbols_initiation_into_twin_code (std::stringstream &out) {
+  const char *registersNames[] = {// count == 16
+                                  "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "rsp", "rbp",
+                                  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
+  };
+  out << "RegistersSet regs;\n";
+  out << "SAVE_REGISTERS (regs);\n";
+  out << "UINT64 " << registersNames[0] << "_0 = regs." << registersNames[0];
+  for (int i = 1; i < 16; ++i) {
+    out << ", " << registersNames[i] << "_0 = regs." << registersNames[i];
+  }
+  out << ";\n";
 }
 
 void code_symbol_initiation_into_twin_code (std::stringstream &out,
