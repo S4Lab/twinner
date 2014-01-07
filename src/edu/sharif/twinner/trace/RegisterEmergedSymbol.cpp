@@ -52,8 +52,49 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::loadFromBinaryStream (std::ifstrea
 
 std::string RegisterEmergedSymbol::toString () const {
   std::stringstream ss;
-  ss << "r" << std::hex << address << '_' << generationIndex;
+  ss << std::hex << getRegisterName () << '_' << generationIndex;
   return ss.str ();
+}
+
+const char *RegisterEmergedSymbol::getRegisterName () const {
+  // ASSERT: address is a 64 bits register
+  // Above assertion is ensured during instantiation in the ExpressionImp class
+  switch (address) {
+  case REG_RAX:
+    return "rax";
+  case REG_RBX:
+    return "rbx";
+  case REG_RCX:
+    return "rcx";
+  case REG_RDX:
+    return "rdx";
+  case REG_RDI:
+    return "rdi";
+  case REG_RSI:
+    return "rsi";
+  case REG_RSP:
+    return "rsp";
+  case REG_RBP:
+    return "rbp";
+  case REG_R8:
+    return "r8";
+  case REG_R9:
+    return "r9";
+  case REG_R10:
+    return "r10";
+  case REG_R11:
+    return "r11";
+  case REG_R12:
+    return "r12";
+  case REG_R13:
+    return "r13";
+  case REG_R14:
+    return "r14";
+  case REG_R15:
+    return "r15";
+  default:
+    throw std::runtime_error ("Register emerged symbols must correspond to 64 bits regs");
+  }
 }
 
 }
