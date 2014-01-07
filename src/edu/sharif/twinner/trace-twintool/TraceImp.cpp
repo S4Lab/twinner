@@ -27,7 +27,8 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-TraceImp::TraceImp (std::ifstream &symbolsFileInputStream) {
+TraceImp::TraceImp (std::ifstream &symbolsFileInputStream) :
+Trace (1 /* Invoking dummy constructor of parent class to stop adding segments there*/) {
   loadInitializedSymbolsFromBinaryStream (symbolsFileInputStream);
   currentSegmentIterator = segments.end ();
   if (currentSegmentIterator != segments.begin ()) {

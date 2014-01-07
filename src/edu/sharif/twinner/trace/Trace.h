@@ -53,6 +53,12 @@ protected:
    */
   int currentSegmentIndex;
 
+  /**
+   * Dummy constructor: Allowing child class to do all initializations
+   */
+  Trace (int) {
+  }
+
 private:
   Trace (const std::list < ExecutionTraceSegment * > &list);
 
