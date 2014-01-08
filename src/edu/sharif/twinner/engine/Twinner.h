@@ -64,7 +64,7 @@ private:
       std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols);
 
   std::map < ADDRINT, UINT64 > obtainInitializedMemoryValues (Executer &ex) const;
-  void codeTracesIntoTwinBinary (const std::map < ADDRINT, UINT64 > &initialValues);
+  void codeTracesIntoTwinCode (const std::map < ADDRINT, UINT64 > &initialValues);
   void codeInitialValuesIntoTwinCode (std::stringstream &out,
       const std::map < ADDRINT, UINT64 > &initialValues) const;
 };

@@ -173,7 +173,7 @@ void Twinner::generateTwinBinary () {
   edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
   symbols.clear ();
   std::map < ADDRINT, UINT64 > initialValues = obtainInitializedMemoryValues (ex);
-  codeTracesIntoTwinBinary (initialValues);
+  codeTracesIntoTwinCode (initialValues);
 }
 
 std::map < ADDRINT, UINT64 > Twinner::obtainInitializedMemoryValues (Executer &ex) const {
@@ -292,7 +292,7 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
   return false;
 }
 
-void Twinner::codeTracesIntoTwinBinary (
+void Twinner::codeTracesIntoTwinCode (
     const std::map < ADDRINT, UINT64 > &initialValues) {
   std::stringstream out;
   out << '\n';
@@ -302,6 +302,18 @@ void Twinner::codeTracesIntoTwinBinary (
   codeInitialValuesIntoTwinCode (out, initialValues);
   edu::sharif::twinner::util::foreach (traces, &code_trace_into_twin_code, out);
   edu::sharif::twinner::util::Logger::info () << out.str ();
+
+  std::ofstream fileout;
+  fileout.open (twin.c_str (), ios_base::out | ios_base::trunc);
+  if (!fileout.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not write twincode"
+        " to file: Error in open function: "
+        << twin << '\n';
+    throw std::runtime_error ("Error in saving twincode in file");
+  }
+  fileout << out.str ();
+
+  fileout.close ();
 }
 
 void code_registers_symbols_initiation_into_twin_code (std::stringstream &out) {
