@@ -296,11 +296,16 @@ void Twinner::codeTracesIntoTwinCode (
     const std::map < ADDRINT, UINT64 > &initialValues) {
   std::stringstream out;
   out << '\n';
+  out << "#include \"twincode.h\"\n";
+  out << '\n';
+  out << "int main () {\n";
+
   code_registers_symbols_initiation_into_twin_code (out);
   edu::sharif::twinner::util::foreach (addresses,
                                        &code_symbol_initiation_into_twin_code, out);
   codeInitialValuesIntoTwinCode (out, initialValues);
   edu::sharif::twinner::util::foreach (traces, &code_trace_into_twin_code, out);
+  out << "}\n";
   edu::sharif::twinner::util::Logger::info () << out.str ();
 
   std::ofstream fileout;
@@ -321,8 +326,11 @@ void code_registers_symbols_initiation_into_twin_code (std::stringstream &out) {
                                   "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "rsp", "rbp",
                                   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
   };
-  out << "RegistersSet regs;\n";
+  out << "\t";
+  out << "struct RegistersSet regs;\n";
+  out << "\t";
   out << "SAVE_REGISTERS (regs);\n";
+  out << "\t";
   out << "const UINT64 " << registersNames[0] << "_0 = regs." << registersNames[0];
   for (int i = 1; i < 16; ++i) {
     out << ", " << registersNames[i] << "_0 = regs." << registersNames[i];
@@ -332,6 +340,7 @@ void code_registers_symbols_initiation_into_twin_code (std::stringstream &out) {
 
 void code_symbol_initiation_into_twin_code (std::stringstream &out,
     const ADDRINT &address) {
+  out << "\t";
   out << "const UINT64 m" << std::hex << address
       << "_0 = *((UINT64 *) 0x" << address << ");\n";
 }

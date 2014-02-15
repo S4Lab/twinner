@@ -13,6 +13,8 @@
 #ifndef TWINCODE_H
 #define	TWINCODE_H
 
+typedef unsigned long long int UINT64;
+
 struct RegistersSet {
 
   UINT64 rax;
@@ -75,15 +77,15 @@ struct RegistersSet {
     : "=o" (REGS) \
   )
 
-RegistersSet setRegistersValuesAndInvokeSyscall (RegistersSet regs) {
-  static RegistersSet currentRegs; // static => to be coded independent of rsp and so on
+struct RegistersSet setRegistersValuesAndInvokeSyscall (struct RegistersSet regs) {
+  static struct RegistersSet currentRegs; // static => to be coded independent of rsp and so on
   SAVE_REGISTERS (currentRegs);
-  static RegistersSet resultingRegs;
+  static struct RegistersSet resultingRegs;
   asm (
         /* loading registers' values from regs (the %1) variable */
         LOADING_REGISTERS_COMMANDS (1)
         /* the syscall itself */
-        "syscall" /* FIXME: the syscall code should specify its args/aux-info */
+        "syscall\n\t" /* FIXME: the syscall code should specify its args/aux-info */
         /* saving resulting registers' values within resultingRegs (the %0) variable */
         SAVING_REGISTERS_COMMANDS (0)
         /* loading registers' old values from currentRegs (the %2) variable */
