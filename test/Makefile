@@ -4,7 +4,8 @@ INCLUDEPATH := -I ../src/res/
 TARGETS := simple-condition-test \
 	simple-condition-test.twin \
 	assembly-mov-sizes \
-	registers-state-manipulation
+	registers-state-manipulation \
+	multi-path-with-printf-leafs-test
 
 all: $(TARGETS:=.out)
 
