@@ -20,6 +20,7 @@
 #include "InstructionSymbolicExecuter.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/Syscall.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
@@ -502,7 +503,8 @@ void Instrumenter::printDebugInformation (INS ins) const {
 void Instrumenter::syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt,
     SYSCALL_STANDARD std) {
   edu::sharif::twinner::util::Logger::loquacious () << "***** syscallEntryPoint *****\n";
-  //TODO: Implement...
+  ise->syscallInvoked (edu::sharif::twinner::trace::Syscall (std));
+
   if (isWithinInitialStateDetectionMode) {
     edu::sharif::twinner::util::Logger::debug () << "Gathering initial contents of"
         " requested memory addresses, right before first syscall\n";

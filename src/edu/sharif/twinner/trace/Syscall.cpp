@@ -10,8 +10,6 @@
  * This file is part of Twinner project.
  */
 
-#include <ins.PH>
-
 #include "Syscall.h"
 
 namespace edu {

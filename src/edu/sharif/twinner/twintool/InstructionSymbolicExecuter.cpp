@@ -20,6 +20,7 @@
 #include "edu/sharif/twinner/trace-twintool/TraceImp.h"
 #include "edu/sharif/twinner/trace-twintool/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
+#include "edu/sharif/twinner/trace/Syscall.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/memory.h"
@@ -54,6 +55,11 @@ void InstructionSymbolicExecuter::disable () {
 
 void InstructionSymbolicExecuter::enable () {
   disabled = false;
+}
+
+void InstructionSymbolicExecuter::syscallInvoked (
+    edu::sharif::twinner::trace::Syscall s) {
+  trace->syscallInvoked (s);
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,

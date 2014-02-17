@@ -13,6 +13,8 @@
 #ifndef SYSCALL_H
 #define SYSCALL_H
 
+#include "pin.H"
+
 namespace edu {
 namespace sharif {
 namespace twinner {

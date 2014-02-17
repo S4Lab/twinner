@@ -23,6 +23,7 @@ namespace twinner {
 namespace trace {
 
 class Trace;
+class Syscall;
 }
 namespace twintool {
 
@@ -64,6 +65,8 @@ public:
 
   void disable ();
   void enable ();
+
+  void syscallInvoked (edu::sharif::twinner::trace::Syscall s);
 
 public:
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
