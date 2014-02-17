@@ -15,6 +15,7 @@
 
 #include "ExecutionState.h"
 #include "Constraint.h"
+#include "Syscall.h"
 
 #include <map>
 
@@ -29,6 +30,8 @@ private:
   std::map < REG, Expression * > registerToExpression;
   std::map < ADDRINT, Expression * > memoryAddressToExpression;
   std::list < const Constraint * > pathConstraints;
+  /// Each execution trace segment is terminated with some syscall.
+  Syscall syscall;
 
   ExecutionTraceSegment (const std::map < REG, Expression * > &regi,
       const std::map < ADDRINT, Expression * > &memo,
@@ -99,6 +102,9 @@ public:
   const std::map < REG, Expression * > &getRegisterToExpression () const;
   const std::map < ADDRINT, Expression * > &getMemoryAddressToExpression () const;
   const std::list < const Constraint * > &getPathConstraints () const;
+
+  void setSyscall (Syscall syscall);
+  Syscall getSyscall () const;
 };
 
 }

@@ -334,6 +334,14 @@ ExecutionTraceSegment::getPathConstraints () const {
   return pathConstraints;
 }
 
+void ExecutionTraceSegment::setSyscall (Syscall _syscall) {
+  syscall = _syscall;
+}
+
+Syscall ExecutionTraceSegment::getSyscall () const {
+  return syscall;
+}
+
 }
 }
 }
