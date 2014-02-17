@@ -98,7 +98,12 @@ void Trace::addPathConstraint (const Constraint *c) {
 }
 
 void Trace::syscallInvoked (Syscall s) {
-  throw std::runtime_error ("Trace::syscallInvoked: Not yet implemented");
+  getCurrentTraceSegment ()->setSyscall (s);
+  if (currentSegmentIterator == segments.begin ()) {
+    segments.push_front (new ExecutionTraceSegment ());
+  }
+  currentSegmentIterator--;
+  currentSegmentIndex++;
 }
 
 bool Trace::saveToFile (const char *path) const {
