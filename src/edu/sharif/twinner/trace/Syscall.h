@@ -20,6 +20,13 @@ namespace trace {
 
 class Syscall {
 
+private:
+  SYSCALL_STANDARD standard;
+
+public:
+  Syscall ();
+  Syscall (SYSCALL_STANDARD standard);
+  ~Syscall ();
 };
 
 }

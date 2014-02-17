@@ -10,3 +10,27 @@
  * This file is part of Twinner project.
  */
 
+#include <ins.PH>
+
+#include "Syscall.h"
+
+namespace edu {
+namespace sharif {
+namespace twinner {
+namespace trace {
+
+Syscall::Syscall () :
+standard (SYSCALL_STANDARD_INVALID) {
+}
+
+Syscall::Syscall (SYSCALL_STANDARD _standard) :
+standard (_standard) {
+}
+
+Syscall::~Syscall () {
+}
+
+}
+}
+}
+}
