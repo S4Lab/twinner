@@ -503,7 +503,7 @@ void Instrumenter::printDebugInformation (INS ins) const {
 void Instrumenter::syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt,
     SYSCALL_STANDARD std) {
   edu::sharif::twinner::util::Logger::loquacious () << "***** syscallEntryPoint *****\n";
-  ise->syscallInvoked (edu::sharif::twinner::trace::Syscall (std));
+  ise->syscallInvoked (ctxt, edu::sharif::twinner::trace::Syscall (std));
 
   if (isWithinInitialStateDetectionMode) {
     edu::sharif::twinner::util::Logger::debug () << "Gathering initial contents of"

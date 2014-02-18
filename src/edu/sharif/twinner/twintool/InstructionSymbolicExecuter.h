@@ -66,7 +66,7 @@ public:
   void disable ();
   void enable ();
 
-  void syscallInvoked (edu::sharif::twinner::trace::Syscall s);
+  void syscallInvoked (const CONTEXT *context, edu::sharif::twinner::trace::Syscall s);
 
 public:
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,

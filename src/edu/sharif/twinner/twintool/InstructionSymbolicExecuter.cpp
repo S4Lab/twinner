@@ -57,8 +57,12 @@ void InstructionSymbolicExecuter::enable () {
   disabled = false;
 }
 
-void InstructionSymbolicExecuter::syscallInvoked (
+void InstructionSymbolicExecuter::syscallInvoked (const CONTEXT *context,
     edu::sharif::twinner::trace::Syscall s) {
+  runHooks (context);
+  if (disabled) {
+    return;
+  }
   trace->syscallInvoked (s);
 }
 
