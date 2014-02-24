@@ -2,7 +2,7 @@ fullpreparation=$1
 
 echo "Linking to source files from deploy folder..."
 cp -f -l -a -u mem.sh run_twinner.sh run_twintool.sh src/* "deploy/"
-cp -f -l -a -u test/simple-condition-test.out deploy/obj-intel64/
+cp -f -l -a -u "test/simple-condition-test.out" "test/multi-path-with-printf-leafs-test.out" "deploy/obj-intel64/"
 
 if [ "a$fullpreparation" = "afull" ]; then
 	echo "Full preparation..."

@@ -1,1 +1,1 @@
-sudo su sandbox -c "./obj-intel64/Twinner --input ./obj-intel64/simple-condition-test.out --args 'abcd efg' --pin-launcher ../../../pin.sh --tool ./obj-intel64/TwinTool.so -o /tmp/twinner/unpacked.twin.c --verbose $@"
+sudo su sandbox -c "./obj-intel64/Twinner --input ./obj-intel64/multi-path-with-printf-leafs-test.out --args '475' --pin-launcher ../../../pin.sh --tool ./obj-intel64/TwinTool.so -o /tmp/twinner/unpacked.twin.c --verbose $@"
