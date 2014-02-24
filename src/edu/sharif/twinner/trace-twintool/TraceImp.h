@@ -40,6 +40,7 @@ private:
   std::map < REG, int > registerResidentSymbolsGenerationIndices;
 
 public:
+  TraceImp ();
   TraceImp (std::ifstream &symbolsFileInputStream);
   virtual ~TraceImp ();
 

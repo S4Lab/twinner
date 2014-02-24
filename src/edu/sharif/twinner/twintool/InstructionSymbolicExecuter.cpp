@@ -40,7 +40,7 @@ disabled (_disabled) {
 }
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (bool _disabled) :
-trace (new edu::sharif::twinner::trace::Trace ()),
+trace (new edu::sharif::twinner::trace::TraceImp ()),
 trackedReg (REG_INVALID_), operandSize (-1), hook (0),
 disabled (_disabled) {
 }
