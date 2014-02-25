@@ -146,11 +146,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (T address, UINT64 val
         "Probably, a new symbol is required to describe it.\n";
   }
   // instantiate and set a new expression in the current segment
-  typename std::map < T, int >::iterator it = generationIndices.find (address);
-  if (it == generationIndices.end () || it->second < currentSegmentIndex) {
-    generationIndices[address] = currentSegmentIndex;
-
-  } else {
+  if (!checkAndSetGenerationIndex (address, generationIndices)) {
     getCurrentTraceSegment ()->printRegistersValues
         (edu::sharif::twinner::util::Logger::loquacious ());
     throw_exception_about_unexpected_change_in_memory_or_register_address
@@ -175,11 +171,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (T address,
     return exp;
   }
   // instantiate and set a new expression in the current segment
-  typename std::map < T, int >::iterator it = generationIndices.find (address);
-  if (it == generationIndices.end () || it->second < currentSegmentIndex) {
-    generationIndices[address] = currentSegmentIndex;
-
-  } else {
+  if (!checkAndSetGenerationIndex (address, generationIndices)) {
     // as there was no expression (regardless of concrete value), this case is impossible!
     throw std::runtime_error ("Trace::getSymbolicExpressionImplementation (...) method: "
                               "generation index is set while there is no expression!");
@@ -193,6 +185,29 @@ Expression *TraceImp::getSymbolicExpressionImplementation (T address,
     newExpression = new ExpressionImp (address, 0, currentSegmentIndex);
   }
   return (getCurrentTraceSegment ()->*getMethod) (address, newExpression);
+}
+
+template < >
+bool TraceImp::checkAndSetGenerationIndex (REG address,
+    std::map < REG, int > &generationIndices) {
+  const REG enclosingReg = REG_FullRegName (address);
+  typename std::map < REG, int >::iterator it = generationIndices.find (enclosingReg);
+  if (it == generationIndices.end () || it->second < currentSegmentIndex) {
+    generationIndices[enclosingReg] = currentSegmentIndex;
+    return true;
+  }
+  return false;
+}
+
+template < >
+bool TraceImp::checkAndSetGenerationIndex (ADDRINT address,
+    std::map < ADDRINT, int > &generationIndices) {
+  typename std::map < ADDRINT, int >::iterator it = generationIndices.find (address);
+  if (it == generationIndices.end () || it->second < currentSegmentIndex) {
+    generationIndices[address] = currentSegmentIndex;
+    return true;
+  }
+  return false;
 }
 
 void TraceImp::loadInitializedSymbolsFromBinaryStream (std::ifstream &in) {

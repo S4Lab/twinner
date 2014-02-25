@@ -125,6 +125,9 @@ private:
       typename GetSymbolicExpressionMethod < T >::
       TraceSegmentTypeWithoutConcreteValue getMethod);
 
+  template < typename T >
+  bool checkAndSetGenerationIndex (T address, std::map < T, int > &generationIndices);
+
   void loadInitializedSymbolsFromBinaryStream (std::ifstream &in);
   ExecutionTraceSegment *loadSingleSegmentSymbolsRecordsFromBinaryStream (int index,
       std::ifstream &in);
