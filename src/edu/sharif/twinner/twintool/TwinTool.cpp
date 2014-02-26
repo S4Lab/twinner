@@ -234,12 +234,14 @@ const Logger &operator<< (const Logger &logger, REG reg) {
   return logger << "Reg(" << REG_StringShort (reg) << ")";
 }
 
-UINT64 readRegisterContent (const CONTEXT *context,
-    REG reg) {
-  REGVAL regVal;
-  PIN_GetContextRegval (context, reg, &regVal);
-  UINT64 value;
-  PIN_ReadRegvalQWord (&regVal, &value, 0);
+UINT64 readRegisterContent (const CONTEXT *context, REG reg) {
+  /*
+   * Intel is little-endian. So allocating 64-bit, initial bytes will be used and
+   * extra bytes (at right-hand part) will remain unused. So there is no need to any
+   * conversion to fit a 16-bit value in a 64-bit variable.
+   */
+  UINT64 value = 0;
+  PIN_GetContextRegval (context, reg, (UINT8 *) & value);
   return value;
 }
 
