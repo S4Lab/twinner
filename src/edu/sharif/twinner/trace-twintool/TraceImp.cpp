@@ -63,6 +63,11 @@ Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryE
        &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
 }
 
+void throw_exception_about_unexpected_change_in_memory_or_register_address
+(REG reg, UINT64 expectedVal, UINT64 currentVal);
+void throw_exception_about_unexpected_change_in_memory_or_register_address
+(ADDRINT address, UINT64 expectedVal, UINT64 currentVal);
+
 template < typename T >
 Expression *TraceImp::tryToGetSymbolicExpressionImplementation (T address, UINT64 val,
     typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
@@ -71,9 +76,21 @@ throw (WrongStateException) {
       it != segments.end (); ++it) {
     // searches segments starting from the current towards the oldest one
     ExecutionTraceSegment *seg = *it;
-    Expression *exp = (seg->*method) (address, val);
-    if (exp) {
-      return exp;
+    try {
+      Expression *exp = (seg->*method) (address, val);
+      if (exp) {
+        return exp;
+      }
+    } catch (const WrongStateException &e) {
+      if (it == currentSegmentIterator) {
+        UINT64 currentValue = e.getCurrentStateValue ();
+        getCurrentTraceSegment ()->printRegistersValues
+            (edu::sharif::twinner::util::Logger::loquacious ());
+        throw_exception_about_unexpected_change_in_memory_or_register_address
+            (address, val, currentValue);
+      } else {
+        throw e;
+      }
     }
   }
   return 0;
@@ -99,16 +116,14 @@ Expression *TraceImp::getSymbolicExpressionByRegister (REG reg, UINT64 regval,
     Expression *newExpression) {
   return getSymbolicExpressionImplementation
       (reg, regval, newExpression,
-       &Trace::tryToGetSymbolicExpressionByRegister,
-       registerResidentSymbolsGenerationIndices,
+       &TraceImp::tryToGetSymbolicExpressionByRegister,
        &ExecutionTraceSegment::getSymbolicExpressionByRegister);
 }
 
 Expression *TraceImp::getSymbolicExpressionByRegister (REG reg, Expression *newExpression) {
   return getSymbolicExpressionImplementation
       (reg, newExpression,
-       &Trace::tryToGetSymbolicExpressionByRegister,
-       registerResidentSymbolsGenerationIndices,
+       &TraceImp::tryToGetSymbolicExpressionByRegister,
        &ExecutionTraceSegment::getSymbolicExpressionByRegister);
 }
 
@@ -116,42 +131,29 @@ Expression *TraceImp::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa, UI
     Expression *newExpression) {
   return getSymbolicExpressionImplementation
       (memoryEa, memval, newExpression,
-       &Trace::tryToGetSymbolicExpressionByMemoryAddress,
-       memoryResidentSymbolsGenerationIndices,
+       &TraceImp::tryToGetSymbolicExpressionByMemoryAddress,
        &ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress);
 }
-
-void throw_exception_about_unexpected_change_in_memory_or_register_address
-(REG reg, UINT64 expectedVal, UINT64 currentVal);
-void throw_exception_about_unexpected_change_in_memory_or_register_address
-(ADDRINT address, UINT64 expectedVal, UINT64 currentVal);
 
 template < typename T >
 Expression *TraceImp::getSymbolicExpressionImplementation (T address, UINT64 val,
     Expression *newExpression,
     typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
-    std::map < T, int > &generationIndices,
     typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod) {
-  UINT64 currentValue = -1;
   try {
     Expression *exp = (this->*tryToGetMethod) (address, val);
-    if (exp) {
+    if (exp) { // exp exists and its val matches with expected value
       return exp;
-    }
+    } // exp does not exist at all, so it's OK to create a new one
+
   } catch (const WrongStateException &e) {
-    currentValue = e.getCurrentStateValue ();
+    UINT64 currentValue = e.getCurrentStateValue ();
     edu::sharif::twinner::util::Logger::debug () << "Unexpected value (0x"
         << std::hex << currentValue
         << ") was found (instead of 0x" << val << "). "
         "Probably, a new symbol is required to describe it.\n";
   }
   // instantiate and set a new expression in the current segment
-  if (!checkAndSetGenerationIndex (address, generationIndices)) {
-    getCurrentTraceSegment ()->printRegistersValues
-        (edu::sharif::twinner::util::Logger::loquacious ());
-    throw_exception_about_unexpected_change_in_memory_or_register_address
-        (address, val, currentValue);
-  }
   if (!newExpression) {
     newExpression = new ExpressionImp (address, val, currentSegmentIndex);
   }
@@ -163,7 +165,6 @@ Expression *TraceImp::getSymbolicExpressionImplementation (T address,
     Expression *newExpression,
     typename TryToGetSymbolicExpressionMethod < T >
     ::TraceTypeWithoutConcreteValue tryToGetMethod,
-    std::map < T, int > &generationIndices,
     typename GetSymbolicExpressionMethod < T >::
     TraceSegmentTypeWithoutConcreteValue getMethod) {
   Expression *exp = (this->*tryToGetMethod) (address);
@@ -171,11 +172,6 @@ Expression *TraceImp::getSymbolicExpressionImplementation (T address,
     return exp;
   }
   // instantiate and set a new expression in the current segment
-  if (!checkAndSetGenerationIndex (address, generationIndices)) {
-    // as there was no expression (regardless of concrete value), this case is impossible!
-    throw std::runtime_error ("Trace::getSymbolicExpressionImplementation (...) method: "
-                              "generation index is set while there is no expression!");
-  }
   if (!newExpression) {
     /*
      * This getter, which ignores concrete value, is only called when the returned
@@ -185,29 +181,6 @@ Expression *TraceImp::getSymbolicExpressionImplementation (T address,
     newExpression = new ExpressionImp (address, 0, currentSegmentIndex);
   }
   return (getCurrentTraceSegment ()->*getMethod) (address, newExpression);
-}
-
-template < >
-bool TraceImp::checkAndSetGenerationIndex (REG address,
-    std::map < REG, int > &generationIndices) {
-  const REG enclosingReg = REG_FullRegName (address);
-  typename std::map < REG, int >::iterator it = generationIndices.find (enclosingReg);
-  if (it == generationIndices.end () || it->second < currentSegmentIndex) {
-    generationIndices[enclosingReg] = currentSegmentIndex;
-    return true;
-  }
-  return false;
-}
-
-template < >
-bool TraceImp::checkAndSetGenerationIndex (ADDRINT address,
-    std::map < ADDRINT, int > &generationIndices) {
-  typename std::map < ADDRINT, int >::iterator it = generationIndices.find (address);
-  if (it == generationIndices.end () || it->second < currentSegmentIndex) {
-    generationIndices[address] = currentSegmentIndex;
-    return true;
-  }
-  return false;
 }
 
 void TraceImp::loadInitializedSymbolsFromBinaryStream (std::ifstream &in) {
@@ -240,7 +213,6 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
     SymbolRecord record;
     in.read ((char *) &record.address, sizeof (record.address));
     in.read ((char *) &record.concreteValue, sizeof (record.concreteValue));
-    memoryResidentSymbolsGenerationIndices[record.address] = index;
     Expression *exp = new ExpressionImp (record.address,
                                          record.concreteValue, index, true);
     std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =

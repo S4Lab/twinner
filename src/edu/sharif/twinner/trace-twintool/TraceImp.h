@@ -22,23 +22,6 @@ namespace trace {
 
 class TraceImp : public Trace {
 
-private:
-  /**
-   * The last used index (starting from zero) for each symbol
-   * which was created at a given memory address is kept here.
-   * A new expression may emerge out of an address iff either there is no stored index
-   * for that address or the stored index is less than current generation/segment index.
-   */
-  std::map < ADDRINT, int > memoryResidentSymbolsGenerationIndices;
-
-  /**
-   * The last used index (starting from zero) for each symbol
-   * which was created in a given register is kept here.
-   * A new expression may emerge out of an address iff either there is no stored index
-   * for that address or the stored index is less than current generation/segment index.
-   */
-  std::map < REG, int > registerResidentSymbolsGenerationIndices;
-
 public:
   TraceImp ();
   TraceImp (std::ifstream &symbolsFileInputStream);
@@ -88,8 +71,8 @@ private:
         UINT64 val);
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
         T address);
-    typedef Expression *(Trace::*TraceType) (T address, UINT64 val);
-    typedef Expression *(Trace::*TraceTypeWithoutConcreteValue) (T address);
+    typedef Expression *(TraceImp::*TraceType) (T address, UINT64 val);
+    typedef Expression *(TraceImp::*TraceTypeWithoutConcreteValue) (T address);
   };
 
   template < typename T >
@@ -114,19 +97,14 @@ private:
   Expression *getSymbolicExpressionImplementation (T address, UINT64 val,
       Expression *newExpression,
       typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
-      std::map < T, int > &generationIndices,
       typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod);
   template < typename T >
   Expression *getSymbolicExpressionImplementation (T address,
       Expression *newExpression,
       typename TryToGetSymbolicExpressionMethod < T >::
       TraceTypeWithoutConcreteValue tryToGetMethod,
-      std::map < T, int > &generationIndices,
       typename GetSymbolicExpressionMethod < T >::
       TraceSegmentTypeWithoutConcreteValue getMethod);
-
-  template < typename T >
-  bool checkAndSetGenerationIndex (T address, std::map < T, int > &generationIndices);
 
   void loadInitializedSymbolsFromBinaryStream (std::ifstream &in);
   ExecutionTraceSegment *loadSingleSegmentSymbolsRecordsFromBinaryStream (int index,

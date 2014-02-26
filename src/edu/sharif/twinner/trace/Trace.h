@@ -47,9 +47,6 @@ protected:
   /**
    * This index indicates current generation starting from zero. This should not be
    * confused with an index in segments list (as segments list is in reverse order).
-   * This generation index matches with values kept in
-   * memoryResidentSymbolsGenerationIndices and registerResidentSymbolsGenerationIndices
-   * in TraceImp class.
    */
   int currentSegmentIndex;
 
