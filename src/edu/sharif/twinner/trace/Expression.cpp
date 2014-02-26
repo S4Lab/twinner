@@ -124,6 +124,7 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
 }
 
 void Expression::truncate (int bits) {
+  //TODO: Detect when truncation has no effect (value is already truncated) and ignore it
   UINT64 mask;
   if (bits == 64) {
     mask = (UINT64) (-1);
