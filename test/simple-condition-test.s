@@ -307,20 +307,20 @@ main:
 	.section	.debug_line,"",@progbits
 .Ldebug_line0:
 	.section	.debug_str,"MS",@progbits,1
-.LASF11:
-	.string	"GNU C 4.8.2 -mtune=generic -march=x86-64 -g"
+.LASF2:
+	.string	"short unsigned int"
 .LASF3:
 	.string	"unsigned int"
 .LASF4:
 	.string	"signed char"
 .LASF13:
 	.string	"/home/behnam/thesis/tools/Twinner/test"
+.LASF11:
+	.string	"GNU C 4.8.2 20140206 (prerelease) -mtune=generic -march=x86-64 -g"
 .LASF12:
 	.string	"simple-condition-test.c"
 .LASF0:
 	.string	"long unsigned int"
-.LASF2:
-	.string	"short unsigned int"
 .LASF8:
 	.string	"char"
 .LASF1:
@@ -337,5 +337,5 @@ main:
 	.string	"sizetype"
 .LASF10:
 	.string	"argv"
-	.ident	"GCC: (GNU) 4.8.2"
+	.ident	"GCC: (GNU) 4.8.2 20140206 (prerelease)"
 	.section	.note.GNU-stack,"",@progbits

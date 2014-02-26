@@ -11,10 +11,10 @@ all: $(TARGETS:=.out)
 
 
 %.s: %.c
-	gcc $(INCLUDEPATH) -S $<
+	gcc -g $(INCLUDEPATH) -S $<
 
 %.out: %.s
-	gcc $< -o $@
+	gcc -g $< -o $@
 
 clean:
 	rm -f *.out *~
