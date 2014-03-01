@@ -235,14 +235,27 @@ const Logger &operator<< (const Logger &logger, REG reg) {
 }
 
 UINT64 readRegisterContent (const CONTEXT *context, REG reg) {
-  /*
-   * Intel is little-endian. So allocating 64-bit, initial bytes will be used and
-   * extra bytes (at right-hand part) will remain unused. So there is no need to any
-   * conversion to fit a 16-bit value in a 64-bit variable.
-   */
-  UINT64 value = 0;
-  PIN_GetContextRegval (context, reg, (UINT8 *) & value);
-  return value;
+  /// XXX: Only full-size registers (e.g. RAX, RSP) are safe to be read
+  PIN_REGISTER buffer;
+  PIN_GetContextRegval (context, REG_FullRegName (reg), buffer.byte);
+
+  switch (REG_Size (reg)) {
+  case 1:
+    if (REG_is_Lower8 (reg)) { // e.g. AL
+      return buffer.byte[0]; // Little Endian
+    } else { // e.g. AH
+      return buffer.byte[1]; // Little Endian
+    }
+  case 2:
+    return buffer.word[0];
+  case 4:
+    return buffer.dword[0];
+  case 8:
+    return buffer.qword[0];
+  default:
+    throw std::runtime_error ("util::readRegisterContent (...) method: "
+                              "Size of requested register is unsupported.");
+  }
 }
 
 UINT64 readMemoryContent (ADDRINT memoryEa) {
