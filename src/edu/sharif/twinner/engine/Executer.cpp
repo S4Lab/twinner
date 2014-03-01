@@ -183,6 +183,7 @@ void Executer::changeArguments () {
   }
   *ptr = '\0';
   inputArguments = std::string (buffer);
+  delete[] buffer;
 }
 
 map < ADDRINT, UINT64 >
