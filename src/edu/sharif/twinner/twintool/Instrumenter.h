@@ -112,9 +112,9 @@ private:
   InstructionModel getInstructionModelForPopInstruction (INS ins) const;
   InstructionModel getInstructionModelForNormalInstruction (INS ins) const;
   void instrumentSingleInstruction (InstructionModel model, OPCODE op, INS ins,
-      std::string *insAssembly) const;
+      UINT32 insAssembly) const;
 
-  void printDebugInformation (INS ins) const;
+  void printDebugInformation (INS ins, const char *insAssembly) const;
 
   std::map < OPCODE, int > countOfInstructionsPerOpcode;
   int totalCountOfInstructions;
