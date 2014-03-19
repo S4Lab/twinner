@@ -59,6 +59,10 @@ bool ConcreteValue64Bits::isNegative (int size) const {
   return (value >= (1ull << (size - 1)));
 }
 
+bool ConcreteValue64Bits::isZero () const {
+  return (value == 0);
+}
+
 ConcreteValue64Bits *ConcreteValue64Bits::twosComplement () const {
   return new ConcreteValue64Bits ((~value) + 1);
 }
@@ -106,6 +110,54 @@ ConcreteValue64Bits &ConcreteValue64Bits::operator-= (const ConcreteValue &cv) {
 ConcreteValue64Bits &ConcreteValue64Bits::operator+= (const ConcreteValue &cv) {
   const ConcreteValue64Bits tmp (cv);
   value += tmp.value;
+  return *this;
+}
+
+ConcreteValue64Bits &ConcreteValue64Bits::operator&= (const ConcreteValue &mask) {
+  const ConcreteValue64Bits tmp (mask);
+  value &= tmp.value;
+  return *this;
+}
+
+ConcreteValue64Bits &ConcreteValue64Bits::operator|= (const ConcreteValue &mask) {
+  const ConcreteValue64Bits tmp (mask);
+  value |= tmp.value;
+  return *this;
+}
+
+ConcreteValue &ConcreteValue64Bits::operator*= (const ConcreteValue &mul) {
+  const ConcreteValue64Bits tmp (mul);
+  value *= tmp.value;
+  return *this;
+}
+
+ConcreteValue &ConcreteValue64Bits::operator/= (const ConcreteValue &divisor) {
+  const ConcreteValue64Bits tmp (value);
+  value /= tmp.value;
+  return *this;
+}
+
+ConcreteValue &ConcreteValue64Bits::operator%= (const ConcreteValue &divisor) {
+  const ConcreteValue64Bits tmp (divisor);
+  value %= tmp.value;
+  return *this;
+}
+
+ConcreteValue &ConcreteValue64Bits::operator^= (const ConcreteValue &pattern) {
+  const ConcreteValue64Bits tmp (pattern);
+  value ^= tmp.value;
+  return *this;
+}
+
+ConcreteValue64Bits &ConcreteValue64Bits::operator>>= (const ConcreteValue &bits) {
+  const ConcreteValue64Bits tmp (bits);
+  value >>= tmp.value;
+  return *this;
+}
+
+ConcreteValue64Bits &ConcreteValue64Bits::operator<<= (const ConcreteValue &bits) {
+  const ConcreteValue64Bits tmp (bits);
+  value <<= tmp.value;
   return *this;
 }
 

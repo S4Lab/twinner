@@ -91,16 +91,16 @@ ConcreteValue &ConcreteValue::operator|= (UINT64 mask) {
   return (*this) |= ConcreteValue64Bits (mask);
 }
 
-ConcreteValue &ConcreteValue::operator*= (UINT64 value) {
-  return (*this) *= ConcreteValue64Bits (value);
+ConcreteValue &ConcreteValue::operator*= (UINT64 mul) {
+  return (*this) *= ConcreteValue64Bits (mul);
 }
 
-ConcreteValue &ConcreteValue::operator/= (UINT64 value) {
-  return (*this) /= ConcreteValue64Bits (value);
+ConcreteValue &ConcreteValue::operator/= (UINT64 divisor) {
+  return (*this) /= ConcreteValue64Bits (divisor);
 }
 
-ConcreteValue &ConcreteValue::operator%= (UINT64 divider) {
-  return (*this) %= ConcreteValue64Bits (divider);
+ConcreteValue &ConcreteValue::operator%= (UINT64 divisor) {
+  return (*this) %= ConcreteValue64Bits (divisor);
 }
 
 ConcreteValue &ConcreteValue::operator^= (UINT64 pattern) {

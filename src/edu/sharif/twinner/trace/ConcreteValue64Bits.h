@@ -38,6 +38,7 @@ public:
       const ConcreteValue64Bits &me);
 
   virtual bool isNegative (int size) const;
+  virtual bool isZero () const;
 
   virtual ConcreteValue64Bits *twosComplement () const;
 
@@ -58,24 +59,13 @@ public:
   virtual ConcreteValue64Bits &operator&= (const ConcreteValue &mask);
   virtual ConcreteValue64Bits &operator|= (const ConcreteValue &mask);
 
-  virtual ConcreteValue &operator*= (const ConcreteValue &value);
-  virtual ConcreteValue &operator/= (const ConcreteValue &value);
-  virtual ConcreteValue &operator%= (const ConcreteValue &divider);
+  virtual ConcreteValue &operator*= (const ConcreteValue &mul);
+  virtual ConcreteValue &operator/= (const ConcreteValue &divisor);
+  virtual ConcreteValue &operator%= (const ConcreteValue &divisor);
   virtual ConcreteValue &operator^= (const ConcreteValue &pattern);
 
   virtual ConcreteValue64Bits &operator>>= (const ConcreteValue &bits);
   virtual ConcreteValue64Bits &operator<<= (const ConcreteValue &bits);
-
-  ConcreteValue &operator-= (UINT64 cv);
-  ConcreteValue &operator+= (UINT64 cv);
-  ConcreteValue &operator&= (UINT64 mask);
-  ConcreteValue &operator|= (UINT64 mask);
-  ConcreteValue &operator*= (UINT16 value);
-  ConcreteValue &operator/= (UINT16 value);
-  ConcreteValue &operator%= (UINT16 divider);
-  ConcreteValue &operator^= (UINT16 pattern);
-  ConcreteValue &operator>>= (UINT64 bits);
-  ConcreteValue &operator<<= (UINT64 bits);
 };
 
 }

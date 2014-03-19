@@ -26,10 +26,14 @@ private:
   UINT64 msb, lsb; // most/least significant byte
 
 public:
+  ConcreteValue128Bits ();
   ConcreteValue128Bits (UINT64 msb, UINT64 lsb);
   ConcreteValue128Bits (const PIN_REGISTER &value);
   ConcreteValue128Bits (const ConcreteValue &cv);
   virtual ~ConcreteValue128Bits ();
+
+  ConcreteValue128Bits &operator= (UINT64 value);
+  ConcreteValue128Bits &operator= (const ConcreteValue &value);
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
 
@@ -39,6 +43,7 @@ public:
       const ConcreteValue128Bits &me);
 
   virtual bool isNegative (int size) const;
+  virtual bool isZero () const;
 
   virtual ConcreteValue128Bits *twosComplement () const;
 
@@ -60,24 +65,30 @@ public:
   virtual ConcreteValue128Bits &operator&= (const ConcreteValue &mask);
   virtual ConcreteValue128Bits &operator|= (const ConcreteValue &mask);
 
-  virtual ConcreteValue &operator*= (const ConcreteValue &value);
-  virtual ConcreteValue &operator/= (const ConcreteValue &value);
-  virtual ConcreteValue &operator%= (const ConcreteValue &divider);
+  virtual ConcreteValue &operator*= (const ConcreteValue &mul);
+  virtual ConcreteValue &operator/= (const ConcreteValue &divisor);
+  virtual ConcreteValue &operator%= (const ConcreteValue &divisor);
   virtual ConcreteValue &operator^= (const ConcreteValue &pattern);
 
   virtual ConcreteValue128Bits &operator>>= (const ConcreteValue &bits);
   virtual ConcreteValue128Bits &operator<<= (const ConcreteValue &bits);
 
-  ConcreteValue &operator-= (UINT64 cv);
-  ConcreteValue &operator+= (UINT64 cv);
-  ConcreteValue &operator&= (UINT64 mask);
-  ConcreteValue &operator|= (UINT64 mask);
-  ConcreteValue &operator*= (UINT16 value);
-  ConcreteValue &operator/= (UINT16 value);
-  ConcreteValue &operator%= (UINT16 divider);
-  ConcreteValue &operator^= (UINT16 pattern);
-  ConcreteValue &operator>>= (UINT64 bits);
-  ConcreteValue &operator<<= (UINT64 bits);
+private:
+
+  struct ResultCarry {
+
+    UINT64 result;
+    UINT64 carry;
+
+    ResultCarry (UINT64 v) :
+        result (v & 0xFFFFFFFF), carry (v >> 32) {
+    }
+  };
+
+  void divide (ConcreteValue128Bits dividend, ConcreteValue128Bits divisor,
+      ConcreteValue128Bits &quotient, ConcreteValue128Bits &remainder) const;
+
+  void doubleIt ();
 };
 
 }

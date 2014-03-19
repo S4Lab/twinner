@@ -50,6 +50,12 @@ public:
   virtual bool isNegative (int size) const = 0;
 
   /**
+   * Returns true if and only if the underlying concrete value is equal to zero.
+   * @return true iff concrete value is zero.
+   */
+  virtual bool isZero () const = 0;
+
+  /**
    * Instantiates a new concrete value object holding two's complement of this concrete
    * value. Caller should delete the returned object.
    * @return The two's complement of this concrete value.
@@ -94,9 +100,9 @@ public:
   virtual ConcreteValue &operator&= (const ConcreteValue &mask) = 0;
   virtual ConcreteValue &operator|= (const ConcreteValue &mask) = 0;
 
-  virtual ConcreteValue &operator*= (const ConcreteValue &value) = 0;
+  virtual ConcreteValue &operator*= (const ConcreteValue &mul) = 0;
   virtual ConcreteValue &operator/= (const ConcreteValue &value) = 0;
-  virtual ConcreteValue &operator%= (const ConcreteValue &divider) = 0;
+  virtual ConcreteValue &operator%= (const ConcreteValue &divisor) = 0;
   virtual ConcreteValue &operator^= (const ConcreteValue &pattern) = 0;
 
   virtual ConcreteValue &operator>>= (const ConcreteValue &bits) = 0;
@@ -106,9 +112,9 @@ public:
   ConcreteValue &operator+= (UINT64 cv);
   ConcreteValue &operator&= (UINT64 mask);
   ConcreteValue &operator|= (UINT64 mask);
-  ConcreteValue &operator*= (UINT64 value);
-  ConcreteValue &operator/= (UINT64 value);
-  ConcreteValue &operator%= (UINT64 divider);
+  ConcreteValue &operator*= (UINT64 mul);
+  ConcreteValue &operator/= (UINT64 divisor);
+  ConcreteValue &operator%= (UINT64 divisor);
   ConcreteValue &operator^= (UINT64 pattern);
   ConcreteValue &operator>>= (UINT64 bits);
   ConcreteValue &operator<<= (UINT64 bits);
