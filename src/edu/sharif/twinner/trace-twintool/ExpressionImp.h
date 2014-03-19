@@ -30,14 +30,19 @@ public:
    * Instantiates an expression containing a new (yet unused) symbol,
    * initiated from a register.
    */
-  ExpressionImp (REG reg, UINT64 concreteValue, int generationIndex);
+  ExpressionImp (REG reg, const ConcreteValue &concreteValue, int generationIndex);
 
   /**
    * Instantiates an expression containing a new (yet unused) symbol,
    * initiated from a memory address.
    */
-  ExpressionImp (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex,
-      bool isOverwriting = false);
+  ExpressionImp (ADDRINT memoryEa, const ConcreteValue &concreteValue,
+      int generationIndex, bool isOverwriting = false);
+
+  /**
+   * Instantiates an expression containing a constant value (non-symbolic).
+   */
+  ExpressionImp (const ConcreteValue &value);
 
   /**
    * Instantiates an expression containing a constant value (non-symbolic).

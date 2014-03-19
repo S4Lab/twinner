@@ -19,6 +19,7 @@
 
 #include "edu/sharif/twinner/trace-twintool/TraceImp.h"
 #include "edu/sharif/twinner/trace-twintool/ExpressionImp.h"
+#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 #include "edu/sharif/twinner/trace/Syscall.h"
 
@@ -106,8 +107,8 @@ void InstructionSymbolicExecuter::syscallInvoked (const CONTEXT *context,
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
-    REG dstReg, UINT64 dstRegVal,
-    REG srcReg, UINT64 srcRegVal,
+    REG dstReg, const ConcreteValue &dstRegVal,
+    REG srcReg, const ConcreteValue &srcRegVal,
     const char *insAssembly) {
   if (disabled) {
     return;
@@ -124,7 +125,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
-    REG dstReg, UINT64 dstRegVal,
+    REG dstReg, const ConcreteValue &dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
     const char *insAssembly) {
   if (disabled) {
@@ -143,8 +144,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine r
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
-    REG dstReg, UINT64 dstRegVal,
-    ADDRINT srcImmediateValue,
+    REG dstReg, const ConcreteValue &dstRegVal,
+    const ConcreteValue &srcImmediateValue,
     const char *insAssembly) {
   if (disabled) {
     return;
@@ -165,7 +166,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
 
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
-    REG srcReg, UINT64 srcRegVal,
+    REG srcReg, const ConcreteValue &srcRegVal,
     UINT32 memReadBytes,
     const char *insAssembly) {
   if (disabled) {
@@ -184,7 +185,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
 
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
-    ADDRINT srcImmediateValue,
+    const ConcreteValue &srcImmediateValue,
     UINT32 memReadBytes,
     const char *insAssembly) {
   if (disabled) {
@@ -245,7 +246,7 @@ void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine routine,
-    REG dstReg, UINT64 dstRegVal,
+    REG dstReg, const ConcreteValue &dstRegVal,
     const char *insAssembly) {
   if (disabled) {
     return;
@@ -254,8 +255,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcAdg(INS: "
       << insAssembly << ") [AFTER execution of instruction]: dst reg: "
-      << REG_StringShort (dstReg) << ", dst reg value: 0x"
-      << std::hex << dstRegVal << '\n';
+      << REG_StringShort (dstReg) << ", dst reg value: "
+      << dstRegVal << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::ExpressionImp (dstRegVal);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
@@ -286,9 +287,9 @@ void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfReg (
 
 void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
     DoubleDestinationsAnalysisRoutine routine,
-    REG dstLeftReg, UINT64 dstLeftRegVal,
-    REG dstRightReg, UINT64 dstRightRegVal,
-    REG srcReg, UINT64 srcRegVal,
+    REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
+    REG dstRightReg, const ConcreteValue &dstRightRegVal,
+    REG srcReg, const ConcreteValue &srcRegVal,
     const char *insAssembly) {
   if (disabled) {
     return;
@@ -328,13 +329,14 @@ void InstructionSymbolicExecuter::analysisRoutineRunHooks (const CONTEXT *contex
 
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
-    const UINT64 value =
+    const ConcreteValue &value =
         edu::sharif::twinner::util::readRegisterContent (context, trackedReg);
     (this->*hook) (context, value);
     trackedReg = REG_INVALID_;
 
   } else if (operandSize > 0) {
-    (this->*hook) (context, (UINT64) operandSize);
+    (this->*hook) (context,
+        edu::sharif::twinner::trace::ConcreteValue64Bits (operandSize));
     operandSize = -1;
   }
   hook = 0;
@@ -367,7 +369,7 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   edu::sharif::twinner::trace::Expression *conditionExp = srcexp->clone ();
   conditionExp->minus (1ull << (size - 1));
   edu::sharif::twinner::trace::Constraint *cc;
-  if (srcexp->getLastConcreteValue () >= (1ull << (size - 1))) {
+  if (srcexp->getLastConcreteValue ().isNegative (size)) {
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy negative condition...";
     cc = new edu::sharif::twinner::trace::Constraint
         (conditionExp, edu::sharif::twinner::trace::Constraint::NON_NEGATIVE);
@@ -534,7 +536,7 @@ void InstructionSymbolicExecuter::jzAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
-    UINT64 rspRegVal) {
+    const ConcreteValue &rspRegVal) {
   edu::sharif::twinner::util::Logger::loquacious () << "callAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
@@ -542,10 +544,12 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
     edu::sharif::twinner::util::Logger::loquacious ()
         << "\tadjusting rsp...";
-    UINT64 oldVal = rsp->getLastConcreteValue ();
+    const ConcreteValue &oldVal = rsp->getLastConcreteValue ();
     if (oldVal > rspRegVal) {
       // some items have been pushed into stack by CALL and so RSP is decremented
-      rsp->minus (oldVal - rspRegVal);
+      ConcreteValue *cv = oldVal.clone ();
+      (*cv) -= rspRegVal;
+      rsp->minus (cv);
       // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
 
     } else {
@@ -557,7 +561,7 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
 }
 
 void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
-    UINT64 rspRegVal) {
+    const ConcreteValue &rspRegVal) {
   edu::sharif::twinner::util::Logger::loquacious () << "retAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
@@ -565,10 +569,12 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
     edu::sharif::twinner::util::Logger::loquacious ()
         << "\tadjusting rsp...";
-    UINT64 oldVal = rsp->getLastConcreteValue ();
+    const ConcreteValue &oldVal = rsp->getLastConcreteValue ();
     if (oldVal < rspRegVal) {
       // some items have been popped out from the stack by RET and so RSP is incremented
-      rsp->add (rspRegVal - oldVal);
+      ConcreteValue *cv = rspRegVal.clone ();
+      (*cv) -= oldVal;
+      rsp->add (cv);
       // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
 
     } else {
@@ -593,7 +599,7 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
       << "\tshifting operation...";
   if (dynamic_cast<const ConstantExpressionValueProxy *> (&src) != 0) {
     // src was an immediate value
-    dstexp->shiftToLeft (srcexp->getLastConcreteValue ());
+    dstexp->shiftToLeft (srcexp->getLastConcreteValue ().clone ());
   } else {
     // src was CL register
     dstexp->shiftToLeft (srcexp);
@@ -620,7 +626,7 @@ void InstructionSymbolicExecuter::shrAnalysisRoutine (
       << "\tshifting operation...";
   if (dynamic_cast<const ConstantExpressionValueProxy *> (&src) != 0) {
     // src was an immediate value
-    dstexp->shiftToRight (srcexp->getLastConcreteValue ());
+    dstexp->shiftToRight (srcexp->getLastConcreteValue ().clone ());
   } else {
     // src was CL register
     dstexp->shiftToRight (srcexp);
@@ -761,11 +767,12 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
-    const CONTEXT *context, UINT64 operandSize) {
+    const CONTEXT *context, const ConcreteValue &operandSize) {
   edu::sharif::twinner::util::Logger::loquacious ()
       << "adjustDivisionMultiplicationOperands(...) hook...";
+  edu::sharif::twinner::trace::ConcreteValue64Bits os = operandSize;
   REG leftReg, rightReg;
-  switch (operandSize) {
+  switch (os.getValue ()) {
   case 8:
     leftReg = REG_AH;
     rightReg = REG_AL;
@@ -788,25 +795,24 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
     throw std::runtime_error
         ("Unsupported operand size in division/multiplication instruction");
   }
-  const UINT64 leftVal =
+  const ConcreteValue &leftVal =
       edu::sharif::twinner::util::readRegisterContent (context, leftReg);
-  const UINT64 rightVal =
+  const ConcreteValue &rightVal =
       edu::sharif::twinner::util::readRegisterContent (context, rightReg);
   edu::sharif::twinner::trace::Expression *leftExp =
       trace->getSymbolicExpressionByRegister (leftReg);
   edu::sharif::twinner::trace::Expression *rightExp =
       trace->getSymbolicExpressionByRegister (rightReg);
-  leftExp->setLastConcreteValue (leftVal);
-  rightExp->setLastConcreteValue (rightVal);
+  leftExp->setLastConcreteValue (leftVal.clone ());
+  rightExp->setLastConcreteValue (rightVal.clone ());
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tconcrete values are adjusted...";
-  if (operandSize == 8) { // AX == AH:AL
+  if (os.getValue () == 8) { // AX == AH:AL
     leftExp->shiftToLeft (8);
     leftExp->binaryOperation
         (new edu::sharif::twinner::trace::Operator
          (edu::sharif::twinner::trace::Operator::BITWISE_OR), rightExp);
-    const MutableExpressionValueProxy &ax =
-        RegisterResidentExpressionValueProxy (REG_AX, 0);
+    const MutableExpressionValueProxy &ax = RegisterResidentExpressionValueProxy (REG_AX);
     ax.setExpression (trace, leftExp); // this deletes unused expressions by itself
   } else {
     const MutableExpressionValueProxy &left =
@@ -862,9 +868,9 @@ void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) 
    * the edx:eax registers. These registers should be loaded as immediate values
    * in symbolic expressions.
    */
-  const UINT64 edxVal =
+  const ConcreteValue &edxVal =
       edu::sharif::twinner::util::readRegisterContent (context, REG_EDX);
-  const UINT64 eaxVal =
+  const ConcreteValue &eaxVal =
       edu::sharif::twinner::util::readRegisterContent (context, REG_EAX);
   edu::sharif::twinner::trace::Expression *edxNewExp =
       new edu::sharif::twinner::trace::ExpressionImp (edxVal);
@@ -990,10 +996,11 @@ VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
-  ise->analysisRoutineDstRegSrcReg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-                                    (REG) dstReg, dstRegVal,
-                                    (REG) srcReg, srcRegVal,
-                                    insAssemblyStr);
+  ise->analysisRoutineDstRegSrcReg
+      (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       insAssemblyStr);
 }
 
 VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
@@ -1002,10 +1009,11 @@ VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
-  ise->analysisRoutineDstRegSrcMem (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-                                    (REG) dstReg, dstRegVal,
-                                    srcMemoryEa, memReadBytes,
-                                    insAssemblyStr);
+  ise->analysisRoutineDstRegSrcMem
+      (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       srcMemoryEa, memReadBytes,
+       insAssemblyStr);
 }
 
 VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
@@ -1014,10 +1022,11 @@ VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
-  ise->analysisRoutineDstRegSrcImd (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-                                    (REG) dstReg, dstRegVal,
-                                    srcImmediateValue,
-                                    insAssemblyStr);
+  ise->analysisRoutineDstRegSrcImd
+      (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       edu::sharif::twinner::trace::ConcreteValue64Bits (srcImmediateValue),
+       insAssemblyStr);
 }
 
 VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
@@ -1027,11 +1036,12 @@ VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
-  ise->analysisRoutineDstMemSrcReg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-                                    dstMemoryEa,
-                                    (REG) srcReg, srcRegVal,
-                                    memReadBytes,
-                                    insAssemblyStr);
+  ise->analysisRoutineDstMemSrcReg
+      (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       dstMemoryEa,
+       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       memReadBytes,
+       insAssemblyStr);
 }
 
 VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
@@ -1041,11 +1051,12 @@ VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
-  ise->analysisRoutineDstMemSrcImd (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-                                    dstMemoryEa,
-                                    srcImmediateValue,
-                                    memReadBytes,
-                                    insAssemblyStr);
+  ise->analysisRoutineDstMemSrcImd
+      (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       dstMemoryEa,
+       edu::sharif::twinner::trace::ConcreteValue64Bits (srcImmediateValue),
+       memReadBytes,
+       insAssemblyStr);
 }
 
 VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
@@ -1054,10 +1065,11 @@ VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
-  ise->analysisRoutineDstMemSrcMem (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-                                    dstMemoryEa,
-                                    srcMemoryEa, memReadBytes,
-                                    insAssemblyStr);
+  ise->analysisRoutineDstMemSrcMem
+      (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       dstMemoryEa,
+       srcMemoryEa, memReadBytes,
+       insAssemblyStr);
 }
 
 VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
@@ -1076,9 +1088,10 @@ VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
-  ise->analysisRoutineDstRegSrcAdg (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-                                    (REG) dstReg, dstRegVal,
-                                    insAssemblyStr);
+  ise->analysisRoutineDstRegSrcAdg
+      (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       insAssemblyStr);
 }
 
 VOID analysisRoutineBeforeChangeOfReg (VOID *iseptr, UINT32 opcode,
@@ -1101,9 +1114,12 @@ VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,
   const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineTwoDstRegOneSrcReg
       (ise->convertOpcodeToDoubleDestinationsAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstLeftReg, dstLeftRegVal,
-       (REG) dstRightReg, dstRightRegVal,
-       (REG) srcReg, srcRegVal,
+       (REG) dstLeftReg,
+       edu::sharif::twinner::trace::ConcreteValue64Bits (dstLeftRegVal),
+       (REG) dstRightReg,
+       edu::sharif::twinner::trace::ConcreteValue64Bits (dstRightRegVal),
+       (REG) srcReg,
+       edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
        insAssemblyStr);
 }
 

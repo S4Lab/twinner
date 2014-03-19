@@ -22,6 +22,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
+#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
 
 using namespace std;
 
@@ -234,28 +235,35 @@ const Logger &operator<< (const Logger &logger, REG reg) {
   return logger << "Reg(" << REG_StringShort (reg) << ")";
 }
 
-UINT64 readRegisterContent (const CONTEXT *context, REG reg) {
+const edu::sharif::twinner::trace::ConcreteValue &readRegisterContent (
+    const CONTEXT *context, REG reg) {
   /// XXX: Only full-size registers (e.g. RAX, RSP) are safe to be read
   PIN_REGISTER buffer;
   PIN_GetContextRegval (context, REG_FullRegName (reg), buffer.byte);
-
+  UINT64 value;
   switch (REG_Size (reg)) {
   case 1:
     if (REG_is_Lower8 (reg)) { // e.g. AL
-      return buffer.byte[0]; // Little Endian
+      value = buffer.byte[0]; // Little Endian
+      break;
     } else { // e.g. AH
-      return buffer.byte[1]; // Little Endian
+      value = buffer.byte[1]; // Little Endian
+      break;
     }
   case 2:
-    return buffer.word[0];
+    value = buffer.word[0];
+    break;
   case 4:
-    return buffer.dword[0];
+    value = buffer.dword[0];
+    break;
   case 8:
-    return buffer.qword[0];
+    value = buffer.qword[0];
+    break;
   default:
     throw std::runtime_error ("util::readRegisterContent (...) method: "
                               "Size of requested register is unsupported.");
   }
+  return edu::sharif::twinner::trace::ConcreteValue64Bits (value);
 }
 
 UINT64 readMemoryContent (ADDRINT memoryEa) {

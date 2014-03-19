@@ -56,8 +56,8 @@ Trace::~Trace () {
   }
 }
 
-Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
-throw (WrongStateException) {
+Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg,
+    const ConcreteValue &regval) throw (WrongStateException) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
@@ -66,11 +66,11 @@ Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg) {
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-    UINT64 memval) throw (WrongStateException) {
+    const ConcreteValue &memval) throw (WrongStateException) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
-Expression *Trace::getSymbolicExpressionByRegister (REG reg, UINT64 regval,
+Expression *Trace::getSymbolicExpressionByRegister (REG reg, const ConcreteValue &regval,
     Expression *newExpression) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
@@ -79,8 +79,8 @@ Expression *Trace::getSymbolicExpressionByRegister (REG reg, Expression *newExpr
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
-Expression *Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa, UINT64 memval,
-    Expression *newExpression) {
+Expression *Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+    const ConcreteValue &memval, Expression *newExpression) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 

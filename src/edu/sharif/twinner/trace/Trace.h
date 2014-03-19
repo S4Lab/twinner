@@ -66,8 +66,8 @@ public:
   /**
    * Searches backwards to find queried values.
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
-  throw (WrongStateException);
+  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
+      const ConcreteValue &regval) throw (WrongStateException);
 
   /**
    * Searches backwards to find queried values.
@@ -78,13 +78,13 @@ public:
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      UINT64 memval) throw (WrongStateException);
+      const ConcreteValue &memval) throw (WrongStateException);
 
   /**
    * The getter searches segments backwards to find queried value.
    */
-  virtual Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
-      Expression *newExpression = 0);
+  virtual Expression *getSymbolicExpressionByRegister (REG reg,
+      const ConcreteValue &regval, Expression *newExpression = 0);
 
   /**
    * The getter searches segments backwards to find queried value.
@@ -96,7 +96,7 @@ public:
    * The getter searches segments backwards to find queried value.
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      UINT64 memval, Expression *newExpression = 0);
+      const ConcreteValue &memval, Expression *newExpression = 0);
 
   /**
    * The setter, uses most recent trace segment for setting the new value.

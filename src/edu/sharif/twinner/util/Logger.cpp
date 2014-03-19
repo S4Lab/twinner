@@ -14,6 +14,7 @@
 
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
+#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
 
 #include <stdexcept>
 
@@ -116,6 +117,17 @@ const Logger &Logger::operator<< (
   return (*this) << "Token(" << token->toString () << ')';
 }
 
+const Logger &Logger::operator<< (
+    const edu::sharif::twinner::trace::ConcreteValue &value) const {
+  const edu::sharif::twinner::trace::ConcreteValue64Bits *valueimp =
+      dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue64Bits *> (&value);
+  if (valueimp) {
+    return (*this) << "ConcreteValue64Bits(0x" << std::hex
+        << valueimp->getValue () << ')';
+  } else {
+    return (*this) << "ConcreteValue(unsupported-type)";
+  }
+}
 
 }
 }

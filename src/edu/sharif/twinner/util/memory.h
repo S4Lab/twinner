@@ -20,7 +20,8 @@ namespace sharif {
 namespace twinner {
 namespace util {
 
-UINT64 readRegisterContent (const CONTEXT *context, REG reg);
+const edu::sharif::twinner::trace::ConcreteValue &readRegisterContent (
+    const CONTEXT *context, REG reg);
 UINT64 readMemoryContent (ADDRINT memoryEa);
 VOID writeMemoryContent (ADDRINT memoryEa, UINT64 value);
 

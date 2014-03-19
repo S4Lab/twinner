@@ -24,6 +24,7 @@ namespace trace {
 
 class Trace;
 class Syscall;
+class ConcreteValue;
 }
 namespace twintool {
 
@@ -33,6 +34,7 @@ class MutableExpressionValueProxy;
 class InstructionSymbolicExecuter {
 
 private:
+  typedef edu::sharif::twinner::trace::ConcreteValue ConcreteValue;
 
   typedef void (InstructionSymbolicExecuter::*AnalysisRoutine) (
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
@@ -43,7 +45,7 @@ private:
   typedef void (InstructionSymbolicExecuter::*ConditionalBranchAnalysisRoutine) (
       bool branchTaken);
   typedef void (InstructionSymbolicExecuter::*Hook) (const CONTEXT *context,
-      UINT64 value);
+      const ConcreteValue &value);
   typedef Hook SuddenlyChangedRegAnalysisRoutine;
   typedef void (InstructionSymbolicExecuter::*OperandLessAnalysisRoutine) (
       const CONTEXT *context);
@@ -70,25 +72,25 @@ public:
 
 public:
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
-      REG dstReg, UINT64 dstRegVal,
-      REG srcReg, UINT64 srcRegVal,
+      REG dstReg, const ConcreteValue &dstRegVal,
+      REG srcReg, const ConcreteValue &srcRegVal,
       const char *insAssembly);
   void analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
-      REG dstReg, UINT64 dstRegVal,
+      REG dstReg, const ConcreteValue &dstRegVal,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
       const char *insAssembly);
   void analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
-      REG dstReg, UINT64 dstRegVal,
-      ADDRINT srcImmediateValue,
+      REG dstReg, const ConcreteValue &dstRegVal,
+      const ConcreteValue &srcImmediateValue,
       const char *insAssembly);
   void analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
-      REG srcReg, UINT64 srcRegVal,
+      REG srcReg, const ConcreteValue &srcRegVal,
       UINT32 memReadBytes,
       const char *insAssembly);
   void analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
-      ADDRINT srcImmediateValue,
+      const ConcreteValue &srcImmediateValue,
       UINT32 memReadBytes,
       const char *insAssembly);
   void analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
@@ -99,15 +101,15 @@ public:
       BOOL branchTaken,
       const char *insAssembly);
   void analysisRoutineDstRegSrcAdg (AnalysisRoutine routine,
-      REG dstReg, UINT64 dstRegVal,
+      REG dstReg, const ConcreteValue &dstRegVal,
       const char *insAssembly);
   void analysisRoutineBeforeChangeOfReg (SuddenlyChangedRegAnalysisRoutine routine,
       REG reg,
       const char *insAssembly);
   void analysisRoutineTwoDstRegOneSrcReg (DoubleDestinationsAnalysisRoutine routine,
-      REG dstLeftReg, UINT64 dstLeftRegVal,
-      REG dstRightReg, UINT64 dstRightRegVal,
-      REG srcReg, UINT64 srcRegVal,
+      REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
+      REG dstRightReg, const ConcreteValue &dstRightRegVal,
+      REG srcReg, const ConcreteValue &srcRegVal,
       const char *insAssembly);
   void analysisRoutineAfterOperandLessInstruction (OperandLessAnalysisRoutine routine,
       const CONTEXT *context,
@@ -195,13 +197,13 @@ private:
    * CALL instruction is executed and RSP is changed. This method will synchronize its
    * symbolic value with its concrete value.
    */
-  void callAnalysisRoutine (const CONTEXT *context, UINT64 rspRegVal);
+  void callAnalysisRoutine (const CONTEXT *context, const ConcreteValue &rspRegVal);
 
   /**
    * RET instruction is executed and RSP is changed. This method will synchronize its
    * symbolic value with its concrete value.
    */
-  void retAnalysisRoutine (const CONTEXT *context, UINT64 rspRegVal);
+  void retAnalysisRoutine (const CONTEXT *context, const ConcreteValue &rspRegVal);
 
   /**
    * SHL shifts dst to left as much as indicated by src.
@@ -266,7 +268,8 @@ private:
    * This hook adjusts concrete values of division/multiplication operands
    * and also propagates their values to overlapping registers.
    */
-  void adjustDivisionMultiplicationOperands (const CONTEXT *context, UINT64 operandSize);
+  void adjustDivisionMultiplicationOperands (const CONTEXT *context,
+      const ConcreteValue &operandSize);
 
   /**
    * read time-stamp counter and put it in EDX:EAX

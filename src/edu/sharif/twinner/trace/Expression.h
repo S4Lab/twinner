@@ -32,6 +32,8 @@ class Logger;
 }
 namespace trace {
 
+class ConcreteValue;
+
 class Expression : public Savable {
 
 protected:
@@ -41,16 +43,29 @@ protected:
   std::list < ExpressionToken * > stack;
 
 private:
-  UINT64 lastConcreteValue;
+  ConcreteValue *lastConcreteValue;
 
   bool isOverwriting;
 
-  Expression (const std::list < ExpressionToken * > &stk, UINT64 concreteValue);
+  /**
+   * Instantiates an expression with given internal stack of symbols and given last
+   * concrete value. This object takes ownership of both.
+   * @param stk Internal stack of symbols of the new expression.
+   * @param concreteValue The last concrete value of the new expression.
+   */
+  Expression (const std::list < ExpressionToken * > &stk, ConcreteValue *concreteValue);
 
 protected:
   Expression (const Expression &exp);
 
-  Expression (UINT64 lastConcreteValue, bool isOverwriting);
+  /**
+   * Instantiates an expression with given concrete value and leaves its internal stack
+   * of symbols uninitialized to be filled by a child implementation. It also takes
+   * ownership of the concrete value object.
+   * @param lastConcreteValue The last concrete value of the new expression.
+   * @param isOverwriting If true, on first read, it writes concrete value to real memory.
+   */
+  Expression (ConcreteValue *lastConcreteValue, bool isOverwriting);
 
 public:
   /**
@@ -58,14 +73,18 @@ public:
    */
   ~Expression ();
 
-  UINT64 getLastConcreteValue () const;
-  void setLastConcreteValue (UINT64 value);
+  const ConcreteValue &getLastConcreteValue () const;
+  /**
+   * Set last concrete value to given object and take ownership of it.
+   * @param value The new concrete value which is assumed to be owned by this object.
+   */
+  void setLastConcreteValue (ConcreteValue *value);
 
   std::string toString () const;
   void convertToInfixExpression (std::list < ExpressionToken * > &st,
       std::stringstream &ss) const;
 
-  void unaryOperation (Operator op, Expression exp);
+  void unaryOperation (Operator op, const Expression *exp);
 
   /**
    * The op operator is assumed to be owned by this expression object.
@@ -86,6 +105,7 @@ public:
    * Shifts the expression to right as much as the given count of bits.
    * @param bits Count of bits that this expression should be shifted upon to right.
    */
+  void shiftToRight (ConcreteValue *bits);
   void shiftToRight (int bits);
 
   /**
@@ -99,6 +119,7 @@ public:
    * Shifts the expression to left as much as the given count of bits.
    * @param bits Count of bits that this expression should be shifted upon to left.
    */
+  void shiftToLeft (ConcreteValue *bits);
   void shiftToLeft (int bits);
 
   /**
@@ -112,13 +133,41 @@ public:
    * Decrement this expression as much as the given immediate value.
    * @param immediate The value which its value will be decremented from this expression.
    */
+  void minus (ConcreteValue *immediate);
   void minus (UINT64 immediate);
 
   /**
    * Increment this expression as much as the given immediate value.
    * @param immediate The value which its value will be added to this expression.
    */
+  void add (ConcreteValue *immediate);
   void add (UINT64 immediate);
+
+  /**
+   * Bitwise AND of this expression and given mask value.
+   * @param mask The mask value which should be bitwise-and-ed by this expression.
+   */
+  void bitwiseAnd (ConcreteValue *mask);
+  void bitwiseAnd (UINT64 mask);
+
+  /**
+   * Bitwise AND of this expression and the given symbolic value/expression.
+   * @param mask The mask (symbolically) that this expression should be AND-ed with it.
+   */
+  void bitwiseAnd (const Expression *mask);
+
+  /**
+   * Bitwise OR of this expression and given mask value.
+   * @param mask The mask value which should be bitwise-or-ed by this expression.
+   */
+  void bitwiseOr (ConcreteValue *mask);
+  void bitwiseOr (UINT64 mask);
+
+  /**
+   * Bitwise OR of this expression and the given symbolic value/expression.
+   * @param mask The mask (symbolically) that this expression should be OR-ed with it.
+   */
+  void bitwiseOr (const Expression *mask);
 
   /**
    * Sets the given count of bits, from least significant bits, to zero.
@@ -141,9 +190,9 @@ public:
   const std::list < ExpressionToken * > &getStack () const;
 
   void checkConcreteValueReg (REG reg,
-      UINT64 concreteVal) const throw (WrongStateException);
+      const ConcreteValue &concreteVal) const throw (WrongStateException);
   void checkConcreteValueMemory (ADDRINT memoryEa,
-      UINT64 concreteVal) throw (WrongStateException);
+      const ConcreteValue &concreteVal) throw (WrongStateException);
 };
 
 }

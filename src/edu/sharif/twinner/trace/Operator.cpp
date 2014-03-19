@@ -14,6 +14,7 @@
 #include <stdexcept>
 
 #include "Operator.h"
+#include "ConcreteValue.h"
 
 namespace edu {
 namespace sharif {
@@ -43,28 +44,38 @@ Operator *Operator::loadFromBinaryStream (std::ifstream &in) {
   return new Operator (oi);
 }
 
-UINT64 Operator::apply (UINT64 a, UINT64 b) const {
+void Operator::apply (ConcreteValue &dst, const ConcreteValue &src) const {
   switch (oi) {
   case ADD:
-    return a + b;
+    dst += src;
+    break;
   case MINUS:
-    return a - b;
+    dst -= src;
+    break;
   case MULTIPLY:
-    return a * b;
+    dst *= src;
+    break;
   case DIVIDE:
-    return a / b;
+    dst /= src;
+    break;
   case REMAINDER:
-    return a % b;
+    dst %= src;
+    break;
   case XOR:
-    return a ^ b;
+    dst ^= src;
+    break;
   case BITWISE_AND:
-    return a & b;
+    dst &= src;
+    break;
   case BITWISE_OR:
-    return a | b;
+    dst |= src;
+    break;
   case SHIFT_LEFT:
-    return a << b;
+    dst <<= src;
+    break;
   case SHIFT_RIGHT:
-    return a >> b;
+    dst >>= src;
+    break;
   default:
     throw std::runtime_error ("Operator::apply(...): Non-handled operator identifier");
   }

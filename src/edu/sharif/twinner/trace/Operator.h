@@ -22,6 +22,8 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+class ConcreteValue;
+
 class Operator : public ExpressionToken {
 
 public:
@@ -56,7 +58,7 @@ public:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static Operator *loadFromBinaryStream (std::ifstream &in);
 
-  UINT64 apply (UINT64 a, UINT64 b) const;
+  void apply (ConcreteValue &dst, const ConcreteValue &src) const;
 
   virtual std::string toString () const;
 

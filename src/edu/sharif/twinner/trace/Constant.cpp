@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include "Constant.h"
+#include "ConcreteValue64Bits.h"
 
 namespace edu {
 namespace sharif {
@@ -20,11 +21,19 @@ namespace twinner {
 namespace trace {
 
 Constant::Constant (const Constant &c) :
-value (c.value) {
+Operand (c) {
 }
 
 Constant::Constant (UINT64 val) :
-value (val) {
+Operand (ConcreteValue64Bits (val)) {
+}
+
+Constant::Constant (const ConcreteValue &val) :
+Operand (val) {
+}
+
+Constant::Constant (ConcreteValue *val) :
+Operand (val) {
 }
 
 Constant *Constant::clone () const {
@@ -33,23 +42,22 @@ Constant *Constant::clone () const {
 
 void Constant::saveToBinaryStream (std::ofstream &out) const {
   out.write ("C", 1);
-  out.write ((const char *) &value, sizeof (value));
+  concreteValue->saveToBinaryStream (out);
 }
 
 Constant *Constant::loadFromBinaryStream (std::ifstream &in) {
-  UINT64 value;
-  in.read ((char *) &value, sizeof (value));
-  return new Constant (value);
+  return new Constant (ConcreteValue::loadFromBinaryStream (in));
 }
 
 std::string Constant::toString () const {
   std::stringstream ss;
-  ss << "0x" << std::hex << value;
+  ss << *concreteValue;
   return ss.str ();
 }
 
 UINT64 Constant::getValue () const {
-  return value;
+  //FIXME: Support 128 bits constants
+  return static_cast<ConcreteValue64Bits *> (concreteValue)->getValue ();
 }
 
 }

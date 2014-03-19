@@ -28,6 +28,7 @@ namespace trace {
 
 class Expression;
 class Constraint;
+class ConcreteValue;
 
 /**
  * This exception indicates that current execution state differs from the expected state.
@@ -35,11 +36,11 @@ class Constraint;
 class WrongStateException : public std::exception {
 
 private:
-  UINT64 currentValue;
+  const ConcreteValue &currentValue;
 
 public:
 
-  WrongStateException (UINT64 _currentValue) :
+  WrongStateException (const ConcreteValue &_currentValue) :
       currentValue (_currentValue) {
   }
 
@@ -47,7 +48,7 @@ public:
     return "Execution state differ from what we expected (probably, user space memory is changed by a syscall).";
   }
 
-  UINT64 getCurrentStateValue () const {
+  const ConcreteValue &getCurrentStateValue () const {
     return currentValue;
   }
 };
@@ -86,11 +87,11 @@ public:
    * @except Throws a WrongStateException, if the last concrete value of the reg's
    * corresponding expression differs from expected @c regval value.
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
-  throw (WrongStateException) = 0;
+  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
+      const ConcreteValue &regval) throw (WrongStateException) = 0;
 
   /**
-   * Overload of tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval) method.
+   * Overload of tryToGetSymbolicExpressionByRegister (reg, regval) method.
    * This overload does not take care of concrete values.
    * 
    * @param reg The register which its value is returned.
@@ -109,7 +110,7 @@ public:
    * @return symbolic expression which is living at the given memory address at current state.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      UINT64 memval) throw (WrongStateException) = 0;
+      const ConcreteValue &memval) throw (WrongStateException) = 0;
 
   /**
    * The getter returns current value stored in one register.
@@ -128,11 +129,11 @@ public:
    * @param newExpression The expression which will be set if there was no current value.
    * @return symbolic expression which is living in register at current state.
    */
-  virtual Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
-      Expression *newExpression) = 0;
+  virtual Expression *getSymbolicExpressionByRegister (REG reg,
+      const ConcreteValue &regval, Expression *newExpression) = 0;
 
   /**
-   * Overload of getSymbolicExpressionByRegister (REG reg, UINT64 regval, Expression *newExpression)
+   * Overload of getSymbolicExpressionByRegister (reg, regval, newExpression)
    * method. This overload is used when the regval is irrelevant. So if there is any
    * expression kept in asked register, it will be returned and only when no expression,
    * regardless of its last concrete value, were being kept in asked register, a new
@@ -163,7 +164,7 @@ public:
    * @return symbolic expression which is living at the given memory address at current state.
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      UINT64 memval, Expression *newExpression) = 0;
+      const ConcreteValue &memval, Expression *newExpression) = 0;
 
   /**
    * The setter clones given expression and stores it as the new value living

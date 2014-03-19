@@ -27,12 +27,12 @@ namespace trace {
 class Constant : public Operand {
 
 private:
-  UINT64 value;
-
   Constant (const Constant &c);
 
 public:
   Constant (UINT64 val);
+  Constant (const ConcreteValue &val);
+  Constant (ConcreteValue *val);
 
   virtual Constant *clone () const;
 

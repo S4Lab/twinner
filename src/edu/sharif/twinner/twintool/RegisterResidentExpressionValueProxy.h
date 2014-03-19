@@ -20,16 +20,23 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace trace {
+
+class ConcreteValue;
+}
 namespace twintool {
 
 class RegisterResidentExpressionValueProxy : public MutableExpressionValueProxy {
 
 private:
+  typedef edu::sharif::twinner::trace::ConcreteValue ConcreteValue;
+
   REG reg;
-  UINT64 regVal;
+  const ConcreteValue &regVal;
 
 public:
-  RegisterResidentExpressionValueProxy (REG reg, UINT64 regVal);
+  RegisterResidentExpressionValueProxy (REG reg, const ConcreteValue &regVal);
+  RegisterResidentExpressionValueProxy (REG reg);
 
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const;

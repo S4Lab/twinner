@@ -20,20 +20,31 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+class ConcreteValue;
+
 /**
- * @interface
+ * @abstract
  */
 class Operand : public ExpressionToken {
 
 protected:
+  ConcreteValue *concreteValue;
 
-  Operand () :
-      ExpressionToken () {
-  }
+  Operand ();
+  /**
+   * Instantiates a new operand and clones the given concrete value for it.
+   * @param cv The concrete value which its clone will be used as value of this operand.
+   */
+  Operand (const ConcreteValue &cv);
+  /**
+   * Instantiates a new operand and takes ownership of the given concrete value for it.
+   * @param cv The concrete value which its ownership is taken for instantiated operand.
+   */
+  Operand (ConcreteValue *cv);
+  Operand (const Operand &op);
 
-  Operand (const Operand &op) :
-      ExpressionToken (op) {
-  }
+public:
+  ~Operand ();
 };
 
 }

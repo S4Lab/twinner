@@ -15,9 +15,11 @@
 #include <stdexcept>
 #include <set>
 #include <fstream>
+#include <sstream>
 
 #include "ExpressionImp.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
+#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
@@ -44,11 +46,10 @@ Trace (1 /* Invoking dummy constructor of parent class to stop adding segments t
 TraceImp::~TraceImp () {
 }
 
-Expression *TraceImp::tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
-throw (WrongStateException) {
+Expression *TraceImp::tryToGetSymbolicExpressionByRegister (REG reg,
+    const ConcreteValue &regval) throw (WrongStateException) {
   return tryToGetSymbolicExpressionImplementation
-      (reg, regval,
-       &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
+      (reg, regval, &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByRegister (REG reg) {
@@ -57,19 +58,20 @@ Expression *TraceImp::tryToGetSymbolicExpressionByRegister (REG reg) {
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-    UINT64 memval) throw (WrongStateException) {
+    const ConcreteValue &memval) throw (WrongStateException) {
   return tryToGetSymbolicExpressionImplementation
       (memoryEa, memval,
        &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
 }
 
 void throw_exception_about_unexpected_change_in_memory_or_register_address
-(REG reg, UINT64 expectedVal, UINT64 currentVal);
+(REG reg, const ConcreteValue &expectedVal, const ConcreteValue &currentVal);
 void throw_exception_about_unexpected_change_in_memory_or_register_address
-(ADDRINT address, UINT64 expectedVal, UINT64 currentVal);
+(ADDRINT address, const ConcreteValue &expectedVal, const ConcreteValue &currentVal);
 
 template < typename T >
-Expression *TraceImp::tryToGetSymbolicExpressionImplementation (T address, UINT64 val,
+Expression *TraceImp::tryToGetSymbolicExpressionImplementation (T address,
+    const ConcreteValue &val,
     typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
 throw (WrongStateException) {
   for (std::list < ExecutionTraceSegment * >::iterator it = currentSegmentIterator;
@@ -83,7 +85,7 @@ throw (WrongStateException) {
       }
     } catch (const WrongStateException &e) {
       if (it == currentSegmentIterator) {
-        UINT64 currentValue = e.getCurrentStateValue ();
+        const ConcreteValue &currentValue = e.getCurrentStateValue ();
         getCurrentTraceSegment ()->printRegistersValues
             (edu::sharif::twinner::util::Logger::loquacious ());
         throw_exception_about_unexpected_change_in_memory_or_register_address
@@ -112,23 +114,24 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (T address,
   return 0;
 }
 
-Expression *TraceImp::getSymbolicExpressionByRegister (REG reg, UINT64 regval,
-    Expression *newExpression) {
+Expression *TraceImp::getSymbolicExpressionByRegister (REG reg,
+    const ConcreteValue &regval, Expression *newExpression) {
   return getSymbolicExpressionImplementation
       (reg, regval, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByRegister,
        &ExecutionTraceSegment::getSymbolicExpressionByRegister);
 }
 
-Expression *TraceImp::getSymbolicExpressionByRegister (REG reg, Expression *newExpression) {
+Expression *TraceImp::getSymbolicExpressionByRegister (REG reg,
+    Expression *newExpression) {
   return getSymbolicExpressionImplementation
       (reg, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByRegister,
        &ExecutionTraceSegment::getSymbolicExpressionByRegister);
 }
 
-Expression *TraceImp::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa, UINT64 memval,
-    Expression *newExpression) {
+Expression *TraceImp::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+    const ConcreteValue &memval, Expression *newExpression) {
   return getSymbolicExpressionImplementation
       (memoryEa, memval, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByMemoryAddress,
@@ -136,8 +139,8 @@ Expression *TraceImp::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa, UI
 }
 
 template < typename T >
-Expression *TraceImp::getSymbolicExpressionImplementation (T address, UINT64 val,
-    Expression *newExpression,
+Expression *TraceImp::getSymbolicExpressionImplementation (T address,
+    const ConcreteValue &val, Expression *newExpression,
     typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
     typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod) {
   try {
@@ -147,7 +150,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (T address, UINT64 val
     } // exp does not exist at all, so it's OK to create a new one
 
   } catch (const WrongStateException &e) {
-    UINT64 currentValue = e.getCurrentStateValue ();
+    const ConcreteValue &currentValue = e.getCurrentStateValue ();
     edu::sharif::twinner::util::Logger::debug () << "Unexpected value (0x"
         << std::hex << currentValue
         << ") was found (instead of 0x" << val << "). "
@@ -178,7 +181,8 @@ Expression *TraceImp::getSymbolicExpressionImplementation (T address,
      * expression is going to be set immediately. So previous value was random and
      * not significant. Thus we can use 0 as concrete value of instantiated expression.
      */
-    newExpression = new ExpressionImp (address, 0, currentSegmentIndex);
+    newExpression = new ExpressionImp
+        (address, ConcreteValue64Bits (0), currentSegmentIndex);
   }
   return (getCurrentTraceSegment ()->*getMethod) (address, newExpression);
 }
@@ -227,26 +231,26 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
 }
 
 void throw_exception_about_unexpected_change_in_memory_or_register_address
-(REG reg, UINT64 expectedVal, UINT64 currentVal) {
-  char errorMessage[200];
+(REG reg, const ConcreteValue &expectedVal, const ConcreteValue &currentVal) {
   std::string addr = REG_StringShort (reg);
-  snprintf (errorMessage, 200, "Value of an address changed unexpectedly"
-            " without any interfering syscall\n"
-            "\tExpected 0x%lX, Got 0x%lX; at register %s (code: 0x%X)",
-            expectedVal, currentVal, addr.c_str (), (unsigned int) reg);
-  edu::sharif::twinner::util::Logger::error () << errorMessage << '\n';
-  throw std::runtime_error (errorMessage);
+  std::stringstream ss;
+  ss << "Value of an address changed unexpectedly"
+      " without any interfering syscall\n"
+      "\tExpected " << expectedVal << ", Got " << currentVal
+      << "; at register " << addr.c_str () << " (code: 0x" << (unsigned int) reg << ")";
+  edu::sharif::twinner::util::Logger::error () << ss.str () << '\n';
+  throw std::runtime_error (ss.str ());
 }
 
 void throw_exception_about_unexpected_change_in_memory_or_register_address
-(ADDRINT address, UINT64 expectedVal, UINT64 currentVal) {
-  char errorMessage[200];
-  snprintf (errorMessage, 200, "Value of an address changed unexpectedly"
-            " without any interfering syscall\n"
-            "\tExpected 0x%lX, Got 0x%lX; at address 0x%lX",
-            expectedVal, currentVal, address);
-  edu::sharif::twinner::util::Logger::error () << errorMessage << '\n';
-  throw std::runtime_error (errorMessage);
+(ADDRINT address, const ConcreteValue &expectedVal, const ConcreteValue &currentVal) {
+  std::stringstream ss;
+  ss << "Value of an address changed unexpectedly"
+      " without any interfering syscall\n"
+      "\tExpected " << expectedVal << ", Got " << currentVal
+      << "; at address 0x" << address;
+  edu::sharif::twinner::util::Logger::error () << ss.str () << '\n';
+  throw std::runtime_error (ss.str ());
 }
 
 }

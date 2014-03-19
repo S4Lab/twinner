@@ -20,6 +20,7 @@
 #include "edu/sharif/twinner/util/memory.h"
 
 #include "Constant.h"
+#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
 
 namespace edu {
 namespace sharif {
@@ -27,12 +28,12 @@ namespace twinner {
 namespace trace {
 
 Expression::Expression (const std::list < ExpressionToken * > &stk,
-    UINT64 concreteValue) :
+    ConcreteValue *concreteValue) :
 stack (stk), lastConcreteValue (concreteValue), isOverwriting (false) {
 }
 
 Expression::Expression (const Expression &exp) :
-lastConcreteValue (exp.lastConcreteValue), isOverwriting (false) {
+lastConcreteValue (exp.lastConcreteValue->clone ()), isOverwriting (false) {
   for (std::list < ExpressionToken * >::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const ExpressionToken *et = *it;
@@ -40,7 +41,7 @@ lastConcreteValue (exp.lastConcreteValue), isOverwriting (false) {
   }
 }
 
-Expression::Expression (UINT64 concreteValue, bool _isOverwriting) :
+Expression::Expression (ConcreteValue *concreteValue, bool _isOverwriting) :
 lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
 }
 
@@ -49,13 +50,15 @@ Expression::~Expression () {
     delete stack.back ();
     stack.pop_back ();
   }
+  delete lastConcreteValue;
 }
 
-UINT64 Expression::getLastConcreteValue () const {
-  return lastConcreteValue;
+const ConcreteValue &Expression::getLastConcreteValue () const {
+  return *lastConcreteValue;
 }
 
-void Expression::setLastConcreteValue (UINT64 value) {
+void Expression::setLastConcreteValue (ConcreteValue *value) {
+  delete lastConcreteValue;
   lastConcreteValue = value;
 }
 
@@ -63,7 +66,7 @@ std::string Expression::toString () const {
   std::list < ExpressionToken * > st = std::list < ExpressionToken * > (stack);
   std::stringstream ss;
   convertToInfixExpression (st, ss);
-  ss << " /*0x" << std::hex << lastConcreteValue << "*/";
+  ss << " /*" << *lastConcreteValue << "*/";
   return ss.str ();
 }
 
@@ -96,7 +99,7 @@ void Expression::convertToInfixExpression (std::list < ExpressionToken * > &st,
   }
 }
 
-void Expression::unaryOperation (Operator op, Expression exp) {
+void Expression::unaryOperation (Operator op, const Expression *exp) {
   throw std::runtime_error ("Expression::unaryOperation: Not yet implemented");
 }
 
@@ -120,7 +123,7 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
     stack.push_back (token);
   }
   stack.push_back (op);
-  lastConcreteValue = op->apply (lastConcreteValue, exp->lastConcreteValue);
+  op->apply (*lastConcreteValue, *(exp->lastConcreteValue));
 }
 
 void Expression::truncate (int bits) {
@@ -135,53 +138,103 @@ void Expression::truncate (int bits) {
   }
   stack.push_back (new Constant (mask));
   stack.push_back (new Operator (Operator::BITWISE_AND));
-  lastConcreteValue &= mask;
+  (*lastConcreteValue) &= mask;
 }
 
-void Expression::shiftToRight (int bits) {
-  if (bits >= 64) {
+void Expression::shiftToRight (ConcreteValue *bits) {
+  if ((*bits) >= 64) {
     stack.push_back (new Constant (bits));
     stack.push_back (new Operator (Operator::SHIFT_RIGHT));
   } else {
+    ConcreteValue64Bits tmp = *bits;
     UINT64 val = 1;
-    val <<= bits; // shift-to-right by n bits is equivalent to division by 2^n
+    // shift-to-right by n bits is equivalent to division by 2^n
+    val <<= tmp.getValue ();
     stack.push_back (new Constant (val));
     stack.push_back (new Operator (Operator::DIVIDE));
+    delete bits;
   }
-  lastConcreteValue >>= bits;
+  (*lastConcreteValue) >>= *bits;
+}
+
+void Expression::shiftToRight (int bits) {
+  shiftToRight (new ConcreteValue64Bits (bits));
 }
 
 void Expression::shiftToRight (const Expression *bits) {
   binaryOperation (new Operator (Operator::SHIFT_RIGHT), bits);
 }
 
-void Expression::shiftToLeft (int bits) {
-  if (bits >= 64) {
+void Expression::shiftToLeft (ConcreteValue *bits) {
+  if ((*bits) >= 64) {
     stack.push_back (new Constant (bits));
     stack.push_back (new Operator (Operator::SHIFT_LEFT));
   } else {
+    ConcreteValue64Bits tmp = *bits;
     UINT64 val = 1;
-    val <<= bits; // shift-to-left by n bits is equivalent to multiplication by 2^n
+    // shift-to-left by n bits is equivalent to multiplication by 2^n
+    val <<= tmp.getValue ();
     stack.push_back (new Constant (val));
     stack.push_back (new Operator (Operator::MULTIPLY));
+    delete bits;
   }
-  lastConcreteValue <<= bits;
+  (*lastConcreteValue) <<= *bits;
+}
+
+void Expression::shiftToLeft (int bits) {
+  shiftToLeft (new ConcreteValue64Bits (bits));
 }
 
 void Expression::shiftToLeft (const Expression *bits) {
   binaryOperation (new Operator (Operator::SHIFT_LEFT), bits);
 }
 
-void Expression::minus (UINT64 immediate) {
+void Expression::minus (ConcreteValue *immediate) {
   stack.push_back (new Constant (immediate));
   stack.push_back (new Operator (Operator::MINUS));
-  lastConcreteValue -= immediate;
+  (*lastConcreteValue) -= *immediate;
+}
+
+void Expression::minus (UINT64 immediate) {
+  minus (new ConcreteValue64Bits (immediate));
+}
+
+void Expression::add (ConcreteValue *immediate) {
+  stack.push_back (new Constant (immediate));
+  stack.push_back (new Operator (Operator::ADD));
+  (*lastConcreteValue) += *immediate;
 }
 
 void Expression::add (UINT64 immediate) {
-  stack.push_back (new Constant (immediate));
-  stack.push_back (new Operator (Operator::ADD));
-  lastConcreteValue += immediate;
+  add (new ConcreteValue64Bits (immediate));
+}
+
+void Expression::bitwiseAnd (ConcreteValue *mask) {
+  stack.push_back (new Constant (mask));
+  stack.push_back (new Operator (Operator::BITWISE_AND));
+  (*lastConcreteValue) &= *mask;
+}
+
+void Expression::bitwiseAnd (UINT64 mask) {
+  bitwiseAnd (new ConcreteValue64Bits (mask));
+}
+
+void Expression::bitwiseAnd (const Expression *mask) {
+  binaryOperation (new Operator (Operator::BITWISE_AND), mask);
+}
+
+void Expression::bitwiseOr (ConcreteValue *mask) {
+  stack.push_back (new Constant (mask));
+  stack.push_back (new Operator (Operator::BITWISE_OR));
+  (*lastConcreteValue) |= *mask;
+}
+
+void Expression::bitwiseOr (UINT64 mask) {
+  bitwiseOr (new ConcreteValue64Bits (mask));
+}
+
+void Expression::bitwiseOr (const Expression *mask) {
+  binaryOperation (new Operator (Operator::BITWISE_OR), mask);
 }
 
 void Expression::makeLeastSignificantBitsZero (int bits) {
@@ -190,7 +243,7 @@ void Expression::makeLeastSignificantBitsZero (int bits) {
   mask = ~(mask - 1);
   stack.push_back (new Constant (mask));
   stack.push_back (new Operator (Operator::BITWISE_AND));
-  lastConcreteValue &= mask;
+  (*lastConcreteValue) &= mask;
 }
 
 void Expression::negate () {
@@ -210,43 +263,40 @@ Expression *Expression::clone () const {
 
 void Expression::saveToBinaryStream (std::ofstream &out) const {
   saveListToBinaryStream (out, "EXP", stack);
-  out.write ((const char *) &lastConcreteValue, sizeof (lastConcreteValue));
+  lastConcreteValue->saveToBinaryStream (out);
 }
 
 Expression *Expression::loadFromBinaryStream (std::ifstream &in) {
   std::list < ExpressionToken * > stack;
   loadListFromBinaryStream (in, "EXP", stack);
-  UINT64 concreteValue;
-  in.read ((char *) &concreteValue, sizeof (concreteValue));
-
-  return new Expression (stack, concreteValue);
+  return new Expression (stack, ConcreteValue::loadFromBinaryStream (in));
 }
 
 const std::list < ExpressionToken * > &Expression::getStack () const {
   return stack;
 }
 
-void Expression::checkConcreteValueReg (REG reg, UINT64 concreteVal) const
+void Expression::checkConcreteValueReg (REG reg, const ConcreteValue &concreteVal) const
 throw (WrongStateException) {
-  if (lastConcreteValue == concreteVal) {
-
+  if (*lastConcreteValue == concreteVal) {
     return;
   }
   // for reg case, isOverwriting is false for sure
-  throw WrongStateException (lastConcreteValue);
+  throw WrongStateException (*lastConcreteValue);
 }
 
-void Expression::checkConcreteValueMemory (ADDRINT memoryEa, UINT64 concreteVal)
+void Expression::checkConcreteValueMemory (ADDRINT memoryEa,
+    const ConcreteValue &concreteVal)
 throw (WrongStateException) {
-  if (lastConcreteValue == concreteVal) {
+  if (*lastConcreteValue == concreteVal) {
     isOverwriting = false; // overwriting just works at first getting/synchronization
     return;
   }
   if (!isOverwriting) {
-    throw WrongStateException (lastConcreteValue);
+    throw WrongStateException (*lastConcreteValue);
   }
   isOverwriting = false;
-  edu::sharif::twinner::util::writeMemoryContent (memoryEa, lastConcreteValue);
+  lastConcreteValue->writeToMemoryAddress (memoryEa);
 }
 
 }

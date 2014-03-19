@@ -15,6 +15,7 @@
 #include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/Constant.h"
+#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
 
 namespace edu {
 namespace sharif {
@@ -25,8 +26,9 @@ ExpressionImp::ExpressionImp (const ExpressionImp &exp) :
 Expression (exp) {
 }
 
-ExpressionImp::ExpressionImp (REG reg, UINT64 concreteValue, int generationIndex) :
-Expression (concreteValue, false) {
+ExpressionImp::ExpressionImp (REG reg, const ConcreteValue &concreteValue,
+    int generationIndex) :
+Expression (concreteValue.clone (), false) {
   const REG enclosingReg = REG_FullRegName (reg);
   stack.push_back (new RegisterEmergedSymbol
                    (enclosingReg, concreteValue, generationIndex));
@@ -35,15 +37,20 @@ Expression (concreteValue, false) {
   }
 }
 
-ExpressionImp::ExpressionImp (ADDRINT memoryEa, UINT64 concreteValue, int generationIndex,
-    bool isOverwriting) :
-Expression (concreteValue, isOverwriting) {
+ExpressionImp::ExpressionImp (ADDRINT memoryEa, const ConcreteValue &concreteValue,
+    int generationIndex, bool isOverwriting) :
+Expression (concreteValue.clone (), isOverwriting) {
   stack.push_back (new MemoryEmergedSymbol (memoryEa, concreteValue, generationIndex));
 }
 
-ExpressionImp::ExpressionImp (UINT64 value) :
-Expression (value, false) {
+ExpressionImp::ExpressionImp (const ConcreteValue &value) :
+Expression (value.clone (), false) {
   stack.push_back (new Constant (value));
+}
+
+ExpressionImp::ExpressionImp (UINT64 value) :
+Expression (new ConcreteValue64Bits (value), false) {
+  stack.push_back (new Constant (new ConcreteValue64Bits (value)));
 }
 
 ExpressionImp *ExpressionImp::clone () const {

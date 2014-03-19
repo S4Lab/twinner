@@ -12,29 +12,33 @@
 
 #include "Symbol.h"
 
+#include "ConcreteValue.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-Symbol::Symbol (UINT64 _concreteValue, int _generationIndex) :
-Operand (), concreteValue (_concreteValue), generationIndex (_generationIndex) {
+Symbol::Symbol (const ConcreteValue &_concreteValue, int _generationIndex) :
+Operand (_concreteValue), generationIndex (_generationIndex) {
 }
 
 Symbol::Symbol (const Symbol &s) :
-Operand (s), concreteValue (s.concreteValue), generationIndex (s.generationIndex) {
+Operand (s), generationIndex (s.generationIndex) {
 }
 
-Symbol::Symbol () {
+Symbol::Symbol () :
+Operand (), generationIndex (0) {
 }
 
 void Symbol::saveToBinaryStream (std::ofstream &out) const {
-  out.write ((const char *) &concreteValue, sizeof (concreteValue));
+  concreteValue->saveToBinaryStream (out);
   out.write ((const char *) &generationIndex, sizeof (generationIndex));
 }
 
 void Symbol::loadFromBinaryStream (std::ifstream &in) {
-  in.read ((char *) &concreteValue, sizeof (concreteValue));
+  delete concreteValue;
+  concreteValue = ConcreteValue::loadFromBinaryStream (in);
   in.read ((char *) &generationIndex, sizeof (generationIndex));
 }
 

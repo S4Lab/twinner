@@ -61,7 +61,7 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg,
-    UINT64 regval) throw (WrongStateException) {
+    const ConcreteValue &regval) throw (WrongStateException) {
   return tryToGetSymbolicExpressionImplementation (registerToExpression, reg, regval);
 }
 
@@ -70,33 +70,34 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (
-    ADDRINT memoryEa, UINT64 memval) throw (WrongStateException) {
+    ADDRINT memoryEa, const ConcreteValue &memval) throw (WrongStateException) {
   return tryToGetSymbolicExpressionImplementation
       (memoryAddressToExpression, memoryEa, memval);
 }
 
 template < typename Address >
 void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
-    Address address, UINT64 concreteVal);
+    Address address, const ConcreteValue &concreteVal);
 
 template < >
 void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
-    REG reg, UINT64 concreteVal);
+    REG reg, const ConcreteValue &concreteVal);
 template < >
 void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
-    ADDRINT address, UINT64 concreteVal);
+    ADDRINT address, const ConcreteValue &concreteVal);
 
 template < typename KEY >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
-    std::map < KEY, Expression * > &map, const KEY key, UINT64 concreteVal) const
+    std::map < KEY, Expression * > &map, const KEY key,
+    const ConcreteValue &concreteVal) const
 throw (WrongStateException) {
   typename std::map < KEY, Expression * >::iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
     Expression *exp = it->second;
-    check_concrete_value_and_throw_wrong_state_exception_on_mismatch (exp, key,
-                                                                      concreteVal);
+    check_concrete_value_and_throw_wrong_state_exception_on_mismatch
+        (exp, key, concreteVal);
 
     return exp;
   }
@@ -104,13 +105,13 @@ throw (WrongStateException) {
 
 template < >
 void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
-    REG reg, UINT64 concreteVal) {
+    REG reg, const ConcreteValue &concreteVal) {
   exp->checkConcreteValueReg (reg, concreteVal);
 }
 
 template < >
 void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
-    ADDRINT memoryEa, UINT64 concreteVal) {
+    ADDRINT memoryEa, const ConcreteValue &concreteVal) {
   exp->checkConcreteValueMemory (memoryEa, concreteVal);
 }
 
@@ -126,7 +127,7 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
 }
 
 Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg,
-    UINT64 regval, Expression *newExpression) {
+    const ConcreteValue &regval, Expression *newExpression) {
   return getSymbolicExpressionImplementation (registerToExpression, reg, regval,
                                               newExpression);
 }
@@ -138,15 +139,15 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg,
 }
 
 Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-    UINT64 memval, Expression *newExpression) {
+    const ConcreteValue &memval, Expression *newExpression) {
   return getSymbolicExpressionImplementation
       (memoryAddressToExpression, memoryEa, memval, newExpression);
 }
 
 template < typename KEY >
 Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
-    std::map < KEY, Expression * > &map, const KEY key, UINT64 currentConcreteValue,
-    Expression *newExpression) {
+    std::map < KEY, Expression * > &map, const KEY key,
+    const ConcreteValue &currentConcreteValue, Expression *newExpression) {
   typedef typename std::map < KEY, Expression * >::iterator MapIterator;
   try {
     Expression *exp = tryToGetSymbolicExpressionImplementation

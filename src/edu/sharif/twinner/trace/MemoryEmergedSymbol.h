@@ -36,7 +36,8 @@ private:
   MemoryEmergedSymbol (ADDRINT address);
 
 public:
-  MemoryEmergedSymbol (ADDRINT address, UINT64 concreteValue, int generationIndex);
+  MemoryEmergedSymbol (ADDRINT address, const ConcreteValue &concreteValue,
+      int generationIndex);
 
   virtual MemoryEmergedSymbol *clone () const;
 

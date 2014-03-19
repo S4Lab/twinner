@@ -14,6 +14,8 @@
 
 #include "MemoryEmergedSymbol.h"
 
+#include "ConcreteValue64Bits.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -27,8 +29,8 @@ MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT addr) :
 Symbol (), address (addr) {
 }
 
-MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT _address, UINT64 concreteValue,
-    int generationIndex) :
+MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT _address,
+    const ConcreteValue &concreteValue, int generationIndex) :
 Symbol (concreteValue, generationIndex), address (_address) {
 }
 
@@ -57,7 +59,7 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::fromNameAndValue (const std::string &n
   ADDRINT address;
   int generationIndex;
   ss >> dummy >> std::hex >> address >> dummy >> generationIndex;
-  return new MemoryEmergedSymbol (address, value, generationIndex);
+  return new MemoryEmergedSymbol (address, ConcreteValue64Bits (value), generationIndex);
 }
 
 std::string MemoryEmergedSymbol::toString () const {

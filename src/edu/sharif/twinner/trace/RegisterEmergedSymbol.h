@@ -30,7 +30,8 @@ private:
   RegisterEmergedSymbol (REG address);
 
 public:
-  RegisterEmergedSymbol (REG address, UINT64 concreteValue, int generationIndex);
+  RegisterEmergedSymbol (REG address, const ConcreteValue &concreteValue,
+      int generationIndex);
 
   virtual RegisterEmergedSymbol *clone () const;
 

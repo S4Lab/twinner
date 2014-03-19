@@ -42,18 +42,19 @@ public:
   ExecutionTraceSegment (const std::map < ADDRINT, Expression * > &memo);
   virtual ~ExecutionTraceSegment ();
 
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg, UINT64 regval)
+  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
+      const ConcreteValue &regval)
   throw (WrongStateException);
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg);
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      UINT64 memval) throw (WrongStateException);
+      const ConcreteValue &memval) throw (WrongStateException);
 
-  virtual Expression *getSymbolicExpressionByRegister (REG reg, UINT64 regval,
-      Expression *newExpression);
+  virtual Expression *getSymbolicExpressionByRegister (REG reg,
+      const ConcreteValue &regval, Expression *newExpression);
   virtual Expression *getSymbolicExpressionByRegister (REG reg,
       Expression *newExpression);
   virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      UINT64 memval, Expression *newExpression);
+      const ConcreteValue &memval, Expression *newExpression);
 
   virtual Expression *setSymbolicExpressionByRegister (REG reg, const Expression *exp);
   virtual Expression *setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
@@ -67,14 +68,16 @@ public:
 private:
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
-      std::map < KEY, Expression * > &map, const KEY key, UINT64 concreteVal) const
+      std::map < KEY, Expression * > &map, const KEY key,
+      const ConcreteValue &concreteVal) const
   throw (WrongStateException);
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
       std::map < KEY, Expression * > &map, const KEY key) const;
   template < typename KEY >
   Expression *getSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
-      const KEY key, UINT64 currentConcreteValue, Expression *newExpression);
+      const KEY key, const ConcreteValue &currentConcreteValue,
+      Expression *newExpression);
   template < typename KEY >
   Expression *getSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
       const KEY key, Expression *newExpression);

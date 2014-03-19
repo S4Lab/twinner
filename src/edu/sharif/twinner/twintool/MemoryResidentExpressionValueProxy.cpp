@@ -16,6 +16,7 @@
 
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/memory.h"
@@ -41,7 +42,8 @@ MemoryResidentExpressionValueProxy::getExpression (
   UINT64 val = edu::sharif::twinner::util::readMemoryContent (memoryEa);
   val = edu::sharif::twinner::util::truncateValue (val, memReadBytes);
 
-  return trace->getSymbolicExpressionByMemoryAddress (memoryEa, val);
+  return trace->getSymbolicExpressionByMemoryAddress
+      (memoryEa, edu::sharif::twinner::trace::ConcreteValue64Bits (val));
 }
 
 edu::sharif::twinner::trace::Expression *

@@ -27,8 +27,8 @@ RegisterEmergedSymbol::RegisterEmergedSymbol (REG addr) :
 Symbol (), address (addr) {
 }
 
-RegisterEmergedSymbol::RegisterEmergedSymbol (REG _address, UINT64 concreteValue,
-    int generationIndex) :
+RegisterEmergedSymbol::RegisterEmergedSymbol (REG _address,
+    const ConcreteValue &concreteValue, int generationIndex) :
 Symbol (concreteValue, generationIndex), address (_address) {
 }
 

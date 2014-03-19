@@ -18,15 +18,20 @@
 #include "edu/sharif/twinner/trace/Expression.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
 
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace twintool {
 
-RegisterResidentExpressionValueProxy::RegisterResidentExpressionValueProxy (
-    REG _reg, UINT64 _regVal) :
+RegisterResidentExpressionValueProxy::RegisterResidentExpressionValueProxy (REG _reg,
+    const ConcreteValue &_regVal) :
 reg (_reg), regVal (_regVal) {
+}
+
+RegisterResidentExpressionValueProxy::RegisterResidentExpressionValueProxy (REG _reg) :
+reg (_reg), regVal (edu::sharif::twinner::trace::ConcreteValue64Bits (0)) {
 }
 
 edu::sharif::twinner::trace::Expression *
