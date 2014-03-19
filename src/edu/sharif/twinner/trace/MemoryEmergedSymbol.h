@@ -23,7 +23,9 @@ namespace trace {
 struct SymbolRecord {
 
   ADDRINT address;
-  UINT64 concreteValue;
+  UINT32 type; // 64 or 128
+  UINT64 concreteValueLsb;
+  UINT64 concreteValueMsb;
 };
 
 class MemoryEmergedSymbol : public Symbol {

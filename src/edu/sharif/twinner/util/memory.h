@@ -24,6 +24,7 @@ const edu::sharif::twinner::trace::ConcreteValue &readRegisterContent (
     const CONTEXT *context, REG reg);
 UINT64 readMemoryContent (ADDRINT memoryEa);
 VOID writeMemoryContent (ADDRINT memoryEa, UINT64 value);
+VOID writeMemoryContent (ADDRINT memoryEa, UINT8 *value, size_t size);
 
 inline UINT64 truncateValue (UINT64 value, int countOfBytes) {
   switch (countOfBytes) {

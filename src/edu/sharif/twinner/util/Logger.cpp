@@ -125,7 +125,14 @@ const Logger &Logger::operator<< (
     return (*this) << "ConcreteValue64Bits(0x" << std::hex
         << valueimp->getValue () << ')';
   } else {
-    return (*this) << "ConcreteValue(unsupported-type)";
+    const edu::sharif::twinner::trace::ConcreteValue128Bits *value128imp =
+        dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *> (&value);
+    if (value128imp) {
+      return (*this) << "ConcreteValue128Bits(0x" << std::hex
+          << value128imp->getMsb () << value128imp->getLsb () << ')';
+    } else {
+      return (*this) << "ConcreteValue(unsupported-type)";
+    }
   }
 }
 

@@ -134,7 +134,9 @@ void save_records_list (std::ofstream &out, const int &segmentIndex,
 void save_record (std::ofstream &out,
     const edu::sharif::twinner::trace::SymbolRecord &record) {
   out.write ((const char *) &record.address, sizeof (record.address));
-  out.write ((const char *) &record.concreteValue, sizeof (record.concreteValue));
+  out.write ((const char *) &record.type, sizeof (record.type));
+  out.write ((const char *) &record.concreteValueLsb, sizeof (record.concreteValueLsb));
+  out.write ((const char *) &record.concreteValueMsb, sizeof (record.concreteValueMsb));
 }
 
 /**

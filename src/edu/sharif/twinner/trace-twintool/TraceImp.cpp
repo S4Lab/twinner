@@ -20,6 +20,7 @@
 #include "ExpressionImp.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 #include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
+#include "edu/sharif/twinner/trace/ConcreteValue128Bits.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
@@ -216,9 +217,21 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
   repeat (s) {
     SymbolRecord record;
     in.read ((char *) &record.address, sizeof (record.address));
-    in.read ((char *) &record.concreteValue, sizeof (record.concreteValue));
-    Expression *exp = new ExpressionImp (record.address,
-                                         record.concreteValue, index, true);
+    in.read ((char *) &record.type, sizeof (record.type));
+    in.read ((char *) &record.concreteValueLsb, sizeof (record.concreteValueLsb));
+    in.read ((char *) &record.concreteValueMsb, sizeof (record.concreteValueMsb));
+    Expression *exp;
+    if (record.type == 64) {
+      exp = new ExpressionImp
+          (record.address, ConcreteValue64Bits (record.concreteValueLsb), index, true);
+    } else if (record.type == 128) {
+      exp = new ExpressionImp
+          (record.address,
+           ConcreteValue128Bits (record.concreteValueMsb, record.concreteValueLsb),
+           index, true);
+    } else {
+      throw std::runtime_error ("Unsupported SymbolRecord type");
+    }
     std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
         map.insert (make_pair (record.address, exp));
     if (!res.second) {

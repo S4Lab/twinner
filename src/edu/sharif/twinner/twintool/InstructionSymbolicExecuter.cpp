@@ -20,6 +20,7 @@
 #include "edu/sharif/twinner/trace-twintool/TraceImp.h"
 #include "edu/sharif/twinner/trace-twintool/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
+#include "edu/sharif/twinner/trace/ConcreteValue128Bits.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 #include "edu/sharif/twinner/trace/Syscall.h"
 

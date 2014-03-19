@@ -276,6 +276,10 @@ VOID writeMemoryContent (ADDRINT memoryEa, UINT64 value) {
   PIN_SafeCopy ((VOID *) memoryEa, (const VOID *) &value, sizeof (value));
 }
 
+VOID writeMemoryContent (ADDRINT memoryEa, UINT8 *value, size_t size) {
+  PIN_SafeCopy ((VOID *) memoryEa, (const VOID *) value, size);
+}
+
 }
 }
 }

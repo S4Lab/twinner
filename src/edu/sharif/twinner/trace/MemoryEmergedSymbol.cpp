@@ -15,6 +15,7 @@
 #include "MemoryEmergedSymbol.h"
 
 #include "ConcreteValue64Bits.h"
+#include "ConcreteValue128Bits.h"
 
 namespace edu {
 namespace sharif {
@@ -76,7 +77,21 @@ std::pair < int, SymbolRecord >
 MemoryEmergedSymbol::toSymbolRecord () const {
   SymbolRecord record;
   record.address = address;
-  record.concreteValue = concreteValue;
+  if (dynamic_cast<const ConcreteValue64Bits *> (concreteValue)) {
+    record.type = 64;
+    record.concreteValueLsb =
+        static_cast<const ConcreteValue64Bits *> (concreteValue)->getValue ();
+    record.concreteValueMsb = 0;
+  } else if (dynamic_cast<const ConcreteValue128Bits *> (concreteValue)) {
+    record.type = 128;
+    record.concreteValueLsb =
+        static_cast<const ConcreteValue128Bits *> (concreteValue)->getLsb ();
+    record.concreteValueMsb =
+        static_cast<const ConcreteValue128Bits *> (concreteValue)->getMsb ();
+  } else {
+    throw std::runtime_error ("MemoryEmergedSymbol::toSymbolRecord () method: "
+                              "Unsupported concrete value type.");
+  }
   return make_pair (generationIndex, record);
 }
 
