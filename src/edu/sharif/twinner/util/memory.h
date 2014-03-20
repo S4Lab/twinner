@@ -20,8 +20,12 @@ namespace sharif {
 namespace twinner {
 namespace util {
 
-const edu::sharif::twinner::trace::ConcreteValue &readRegisterContent (
+/**
+ * Caller is owner of the returned concrete value object.
+ */
+edu::sharif::twinner::trace::ConcreteValue *readRegisterContent (
     const CONTEXT *context, REG reg);
+
 UINT64 readMemoryContent (ADDRINT memoryEa);
 VOID writeMemoryContent (ADDRINT memoryEa, UINT64 value);
 VOID writeMemoryContent (ADDRINT memoryEa, UINT8 *value, size_t size);

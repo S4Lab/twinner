@@ -48,6 +48,11 @@ Expression (value.clone (), false) {
   stack.push_back (new Constant (value));
 }
 
+ExpressionImp::ExpressionImp (ConcreteValue *value) :
+Expression (value, false) {
+  stack.push_back (new Constant (*value));
+}
+
 ExpressionImp::ExpressionImp (UINT64 value) :
 Expression (new ConcreteValue64Bits (value), false) {
   stack.push_back (new Constant (new ConcreteValue64Bits (value)));

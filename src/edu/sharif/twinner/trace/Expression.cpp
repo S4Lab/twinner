@@ -145,6 +145,7 @@ void Expression::shiftToRight (ConcreteValue *bits) {
   if ((*bits) >= 64) {
     stack.push_back (new Constant (bits));
     stack.push_back (new Operator (Operator::SHIFT_RIGHT));
+    (*lastConcreteValue) >>= *bits;
   } else {
     ConcreteValue64Bits tmp = *bits;
     UINT64 val = 1;
@@ -152,9 +153,9 @@ void Expression::shiftToRight (ConcreteValue *bits) {
     val <<= tmp.getValue ();
     stack.push_back (new Constant (val));
     stack.push_back (new Operator (Operator::DIVIDE));
+    (*lastConcreteValue) >>= *bits;
     delete bits;
   }
-  (*lastConcreteValue) >>= *bits;
 }
 
 void Expression::shiftToRight (int bits) {
@@ -169,6 +170,7 @@ void Expression::shiftToLeft (ConcreteValue *bits) {
   if ((*bits) >= 64) {
     stack.push_back (new Constant (bits));
     stack.push_back (new Operator (Operator::SHIFT_LEFT));
+    (*lastConcreteValue) <<= *bits;
   } else {
     ConcreteValue64Bits tmp = *bits;
     UINT64 val = 1;
@@ -176,9 +178,9 @@ void Expression::shiftToLeft (ConcreteValue *bits) {
     val <<= tmp.getValue ();
     stack.push_back (new Constant (val));
     stack.push_back (new Operator (Operator::MULTIPLY));
+    (*lastConcreteValue) <<= *bits;
     delete bits;
   }
-  (*lastConcreteValue) <<= *bits;
 }
 
 void Expression::shiftToLeft (int bits) {

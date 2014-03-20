@@ -235,7 +235,7 @@ const Logger &operator<< (const Logger &logger, REG reg) {
   return logger << "Reg(" << REG_StringShort (reg) << ")";
 }
 
-const edu::sharif::twinner::trace::ConcreteValue &readRegisterContent (
+edu::sharif::twinner::trace::ConcreteValue *readRegisterContent (
     const CONTEXT *context, REG reg) {
   /// XXX: Only full-size registers (e.g. RAX, RSP) are safe to be read
   PIN_REGISTER buffer;
@@ -263,7 +263,7 @@ const edu::sharif::twinner::trace::ConcreteValue &readRegisterContent (
     throw std::runtime_error ("util::readRegisterContent (...) method: "
                               "Size of requested register is unsupported.");
   }
-  return edu::sharif::twinner::trace::ConcreteValue64Bits (value);
+  return new edu::sharif::twinner::trace::ConcreteValue64Bits (value);
 }
 
 UINT64 readMemoryContent (ADDRINT memoryEa) {

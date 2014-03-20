@@ -45,9 +45,15 @@ public:
   ExpressionImp (const ConcreteValue &value);
 
   /**
+   * Instantiates an expression containing a constant value (non-symbolic) and takes
+   * ownership of the given concrete value.
+   */
+  ExpressionImp (ConcreteValue *value);
+
+  /**
    * Instantiates an expression containing a constant value (non-symbolic).
    */
-  ExpressionImp (UINT64 value);
+  ExpressionImp (UINT64 value = 0);
 
   virtual ExpressionImp *clone () const;
 };

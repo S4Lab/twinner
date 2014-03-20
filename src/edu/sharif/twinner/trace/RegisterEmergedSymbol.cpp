@@ -57,7 +57,7 @@ std::string RegisterEmergedSymbol::toString () const {
 }
 
 const char *RegisterEmergedSymbol::getRegisterName () const {
-  // ASSERT: address is a 64 bits register
+  // ASSERT: address is a 64 bits or 128 bits register
   // Above assertion is ensured during instantiation in the ExpressionImp class
   switch (address) {
   case REG_RAX:
@@ -92,8 +92,41 @@ const char *RegisterEmergedSymbol::getRegisterName () const {
     return "r14";
   case REG_R15:
     return "r15";
+  case REG_XMM0:
+    return "xmm0";
+  case REG_XMM1:
+    return "xmm1";
+  case REG_XMM2:
+    return "xmm2";
+  case REG_XMM3:
+    return "xmm3";
+  case REG_XMM4:
+    return "xmm4";
+  case REG_XMM5:
+    return "xmm5";
+  case REG_XMM6:
+    return "xmm6";
+  case REG_XMM7:
+    return "xmm7";
+  case REG_XMM8:
+    return "xmm8";
+  case REG_XMM9:
+    return "xmm9";
+  case REG_XMM10:
+    return "xmm10";
+  case REG_XMM11:
+    return "xmm11";
+  case REG_XMM12:
+    return "xmm12";
+  case REG_XMM13:
+    return "xmm13";
+  case REG_XMM14:
+    return "xmm14";
+  case REG_XMM15:
+    return "xmm15";
   default:
-    throw std::runtime_error ("Register emerged symbols must correspond to 64 bits regs");
+    throw std::runtime_error ("Register emerged symbols must correspond to 64 bits "
+                              "or 128 bits (XMM series) regs");
   }
 }
 

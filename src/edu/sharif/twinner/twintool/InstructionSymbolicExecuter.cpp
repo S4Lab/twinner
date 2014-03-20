@@ -330,9 +330,10 @@ void InstructionSymbolicExecuter::analysisRoutineRunHooks (const CONTEXT *contex
 
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
-    const ConcreteValue &value =
+    ConcreteValue *value =
         edu::sharif::twinner::util::readRegisterContent (context, trackedReg);
-    (this->*hook) (context, value);
+    (this->*hook) (context, *value);
+    delete value;
     trackedReg = REG_INVALID_;
 
   } else if (operandSize > 0) {
@@ -796,16 +797,16 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
     throw std::runtime_error
         ("Unsupported operand size in division/multiplication instruction");
   }
-  const ConcreteValue &leftVal =
+  ConcreteValue *leftVal =
       edu::sharif::twinner::util::readRegisterContent (context, leftReg);
-  const ConcreteValue &rightVal =
+  ConcreteValue *rightVal =
       edu::sharif::twinner::util::readRegisterContent (context, rightReg);
   edu::sharif::twinner::trace::Expression *leftExp =
       trace->getSymbolicExpressionByRegister (leftReg);
   edu::sharif::twinner::trace::Expression *rightExp =
       trace->getSymbolicExpressionByRegister (rightReg);
-  leftExp->setLastConcreteValue (leftVal.clone ());
-  rightExp->setLastConcreteValue (rightVal.clone ());
+  leftExp->setLastConcreteValue (leftVal);
+  rightExp->setLastConcreteValue (rightVal);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tconcrete values are adjusted...";
   if (os.getValue () == 8) { // AX == AH:AL
@@ -817,9 +818,9 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
     ax.setExpression (trace, leftExp); // this deletes unused expressions by itself
   } else {
     const MutableExpressionValueProxy &left =
-        RegisterResidentExpressionValueProxy (leftReg, leftVal);
+        RegisterResidentExpressionValueProxy (leftReg, *leftVal);
     const MutableExpressionValueProxy &right =
-        RegisterResidentExpressionValueProxy (rightReg, rightVal);
+        RegisterResidentExpressionValueProxy (rightReg, *rightVal);
     left.valueIsChanged (trace, leftExp);
     right.valueIsChanged (trace, rightExp);
   }
@@ -869,9 +870,9 @@ void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) 
    * the edx:eax registers. These registers should be loaded as immediate values
    * in symbolic expressions.
    */
-  const ConcreteValue &edxVal =
+  ConcreteValue *edxVal =
       edu::sharif::twinner::util::readRegisterContent (context, REG_EDX);
-  const ConcreteValue &eaxVal =
+  ConcreteValue *eaxVal =
       edu::sharif::twinner::util::readRegisterContent (context, REG_EAX);
   edu::sharif::twinner::trace::Expression *edxNewExp =
       new edu::sharif::twinner::trace::ExpressionImp (edxVal);
@@ -879,9 +880,9 @@ void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) 
       new edu::sharif::twinner::trace::ExpressionImp (eaxVal);
 
   const MutableExpressionValueProxy &edx =
-      RegisterResidentExpressionValueProxy (REG_EDX, edxVal);
+      RegisterResidentExpressionValueProxy (REG_EDX, *edxVal);
   const MutableExpressionValueProxy &eax =
-      RegisterResidentExpressionValueProxy (REG_EAX, eaxVal);
+      RegisterResidentExpressionValueProxy (REG_EAX, *eaxVal);
   edx.setExpression (trace, edxNewExp);
   eax.setExpression (trace, eaxNewExp);
   delete edxNewExp; // expressions are cloned by above setter methods
