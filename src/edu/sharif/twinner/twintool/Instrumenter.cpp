@@ -315,6 +315,18 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_END);
     break;
   }
+  case DST_REG_SRC_LARGE_REG:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    REG srcreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcLargeReg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                    IARG_UINT32, srcreg, IARG_REG_CONST_REFERENCE, srcreg,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
   case DST_REG_SRC_MEM:
   {
     REG dstreg = INS_OperandReg (ins, 0);
