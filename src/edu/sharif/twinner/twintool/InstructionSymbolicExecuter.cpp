@@ -727,6 +727,34 @@ void InstructionSymbolicExecuter::testAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "pmovmskbAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tpreparing mask-byte(src)...";
+  edu::sharif::twinner::trace::Expression *maskbyte =
+      new edu::sharif::twinner::trace::ExpressionImp (); // zero-filled
+  // src is a reg and is mutable
+  const int size = static_cast<const MutableExpressionValueProxy &> (src).getSize ();
+  for (int i = 7, loc = 0; i < size; i += 8) {
+    edu::sharif::twinner::trace::Expression *ithBit = srcexp->clone ();
+    ithBit->shiftToRight (i - loc); // it is (i+1)-th bit in 1-counting mode
+    ithBit->bitwiseAnd (1 << loc); // i-th bit in 0-counting
+    loc++;
+    maskbyte->bitwiseOr (ithBit);
+    delete ithBit;
+  }
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tsetting dst exp...";
+  dst.setExpression (trace, maskbyte);
+  delete maskbyte;
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::divAnalysisRoutine (
     const MutableExpressionValueProxy &leftDst,
     const MutableExpressionValueProxy &rightDst,
@@ -922,6 +950,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::xorAnalysisRoutine;
   case XED_ICLASS_TEST:
     return &InstructionSymbolicExecuter::testAnalysisRoutine;
+  case XED_ICLASS_PMOVMSKB:
+    return &InstructionSymbolicExecuter::pmovmskbAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: Unknown opcode: "
         << OPCODE_StringShort (op) << '\n';

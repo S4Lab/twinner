@@ -243,6 +243,16 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * PMOVMSKB is a packed-move instruction which moves mask-byte of src reg to dat reg.
+   * Mask-byte: read MSB of each byte of a reg and put those bits together. A 128-bits reg
+   * has 16 bytes and its mask-byte has 16-bits or 2 bytes. Remaining bits in left-side of
+   * the dst reg will be filled with zero.
+   * TODO: Currently only 128-bit XMM registers are supported which should be expanded with proxy objects
+   */
+  void pmovmskbAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * DIV unsigned divide left-right regs by src reg putting quotient in right, remainder
    * in left. This method only calculates symbolic values of operands (concrete values
    * will be wrong) and also ignores propagating new values to overlapping registers.
