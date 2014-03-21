@@ -166,6 +166,10 @@ void Expression::shiftToRight (const Expression *bits) {
   binaryOperation (new Operator (Operator::SHIFT_RIGHT), bits);
 }
 
+void Expression::arithmeticShiftToRight (const Expression *bits) {
+  binaryOperation (new Operator (Operator::ARITHMETIC_SHIFT_RIGHT), bits);
+}
+
 void Expression::shiftToLeft (ConcreteValue *bits) {
   if ((*bits) >= 64) {
     stack.push_back (new Constant (bits));

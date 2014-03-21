@@ -37,6 +37,7 @@ public:
     XOR,
     BITWISE_AND, BITWISE_OR,
     SHIFT_LEFT, SHIFT_RIGHT,
+    ARITHMETIC_SHIFT_RIGHT,
   };
 
   enum OperatorType {

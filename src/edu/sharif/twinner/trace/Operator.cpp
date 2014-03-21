@@ -76,6 +76,23 @@ void Operator::apply (ConcreteValue &dst, const ConcreteValue &src) const {
   case SHIFT_RIGHT:
     dst >>= src;
     break;
+  case ARITHMETIC_SHIFT_RIGHT:
+  {
+    ConcreteValue *tmp = dst.clone ();
+    (*tmp) >>= dst.getSize () - 1;
+    dst >>= src;
+    if ((*tmp) == 1) {
+      (*tmp) <<= src;
+      (*tmp) -= 1;
+      ConcreteValue *size = src.twosComplement ();
+      (*size) += dst.getSize ();
+      (*tmp) <<= (*size);
+      delete size;
+      dst |= (*tmp);
+    }
+    delete tmp;
+    break;
+  }
   default:
     throw std::runtime_error ("Operator::apply(...): Non-handled operator identifier");
   }
@@ -105,6 +122,8 @@ std::string Operator::toString () const {
     return "<<";
   case SHIFT_RIGHT:
     return ">>";
+  case ARITHMETIC_SHIFT_RIGHT:
+    return "(arithmetic)>>";
   default:
     throw std::runtime_error ("Operator::toString(...): Non-handled operator identifier");
   }

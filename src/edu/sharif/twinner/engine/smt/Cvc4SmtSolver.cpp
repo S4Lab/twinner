@@ -256,6 +256,8 @@ Kind convertOperatorIdentifierToCvc4Kind (
   case edu::sharif::twinner::trace::Operator::SHIFT_LEFT:
     return kind::BITVECTOR_SHL;
   case edu::sharif::twinner::trace::Operator::SHIFT_RIGHT:
+    return kind::BITVECTOR_LSHR;
+  case edu::sharif::twinner::trace::Operator::ARITHMETIC_SHIFT_RIGHT:
     return kind::BITVECTOR_ASHR;
   default:
     throw std::runtime_error ("Unknown Operator Identifier");

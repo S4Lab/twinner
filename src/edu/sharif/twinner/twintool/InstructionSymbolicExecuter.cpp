@@ -626,12 +626,46 @@ void InstructionSymbolicExecuter::shrAnalysisRoutine (
       dst.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tshifting operation...";
-  if (dynamic_cast<const ConstantExpressionValueProxy *> (&src) != 0) {
-    // src was an immediate value
-    dstexp->shiftToRight (srcexp->getLastConcreteValue ().clone ());
-  } else {
-    // src was CL register
-    dstexp->shiftToRight (srcexp);
+  dstexp->shiftToRight (srcexp);
+  dst.valueIsChanged (trace, dstexp);
+  //TODO: set rflags
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
+void InstructionSymbolicExecuter::sarAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "sarAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp =
+      dst.getExpression (trace);
+  const int size = dst.getSize ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tshifting operation...";
+  dstexp->arithmeticShiftToRight (srcexp);
+  {//TODO: Remove following code when all sizes have their own concrete value imps.
+    const ConcreteValue &srcval = srcexp->getLastConcreteValue ();
+    const ConcreteValue &dstval = dstexp->getLastConcreteValue ();
+    ConcreteValue *tmp = dstval.clone ();
+    ConcreteValue *sizeval = srcval.twosComplement ();
+    (*sizeval) += size - 1;
+    (*tmp) >>= (*sizeval);
+    if ((*tmp) == 1) {
+      (*tmp) <<= srcval;
+      (*tmp) -= 1;
+      (*sizeval) += 1;
+      (*tmp) <<= (*sizeval);
+      delete sizeval;
+      (*tmp) |= dstval;
+      dstexp->setLastConcreteValue (tmp);
+    } else {
+      delete sizeval;
+      delete tmp;
+    }
   }
   dst.valueIsChanged (trace, dstexp);
   //TODO: set rflags
@@ -942,6 +976,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::shlAnalysisRoutine;
   case XED_ICLASS_SHR:
     return &InstructionSymbolicExecuter::shrAnalysisRoutine;
+  case XED_ICLASS_SAR:
+    return &InstructionSymbolicExecuter::sarAnalysisRoutine;
   case XED_ICLASS_AND:
     return &InstructionSymbolicExecuter::andAnalysisRoutine;
   case XED_ICLASS_OR:
