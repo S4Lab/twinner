@@ -143,6 +143,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_RDTSC, OPERAND_LESS)); // read time-stamp counter
   managedInstructions.insert
       (make_pair (XED_ICLASS_PMOVMSKB, DST_REG_SRC_LARGE_REG)); // packed move mask-byte
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_BSF, BSF_AND_BSR_INS_MODELS));
 }
 
 Instrumenter::~Instrumenter () {

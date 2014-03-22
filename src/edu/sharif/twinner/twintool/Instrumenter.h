@@ -72,6 +72,7 @@ private:
     | DST_MEM_SRC_IMD | DST_MEM_SRC_REG,
     TEST_INS_MODELS = DST_REG_SRC_IMD | DST_MEM_SRC_IMD
     | DST_REG_SRC_REG | DST_MEM_SRC_REG,
+    BSF_AND_BSR_INS_MODELS = DST_REG_SRC_REG | DST_REG_SRC_MEM,
   };
 
   std::map < OPCODE, InstructionModel > managedInstructions;

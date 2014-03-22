@@ -259,6 +259,14 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * BSF is bit scan forward instruction which searches for the least significant 1 bit
+   * in the src and sets its index in the dst. The index is placed as a constant in dst
+   * and a constraint is added to indicate that the noted bit was set.
+   */
+  void bsfAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * DIV unsigned divide left-right regs by src reg putting quotient in right, remainder
    * in left. This method only calculates symbolic values of operands (concrete values
    * will be wrong) and also ignores propagating new values to overlapping registers.

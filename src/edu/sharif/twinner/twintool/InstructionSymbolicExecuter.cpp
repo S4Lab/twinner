@@ -789,6 +789,45 @@ void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::bsfAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "bsfAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      src.getExpression (trace);
+  const edu::sharif::twinner::trace::ConcreteValue &cv = srcexp->getLastConcreteValue ();
+  UINT64 i = 0;
+  for (unsigned int s = cv.getSize (); i < s; ++i) {
+    edu::sharif::twinner::trace::ConcreteValue *bit = cv.clone ();
+    (*bit) >>= i;
+    (*bit) &= 1;
+    if ((*bit) == 1) {
+      delete bit;
+      break;
+    }
+    delete bit;
+  }
+  edu::sharif::twinner::trace::Expression *indexexp =
+      new edu::sharif::twinner::trace::ExpressionImp (i);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tsetting dst exp...";
+  dst.setExpression (trace, indexexp);
+  delete indexexp;
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tadding constraint...";
+  edu::sharif::twinner::trace::Expression *conditionExp = srcexp->clone ();
+  conditionExp->shiftToLeft (i);
+  conditionExp->bitwiseAnd (1);
+  conditionExp->minus (1);
+  edu::sharif::twinner::trace::Constraint *cc =
+      new edu::sharif::twinner::trace::Constraint
+      (conditionExp, edu::sharif::twinner::trace::Constraint::ZERO);
+  delete conditionExp;
+  trace->addPathConstraint (cc);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::divAnalysisRoutine (
     const MutableExpressionValueProxy &leftDst,
     const MutableExpressionValueProxy &rightDst,
@@ -988,6 +1027,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::testAnalysisRoutine;
   case XED_ICLASS_PMOVMSKB:
     return &InstructionSymbolicExecuter::pmovmskbAnalysisRoutine;
+  case XED_ICLASS_BSF:
+    return &InstructionSymbolicExecuter::bsfAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: Unknown opcode: "
         << OPCODE_StringShort (op) << '\n';
