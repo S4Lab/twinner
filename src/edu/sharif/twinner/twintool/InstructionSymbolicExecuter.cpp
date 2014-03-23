@@ -872,10 +872,9 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
       << "\tpreparing left-right in both dst regs...";
   operandSize = leftDst.getSize ();
   leftDstExp->shiftToLeft (operandSize);
-  leftDstExp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::BITWISE_OR), rightDstExp);
+  leftDstExp->bitwiseOr (rightDstExp);
   rightDstExp = rightDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
+  // now leftDstExp is not connected but rightDstExp is connected to related registers
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tcalculating quotient (right) and remainder (left) of division...";
   leftDstExp->binaryOperation
@@ -887,8 +886,6 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
   delete srcexp;
   leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
   delete leftDstExp;
-  rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
-  delete rightDstExp;
   // At this point, symbolic quotient and remainder are calculated correctly.
   // but concrete values are not! So we need to register a hook to synchronize concrete
   // values too (we can also calculate them in assembly, but it's not required).
