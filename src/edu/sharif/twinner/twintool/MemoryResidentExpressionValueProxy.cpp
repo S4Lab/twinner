@@ -69,7 +69,7 @@ MemoryResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     }
     edu::sharif::twinner::trace::Expression *truncatedExp = exp->clone ();
     truncatedExp->truncate (memReadBytes * 8);
-    const UINT64 mask = ~((1 << (memReadBytes * 8)) - 1);
+    const UINT64 mask = ~((1ull << (memReadBytes * 8)) - 1);
     bigexp->bitwiseAnd (mask);
     bigexp->bitwiseOr (exp);
     delete truncatedExp;
