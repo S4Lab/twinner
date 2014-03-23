@@ -40,7 +40,6 @@ MemoryResidentExpressionValueProxy::getExpression (
          "memReadBytes must be provided to the constructor of expression proxy class.");
   }
   UINT64 val = edu::sharif::twinner::util::readMemoryContent (memoryEa);
-
   edu::sharif::twinner::trace::Expression *exp =
       trace->getSymbolicExpressionByMemoryAddress
       (memoryEa, edu::sharif::twinner::trace::ConcreteValue64Bits (val))->clone ();
