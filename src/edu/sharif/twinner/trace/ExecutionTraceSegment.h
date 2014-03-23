@@ -43,11 +43,11 @@ public:
   virtual ~ExecutionTraceSegment ();
 
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
-      const ConcreteValue &regval)
-  throw (WrongStateException);
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg);
+      const ConcreteValue &regval) const throw (WrongStateException);
+  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg) const;
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      const ConcreteValue &memval) throw (WrongStateException);
+      const ConcreteValue &memval) const throw (WrongStateException);
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) const;
 
   virtual Expression *getSymbolicExpressionByRegister (REG reg,
       const ConcreteValue &regval, Expression *newExpression);
@@ -55,6 +55,8 @@ public:
       Expression *newExpression);
   virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       const ConcreteValue &memval, Expression *newExpression);
+  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+      Expression *newExpression);
 
   virtual Expression *setSymbolicExpressionByRegister (REG reg, const Expression *exp);
   virtual Expression *setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
@@ -68,12 +70,12 @@ public:
 private:
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
-      std::map < KEY, Expression * > &map, const KEY key,
+      const std::map < KEY, Expression * > &map, const KEY key,
       const ConcreteValue &concreteVal) const
   throw (WrongStateException);
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
-      std::map < KEY, Expression * > &map, const KEY key) const;
+      const std::map < KEY, Expression * > &map, const KEY key) const;
   template < typename KEY >
   Expression *getSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
       const KEY key, const ConcreteValue &currentConcreteValue,

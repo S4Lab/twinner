@@ -48,21 +48,26 @@ TraceImp::~TraceImp () {
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByRegister (REG reg,
-    const ConcreteValue &regval) throw (WrongStateException) {
+    const ConcreteValue &regval) const throw (WrongStateException) {
   return tryToGetSymbolicExpressionImplementation
       (reg, regval, &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
 }
 
-Expression *TraceImp::tryToGetSymbolicExpressionByRegister (REG reg) {
+Expression *TraceImp::tryToGetSymbolicExpressionByRegister (REG reg) const {
   return tryToGetSymbolicExpressionImplementation
       (reg, &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-    const ConcreteValue &memval) throw (WrongStateException) {
+    const ConcreteValue &memval) const throw (WrongStateException) {
   return tryToGetSymbolicExpressionImplementation
       (memoryEa, memval,
        &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
+}
+
+Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) const {
+  return tryToGetSymbolicExpressionImplementation
+      (memoryEa, &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
 }
 
 void throw_exception_about_unexpected_change_in_memory_or_register_address
@@ -73,7 +78,7 @@ void throw_exception_about_unexpected_change_in_memory_or_register_address
 template < typename T >
 Expression *TraceImp::tryToGetSymbolicExpressionImplementation (T address,
     const ConcreteValue &val,
-    typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
+    typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
 throw (WrongStateException) {
   for (std::list < ExecutionTraceSegment * >::iterator it = currentSegmentIterator;
       it != segments.end (); ++it) {
@@ -102,7 +107,7 @@ throw (WrongStateException) {
 template < typename T >
 Expression *TraceImp::tryToGetSymbolicExpressionImplementation (T address,
     typename TryToGetSymbolicExpressionMethod < T >::
-    TraceSegmentTypeWithoutConcreteValue method) {
+    TraceSegmentTypeWithoutConcreteValue method) const {
   for (std::list < ExecutionTraceSegment * >::iterator it = currentSegmentIterator;
       it != segments.end (); ++it) {
     // searches segments starting from the current towards the oldest one
@@ -135,6 +140,14 @@ Expression *TraceImp::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
     const ConcreteValue &memval, Expression *newExpression) {
   return getSymbolicExpressionImplementation
       (memoryEa, memval, newExpression,
+       &TraceImp::tryToGetSymbolicExpressionByMemoryAddress,
+       &ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress);
+}
+
+Expression *TraceImp::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+    Expression *newExpression) {
+  return getSymbolicExpressionImplementation
+      (memoryEa, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByMemoryAddress,
        &ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress);
 }
@@ -181,6 +194,9 @@ Expression *TraceImp::getSymbolicExpressionImplementation (T address,
      * This getter, which ignores concrete value, is only called when the returned
      * expression is going to be set immediately. So previous value was random and
      * not significant. Thus we can use 0 as concrete value of instantiated expression.
+     *
+     * Callers who care about concrete value of the created expression, are not allowed
+     * to pass null for the newExpression argument.
      */
     newExpression = new ExpressionImp
         (address, ConcreteValue64Bits (0), currentSegmentIndex);

@@ -57,16 +57,20 @@ Trace::~Trace () {
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg,
-    const ConcreteValue &regval) throw (WrongStateException) {
+    const ConcreteValue &regval) const throw (WrongStateException) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
-Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg) {
+Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg) const {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-    const ConcreteValue &memval) throw (WrongStateException) {
+    const ConcreteValue &memval) const throw (WrongStateException) {
+  throw std::runtime_error ("PIN infrastructure is not available");
+}
+
+Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) const {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
@@ -81,6 +85,11 @@ Expression *Trace::getSymbolicExpressionByRegister (REG reg, Expression *newExpr
 
 Expression *Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
     const ConcreteValue &memval, Expression *newExpression) {
+  throw std::runtime_error ("PIN infrastructure is not available");
+}
+
+Expression *Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+    Expression *newExpression) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
@@ -266,6 +275,10 @@ void Trace::printCompleteState (
     logger << "Segment #" << i++ << ":\n";
     seg->printCompleteState (logger);
   }
+}
+
+int Trace::getCurrentSegmentIndex () const {
+  return currentSegmentIndex;
 }
 
 }

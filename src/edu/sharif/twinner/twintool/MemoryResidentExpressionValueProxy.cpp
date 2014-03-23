@@ -15,8 +15,8 @@
 #include "MemoryResidentExpressionValueProxy.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
-#include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
+#include "edu/sharif/twinner/trace-twintool/ExpressionImp.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/memory.h"
@@ -40,17 +40,42 @@ MemoryResidentExpressionValueProxy::getExpression (
          "memReadBytes must be provided to the constructor of expression proxy class.");
   }
   UINT64 val = edu::sharif::twinner::util::readMemoryContent (memoryEa);
-  val = edu::sharif::twinner::util::truncateValue (val, memReadBytes);
 
-  return trace->getSymbolicExpressionByMemoryAddress
-      (memoryEa, edu::sharif::twinner::trace::ConcreteValue64Bits (val));
+  edu::sharif::twinner::trace::Expression *exp =
+      trace->getSymbolicExpressionByMemoryAddress
+      (memoryEa, edu::sharif::twinner::trace::ConcreteValue64Bits (val))->clone ();
+  if (memReadBytes != 8) {
+    exp->truncate (memReadBytes * 8);
+  }
+  return exp;
 }
 
 edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression *exp) const {
-  return trace->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
+  if (memReadBytes == 8) {
+    return trace->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
+  } else {
+    UINT64 val = edu::sharif::twinner::util::readMemoryContent (memoryEa);
+    edu::sharif::twinner::trace::Expression *newexp =
+        new edu::sharif::twinner::trace::ExpressionImp
+        (memoryEa, edu::sharif::twinner::trace::ConcreteValue64Bits (val),
+         trace->getCurrentSegmentIndex ());
+    edu::sharif::twinner::trace::Expression *bigexp =
+        trace->getSymbolicExpressionByMemoryAddress
+        (memoryEa, newexp);
+    if (bigexp != newexp) {
+      delete newexp;
+    }
+    edu::sharif::twinner::trace::Expression *truncatedExp = exp->clone ();
+    truncatedExp->truncate (memReadBytes * 8);
+    const UINT64 mask = ~((1 << (memReadBytes * 8)) - 1);
+    bigexp->bitwiseAnd (mask);
+    bigexp->bitwiseOr (exp);
+    delete truncatedExp;
+    return bigexp;
+  }
 }
 
 void MemoryResidentExpressionValueProxy::valueIsChanged (

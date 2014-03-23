@@ -353,6 +353,7 @@ void InstructionSymbolicExecuter::movAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
+  delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
@@ -361,14 +362,14 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "movsxAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   edu::sharif::twinner::trace::Expression *dstexp =
       dst.setExpressionWithoutChangeNotification (trace, srcexp);
   // src is either reg or mem. So src is mutable
   const int size = static_cast<const MutableExpressionValueProxy &> (src).getSize ();
   // size is at most 32 bits
-  edu::sharif::twinner::trace::Expression *conditionExp = srcexp->clone ();
+  edu::sharif::twinner::trace::Expression *conditionExp = srcexp;
   conditionExp->minus (1ull << (size - 1));
   edu::sharif::twinner::trace::Constraint *cc;
   if (srcexp->getLastConcreteValue ().isNegative (size)) {
@@ -399,6 +400,7 @@ void InstructionSymbolicExecuter::pushAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
+  delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tadjusting rsp...";
   //TODO: check for current value of RSP too
@@ -421,6 +423,7 @@ void InstructionSymbolicExecuter::popAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
+  delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tadjusting rsp...";
   //TODO: check for current value of RSP too
@@ -449,7 +452,9 @@ void InstructionSymbolicExecuter::addAnalysisRoutine (
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::ADD), srcexp);
-  dst.valueIsChanged (trace, dstexp);
+  delete srcexp;
+  dst.setExpression (trace, dstexp);
+  delete dstexp;
   //TODO: set rflags
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -470,7 +475,9 @@ void InstructionSymbolicExecuter::subAnalysisRoutine (
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
-  dst.valueIsChanged (trace, dstexp);
+  delete srcexp;
+  dst.setExpression (trace, dstexp);
+  delete dstexp;
   //TODO: set rflags
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -484,15 +491,16 @@ void InstructionSymbolicExecuter::cmpAnalysisRoutine (
       src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tgetting dst exp...";
-  const edu::sharif::twinner::trace::Expression *dstexp =
+  edu::sharif::twinner::trace::Expression *dstexp =
       dst.getExpression (trace);
 
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tbinary operation...";
-  edu::sharif::twinner::trace::Expression *tmpexp = dstexp->clone ();
+  edu::sharif::twinner::trace::Expression *tmpexp = dstexp;
   tmpexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
+  delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tsetting EFLAGS...";
   eflags.setFlags (tmpexp);
@@ -509,6 +517,7 @@ void InstructionSymbolicExecuter::leaAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
+  delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
@@ -606,9 +615,11 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
     // src was CL register
     dstexp->shiftToLeft (srcexp);
   }
+  delete srcexp;
   // truncate bits which are shifted left, outside of dst boundaries
   dst.truncate (dstexp);
-  dst.valueIsChanged (trace, dstexp);
+  dst.setExpression (trace, dstexp);
+  delete dstexp;
   //TODO: set rflags
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -627,7 +638,9 @@ void InstructionSymbolicExecuter::shrAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tshifting operation...";
   dstexp->shiftToRight (srcexp);
-  dst.valueIsChanged (trace, dstexp);
+  delete srcexp;
+  dst.setExpression (trace, dstexp);
+  delete dstexp;
   //TODO: set rflags
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -667,7 +680,9 @@ void InstructionSymbolicExecuter::sarAnalysisRoutine (
       delete tmp;
     }
   }
-  dst.valueIsChanged (trace, dstexp);
+  delete srcexp;
+  dst.setExpression (trace, dstexp);
+  delete dstexp;
   //TODO: set rflags
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -688,7 +703,9 @@ void InstructionSymbolicExecuter::andAnalysisRoutine (
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::BITWISE_AND), srcexp);
-  dst.valueIsChanged (trace, dstexp);
+  delete srcexp;
+  dst.setExpression (trace, dstexp);
+  delete dstexp;
   //TODO: set rflags
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -709,7 +726,9 @@ void InstructionSymbolicExecuter::orAnalysisRoutine (
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::BITWISE_OR), srcexp);
-  dst.valueIsChanged (trace, dstexp);
+  delete srcexp;
+  dst.setExpression (trace, dstexp);
+  delete dstexp;
   //TODO: set rflags
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -730,7 +749,9 @@ void InstructionSymbolicExecuter::xorAnalysisRoutine (
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::XOR), srcexp);
-  dst.valueIsChanged (trace, dstexp);
+  delete srcexp;
+  dst.setExpression (trace, dstexp);
+  delete dstexp;
   //TODO: set rflags
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
@@ -744,15 +765,16 @@ void InstructionSymbolicExecuter::testAnalysisRoutine (
       src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tgetting dst exp...";
-  const edu::sharif::twinner::trace::Expression *dstexp =
+  edu::sharif::twinner::trace::Expression *dstexp =
       dst.getExpression (trace);
 
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tbinary operation...";
-  edu::sharif::twinner::trace::Expression *tmpexp = dstexp->clone ();
+  edu::sharif::twinner::trace::Expression *tmpexp = dstexp;
   tmpexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::BITWISE_AND), srcexp);
+  delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tsetting EFLAGS...";
   eflags.setFlags (tmpexp);
@@ -781,6 +803,7 @@ void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
     maskbyte->bitwiseOr (ithBit);
     delete ithBit;
   }
+  delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tsetting dst exp...";
   dst.setExpression (trace, maskbyte);
@@ -793,7 +816,7 @@ void InstructionSymbolicExecuter::bsfAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "bsfAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
+  edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
   const edu::sharif::twinner::trace::ConcreteValue &cv = srcexp->getLastConcreteValue ();
   UINT64 i = 0;
@@ -815,7 +838,7 @@ void InstructionSymbolicExecuter::bsfAnalysisRoutine (
   delete indexexp;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tadding constraint...";
-  edu::sharif::twinner::trace::Expression *conditionExp = srcexp->clone ();
+  edu::sharif::twinner::trace::Expression *conditionExp = srcexp;
   conditionExp->shiftToLeft (i);
   conditionExp->bitwiseAnd (1);
   conditionExp->minus (1);
@@ -860,6 +883,11 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
   rightDstExp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::DIVIDE), srcexp);
+  delete srcexp;
+  leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
+  delete leftDstExp;
+  rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
+  delete rightDstExp;
   // At this point, symbolic quotient and remainder are calculated correctly.
   // but concrete values are not! So we need to register a hook to synchronize concrete
   // values too (we can also calculate them in assembly, but it's not required).
@@ -952,9 +980,14 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
   rightDstExp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::MULTIPLY), srcexp);
+  delete srcexp;
   leftDstExp = leftDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
   leftDstExp->shiftToRight (operandSize);
   rightDstExp->truncate (operandSize);
+  leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
+  rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
+  delete leftDstExp;
+  delete rightDstExp;
   // At this point, symbolic multiplication result is calculated correctly.
   // but concrete values are not! So we need to register a hook to synchronize concrete
   // values too (we can also calculate them in assembly, but it's not required).

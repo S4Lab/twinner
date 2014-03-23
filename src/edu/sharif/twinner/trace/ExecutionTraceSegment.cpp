@@ -61,18 +61,23 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg,
-    const ConcreteValue &regval) throw (WrongStateException) {
+    const ConcreteValue &regval) const throw (WrongStateException) {
   return tryToGetSymbolicExpressionImplementation (registerToExpression, reg, regval);
 }
 
-Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg) {
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg) const {
   return tryToGetSymbolicExpressionImplementation (registerToExpression, reg);
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (
-    ADDRINT memoryEa, const ConcreteValue &memval) throw (WrongStateException) {
+    ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException) {
   return tryToGetSymbolicExpressionImplementation
       (memoryAddressToExpression, memoryEa, memval);
+}
+
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (
+    ADDRINT memoryEa) const {
+  return tryToGetSymbolicExpressionImplementation (memoryAddressToExpression, memoryEa);
 }
 
 template < typename Address >
@@ -88,10 +93,10 @@ void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expressio
 
 template < typename KEY >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
-    std::map < KEY, Expression * > &map, const KEY key,
+    const std::map < KEY, Expression * > &map, const KEY key,
     const ConcreteValue &concreteVal) const
 throw (WrongStateException) {
-  typename std::map < KEY, Expression * >::iterator it = map.find (key);
+  typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
@@ -117,8 +122,8 @@ void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expressio
 
 template < typename KEY >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
-    std::map < KEY, Expression * > &map, const KEY key) const {
-  typename std::map < KEY, Expression * >::iterator it = map.find (key);
+    const std::map < KEY, Expression * > &map, const KEY key) const {
+  typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
@@ -134,14 +139,19 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg,
 
 Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg,
     Expression *newExpression) {
-  return getSymbolicExpressionImplementation (registerToExpression, reg,
-                                              newExpression);
+  return getSymbolicExpressionImplementation (registerToExpression, reg, newExpression);
 }
 
 Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
     const ConcreteValue &memval, Expression *newExpression) {
   return getSymbolicExpressionImplementation
       (memoryAddressToExpression, memoryEa, memval, newExpression);
+}
+
+Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+    Expression *newExpression) {
+  return getSymbolicExpressionImplementation
+      (memoryAddressToExpression, memoryEa, newExpression);
 }
 
 template < typename KEY >

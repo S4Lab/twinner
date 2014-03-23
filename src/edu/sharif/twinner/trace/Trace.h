@@ -67,18 +67,23 @@ public:
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
-      const ConcreteValue &regval) throw (WrongStateException);
+      const ConcreteValue &regval) const throw (WrongStateException);
 
   /**
    * Searches backwards to find queried values.
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg);
+  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg) const;
 
   /**
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      const ConcreteValue &memval) throw (WrongStateException);
+      const ConcreteValue &memval) const throw (WrongStateException);
+
+  /**
+   * Searches backwards to find queried values.
+   */
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) const;
 
   /**
    * The getter searches segments backwards to find queried value.
@@ -97,6 +102,12 @@ public:
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       const ConcreteValue &memval, Expression *newExpression = 0);
+
+  /**
+   * The getter searches segments backwards to find queried value.
+   */
+  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+      Expression *newExpression = 0);
 
   /**
    * The setter, uses most recent trace segment for setting the new value.
@@ -147,6 +158,8 @@ public:
       const edu::sharif::twinner::util::Logger &logger) const;
   virtual void printCompleteState (
       const edu::sharif::twinner::util::Logger &logger) const;
+
+  int getCurrentSegmentIndex () const;
 };
 
 }

@@ -37,7 +37,7 @@ reg (_reg), regVal (edu::sharif::twinner::trace::ConcreteValue64Bits (0)) {
 edu::sharif::twinner::trace::Expression *
 RegisterResidentExpressionValueProxy::getExpression (
     edu::sharif::twinner::trace::Trace *trace) const {
-  return trace->getSymbolicExpressionByRegister (reg, regVal);
+  return trace->getSymbolicExpressionByRegister (reg, regVal)->clone ();
 }
 
 edu::sharif::twinner::trace::Expression *

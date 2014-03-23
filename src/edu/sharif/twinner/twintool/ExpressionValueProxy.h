@@ -45,10 +45,11 @@ public:
 
   /**
    * Returns expression. This call may have side-effects.
-   * Returned expression can be changed (dependent on logic of proxied expression).
-   * BTW, if returned expression get changed, the caller must call valueIsChanged method.
+   * Changes on the returned expression won't affect the stored one. Indeed a cloned
+   * instance is returned which must be deleted by the caller. For changing the underlying
+   * instance, the setter methods must be used.
    * @param trace Trace object which this expression will be resolved upon it.
-   * @return The expression object.
+   * @return The cloned expression object.
    */
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const = 0;

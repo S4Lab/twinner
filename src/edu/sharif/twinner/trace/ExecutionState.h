@@ -88,17 +88,17 @@ public:
    * corresponding expression differs from expected @c regval value.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
-      const ConcreteValue &regval) throw (WrongStateException) = 0;
+      const ConcreteValue &regval) const throw (WrongStateException) = 0;
 
   /**
    * Overload of tryToGetSymbolicExpressionByRegister (reg, regval) method.
    * This overload does not take care of concrete values.
-   * 
+   *
    * @param reg The register which its value is returned.
    * @return symbolic expression which is living in given register at current state
    * or 0/null if there is no such expression.
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg) = 0;
+  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg) const = 0;
 
   /**
    * The getter returns current value stored in one memory address.
@@ -107,10 +107,22 @@ public:
    *
    * @param memoryEa The memory effective address which its value will be returned.
    * @param memval The concrete value which currently lives at given memory address.
-   * @return symbolic expression which is living at the given memory address at current state.
+   * @return symbolic expression which is living at the given memory address at current
+   * state or 0/null if there is no such expression.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      const ConcreteValue &memval) throw (WrongStateException) = 0;
+      const ConcreteValue &memval) const throw (WrongStateException) = 0;
+
+  /**
+   * Overloads of tryToGetSymbolicExpressionByMemoryAddress (memoryEa, memval) method.
+   * This overload does not take care of concrete values.
+   * 
+   * @param memoryEa The memory effective address which its value will be returned.
+   * @return symbolic expression which is living at the given memory address at current
+   * state or 0/null if there is no such expression.
+   */
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (
+      ADDRINT memoryEa) const = 0;
 
   /**
    * The getter returns current value stored in one register.
@@ -165,6 +177,20 @@ public:
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       const ConcreteValue &memval, Expression *newExpression) = 0;
+
+  /**
+   * Overload of getSymbolicExpressionByMemoryAddress (memoryEa, memval, newExpression)
+   * method. This overload is used when the memval is irrelevant. So if there is any
+   * expression kept at asked memory address, it will be returned and only when
+   * no expression, regardless of its last concrete value, were being kept at asked
+   * address, a new symbol will be created.
+   *
+   * @param memoryEa The memory effective address which its value will be returned.
+   * @param newExpression The expression which will be set if there was no current value.
+   * @return symbolic expression which is living at the given memory address at current state.
+   */
+  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+      Expression *newExpression) = 0;
 
   /**
    * The setter clones given expression and stores it as the new value living

@@ -14,6 +14,8 @@
 
 #include "ConstantExpressionValueProxy.h"
 
+#include "edu/sharif/twinner/trace/Expression.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -26,7 +28,7 @@ exp (_exp) {
 
 edu::sharif::twinner::trace::Expression *ConstantExpressionValueProxy::getExpression (
     edu::sharif::twinner::trace::Trace *trace) const {
-  return exp;
+  return exp->clone ();
 }
 
 void ConstantExpressionValueProxy::valueIsChanged (
