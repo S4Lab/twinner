@@ -344,6 +344,29 @@ void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   hook = 0;
 }
 
+void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "cmovbeAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  edu::sharif::twinner::trace::Constraint *cc
+      = eflags.instantiateConstraintForBelowOrEqual ();
+  const bool shouldExecuteTheMov =
+      cc->getComparisonType () == edu::sharif::twinner::trace::Constraint::NON_POSITIVE;
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tadding constraint...";
+  trace->addPathConstraint (cc);
+  if (shouldExecuteTheMov) {
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\texecuting the actual move...";
+    movAnalysisRoutine (dst, src);
+  } else {
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tignoring the move...";
+  }
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::movAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "movAnalysisRoutine(...)\n"
@@ -1030,6 +1053,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_MOVSX:
   case XED_ICLASS_MOVSXD:
     return &InstructionSymbolicExecuter::movsxAnalysisRoutine;
+  case XED_ICLASS_CMOVBE:
+    return &InstructionSymbolicExecuter::cmovbeAnalysisRoutine;
   case XED_ICLASS_PUSH:
     return &InstructionSymbolicExecuter::pushAnalysisRoutine;
   case XED_ICLASS_POP:

@@ -96,6 +96,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_MOVSXD, // 2 models (r <- sign-extend(r/m))
                   MOV_ZX_AND_SX_INS_MODELS));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_CMOVBE, DST_REG_SRC_EITHER_REG_OR_MEM));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_PUSH, PUSH_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_POP, POP_INS_MODELS));
@@ -144,7 +146,7 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_PMOVMSKB, DST_REG_SRC_LARGE_REG)); // packed move mask-byte
   managedInstructions.insert
-      (make_pair (XED_ICLASS_BSF, BSF_AND_BSR_INS_MODELS));
+      (make_pair (XED_ICLASS_BSF, DST_REG_SRC_EITHER_REG_OR_MEM));
 }
 
 Instrumenter::~Instrumenter () {

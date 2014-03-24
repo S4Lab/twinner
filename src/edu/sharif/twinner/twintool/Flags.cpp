@@ -14,6 +14,7 @@
 
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
+#include "edu/sharif/twinner/trace/ConcreteValue.h"
 
 namespace edu {
 namespace sharif {
@@ -49,6 +50,16 @@ Flags::instantiateConstraintForZeroFlag (bool zfIsSet) const {
        zfIsSet ?
        edu::sharif::twinner::trace::Constraint::ZERO :
        edu::sharif::twinner::trace::Constraint::NON_ZERO);
+}
+
+edu::sharif::twinner::trace::Constraint *
+Flags::instantiateConstraintForBelowOrEqual () const {
+  const edu::sharif::twinner::trace::Expression *exp = getFlagsUnderlyingExpression ();
+  const edu::sharif::twinner::trace::ConcreteValue &cv = exp->getLastConcreteValue ();
+  return new edu::sharif::twinner::trace::Constraint
+      (exp, (cv == 0 || cv.isNegative (cv.getSize ())) ?
+       edu::sharif::twinner::trace::Constraint::NON_POSITIVE :
+       edu::sharif::twinner::trace::Constraint::POSITIVE);
 }
 
 }

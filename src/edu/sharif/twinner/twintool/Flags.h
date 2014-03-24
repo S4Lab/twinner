@@ -49,6 +49,15 @@ public:
   edu::sharif::twinner::trace::Constraint *
   instantiateConstraintForZeroFlag (bool zfIsSet) const;
 
+  /**
+   * Instantiates a new constraint object denoting the whether underlying expression
+   * matches with below or equal (BE) condition. The last concrete value of the expression
+   * indicates that BE should be satisfied or its negate should be satisfied.
+   * @return A new constraint instance denoting whether current eflags matches with BE.
+   */
+  edu::sharif::twinner::trace::Constraint *
+  instantiateConstraintForBelowOrEqual () const;
+
 private:
   /**
    * Returns the underlying expression which currently, flags are set based on it. The
