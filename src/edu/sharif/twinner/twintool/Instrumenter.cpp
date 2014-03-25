@@ -147,6 +147,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_PMOVMSKB, DST_REG_SRC_LARGE_REG)); // packed move mask-byte
   managedInstructions.insert
       (make_pair (XED_ICLASS_BSF, DST_REG_SRC_EITHER_REG_OR_MEM));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_INC, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
 }
 
 Instrumenter::~Instrumenter () {
@@ -233,6 +235,8 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_PMOVMSKB:
     // TODO: Find a more abstract/general solution to check for XMM registers
     return DST_REG_SRC_LARGE_REG;
+  case XED_ICLASS_INC:
+    return INS_OperandIsReg (ins, 0) ? DST_REG_SRC_IMPLICIT : DST_MEM_SRC_IMPLICIT;
   default:
     switch (INS_Category (ins)) {
     case XED_CATEGORY_COND_BR:
@@ -474,6 +478,25 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_AFTER, (AFUNPTR) analysisRoutineAfterOperandLess,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_CONST_CONTEXT,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_REG_SRC_IMPLICIT:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcImplicit,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_MEM_SRC_IMPLICIT:
+  {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcImplicit,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;

@@ -324,6 +324,39 @@ void InstructionSymbolicExecuter::analysisRoutineAfterOperandLessInstruction (
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImplicit (
+    SingleOperandAnalysisRoutine routine,
+    REG dstReg, const ConcreteValue &dstRegVal,
+    const char *insAssembly) {
+  if (disabled) {
+    return;
+  }
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineDstRegSrcImplicit(INS: "
+      << insAssembly << "): reg operand: " << REG_StringShort (dstReg) << '\n';
+  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal));
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
+void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImplicit (
+    SingleOperandAnalysisRoutine routine,
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    const char *insAssembly) {
+  if (disabled) {
+    return;
+  }
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineDstMemSrcImplicit(INS: "
+      << insAssembly << "): src mem addr: " << srcMemoryEa
+      << ", mem read bytes: " << memReadBytes << '\n';
+  (this->*routine) (MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::analysisRoutineRunHooks (const CONTEXT *context) {
   runHooks (context);
 }
@@ -1044,6 +1077,22 @@ void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) 
   delete eaxNewExp;
 }
 
+void InstructionSymbolicExecuter::incAnalysisRoutine (
+    const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::util::Logger::loquacious () << "incAnalysisRoutine(...)\n"
+      << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp =
+      opr.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tincrementing...";
+  dstexp->add (1);
+  opr.setExpression (trace, dstexp);
+  delete dstexp;
+  //TODO: set rflags
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -1152,6 +1201,20 @@ InstructionSymbolicExecuter::convertOpcodeToOperandLessAnalysisRoutine (
         "Operand Less: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
     throw std::runtime_error
         ("Unknown opcode (for operand-less) given to analysis routine");
+  }
+}
+
+InstructionSymbolicExecuter::SingleOperandAnalysisRoutine
+InstructionSymbolicExecuter::convertOpcodeToSingleOperandAnalysisRoutine (
+    OPCODE op) const {
+  switch (op) {
+  case XED_ICLASS_INC:
+    return &InstructionSymbolicExecuter::incAnalysisRoutine;
+  default:
+    edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
+        "Single Operand: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
+    throw std::runtime_error
+        ("Unknown opcode (for single-operand) given to analysis routine");
   }
 }
 
@@ -1315,6 +1378,28 @@ VOID analysisRoutineAfterOperandLess (VOID *iseptr, UINT32 opcode,
 VOID analysisRoutineRunHooks (VOID *iseptr, const CONTEXT *context) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineRunHooks (context);
+}
+
+VOID analysisRoutineDstRegSrcImplicit (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
+  ise->analysisRoutineDstRegSrcImplicit
+      (ise->convertOpcodeToSingleOperandAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       insAssemblyStr);
+}
+
+VOID analysisRoutineDstMemSrcImplicit (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa, UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
+  ise->analysisRoutineDstMemSrcImplicit
+      (ise->convertOpcodeToSingleOperandAnalysisRoutine ((OPCODE) opcode),
+       dstMemoryEa, memReadBytes,
+       insAssemblyStr);
 }
 
 }

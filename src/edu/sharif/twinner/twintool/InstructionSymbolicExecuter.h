@@ -49,6 +49,8 @@ private:
   typedef Hook SuddenlyChangedRegAnalysisRoutine;
   typedef void (InstructionSymbolicExecuter::*OperandLessAnalysisRoutine) (
       const CONTEXT *context);
+  typedef void (InstructionSymbolicExecuter::*SingleOperandAnalysisRoutine) (
+      const MutableExpressionValueProxy &opr);
 
   edu::sharif::twinner::trace::Trace *trace;
   Flags eflags;
@@ -113,6 +115,12 @@ public:
       const char *insAssembly);
   void analysisRoutineAfterOperandLessInstruction (OperandLessAnalysisRoutine routine,
       const CONTEXT *context,
+      const char *insAssembly);
+  void analysisRoutineDstRegSrcImplicit (SingleOperandAnalysisRoutine routine,
+      REG dstReg, const ConcreteValue &dstRegVal,
+      const char *insAssembly);
+  void analysisRoutineDstMemSrcImplicit (SingleOperandAnalysisRoutine routine,
+      ADDRINT srcMemoryEa, UINT32 memReadBytes,
       const char *insAssembly);
   void analysisRoutineRunHooks (const CONTEXT *context);
 
@@ -306,6 +314,11 @@ private:
    */
   void rdtscAnalysisRoutine (const CONTEXT *context);
 
+  /**
+   * INC increments the opr reg/mem operand.
+   */
+  void incAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
   DoubleDestinationsAnalysisRoutine convertOpcodeToDoubleDestinationsAnalysisRoutine (
@@ -315,6 +328,8 @@ public:
   SuddenlyChangedRegAnalysisRoutine convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
       OPCODE op) const;
   OperandLessAnalysisRoutine convertOpcodeToOperandLessAnalysisRoutine (
+      OPCODE op) const;
+  SingleOperandAnalysisRoutine convertOpcodeToSingleOperandAnalysisRoutine (
       OPCODE op) const;
 };
 
@@ -366,6 +381,12 @@ VOID analysisRoutineAfterOperandLess (VOID *iseptr, UINT32 opcode,
     const CONTEXT *context,
     UINT32 insAssembly);
 VOID analysisRoutineRunHooks (VOID *iseptr, const CONTEXT *context);
+VOID analysisRoutineDstRegSrcImplicit (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 insAssembly);
+VOID analysisRoutineDstMemSrcImplicit (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa, UINT32 memReadBytes,
+    UINT32 insAssembly);
 
 }
 }
