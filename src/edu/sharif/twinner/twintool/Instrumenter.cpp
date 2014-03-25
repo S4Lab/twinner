@@ -98,6 +98,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_CMOVBE, DST_REG_SRC_EITHER_REG_OR_MEM));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_CMOVNBE, DST_REG_SRC_EITHER_REG_OR_MEM));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_PUSH, PUSH_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_POP, POP_INS_MODELS));

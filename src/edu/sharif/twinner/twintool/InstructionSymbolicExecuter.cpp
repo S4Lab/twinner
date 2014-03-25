@@ -381,10 +381,33 @@ void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "cmovbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
-  edu::sharif::twinner::trace::Constraint *cc
-      = eflags.instantiateConstraintForBelowOrEqual ();
+  edu::sharif::twinner::trace::Constraint *cc =
+      eflags.instantiateConstraintForBelowOrEqual ();
   const bool shouldExecuteTheMov =
       cc->getComparisonType () == edu::sharif::twinner::trace::Constraint::NON_POSITIVE;
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tadding constraint...";
+  trace->addPathConstraint (cc);
+  if (shouldExecuteTheMov) {
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\texecuting the actual move...";
+    movAnalysisRoutine (dst, src);
+  } else {
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tignoring the move...";
+  }
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
+void InstructionSymbolicExecuter::cmovnbeAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "cmovnbeAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  edu::sharif::twinner::trace::Constraint *cc =
+      eflags.instantiateConstraintForBelowOrEqual ();
+  const bool shouldExecuteTheMov =
+      cc->getComparisonType () == edu::sharif::twinner::trace::Constraint::POSITIVE;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tadding constraint...";
   trace->addPathConstraint (cc);
@@ -1104,6 +1127,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::movsxAnalysisRoutine;
   case XED_ICLASS_CMOVBE:
     return &InstructionSymbolicExecuter::cmovbeAnalysisRoutine;
+  case XED_ICLASS_CMOVNBE:
+    return &InstructionSymbolicExecuter::cmovnbeAnalysisRoutine;
   case XED_ICLASS_PUSH:
     return &InstructionSymbolicExecuter::pushAnalysisRoutine;
   case XED_ICLASS_POP:

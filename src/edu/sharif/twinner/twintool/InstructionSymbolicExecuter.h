@@ -138,6 +138,12 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * CMOVNBE (Conditional Move) moves src to dst iff (CF=0 && ZF=0).
+   */
+  void cmovnbeAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * MOV has 5 models
    * r <- r/m/i
    * m <- r/i
