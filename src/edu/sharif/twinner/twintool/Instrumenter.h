@@ -32,32 +32,32 @@ private:
 
   enum InstructionModel {
 
-    NOP_INS_MODELS = 0x0000,
+    NOP_INS_MODELS = 0x00000000,
 
-    DST_REG_SRC_REG = 0x0001,
-    DST_REG_SRC_MEM = 0x0002,
-    DST_REG_SRC_IMD = 0x0004,
-    DST_MEM_SRC_REG = 0x0008,
-    DST_MEM_SRC_IMD = 0x0010,
+    DST_REG_SRC_REG = 0x00000001,
+    DST_REG_SRC_MEM = 0x00000002,
+    DST_REG_SRC_IMD = 0x00000004,
+    DST_MEM_SRC_REG = 0x00000008,
+    DST_MEM_SRC_IMD = 0x00000010,
 
-    DST_STK_SRC_REG = 0x0020,
-    DST_STK_SRC_IMD = 0x0040,
-    DST_STK_SRC_MEM = 0x0080,
+    DST_STK_SRC_REG = 0x00000020,
+    DST_STK_SRC_IMD = 0x00000040,
+    DST_STK_SRC_MEM = 0x00000080,
 
     DST_REG_SRC_STK = DST_REG_SRC_MEM,
-    DST_MEM_SRC_STK = 0x0100,
+    DST_MEM_SRC_STK = 0x00000100,
 
-    JMP_CC_INS_MODELS = 0x0200,
+    JMP_CC_INS_MODELS = 0x00000200,
 
-    DST_REG_SRC_ADG = 0x0400,
+    DST_REG_SRC_ADG = 0x00000400,
 
-    DST_RSP_SRC_CALL = 0x0800, // instructions who update RSP due to routine calls
+    DST_RSP_SRC_CALL = 0x00000800, // instructions who update RSP due to routine calls
 
-    DST_REG_REG_SRC_REG = 0x1000, // there are two (left and right) destinations
+    DST_REG_REG_SRC_REG = 0x00001000, // there are two (left and right) destinations
 
-    OPERAND_LESS = 0x2000,
+    OPERAND_LESS = 0x00002000,
 
-    DST_REG_SRC_LARGE_REG = 0x4000,
+    DST_REG_SRC_LARGE_REG = 0x00004000,
 
     RET_INS_MODELS = DST_RSP_SRC_CALL,
     CALL_INS_MODELS = DST_RSP_SRC_CALL,
