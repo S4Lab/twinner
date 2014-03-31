@@ -85,7 +85,7 @@ struct RegistersSet setRegistersValuesAndInvokeSyscall (struct RegistersSet regs
         /* loading registers' values from regs (the %1) variable */
         LOADING_REGISTERS_COMMANDS (1)
         /* the syscall itself */
-        "syscall\n\t" /* FIXME: the syscall code should specify its args/aux-info */
+        "syscall\n\t"
         /* saving resulting registers' values within resultingRegs (the %0) variable */
         SAVING_REGISTERS_COMMANDS (0)
         /* loading registers' old values from currentRegs (the %2) variable */
