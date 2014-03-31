@@ -359,8 +359,12 @@ void code_initial_value_into_twin_code (std::stringstream &out,
 void code_trace_into_twin_code (std::stringstream &out,
     const edu::sharif::twinner::trace::Trace * const &trace) {
   TwinCodeGenerationAux aux = {1, out};
-  edu::sharif::twinner::util::foreach (trace->getTraceSegments (),
-                                       &code_segment_into_twin_code, aux);
+  for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
+      ::const_reverse_iterator it = trace->getTraceSegments ().rbegin ();
+      it != trace->getTraceSegments ().rend (); ++it) {
+    edu::sharif::twinner::trace::ExecutionTraceSegment * const segment = *it;
+    code_segment_into_twin_code (aux, segment);
+  }
   for (unsigned int j = aux.depth - 1; j > 0; --j) {
 
     repeat (j) {
