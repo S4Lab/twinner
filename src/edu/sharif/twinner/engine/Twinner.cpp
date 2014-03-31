@@ -61,7 +61,27 @@ class IndentedStringStream : public std::stringstream {
 
 inline void code_trace_into_twin_code (std::stringstream &out,
     const edu::sharif::twinner::trace::Trace * const &trace);
-inline void code_segment_into_twin_code (TwinCodeGenerationAux &aux,
+inline std::map < int, std::set < ADDRINT > > gather_symbols_addresses_of_trace (
+    const edu::sharif::twinner::trace::Trace *trace);
+inline void extract_memory_addresses_of_trace_segment (
+    std::map < int, std::set < ADDRINT > > &addr,
+    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
+inline void extract_memory_addresses_of_constraint (
+    std::map < int, std::set < ADDRINT > > &addr,
+    const edu::sharif::twinner::trace::Constraint * const &constraint);
+template < typename Key >
+inline void extract_memory_addresses_of_expression (
+    std::map < int, std::set < ADDRINT > > &addr,
+    const Key &key, edu::sharif::twinner::trace::Expression * const &exp);
+inline void extract_memory_addresses_of_expression (
+    std::map < int, std::set < ADDRINT > > &addr,
+    const edu::sharif::twinner::trace::Expression *exp);
+inline void check_symbol_type_and_add_it_to_set (
+    std::map < int, std::set < ADDRINT > > &addr,
+    edu::sharif::twinner::trace::ExpressionToken * const &token);
+
+inline void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
+    TwinCodeGenerationAux &aux,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
 inline void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
     const edu::sharif::twinner::trace::Constraint * const &constraint);
@@ -74,18 +94,6 @@ inline std::set < Value > get_values_set (const std::map < Key, Value > &map);
 template < typename Key, typename Value >
 inline void add_value_to_set (std::set < Value > &set,
     const Key &key, const Value &value);
-
-inline void extract_memory_addresses_of_trace_segment (std::set < ADDRINT > &addresses,
-    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
-inline void extract_memory_addresses_of_constraint (std::set < ADDRINT > &addresses,
-    const edu::sharif::twinner::trace::Constraint * const &constraint);
-template < typename Key >
-inline void extract_memory_addresses_of_expression (std::set < ADDRINT > &addresses,
-    const Key &key, edu::sharif::twinner::trace::Expression * const &exp);
-inline void extract_memory_addresses_of_expression (std::set < ADDRINT > &addresses,
-    const edu::sharif::twinner::trace::Expression *exp);
-inline void check_symbol_type_and_add_it_to_set (std::set < ADDRINT > &addresses,
-    edu::sharif::twinner::trace::ExpressionToken * const &token);
 
 inline void remove_mismatches_from_map (std::map < ADDRINT, UINT64 > &initialValues,
     const ADDRINT &address, const UINT64 &content);
@@ -104,7 +112,7 @@ inline void code_registers_symbolic_changes_of_one_segment (IndentedStringStream
 
 inline void code_registers_symbols_initiation_into_twin_code (std::stringstream &out,
     int index);
-inline void code_symbol_initiation_into_twin_code (std::stringstream &out,
+inline void code_symbol_initiation_into_twin_code (TwinCodeGenerationAux &aux,
     const ADDRINT &address);
 inline void code_memory_changes (IndentedStringStream &out,
     const ADDRINT &memoryEa, edu::sharif::twinner::trace::Expression * const &exp);
@@ -181,6 +189,18 @@ void Twinner::generateTwinBinary () {
 
 std::map < ADDRINT, UINT64 > Twinner::obtainInitializedMemoryValues (Executer &ex) const {
   // step 4: `addresses` field holds candidate addresses
+  std::set < ADDRINT > addresses;
+  for (std::list < const edu::sharif::twinner::trace::Trace * >::const_iterator it =
+      traces.begin (); it != traces.end (); ++it) {
+    const edu::sharif::twinner::trace::Trace *trace = *it;
+    const std::map < int, std::set < ADDRINT > > addr =
+        gather_symbols_addresses_of_trace (trace);
+    for (std::map < int, std::set < ADDRINT > >::const_iterator it2 = addr.begin ();
+        it2 != addr.end (); ++it2) {
+      const std::set < ADDRINT > &a = it2->second;
+      addresses.insert (a.begin (), a.end ());
+    }
+  }
   ex.setCandidateAddresses (addresses);
   // step 5
   std::map < ADDRINT, UINT64 > initialValues1 =
@@ -222,9 +242,6 @@ void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace
   edu::sharif::twinner::util::foreach (trace->getTraceSegments (),
                                        &gather_constraints_of_trace_segment,
                                        constraints);
-  edu::sharif::twinner::util::foreach (trace->getTraceSegments (),
-                                       &extract_memory_addresses_of_trace_segment,
-                                       addresses);
   log << "Done.\n";
 }
 
@@ -234,45 +251,6 @@ void gather_constraints_of_trace_segment (
   constraints.insert (constraints.end (),
                       segment->getPathConstraints ().begin (),
                       segment->getPathConstraints ().end ());
-}
-
-void extract_memory_addresses_of_trace_segment (std::set < ADDRINT > &addresses,
-    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
-  edu::sharif::twinner::util::foreach (segment->getMemoryAddressToExpression (),
-                                       &extract_memory_addresses_of_expression,
-                                       addresses);
-  edu::sharif::twinner::util::foreach (segment->getRegisterToExpression (),
-                                       &extract_memory_addresses_of_expression,
-                                       addresses);
-  edu::sharif::twinner::util::foreach (segment->getPathConstraints (),
-                                       &extract_memory_addresses_of_constraint,
-                                       addresses);
-}
-
-void extract_memory_addresses_of_constraint (std::set < ADDRINT > &addresses,
-    const edu::sharif::twinner::trace::Constraint * const &constraint) {
-  extract_memory_addresses_of_expression (addresses, constraint->getExpression ());
-}
-
-template < typename Key >
-void extract_memory_addresses_of_expression (std::set < ADDRINT > &addresses,
-    const Key &key, edu::sharif::twinner::trace::Expression * const &exp) {
-  extract_memory_addresses_of_expression (addresses, exp);
-}
-
-void extract_memory_addresses_of_expression (std::set < ADDRINT > &addresses,
-    const edu::sharif::twinner::trace::Expression *exp) {
-  edu::sharif::twinner::util::foreach (exp->getStack (),
-                                       &check_symbol_type_and_add_it_to_set, addresses);
-}
-
-void check_symbol_type_and_add_it_to_set (std::set < ADDRINT > &addresses,
-    edu::sharif::twinner::trace::ExpressionToken * const &token) {
-  const edu::sharif::twinner::trace::MemoryEmergedSymbol *symbol =
-      dynamic_cast<edu::sharif::twinner::trace::MemoryEmergedSymbol *> (token);
-  if (symbol) {
-    addresses.insert (symbol->getAddress ());
-  }
 }
 
 bool Twinner::calculateSymbolsValuesForCoveringNextPath (
@@ -306,8 +284,6 @@ void Twinner::codeTracesIntoTwinCode (
   out << "\tSAVE_REGISTERS (regs);\n";
   out << '\t';
   code_registers_symbols_initiation_into_twin_code (out, 0);
-  edu::sharif::twinner::util::foreach (addresses,
-                                       &code_symbol_initiation_into_twin_code, out);
   codeInitialValuesIntoTwinCode (out, initialValues);
   edu::sharif::twinner::util::foreach (traces, &code_trace_into_twin_code, out);
   out << "}\n";
@@ -340,11 +316,14 @@ void code_registers_symbols_initiation_into_twin_code (std::stringstream &out,
   out << ";\n";
 }
 
-void code_symbol_initiation_into_twin_code (std::stringstream &out,
+void code_symbol_initiation_into_twin_code (TwinCodeGenerationAux &aux,
     const ADDRINT &address) {
-  out << "\t";
-  out << "const UINT64 m" << std::hex << address
-      << "_0 = *((UINT64 *) 0x" << address << ");\n";
+
+  repeat (aux.depth) {
+    aux.out << '\t';
+  }
+  aux.out << "const UINT64 m" << std::hex << address << "_" << aux.index
+      << " = *((UINT64 *) 0x" << address << ");\n";
 }
 
 void Twinner::codeInitialValuesIntoTwinCode (std::stringstream &out,
@@ -360,12 +339,18 @@ void code_initial_value_into_twin_code (std::stringstream &out,
 
 void code_trace_into_twin_code (std::stringstream &out,
     const edu::sharif::twinner::trace::Trace * const &trace) {
-  TwinCodeGenerationAux aux = {1, out, 0};
+  TwinCodeGenerationAux aux = {
+                               1, // depth
+                               out,
+                               0 // index
+  };
+  const std::map < int, std::set < ADDRINT > > addresses =
+      gather_symbols_addresses_of_trace (trace);
   for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
       ::const_reverse_iterator it = trace->getTraceSegments ().rbegin ();
       it != trace->getTraceSegments ().rend (); ++it) {
     edu::sharif::twinner::trace::ExecutionTraceSegment * const segment = *it;
-    code_segment_into_twin_code (aux, segment);
+    code_segment_into_twin_code (addresses.at (aux.index), aux, segment);
   }
   for (unsigned int j = aux.depth - 1; j > 0; --j) {
 
@@ -376,9 +361,60 @@ void code_trace_into_twin_code (std::stringstream &out,
   }
 }
 
-void code_segment_into_twin_code (TwinCodeGenerationAux &aux,
+std::map < int, std::set < ADDRINT > > gather_symbols_addresses_of_trace (
+    const edu::sharif::twinner::trace::Trace *trace) {
+  std::map < int, std::set < ADDRINT > > addr;
+  edu::sharif::twinner::util::foreach (trace->getTraceSegments (),
+                                       &extract_memory_addresses_of_trace_segment,
+                                       addr);
+  return addr;
+}
+
+void extract_memory_addresses_of_trace_segment (
+    std::map < int, std::set < ADDRINT > > &addr,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
-  std::stringstream &out = aux.out;
+  edu::sharif::twinner::util::foreach (segment->getMemoryAddressToExpression (),
+                                       &extract_memory_addresses_of_expression,
+                                       addr);
+  edu::sharif::twinner::util::foreach (segment->getRegisterToExpression (),
+                                       &extract_memory_addresses_of_expression,
+                                       addr);
+  edu::sharif::twinner::util::foreach (segment->getPathConstraints (),
+                                       &extract_memory_addresses_of_constraint,
+                                       addr);
+}
+
+void extract_memory_addresses_of_constraint (std::map < int, std::set < ADDRINT > > &addr,
+    const edu::sharif::twinner::trace::Constraint * const &constraint) {
+  extract_memory_addresses_of_expression (addr, constraint->getExpression ());
+}
+
+template < typename Key >
+void extract_memory_addresses_of_expression (std::map < int, std::set < ADDRINT > > &addr,
+    const Key &key, edu::sharif::twinner::trace::Expression * const &exp) {
+  extract_memory_addresses_of_expression (addr, exp);
+}
+
+void extract_memory_addresses_of_expression (std::map < int, std::set < ADDRINT > > &addr,
+    const edu::sharif::twinner::trace::Expression *exp) {
+  edu::sharif::twinner::util::foreach (exp->getStack (),
+                                       &check_symbol_type_and_add_it_to_set, addr);
+}
+
+void check_symbol_type_and_add_it_to_set (std::map < int, std::set < ADDRINT > > &addr,
+    edu::sharif::twinner::trace::ExpressionToken * const &token) {
+  const edu::sharif::twinner::trace::MemoryEmergedSymbol *symbol =
+      dynamic_cast<edu::sharif::twinner::trace::MemoryEmergedSymbol *> (token);
+  if (symbol) {
+    addr[symbol->getGenerationIndex ()].insert (symbol->getAddress ());
+  }
+}
+
+void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
+    TwinCodeGenerationAux &aux,
+    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
+  edu::sharif::twinner::util::foreach
+      (addresses, &code_symbol_initiation_into_twin_code, aux);
   edu::sharif::twinner::util::foreach (segment->getPathConstraints (),
                                        &code_constraint_into_twin_code, aux);
   std::stringstream indentation;
@@ -389,7 +425,7 @@ void code_segment_into_twin_code (TwinCodeGenerationAux &aux,
   IndentedStringStream iss (indentation.str ());
   code_memory_symbolic_changes_of_one_segment (iss, segment);
   code_registers_symbolic_changes_of_one_segment (iss, segment, aux.index);
-  out << iss.str ();
+  aux.out << iss.str ();
 }
 
 void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &out,

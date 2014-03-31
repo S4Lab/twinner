@@ -46,6 +46,9 @@ protected:
 protected:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   void loadFromBinaryStream (std::ifstream &in);
+
+public:
+  int getGenerationIndex () const;
 };
 
 }

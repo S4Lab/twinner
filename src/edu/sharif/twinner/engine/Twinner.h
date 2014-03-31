@@ -44,7 +44,6 @@ private:
 
   std::list < const edu::sharif::twinner::trace::Trace * > traces;
   std::list < const edu::sharif::twinner::trace::Constraint * > constraints;
-  std::set < ADDRINT > addresses;
 
 public:
   Twinner ();

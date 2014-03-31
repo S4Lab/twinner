@@ -42,6 +42,10 @@ void Symbol::loadFromBinaryStream (std::ifstream &in) {
   in.read ((char *) &generationIndex, sizeof (generationIndex));
 }
 
+int Symbol::getGenerationIndex () const {
+  return generationIndex;
+}
+
 }
 }
 }
