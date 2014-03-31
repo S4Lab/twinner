@@ -20,7 +20,7 @@ namespace twinner {
 namespace trace {
 
 Operand::Operand () :
-ExpressionToken () {
+ExpressionToken (), concreteValue (0) {
 }
 
 Operand::Operand (const ConcreteValue &cv) :
