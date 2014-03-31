@@ -39,6 +39,7 @@ struct TwinCodeGenerationAux {
 
   unsigned int depth;
   std::stringstream &out;
+  unsigned int index;
 };
 
 class IndentedStringStream : public std::stringstream {
@@ -98,9 +99,11 @@ inline void gather_constraints_of_trace_segment (
 inline void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &out,
     const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
 inline void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
-    const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
+    const edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
+    unsigned int &index);
 
-inline void code_registers_symbols_initiation_into_twin_code (std::stringstream &out);
+inline void code_registers_symbols_initiation_into_twin_code (std::stringstream &out,
+    int index);
 inline void code_symbol_initiation_into_twin_code (std::stringstream &out,
     const ADDRINT &address);
 inline void code_memory_changes (IndentedStringStream &out,
@@ -299,8 +302,10 @@ void Twinner::codeTracesIntoTwinCode (
   out << "#include \"twincode.h\"\n";
   out << '\n';
   out << "int main () {\n";
-
-  code_registers_symbols_initiation_into_twin_code (out);
+  out << "\tstruct RegistersSet regs;\n";
+  out << "\tSAVE_REGISTERS (regs);\n";
+  out << '\t';
+  code_registers_symbols_initiation_into_twin_code (out, 0);
   edu::sharif::twinner::util::foreach (addresses,
                                        &code_symbol_initiation_into_twin_code, out);
   codeInitialValuesIntoTwinCode (out, initialValues);
@@ -321,19 +326,16 @@ void Twinner::codeTracesIntoTwinCode (
   fileout.close ();
 }
 
-void code_registers_symbols_initiation_into_twin_code (std::stringstream &out) {
+void code_registers_symbols_initiation_into_twin_code (std::stringstream &out,
+    int index) {
   const char *registersNames[] = {// count == 16
                                   "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "rsp", "rbp",
                                   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
   };
-  out << "\t";
-  out << "struct RegistersSet regs;\n";
-  out << "\t";
-  out << "SAVE_REGISTERS (regs);\n";
-  out << "\t";
-  out << "const UINT64 " << registersNames[0] << "_0 = regs." << registersNames[0];
+  out << "const UINT64 " << registersNames[0] << "_" << index <<
+      " = regs." << registersNames[0];
   for (int i = 1; i < 16; ++i) {
-    out << ", " << registersNames[i] << "_0 = regs." << registersNames[i];
+    out << ", " << registersNames[i] << "_" << index << " = regs." << registersNames[i];
   }
   out << ";\n";
 }
@@ -358,7 +360,7 @@ void code_initial_value_into_twin_code (std::stringstream &out,
 
 void code_trace_into_twin_code (std::stringstream &out,
     const edu::sharif::twinner::trace::Trace * const &trace) {
-  TwinCodeGenerationAux aux = {1, out};
+  TwinCodeGenerationAux aux = {1, out, 0};
   for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
       ::const_reverse_iterator it = trace->getTraceSegments ().rbegin ();
       it != trace->getTraceSegments ().rend (); ++it) {
@@ -386,7 +388,7 @@ void code_segment_into_twin_code (TwinCodeGenerationAux &aux,
   }
   IndentedStringStream iss (indentation.str ());
   code_memory_symbolic_changes_of_one_segment (iss, segment);
-  code_registers_symbolic_changes_of_one_segment (iss, segment);
+  code_registers_symbolic_changes_of_one_segment (iss, segment, aux.index);
   out << iss.str ();
 }
 
@@ -405,7 +407,8 @@ void code_memory_changes (IndentedStringStream &out,
 }
 
 void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
-    const edu::sharif::twinner::trace::ExecutionTraceSegment *segment) {
+    const edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
+    unsigned int &index) {
 
   struct RegInfo {
 
@@ -439,10 +442,11 @@ void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
     if (it != regToExp.end ()) {
       out << it->second->toString () << ";\n";
     } else {
-      out << regs[i].name << "_0;\n";
+      out << regs[i].name << "_" << index << ";\n";
     }
   }
   out.indented () << "regs = setRegistersValuesAndInvokeSyscall (regs);\n";
+  code_registers_symbols_initiation_into_twin_code (out.indented (), ++index);
 }
 
 void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
