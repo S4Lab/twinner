@@ -60,7 +60,7 @@ class IndentedStringStream : public std::stringstream {
 
 inline void code_trace_into_twin_code (std::stringstream &out,
     const edu::sharif::twinner::trace::Trace * const &trace);
-inline void code_segment_into_twin_code (std::stringstream &out,
+inline void code_segment_into_twin_code (TwinCodeGenerationAux &aux,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
 inline void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
     const edu::sharif::twinner::trace::Constraint * const &constraint);
@@ -353,19 +353,26 @@ void Twinner::codeInitialValuesIntoTwinCode (std::stringstream &out,
 
 void code_initial_value_into_twin_code (std::stringstream &out,
     const ADDRINT &address, const UINT64 &content) {
-  out << "UINT64 &m" << std::hex << address << " = *((UINT64 *) 0x" << address << ");\n"
-      << "m" << address << " = 0x" << content << ";\n";
+  out << std::hex << "\t*((UINT64 *) 0x" << address << ") = 0x" << content << ";\n";
 }
 
 void code_trace_into_twin_code (std::stringstream &out,
     const edu::sharif::twinner::trace::Trace * const &trace) {
+  TwinCodeGenerationAux aux = {1, out};
   edu::sharif::twinner::util::foreach (trace->getTraceSegments (),
-                                       &code_segment_into_twin_code, out);
+                                       &code_segment_into_twin_code, aux);
+  for (unsigned int j = aux.depth - 1; j > 0; --j) {
+
+    repeat (j) {
+      out << '\t';
+    }
+    out << "}\n";
+  }
 }
 
-void code_segment_into_twin_code (std::stringstream &out,
+void code_segment_into_twin_code (TwinCodeGenerationAux &aux,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
-  TwinCodeGenerationAux aux = {1, out};
+  std::stringstream &out = aux.out;
   edu::sharif::twinner::util::foreach (segment->getPathConstraints (),
                                        &code_constraint_into_twin_code, aux);
   std::stringstream indentation;
@@ -377,13 +384,6 @@ void code_segment_into_twin_code (std::stringstream &out,
   code_memory_symbolic_changes_of_one_segment (iss, segment);
   code_registers_symbolic_changes_of_one_segment (iss, segment);
   out << iss.str ();
-  for (unsigned int j = aux.depth - 1; j > 0; --j) {
-
-    repeat (j) {
-      out << '\t';
-    }
-    out << "}\n";
-  }
 }
 
 void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &out,
