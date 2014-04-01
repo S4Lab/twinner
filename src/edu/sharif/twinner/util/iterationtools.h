@@ -13,6 +13,10 @@
 #ifndef ITERATION_TOOLS_H
 #define ITERATION_TOOLS_H
 
+#include <list>
+#include <set>
+#include <map>
+
 namespace edu {
 namespace sharif {
 namespace twinner {

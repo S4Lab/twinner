@@ -27,6 +27,7 @@
 
 #include "edu/sharif/twinner/engine/smt/SmtSolver.h"
 #include "smt/Cvc4SmtSolver.h"
+#include "search/ConstraintTree.h"
 
 using namespace std;
 
@@ -100,10 +101,6 @@ inline void remove_mismatches_from_map (std::map < ADDRINT, UINT64 > &initialVal
 inline void code_initial_value_into_twin_code (std::stringstream &out,
     const ADDRINT &address, const UINT64 &content);
 
-inline void gather_constraints_of_trace_segment (
-    std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
-
 inline void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &out,
     const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
 inline void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
@@ -117,9 +114,14 @@ inline void code_symbol_initiation_into_twin_code (TwinCodeGenerationAux &aux,
 inline void code_memory_changes (IndentedStringStream &out,
     const ADDRINT &memoryEa, edu::sharif::twinner::trace::Expression * const &exp);
 
-Twinner::Twinner () {
+Twinner::Twinner () :
+ctree (new edu::sharif::twinner::engine::search::ConstraintTree ()) {
   edu::sharif::twinner::engine::smt::SmtSolver::init
       (new edu::sharif::twinner::engine::smt::Cvc4SmtSolver ());
+}
+
+Twinner::~Twinner () {
+  delete ctree;
 }
 
 void Twinner::setInputBinaryPath (string input) {
@@ -237,37 +239,21 @@ void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace
   log << "Adding execution trace:\n";
   trace->printCompleteState (log);
   traces.push_back (trace);
-  //TODO: Add (refactor out of this class) constraints to a search strategy class
-  constraints.clear ();
-  edu::sharif::twinner::util::foreach (trace->getTraceSegments (),
-                                       &gather_constraints_of_trace_segment,
-                                       constraints);
+  ctree->addConstraints (trace);
   log << "Done.\n";
-}
-
-void gather_constraints_of_trace_segment (
-    std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
-  constraints.insert (constraints.end (),
-                      segment->getPathConstraints ().begin (),
-                      segment->getPathConstraints ().end ());
 }
 
 bool Twinner::calculateSymbolsValuesForCoveringNextPath (
     set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols) {
-  static bool first = true;
-  if (first) {
-    first = false;
-    const edu::sharif::twinner::trace::Constraint *cns = constraints.back ();
-    edu::sharif::twinner::trace::Constraint *cc = cns->instantiateNegatedConstraint ();
-    constraints.pop_back ();
-    constraints.push_back (cc);
+  //TODO: Refactor these codes out of this class (to a search strategy class)
+  std::list < const edu::sharif::twinner::trace::Constraint * > clist;
+  while (ctree->getNextConstraintsList (clist)) {
     try {
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->solveConstraints
-          (constraints, symbols);
+          (clist, symbols);
       return true;
-    } catch (
-        const edu::sharif::twinner::engine::smt::UnsatisfiableConstraintsException &e) {
+    } catch
+      (const edu::sharif::twinner::engine::smt::UnsatisfiableConstraintsException &e) {
     }
   }
   return false;

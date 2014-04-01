@@ -30,6 +30,10 @@ class Constraint;
 class MemoryEmergedSymbol;
 }
 namespace engine {
+namespace search {
+
+class ConstraintTree;
+}
 
 class Executer;
 
@@ -43,10 +47,11 @@ private:
   std::string arguments;
 
   std::list < const edu::sharif::twinner::trace::Trace * > traces;
-  std::list < const edu::sharif::twinner::trace::Constraint * > constraints;
+  edu::sharif::twinner::engine::search::ConstraintTree *ctree;
 
 public:
   Twinner ();
+  ~Twinner ();
 
   void setInputBinaryPath (std::string input);
   void setTwinToolPath (std::string twintool);
