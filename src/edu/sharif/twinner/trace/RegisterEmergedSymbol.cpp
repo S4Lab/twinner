@@ -56,6 +56,13 @@ std::string RegisterEmergedSymbol::toString () const {
   return ss.str ();
 }
 
+bool RegisterEmergedSymbol::operator== (const ExpressionToken &token) const {
+  return dynamic_cast<const RegisterEmergedSymbol *> (&token)
+      && static_cast<const RegisterEmergedSymbol *> (&token)->generationIndex ==
+      generationIndex
+      && static_cast<const RegisterEmergedSymbol *> (&token)->address == address;
+}
+
 const char *RegisterEmergedSymbol::getRegisterName () const {
   // ASSERT: address is a 64 bits or 128 bits register
   // Above assertion is ensured during instantiation in the ExpressionImp class

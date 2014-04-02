@@ -69,6 +69,13 @@ std::string MemoryEmergedSymbol::toString () const {
   return ss.str ();
 }
 
+bool MemoryEmergedSymbol::operator== (const ExpressionToken &token) const {
+  return dynamic_cast<const MemoryEmergedSymbol *> (&token)
+      && static_cast<const MemoryEmergedSymbol *> (&token)->generationIndex ==
+      generationIndex
+      && static_cast<const MemoryEmergedSymbol *> (&token)->address == address;
+}
+
 ADDRINT MemoryEmergedSymbol::getAddress () const {
   return address;
 }

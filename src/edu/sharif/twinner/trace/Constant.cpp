@@ -60,6 +60,11 @@ UINT64 Constant::getValue () const {
   return static_cast<ConcreteValue64Bits *> (concreteValue)->getValue ();
 }
 
+bool Constant::operator== (const ExpressionToken &token) const {
+  return dynamic_cast<const Constant *> (&token)
+      && (*static_cast<const Constant *> (&token)->concreteValue) == (*concreteValue);
+}
+
 }
 }
 }

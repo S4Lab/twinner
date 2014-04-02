@@ -48,6 +48,7 @@ public:
   static MemoryEmergedSymbol *fromNameAndValue (const std::string &name, UINT64 value);
 
   virtual std::string toString () const;
+  virtual bool operator== (const ExpressionToken &token) const;
 
   ADDRINT getAddress () const;
   std::pair < int, SymbolRecord > toSymbolRecord () const;

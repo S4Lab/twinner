@@ -40,6 +40,7 @@ public:
   static ExpressionToken *loadFromBinaryStream (std::ifstream &in);
 
   virtual std::string toString () const = 0;
+  virtual bool operator== (const ExpressionToken &token) const = 0;
 };
 
 }

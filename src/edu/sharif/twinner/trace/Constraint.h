@@ -71,6 +71,12 @@ public:
   ComparisonType getComparisonType () const;
 
   Constraint *instantiateNegatedConstraint () const;
+
+  bool operator!= (const Constraint &constraint) const {
+    return !((*this) == constraint);
+  }
+
+  bool operator== (const Constraint &constraint) const;
 };
 
 }

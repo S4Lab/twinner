@@ -39,6 +39,7 @@ public:
   static RegisterEmergedSymbol *loadFromBinaryStream (std::ifstream &in);
 
   virtual std::string toString () const;
+  virtual bool operator== (const ExpressionToken &token) const;
 
 private:
   const char *getRegisterName () const;

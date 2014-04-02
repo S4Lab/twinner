@@ -200,6 +200,8 @@ public:
       const ConcreteValue &concreteVal) const throw (WrongStateException);
   void checkConcreteValueMemory (ADDRINT memoryEa,
       const ConcreteValue &concreteVal) throw (WrongStateException);
+
+  bool operator== (const Expression &exp) const;
 };
 
 }

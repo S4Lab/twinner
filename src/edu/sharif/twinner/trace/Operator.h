@@ -65,6 +65,8 @@ public:
 
   OperatorType getType () const;
   OperatorIdentifier getIdentifier () const;
+
+  virtual bool operator== (const ExpressionToken &token) const;
 };
 
 }

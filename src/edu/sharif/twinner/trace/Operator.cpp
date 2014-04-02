@@ -141,6 +141,11 @@ Operator::OperatorIdentifier Operator::getIdentifier () const {
   return oi;
 }
 
+bool Operator::operator== (const ExpressionToken &token) const {
+  return dynamic_cast<const Operator *> (&token)
+      && static_cast<const Operator *> (&token)->oi == oi;
+}
+
 }
 }
 }

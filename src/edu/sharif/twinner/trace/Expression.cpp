@@ -305,6 +305,10 @@ throw (WrongStateException) {
   lastConcreteValue->writeToMemoryAddress (memoryEa);
 }
 
+bool Expression::operator== (const Expression &exp) const {
+  return stack == exp.stack;
+}
+
 }
 }
 }

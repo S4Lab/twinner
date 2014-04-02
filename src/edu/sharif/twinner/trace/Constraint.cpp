@@ -104,6 +104,10 @@ Constraint *Constraint::instantiateNegatedConstraint () const {
   }
 }
 
+bool Constraint::operator== (const Constraint &constraint) const {
+  return (*exp) == (*constraint.exp) && type == constraint.type;
+}
+
 }
 }
 }
