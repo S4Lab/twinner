@@ -15,7 +15,10 @@
 #include "TreeNode.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
+
+#include "edu/sharif/twinner/util/iterationtools.h"
 
 namespace edu {
 namespace sharif {
@@ -32,12 +35,34 @@ ConstraintTree::~ConstraintTree () {
 }
 
 void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *trace) {
-
+  TreeNode *node = root;
+  const std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * > &segments =
+      trace->getTraceSegments ();
+  for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
+      ::const_reverse_iterator it = segments.rbegin (); it != segments.rend (); ++it) {
+    const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints =
+        (*it)->getPathConstraints ();
+    for (std::list < const edu::sharif::twinner::trace::Constraint * >
+        ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
+      const edu::sharif::twinner::trace::Constraint *constraint = *it2;
+      node = node->addConstraint (constraint);
+    }
+  }
+  iterator = root;
 }
 
 bool ConstraintTree::getNextConstraintsList (
     std::list < const edu::sharif::twinner::trace::Constraint * > &clist) {
-  return false;
+  //PRE-CONDITION: clist is in sync with iterator
+  if (iterator == root) {
+    iterator = iterator->getRightMostDeepestGrandChild (clist);
+  }
+  iterator = iterator->getNextNode (clist);
+  if (!iterator) {
+    iterator = root;
+    return false;
+  }
+  return true;
 }
 
 }
