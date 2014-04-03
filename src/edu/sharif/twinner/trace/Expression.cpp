@@ -306,7 +306,11 @@ throw (WrongStateException) {
 }
 
 bool Expression::operator== (const Expression &exp) const {
-  return stack == exp.stack;
+  std::list < ExpressionToken * >::const_iterator it1 = stack.begin (),
+      end1 = stack.end (), it2 = exp.stack.begin (), end2 = exp.stack.end ();
+  for (; it1 != end1 && it2 != end2 && (**it1) == (**it2); ++it1, ++it2)
+    continue;
+  return it1 == end1 && it2 == end2;
 }
 
 bool Expression::isTrivial () const {
