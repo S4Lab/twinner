@@ -15,6 +15,8 @@
 #include "Constant.h"
 #include "ConcreteValue64Bits.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {

@@ -17,6 +17,8 @@
 #include "ConcreteValue64Bits.h"
 #include "ConcreteValue128Bits.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {

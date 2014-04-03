@@ -18,6 +18,7 @@
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 
 namespace edu {
@@ -63,6 +64,12 @@ bool ConstraintTree::getNextConstraintsList (
     return false;
   }
   return true;
+}
+
+void ConstraintTree::dumpTree () const {
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::debug ();
+  root->dumpSubTree (logger);
 }
 
 }

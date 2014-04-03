@@ -41,6 +41,8 @@ public:
   void addConstraints (const edu::sharif::twinner::trace::Trace *trace);
   bool getNextConstraintsList (
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
+
+  void dumpTree () const;
 };
 
 }

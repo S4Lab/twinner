@@ -14,6 +14,7 @@
 
 #include "edu/sharif/twinner/trace/Constraint.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 
 namespace edu {
@@ -22,7 +23,10 @@ namespace twinner {
 namespace engine {
 namespace search {
 
+static int lastDebugId = 0;
+
 TreeNode::TreeNode (TreeNode *p, const edu::sharif::twinner::trace::Constraint *c) :
+debugId (++lastDebugId),
 parent (p), constraint (c) {
   if (p) {
     p->children.push_back (this);
@@ -42,7 +46,7 @@ void delete_tree_node (TreeNode * const &node) {
 
 TreeNode *TreeNode::addConstraint (
     const edu::sharif::twinner::trace::Constraint *c) {
-  if ((*children.back ()->constraint) != (*c)) {
+  if (children.empty () || (*children.back ()->constraint) != (*c)) {
     new TreeNode (this, c);
   }
   return children.back ();
@@ -73,6 +77,26 @@ TreeNode *TreeNode::getNextNode (
   TreeNode *n = new TreeNode (node, negatedConstraint);
   clist.push_back (negatedConstraint);
   return n;
+}
+
+void TreeNode::dumpSubTree (edu::sharif::twinner::util::Logger &logger) const {
+  logger << "Node(" << debugId << "): ";
+  bool first = true;
+  for (std::list < TreeNode * >::const_iterator it = children.begin ();
+      it != children.end (); ++it) {
+    const TreeNode *node = *it;
+    if (!first) {
+      logger << ", ";
+    }
+    logger << node->debugId;
+    first = false;
+  }
+  logger << '\n';
+  for (std::list < TreeNode * >::const_iterator it = children.begin ();
+      it != children.end (); ++it) {
+    const TreeNode *node = *it;
+    node->dumpSubTree (logger);
+  }
 }
 
 }

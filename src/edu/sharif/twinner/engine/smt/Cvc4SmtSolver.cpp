@@ -138,6 +138,7 @@ void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
           (edu::sharif::twinner::trace::MemoryEmergedSymbol::fromNameAndValue
            (it->first, value));
     }
+    //TODO: Handle register symbols
   }
   log << '\n';
 }

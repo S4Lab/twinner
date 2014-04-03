@@ -18,6 +18,10 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace util {
+
+class Logger;
+}
 namespace trace {
 
 class Constraint;
@@ -28,6 +32,8 @@ namespace search {
 class TreeNode {
 
 private:
+  const int debugId; // FIXME: Remove this field when debug is not required
+
   TreeNode *parent;
   // front of list: left-most | back of list: right-most
   std::list < TreeNode * > children;
@@ -68,6 +74,8 @@ public:
    */
   TreeNode *getNextNode (
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
+
+  void dumpSubTree (edu::sharif::twinner::util::Logger &logger) const;
 };
 
 }
