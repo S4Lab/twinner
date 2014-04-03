@@ -331,6 +331,7 @@ void code_trace_into_twin_code (std::stringstream &out,
                                out,
                                0 // index
   };
+  out << "\t{\n";
   const std::map < int, std::set < ADDRINT > > addresses =
       gather_symbols_addresses_of_trace (trace);
   for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
@@ -346,6 +347,7 @@ void code_trace_into_twin_code (std::stringstream &out,
     }
     out << "}\n";
   }
+  out << "\t}\n";
 }
 
 std::map < int, std::set < ADDRINT > > gather_symbols_addresses_of_trace (
