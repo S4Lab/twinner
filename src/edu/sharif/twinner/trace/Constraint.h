@@ -77,6 +77,8 @@ public:
   }
 
   bool operator== (const Constraint &constraint) const;
+
+  bool isTrivial () const;
 };
 
 }

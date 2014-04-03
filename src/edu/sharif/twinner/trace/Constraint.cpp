@@ -108,6 +108,10 @@ bool Constraint::operator== (const Constraint &constraint) const {
   return (*exp) == (*constraint.exp) && type == constraint.type;
 }
 
+bool Constraint::isTrivial () const {
+  return exp->isTrivial ();
+}
+
 }
 }
 }

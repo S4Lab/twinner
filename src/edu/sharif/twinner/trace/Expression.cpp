@@ -309,6 +309,17 @@ bool Expression::operator== (const Expression &exp) const {
   return stack == exp.stack;
 }
 
+bool Expression::isTrivial () const {
+  for (std::list < ExpressionToken * >::const_iterator it = stack.begin ();
+      it != stack.end (); ++it) {
+    const ExpressionToken *token = *it;
+    if (dynamic_cast<const Symbol *> (token)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 }
 }
 }

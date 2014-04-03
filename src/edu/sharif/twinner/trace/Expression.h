@@ -202,6 +202,8 @@ public:
       const ConcreteValue &concreteVal) throw (WrongStateException);
 
   bool operator== (const Expression &exp) const;
+
+  bool isTrivial () const;
 };
 
 }

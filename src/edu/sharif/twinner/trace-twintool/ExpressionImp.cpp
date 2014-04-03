@@ -40,6 +40,13 @@ Expression (concreteValue.clone (), false) {
 ExpressionImp::ExpressionImp (ADDRINT memoryEa, const ConcreteValue &concreteValue,
     int generationIndex, bool isOverwriting) :
 Expression (concreteValue.clone (), isOverwriting) {
+  if (!isOverwriting) {
+    if (memoryEa < 0x7f0000000000ull) { // FIXME: Generalize this code
+      // this temporary code assumes that everything out of stack (including heap) is constant
+      stack.push_back (new Constant (concreteValue));
+      return;
+    }
+  }
   stack.push_back (new MemoryEmergedSymbol (memoryEa, concreteValue, generationIndex));
 }
 

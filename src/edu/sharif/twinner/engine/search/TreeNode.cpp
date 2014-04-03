@@ -46,6 +46,9 @@ void delete_tree_node (TreeNode * const &node) {
 
 TreeNode *TreeNode::addConstraint (
     const edu::sharif::twinner::trace::Constraint *c) {
+  if (c->isTrivial ()) {
+    return this;
+  }
   if (children.empty () || (*children.back ()->constraint) != (*c)) {
     new TreeNode (this, c);
   }
