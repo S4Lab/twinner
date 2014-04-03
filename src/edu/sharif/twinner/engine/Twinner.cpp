@@ -19,6 +19,7 @@
 #include "Executer.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 #include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
 
@@ -87,8 +88,7 @@ inline void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
 inline void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
     const edu::sharif::twinner::trace::Constraint * const &constraint);
 
-inline void delete_symbol (
-    const edu::sharif::twinner::trace::MemoryEmergedSymbol * const &symbol);
+inline void delete_symbol (const edu::sharif::twinner::trace::Symbol * const &symbol);
 
 template < typename Key, typename Value >
 inline std::set < Value > get_values_set (const std::map < Key, Value > &map);
@@ -168,7 +168,7 @@ void Twinner::setInputBinaryArguments (string arguments) {
  */
 void Twinner::generateTwinBinary () {
   Executer ex (pin, twintool, input, arguments);
-  set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > symbols;
+  set < const edu::sharif::twinner::trace::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;
   while (somePathsAreNotCovered) {
@@ -229,8 +229,7 @@ void remove_mismatches_from_map (std::map < ADDRINT, UINT64 > &initialValues,
   }
 }
 
-void delete_symbol (
-    const edu::sharif::twinner::trace::MemoryEmergedSymbol * const &symbol) {
+void delete_symbol (const edu::sharif::twinner::trace::Symbol * const &symbol) {
   delete symbol;
 }
 
@@ -244,7 +243,7 @@ void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace
 }
 
 bool Twinner::calculateSymbolsValuesForCoveringNextPath (
-    set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols) {
+    set < const edu::sharif::twinner::trace::Symbol * > &symbols) {
   //TODO: Refactor these codes out of this class (to a search strategy class)
   std::list < const edu::sharif::twinner::trace::Constraint * > clist;
   while (ctree->getNextConstraintsList (clist)) {

@@ -16,9 +16,6 @@
 #include "Savable.h"
 
 #include "Operator.h"
-
-#include "pin.H"
-#include "MemoryEmergedSymbol.h"
 #include "ExecutionState.h"
 
 #include <list>

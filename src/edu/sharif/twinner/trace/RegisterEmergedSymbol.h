@@ -34,15 +34,18 @@ public:
       int generationIndex);
 
   virtual RegisterEmergedSymbol *clone () const;
+  virtual std::pair < int, SymbolRecord > toSymbolRecord () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static RegisterEmergedSymbol *loadFromBinaryStream (std::ifstream &in);
+  static RegisterEmergedSymbol *fromNameAndValue (const std::string &name, UINT64 value);
 
   virtual std::string toString () const;
   virtual bool operator== (const ExpressionToken &token) const;
 
 private:
   const char *getRegisterName () const;
+  static REG getRegisterFromName (const std::string &name);
 };
 
 }

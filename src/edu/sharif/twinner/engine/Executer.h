@@ -26,7 +26,7 @@ namespace twinner {
 namespace trace {
 
 class Trace;
-class MemoryEmergedSymbol;
+class Symbol;
 struct SymbolRecord;
 }
 namespace engine {
@@ -61,8 +61,7 @@ public:
 
   void setCandidateAddresses (const std::set < ADDRINT > &addresses) const;
   void setSymbolsValues (
-      const std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &
-      symbols) const;
+      const std::set < const edu::sharif::twinner::trace::Symbol * > &symbols) const;
 
   edu::sharif::twinner::trace::Trace *executeSingleTraceInNormalMode () const;
 

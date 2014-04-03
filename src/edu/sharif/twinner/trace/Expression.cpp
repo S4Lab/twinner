@@ -20,7 +20,8 @@
 #include "edu/sharif/twinner/util/memory.h"
 
 #include "Constant.h"
-#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
+#include "ConcreteValue64Bits.h"
+#include "Symbol.h"
 
 namespace edu {
 namespace sharif {

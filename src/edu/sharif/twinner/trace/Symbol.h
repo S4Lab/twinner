@@ -22,6 +22,16 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+//FIXME: Update to include register symbol record too
+
+struct SymbolRecord {
+
+  ADDRINT address;
+  UINT32 type; // 64 or 128
+  UINT64 concreteValueLsb;
+  UINT64 concreteValueMsb;
+};
+
 /**
  * @abstract
  */
@@ -49,6 +59,8 @@ protected:
 
 public:
   int getGenerationIndex () const;
+
+  virtual std::pair < int, SymbolRecord > toSymbolRecord () const = 0;
 };
 
 }

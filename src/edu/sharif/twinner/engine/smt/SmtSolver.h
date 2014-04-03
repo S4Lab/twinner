@@ -22,7 +22,7 @@ namespace twinner {
 namespace trace {
 
 class Constraint;
-class MemoryEmergedSymbol;
+class Symbol;
 }
 namespace engine {
 namespace smt {
@@ -58,18 +58,16 @@ public:
    * Passes list of constraints (using AND between different constraints) to the real
    * SMT solver implementation. It tries to find an assignment of concrete values to
    * different symbols/variables to make all constraints satisfiable simultaneously.
-   * These values will be encoded in MemoryEmergedSymbol objects and will be added to
-   * the given set.
-   * Values of symbols which are not represented by MemoryEmergedSymbol class, are
-   * ignored.
+   * These values will be encoded in Symbol objects and will be added to the given set.
+   *
    * @param constraints List of constraints which are supposed to be satisfied.
    * @param symbols Set of symbols values of the example assignment (output).
-   * 
+   *
    * @except Throws UnsatisfiableConstraintsException if constraints are unsatisfiable.
    */
   virtual void solveConstraints (
       const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-      std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols)
+      std::set < const edu::sharif::twinner::trace::Symbol * > &symbols)
   throw (UnsatisfiableConstraintsException) = 0;
 
   static void init (SmtSolver *instance);

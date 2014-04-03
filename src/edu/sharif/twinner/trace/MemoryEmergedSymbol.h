@@ -20,14 +20,6 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-struct SymbolRecord {
-
-  ADDRINT address;
-  UINT32 type; // 64 or 128
-  UINT64 concreteValueLsb;
-  UINT64 concreteValueMsb;
-};
-
 class MemoryEmergedSymbol : public Symbol {
 
 private:
@@ -42,6 +34,7 @@ public:
       int generationIndex);
 
   virtual MemoryEmergedSymbol *clone () const;
+  virtual std::pair < int, SymbolRecord > toSymbolRecord () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static MemoryEmergedSymbol *loadFromBinaryStream (std::ifstream &in);
@@ -51,7 +44,6 @@ public:
   virtual bool operator== (const ExpressionToken &token) const;
 
   ADDRINT getAddress () const;
-  std::pair < int, SymbolRecord > toSymbolRecord () const;
 };
 
 }

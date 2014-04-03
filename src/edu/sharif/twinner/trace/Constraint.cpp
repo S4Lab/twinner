@@ -12,8 +12,10 @@
 
 #include "Constraint.h"
 
-#include "edu/sharif/twinner/util/Logger.h"
 #include "ExecutionState.h"
+#include "Expression.h"
+
+#include "edu/sharif/twinner/util/Logger.h"
 
 #include <stdexcept>
 #include <fstream>

@@ -29,7 +29,7 @@ public:
 
   virtual void solveConstraints (
       const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-      std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &symbols)
+      std::set < const edu::sharif::twinner::trace::Symbol * > &symbols)
   throw (UnsatisfiableConstraintsException);
 };
 

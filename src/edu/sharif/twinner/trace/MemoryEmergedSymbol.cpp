@@ -41,6 +41,28 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::clone () const {
   return new MemoryEmergedSymbol (*this);
 }
 
+std::pair < int, SymbolRecord >
+MemoryEmergedSymbol::toSymbolRecord () const {
+  SymbolRecord record;
+  record.address = address;
+  if (dynamic_cast<const ConcreteValue64Bits *> (concreteValue)) {
+    record.type = 64;
+    record.concreteValueLsb =
+        static_cast<const ConcreteValue64Bits *> (concreteValue)->getValue ();
+    record.concreteValueMsb = 0;
+  } else if (dynamic_cast<const ConcreteValue128Bits *> (concreteValue)) {
+    record.type = 128;
+    record.concreteValueLsb =
+        static_cast<const ConcreteValue128Bits *> (concreteValue)->getLsb ();
+    record.concreteValueMsb =
+        static_cast<const ConcreteValue128Bits *> (concreteValue)->getMsb ();
+  } else {
+    throw std::runtime_error ("MemoryEmergedSymbol::toSymbolRecord () method: "
+                              "Unsupported concrete value type.");
+  }
+  return make_pair (generationIndex, record);
+}
+
 void MemoryEmergedSymbol::saveToBinaryStream (std::ofstream &out) const {
   out.write ("M", 1);
   out.write ((const char *) &address, sizeof (address));
@@ -80,28 +102,6 @@ bool MemoryEmergedSymbol::operator== (const ExpressionToken &token) const {
 
 ADDRINT MemoryEmergedSymbol::getAddress () const {
   return address;
-}
-
-std::pair < int, SymbolRecord >
-MemoryEmergedSymbol::toSymbolRecord () const {
-  SymbolRecord record;
-  record.address = address;
-  if (dynamic_cast<const ConcreteValue64Bits *> (concreteValue)) {
-    record.type = 64;
-    record.concreteValueLsb =
-        static_cast<const ConcreteValue64Bits *> (concreteValue)->getValue ();
-    record.concreteValueMsb = 0;
-  } else if (dynamic_cast<const ConcreteValue128Bits *> (concreteValue)) {
-    record.type = 128;
-    record.concreteValueLsb =
-        static_cast<const ConcreteValue128Bits *> (concreteValue)->getLsb ();
-    record.concreteValueMsb =
-        static_cast<const ConcreteValue128Bits *> (concreteValue)->getMsb ();
-  } else {
-    throw std::runtime_error ("MemoryEmergedSymbol::toSymbolRecord () method: "
-                              "Unsupported concrete value type.");
-  }
-  return make_pair (generationIndex, record);
 }
 
 }

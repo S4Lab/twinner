@@ -15,13 +15,12 @@
 
 #include "Savable.h"
 
-#include "Expression.h"
-#include "Constant.h"
-
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+
+class Expression;
 
 class Constraint : public Savable {
 

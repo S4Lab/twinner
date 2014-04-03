@@ -69,6 +69,7 @@ bool ConstraintTree::getNextConstraintsList (
 void ConstraintTree::dumpTree () const {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::debug ();
+  root->dumpConstraints (logger);
   root->dumpSubTree (logger);
 }
 

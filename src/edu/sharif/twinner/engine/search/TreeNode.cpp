@@ -82,6 +82,17 @@ TreeNode *TreeNode::getNextNode (
   return n;
 }
 
+void TreeNode::dumpConstraints (edu::sharif::twinner::util::Logger &logger) const {
+  if (constraint) {
+    logger << debugId << " -> " << constraint << '\n';
+  }
+  for (std::list < TreeNode * >::const_iterator it = children.begin ();
+      it != children.end (); ++it) {
+    const TreeNode *node = *it;
+    node->dumpConstraints (logger);
+  }
+}
+
 void TreeNode::dumpSubTree (edu::sharif::twinner::util::Logger &logger) const {
   logger << "Node(" << debugId << "): ";
   bool first = true;

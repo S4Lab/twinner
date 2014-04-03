@@ -25,7 +25,8 @@
 #endif // end of inclusion of CVC4 header
 
 #include "edu/sharif/twinner/trace/Constant.h"
-#include "edu/sharif/twinner/trace/Symbol.h"
+#include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/Operator.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
@@ -62,7 +63,7 @@ Kind convertOperatorIdentifierToCvc4Kind (
     edu::sharif::twinner::trace::Operator::OperatorIdentifier oi);
 
 void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
-    std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &satSolution);
+    std::set < const edu::sharif::twinner::trace::Symbol * > &satSolution);
 
 Cvc4SmtSolver::Cvc4SmtSolver () :
 SmtSolver () {
@@ -73,7 +74,7 @@ Cvc4SmtSolver::~Cvc4SmtSolver () {
 
 void Cvc4SmtSolver::solveConstraints (
     const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-    std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &satSolution)
+    std::set < const edu::sharif::twinner::trace::Symbol * > &satSolution)
 throw (UnsatisfiableConstraintsException) {
   edu::sharif::twinner::util::Logger::loquacious ()
       << "Cvc4SmtSolver::solveConstraints (...)\n";
@@ -120,25 +121,28 @@ throw (UnsatisfiableConstraintsException) {
 }
 
 void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
-    std::set < const edu::sharif::twinner::trace::MemoryEmergedSymbol * > &satSolution) {
+    std::set < const edu::sharif::twinner::trace::Symbol * > &satSolution) {
   edu::sharif::twinner::util::Logger log =
       edu::sharif::twinner::util::Logger::loquacious ();
   log << "Constraints are satisfiable. Filling satSolution with memory symbols...";
   for (std::map<std::string, Expr>::const_iterator it = symbols.begin ();
       it != symbols.end (); ++it) {
+    Expr exp = smt.getValue (it->second); // assigned value by SMT solver
+    const BitVector &bv = exp.getConst< BitVector > ();
+    const Integer &val = bv.getValue ();
+    const UINT64 high = UINT32 (val.divByPow2 (32).getUnsignedLong ());
+    const UINT64 low = UINT32 (val.modByPow2 (32).getUnsignedLong ());
+    UINT64 value = (high << 32) | low;
+    log << "\tsetting " << it->first << " -> 0x" << std::hex << value << "...";
     if (it->first.at (0) == 'm') { // memory symbol
-      Expr exp = smt.getValue (it->second); // assigned value by SMT solver
-      const BitVector &bv = exp.getConst< BitVector > ();
-      const Integer &val = bv.getValue ();
-      const UINT64 high = UINT32 (val.divByPow2 (32).getUnsignedLong ());
-      const UINT64 low = UINT32 (val.modByPow2 (32).getUnsignedLong ());
-      UINT64 value = (high << 32) | low;
-      log << "\tsetting " << it->first << " -> 0x" << std::hex << value << "...";
       satSolution.insert
           (edu::sharif::twinner::trace::MemoryEmergedSymbol::fromNameAndValue
            (it->first, value));
+    } else { // register symbol
+      satSolution.insert
+          (edu::sharif::twinner::trace::RegisterEmergedSymbol::fromNameAndValue
+           (it->first, value));
     }
-    //TODO: Handle register symbols
   }
   log << '\n';
 }
