@@ -313,8 +313,21 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
   }
 }
 
+inline void Instrumenter::checkForInitialState (INS ins) const {
+  static bool firstTime = true;
+  if (firstTime) {
+    firstTime = false;
+    // initializing registers, right before execution of first instrumented instruction
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineInitializeRegisters,
+                    IARG_PTR, ise,
+                    IARG_CONTEXT,
+                    IARG_END);
+  }
+}
+
 void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE op,
     INS ins, UINT32 insAssembly) const {
+  checkForInitialState (ins);
   INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineRunHooks,
                   IARG_PTR, ise,
                   IARG_CONST_CONTEXT,

@@ -368,6 +368,12 @@ void InstructionSymbolicExecuter::analysisRoutineRunHooks (const CONTEXT *contex
   runHooks (context);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineInitializeRegisters (
+    CONTEXT *context) const {
+  syscallReturned (context);
+  PIN_ExecuteAt (context); // never returns
+}
+
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
     ConcreteValue *value =
@@ -1432,6 +1438,11 @@ VOID analysisRoutineDstMemSrcImplicit (VOID *iseptr, UINT32 opcode,
       (ise->convertOpcodeToSingleOperandAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa, memReadBytes,
        insAssemblyStr);
+}
+
+VOID analysisRoutineInitializeRegisters (VOID *iseptr, CONTEXT *context) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineInitializeRegisters (context);
 }
 
 }

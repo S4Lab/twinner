@@ -118,6 +118,7 @@ private:
   InstructionModel getInstructionModelForPushInstruction (INS ins) const;
   InstructionModel getInstructionModelForPopInstruction (INS ins) const;
   InstructionModel getInstructionModelForNormalInstruction (INS ins) const;
+  inline void checkForInitialState (INS ins) const;
   void instrumentSingleInstruction (InstructionModel model, OPCODE op, INS ins,
       UINT32 insAssembly) const;
 

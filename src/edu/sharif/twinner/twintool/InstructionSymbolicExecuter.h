@@ -124,6 +124,8 @@ public:
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
       const char *insAssembly);
   void analysisRoutineRunHooks (const CONTEXT *context);
+  /// This call does not return to caller
+  void analysisRoutineInitializeRegisters (CONTEXT *context) const;
 
 private:
 
@@ -394,6 +396,7 @@ VOID analysisRoutineDstRegSrcImplicit (VOID *iseptr, UINT32 opcode,
 VOID analysisRoutineDstMemSrcImplicit (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa, UINT32 memReadBytes,
     UINT32 insAssembly);
+VOID analysisRoutineInitializeRegisters (VOID *iseptr, CONTEXT *context);
 
 }
 }
