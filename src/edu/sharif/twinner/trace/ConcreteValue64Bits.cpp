@@ -51,8 +51,10 @@ void ConcreteValue64Bits::writeToMemoryAddress (ADDRINT memoryEa) const {
 }
 
 void ConcreteValue64Bits::writeToRegister (CONTEXT *context, REG reg) const {
-  edu::sharif::twinner::util::writeRegisterContent
-      (context, reg, (const UINT8 *) value);
+  PIN_REGISTER buffer;
+  memset (buffer.byte, 0, sizeof (buffer));
+  buffer.qword[0] = value;
+  edu::sharif::twinner::util::writeRegisterContent (context, reg, buffer.byte);
 }
 
 std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,

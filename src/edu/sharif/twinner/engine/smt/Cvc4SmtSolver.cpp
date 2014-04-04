@@ -88,6 +88,7 @@ throw (UnsatisfiableConstraintsException) {
   smt.setOption ("produce-models", true);
   //  smt.setOption ("trace", "smt");
 
+  //FIXME: Handle 128 bits variables too (e.g. xmm0 is 128 bits)
   Type bitvector64 = em.mkBitVectorType (64);
   std::map<std::string, Expr> symbols;
   std::map<UINT64, Expr> constants;
