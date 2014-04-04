@@ -225,8 +225,8 @@ void TraceImp::loadInitializedSymbolsFromBinaryStream (std::ifstream &in) {
   }
 }
 
-ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream (int index,
-    std::ifstream &in) {
+ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream (
+    int index, std::ifstream &in) {
   std::map < ADDRINT, Expression * > memMap;
   std::map < REG, Expression * > regMap;
   std::list < SymbolRecord >::size_type s;
@@ -252,11 +252,11 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
              ConcreteValue128Bits (record.concreteValueMsb, record.concreteValueLsb),
              index);
       }
-      std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
-          memMap.insert (make_pair (ADDRINT (record.address), exp));
+      std::pair < std::map < REG, Expression * >::iterator, bool > res =
+          regMap.insert (make_pair (REG (record.address), exp));
       if (!res.second) {
-        throw std::runtime_error ("Duplicate symbols are read for one memory address"
-                                  " from symbols binary stream");
+        throw std::runtime_error
+            ("Duplicate symbols are read for one register from symbols binary stream");
       }
       break;
     }
@@ -273,11 +273,11 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
              ConcreteValue128Bits (record.concreteValueMsb, record.concreteValueLsb),
              index, true);
       }
-      std::pair < std::map < REG, Expression * >::iterator, bool > res =
-          regMap.insert (make_pair (REG (record.address), exp));
+      std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
+          memMap.insert (make_pair (ADDRINT (record.address), exp));
       if (!res.second) {
-        throw std::runtime_error
-            ("Duplicate symbols are read for one register from symbols binary stream");
+        throw std::runtime_error ("Duplicate symbols are read for one memory address"
+                                  " from symbols binary stream");
       }
       break;
     }
