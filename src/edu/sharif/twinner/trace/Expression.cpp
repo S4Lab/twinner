@@ -289,6 +289,7 @@ throw (WrongStateException) {
     return;
   }
   // for reg case, isOverwriting is false for sure
+  // overwriting is done after syscall instructions instead
   throw WrongStateException (*lastConcreteValue);
 }
 

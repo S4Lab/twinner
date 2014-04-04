@@ -22,12 +22,18 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-//FIXME: Update to include register symbol record too
+enum SymbolType {
+
+  REGISTER_64_BITS_SYMBOL_TYPE = 16,
+  REGISTER_128_BITS_SYMBOL_TYPE = 32,
+  MEMORY_64_BITS_SYMBOL_TYPE = 64,
+  MEMORY_128_BITS_SYMBOL_TYPE = 128,
+};
 
 struct SymbolRecord {
 
-  ADDRINT address;
-  UINT32 type; // 64 or 128
+  UINT64 address;
+  UINT32 type; // SymbolType
   UINT64 concreteValueLsb;
   UINT64 concreteValueMsb;
 };

@@ -158,6 +158,7 @@ Instrumenter::~Instrumenter () {
 }
 
 void Instrumenter::instrumentSingleInstruction (INS ins) {
+  //TODO: Overwrite registers after syscall instructions
   if (disabled) {
     RTN rtn = INS_Rtn (ins);
     if (RTN_Valid (rtn) && RTN_Name (rtn) == "main") {

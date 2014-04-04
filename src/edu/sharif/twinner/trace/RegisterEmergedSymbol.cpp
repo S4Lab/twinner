@@ -13,6 +13,7 @@
 #include "RegisterEmergedSymbol.h"
 
 #include "ConcreteValue64Bits.h"
+#include "ConcreteValue128Bits.h"
 
 #include <sstream>
 
@@ -39,7 +40,24 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::clone () const {
 }
 
 std::pair < int, SymbolRecord > RegisterEmergedSymbol::toSymbolRecord () const {
-  throw std::runtime_error ("Not implemented yet");
+  SymbolRecord record;
+  record.address = address;
+  if (dynamic_cast<const ConcreteValue64Bits *> (concreteValue)) {
+    record.type = REGISTER_64_BITS_SYMBOL_TYPE;
+    record.concreteValueLsb =
+        static_cast<const ConcreteValue64Bits *> (concreteValue)->getValue ();
+    record.concreteValueMsb = 0;
+  } else if (dynamic_cast<const ConcreteValue128Bits *> (concreteValue)) {
+    record.type = REGISTER_128_BITS_SYMBOL_TYPE;
+    record.concreteValueLsb =
+        static_cast<const ConcreteValue128Bits *> (concreteValue)->getLsb ();
+    record.concreteValueMsb =
+        static_cast<const ConcreteValue128Bits *> (concreteValue)->getMsb ();
+  } else {
+    throw std::runtime_error ("RegisterEmergedSymbol::toSymbolRecord () method: "
+                              "Unsupported concrete value type.");
+  }
+  return make_pair (generationIndex, record);
 }
 
 void RegisterEmergedSymbol::saveToBinaryStream (std::ofstream &out) const {

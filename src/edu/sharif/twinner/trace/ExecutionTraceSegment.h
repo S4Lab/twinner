@@ -39,7 +39,8 @@ private:
 
 public:
   ExecutionTraceSegment ();
-  ExecutionTraceSegment (const std::map < ADDRINT, Expression * > &memo);
+  ExecutionTraceSegment (const std::map < REG, Expression * > &regMap,
+      const std::map < ADDRINT, Expression * > &memMap);
   virtual ~ExecutionTraceSegment ();
 
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,

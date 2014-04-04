@@ -227,7 +227,8 @@ void TraceImp::loadInitializedSymbolsFromBinaryStream (std::ifstream &in) {
 
 ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream (int index,
     std::ifstream &in) {
-  std::map < ADDRINT, Expression * > map;
+  std::map < ADDRINT, Expression * > memMap;
+  std::map < REG, Expression * > regMap;
   std::list < SymbolRecord >::size_type s;
   in.read ((char *) &s, sizeof (s));
 
@@ -238,26 +239,53 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
     in.read ((char *) &record.concreteValueLsb, sizeof (record.concreteValueLsb));
     in.read ((char *) &record.concreteValueMsb, sizeof (record.concreteValueMsb));
     Expression *exp;
-    if (record.type == 64) {
-      exp = new ExpressionImp
-          (record.address, ConcreteValue64Bits (record.concreteValueLsb), index, true);
-    } else if (record.type == 128) {
-      exp = new ExpressionImp
-          (record.address,
-           ConcreteValue128Bits (record.concreteValueMsb, record.concreteValueLsb),
-           index, true);
-    } else {
+    switch (SymbolType (record.type)) {
+    case REGISTER_64_BITS_SYMBOL_TYPE:
+    case REGISTER_128_BITS_SYMBOL_TYPE:
+    {
+      if (record.type == REGISTER_64_BITS_SYMBOL_TYPE) {
+        exp = new ExpressionImp
+            (REG (record.address), ConcreteValue64Bits (record.concreteValueLsb), index);
+      } else {
+        exp = new ExpressionImp
+            (REG (record.address),
+             ConcreteValue128Bits (record.concreteValueMsb, record.concreteValueLsb),
+             index);
+      }
+      std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
+          memMap.insert (make_pair (ADDRINT (record.address), exp));
+      if (!res.second) {
+        throw std::runtime_error ("Duplicate symbols are read for one memory address"
+                                  " from symbols binary stream");
+      }
+      break;
+    }
+    case MEMORY_64_BITS_SYMBOL_TYPE:
+    case MEMORY_128_BITS_SYMBOL_TYPE:
+    {
+      if (record.type == MEMORY_64_BITS_SYMBOL_TYPE) {
+        exp = new ExpressionImp
+            (ADDRINT (record.address), ConcreteValue64Bits (record.concreteValueLsb),
+             index, true);
+      } else {
+        exp = new ExpressionImp
+            (ADDRINT (record.address),
+             ConcreteValue128Bits (record.concreteValueMsb, record.concreteValueLsb),
+             index, true);
+      }
+      std::pair < std::map < REG, Expression * >::iterator, bool > res =
+          regMap.insert (make_pair (REG (record.address), exp));
+      if (!res.second) {
+        throw std::runtime_error
+            ("Duplicate symbols are read for one register from symbols binary stream");
+      }
+      break;
+    }
+    default:
       throw std::runtime_error ("Unsupported SymbolRecord type");
     }
-    std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
-        map.insert (make_pair (record.address, exp));
-    if (!res.second) {
-      throw std::runtime_error
-          ("Duplicate symbols are read for one memory address"
-           " from symbols binary stream");
-    }
   }
-  return new ExecutionTraceSegment (map);
+  return new ExecutionTraceSegment (regMap, memMap);
 }
 
 void throw_exception_about_unexpected_change_in_memory_or_register_address

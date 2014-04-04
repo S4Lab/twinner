@@ -37,8 +37,9 @@ ExecutionTraceSegment::ExecutionTraceSegment () {
 }
 
 ExecutionTraceSegment::ExecutionTraceSegment (
-    const std::map < ADDRINT, Expression * > &memo) :
-memoryAddressToExpression (memo) {
+    const std::map < REG, Expression * > &regMap,
+    const std::map < ADDRINT, Expression * > &memMap) :
+registerToExpression (regMap), memoryAddressToExpression (memMap) {
 }
 
 ExecutionTraceSegment::~ExecutionTraceSegment () {

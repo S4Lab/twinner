@@ -46,12 +46,12 @@ MemoryEmergedSymbol::toSymbolRecord () const {
   SymbolRecord record;
   record.address = address;
   if (dynamic_cast<const ConcreteValue64Bits *> (concreteValue)) {
-    record.type = 64;
+    record.type = MEMORY_64_BITS_SYMBOL_TYPE;
     record.concreteValueLsb =
         static_cast<const ConcreteValue64Bits *> (concreteValue)->getValue ();
     record.concreteValueMsb = 0;
   } else if (dynamic_cast<const ConcreteValue128Bits *> (concreteValue)) {
-    record.type = 128;
+    record.type = MEMORY_128_BITS_SYMBOL_TYPE;
     record.concreteValueLsb =
         static_cast<const ConcreteValue128Bits *> (concreteValue)->getLsb ();
     record.concreteValueMsb =
