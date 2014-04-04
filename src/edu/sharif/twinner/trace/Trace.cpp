@@ -25,6 +25,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
+#include "ConcreteValue.h"
 
 namespace edu {
 namespace sharif {
@@ -113,6 +114,18 @@ void Trace::syscallInvoked (Syscall s) {
   }
   currentSegmentIterator--;
   currentSegmentIndex++;
+}
+
+void Trace::syscallReturned (CONTEXT *context) const {
+  const ExecutionTraceSegment *segment = *currentSegmentIterator;
+  const std::map < REG, Expression * > &map = segment->getRegisterToExpression ();
+  for (std::map < REG, Expression * >::const_iterator it = map.begin ();
+      it != map.end (); ++it) {
+    const REG reg = it->first;
+    const Expression *exp = it->second;
+    // The expression is an overwriting symbol for sure
+    exp->getLastConcreteValue ().writeToRegister (context, reg);
+  }
 }
 
 bool Trace::saveToFile (const char *path) const {

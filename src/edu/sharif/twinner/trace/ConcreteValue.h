@@ -36,6 +36,7 @@ public:
   virtual ~ConcreteValue ();
 
   virtual void writeToMemoryAddress (ADDRINT memoryEa) const = 0;
+  virtual void writeToRegister (CONTEXT *context, REG reg) const = 0;
 
   friend std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
       const ConcreteValue &me);

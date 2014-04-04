@@ -126,6 +126,7 @@ public:
   virtual void addPathConstraint (const Constraint *c);
 
   void syscallInvoked (Syscall s);
+  void syscallReturned (CONTEXT *context) const;
 
   bool saveToFile (const char *path) const;
   static Trace *loadFromFile (const char *path);

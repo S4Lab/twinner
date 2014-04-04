@@ -50,6 +50,11 @@ void ConcreteValue64Bits::writeToMemoryAddress (ADDRINT memoryEa) const {
   edu::sharif::twinner::util::writeMemoryContent (memoryEa, value);
 }
 
+void ConcreteValue64Bits::writeToRegister (CONTEXT *context, REG reg) const {
+  edu::sharif::twinner::util::writeRegisterContent
+      (context, reg, (const UINT8 *) value);
+}
+
 std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
     const ConcreteValue64Bits &me) {
   return stream << "0x" << std::hex << me.value;

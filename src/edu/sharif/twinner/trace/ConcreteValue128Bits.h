@@ -38,6 +38,7 @@ public:
   virtual void saveToBinaryStream (std::ofstream &out) const;
 
   virtual void writeToMemoryAddress (ADDRINT memoryEa) const;
+  virtual void writeToRegister (CONTEXT *context, REG reg) const;
 
   friend std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
       const ConcreteValue128Bits &me);

@@ -100,11 +100,18 @@ void InstructionSymbolicExecuter::enable () {
 
 void InstructionSymbolicExecuter::syscallInvoked (const CONTEXT *context,
     edu::sharif::twinner::trace::Syscall s) {
-  runHooks (context); // FIXME: Should I call hooks here or syscall instruction is instrumented independently?
+  runHooks (context);
   if (disabled) {
     return;
   }
   trace->syscallInvoked (s);
+}
+
+void InstructionSymbolicExecuter::syscallReturned (CONTEXT *context) const {
+  if (disabled) {
+    return;
+  }
+  trace->syscallReturned (context);
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,

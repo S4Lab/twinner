@@ -524,15 +524,22 @@ UINT64 readMemoryContent (ADDRINT memoryEa) {
   throw std::runtime_error (msg);
 }
 
-VOID writeMemoryContent (ADDRINT memoryEa, UINT64 value) {
+VOID writeMemoryContent (ADDRINT memoryEa, const UINT64 value) {
   const char *msg = "The writeMemoryContent(...) method is only supported in TwinTool:"
       " Calling error from Twinner.\n";
   edu::sharif::twinner::util::Logger::error () << msg;
   throw std::runtime_error (msg);
 }
 
-VOID writeMemoryContent (ADDRINT memoryEa, UINT8 *value, size_t size) {
+VOID writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
   const char *msg = "The writeMemoryContent(...) method is only supported in TwinTool:"
+      " Calling error from Twinner.\n";
+  edu::sharif::twinner::util::Logger::error () << msg;
+  throw std::runtime_error (msg);
+}
+
+VOID writeRegisterContent (CONTEXT *context, REG reg, const UINT8 *value) {
+  const char *msg = "The writeRegisterContent(...) method is only supported in TwinTool:"
       " Calling error from Twinner.\n";
   edu::sharif::twinner::util::Logger::error () << msg;
   throw std::runtime_error (msg);

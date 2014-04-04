@@ -71,9 +71,15 @@ void ConcreteValue128Bits::saveToBinaryStream (std::ofstream &out) const {
 }
 
 void ConcreteValue128Bits::writeToMemoryAddress (ADDRINT memoryEa) const {
-  UINT64 qword[] = {lsb, msb};
+  const UINT64 qword[] = {lsb, msb};
   edu::sharif::twinner::util::writeMemoryContent
-      (memoryEa, (UINT8 *) qword, sizeof (qword));
+      (memoryEa, (const UINT8 *) qword, sizeof (qword));
+}
+
+void ConcreteValue128Bits::writeToRegister (CONTEXT *context, REG reg) const {
+  const UINT64 qword[] = {lsb, msb};
+  edu::sharif::twinner::util::writeRegisterContent
+      (context, reg, (const UINT8 *) qword);
 }
 
 std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,

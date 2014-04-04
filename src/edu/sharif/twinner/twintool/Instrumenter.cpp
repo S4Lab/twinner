@@ -158,7 +158,6 @@ Instrumenter::~Instrumenter () {
 }
 
 void Instrumenter::instrumentSingleInstruction (INS ins) {
-  //TODO: Overwrite registers after syscall instructions
   if (disabled) {
     RTN rtn = INS_Rtn (ins);
     if (RTN_Valid (rtn) && RTN_Name (rtn) == "main") {
@@ -556,6 +555,7 @@ void Instrumenter::printDebugInformation (INS ins, const char *insAssembly) cons
 
 void Instrumenter::syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt,
     SYSCALL_STANDARD std) {
+  UNUSED_VARIABLE (threadIndex);
   edu::sharif::twinner::util::Logger::loquacious () << "***** syscallEntryPoint *****\n";
   ise->syscallInvoked (ctxt, edu::sharif::twinner::trace::Syscall (std));
 
@@ -570,8 +570,10 @@ void Instrumenter::syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt,
 
 void Instrumenter::syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt,
     SYSCALL_STANDARD std) {
+  UNUSED_VARIABLE (threadIndex);
+  UNUSED_VARIABLE (std);
   edu::sharif::twinner::util::Logger::loquacious () << "*** syscallExitPoint ***\n";
-  //TODO: Implement...
+  ise->syscallReturned (ctxt);
 }
 
 void Instrumenter::saveMemoryContentsToFile (const char *path) const {
