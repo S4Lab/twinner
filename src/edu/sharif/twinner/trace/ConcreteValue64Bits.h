@@ -30,6 +30,9 @@ public:
   ConcreteValue64Bits (const ConcreteValue &cv);
   virtual ~ConcreteValue64Bits ();
 
+  virtual ConcreteValue64Bits &operator= (UINT64 value);
+  ConcreteValue64Bits &operator= (const ConcreteValue &value);
+
   virtual void saveToBinaryStream (std::ofstream &out) const;
 
   virtual void writeToMemoryAddress (ADDRINT memoryEa) const;

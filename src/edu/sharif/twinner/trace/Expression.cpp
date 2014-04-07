@@ -213,6 +213,10 @@ void Expression::minus (UINT64 immediate) {
   minus (new ConcreteValue64Bits (immediate));
 }
 
+void Expression::minus (const Expression *exp) {
+  binaryOperation (new Operator (Operator::MINUS), exp);
+}
+
 void Expression::add (ConcreteValue *immediate) {
   stack.push_back (new Constant (immediate));
   stack.push_back (new Operator (Operator::ADD));

@@ -40,6 +40,17 @@ ConcreteValue () {
 ConcreteValue64Bits::~ConcreteValue64Bits () {
 }
 
+ConcreteValue64Bits &ConcreteValue64Bits::operator= (UINT64 v) {
+  value = v;
+  return *this;
+}
+
+ConcreteValue64Bits &ConcreteValue64Bits::operator= (const ConcreteValue &v) {
+  ConcreteValue64Bits tmp (v);
+  value = tmp.value;
+  return *this;
+}
+
 void ConcreteValue64Bits::saveToBinaryStream (std::ofstream &out) const {
   const UINT32 size = 64;
   out.write ((const char *) &size, sizeof (size));

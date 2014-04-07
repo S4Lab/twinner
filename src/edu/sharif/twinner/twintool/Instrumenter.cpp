@@ -148,6 +148,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_PMOVMSKB, DST_REG_SRC_LARGE_REG)); // packed move mask-byte
   managedInstructions.insert
+      (make_pair (XED_ICLASS_PCMPEQB, PCMPEQX_INS_MODELS)); // packed compare byte
+  managedInstructions.insert
       (make_pair (XED_ICLASS_BSF, DST_REG_SRC_EITHER_REG_OR_MEM));
   managedInstructions.insert
       (make_pair (XED_ICLASS_INC, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));

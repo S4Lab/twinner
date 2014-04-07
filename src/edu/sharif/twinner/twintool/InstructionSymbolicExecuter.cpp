@@ -913,6 +913,57 @@ void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "pcmpeqbAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tcomparing...";
+  const int size = dst.getSize ();
+  ConcreteValue *result = dstexp->getLastConcreteValue ().clone ();
+  *result = 0;
+  for (int i = 0; i < size; i += 8) {
+    edu::sharif::twinner::trace::Expression *ithByteSrc = srcexp->clone ();
+    edu::sharif::twinner::trace::Expression *ithByteDst = dstexp->clone ();
+    ithByteSrc->shiftToRight (i);
+    ithByteSrc->bitwiseAnd (0xFF);
+    ithByteDst->shiftToRight (i);
+    ithByteDst->bitwiseAnd (0xFF);
+    //    edu::sharif::twinner::util::Logger::warning () << "byte: " << i
+    //        << " from src: " << ithByteSrc << " and from dst: " << ithByteDst << "\n";
+    ithByteSrc->minus (ithByteDst);
+    ConcreteValue *c = dstexp->getLastConcreteValue ().clone ();
+    if (ithByteSrc->getLastConcreteValue ().isZero ()) { // equal
+      trace->addPathConstraint
+          (new edu::sharif::twinner::trace::Constraint
+           (ithByteSrc, edu::sharif::twinner::trace::Constraint::ZERO));
+      *c = 0xFF;
+    } else { // non-equal
+      trace->addPathConstraint
+          (new edu::sharif::twinner::trace::Constraint
+           (ithByteSrc, edu::sharif::twinner::trace::Constraint::NON_ZERO));
+      *c = 0x00;
+    }
+    delete ithByteSrc;
+    delete ithByteDst;
+    (*c) <<= i;
+    (*result) |= (*c);
+    delete c;
+  }
+  delete srcexp;
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tsetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *resexp =
+      new edu::sharif::twinner::trace::ExpressionImp (result);
+  dst.setExpression (trace, resexp);
+  delete resexp;
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::bsfAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "bsfAnalysisRoutine(...)\n"
@@ -1178,6 +1229,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::testAnalysisRoutine;
   case XED_ICLASS_PMOVMSKB:
     return &InstructionSymbolicExecuter::pmovmskbAnalysisRoutine;
+  case XED_ICLASS_PCMPEQB:
+    return &InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine;
   case XED_ICLASS_BSF:
     return &InstructionSymbolicExecuter::bsfAnalysisRoutine;
   default:

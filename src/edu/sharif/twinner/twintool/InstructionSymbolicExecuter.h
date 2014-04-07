@@ -282,6 +282,14 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * PCMPEQB is a packed compare equality check which works byte-wise. The src and dst
+   * are compared together byte-by-byte and those byte which are/aren't equal will be
+   * filed with 1 (0xFF) / 0 (0x00) in the dst reg.
+   */
+  void pcmpeqbAnalysisRoutine (
+      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+
+  /**
    * BSF is bit scan forward instruction which searches for the least significant 1 bit
    * in the src and sets its index in the dst. The index is placed as a constant in dst
    * and a constraint is added to indicate that the noted bit was set.

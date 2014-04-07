@@ -141,6 +141,12 @@ public:
   void minus (UINT64 immediate);
 
   /**
+   * Decrement this expression as much as the given exp expression.
+   * @param exp The expression indicating how much this expression should be decremented.
+   */
+  void minus (const Expression *exp);
+
+  /**
    * Increment this expression as much as the given immediate value.
    * @param immediate The value which its value will be added to this expression.
    */
