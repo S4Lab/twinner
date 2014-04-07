@@ -18,6 +18,8 @@
 #include "edu/sharif/twinner/trace/ConcreteValue128Bits.h"
 
 #include <stdexcept>
+#include <iomanip>
+#include <sstream>
 
 namespace edu {
 namespace sharif {
@@ -129,8 +131,11 @@ const Logger &Logger::operator<< (
     const edu::sharif::twinner::trace::ConcreteValue128Bits *value128imp =
         dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *> (&value);
     if (value128imp) {
-      return (*this) << "ConcreteValue128Bits(0x" << std::hex
-          << value128imp->getMsb () << value128imp->getLsb () << ')';
+      std::stringstream ss;
+      ss << "ConcreteValue128Bits(0x" << std::hex
+          << value128imp->getMsb () << std::setw (16) << std::setfill ('0')
+          << value128imp->getLsb () << ')';
+      return (*this) << ss.str ();
     } else {
       return (*this) << "ConcreteValue(unsupported-type)";
     }

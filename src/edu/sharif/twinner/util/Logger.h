@@ -16,6 +16,7 @@
 #include "pin.H"
 
 #include <iostream>
+#include <iomanip>
 #include <map>
 #include <list>
 
@@ -104,6 +105,15 @@ public:
 
   inline const Logger &operator<< (ios_base &(*func)(ios_base &)) const {
     return actualWrite (func);
+  }
+
+  inline const Logger &operator<< (struct std::_Setw w) const {
+    return actualWrite (w);
+  }
+
+  template<typename _CharT>
+  inline const Logger &operator<< (struct std::_Setfill<_CharT> f) const {
+    return actualWrite (f);
   }
 
   template <typename T>
