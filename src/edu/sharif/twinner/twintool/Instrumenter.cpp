@@ -234,9 +234,6 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_DIV:
   case XED_ICLASS_MUL:
     return DST_REG_REG_SRC_REG;
-  case XED_ICLASS_PMOVMSKB:
-    // TODO: Find a more abstract/general solution to check for XMM registers
-    return DST_REG_SRC_LARGE_REG;
   case XED_ICLASS_INC:
     return INS_OperandIsReg (ins, 0) ? DST_REG_SRC_IMPLICIT : DST_MEM_SRC_IMPLICIT;
   default:
@@ -283,18 +280,31 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForPopInstructio
 
 Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruction (
     INS ins) const {
-  bool destIsReg = INS_OperandIsReg (ins, 0);
-  bool destIsMem = INS_OperandIsMemory (ins, 0);
-  bool sourceIsReg = INS_OperandIsReg (ins, 1);
-  bool sourceIsMem = INS_OperandIsMemory (ins, 1);
-  bool sourceIsImmed = INS_OperandIsImmediate (ins, 1);
-  bool sourceIsAdg = INS_OperandIsAddressGenerator (ins, 1);
+  const bool destIsReg = INS_OperandIsReg (ins, 0);
+  const bool destIsMem = INS_OperandIsMemory (ins, 0);
+  const bool sourceIsReg = INS_OperandIsReg (ins, 1);
+  const bool sourceIsMem = INS_OperandIsMemory (ins, 1);
+  const bool sourceIsImmed = INS_OperandIsImmediate (ins, 1);
+  const bool sourceIsAdg = INS_OperandIsAddressGenerator (ins, 1);
 
   if (destIsReg && sourceIsReg) {
-    return DST_REG_SRC_REG;
+    const bool destRegIsXmm = REG_is_xmm (INS_OperandReg (ins, 0));
+    const bool sourceRegIsXmm = REG_is_xmm (INS_OperandReg (ins, 1));
+    if (destRegIsXmm && sourceRegIsXmm) {
+      return DST_LARGE_REG_SRC_LARGE_REG;
+    } else if (!destRegIsXmm && sourceRegIsXmm) {
+      return DST_REG_SRC_LARGE_REG;
+    } else {
+      return DST_REG_SRC_REG;
+    }
 
   } else if (destIsReg && sourceIsMem) {
-    return DST_REG_SRC_MEM;
+    const bool destRegIsXmm = REG_is_xmm (INS_OperandReg (ins, 0));
+    if (destRegIsXmm) {
+      return DST_LARGE_REG_SRC_MEM;
+    } else {
+      return DST_REG_SRC_MEM;
+    }
 
   } else if (destIsReg && sourceIsImmed) {
     return DST_REG_SRC_IMD;
@@ -353,6 +363,29 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_UINT32, srcreg, IARG_REG_CONST_REFERENCE, srcreg,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_LARGE_REG_SRC_LARGE_REG:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    REG srcreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstLargeRegSrcLargeReg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
+                    IARG_UINT32, srcreg, IARG_REG_CONST_REFERENCE, srcreg,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_LARGE_REG_SRC_MEM:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstLargeRegSrcMem,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
+                    IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -600,6 +633,7 @@ void Instrumenter::saveMemoryContentsToFile (const char *path) const {
 
 void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > &map,
     const ADDRINT &address) {
+  //TODO: Communicate mem-read size and read 64bits or 128bits values accordingly
   map.insert (make_pair (address,
                          edu::sharif::twinner::util::readMemoryContent (address)));
 }

@@ -1290,6 +1290,32 @@ VOID analysisRoutineDstRegSrcLargeReg (VOID *iseptr, UINT32 opcode,
        insAssemblyStr);
 }
 
+VOID analysisRoutineDstLargeRegSrcLargeReg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, const PIN_REGISTER *dstRegVal,
+    UINT32 srcReg, const PIN_REGISTER *srcRegVal,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
+  ise->analysisRoutineDstRegSrcReg
+      (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*srcRegVal),
+       insAssemblyStr);
+}
+
+VOID analysisRoutineDstLargeRegSrcMem (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, const PIN_REGISTER *dstRegVal,
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
+  ise->analysisRoutineDstRegSrcMem
+      (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*dstRegVal),
+       srcMemoryEa, memReadBytes,
+       insAssemblyStr);
+}
+
 VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
