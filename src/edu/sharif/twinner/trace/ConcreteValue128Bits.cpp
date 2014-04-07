@@ -10,6 +10,9 @@
  * This file is part of Twinner project.
  */
 
+#include <iomanip>
+#include <sstream>
+
 #include "ConcreteValue128Bits.h"
 
 #include "ConcreteValue64Bits.h"
@@ -86,7 +89,9 @@ void ConcreteValue128Bits::writeToRegister (CONTEXT *context, REG reg) const {
 
 std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
     const ConcreteValue128Bits &me) {
-  return stream << "0x" << std::hex << me.msb << me.lsb;
+  std::stringstream ss;
+  ss << "0x" << std::hex << me.msb << std::setw (16) << std::setfill ('0') << me.lsb;
+  return stream << ss.str ();
 }
 
 bool ConcreteValue128Bits::isNegative (int size) const {
