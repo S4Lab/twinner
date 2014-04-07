@@ -158,10 +158,20 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator-= (const ConcreteValue &cv)
 ConcreteValue128Bits &ConcreteValue128Bits::operator+= (const ConcreteValue &cv) {
   const ConcreteValue128Bits tmp (cv);
   int carry;
-  if ((lsb & (1ull << 63)) != 0 && (tmp.lsb & (1ull << 63)) != 0) {
+  bool myMsbIsSet = ((lsb & (1ull << 63)) != 0);
+  bool cvMsbIsSet = ((tmp.lsb & (1ull << 63)) != 0);
+  if (myMsbIsSet && cvMsbIsSet) {
     carry = 1;
-  } else {
+  } else if (!myMsbIsSet && !cvMsbIsSet) {
     carry = 0;
+  } else { // one MSB is set and another is not set
+    const UINT64 first63BitsOfMyValue = (lsb & ((1ull << 63) - 1));
+    const UINT64 first63BitsOfCvValue = (tmp.lsb & ((1ull << 63) - 1));
+    if (first63BitsOfMyValue + first63BitsOfCvValue >= (1ull << 63)) {
+      carry = 1;
+    } else {
+      carry = 0;
+    }
   }
   lsb += tmp.lsb;
   msb += tmp.msb + carry;
