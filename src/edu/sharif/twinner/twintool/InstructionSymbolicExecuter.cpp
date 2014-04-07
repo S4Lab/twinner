@@ -1193,6 +1193,7 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
   case XED_ICLASS_MOV:
   case XED_ICLASS_MOVZX:
+  case XED_ICLASS_MOVDQU:
     return &InstructionSymbolicExecuter::movAnalysisRoutine;
   case XED_ICLASS_MOVSX:
   case XED_ICLASS_MOVSXD:
@@ -1407,6 +1408,21 @@ VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
        (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       memReadBytes,
+       insAssemblyStr);
+}
+
+VOID analysisRoutineDstMemSrcLargeReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, const PIN_REGISTER *srcRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
+  ise->analysisRoutineDstMemSrcReg
+      (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       dstMemoryEa,
+       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*srcRegVal),
        memReadBytes,
        insAssemblyStr);
 }

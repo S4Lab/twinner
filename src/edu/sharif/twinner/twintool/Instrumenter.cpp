@@ -152,6 +152,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_PXOR, PCMPEQX_INS_MODELS));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_MOVDQU, MOV_INS_WITH_LARGE_REG_INS_MODELS));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_BSF, DST_REG_SRC_EITHER_REG_OR_MEM));
   managedInstructions.insert
       (make_pair (XED_ICLASS_INC, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
@@ -314,7 +316,12 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
     return DST_REG_SRC_IMD;
 
   } else if (destIsMem && sourceIsReg) {
-    return DST_MEM_SRC_REG;
+    const bool sourceRegIsXmm = REG_is_xmm (INS_OperandReg (ins, 1));
+    if (sourceRegIsXmm) {
+      return DST_MEM_SRC_LARGE_REG;
+    } else {
+      return DST_MEM_SRC_REG;
+    }
 
   } else if (destIsMem && sourceIsImmed) {
     return DST_MEM_SRC_IMD;
@@ -423,6 +430,18 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_MEM_SRC_LARGE_REG:
+  {
+    REG srcreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcLargeReg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_MEMORYOP_EA, 0,
+                    IARG_UINT32, srcreg, IARG_REG_CONST_REFERENCE, srcreg,
                     IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);

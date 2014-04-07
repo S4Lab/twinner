@@ -379,6 +379,11 @@ VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 srcReg, ADDRINT srcRegVal,
     UINT32 memReadBytes,
     UINT32 insAssembly);
+VOID analysisRoutineDstMemSrcLargeReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, const PIN_REGISTER *srcRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly);
 VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     ADDRINT srcImmediateValue,
