@@ -209,6 +209,14 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
   }
   logger << ": dst mem addr: " << dstMemoryEa
       << ", src imd: " << srcImmediateValue << '\n';
+  const UINT32 maxReadSizeInBytes = srcImmediateValue.getSize () / 8;
+  if (memReadBytes > maxReadSizeInBytes) {
+    edu::sharif::twinner::util::Logger::warning () << std::hex
+        << "memReadBytes was 0x" << memReadBytes << " which is larger than size of "
+        "srcImmediateValue (which is just 0x" << maxReadSizeInBytes << " bytes)"
+        "; lowering the memReadBytes to 0x" << maxReadSizeInBytes << " bytes.\n";
+    memReadBytes = maxReadSizeInBytes;
+  }
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
