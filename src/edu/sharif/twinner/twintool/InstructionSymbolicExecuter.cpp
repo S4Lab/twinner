@@ -141,9 +141,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine r
   }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
-  logger << "analysisRoutineDstRegSrcMem(INS: "
+  logger << std::hex << "analysisRoutineDstRegSrcMem(INS: "
       << insAssembly << "): dst reg: " << REG_StringShort (dstReg)
-      << ", src mem addr: " << srcMemoryEa << ", mem read bytes: " << memReadBytes
+      << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
       MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
@@ -160,9 +160,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
   }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
-  logger << "analysisRoutineDstRegSrcImd(INS: "
+  logger << std::hex << "analysisRoutineDstRegSrcImd(INS: "
       << insAssembly << "): dst reg: " << REG_StringShort (dstReg)
-      << ", src imd: " << srcImmediateValue << '\n';
+      << ", src imd: 0x" << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
@@ -182,8 +182,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
   }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
-  logger << "analysisRoutineDstMemSrcReg(INS: "
-      << insAssembly << "): dst mem addr: " << dstMemoryEa
+  logger << std::hex << "analysisRoutineDstMemSrcReg(INS: "
+      << insAssembly << "): dst mem addr: 0x" << dstMemoryEa
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
       RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
@@ -207,8 +207,6 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
   } else {
     logger << "analysisRoutineDstMemSrcImd()";
   }
-  logger << ": dst mem addr: " << dstMemoryEa
-      << ", src imd: " << srcImmediateValue << '\n';
   const UINT32 maxReadSizeInBytes = srcImmediateValue.getSize () / 8;
   if (memReadBytes > maxReadSizeInBytes) {
     edu::sharif::twinner::util::Logger::warning () << std::hex
@@ -217,6 +215,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
         "; lowering the memReadBytes to 0x" << maxReadSizeInBytes << " bytes.\n";
     memReadBytes = maxReadSizeInBytes;
   }
+  logger << std::hex << ": dst mem addr: 0x" << dstMemoryEa
+      << ", src imd: 0x" << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
@@ -235,9 +235,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine r
   }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
-  logger << "analysisRoutineDstMemSrcMem(INS: "
-      << insAssembly << "): dst mem addr: " << dstMemoryEa
-      << ", src mem addr: " << srcMemoryEa << ", mem read bytes: " << memReadBytes
+  logger << std::hex << "analysisRoutineDstMemSrcMem(INS: "
+      << insAssembly << "): dst mem addr: 0x" << dstMemoryEa
+      << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
       MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
@@ -269,9 +269,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
   }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
-  logger << "analysisRoutineDstRegSrcAdg(INS: "
+  logger << std::hex << "analysisRoutineDstRegSrcAdg(INS: "
       << insAssembly << ") [AFTER execution of instruction]: dst reg: "
-      << REG_StringShort (dstReg) << ", dst reg value: "
+      << REG_StringShort (dstReg) << ", dst reg value: 0x"
       << dstRegVal << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::ExpressionImp (dstRegVal);
@@ -364,9 +364,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImplicit (
   }
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
-  logger << "analysisRoutineDstMemSrcImplicit(INS: "
-      << insAssembly << "): src mem addr: " << srcMemoryEa
-      << ", mem read bytes: " << memReadBytes << '\n';
+  logger << std::hex << "analysisRoutineDstMemSrcImplicit(INS: "
+      << insAssembly << "): src mem addr: 0x" << srcMemoryEa
+      << ", mem read bytes: 0x" << memReadBytes << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
