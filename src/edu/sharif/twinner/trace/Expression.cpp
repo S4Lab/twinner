@@ -22,6 +22,7 @@
 #include "Constant.h"
 #include "ConcreteValue64Bits.h"
 #include "Symbol.h"
+#include "ConcreteValue128Bits.h"
 
 namespace edu {
 namespace sharif {
@@ -129,17 +130,23 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
 
 void Expression::truncate (int bits) {
   //TODO: Detect when truncation has no effect (value is already truncated) and ignore it
-  UINT64 mask;
-  if (bits == 64) {
-    mask = (UINT64) (-1);
-  } else {
-    mask = 1;
-    mask <<= bits;
-    mask--;
+  ConcreteValue *mask;
+  if (bits > 128) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Truncating to " << std::dec << bits << " bits.\n";
+    throw std::runtime_error ("Expression::truncate(...): number of bits is too large");
+  } else if (bits == 128) {
+    mask = new ConcreteValue128Bits (UINT64 (-1), UINT64 (-1));
+  } else if (bits > 64) {
+    mask = new ConcreteValue128Bits ((1ull << (bits - 64)) - 1, UINT64 (-1));
+  } else if (bits == 64) {
+    mask = new ConcreteValue64Bits (UINT64 (-1));
+  } else { // < 64
+    mask = new ConcreteValue64Bits ((1ull << bits) - 1);
   }
   stack.push_back (new Constant (mask));
   stack.push_back (new Operator (Operator::BITWISE_AND));
-  (*lastConcreteValue) &= mask;
+  (*lastConcreteValue) &= (*mask);
 }
 
 void Expression::shiftToRight (ConcreteValue *bits) {
