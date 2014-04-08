@@ -75,13 +75,26 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::loadFromBinaryStream (std::ifstrea
 }
 
 RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::string &name,
-    UINT64 value) {
+    UINT32 v4, UINT32 v3, UINT32 v2, UINT32 v1) {
   const int separator = name.find ('_');
   const REG reg = getRegisterFromName (name.substr (0, separator));
   std::stringstream ss (name.substr (separator + 1));
   int generationIndex;
   ss >> std::hex >> generationIndex;
-  return new RegisterEmergedSymbol (reg, ConcreteValue64Bits (value), generationIndex);
+  if (is128BitsRegister (reg)) {
+    const UINT64 high = (UINT64 (v4) << 32) | v3;
+    const UINT64 low = (UINT64 (v2) << 32) | v1;
+    return new RegisterEmergedSymbol
+        (reg, ConcreteValue128Bits (high, low), generationIndex);
+
+  } else {
+    if (v4 != 0 || v3 != 0) {
+      throw std::runtime_error ("RegisterEmergedSymbol::fromNameAndValue (...): "
+                                "Illegal value: This register is only 64 bits.");
+    }
+    const UINT64 value = (UINT64 (v2) << 32) | v1;
+    return new RegisterEmergedSymbol (reg, ConcreteValue64Bits (value), generationIndex);
+  }
 }
 
 std::string RegisterEmergedSymbol::toString () const {
@@ -239,6 +252,30 @@ REG RegisterEmergedSymbol::getRegisterFromName (const std::string &name) {
   } else {
     const std::string msg = "Unknown Register Name";
     throw std::runtime_error (msg + name);
+  }
+}
+
+bool RegisterEmergedSymbol::is128BitsRegister (REG reg) {
+  switch (reg) {
+  case REG_XMM0:
+  case REG_XMM1:
+  case REG_XMM2:
+  case REG_XMM3:
+  case REG_XMM4:
+  case REG_XMM5:
+  case REG_XMM6:
+  case REG_XMM7:
+  case REG_XMM8:
+  case REG_XMM9:
+  case REG_XMM10:
+  case REG_XMM11:
+  case REG_XMM12:
+  case REG_XMM13:
+  case REG_XMM14:
+  case REG_XMM15:
+    return true;
+  default:
+    return false;
   }
 }
 

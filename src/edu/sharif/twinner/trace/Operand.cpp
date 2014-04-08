@@ -39,6 +39,10 @@ Operand::~Operand () {
   delete concreteValue;
 }
 
+const ConcreteValue &Operand::getValue () const {
+  return *concreteValue;
+}
+
 }
 }
 }

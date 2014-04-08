@@ -45,6 +45,8 @@ protected:
 
 public:
   ~Operand ();
+
+  const ConcreteValue &getValue () const;
 };
 
 }

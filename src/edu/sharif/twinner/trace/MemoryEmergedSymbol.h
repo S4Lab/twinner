@@ -38,7 +38,8 @@ public:
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static MemoryEmergedSymbol *loadFromBinaryStream (std::ifstream &in);
-  static MemoryEmergedSymbol *fromNameAndValue (const std::string &name, UINT64 value);
+  static MemoryEmergedSymbol *fromNameAndValue (const std::string &name,
+      UINT32 v4, UINT32 v3, UINT32 v2, UINT32 v1);
 
   virtual std::string toString () const;
   virtual bool operator== (const ExpressionToken &token) const;

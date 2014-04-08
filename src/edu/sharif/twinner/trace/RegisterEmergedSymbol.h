@@ -38,7 +38,8 @@ public:
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static RegisterEmergedSymbol *loadFromBinaryStream (std::ifstream &in);
-  static RegisterEmergedSymbol *fromNameAndValue (const std::string &name, UINT64 value);
+  static RegisterEmergedSymbol *fromNameAndValue (const std::string &name,
+      UINT32 v4, UINT32 v3, UINT32 v2, UINT32 v1);
 
   virtual std::string toString () const;
   virtual bool operator== (const ExpressionToken &token) const;
@@ -46,6 +47,7 @@ public:
 private:
   const char *getRegisterName () const;
   static REG getRegisterFromName (const std::string &name);
+  static bool is128BitsRegister (REG reg);
 };
 
 }

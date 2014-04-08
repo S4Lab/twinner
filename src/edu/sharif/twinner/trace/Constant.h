@@ -41,8 +41,6 @@ public:
 
   virtual std::string toString () const;
 
-  UINT64 getValue () const;
-
   virtual bool operator== (const ExpressionToken &token) const;
 };
 

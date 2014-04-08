@@ -57,11 +57,6 @@ std::string Constant::toString () const {
   return ss.str ();
 }
 
-UINT64 Constant::getValue () const {
-  //FIXME: Support 128 bits constants
-  return static_cast<ConcreteValue64Bits *> (concreteValue)->getValue ();
-}
-
 bool Constant::operator== (const ExpressionToken &token) const {
   return dynamic_cast<const Constant *> (&token)
       && (*static_cast<const Constant *> (&token)->concreteValue) == (*concreteValue);

@@ -78,7 +78,12 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::loadFromBinaryStream (std::ifstream &i
 }
 
 MemoryEmergedSymbol *MemoryEmergedSymbol::fromNameAndValue (const std::string &name,
-    UINT64 value) {
+    UINT32 v4, UINT32 v3, UINT32 v2, UINT32 v1) {
+  if (v4 != 0 || v3 != 0) {
+    throw std::runtime_error ("MemoryEmergedSymbol::fromNameAndValue (...): "
+                              "Illegal value: Currently, all memory symbols are 64 bits.");
+  }
+  const UINT64 value = (UINT64 (v2) << 32) | v1;
   std::stringstream ss (name);
   char dummy;
   ADDRINT address;
