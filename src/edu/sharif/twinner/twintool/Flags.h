@@ -43,14 +43,24 @@ public:
    * Instantiates a new constraint object denoting ZF's (zero flag) state. The concrete
    * status of the ZF should be provided as argument.
    * @param zfIsSet The concrete status of the ZF in processor.
-   * 
+   *
    * @return A new constraint instance denoting current zero flag's state.
    */
   edu::sharif::twinner::trace::Constraint *
   instantiateConstraintForZeroFlag (bool zfIsSet) const;
 
   /**
-   * Instantiates a new constraint object denoting the whether underlying expression
+   * Instantiates a new constraint object denoting ZF's (zero flag) state. The last
+   * concrete value of the expression indicates that ZF should be satisfied or its negate
+   * should be satisfied.
+   *
+   * @return A new constraint instance denoting current zero flag's state.
+   */
+  edu::sharif::twinner::trace::Constraint *
+  instantiateConstraintForZeroFlag () const;
+
+  /**
+   * Instantiates a new constraint object denoting that whether underlying expression
    * matches with below or equal (BE) condition. The last concrete value of the expression
    * indicates that BE should be satisfied or its negate should be satisfied.
    * @return A new constraint instance denoting whether current eflags matches with BE.

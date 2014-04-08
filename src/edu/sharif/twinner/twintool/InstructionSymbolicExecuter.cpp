@@ -1188,6 +1188,28 @@ void InstructionSymbolicExecuter::incAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::setnzAnalysisRoutine (
+    const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::util::Logger::loquacious () << "setnzAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  edu::sharif::twinner::trace::Constraint *cc =
+      eflags.instantiateConstraintForZeroFlag ();
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  const bool shouldSetToOne =
+      cc->getComparisonType () == edu::sharif::twinner::trace::Constraint::NON_ZERO;
+  trace->addPathConstraint (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp;
+  if (shouldSetToOne) {
+    dstexp = new edu::sharif::twinner::trace::ExpressionImp (UINT64 (1));
+  } else { // shouldSetToZero
+    dstexp = new edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
+  }
+  opr.setExpression (trace, dstexp);
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -1311,6 +1333,8 @@ InstructionSymbolicExecuter::convertOpcodeToSingleOperandAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_INC:
     return &InstructionSymbolicExecuter::incAnalysisRoutine;
+  case XED_ICLASS_SETNZ:
+    return &InstructionSymbolicExecuter::setnzAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Single Operand: Unknown opcode: " << OPCODE_StringShort (op) << '\n';

@@ -336,6 +336,11 @@ private:
    */
   void incAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
+  /**
+   * SETNZ sets opr to 1 iff ZF=0 (and set it to 0 otherwise).
+   */
+  void setnzAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
   DoubleDestinationsAnalysisRoutine convertOpcodeToDoubleDestinationsAnalysisRoutine (

@@ -157,6 +157,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_BSF, DST_REG_SRC_EITHER_REG_OR_MEM));
   managedInstructions.insert
       (make_pair (XED_ICLASS_INC, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_SETNZ, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
 }
 
 Instrumenter::~Instrumenter () {
@@ -241,6 +243,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_MUL:
     return DST_REG_REG_SRC_REG;
   case XED_ICLASS_INC:
+  case XED_ICLASS_SETNZ:
     return INS_OperandIsReg (ins, 0) ? DST_REG_SRC_IMPLICIT : DST_MEM_SRC_IMPLICIT;
   default:
     switch (INS_Category (ins)) {

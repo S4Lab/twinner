@@ -53,6 +53,16 @@ Flags::instantiateConstraintForZeroFlag (bool zfIsSet) const {
 }
 
 edu::sharif::twinner::trace::Constraint *
+Flags::instantiateConstraintForZeroFlag () const {
+  const edu::sharif::twinner::trace::Expression *exp = getFlagsUnderlyingExpression ();
+  const edu::sharif::twinner::trace::ConcreteValue &cv = exp->getLastConcreteValue ();
+  return new edu::sharif::twinner::trace::Constraint
+      (exp, (cv == 0) ?
+       edu::sharif::twinner::trace::Constraint::ZERO :
+       edu::sharif::twinner::trace::Constraint::NON_ZERO);
+}
+
+edu::sharif::twinner::trace::Constraint *
 Flags::instantiateConstraintForBelowOrEqual () const {
   const edu::sharif::twinner::trace::Expression *exp = getFlagsUnderlyingExpression ();
   const edu::sharif::twinner::trace::ConcreteValue &cv = exp->getLastConcreteValue ();
