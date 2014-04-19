@@ -25,6 +25,7 @@
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/memory.h"
+#include "edu/sharif/twinner/util/MemoryManager.h"
 
 using namespace std;
 
@@ -32,10 +33,6 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace twintool {
-
-UINT32 allocate_memory_from_instructions_disassembly_shared_memory_area (UINT32 size);
-char *get_pointer_to_allocated_memory (UINT32 index);
-void deallocate_memory_from_instructions_disassembly_shared_memory_area (UINT32 size);
 
 inline void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > &map,
     const ADDRINT &address);
@@ -188,9 +185,9 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
    */
   std::string insAssemblyStr = INS_Disassemble (ins);
   const int size = insAssemblyStr.length () + 1;
-  UINT32 allocatedIndex =
-      allocate_memory_from_instructions_disassembly_shared_memory_area (size);
-  char *allocated = get_pointer_to_allocated_memory (allocatedIndex);
+  UINT32 allocatedIndex = ise->getTrace ()->getMemoryManager ()->allocate (size);
+  char *allocated = ise->getTrace ()->getMemoryManager ()
+      ->getPointerToAllocatedMemory (allocatedIndex);
   char * const insAssembly = allocated;
   //insAssembly = new char[insAssemblyStr.length () + 1];
   for (const char *ptr = insAssemblyStr.c_str (); *ptr; ++ptr) {
@@ -225,7 +222,7 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
       }
     }
   }
-  deallocate_memory_from_instructions_disassembly_shared_memory_area (size);
+  ise->getTrace ()->getMemoryManager ()->deallocate (size);
 }
 
 Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,

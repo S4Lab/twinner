@@ -26,6 +26,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/memory.h"
+#include "edu/sharif/twinner/util/MemoryManager.h"
 
 #include <stdexcept>
 
@@ -33,45 +34,6 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace twintool {
-
-
-static const int shared_memory_area_capacity = 50 * 1024; // 50 MiB
-static char instructions_disassembly_shared_memory_area[shared_memory_area_capacity];
-static UINT32 after_last_allocated_byte_index = 0; // [0, this-index) is allocated
-
-UINT32 allocate_memory_from_instructions_disassembly_shared_memory_area (UINT32 size) {
-  if (size == 0) {
-    throw std::runtime_error
-        ("allocate_memory_from_instructions_disassembly_shared_memory_area (...) "
-         "function: size must be positive");
-  }
-  if (after_last_allocated_byte_index + size > shared_memory_area_capacity) {
-    // throw std::bad_alloc ();
-    throw std::runtime_error
-        ("allocate_memory_from_instructions_disassembly_shared_memory_area (...) "
-         "function: Out of memory!");
-  }
-  const UINT32 allocated = after_last_allocated_byte_index;
-  after_last_allocated_byte_index += size;
-  return allocated;
-}
-
-char *get_pointer_to_allocated_memory (UINT32 index) {
-  if (index < after_last_allocated_byte_index) {
-    return &instructions_disassembly_shared_memory_area[index];
-  } else {
-    return 0;
-  }
-}
-
-void deallocate_memory_from_instructions_disassembly_shared_memory_area (UINT32 size) {
-  if (size == 0 || size > after_last_allocated_byte_index) {
-    throw std::runtime_error
-        ("deallocate_memory_from_instructions_disassembly_shared_memory_area (...) "
-         "function : size must be positive and smaller than currently allocated area");
-  }
-  after_last_allocated_byte_index -= size;
-}
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     std::ifstream &symbolsFileInputStream, bool _disabled) :
@@ -117,14 +79,17 @@ void InstructionSymbolicExecuter::syscallReturned (CONTEXT *context) const {
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
     REG dstReg, const ConcreteValue &dstRegVal,
     REG srcReg, const ConcreteValue &srcRegVal,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcReg(INS: "
-      << insAssembly << "): dst reg: " << REG_StringShort (dstReg)
+      << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
       RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
@@ -135,14 +100,17 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
     REG dstReg, const ConcreteValue &dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << std::hex << "analysisRoutineDstRegSrcMem(INS: "
-      << insAssembly << "): dst reg: " << REG_StringShort (dstReg)
+      << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
@@ -154,14 +122,17 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
     REG dstReg, const ConcreteValue &dstRegVal,
     const ConcreteValue &srcImmediateValue,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << std::hex << "analysisRoutineDstRegSrcImd(INS: "
-      << insAssembly << "): dst reg: " << REG_StringShort (dstReg)
+      << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src imd: 0x" << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
@@ -176,14 +147,17 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
     ADDRINT dstMemoryEa,
     REG srcReg, const ConcreteValue &srcRegVal,
     UINT32 memReadBytes,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << std::hex << "analysisRoutineDstMemSrcReg(INS: "
-      << insAssembly << "): dst mem addr: 0x" << dstMemoryEa
+      << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
       RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
@@ -195,16 +169,20 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
     ADDRINT dstMemoryEa,
     const ConcreteValue &srcImmediateValue,
     UINT32 memReadBytes,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
-  if (insAssembly) {
+  if (insAssemblyStr) {
     logger << "analysisRoutineDstMemSrcImd(INS: "
-        << insAssembly << ")";
+        << insAssemblyStr << ")";
   } else {
+    disassembledInstruction = 0;
     logger << "analysisRoutineDstMemSrcImd()";
   }
   const UINT32 maxReadSizeInBytes = srcImmediateValue.getSize () / 8;
@@ -229,14 +207,17 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << std::hex << "analysisRoutineDstMemSrcMem(INS: "
-      << insAssembly << "): dst mem addr: 0x" << dstMemoryEa
+      << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
@@ -248,14 +229,17 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
     ConditionalBranchAnalysisRoutine routine,
     BOOL branchTaken,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineConditionalBranch(INS: "
-      << insAssembly << "): branch taken: " << branchTaken << '\n';
+      << insAssemblyStr << "): branch taken: " << branchTaken << '\n';
   (this->*routine) (branchTaken);
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
@@ -263,14 +247,17 @@ void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine routine,
     REG dstReg, const ConcreteValue &dstRegVal,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << std::hex << "analysisRoutineDstRegSrcAdg(INS: "
-      << insAssembly << ") [AFTER execution of instruction]: dst reg: "
+      << insAssemblyStr << ") [AFTER execution of instruction]: dst reg: "
       << REG_StringShort (dstReg) << ", dst reg value: 0x"
       << dstRegVal << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
@@ -285,14 +272,17 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
 void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfReg (
     SuddenlyChangedRegAnalysisRoutine routine,
     REG reg,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineBeforeChangeOfReg(INS: "
-      << insAssembly << ")\n"
+      << insAssemblyStr << ")\n"
       "\tregistering register to be tracked...";
   trackedReg = reg;
   hook = routine;
@@ -306,14 +296,17 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
     REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
     REG dstRightReg, const ConcreteValue &dstRightRegVal,
     REG srcReg, const ConcreteValue &srcRegVal,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineTwoDstRegOneSrcReg(INS: "
-      << insAssembly << "): left dst reg: " << REG_StringShort (dstLeftReg)
+      << insAssemblyStr << "): left dst reg: " << REG_StringShort (dstLeftReg)
       << ", right dst reg: " << REG_StringShort (dstRightReg)
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
@@ -326,14 +319,17 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
 void InstructionSymbolicExecuter::analysisRoutineAfterOperandLessInstruction (
     OperandLessAnalysisRoutine routine,
     const CONTEXT *context,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineAfterOperandLessInstruction(INS: "
-      << insAssembly << "): [AFTER execution of instruction]: operand-less ins\n";
+      << insAssemblyStr << "): [AFTER execution of instruction]: operand-less ins\n";
   (this->*routine) (context);
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
@@ -342,14 +338,17 @@ void InstructionSymbolicExecuter::analysisRoutineAfterOperandLessInstruction (
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImplicit (
     SingleOperandAnalysisRoutine routine,
     REG dstReg, const ConcreteValue &dstRegVal,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcImplicit(INS: "
-      << insAssembly << "): reg operand: " << REG_StringShort (dstReg) << '\n';
+      << insAssemblyStr << "): reg operand: " << REG_StringShort (dstReg) << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
@@ -358,14 +357,17 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImplicit (
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImplicit (
     SingleOperandAnalysisRoutine routine,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
-    const char *insAssembly) {
+    UINT32 insAssembly) {
   if (disabled) {
     return;
   }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << std::hex << "analysisRoutineDstMemSrcImplicit(INS: "
-      << insAssembly << "): src mem addr: 0x" << srcMemoryEa
+      << insAssemblyStr << "): src mem addr: 0x" << srcMemoryEa
       << ", mem read bytes: 0x" << memReadBytes << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
   logger << "Registers:\n";
@@ -1348,12 +1350,11 @@ VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 srcReg, ADDRINT srcRegVal,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstRegSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
        (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineDstRegSrcLargeReg (VOID *iseptr, UINT32 opcode,
@@ -1361,12 +1362,11 @@ VOID analysisRoutineDstRegSrcLargeReg (VOID *iseptr, UINT32 opcode,
     UINT32 srcReg, const PIN_REGISTER *srcRegVal,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstRegSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
        (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*srcRegVal),
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineDstLargeRegSrcLargeReg (VOID *iseptr, UINT32 opcode,
@@ -1374,12 +1374,11 @@ VOID analysisRoutineDstLargeRegSrcLargeReg (VOID *iseptr, UINT32 opcode,
     UINT32 srcReg, const PIN_REGISTER *srcRegVal,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstRegSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*dstRegVal),
        (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*srcRegVal),
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineDstLargeRegSrcMem (VOID *iseptr, UINT32 opcode,
@@ -1387,12 +1386,11 @@ VOID analysisRoutineDstLargeRegSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstRegSrcMem
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*dstRegVal),
        srcMemoryEa, memReadBytes,
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
@@ -1400,12 +1398,11 @@ VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstRegSrcMem
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
        srcMemoryEa, memReadBytes,
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
@@ -1413,12 +1410,11 @@ VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT srcImmediateValue,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstRegSrcImd
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
        edu::sharif::twinner::trace::ConcreteValue64Bits (srcImmediateValue),
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
@@ -1427,13 +1423,12 @@ VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 memReadBytes,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstMemSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
        (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
        memReadBytes,
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineDstMemSrcLargeReg (VOID *iseptr, UINT32 opcode,
@@ -1442,13 +1437,12 @@ VOID analysisRoutineDstMemSrcLargeReg (VOID *iseptr, UINT32 opcode,
     UINT32 memReadBytes,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstMemSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
        (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*srcRegVal),
        memReadBytes,
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
@@ -1457,13 +1451,12 @@ VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     UINT32 memReadBytes,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstMemSrcImd
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
        edu::sharif::twinner::trace::ConcreteValue64Bits (srcImmediateValue),
        memReadBytes,
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
@@ -1471,45 +1464,41 @@ VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstMemSrcMem
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
        srcMemoryEa, memReadBytes,
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
     BOOL branchTaken,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineConditionalBranch
       (ise->convertOpcodeToConditionalBranchAnalysisRoutine ((OPCODE) opcode),
        branchTaken,
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstRegSrcAdg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineBeforeChangeOfReg (VOID *iseptr, UINT32 opcode,
     UINT32 reg,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineBeforeChangeOfReg
       (ise->convertOpcodeToSuddenlyChangedRegAnalysisRoutine ((OPCODE) opcode),
        (REG) reg,
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,
@@ -1518,7 +1507,6 @@ VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 srcReg, ADDRINT srcRegVal,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineTwoDstRegOneSrcReg
       (ise->convertOpcodeToDoubleDestinationsAnalysisRoutine ((OPCODE) opcode),
        (REG) dstLeftReg,
@@ -1527,18 +1515,17 @@ VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,
        edu::sharif::twinner::trace::ConcreteValue64Bits (dstRightRegVal),
        (REG) srcReg,
        edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineAfterOperandLess (VOID *iseptr, UINT32 opcode,
     const CONTEXT *context,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineAfterOperandLessInstruction
       (ise->convertOpcodeToOperandLessAnalysisRoutine ((OPCODE) opcode),
        context,
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineRunHooks (VOID *iseptr, const CONTEXT *context) {
@@ -1550,22 +1537,20 @@ VOID analysisRoutineDstRegSrcImplicit (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstRegSrcImplicit
       (ise->convertOpcodeToSingleOperandAnalysisRoutine ((OPCODE) opcode),
        (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineDstMemSrcImplicit (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa, UINT32 memReadBytes,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  const char *insAssemblyStr = get_pointer_to_allocated_memory (insAssembly);
   ise->analysisRoutineDstMemSrcImplicit
       (ise->convertOpcodeToSingleOperandAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa, memReadBytes,
-       insAssemblyStr);
+       insAssembly);
 }
 
 VOID analysisRoutineInitializeRegisters (VOID *iseptr, CONTEXT *context) {

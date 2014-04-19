@@ -59,6 +59,8 @@ private:
   int operandSize;
   Hook hook;
 
+  UINT32 disassembledInstruction;
+
   bool disabled;
 
 public:
@@ -77,52 +79,52 @@ public:
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
       REG srcReg, const ConcreteValue &srcRegVal,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
       const ConcreteValue &srcImmediateValue,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       REG srcReg, const ConcreteValue &srcRegVal,
       UINT32 memReadBytes,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       const ConcreteValue &srcImmediateValue,
       UINT32 memReadBytes,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineConditionalBranch (ConditionalBranchAnalysisRoutine routine,
       BOOL branchTaken,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineDstRegSrcAdg (AnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineBeforeChangeOfReg (SuddenlyChangedRegAnalysisRoutine routine,
       REG reg,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineTwoDstRegOneSrcReg (DoubleDestinationsAnalysisRoutine routine,
       REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
       REG dstRightReg, const ConcreteValue &dstRightRegVal,
       REG srcReg, const ConcreteValue &srcRegVal,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineAfterOperandLessInstruction (OperandLessAnalysisRoutine routine,
       const CONTEXT *context,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineDstRegSrcImplicit (SingleOperandAnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineDstMemSrcImplicit (SingleOperandAnalysisRoutine routine,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
-      const char *insAssembly);
+      UINT32 insAssembly);
   void analysisRoutineRunHooks (const CONTEXT *context);
   /// This call does not return to caller
   void analysisRoutineInitializeRegisters (CONTEXT *context) const;

@@ -25,6 +25,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
+#include "edu/sharif/twinner/util/MemoryManager.h"
 #include "ConcreteValue.h"
 
 namespace edu {
@@ -35,8 +36,9 @@ namespace trace {
 inline void write_map_entry (std::ofstream &out,
     const ADDRINT &addr, const UINT64 &content);
 
-Trace::Trace (const std::list < ExecutionTraceSegment * > &list) :
-segments (list) {
+Trace::Trace (const std::list < ExecutionTraceSegment * > &list,
+    edu::sharif::twinner::util::MemoryManager *_memoryManager) :
+segments (list), memoryManager (_memoryManager) {
   currentSegmentIterator = segments.end ();
   if (currentSegmentIterator != segments.begin ()) {
     currentSegmentIterator--;
@@ -44,7 +46,8 @@ segments (list) {
   currentSegmentIndex = 0;
 }
 
-Trace::Trace () {
+Trace::Trace () :
+memoryManager (edu::sharif::twinner::util::MemoryManager::allocateInstance ()) {
   segments.push_front (new ExecutionTraceSegment ());
   currentSegmentIterator = segments.begin ();
   currentSegmentIndex = 0;
@@ -170,7 +173,9 @@ Trace *Trace::loadFromFile (const char *path) {
 Trace *Trace::loadFromBinaryStream (std::ifstream &in) {
   std::list < ExecutionTraceSegment * > list;
   loadListFromBinaryStream (in, "TRA", list);
-  return new Trace (list);
+  edu::sharif::twinner::util::MemoryManager *mm =
+      edu::sharif::twinner::util::MemoryManager::allocateInstance ();
+  return new Trace (list, mm);
 }
 
 bool Trace::saveAddressToValueMapToFile (const std::map < ADDRINT, UINT64 > &map,
@@ -292,6 +297,14 @@ void Trace::printCompleteState (
 
 int Trace::getCurrentSegmentIndex () const {
   return currentSegmentIndex;
+}
+
+edu::sharif::twinner::util::MemoryManager *Trace::getMemoryManager () {
+  return memoryManager;
+}
+
+const edu::sharif::twinner::util::MemoryManager *Trace::getMemoryManager () const {
+  return memoryManager;
 }
 
 }

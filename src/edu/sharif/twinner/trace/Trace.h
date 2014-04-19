@@ -21,6 +21,10 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace util {
+
+class MemoryManager;
+}
 namespace trace {
 
 class Syscall;
@@ -51,13 +55,20 @@ protected:
   int currentSegmentIndex;
 
   /**
+   * Manages memory and allows allocation/deallocation from a pre-allocated part of the
+   * memory. Used for keeping strings of disassembled instructions.
+   */
+  edu::sharif::twinner::util::MemoryManager *memoryManager;
+
+  /**
    * Dummy constructor: Allowing child class to do all initializations
    */
   Trace (int) {
   }
 
 private:
-  Trace (const std::list < ExecutionTraceSegment * > &list);
+  Trace (const std::list < ExecutionTraceSegment * > &list,
+      edu::sharif::twinner::util::MemoryManager *memoryManager);
 
 public:
   Trace ();
@@ -161,6 +172,9 @@ public:
       const edu::sharif::twinner::util::Logger &logger) const;
 
   int getCurrentSegmentIndex () const;
+
+  edu::sharif::twinner::util::MemoryManager *getMemoryManager ();
+  const edu::sharif::twinner::util::MemoryManager *getMemoryManager () const;
 };
 
 }
