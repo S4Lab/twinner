@@ -131,7 +131,7 @@ void Trace::syscallReturned (CONTEXT *context) const {
   }
 }
 
-bool Trace::saveToFile (const char *path) const {
+bool Trace::saveToFile (const char *path, const char *memoryPath) const {
   std::ofstream out;
   out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
   if (!out.is_open ()) {
@@ -145,6 +145,7 @@ bool Trace::saveToFile (const char *path) const {
   }
   saveToBinaryStream (out);
   out.close ();
+  memoryManager->saveToFile (memoryPath);
   return true;
 }
 
@@ -157,7 +158,7 @@ void Trace::saveToBinaryStream (std::ofstream &out) const {
  * and the caller must delete it. If path does not exist, an exception will be raised.
  * @return A newed Trace object loaded from file "path".
  */
-Trace *Trace::loadFromFile (const char *path) {
+Trace *Trace::loadFromFile (const char *path, const char *memoryPath) {
   std::ifstream in;
   in.open (path, ios_base::in | ios_base::binary);
   if (!in.is_open ()) {
@@ -165,16 +166,16 @@ Trace *Trace::loadFromFile (const char *path) {
         " Error in open function: " << path << '\n';
     return 0;
   }
-  Trace *trace = Trace::loadFromBinaryStream (in);
+  Trace *trace = Trace::loadFromBinaryStream (in, memoryPath);
   in.close ();
   return trace;
 }
 
-Trace *Trace::loadFromBinaryStream (std::ifstream &in) {
+Trace *Trace::loadFromBinaryStream (std::ifstream &in, const char *memoryPath) {
   std::list < ExecutionTraceSegment * > list;
   loadListFromBinaryStream (in, "TRA", list);
   edu::sharif::twinner::util::MemoryManager *mm =
-      edu::sharif::twinner::util::MemoryManager::allocateInstance ();
+      edu::sharif::twinner::util::MemoryManager::loadFromFile (memoryPath);
   return new Trace (list, mm);
 }
 

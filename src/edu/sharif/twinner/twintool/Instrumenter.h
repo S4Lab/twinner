@@ -92,6 +92,7 @@ private:
   std::map < OPCODE, InstructionModel > managedInstructions;
 
   std::string traceFilePath; // save final execution trace into this file
+  std::string disassemblyFilePath; // save disassembled instructions into this file
 
   InstructionSymbolicExecuter *ise;
 
@@ -102,10 +103,13 @@ private:
 
 public:
   Instrumenter (std::ifstream &symbolsFileInputStream,
-      const std::string &traceFilePath, bool disabled);
+      const std::string &traceFilePath, const std::string &disassemblyFilePath,
+      bool disabled);
   Instrumenter (const std::set < ADDRINT > &candidateAddresses,
-      const std::string &traceFilePath, bool disabled);
-  Instrumenter (const std::string &traceFilePath, bool disabled);
+      const std::string &traceFilePath, const std::string &disassemblyFilePath,
+      bool disabled);
+  Instrumenter (const std::string &traceFilePath, const std::string &disassemblyFilePath,
+      bool disabled);
   ~Instrumenter ();
 
   void instrumentSingleInstruction (INS ins);

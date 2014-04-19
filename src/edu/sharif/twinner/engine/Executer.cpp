@@ -20,6 +20,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
+#include "edu/sharif/twinner/util/MemoryManager.h"
 
 using namespace std;
 
@@ -40,6 +41,8 @@ inline void save_record (std::ofstream &out,
 
 const char *Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE = "/tmp/twinner/symbols.dat";
 const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/trace.dat";
+const char *Executer::DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE =
+    "/tmp/twinner/memory.dat";
 
 Executer::Executer (std::string pinLauncher, std::string twintool,
     std::string inputBinary, std::string _inputArguments) :
@@ -47,6 +50,7 @@ baseCommand (pinLauncher
 + " -t " + twintool
 + " -symbols " + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
 + " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
++ " -memory " + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
 + " -verbose " + edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString ()
 + " -main -- " + inputBinary),
 inputArguments (_inputArguments) {
@@ -160,7 +164,8 @@ Executer::executeSingleTraceInNormalMode () const {
   edu::sharif::twinner::util::Logger::debug ()
       << "The system(...) call returns code: " << ret << '\n';
   return edu::sharif::twinner::trace::Trace::loadFromFile
-      (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
+      (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
+       DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
 }
 
 void Executer::changeArguments () {

@@ -36,6 +36,9 @@ public:
   ~MemoryManager ();
 
   static MemoryManager *allocateInstance ();
+  static MemoryManager *loadFromFile (const char *path);
+
+  void saveToFile (const char *path) const;
 
   uint32_t allocate (uint32_t size);
   void deallocate (uint32_t size);

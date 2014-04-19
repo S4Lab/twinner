@@ -39,6 +39,10 @@ KNOB < string > traceOutputFilePath (KNOB_MODE_WRITEONCE, "pintool", "trace",
     "/tmp/twinner/trace.dat", //
     "specify file path for saving execution trace");
 
+KNOB < string > disassemblyOutputFilePath (KNOB_MODE_WRITEONCE, "pintool", "memory",
+    "/tmp/twinner/memory.dat", //
+    "specify file path for saving disassembled instructions memory");
+
 KNOB < string > verbose (KNOB_MODE_WRITEONCE, "pintool", "verbose", "warning",
     "specify the level of verboseness: { quiet, error, warning, info, debug }");
 
@@ -87,6 +91,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
   bool hasSymbolsInputFile = false;
   string symbolsFilePath = symbolsInputFilePath.Value ();
   string traceFilePath = traceOutputFilePath.Value ();
+  string disassemblyFilePath = disassemblyOutputFilePath.Value ();
   if (!symbolsFilePath.empty ()) { // optional
     if (access (symbolsFilePath.c_str (), F_OK) == 0) { // optional
       if (access (symbolsFilePath.c_str (), R_OK) != 0) {
@@ -100,14 +105,25 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     }
   }
   if (traceFilePath.empty ()) {
-    printError
-        ("The execution trace must be saved somewhere. Use --trace to specify the path!");
+    printError ("The execution trace must be saved somewhere."
+                " Use --trace to specify the path!");
+    return false;
+  }
+  if (disassemblyFilePath.empty ()) {
+    printError ("Disassembled instructions must be saved somewhere."
+                " Use --memory to specify the path!");
     return false;
   }
   if (access (traceFilePath.c_str (), F_OK) == 0
       && access (traceFilePath.c_str (), W_OK) != 0) {
-    printError
-        ("permission denied: can not write to execution trace file: " + traceFilePath);
+    printError ("permission denied: can not write to execution trace file: "
+                + traceFilePath);
+    return false;
+  }
+  if (access (disassemblyFilePath.c_str (), F_OK) == 0
+      && access (disassemblyFilePath.c_str (), W_OK) != 0) {
+    printError ("permission denied: can not write to disassembly memory file: "
+                + disassemblyFilePath);
     return false;
   }
   // At the end, traceFilePath will be opened and execution trace will be saved in it.
@@ -134,11 +150,12 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     ExecutionMode mode = readExecutionModeFromBinaryStream (in);
     switch (mode) {
     case NORMAL_MODE:
-      im = new Instrumenter (in, traceFilePath, justAnalyzeMainRoutine);
+      im = new Instrumenter (in, traceFilePath, disassemblyFilePath,
+                             justAnalyzeMainRoutine);
       break;
     case INITIAL_STATE_DETECTION_MODE:
       im = new Instrumenter (readSetOfAddressesFromBinaryStream (in),
-                             traceFilePath, justAnalyzeMainRoutine);
+                             traceFilePath, disassemblyFilePath, justAnalyzeMainRoutine);
       break;
     default:
       in.close ();
@@ -146,7 +163,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     }
     in.close ();
   } else {
-    im = new Instrumenter (traceFilePath, justAnalyzeMainRoutine);
+    im = new Instrumenter (traceFilePath, disassemblyFilePath, justAnalyzeMainRoutine);
   }
   return true;
 }

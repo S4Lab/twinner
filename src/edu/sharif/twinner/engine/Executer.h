@@ -51,6 +51,11 @@ public:
    */
   static const char *EXECUTION_TRACE_COMMUNICATION_TEMP_FILE;
 
+  /**
+   * Indicating name of the temp file, being used to communicate content of shared memory of disassembled instructions.
+   */
+  static const char *DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE;
+
 private:
   const std::string baseCommand;
   std::string inputArguments;

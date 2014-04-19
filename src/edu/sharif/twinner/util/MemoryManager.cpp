@@ -45,6 +45,39 @@ MemoryManager *MemoryManager::allocateInstance () {
   return MemoryManager::me;
 }
 
+MemoryManager *MemoryManager::loadFromFile (const char *path) {
+  std::ifstream in;
+  in.open (path, ios_base::in | ios_base::binary);
+  if (!in.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not read memory data:"
+        " Error in open function: " << path << '\n';
+    throw std::runtime_error ("MemoryManager::loadFromFile (...) method: "
+                              "Can not read memory data");
+  }
+  uint32_t after_last_allocated_byte_index;
+  in.read ((char *) &after_last_allocated_byte_index,
+           sizeof (after_last_allocated_byte_index));
+  char *memory_area = new char[after_last_allocated_byte_index];
+  in.read (memory_area, after_last_allocated_byte_index);
+  in.close ();
+  return new MemoryManager (after_last_allocated_byte_index, memory_area);
+}
+
+void MemoryManager::saveToFile (const char *path) const {
+  std::ofstream out;
+  out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
+  if (!out.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not write memory data:"
+        " Error in open function: " << path << '\n';
+    throw std::runtime_error ("MemoryManager::saveToFile (...) method: "
+                              "Can not write memory data");
+  }
+  out.write ((const char *) &afterLastAllocatedByteIndex,
+             sizeof (afterLastAllocatedByteIndex));
+  out.write (memory, afterLastAllocatedByteIndex);
+  out.close ();
+}
+
 uint32_t MemoryManager::allocate (uint32_t size) {
   if (size == 0) {
     throw std::runtime_error

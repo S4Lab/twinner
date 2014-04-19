@@ -25,6 +25,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
+#include "edu/sharif/twinner/util/MemoryManager.h"
 
 namespace edu {
 namespace sharif {
@@ -37,6 +38,7 @@ Trace () {
 
 TraceImp::TraceImp (std::ifstream &symbolsFileInputStream) :
 Trace (1 /* Invoking dummy constructor of parent class to stop adding segments there*/) {
+  memoryManager = edu::sharif::twinner::util::MemoryManager::allocateInstance ();
   loadInitializedSymbolsFromBinaryStream (symbolsFileInputStream);
   currentSegmentIterator = segments.end ();
   if (currentSegmentIterator != segments.begin ()) {

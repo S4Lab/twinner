@@ -38,8 +38,9 @@ inline void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > 
     const ADDRINT &address);
 
 Instrumenter::Instrumenter (std::ifstream &symbolsFileInputStream,
-    const string &_traceFilePath, bool _disabled) :
-traceFilePath (_traceFilePath),
+    const string &_traceFilePath, const std::string &_disassemblyFilePath,
+    bool _disabled) :
+traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
 ise (new InstructionSymbolicExecuter (symbolsFileInputStream, _disabled)),
 isWithinInitialStateDetectionMode (false),
 disabled (_disabled),
@@ -48,8 +49,9 @@ totalCountOfInstructions (0) {
 }
 
 Instrumenter::Instrumenter (const std::set < ADDRINT > &_candidateAddresses,
-    const std::string &_traceFilePath, bool _disabled) :
-traceFilePath (_traceFilePath),
+    const std::string &_traceFilePath, const std::string &_disassemblyFilePath,
+    bool _disabled) :
+traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
 ise (new InstructionSymbolicExecuter (_disabled)),
 candidateAddresses (_candidateAddresses),
 isWithinInitialStateDetectionMode (true),
@@ -58,8 +60,9 @@ totalCountOfInstructions (0) {
   initialize ();
 }
 
-Instrumenter::Instrumenter (const string &_traceFilePath, bool _disabled) :
-traceFilePath (_traceFilePath),
+Instrumenter::Instrumenter (const string &_traceFilePath,
+    const std::string &_disassemblyFilePath, bool _disabled) :
+traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
 ise (new InstructionSymbolicExecuter (_disabled)),
 isWithinInitialStateDetectionMode (false),
 disabled (_disabled),
@@ -171,18 +174,6 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
       return;
     }
   }
-  /*
-   * The INS_Disassemble does not disassemble ins correctly when it is passed to
-   * analysis routines. So we must disassemble it here and then pass the string there.
-   * But we only can pass pointers, so we must new this string object.
-   * Unfortunately there is no clean way to delete these strings as it's not possible to
-   * detect when analysis routine is called for the last time. However, it's possible
-   * to keep a collection of these string objects and delete them at the Fini call
-   * from PIN (the applicationIsAboutToExit(...) method).
-   * As that point of time is too near to exit(), I'm not going to implement it
-   * right now.
-   * TODO: Keep pointers of instantiated strings and delete them in Fini call.
-   */
   std::string insAssemblyStr = INS_Disassemble (ins);
   const int size = insAssemblyStr.length () + 1;
   UINT32 allocatedIndex = ise->getTrace ()->getMemoryManager ()->allocate (size);
@@ -663,11 +654,14 @@ void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > &map,
 
 void Instrumenter::aboutToExit (INT32 code) {
   printInstructionsStatisticsInfo ();
-  edu::sharif::twinner::util::Logger::debug () << "Saving trace info...";
-  if (ise->getTrace ()->saveToFile (traceFilePath.c_str ())) {
-    edu::sharif::twinner::util::Logger::debug () << "Done.\n";
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::debug ();
+  logger << "Saving trace info...";
+  if (ise->getTrace ()->saveToFile
+      (traceFilePath.c_str (), disassemblyFilePath.c_str ())) {
+    logger << "Done.\n";
   } else {
-    edu::sharif::twinner::util::Logger::debug () << "Failed.\n";
+    logger << "Failed.\n";
   }
 }
 

@@ -139,8 +139,8 @@ public:
   void syscallInvoked (Syscall s);
   void syscallReturned (CONTEXT *context) const;
 
-  bool saveToFile (const char *path) const;
-  static Trace *loadFromFile (const char *path);
+  bool saveToFile (const char *path, const char *memoryPath) const;
+  static Trace *loadFromFile (const char *path, const char *memoryPath);
   static bool saveAddressToValueMapToFile (const std::map < ADDRINT, UINT64 > &map,
       const char *path);
   static map < ADDRINT, UINT64 > loadAddressToValueMapFromFile (const char *path);
@@ -149,7 +149,7 @@ public:
 
 private:
   void saveToBinaryStream (std::ofstream &out) const;
-  static Trace *loadFromBinaryStream (std::ifstream &in);
+  static Trace *loadFromBinaryStream (std::ifstream &in, const char *memoryPath);
   static void saveAddressToValueMapToBinaryStream (
       const std::map < ADDRINT, UINT64 > &map, std::ofstream &out);
   static map < ADDRINT, UINT64 > loadAddressToValueMapFromBinaryStream (
