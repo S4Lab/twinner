@@ -16,6 +16,7 @@
 #include "Expression.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "ConcreteValue.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -25,12 +26,12 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-Constraint::Constraint (ComparisonType _type) :
-type (_type) {
+Constraint::Constraint (ComparisonType _type, uint32_t instr) :
+type (_type), instruction (instr) {
 }
 
-Constraint::Constraint (const Expression *_exp, ComparisonType _type) :
-exp (_exp->clone ()), type (_type) {
+Constraint::Constraint (const Expression *_exp, ComparisonType _type, uint32_t instr) :
+exp (_exp->clone ()), type (_type), instruction (instr) {
 }
 
 Constraint::~Constraint () {
@@ -40,13 +41,16 @@ Constraint::~Constraint () {
 void Constraint::saveToBinaryStream (std::ofstream &out) const {
   exp->saveToBinaryStream (out);
   out.write ((const char *) &type, sizeof (type));
+  out.write ((const char *) &instruction, sizeof (instruction));
 }
 
 Constraint *Constraint::loadFromBinaryStream (std::ifstream &in) {
   Expression *exp = Expression::loadFromBinaryStream (in);
   ComparisonType type;
   in.read ((char *) &type, sizeof (type));
-  Constraint *cnrt = new Constraint (type);
+  uint32_t instruction;
+  in.read ((char *) &instruction, sizeof (instruction));
+  Constraint *cnrt = new Constraint (type, instruction);
   cnrt->exp = exp;
   return cnrt;
 }
@@ -85,6 +89,10 @@ const Expression *Constraint::getExpression () const {
 
 Constraint::ComparisonType Constraint::getComparisonType () const {
   return type;
+}
+
+uint32_t Constraint::getCausingInstructionIdentifier () const {
+  return instruction;
 }
 
 Constraint *Constraint::instantiateNegatedConstraint () const {

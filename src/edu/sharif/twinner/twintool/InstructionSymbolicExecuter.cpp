@@ -478,7 +478,8 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   if (isNegative) {
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy negative condition...";
     cc = new edu::sharif::twinner::trace::Constraint
-        (conditionExp, edu::sharif::twinner::trace::Constraint::NON_NEGATIVE);
+        (conditionExp, edu::sharif::twinner::trace::Constraint::NON_NEGATIVE,
+         disassembledInstruction);
     edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operations...";
     dstexp->truncate (size);
     dstexp->minus (1ull << size);
@@ -486,7 +487,8 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   } else {
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy positive condition...";
     cc = new edu::sharif::twinner::trace::Constraint
-        (conditionExp, edu::sharif::twinner::trace::Constraint::NEGATIVE);
+        (conditionExp, edu::sharif::twinner::trace::Constraint::NEGATIVE,
+         disassembledInstruction);
   }
   delete conditionExp; // this is cloned by cc and is not required anymore
   trace->addPathConstraint (cc);
@@ -940,12 +942,14 @@ void InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine (
     if (ithByteSrc->getLastConcreteValue ().isZero ()) { // equal
       trace->addPathConstraint
           (new edu::sharif::twinner::trace::Constraint
-           (ithByteSrc, edu::sharif::twinner::trace::Constraint::ZERO));
+           (ithByteSrc, edu::sharif::twinner::trace::Constraint::ZERO,
+            disassembledInstruction));
       *c = 0xFF;
     } else { // non-equal
       trace->addPathConstraint
           (new edu::sharif::twinner::trace::Constraint
-           (ithByteSrc, edu::sharif::twinner::trace::Constraint::NON_ZERO));
+           (ithByteSrc, edu::sharif::twinner::trace::Constraint::NON_ZERO,
+            disassembledInstruction));
       *c = 0x00;
     }
     delete ithByteSrc;
@@ -998,7 +1002,8 @@ void InstructionSymbolicExecuter::bsfAnalysisRoutine (
   conditionExp->minus (1);
   edu::sharif::twinner::trace::Constraint *cc =
       new edu::sharif::twinner::trace::Constraint
-      (conditionExp, edu::sharif::twinner::trace::Constraint::ZERO);
+      (conditionExp, edu::sharif::twinner::trace::Constraint::ZERO,
+       disassembledInstruction);
   delete conditionExp;
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious ()

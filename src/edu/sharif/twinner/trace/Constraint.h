@@ -15,6 +15,8 @@
 
 #include "Savable.h"
 
+#include <stdint.h>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -35,6 +37,7 @@ public:
 private:
   Expression *exp;
   ComparisonType type;
+  uint32_t instruction;
 
   /**
    * Disable copy constructor.
@@ -43,21 +46,24 @@ private:
   Constraint (const Constraint &c);
 
   /**
-   * Instantiate a constraint with the given comparison type. Its expression should
+   * Instantiate a constraint with the given comparison type. Its expressions should
    * be set manually later.
-   * @param type The comparison type of this constraint.
+   * @param type The comparison type of this constraint.\
+   * @param instruction The instruction which is cause of this constraint instantiation.
    */
-  Constraint (ComparisonType type);
+  Constraint (ComparisonType type, uint32_t instruction);
 
 public:
   /**
    * Constructs a constraint indicating that given expression should obey the
    * (in)equality which is specified by type. Expression is cloned and deleted upon
    * destruction of constraint object.
+   * Given expression is compared against zero (e.g. exp >= 0).
    * @param exp The expression which will be cloned and should satisfy (in)equality.
    * @param type Indicates the (in)equality which exp should satisfy it.
+   * @param instruction The instruction which is cause of this constraint instantiation.
    */
-  Constraint (const Expression *exp, ComparisonType type);
+  Constraint (const Expression *exp, ComparisonType type, uint32_t instruction);
 
   ~Constraint ();
 
@@ -68,6 +74,7 @@ public:
 
   const Expression *getExpression () const;
   ComparisonType getComparisonType () const;
+  uint32_t getCausingInstructionIdentifier () const;
 
   Constraint *instantiateNegatedConstraint () const;
 

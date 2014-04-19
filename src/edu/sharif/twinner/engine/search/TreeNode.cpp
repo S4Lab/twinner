@@ -16,6 +16,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
+#include "edu/sharif/twinner/util/MemoryManager.h"
 
 namespace edu {
 namespace sharif {
@@ -25,9 +26,10 @@ namespace search {
 
 static int lastDebugId = 0;
 
-TreeNode::TreeNode (TreeNode *p, const edu::sharif::twinner::trace::Constraint *c) :
+TreeNode::TreeNode (TreeNode *p, const edu::sharif::twinner::trace::Constraint *c,
+    const edu::sharif::twinner::util::MemoryManager *m) :
 debugId (++lastDebugId),
-parent (p), constraint (c) {
+parent (p), constraint (c), memoryManager (m) {
   if (p) {
     p->children.push_back (this);
   }
@@ -45,12 +47,13 @@ void delete_tree_node (TreeNode * const &node) {
 }
 
 TreeNode *TreeNode::addConstraint (
-    const edu::sharif::twinner::trace::Constraint *c) {
+    const edu::sharif::twinner::trace::Constraint *c,
+    const edu::sharif::twinner::util::MemoryManager *m) {
   if (c->isTrivial ()) {
     return this;
   }
   if (children.empty () || (*children.back ()->constraint) != (*c)) {
-    new TreeNode (this, c);
+    new TreeNode (this, c, m);
   }
   return children.back ();
 }
@@ -77,7 +80,7 @@ TreeNode *TreeNode::getNextNode (
   const edu::sharif::twinner::trace::Constraint *negatedConstraint =
       clist.back ()->instantiateNegatedConstraint ();
   clist.pop_back ();
-  TreeNode *n = new TreeNode (node, negatedConstraint);
+  TreeNode *n = new TreeNode (node, negatedConstraint, memoryManager);
   clist.push_back (negatedConstraint);
   return n;
 }
@@ -94,7 +97,14 @@ void TreeNode::dumpConstraints (edu::sharif::twinner::util::Logger &logger) cons
 }
 
 void TreeNode::dumpSubTree (edu::sharif::twinner::util::Logger &logger) const {
-  logger << "Node(" << debugId << "): ";
+  logger << "Node(" << debugId;
+  if (constraint) {
+    const uint32_t ins = constraint->getCausingInstructionIdentifier ();
+    if (ins) {
+      logger << "<" << ins << ">; " << memoryManager->getPointerToAllocatedMemory (ins);
+    }
+  }
+  logger << "): ";
   bool first = true;
   for (std::list < TreeNode * >::const_iterator it = children.begin ();
       it != children.end (); ++it) {

@@ -21,6 +21,7 @@ namespace twinner {
 namespace util {
 
 class Logger;
+class MemoryManager;
 }
 namespace trace {
 
@@ -38,9 +39,11 @@ private:
   // front of list: left-most | back of list: right-most
   std::list < TreeNode * > children;
   const edu::sharif::twinner::trace::Constraint *constraint;
+  const edu::sharif::twinner::util::MemoryManager *memoryManager;
 
 public:
-  TreeNode (TreeNode *parent = 0, const edu::sharif::twinner::trace::Constraint *c = 0);
+  TreeNode (TreeNode *parent = 0, const edu::sharif::twinner::trace::Constraint *c = 0,
+      const edu::sharif::twinner::util::MemoryManager *m = 0);
   ~TreeNode ();
 
   /**
@@ -48,9 +51,12 @@ public:
    * node. However, if the given constraint was already handled by current right-most
    * child of this node, the responsible node will be returned.
    * @param constraint The constraint which should be added.
+   * @param memoryManager The memory manager which contains causing instruction.
+   *
    * @return The node (possibly newly instantiated) which is responsible for constraint.
    */
-  TreeNode *addConstraint (const edu::sharif::twinner::trace::Constraint *constraint);
+  TreeNode *addConstraint (const edu::sharif::twinner::trace::Constraint *constraint,
+      const edu::sharif::twinner::util::MemoryManager *memoryManager);
 
   /**
    * Moves downward, traversing right-most children until a leaf is visited. During this
