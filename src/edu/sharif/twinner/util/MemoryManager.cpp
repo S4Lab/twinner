@@ -32,6 +32,10 @@ MemoryManager::MemoryManager (uint32_t _capacity, char *_memory) :
 capacity (_capacity), memory (_memory), afterLastAllocatedByteIndex (_capacity) {
 }
 
+MemoryManager::~MemoryManager () {
+  delete memory;
+}
+
 MemoryManager *MemoryManager::allocateInstance () {
   if (MemoryManager::me) {
     throw std::runtime_error ("MemoryManager::allocateInstance (): "
@@ -55,7 +59,7 @@ uint32_t MemoryManager::allocate (uint32_t size) {
   }
   const uint32_t allocated = afterLastAllocatedByteIndex;
   afterLastAllocatedByteIndex += size;
-  return allocated;
+  return allocated + 1;
 }
 
 void MemoryManager::deallocate (uint32_t size) {
@@ -68,17 +72,17 @@ void MemoryManager::deallocate (uint32_t size) {
 }
 
 const char *MemoryManager::getPointerToAllocatedMemory (uint32_t index) const {
-  if (index >= afterLastAllocatedByteIndex) {
+  if (index == 0 || index > afterLastAllocatedByteIndex) {
     return 0;
   }
-  return &memory[index];
+  return &memory[index - 1];
 }
 
 char *MemoryManager::getPointerToAllocatedMemory (uint32_t index) {
-  if (index >= afterLastAllocatedByteIndex) {
+  if (index == 0 || index > afterLastAllocatedByteIndex) {
     return 0;
   }
-  return &memory[index];
+  return &memory[index - 1];
 }
 
 }

@@ -33,6 +33,8 @@ private:
   MemoryManager (uint32_t capacity, char *memory);
 
 public:
+  ~MemoryManager ();
+
   static MemoryManager *allocateInstance ();
 
   uint32_t allocate (uint32_t size);
