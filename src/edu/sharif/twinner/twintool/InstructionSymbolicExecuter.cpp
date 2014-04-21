@@ -584,25 +584,16 @@ void InstructionSymbolicExecuter::cmpAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "cmpAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
+  //TODO: Either add getExpressionWithSignExtension or support all sizes in concrete value
+  edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tgetting dst exp...";
   edu::sharif::twinner::trace::Expression *dstexp =
       dst.getExpression (trace);
-
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tbinary operation...";
-  edu::sharif::twinner::trace::Expression *tmpexp = dstexp;
-  tmpexp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
-  delete srcexp;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting EFLAGS...";
-  eflags.setFlags (tmpexp);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting EFLAGS...";
+  eflags.setFlags (dstexp, srcexp); // dstexp - srcexp
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::leaAnalysisRoutine (
