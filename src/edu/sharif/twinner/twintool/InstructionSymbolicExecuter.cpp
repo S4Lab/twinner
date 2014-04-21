@@ -668,6 +668,17 @@ void InstructionSymbolicExecuter::jnbeAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::jsAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::util::Logger::loquacious () << "jsAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  bool sign;
+  edu::sharif::twinner::trace::Constraint *cc =
+      eflags.instantiateConstraintForSignCase (sign, disassembledInstruction);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraint (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
     const ConcreteValue &rspRegVal) {
   edu::sharif::twinner::util::Logger::loquacious () << "callAnalysisRoutine(...)\n"
@@ -1319,6 +1330,8 @@ InstructionSymbolicExecuter::convertOpcodeToConditionalBranchAnalysisRoutine (
     return &InstructionSymbolicExecuter::jbeAnalysisRoutine;
   case XED_ICLASS_JNBE:
     return &InstructionSymbolicExecuter::jnbeAnalysisRoutine;
+  case XED_ICLASS_JS:
+    return &InstructionSymbolicExecuter::jsAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Conditional Branch: Unknown opcode: " << OPCODE_StringShort (op) << '\n';

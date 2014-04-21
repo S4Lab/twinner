@@ -234,6 +234,11 @@ private:
   void jnbeAnalysisRoutine (bool branchTaken);
 
   /**
+   * JS jumps if SF=1 which means that corresponding expression was < 0
+   */
+  void jsAnalysisRoutine (bool branchTaken);
+
+  /**
    * CALL instruction is executed and RSP is changed. This method will synchronize its
    * symbolic value with its concrete value.
    */
