@@ -404,46 +404,38 @@ void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "cmovbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
+  bool belowOrEqual;
   edu::sharif::twinner::trace::Constraint *cc =
-      eflags.instantiateConstraintForBelowOrEqual ();
-  const bool shouldExecuteTheMov =
-      cc->getComparisonType () == edu::sharif::twinner::trace::Constraint::NON_POSITIVE;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tadding constraint...";
+      eflags.instantiateConstraintForBelowOrEqualCase
+      (belowOrEqual, disassembledInstruction);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   trace->addPathConstraint (cc);
-  if (shouldExecuteTheMov) {
-    edu::sharif::twinner::util::Logger::loquacious ()
-        << "\texecuting the actual move...";
+  if (belowOrEqual) {
+    edu::sharif::twinner::util::Logger::loquacious () << "\texecuting the actual move...";
     movAnalysisRoutine (dst, src);
   } else {
-    edu::sharif::twinner::util::Logger::loquacious ()
-        << "\tignoring the move...";
+    edu::sharif::twinner::util::Logger::loquacious () << "\tignoring the move...";
   }
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::cmovnbeAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "cmovnbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
+  bool belowOrEqual;
   edu::sharif::twinner::trace::Constraint *cc =
-      eflags.instantiateConstraintForBelowOrEqual ();
-  const bool shouldExecuteTheMov =
-      cc->getComparisonType () == edu::sharif::twinner::trace::Constraint::POSITIVE;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tadding constraint...";
+      eflags.instantiateConstraintForBelowOrEqualCase
+      (belowOrEqual, disassembledInstruction);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   trace->addPathConstraint (cc);
-  if (shouldExecuteTheMov) {
-    edu::sharif::twinner::util::Logger::loquacious ()
-        << "\texecuting the actual move...";
+  if (!belowOrEqual) {
+    edu::sharif::twinner::util::Logger::loquacious () << "\texecuting the actual move...";
     movAnalysisRoutine (dst, src);
   } else {
-    edu::sharif::twinner::util::Logger::loquacious ()
-        << "\tignoring the move...";
+    edu::sharif::twinner::util::Logger::loquacious () << "\tignoring the move...";
   }
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::movAnalysisRoutine (
@@ -1201,15 +1193,14 @@ void InstructionSymbolicExecuter::setnzAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::util::Logger::loquacious () << "setnzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
+  bool zero;
   edu::sharif::twinner::trace::Constraint *cc =
-      eflags.instantiateConstraintForZeroFlag ();
+      eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  const bool shouldSetToOne =
-      cc->getComparisonType () == edu::sharif::twinner::trace::Constraint::NON_ZERO;
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   edu::sharif::twinner::trace::Expression *dstexp;
-  if (shouldSetToOne) {
+  if (!zero) {
     dstexp = new edu::sharif::twinner::trace::ExpressionImp (UINT64 (1));
   } else { // shouldSetToZero
     dstexp = new edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
