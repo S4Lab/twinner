@@ -616,6 +616,9 @@ void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
   bool zero;
   edu::sharif::twinner::trace::Constraint *cc =
       eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
+  if (zero == branchTaken) {
+    throw std::runtime_error ("JNZ branching and last known EFLAGS state do not match");
+  }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
@@ -627,6 +630,9 @@ void InstructionSymbolicExecuter::jzAnalysisRoutine (bool branchTaken) {
   bool zero;
   edu::sharif::twinner::trace::Constraint *cc =
       eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
+  if (zero != branchTaken) {
+    throw std::runtime_error ("JZ branching and last known EFLAGS state do not match");
+  }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
@@ -639,6 +645,9 @@ void InstructionSymbolicExecuter::jleAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::trace::Constraint *cc =
       eflags.instantiateConstraintForLessOrEqualCase
       (lessOrEqual, disassembledInstruction);
+  if (lessOrEqual != branchTaken) {
+    throw std::runtime_error ("JLE branching and last known EFLAGS state do not match");
+  }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
@@ -651,6 +660,9 @@ void InstructionSymbolicExecuter::jbeAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::trace::Constraint *cc =
       eflags.instantiateConstraintForBelowOrEqualCase
       (belowOrEqual, disassembledInstruction);
+  if (belowOrEqual != branchTaken) {
+    throw std::runtime_error ("JBE branching and last known EFLAGS state do not match");
+  }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
@@ -663,6 +675,9 @@ void InstructionSymbolicExecuter::jnbeAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::trace::Constraint *cc =
       eflags.instantiateConstraintForBelowOrEqualCase
       (belowOrEqual, disassembledInstruction);
+  if (belowOrEqual == branchTaken) {
+    throw std::runtime_error ("JNBE branching and last known EFLAGS state do not match");
+  }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
@@ -674,6 +689,9 @@ void InstructionSymbolicExecuter::jsAnalysisRoutine (bool branchTaken) {
   bool sign;
   edu::sharif::twinner::trace::Constraint *cc =
       eflags.instantiateConstraintForSignCase (sign, disassembledInstruction);
+  if (sign != branchTaken) {
+    throw std::runtime_error ("JS branching and last known EFLAGS state do not match");
+  }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
