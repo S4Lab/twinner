@@ -997,9 +997,11 @@ void InstructionSymbolicExecuter::bsfAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tadding constraint...";
   edu::sharif::twinner::trace::Expression *conditionExp = srcexp;
-  conditionExp->shiftToLeft (i);
-  conditionExp->bitwiseAnd (1);
-  conditionExp->minus (1);
+  edu::sharif::twinner::trace::ConcreteValue *bit = cv.clone ();
+  (*bit) = 1;
+  (*bit) <<= i;
+  conditionExp->truncate (i + 1);
+  conditionExp->minus (bit); // takes ownership of bit
   edu::sharif::twinner::trace::Constraint *cc =
       new edu::sharif::twinner::trace::Constraint
       (conditionExp, edu::sharif::twinner::trace::Constraint::ZERO,
