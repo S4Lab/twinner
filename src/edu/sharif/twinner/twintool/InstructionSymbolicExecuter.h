@@ -229,6 +229,11 @@ private:
   void jbeAnalysisRoutine (bool branchTaken);
 
   /**
+   * JNBE jumps if ZF=0 and CF=0 which means that corresponding expression was > 0
+   */
+  void jnbeAnalysisRoutine (bool branchTaken);
+
+  /**
    * CALL instruction is executed and RSP is changed. This method will synchronize its
    * symbolic value with its concrete value.
    */
