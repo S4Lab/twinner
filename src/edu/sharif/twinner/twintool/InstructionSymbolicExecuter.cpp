@@ -551,8 +551,7 @@ void InstructionSymbolicExecuter::addAnalysisRoutine (
        (edu::sharif::twinner::trace::Operator::ADD), srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
-  delete dstexp;
-  //TODO: set rflags
+  eflags.setFlags (dstexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
@@ -574,8 +573,7 @@ void InstructionSymbolicExecuter::subAnalysisRoutine (
        (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
-  delete dstexp;
-  //TODO: set rflags
+  eflags.setFlags (dstexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
@@ -770,8 +768,7 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
   // truncate bits which are shifted left, outside of dst boundaries
   dst.truncate (dstexp);
   dst.setExpression (trace, dstexp);
-  delete dstexp;
-  //TODO: set rflags
+  eflags.setFlags (dstexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
@@ -791,8 +788,7 @@ void InstructionSymbolicExecuter::shrAnalysisRoutine (
   dstexp->shiftToRight (srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
-  delete dstexp;
-  //TODO: set rflags
+  eflags.setFlags (dstexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
@@ -833,8 +829,7 @@ void InstructionSymbolicExecuter::sarAnalysisRoutine (
   }
   delete srcexp;
   dst.setExpression (trace, dstexp);
-  delete dstexp;
-  //TODO: set rflags
+  eflags.setFlags (dstexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
@@ -856,8 +851,7 @@ void InstructionSymbolicExecuter::andAnalysisRoutine (
        (edu::sharif::twinner::trace::Operator::BITWISE_AND), srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
-  delete dstexp;
-  //TODO: set rflags
+  eflags.setFlags (dstexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
@@ -879,8 +873,7 @@ void InstructionSymbolicExecuter::orAnalysisRoutine (
        (edu::sharif::twinner::trace::Operator::BITWISE_OR), srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
-  delete dstexp;
-  //TODO: set rflags
+  eflags.setFlags (dstexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
@@ -902,8 +895,7 @@ void InstructionSymbolicExecuter::xorAnalysisRoutine (
        (edu::sharif::twinner::trace::Operator::XOR), srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
-  delete dstexp;
-  //TODO: set rflags
+  eflags.setFlags (dstexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
@@ -1237,8 +1229,7 @@ void InstructionSymbolicExecuter::incAnalysisRoutine (
       << "\tincrementing...";
   dstexp->add (1);
   opr.setExpression (trace, dstexp);
-  delete dstexp;
-  //TODO: set rflags
+  eflags.setFlags (dstexp);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tdone\n";
 }
