@@ -219,6 +219,11 @@ private:
   void jzAnalysisRoutine (bool branchTaken);
 
   /**
+   * JLE jumps if ZF=1 or SF!=OF which means that corresponding expression was <= 0
+   */
+  void jleAnalysisRoutine (bool branchTaken);
+
+  /**
    * CALL instruction is executed and RSP is changed. This method will synchronize its
    * symbolic value with its concrete value.
    */

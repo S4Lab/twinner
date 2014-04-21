@@ -632,6 +632,18 @@ void InstructionSymbolicExecuter::jzAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::jleAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::util::Logger::loquacious () << "jleAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  bool lessOrEqual;
+  edu::sharif::twinner::trace::Constraint *cc =
+      eflags.instantiateConstraintForLessOrEqualCase
+      (lessOrEqual, disassembledInstruction);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraint (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
     const ConcreteValue &rspRegVal) {
   edu::sharif::twinner::util::Logger::loquacious () << "callAnalysisRoutine(...)\n"
@@ -1277,6 +1289,8 @@ InstructionSymbolicExecuter::convertOpcodeToConditionalBranchAnalysisRoutine (
     return &InstructionSymbolicExecuter::jnzAnalysisRoutine;
   case XED_ICLASS_JZ:
     return &InstructionSymbolicExecuter::jzAnalysisRoutine;
+  case XED_ICLASS_JLE:
+    return &InstructionSymbolicExecuter::jleAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Conditional Branch: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
