@@ -622,25 +622,23 @@ void InstructionSymbolicExecuter::leaAnalysisRoutine (
 void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jnzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
-  edu::sharif::twinner::trace::Constraint *cc
-      = eflags.instantiateConstraintForZeroFlag (!branchTaken);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tadding constraint...";
+  bool zero;
+  edu::sharif::twinner::trace::Constraint *cc =
+      eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   trace->addPathConstraint (cc);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::jzAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
-  edu::sharif::twinner::trace::Constraint *cc
-      = eflags.instantiateConstraintForZeroFlag (branchTaken);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tadding constraint...";
+  bool zero;
+  edu::sharif::twinner::trace::Constraint *cc =
+      eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   trace->addPathConstraint (cc);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
