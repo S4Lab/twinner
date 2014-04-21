@@ -22,54 +22,51 @@ namespace twinner {
 namespace twintool {
 
 Flags::Flags () :
-exp (0) {
+leftExp (0), rightExp (0) {
 }
 
 Flags::~Flags () {
-  if (exp) {
-    delete exp;
-  }
+  delete leftExp;
+  delete rightExp;
 }
 
-void Flags::setFlags (edu::sharif::twinner::trace::Expression *_exp) {
-  if (exp) {
-    delete exp;
-  }
-  exp = _exp;
+void Flags::setFlags (edu::sharif::twinner::trace::Expression *exp) {
+  delete leftExp;
+  leftExp = exp;
+  delete rightExp;
+  rightExp = 0;
 }
 
-const edu::sharif::twinner::trace::Expression *
-Flags::getFlagsUnderlyingExpression () const {
-  return exp;
+void Flags::setFlags (edu::sharif::twinner::trace::Expression *exp1,
+    edu::sharif::twinner::trace::Expression *exp2) {
+  delete leftExp;
+  leftExp = exp1;
+  delete rightExp;
+  rightExp = exp2;
 }
 
-edu::sharif::twinner::trace::Constraint *
-Flags::instantiateConstraintForZeroFlag (bool zfIsSet) const {
-  return new edu::sharif::twinner::trace::Constraint
-      (getFlagsUnderlyingExpression (),
-       zfIsSet ?
-       edu::sharif::twinner::trace::Constraint::ZERO :
-       edu::sharif::twinner::trace::Constraint::NON_ZERO);
+edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForZeroCase (
+    bool &zero, uint32_t instruction) const {
+  return edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+      (zero, leftExp, rightExp, instruction);
 }
 
-edu::sharif::twinner::trace::Constraint *
-Flags::instantiateConstraintForZeroFlag () const {
-  const edu::sharif::twinner::trace::Expression *exp = getFlagsUnderlyingExpression ();
-  const edu::sharif::twinner::trace::ConcreteValue &cv = exp->getLastConcreteValue ();
-  return new edu::sharif::twinner::trace::Constraint
-      (exp, (cv == 0) ?
-       edu::sharif::twinner::trace::Constraint::ZERO :
-       edu::sharif::twinner::trace::Constraint::NON_ZERO);
+edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForLessOrEqualCase (
+    bool &lessOrEqual, uint32_t instruction) const {
+  return edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
+      (lessOrEqual, leftExp, rightExp, instruction);
 }
 
-edu::sharif::twinner::trace::Constraint *
-Flags::instantiateConstraintForBelowOrEqual () const {
-  const edu::sharif::twinner::trace::Expression *exp = getFlagsUnderlyingExpression ();
-  const edu::sharif::twinner::trace::ConcreteValue &cv = exp->getLastConcreteValue ();
-  return new edu::sharif::twinner::trace::Constraint
-      (exp, (cv == 0 || cv.isNegative (cv.getSize ())) ?
-       edu::sharif::twinner::trace::Constraint::NON_POSITIVE :
-       edu::sharif::twinner::trace::Constraint::POSITIVE);
+edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForBelowOrEqualCase (
+    bool &belowOrEqual, uint32_t instruction) const {
+  return edu::sharif::twinner::trace::Constraint::instantiateBelowOrEqualConstraint
+      (belowOrEqual, leftExp, rightExp, instruction);
+}
+
+edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForSignCase (
+    bool &sign, uint32_t instruction) const {
+  return edu::sharif::twinner::trace::Constraint::instantiateSignConstraint
+      (sign, leftExp, rightExp, instruction);
 }
 
 }

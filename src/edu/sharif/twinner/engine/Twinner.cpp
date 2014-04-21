@@ -375,7 +375,10 @@ void extract_memory_addresses_of_trace_segment (
 
 void extract_memory_addresses_of_constraint (std::map < int, std::set < ADDRINT > > &addr,
     const edu::sharif::twinner::trace::Constraint * const &constraint) {
-  extract_memory_addresses_of_expression (addr, constraint->getExpression ());
+  extract_memory_addresses_of_expression (addr, constraint->getMainExpression ());
+  if (constraint->getAuxExpression ()) {
+    extract_memory_addresses_of_expression (addr, constraint->getAuxExpression ());
+  }
 }
 
 template < typename Key >

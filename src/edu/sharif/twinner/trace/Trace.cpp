@@ -107,7 +107,11 @@ Expression *Trace::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
 }
 
 void Trace::addPathConstraint (const Constraint *c) {
-  getCurrentTraceSegment ()->addPathConstraint (c);
+  if (c) {
+    getCurrentTraceSegment ()->addPathConstraint (c);
+  } else {
+    edu::sharif::twinner::util::Logger::warning () << "Trace::addPathConstraint (null)\n";
+  }
 }
 
 void Trace::syscallInvoked (Syscall s) {

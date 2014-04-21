@@ -111,6 +111,26 @@ bool ConcreteValue64Bits::operator> (const ConcreteValue &cv) const {
   return value > tmp.value;
 }
 
+bool ConcreteValue64Bits::greaterThan (const ConcreteValue &cv) const {
+  if (getSize () < cv.getSize ()) {
+    return cv.lessThan (*this);
+  }
+  const ConcreteValue64Bits tmp (cv);
+  if (isNegative (64)) {
+    if (tmp.isNegative (64)) {
+      return value > tmp.value;
+    } else {
+      return false;
+    }
+  } else {
+    if (tmp.isNegative (64)) {
+      return true;
+    } else {
+      return value > tmp.value;
+    }
+  }
+}
+
 bool ConcreteValue64Bits::operator== (const ConcreteValue &cv) const {
   if (getSize () < cv.getSize ()) {
     return (cv == (*this));

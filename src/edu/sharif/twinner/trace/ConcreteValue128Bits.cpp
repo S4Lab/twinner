@@ -144,6 +144,26 @@ bool ConcreteValue128Bits::operator> (const ConcreteValue &cv) const {
   return (msb > tmp.msb) || ((msb == tmp.msb) && lsb > tmp.lsb);
 }
 
+bool ConcreteValue128Bits::greaterThan (const ConcreteValue &cv) const {
+  if (getSize () < cv.getSize ()) {
+    return cv.lessThan (*this);
+  }
+  const ConcreteValue128Bits tmp (cv);
+  if (isNegative (128)) {
+    if (tmp.isNegative (128)) {
+      return (msb > tmp.msb) || ((msb == tmp.msb) && lsb > tmp.lsb);
+    } else {
+      return false;
+    }
+  } else {
+    if (tmp.isNegative (128)) {
+      return true;
+    } else {
+      return (msb > tmp.msb) || ((msb == tmp.msb) && lsb > tmp.lsb);
+    }
+  }
+}
+
 bool ConcreteValue128Bits::operator== (const ConcreteValue &cv) const {
   if (getSize () < cv.getSize ()) {
     return (cv == (*this));

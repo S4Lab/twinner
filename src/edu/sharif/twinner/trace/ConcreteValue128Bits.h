@@ -58,6 +58,7 @@ public:
   virtual int getSize () const;
 
   virtual bool operator> (const ConcreteValue &cv) const;
+  virtual bool greaterThan (const ConcreteValue &cv) const;
   virtual bool operator== (const ConcreteValue &cv) const;
 
   virtual ConcreteValue128Bits &operator-= (const ConcreteValue &cv);

@@ -80,15 +80,30 @@ public:
     return !((*this) >= cv);
   }
 
+  bool lessThan (const ConcreteValue &cv) const {
+    return !(this->greaterThanOrEqualTo (cv));
+  }
+
   bool operator<= (const ConcreteValue &cv) const {
     return !((*this) > cv);
+  }
+
+  bool lessThanOrEqualTo (const ConcreteValue &cv) const {
+    return !(this->greaterThan (cv));
   }
 
   bool operator>= (const ConcreteValue &cv) const {
     return ((*this) > cv) || ((*this) == cv);
   }
 
+  bool greaterThanOrEqualTo (const ConcreteValue &cv) const {
+    return this->greaterThan (cv) || ((*this) == cv);
+  }
+
+  // unsigned comparison
   virtual bool operator> (const ConcreteValue &cv) const = 0;
+  // signed comparison
+  virtual bool greaterThan (const ConcreteValue &cv) const = 0;
   virtual bool operator== (const ConcreteValue &cv) const = 0;
 
   bool operator< (UINT64 value) const;
@@ -96,6 +111,11 @@ public:
   bool operator>= (UINT64 value) const;
   bool operator> (UINT64 value) const;
   bool operator== (UINT64 value) const;
+
+  bool lessThan (UINT64 value) const;
+  bool lessThanOrEqualTo (UINT64 value) const;
+  bool greaterThanOrEqualTo (UINT64 value) const;
+  bool greaterThan (UINT64 value) const;
 
   virtual ConcreteValue &operator-= (const ConcreteValue &cv) = 0;
   virtual ConcreteValue &operator+= (const ConcreteValue &cv) = 0;

@@ -60,20 +60,41 @@ void ConstraintToCvc4ExprConverter::addConstraint (Expr constraint) {
 Expr ConstraintToCvc4ExprConverter::convertConstraintToCvc4Expr (
     std::map<std::string, Expr> &symbols,
     const edu::sharif::twinner::trace::Constraint *constraint) {
-  Expr exp = convertExpressionToCvc4Expr (symbols, constraint->getExpression ());
+  Expr leftExp = convertExpressionToCvc4Expr (symbols, constraint->getMainExpression ());
+  Expr rightExp = convertExpressionToCvc4Expr (symbols, constraint->getAuxExpression ());
   switch (constraint->getComparisonType ()) {
   case edu::sharif::twinner::trace::Constraint::NON_POSITIVE:
-    return em.mkExpr (kind::BITVECTOR_SLE, exp, zero);
+    return em.mkExpr (kind::BITVECTOR_SLE, leftExp, zero);
   case edu::sharif::twinner::trace::Constraint::NON_NEGATIVE:
-    return em.mkExpr (kind::BITVECTOR_SGE, exp, zero);
-  case edu::sharif::twinner::trace::Constraint::POSITIVE:
-    return em.mkExpr (kind::BITVECTOR_SGT, exp, zero);
-  case edu::sharif::twinner::trace::Constraint::NEGATIVE:
-    return em.mkExpr (kind::BITVECTOR_SLT, exp, zero);
-  case edu::sharif::twinner::trace::Constraint::ZERO:
-    return em.mkExpr (kind::EQUAL, exp, zero);
+    return em.mkExpr (kind::BITVECTOR_SGE, leftExp, zero);
   case edu::sharif::twinner::trace::Constraint::NON_ZERO:
-    return em.mkExpr (kind::DISTINCT, exp, zero);
+    return em.mkExpr (kind::DISTINCT, leftExp, zero);
+  case edu::sharif::twinner::trace::Constraint::POSITIVE:
+    return em.mkExpr (kind::BITVECTOR_SGT, leftExp, zero);
+  case edu::sharif::twinner::trace::Constraint::NEGATIVE:
+    return em.mkExpr (kind::BITVECTOR_SLT, leftExp, zero);
+  case edu::sharif::twinner::trace::Constraint::ZERO:
+    return em.mkExpr (kind::EQUAL, leftExp, zero);
+  case edu::sharif::twinner::trace::Constraint::BELOW_OR_EQUAL:
+    return em.mkExpr (kind::BITVECTOR_ULE, leftExp, rightExp);
+  case edu::sharif::twinner::trace::Constraint::ABOVE_OR_EQUAL:
+    return em.mkExpr (kind::BITVECTOR_UGE, leftExp, rightExp);
+  case edu::sharif::twinner::trace::Constraint::NON_EQUAL:
+    return em.mkExpr (kind::DISTINCT, leftExp, rightExp);
+  case edu::sharif::twinner::trace::Constraint::ABOVE:
+    return em.mkExpr (kind::BITVECTOR_UGT, leftExp, rightExp);
+  case edu::sharif::twinner::trace::Constraint::BELOW:
+    return em.mkExpr (kind::BITVECTOR_ULT, leftExp, rightExp);
+  case edu::sharif::twinner::trace::Constraint::EQUAL:
+    return em.mkExpr (kind::EQUAL, leftExp, rightExp);
+  case edu::sharif::twinner::trace::Constraint::LESS_OR_EQUAL:
+    return em.mkExpr (kind::BITVECTOR_SLE, leftExp, rightExp);
+  case edu::sharif::twinner::trace::Constraint::GREATER_OR_EQUAL:
+    return em.mkExpr (kind::BITVECTOR_SGE, leftExp, rightExp);
+  case edu::sharif::twinner::trace::Constraint::GREATER:
+    return em.mkExpr (kind::BITVECTOR_SGT, leftExp, rightExp);
+  case edu::sharif::twinner::trace::Constraint::LESS:
+    return em.mkExpr (kind::BITVECTOR_SLT, leftExp, rightExp);
   default:
     throw std::runtime_error ("Unknown Comparison Type");
   }

@@ -59,16 +59,32 @@ bool ConcreteValue::operator< (UINT64 value) const {
   return (*this) < ConcreteValue64Bits (value);
 }
 
+bool ConcreteValue::lessThan (UINT64 value) const {
+  return lessThan (ConcreteValue64Bits (value));
+}
+
 bool ConcreteValue::operator<= (UINT64 value) const {
   return (*this) <= ConcreteValue64Bits (value);
+}
+
+bool ConcreteValue::lessThanOrEqualTo (UINT64 value) const {
+  return lessThanOrEqualTo (ConcreteValue64Bits (value));
 }
 
 bool ConcreteValue::operator>= (UINT64 value) const {
   return (*this) >= ConcreteValue64Bits (value);
 }
 
+bool ConcreteValue::greaterThanOrEqualTo (UINT64 value) const {
+  return greaterThanOrEqualTo (ConcreteValue64Bits (value));
+}
+
 bool ConcreteValue::operator> (UINT64 value) const {
   return (*this) > ConcreteValue64Bits (value);
+}
+
+bool ConcreteValue::greaterThan (UINT64 value) const {
+  return greaterThan (ConcreteValue64Bits (value));
 }
 
 bool ConcreteValue::operator== (UINT64 value) const {

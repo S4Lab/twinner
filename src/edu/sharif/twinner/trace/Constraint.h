@@ -30,12 +30,26 @@ public:
 
   enum ComparisonType {
 
-    NON_POSITIVE, NON_NEGATIVE,
-    POSITIVE, NEGATIVE, ZERO, NON_ZERO
+    // zero
+    NON_POSITIVE, NON_NEGATIVE, NON_ZERO,
+    POSITIVE, NEGATIVE, ZERO,
+
+    MAXIMUM_SINGLE_OPERAND_CODED_CONSTRAINT,
+
+    // unsigned
+    BELOW_OR_EQUAL, ABOVE_OR_EQUAL, NON_EQUAL,
+    ABOVE, BELOW, EQUAL,
+
+    MAXIMUM_UNSIGNED_TWO_OPERANDS_CODED_CONSTRAINT,
+
+    // signed
+    LESS_OR_EQUAL, GREATER_OR_EQUAL,
+    GREATER, LESS,
   };
 
 private:
-  Expression *exp;
+  Expression *mainExp;
+  Expression *auxExp;
   ComparisonType type;
   uint32_t instruction;
 
@@ -65,6 +79,20 @@ public:
    */
   Constraint (const Expression *exp, ComparisonType type, uint32_t instruction);
 
+  /**
+   * Constructs a constraint indicating that given expressions should obey the
+   * (in)equality which is specified by type. Both expressions are cloned and deleted upon
+   * destruction of constraint object.
+   * First expression is left-hand-side and second expression is right-hand-side in the
+   * formula (e.g. mainExp >= auxExp).
+   * @param mainExp The left-hand-side expression.
+   * @param auxExp The right-hand-side expression.
+   * @param type Indicates the (in)equality which given expressions should satisfy it.
+   * @param instruction The instruction which is cause of this constraint instantiation.
+   */
+  Constraint (const Expression *mainExp, const Expression *auxExp,
+      ComparisonType type, uint32_t instruction);
+
   ~Constraint ();
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
@@ -72,7 +100,8 @@ public:
 
   std::string toString () const;
 
-  const Expression *getExpression () const;
+  const Expression *getMainExpression () const;
+  const Expression *getAuxExpression () const;
   ComparisonType getComparisonType () const;
   uint32_t getCausingInstructionIdentifier () const;
 
@@ -85,6 +114,22 @@ public:
   bool operator== (const Constraint &constraint) const;
 
   bool isTrivial () const;
+
+  static Constraint *instantiateBelowConstraint (bool &below,
+      const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
+  static Constraint *instantiateBelowOrEqualConstraint (bool &belowOrEqual,
+      const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
+
+  static Constraint *instantiateLessConstraint (bool &less,
+      const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
+  static Constraint *instantiateLessOrEqualConstraint (bool &lessOrEqual,
+      const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
+
+  static Constraint *instantiateEqualConstraint (bool &equal,
+      const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
+
+  static Constraint *instantiateSignConstraint (bool &sign,
+      const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
 };
 
 }
