@@ -136,6 +136,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
       << ", src imd: 0x" << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
+  srcexp->truncate (REG_Size (dstReg) * 8);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
       ConstantExpressionValueProxy (srcexp));
   delete srcexp;
@@ -197,6 +198,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
       << ", src imd: 0x" << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
+  srcexp->truncate (memReadBytes * 8);
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
       ConstantExpressionValueProxy (srcexp));
   delete srcexp;
