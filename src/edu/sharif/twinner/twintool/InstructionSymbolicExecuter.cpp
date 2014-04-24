@@ -1105,6 +1105,7 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
   case 8:
     leftReg = REG_AH;
     rightReg = REG_AL;
+    break;
   case 16:
     leftReg = REG_DX;
     rightReg = REG_AX;
