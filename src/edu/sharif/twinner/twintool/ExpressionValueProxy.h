@@ -55,6 +55,15 @@ public:
       edu::sharif::twinner::trace::Trace *trace) const = 0;
 
   /**
+   * Acts like getExpression() method, but also sign-extend the expression before
+   * returning it.
+   * @param trace Trace object which this expression will be resolved upon it.
+   * @return The cloned expression object which is sign-extended.
+   */
+  virtual edu::sharif::twinner::trace::Expression *getExpressionWithSignExtension (
+      edu::sharif::twinner::trace::Trace *trace) const = 0;
+
+  /**
    * This method should be called whenever the proxied expression undergoes any change.
    * @param trace The trace which changed expression has been kept there.
    * @param changedExp The underlying expression which is changed.

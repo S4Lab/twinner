@@ -161,9 +161,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
       << ", src imd: 0x" << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
-  srcexp->truncate (REG_Size (dstReg) * 8);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      ConstantExpressionValueProxy (srcexp));
+      ConstantExpressionValueProxy (srcexp, REG_Size (dstReg) * 8));
   delete srcexp;
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
@@ -249,9 +248,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
       << ", src imd: 0x" << srcImmediateValue << '\n';
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
-  srcexp->truncate (memReadBytes * 8);
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-      ConstantExpressionValueProxy (srcexp));
+      ConstantExpressionValueProxy (srcexp, memReadBytes * 8));
   delete srcexp;
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
@@ -316,7 +314,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
   edu::sharif::twinner::trace::Expression *srcexp =
       new edu::sharif::twinner::trace::ExpressionImp (dstRegVal);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      ConstantExpressionValueProxy (srcexp));
+      ConstantExpressionValueProxy (srcexp, REG_Size (dstReg) * 8));
   delete srcexp;
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
@@ -655,13 +653,13 @@ void InstructionSymbolicExecuter::cmpAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "cmpAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  //TODO: Either add getExpressionWithSignExtension or support all sizes in concrete value
+  //TODO: Implement all sizes of concrete value instead of getting sign-extended expr.
   edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
+      src.getExpressionWithSignExtension (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tgetting dst exp...";
   edu::sharif::twinner::trace::Expression *dstexp =
-      dst.getExpression (trace);
+      dst.getExpressionWithSignExtension (trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting EFLAGS...";
   eflags.setFlags (dstexp, srcexp); // dstexp - srcexp
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";

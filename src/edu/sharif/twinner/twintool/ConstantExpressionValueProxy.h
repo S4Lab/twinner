@@ -24,16 +24,20 @@ class ConstantExpressionValueProxy : public ExpressionValueProxy {
 
 private:
   edu::sharif::twinner::trace::Expression *exp;
+  int size;
 
 public:
 
   /**
    * Ownership of exp is not kept. Instantiator should take care of it.
    * @param exp The expression which getter method will return upon requests.
+   * @param size The size of the underlying expression in bits.
    */
-  ConstantExpressionValueProxy (edu::sharif::twinner::trace::Expression *exp);
+  ConstantExpressionValueProxy (edu::sharif::twinner::trace::Expression *exp, int size);
 
   virtual edu::sharif::twinner::trace::Expression *getExpression (
+      edu::sharif::twinner::trace::Trace *trace) const;
+  virtual edu::sharif::twinner::trace::Expression *getExpressionWithSignExtension (
       edu::sharif::twinner::trace::Trace *trace) const;
 
   virtual void valueIsChanged (

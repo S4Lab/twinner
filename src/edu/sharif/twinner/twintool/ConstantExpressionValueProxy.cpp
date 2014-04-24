@@ -15,6 +15,7 @@
 #include "ConstantExpressionValueProxy.h"
 
 #include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/ConcreteValue.h"
 
 namespace edu {
 namespace sharif {
@@ -22,13 +23,26 @@ namespace twinner {
 namespace twintool {
 
 ConstantExpressionValueProxy::ConstantExpressionValueProxy (
-    edu::sharif::twinner::trace::Expression *_exp) :
-exp (_exp) {
+    edu::sharif::twinner::trace::Expression *_exp, int _size) :
+exp (_exp), size (_size) {
+  exp->truncate (_size);
 }
 
 edu::sharif::twinner::trace::Expression *ConstantExpressionValueProxy::getExpression (
     edu::sharif::twinner::trace::Trace *trace) const {
   return exp->clone ();
+}
+
+edu::sharif::twinner::trace::Expression *
+ConstantExpressionValueProxy::getExpressionWithSignExtension (
+    edu::sharif::twinner::trace::Trace *trace) const {
+  edu::sharif::twinner::trace::Expression *exp = getExpression (trace);
+  if (size < 64) {
+    if (exp->getLastConcreteValue ().isNegative (size)) {
+      exp->minus (1ull << size); // sign-extend
+    }
+  }
+  return exp;
 }
 
 void ConstantExpressionValueProxy::valueIsChanged (

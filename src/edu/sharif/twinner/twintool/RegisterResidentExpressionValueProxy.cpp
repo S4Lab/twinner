@@ -41,6 +41,19 @@ RegisterResidentExpressionValueProxy::getExpression (
 }
 
 edu::sharif::twinner::trace::Expression *
+RegisterResidentExpressionValueProxy::getExpressionWithSignExtension (
+    edu::sharif::twinner::trace::Trace *trace) const {
+  edu::sharif::twinner::trace::Expression *exp = getExpression (trace);
+  const int size = getSize ();
+  if (size < 64) {
+    if (exp->getLastConcreteValue ().isNegative (size)) {
+      exp->minus (1ull << size); // sign-extend
+    }
+  }
+  return exp;
+}
+
+edu::sharif::twinner::trace::Expression *
 RegisterResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression *exp) const {
