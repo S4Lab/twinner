@@ -1236,6 +1236,18 @@ void InstructionSymbolicExecuter::incAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::decAnalysisRoutine (
+    const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::util::Logger::loquacious () << "decAnalysisRoutine(...)\n"
+      << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = opr.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdecrementing...";
+  dstexp->minus (1);
+  opr.setExpression (trace, dstexp);
+  eflags.setFlags (dstexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::setnzAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::util::Logger::loquacious () << "setnzAnalysisRoutine(...)\n"
@@ -1388,6 +1400,8 @@ InstructionSymbolicExecuter::convertOpcodeToSingleOperandAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_INC:
     return &InstructionSymbolicExecuter::incAnalysisRoutine;
+  case XED_ICLASS_DEC:
+    return &InstructionSymbolicExecuter::decAnalysisRoutine;
   case XED_ICLASS_SETNZ:
     return &InstructionSymbolicExecuter::setnzAnalysisRoutine;
   default:

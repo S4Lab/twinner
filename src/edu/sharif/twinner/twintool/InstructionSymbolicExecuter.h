@@ -359,6 +359,11 @@ private:
   void incAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
   /**
+   * DEC decrements the opr reg/mem operand.
+   */
+  void decAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
+  /**
    * SETNZ sets opr to 1 iff ZF=0 (and set it to 0 otherwise).
    */
   void setnzAnalysisRoutine (const MutableExpressionValueProxy &opr);
