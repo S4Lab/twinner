@@ -97,6 +97,31 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxReg (
+    AuxOperandHavingAnalysisRoutine routine,
+    REG dstReg, const ConcreteValue &dstRegVal,
+    REG srcReg, const ConcreteValue &srcRegVal,
+    REG auxReg, const ConcreteValue &auxRegVal,
+    UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineDstRegSrcRegAuxReg(INS: "
+      << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
+      << ", src reg: " << REG_StringShort (srcReg)
+      << ", aux reg: " << REG_StringShort (auxReg) << '\n';
+  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+      RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
+      RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
     REG dstReg, const ConcreteValue &dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
@@ -162,6 +187,32 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
       RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
+void InstructionSymbolicExecuter::analysisRoutineDstMemSrcRegAuxReg (
+    AuxOperandHavingAnalysisRoutine routine,
+    ADDRINT dstMemoryEa,
+    REG srcReg, const ConcreteValue &srcRegVal,
+    REG auxReg, const ConcreteValue &auxRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << std::hex << "analysisRoutineDstMemSrcRegAuxReg(INS: "
+      << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
+      << ", src reg: " << REG_StringShort (srcReg)
+      << ", aux reg: " << REG_StringShort (auxReg) << '\n';
+  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+      RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
+      RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -437,6 +488,26 @@ void InstructionSymbolicExecuter::cmovnbeAnalysisRoutine (
   } else {
     edu::sharif::twinner::util::Logger::loquacious () << "\tignoring the move...";
   }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
+void InstructionSymbolicExecuter::cmpxchgAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
+    const MutableExpressionValueProxy &aux) {
+  edu::sharif::twinner::util::Logger::loquacious () << "cmpxchgAnalysisRoutine(...)\n"
+      << "\tcomparison part...";
+  cmpAnalysisRoutine (aux, dst);
+  edu::sharif::twinner::util::Logger::loquacious () << "\texchange part...";
+  bool zero;
+  edu::sharif::twinner::trace::Constraint *cc =
+      eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
+  if (zero) { // equal
+    movAnalysisRoutine (dst, src);
+  } else {
+    movAnalysisRoutine (aux, dst);
+  }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1324,6 +1395,21 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   }
 }
 
+InstructionSymbolicExecuter::AuxOperandHavingAnalysisRoutine
+InstructionSymbolicExecuter::convertOpcodeToAuxOperandHavingAnalysisRoutine (
+    OPCODE op) const {
+  switch (op) {
+  case XED_ICLASS_CMPXCHG:
+    return &InstructionSymbolicExecuter::cmpxchgAnalysisRoutine;
+  default:
+    edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
+        "Having an auxiliary third (dst) operand: Unknown opcode: "
+        << OPCODE_StringShort (op) << '\n';
+    throw std::runtime_error
+        ("Unknown opcode (for aux-operand case) given to analysis routine");
+  }
+}
+
 InstructionSymbolicExecuter::DoubleDestinationsAnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToDoubleDestinationsAnalysisRoutine (
     OPCODE op) const {
@@ -1425,6 +1511,20 @@ VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
        insAssembly);
 }
 
+VOID analysisRoutineDstRegSrcRegAuxReg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 auxReg, ADDRINT auxRegVal,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineDstRegSrcRegAuxReg
+      (ise->convertOpcodeToAuxOperandHavingAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       (REG) auxReg, edu::sharif::twinner::trace::ConcreteValue64Bits (auxRegVal),
+       insAssembly);
+}
+
 VOID analysisRoutineDstRegSrcLargeReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     UINT32 srcReg, const PIN_REGISTER *srcRegVal,
@@ -1495,6 +1595,22 @@ VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
        (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       memReadBytes,
+       insAssembly);
+}
+
+VOID analysisRoutineDstMemSrcRegAuxReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 auxReg, ADDRINT auxRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineDstMemSrcRegAuxReg
+      (ise->convertOpcodeToAuxOperandHavingAnalysisRoutine ((OPCODE) opcode),
+       dstMemoryEa,
+       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       (REG) auxReg, edu::sharif::twinner::trace::ConcreteValue64Bits (auxRegVal),
        memReadBytes,
        insAssembly);
 }

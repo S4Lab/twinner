@@ -100,6 +100,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_CMOVNBE, DST_REG_SRC_EITHER_REG_OR_MEM));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_CMPXCHG, DST_EITHER_REG_OR_MEM_SRC_REG_AUX_REG));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_PUSH, PUSH_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_POP, POP_INS_MODELS));
@@ -309,7 +311,12 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
     } else if (!destRegIsXmm && sourceRegIsXmm) {
       return DST_REG_SRC_LARGE_REG;
     } else {
-      return DST_REG_SRC_REG;
+      if (INS_OperandCount (ins) > 2 && INS_OperandIsReg (ins, 2)
+          && REG_is_gr_any_size (INS_OperandReg (ins, 2))) {
+        return DST_REG_SRC_REG_AUX_REG;
+      } else {
+        return DST_REG_SRC_REG;
+      }
     }
 
   } else if (destIsReg && sourceIsMem) {
@@ -328,7 +335,12 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
     if (sourceRegIsXmm) {
       return DST_MEM_SRC_LARGE_REG;
     } else {
-      return DST_MEM_SRC_REG;
+      if (INS_OperandCount (ins) > 2 && INS_OperandIsReg (ins, 2)
+          && REG_is_gr_any_size (INS_OperandReg (ins, 2))) {
+        return DST_MEM_SRC_REG_AUX_REG;
+      } else {
+        return DST_MEM_SRC_REG;
+      }
     }
 
   } else if (destIsMem && sourceIsImmed) {
@@ -370,6 +382,20 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_REG_SRC_REG_AUX_REG:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    REG srcreg = INS_OperandReg (ins, 1);
+    REG auxreg = INS_OperandReg (ins, 2);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcRegAuxReg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                    IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_UINT32, auxreg, IARG_REG_VALUE, auxreg,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -438,6 +464,20 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_MEM_SRC_REG_AUX_REG:
+  {
+    REG srcreg = INS_OperandReg (ins, 1);
+    REG auxreg = INS_OperandReg (ins, 2);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcRegAuxReg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_MEMORYOP_EA, 0,
+                    IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_UINT32, auxreg, IARG_REG_VALUE, auxreg,
                     IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);

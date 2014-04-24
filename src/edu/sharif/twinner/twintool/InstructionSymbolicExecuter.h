@@ -38,6 +38,9 @@ private:
 
   typedef void (InstructionSymbolicExecuter::*AnalysisRoutine) (
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+  typedef void (InstructionSymbolicExecuter::*AuxOperandHavingAnalysisRoutine) (
+      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
+      const MutableExpressionValueProxy &aux);
   typedef void (InstructionSymbolicExecuter::*DoubleDestinationsAnalysisRoutine) (
       const MutableExpressionValueProxy &leftDst,
       const MutableExpressionValueProxy &rightDst,
@@ -80,6 +83,11 @@ public:
       REG dstReg, const ConcreteValue &dstRegVal,
       REG srcReg, const ConcreteValue &srcRegVal,
       UINT32 insAssembly);
+  void analysisRoutineDstRegSrcRegAuxReg (AuxOperandHavingAnalysisRoutine routine,
+      REG dstReg, const ConcreteValue &dstRegVal,
+      REG srcReg, const ConcreteValue &srcRegVal,
+      REG auxReg, const ConcreteValue &auxRegVal,
+      UINT32 insAssembly);
   void analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
@@ -91,6 +99,12 @@ public:
   void analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       REG srcReg, const ConcreteValue &srcRegVal,
+      UINT32 memReadBytes,
+      UINT32 insAssembly);
+  void analysisRoutineDstMemSrcRegAuxReg (AuxOperandHavingAnalysisRoutine routine,
+      ADDRINT dstMemoryEa,
+      REG srcReg, const ConcreteValue &srcRegVal,
+      REG auxReg, const ConcreteValue &auxRegVal,
       UINT32 memReadBytes,
       UINT32 insAssembly);
   void analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
@@ -147,6 +161,16 @@ private:
    */
   void cmovnbeAnalysisRoutine (const MutableExpressionValueProxy &dst,
       const ExpressionValueProxy &src);
+
+  /**
+   * accumulator := RAX | EAX | AX | AL
+   * if (dst == accumulator)
+   *  dst <- src
+   * else
+   *  accumulator <- dst
+   */
+  void cmpxchgAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src, const MutableExpressionValueProxy &aux);
 
   /**
    * MOV has 5 models
@@ -370,6 +394,8 @@ private:
 
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
+  AuxOperandHavingAnalysisRoutine convertOpcodeToAuxOperandHavingAnalysisRoutine (
+      OPCODE op) const;
   DoubleDestinationsAnalysisRoutine convertOpcodeToDoubleDestinationsAnalysisRoutine (
       OPCODE op) const;
   ConditionalBranchAnalysisRoutine convertOpcodeToConditionalBranchAnalysisRoutine (
@@ -385,6 +411,11 @@ public:
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 insAssembly);
+VOID analysisRoutineDstRegSrcRegAuxReg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 auxReg, ADDRINT auxRegVal,
     UINT32 insAssembly);
 VOID analysisRoutineDstRegSrcLargeReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
@@ -409,6 +440,12 @@ VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
 VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly);
+VOID analysisRoutineDstMemSrcRegAuxReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 auxReg, ADDRINT auxRegVal,
     UINT32 memReadBytes,
     UINT32 insAssembly);
 VOID analysisRoutineDstMemSrcLargeReg (VOID *iseptr, UINT32 opcode,
