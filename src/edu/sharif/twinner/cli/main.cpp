@@ -98,18 +98,18 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
   char *progName = argv[0];
 
   const ArgParser::Option options[] = {
-    { 'h', "help", ArgParser::NO, "display this help message and exit", false},
-    { 'V', "version", ArgParser::NO, "output version number string and exit", false},
-    { 'v', "verbose", ArgParser::YES, "verbose operation", false},
-    { 'L', "license", ArgParser::NO, "output license information and exit", false},
-    { 'i', "input", ArgParser::YES, "input obfuscated binary file", true},
-    { 'a', "args", ArgParser::YES, "arguments for input binary file", false},
-    { 't', "tool", ArgParser::YES, "twintool executable/library file", true},
-    { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true},
-    { 'o', "output", ArgParser::YES, "path/name of the generated twin binary", true},
-    { 0, 0, ArgParser::NO, 0}
+    { 'h', "help", ArgParser::NO, "display this help message and exit", false, true},
+    { 'V', "version", ArgParser::NO, "output version number string and exit", false, true},
+    { 'v', "verbose", ArgParser::YES, "verbose operation", false, false},
+    { 'L', "license", ArgParser::NO, "output license information and exit", false, true},
+    { 'i', "input", ArgParser::YES, "input obfuscated binary file", true, false},
+    { 'a', "args", ArgParser::YES, "arguments for input binary file", false, false},
+    { 't', "tool", ArgParser::YES, "twintool executable/library file", true, false},
+    { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true, false},
+    { 'o', "output", ArgParser::YES, "path/name of the generated twin binary", true, false},
+    { 0, 0, ArgParser::NO, 0, false, false}
   };
-  const ArgParser parser (argc, argv, options);
+  const ArgParser parser (argc, argv, options, true);
   if (parser.error ().size ()) {
     printError (progName, parser.error ());
     return ERROR_OCCURRED;

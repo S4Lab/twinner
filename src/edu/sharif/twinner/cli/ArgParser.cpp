@@ -40,6 +40,7 @@ namespace cli {
 
 ArgParser::ArgParser (const int argc, const char * const argv[], const Option options[],
     const bool inOrder) {
+  aSufficientArgumentExists = false;
   if (!options) {
     return;
   }
@@ -99,6 +100,7 @@ ArgParser::ArgParser (const int argc, const char * const argv[], const Option op
 
 ArgParser::ArgParser (const char * const opt, const char * const arg,
     const Option options[]) {
+  aSufficientArgumentExists = false;
   if (!opt || !opt[0] || !options) {
     return;
   }
@@ -130,6 +132,9 @@ ArgParser::ArgParser (const char * const opt, const char * const arg,
 bool ArgParser::checkMandatoryOptionsPresence (const Option options[]) {
   if (err.size ()) { // already an error is set
     return false;
+  }
+  if (aSufficientArgumentExists) {
+    return true; // a sufficient argument is enough to ignore remaining mandatory options
   }
   for (int i = 0; options[i].code != 0; ++i) {
     if (options[i].mandatory) {
@@ -189,6 +194,7 @@ bool ArgParser::parseLongOption (const char * const opt, const char * const arg,
 
   ++argind;
   data.push_back (Record (options[index].code));
+  aSufficientArgumentExists = aSufficientArgumentExists || options[index].sufficient;
 
   // this option is visited, so it's not required anymore!
   options[index].mandatory = false;
@@ -249,6 +255,7 @@ bool ArgParser::parseShortOption (const char * const opt, const char * const arg
     }
 
     data.push_back (Record (c));
+    aSufficientArgumentExists = aSufficientArgumentExists || options[index].sufficient;
     if (opt[++cind] == 0) {
       ++argind;
       cind = 0;

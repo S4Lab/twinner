@@ -77,6 +77,7 @@ public:
     HasArg hasArg;
     const char *description; // Long description about this option (to be used as the help message)
     mutable bool mandatory; // true indicates that this option must be present
+    const bool sufficient; // true indicates that this option is sufficient for a correct execution (independent of other options)
   };
 
 private:
@@ -93,6 +94,7 @@ private:
 
   std::string err;
   std::vector < Record > data;
+  bool aSufficientArgumentExists;
 
   bool checkMandatoryOptionsPresence (const Option options[]);
 
