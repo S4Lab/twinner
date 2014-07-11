@@ -294,7 +294,7 @@ void ExecutionTraceSegment::loadMapFromBinaryStream (std::ifstream &in,
   }
   typename std::map < ADDRESS, Expression * >::size_type s;
   in.read ((char *) &s, sizeof (s));
-  for (int i = 0; i < s; ++i) {
+  while (s-- > 0) {
     ADDRESS a;
     in.read ((char *) &a, sizeof (a));
 

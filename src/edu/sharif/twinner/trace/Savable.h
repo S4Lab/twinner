@@ -79,7 +79,7 @@ void loadListFromBinaryStream (std::ifstream &in,
   }
   typename std::list< SAVABLE * >::size_type s;
   in.read ((char *) &s, sizeof (s));
-  for (int i = 0; i < s; ++i) {
+  while (s-- > 0) {
     SAVABLE *con = SAVABLE::loadFromBinaryStream (in);
     list.push_back (con);
   }
