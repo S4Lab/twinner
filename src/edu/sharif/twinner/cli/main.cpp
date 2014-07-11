@@ -17,6 +17,8 @@
 #include "ArgParser.h"
 
 #include "edu/sharif/twinner/engine/Twinner.h"
+#include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/engine/search/ConstraintTree.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 
@@ -33,12 +35,14 @@ void printLicense ();
 
 enum ArgumentsParsingStatus {
 
+  CHECK_MODE,
   EXIT_NORMALLY, ERROR_OCCURRED, CONTINUE_NORMALLY
 };
 
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &input, string &args, string &twintool, string &pin, string &twin);
 int run (string input, string args, string twintool, string pin, string twin);
+int checkTraceFile (string traceFilePath, string memoryFilePath);
 
 int main (int argc, char *argv[]) {
   string input, args, twintool, pin, twin;
@@ -60,6 +64,16 @@ int main (int argc, char *argv[]) {
     }
     return -2;
 
+  case CHECK_MODE:
+    if (access (input.c_str (), R_OK) != 0) {
+      printError (argv[0], "permission denied: can not read the trace file!");
+    } else if (access (args.c_str (), R_OK) != 0) {
+      printError (argv[0], "permission denied: can not read the memory file!");
+    } else {
+      return checkTraceFile (input, args);
+    }
+    return -3;
+
   case EXIT_NORMALLY:
     return 0;
   default:
@@ -69,12 +83,9 @@ int main (int argc, char *argv[]) {
 }
 
 int run (string input, string args, string twintool, string pin, string twin) {
-  if (!(edu::sharif::twinner::util::Logger::debug ()
-      << "[verboseness level: debug]\n")) {
-    edu::sharif::twinner::util::Logger::info ()
-        << "[verboseness level: info]\n";
-  }
-  edu::sharif::twinner::util::Logger::info () <<
+  edu::sharif::twinner::util::Logger::info ()
+      << "[verboseness level: "
+      << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n"
       "Input binary file: " << input << '\n'
       << (args.empty () ? "" : ("Input binary arguments: " + args))
       << "\nTwinTool pintool: " << twintool
@@ -93,6 +104,23 @@ int run (string input, string args, string twintool, string pin, string twin) {
   return 0;
 }
 
+int checkTraceFile (string traceFilePath, string memoryFilePath) {
+  edu::sharif::twinner::util::Logger::info ()
+      << "[verboseness level: "
+      << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n"
+      << "Trace file: " << traceFilePath << '\n'
+      << "Memory file: " << memoryFilePath << '\n';
+
+  edu::sharif::twinner::trace::Trace *trace =
+      edu::sharif::twinner::trace::Trace::loadFromFile
+      (traceFilePath.c_str (), memoryFilePath.c_str ());
+  trace->printCompleteState (edu::sharif::twinner::util::Logger::info ());
+
+  edu::sharif::twinner::engine::search::ConstraintTree ct;
+  ct.addConstraints (trace);
+  return 0;
+}
+
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &input, string &args, string &twintool, string &pin, string &twin) {
   char *progName = argv[0];
@@ -107,6 +135,8 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     { 't', "tool", ArgParser::YES, "twintool executable/library file", true, false},
     { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true, false},
     { 'o', "output", ArgParser::YES, "path/name of the generated twin binary", true, false},
+    { 'c', "check", ArgParser::YES, "check validity of a trace file and its memory file"
+     " (must be the last argument)", false, true},
     { 0, 0, ArgParser::NO, 0, false, false}
   };
   const ArgParser parser (argc, argv, options, true);
@@ -136,6 +166,18 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     case 'L':
       printLicense ();
       return EXIT_NORMALLY;
+    case 'c':
+      input = parser.argument (argind);
+      if (++argind < parser.arguments ()) {
+        args = parser.argument (argind);
+        if (++argind < parser.arguments ()) {
+          printError (progName, "The --check must be the last argument");
+          return ERROR_OCCURRED;
+        }
+        return CHECK_MODE;
+      }
+      printError (progName, "The --check requires two arguments (trace and memory files)");
+      return ERROR_OCCURRED;
     case 'i':
       input = parser.argument (argind);
       break;
@@ -169,7 +211,7 @@ void printVersion () {
 }
 
 void printHelp (string progName, const ArgParser::Option options[]) {
-  cout << "Twinner: An unpacker which utilizes concolic execution." << endl;
+  cout << "Twinner: A De-Obfuscator and unpacker which utilizes concolic execution." << endl;
   cout << "Copyright © 2013-2014  Behnam Momeni" << endl;
   cout << endl;
   cout << "Usage: " << progName << " [options]" << endl;
@@ -193,7 +235,7 @@ void printHelp (string progName, const ArgParser::Option options[]) {
 }
 
 void printLicense () {
-  cout << "Twinner: An unpacker which utilizes concolic execution." << endl;
+  cout << "Twinner: A De-Obfuscator and unpacker which utilizes concolic execution." << endl;
   cout << "Copyright © 2013-2014  Behnam Momeni" << endl;
   cout << endl;
   cout << "Not implemented yet!!!! See COPYING file instead." << endl;
