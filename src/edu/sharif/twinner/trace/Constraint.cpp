@@ -28,6 +28,7 @@ namespace twinner {
 namespace trace {
 
 Constraint::Constraint (ComparisonType _type, uint32_t instr) :
+mainExp (0), auxExp (0),
 type (_type), instruction (instr) {
 }
 
