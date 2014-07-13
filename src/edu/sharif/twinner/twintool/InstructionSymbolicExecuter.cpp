@@ -554,6 +554,22 @@ void InstructionSymbolicExecuter::cmpxchgAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::xchgAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const MutableExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "xchgAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  dst.setExpression (trace, srcexp);
+  delete srcexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting src exp...";
+  src.setExpression (trace, dstexp);
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::movAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "movAnalysisRoutine(...)\n"
@@ -1442,6 +1458,8 @@ InstructionSymbolicExecuter::MutableSourceAnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToMutableSourceAnalysisRoutine (
     OPCODE op) const {
   switch (op) {
+  case XED_ICLASS_XCHG:
+    return &InstructionSymbolicExecuter::xchgAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Having Mutable Source operand: Unknown opcode: "

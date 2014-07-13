@@ -102,6 +102,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_CMPXCHG, DST_EITHER_REG_OR_MEM_SRC_REG_AUX_REG));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_XCHG, DST_EITHER_REG_OR_MEM_SRC_MUTABLE_REG));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_PUSH, PUSH_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_POP, POP_INS_MODELS));

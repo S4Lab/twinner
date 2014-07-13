@@ -184,6 +184,12 @@ private:
       const ExpressionValueProxy &src, const MutableExpressionValueProxy &aux);
 
   /**
+   * XCHG instruction exchanges values of dst (r/m) and src (r) atomically
+   */
+  void xchgAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const MutableExpressionValueProxy &src);
+
+  /**
    * MOV has 5 models
    * r <- r/m/i
    * m <- r/i
