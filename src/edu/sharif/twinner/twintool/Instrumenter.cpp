@@ -315,7 +315,11 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
           && REG_is_gr_any_size (INS_OperandReg (ins, 2))) {
         return DST_REG_SRC_REG_AUX_REG;
       } else {
-        return DST_REG_SRC_REG;
+        if (INS_OperandWritten (ins, 1)) {
+          return DST_REG_SRC_MUTABLE_REG;
+        } else {
+          return DST_REG_SRC_REG;
+        }
       }
     }
 
@@ -339,7 +343,11 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
           && REG_is_gr_any_size (INS_OperandReg (ins, 2))) {
         return DST_MEM_SRC_REG_AUX_REG;
       } else {
-        return DST_MEM_SRC_REG;
+        if (INS_OperandWritten (ins, 1)) {
+          return DST_MEM_SRC_MUTABLE_REG;
+        } else {
+          return DST_MEM_SRC_REG;
+        }
       }
     }
 
@@ -379,6 +387,18 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     REG dstreg = INS_OperandReg (ins, 0);
     REG srcreg = INS_OperandReg (ins, 1);
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcReg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                    IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_REG_SRC_MUTABLE_REG:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    REG srcreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMutableReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
@@ -461,6 +481,18 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   {
     REG srcreg = INS_OperandReg (ins, 1);
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcReg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_MEMORYOP_EA, 0,
+                    IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_MEM_SRC_MUTABLE_REG:
+  {
+    REG srcreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMutableReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,

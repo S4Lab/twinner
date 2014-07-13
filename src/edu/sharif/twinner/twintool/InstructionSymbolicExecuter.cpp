@@ -97,6 +97,28 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMutableReg (
+    MutableSourceAnalysisRoutine routine,
+    REG dstReg, const ConcreteValue &dstRegVal,
+    REG srcReg, const ConcreteValue &srcRegVal,
+    UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineDstRegSrcMutableReg(INS: "
+      << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
+      << ", src reg: " << REG_StringShort (srcReg) << '\n';
+  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxReg (
     AuxOperandHavingAnalysisRoutine routine,
     REG dstReg, const ConcreteValue &dstRegVal,
@@ -182,6 +204,29 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << std::hex << "analysisRoutineDstMemSrcReg(INS: "
+      << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
+      << ", src reg: " << REG_StringShort (srcReg) << '\n';
+  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
+void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMutableReg (
+    MutableSourceAnalysisRoutine routine,
+    ADDRINT dstMemoryEa,
+    REG srcReg, const ConcreteValue &srcRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << std::hex << "analysisRoutineDstMemSrcMutableReg(INS: "
       << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
@@ -1393,6 +1438,19 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   }
 }
 
+InstructionSymbolicExecuter::MutableSourceAnalysisRoutine
+InstructionSymbolicExecuter::convertOpcodeToMutableSourceAnalysisRoutine (
+    OPCODE op) const {
+  switch (op) {
+  default:
+    edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
+        "Having Mutable Source operand: Unknown opcode: "
+        << OPCODE_StringShort (op) << '\n';
+    throw std::runtime_error
+        ("Unknown opcode (for mutable source case) given to analysis routine");
+  }
+}
+
 InstructionSymbolicExecuter::AuxOperandHavingAnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAuxOperandHavingAnalysisRoutine (
     OPCODE op) const {
@@ -1509,6 +1567,18 @@ VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
        insAssembly);
 }
 
+VOID analysisRoutineDstRegSrcMutableReg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineDstRegSrcMutableReg
+      (ise->convertOpcodeToMutableSourceAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       insAssembly);
+}
+
 VOID analysisRoutineDstRegSrcRegAuxReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     UINT32 srcReg, ADDRINT srcRegVal,
@@ -1591,6 +1661,20 @@ VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstMemSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       dstMemoryEa,
+       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       memReadBytes,
+       insAssembly);
+}
+
+VOID analysisRoutineDstMemSrcMutableReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineDstMemSrcMutableReg
+      (ise->convertOpcodeToMutableSourceAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
        (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
        memReadBytes,

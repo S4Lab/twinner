@@ -38,6 +38,8 @@ private:
 
   typedef void (InstructionSymbolicExecuter::*AnalysisRoutine) (
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+  typedef void (InstructionSymbolicExecuter::*MutableSourceAnalysisRoutine) (
+      const MutableExpressionValueProxy &dst, const MutableExpressionValueProxy &src);
   typedef void (InstructionSymbolicExecuter::*AuxOperandHavingAnalysisRoutine) (
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
       const MutableExpressionValueProxy &aux);
@@ -83,6 +85,10 @@ public:
       REG dstReg, const ConcreteValue &dstRegVal,
       REG srcReg, const ConcreteValue &srcRegVal,
       UINT32 insAssembly);
+  void analysisRoutineDstRegSrcMutableReg (MutableSourceAnalysisRoutine routine,
+      REG dstReg, const ConcreteValue &dstRegVal,
+      REG srcReg, const ConcreteValue &srcRegVal,
+      UINT32 insAssembly);
   void analysisRoutineDstRegSrcRegAuxReg (AuxOperandHavingAnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
       REG srcReg, const ConcreteValue &srcRegVal,
@@ -97,6 +103,11 @@ public:
       const ConcreteValue &srcImmediateValue,
       UINT32 insAssembly);
   void analysisRoutineDstMemSrcReg (AnalysisRoutine routine,
+      ADDRINT dstMemoryEa,
+      REG srcReg, const ConcreteValue &srcRegVal,
+      UINT32 memReadBytes,
+      UINT32 insAssembly);
+  void analysisRoutineDstMemSrcMutableReg (MutableSourceAnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       REG srcReg, const ConcreteValue &srcRegVal,
       UINT32 memReadBytes,
@@ -394,6 +405,8 @@ private:
 
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
+  MutableSourceAnalysisRoutine convertOpcodeToMutableSourceAnalysisRoutine (
+      OPCODE op) const;
   AuxOperandHavingAnalysisRoutine convertOpcodeToAuxOperandHavingAnalysisRoutine (
       OPCODE op) const;
   DoubleDestinationsAnalysisRoutine convertOpcodeToDoubleDestinationsAnalysisRoutine (
@@ -409,6 +422,10 @@ public:
 };
 
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 insAssembly);
+VOID analysisRoutineDstRegSrcMutableReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     UINT32 srcReg, ADDRINT srcRegVal,
     UINT32 insAssembly);
@@ -438,6 +455,11 @@ VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT srcImmediateValue,
     UINT32 insAssembly);
 VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly);
+VOID analysisRoutineDstMemSrcMutableReg (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     UINT32 srcReg, ADDRINT srcRegVal,
     UINT32 memReadBytes,
