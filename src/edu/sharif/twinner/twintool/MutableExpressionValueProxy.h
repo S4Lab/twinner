@@ -46,9 +46,7 @@ public:
    * expression.
    */
   virtual void setExpression (edu::sharif::twinner::trace::Trace *trace,
-      const edu::sharif::twinner::trace::Expression *exp) const {
-    valueIsChanged (trace, setExpressionWithoutChangeNotification (trace, exp));
-  }
+      const edu::sharif::twinner::trace::Expression *exp) const;
 
   /**
    * Clones the given expression, i.e. exp, and assigns it to the proxied expression
