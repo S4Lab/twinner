@@ -57,11 +57,11 @@ public:
   /**
    * This method should be called whenever the proxied expression undergoes any change.
    * @param trace The trace which changed expression has been kept there.
-   * @param changedExp The underlying expression which is changed.
+   * @param changedExp The expression which is changed.
    */
   virtual void valueIsChanged (
       edu::sharif::twinner::trace::Trace *trace,
-      edu::sharif::twinner::trace::Expression *changedExp) const = 0;
+      const edu::sharif::twinner::trace::Expression &changedExp) const = 0;
 };
 
 }

@@ -44,27 +44,25 @@ public:
    * @param trace The execution trace which changing expression will be saved there.
    * @param exp The new expression which should be cloned and set over the proxied
    * expression.
-   * 
-   * @return The newly cloned expression which is set by this method.
    */
-  virtual edu::sharif::twinner::trace::Expression *setExpression (
-      edu::sharif::twinner::trace::Trace *trace,
+  virtual void setExpression (edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const {
-    edu::sharif::twinner::trace::Expression *newExp =
-        setExpressionWithoutChangeNotification (trace, exp);
-    valueIsChanged (trace, newExp);
-    return newExp;
+    valueIsChanged (trace, setExpressionWithoutChangeNotification (trace, exp));
   }
 
   /**
-   * Sets the proxied expression as the given exp value within the given execution trace.
+   * Clones the given expression, i.e. exp, and assigns it to the proxied expression
+   * within the given execution trace.
+   * Afterwards, it returns a temp-object which is equal (semantically) with the given
+   * expression and can be read or cloned for further usages. Of course changing it has
+   * no effect on the underlying proxied expression.
    * @param trace The execution trace which changing expression will be saved there.
    * @param exp The new expression which should be cloned and set over the proxied
    * expression.
    * 
-   * @return The newly cloned expression which is set by this method.
+   * @return A temp-object equal to the given expression (before calling this method).
    */
-  virtual edu::sharif::twinner::trace::Expression *
+  virtual edu::sharif::twinner::trace::Expression
   setExpressionWithoutChangeNotification (
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const = 0;
