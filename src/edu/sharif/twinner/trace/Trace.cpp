@@ -101,9 +101,22 @@ Expression *Trace::setSymbolicExpressionByRegister (REG reg, const Expression *e
   return getCurrentTraceSegment ()->setSymbolicExpressionByRegister (reg, exp);
 }
 
-Expression *Trace::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+Expression *Trace::setSymbolic128BitsExpressionByMemoryAddress (ADDRINT memoryEa,
     const Expression *exp) {
-  return getCurrentTraceSegment ()->setSymbolicExpressionByMemoryAddress (memoryEa, exp);
+  return getCurrentTraceSegment ()->setSymbolic128BitsExpressionByMemoryAddress
+      (memoryEa, exp);
+}
+
+Expression *Trace::setSymbolic64BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+    const Expression *exp) {
+  return getCurrentTraceSegment ()->setSymbolic64BitsExpressionByMemoryAddress
+      (memoryEa, exp);
+}
+
+Expression *Trace::setSymbolic32BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+    const Expression *exp) {
+  return getCurrentTraceSegment ()->setSymbolic32BitsExpressionByMemoryAddress
+      (memoryEa, exp);
 }
 
 void Trace::addPathConstraint (const Constraint *c) {

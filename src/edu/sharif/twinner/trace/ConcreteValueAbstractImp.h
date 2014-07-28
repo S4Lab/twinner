@@ -20,7 +20,7 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-template<unsigned int bits>
+template<unsigned int bits> // bits must be a multiple of 8
 class ConcreteValueAbstractImp : public ConcreteValue {
 
 public:

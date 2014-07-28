@@ -128,7 +128,11 @@ public:
   /**
    * The setter, uses most recent trace segment for setting the new value.
    */
-  virtual Expression *setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *setSymbolic128BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+      const Expression *exp);
+  virtual Expression *setSymbolic64BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+      const Expression *exp);
+  virtual Expression *setSymbolic32BitsExpressionByMemoryAddress (ADDRINT memoryEa,
       const Expression *exp);
 
   /**

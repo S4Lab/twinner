@@ -207,13 +207,19 @@ public:
   /**
    * The setter clones given expression and stores it as the new value living
    * in given memory address. It takes ownership of the cloned object.
+   * The memory address must be aligned. For example, for 64 bits expressions, the
+   * address must be multiple of 8 bytes.
    *
    * @param memoryEa The memory effective address which its value is being set.
    * @param exp The expression which will be cloned and will determine new value of
    * given memory address.
    * @return The cloned expression which is set at given address will be returned.
    */
-  virtual Expression *setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *setSymbolic128BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+      const Expression *exp) = 0;
+  virtual Expression *setSymbolic64BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+      const Expression *exp) = 0;
+  virtual Expression *setSymbolic32BitsExpressionByMemoryAddress (ADDRINT memoryEa,
       const Expression *exp) = 0;
 
   /**

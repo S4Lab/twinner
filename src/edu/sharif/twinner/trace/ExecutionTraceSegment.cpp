@@ -212,9 +212,22 @@ Expression *ExecutionTraceSegment::setSymbolicExpressionByRegister (REG reg,
   return setSymbolicExpressionImplementation (registerToExpression, reg, exp);
 }
 
-Expression *ExecutionTraceSegment::setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-    const Expression *exp) {
-  return setSymbolicExpressionImplementation (memoryAddressToExpression, memoryEa, exp);
+Expression *ExecutionTraceSegment::setSymbolic128BitsExpressionByMemoryAddress (
+    ADDRINT memoryEa, const Expression *exp) {
+  return setSymbolicExpressionImplementation
+      (memoryAddressTo128BitsExpression, memoryEa, exp);
+}
+
+Expression *ExecutionTraceSegment::setSymbolic64BitsExpressionByMemoryAddress (
+    ADDRINT memoryEa, const Expression *exp) {
+  return setSymbolicExpressionImplementation
+      (memoryAddressTo64BitsExpression, memoryEa, exp);
+}
+
+Expression *ExecutionTraceSegment::setSymbolic32BitsExpressionByMemoryAddress (
+    ADDRINT memoryEa, const Expression *exp) {
+  return setSymbolicExpressionImplementation
+      (memoryAddressTo32BitsExpression, memoryEa, exp);
 }
 
 template < typename KEY >

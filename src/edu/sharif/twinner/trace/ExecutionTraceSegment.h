@@ -28,7 +28,10 @@ class ExecutionTraceSegment : public ExecutionState {
 
 private:
   std::map < REG, Expression * > registerToExpression;
-  std::map < ADDRINT, Expression * > memoryAddressToExpression;
+  /// The ADDRINT must be aligned
+  std::map < ADDRINT, Expression * > memoryAddressTo128BitsExpression;
+  std::map < ADDRINT, Expression * > memoryAddressTo64BitsExpression;
+  std::map < ADDRINT, Expression * > memoryAddressTo32BitsExpression;
   std::list < const Constraint * > pathConstraints;
   /// Each execution trace segment is terminated with some syscall.
   Syscall syscall;
@@ -60,7 +63,11 @@ public:
       Expression *newExpression);
 
   virtual Expression *setSymbolicExpressionByRegister (REG reg, const Expression *exp);
-  virtual Expression *setSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *setSymbolic128BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+      const Expression *exp);
+  virtual Expression *setSymbolic64BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+      const Expression *exp);
+  virtual Expression *setSymbolic32BitsExpressionByMemoryAddress (ADDRINT memoryEa,
       const Expression *exp);
 
   virtual void addPathConstraint (const Constraint *c);
