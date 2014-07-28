@@ -595,7 +595,7 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   // src is either reg or mem. So src is mutable
   const int size = static_cast<const MutableExpressionValueProxy &> (src).getSize ();
   // size is at most 32 bits
-  const bool isNegative = srcexp->getLastConcreteValue ().isNegative (size);
+  const bool isNegative = srcexp->getLastConcreteValue ().isNegative ();
   edu::sharif::twinner::trace::Expression *conditionExp = srcexp;
   conditionExp->minus (1ull << (size - 1));
   edu::sharif::twinner::trace::Constraint *cc;

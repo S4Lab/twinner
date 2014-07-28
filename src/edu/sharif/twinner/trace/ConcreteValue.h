@@ -46,11 +46,10 @@ public:
   /**
    * Interpreting this concrete value as a signed value which is encoded using
    * two's complement rules, return true iff the value is negative.
-   * 
-   * @param size The size of this concrete value in bits (FIXME: this should be removed).
+   *
    * @return True if this value is negative and false if it is zero or positive.
    */
-  virtual bool isNegative (int size) const = 0;
+  virtual bool isNegative () const = 0;
 
   /**
    * Returns true if and only if the underlying concrete value is equal to zero.
@@ -75,6 +74,14 @@ public:
    * @return maximum number of bits which may be contained in this concrete value.
    */
   virtual int getSize () const = 0;
+
+  /**
+   * Casts the underlying concrete value to UINT64. This may cause value truncation (for
+   * values with more than 64 bits, e.g. 128 bits). If underlying value has a length less
+   * than 64 bits, it will be unsigned-casted (MSB will be zero).
+   * @return Result of unsigned casting of the underlying concrete value to UINT64.
+   */
+  virtual UINT64 toUint64 () const = 0;
 
   bool operator< (const ConcreteValue &cv) const {
     return !((*this) >= cv);

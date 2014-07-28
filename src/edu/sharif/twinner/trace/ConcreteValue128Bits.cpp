@@ -25,19 +25,19 @@ namespace twinner {
 namespace trace {
 
 ConcreteValue128Bits::ConcreteValue128Bits () :
-ConcreteValue (), msb (0), lsb (0) {
+ConcreteValueAbstractImp (), msb (0), lsb (0) {
 }
 
 ConcreteValue128Bits::ConcreteValue128Bits (UINT64 _msb, UINT64 _lsb) :
-ConcreteValue (), msb (_msb), lsb (_lsb) {
+ConcreteValueAbstractImp (), msb (_msb), lsb (_lsb) {
 }
 
 ConcreteValue128Bits::ConcreteValue128Bits (const PIN_REGISTER &value) :
-ConcreteValue (), msb (value.qword[1]), lsb (value.qword[0]) {
+ConcreteValueAbstractImp (), msb (value.qword[1]), lsb (value.qword[0]) {
 }
 
 ConcreteValue128Bits::ConcreteValue128Bits (const ConcreteValue &cv) :
-ConcreteValue () {
+ConcreteValueAbstractImp () {
   if (dynamic_cast<const ConcreteValue64Bits *> (&cv)) {
     lsb = static_cast<const ConcreteValue64Bits *> (&cv)->getValue ();
     msb = 0;
@@ -94,12 +94,9 @@ std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
   return stream << ss.str ();
 }
 
-bool ConcreteValue128Bits::isNegative (int size) const {
-  if (size <= 64) {
-    return msb != 0 || (lsb >= (1ull << (size - 1)));
-  } else {
-    return (msb >= (1ull << (size - 64 - 1)));
-  }
+bool ConcreteValue128Bits::isNegative () const {
+  //return msb != 0 || (lsb >= (1ull << (size - 1)));
+  return (msb >= (1ull << 63));
 }
 
 bool ConcreteValue128Bits::isZero () const {
@@ -132,10 +129,6 @@ ConcreteValue128Bits *ConcreteValue128Bits::loadFromBinaryStream (std::ifstream 
   return new ConcreteValue128Bits (msb, lsb);
 }
 
-int ConcreteValue128Bits::getSize () const {
-  return 128;
-}
-
 bool ConcreteValue128Bits::operator> (const ConcreteValue &cv) const {
   if (getSize () < cv.getSize ()) {
     return (cv < (*this));
@@ -149,14 +142,14 @@ bool ConcreteValue128Bits::greaterThan (const ConcreteValue &cv) const {
     return cv.lessThan (*this);
   }
   const ConcreteValue128Bits tmp (cv);
-  if (isNegative (128)) {
-    if (tmp.isNegative (128)) {
+  if (isNegative ()) {
+    if (tmp.isNegative ()) {
       return (msb > tmp.msb) || ((msb == tmp.msb) && lsb > tmp.lsb);
     } else {
       return false;
     }
   } else {
-    if (tmp.isNegative (128)) {
+    if (tmp.isNegative ()) {
       return true;
     } else {
       return (msb > tmp.msb) || ((msb == tmp.msb) && lsb > tmp.lsb);

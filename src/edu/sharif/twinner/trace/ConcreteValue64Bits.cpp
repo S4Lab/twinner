@@ -22,11 +22,11 @@ namespace twinner {
 namespace trace {
 
 ConcreteValue64Bits::ConcreteValue64Bits (UINT64 _value) :
-ConcreteValue (), value (_value) {
+ConcreteValueAbstractImp (), value (_value) {
 }
 
 ConcreteValue64Bits::ConcreteValue64Bits (const ConcreteValue &cv) :
-ConcreteValue () {
+ConcreteValueAbstractImp () {
   if (dynamic_cast<const ConcreteValue64Bits *> (&cv)) {
     value = static_cast<const ConcreteValue64Bits *> (&cv)->getValue ();
   } else if (dynamic_cast<const ConcreteValue128Bits *> (&cv)) {
@@ -73,14 +73,6 @@ std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
   return stream << "0x" << std::hex << me.value;
 }
 
-bool ConcreteValue64Bits::isNegative (int size) const {
-  return (value >= (1ull << (size - 1)));
-}
-
-bool ConcreteValue64Bits::isZero () const {
-  return (value == 0);
-}
-
 ConcreteValue64Bits *ConcreteValue64Bits::twosComplement () const {
   return new ConcreteValue64Bits ((~value) + 1);
 }
@@ -99,10 +91,6 @@ ConcreteValue64Bits *ConcreteValue64Bits::loadFromBinaryStream (std::ifstream &i
   return new ConcreteValue64Bits (value);
 }
 
-int ConcreteValue64Bits::getSize () const {
-  return 64;
-}
-
 bool ConcreteValue64Bits::operator> (const ConcreteValue &cv) const {
   if (getSize () < cv.getSize ()) {
     return (cv < (*this));
@@ -116,14 +104,14 @@ bool ConcreteValue64Bits::greaterThan (const ConcreteValue &cv) const {
     return cv.lessThan (*this);
   }
   const ConcreteValue64Bits tmp (cv);
-  if (isNegative (64)) {
-    if (tmp.isNegative (64)) {
+  if (isNegative ()) {
+    if (tmp.isNegative ()) {
       return value > tmp.value;
     } else {
       return false;
     }
   } else {
-    if (tmp.isNegative (64)) {
+    if (tmp.isNegative ()) {
       return true;
     } else {
       return value > tmp.value;
