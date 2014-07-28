@@ -33,18 +33,6 @@ edu::sharif::twinner::trace::Expression *ConstantExpressionValueProxy::getExpres
   return exp->clone ();
 }
 
-edu::sharif::twinner::trace::Expression *
-ConstantExpressionValueProxy::getExpressionWithSignExtension (
-    edu::sharif::twinner::trace::Trace *trace) const {
-  edu::sharif::twinner::trace::Expression *exp = getExpression (trace);
-  if (size < 64) {
-    if (exp->getLastConcreteValue ().isNegative (size)) {
-      exp->minus (1ull << size); // sign-extend
-    }
-  }
-  return exp;
-}
-
 void ConstantExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
     edu::sharif::twinner::trace::Expression *changedExp) const {

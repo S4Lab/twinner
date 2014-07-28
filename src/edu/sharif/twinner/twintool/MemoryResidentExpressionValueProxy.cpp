@@ -67,18 +67,6 @@ MemoryResidentExpressionValueProxy::getExpression (
 }
 
 edu::sharif::twinner::trace::Expression *
-MemoryResidentExpressionValueProxy::getExpressionWithSignExtension (
-    edu::sharif::twinner::trace::Trace *trace) const {
-  edu::sharif::twinner::trace::Expression *exp = getExpression (trace);
-  if (memReadBytes < 8) {
-    if (exp->getLastConcreteValue ().isNegative (memReadBytes * 8)) {
-      exp->minus (1ull << (memReadBytes * 8)); // sign-extend
-    }
-  }
-  return exp;
-}
-
-edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression *exp) const {

@@ -714,13 +714,9 @@ void InstructionSymbolicExecuter::cmpAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "cmpAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  //TODO: Implement all sizes of concrete value instead of getting sign-extended expr.
-  edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpressionWithSignExtension (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      dst.getExpressionWithSignExtension (trace);
+  edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting EFLAGS...";
   eflags.setFlags (dstexp, srcexp); // dstexp - srcexp
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";

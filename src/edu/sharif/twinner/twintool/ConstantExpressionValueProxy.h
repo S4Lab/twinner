@@ -37,8 +37,6 @@ public:
 
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const;
-  virtual edu::sharif::twinner::trace::Expression *getExpressionWithSignExtension (
-      edu::sharif::twinner::trace::Trace *trace) const;
 
   virtual void valueIsChanged (
       edu::sharif::twinner::trace::Trace *trace,
