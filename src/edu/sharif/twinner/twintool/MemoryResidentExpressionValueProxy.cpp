@@ -110,7 +110,7 @@ MemoryResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     truncatedExp->truncate (memReadBytes * 8);
     const UINT64 mask = ~((1ull << (memReadBytes * 8)) - 1);
     bigexp->bitwiseAnd (mask);
-    bigexp->bitwiseOr (exp);
+    bigexp->bitwiseOr (truncatedExp);
     delete truncatedExp;
     return bigexp;
   }
