@@ -11,7 +11,7 @@
  */
 
 #ifndef CONCRETE_VALUE_64_BITS_H
-#define	CONCRETE_VALUE_64_BITS_H
+#define CONCRETE_VALUE_64_BITS_H
 
 #include "ConcreteValueAbstractImp.h"
 
@@ -63,10 +63,10 @@ public:
   virtual ConcreteValue64Bits &operator&= (const ConcreteValue &mask);
   virtual ConcreteValue64Bits &operator|= (const ConcreteValue &mask);
 
-  virtual ConcreteValue &operator*= (const ConcreteValue &mul);
-  virtual ConcreteValue &operator/= (const ConcreteValue &divisor);
-  virtual ConcreteValue &operator%= (const ConcreteValue &divisor);
-  virtual ConcreteValue &operator^= (const ConcreteValue &pattern);
+  virtual ConcreteValue64Bits &operator*= (const ConcreteValue &mul);
+  virtual ConcreteValue64Bits &operator/= (const ConcreteValue &divisor);
+  virtual ConcreteValue64Bits &operator%= (const ConcreteValue &divisor);
+  virtual ConcreteValue64Bits &operator^= (const ConcreteValue &pattern);
 
   virtual ConcreteValue64Bits &operator>>= (const ConcreteValue &bits);
   virtual ConcreteValue64Bits &operator<<= (const ConcreteValue &bits);

@@ -535,6 +535,13 @@ VOID writeMemoryContent (ADDRINT memoryEa, const UINT64 value) {
   throw std::runtime_error (msg);
 }
 
+VOID writeMemoryContent (ADDRINT memoryEa, const UINT32 value) {
+  const char *msg = "The writeMemoryContent(...) method is only supported in TwinTool:"
+      " Calling error from Twinner.\n";
+  edu::sharif::twinner::util::Logger::error () << msg;
+  throw std::runtime_error (msg);
+}
+
 VOID writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
   const char *msg = "The writeMemoryContent(...) method is only supported in TwinTool:"
       " Calling error from Twinner.\n";

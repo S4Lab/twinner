@@ -28,6 +28,7 @@ edu::sharif::twinner::trace::ConcreteValue *readRegisterContent (
 
 UINT64 readMemoryContent (ADDRINT memoryEa);
 VOID writeMemoryContent (ADDRINT memoryEa, const UINT64 value);
+VOID writeMemoryContent (ADDRINT memoryEa, const UINT32 value);
 VOID writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size);
 VOID writeRegisterContent (CONTEXT *context, REG reg, const UINT8 *value);
 

@@ -15,6 +15,7 @@
 
 #include "ConcreteValue128Bits.h"
 
+#include "ConcreteValue32Bits.h"
 #include "ConcreteValue64Bits.h"
 
 #include "edu/sharif/twinner/util/memory.h"
@@ -38,7 +39,10 @@ ConcreteValueAbstractImp (), msb (value.qword[1]), lsb (value.qword[0]) {
 
 ConcreteValue128Bits::ConcreteValue128Bits (const ConcreteValue &cv) :
 ConcreteValueAbstractImp () {
-  if (dynamic_cast<const ConcreteValue64Bits *> (&cv)) {
+  if (dynamic_cast<const ConcreteValue32Bits *> (&cv)) {
+    lsb = static_cast<const ConcreteValue32Bits *> (&cv)->getValue ();
+    msb = 0;
+  } else if (dynamic_cast<const ConcreteValue64Bits *> (&cv)) {
     lsb = static_cast<const ConcreteValue64Bits *> (&cv)->getValue ();
     msb = 0;
   } else if (dynamic_cast<const ConcreteValue128Bits *> (&cv)) {
@@ -210,7 +214,7 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator|= (const ConcreteValue &mas
   return *this;
 }
 
-ConcreteValue &ConcreteValue128Bits::operator*= (const ConcreteValue &mul) {
+ConcreteValue128Bits &ConcreteValue128Bits::operator*= (const ConcreteValue &mul) {
   const ConcreteValue128Bits tmp (mul);
   const UINT64 b4 = tmp.lsb & 0xFFFFFFFF;
   const UINT64 b3 = tmp.lsb >> 32;
@@ -291,19 +295,19 @@ void ConcreteValue128Bits::doubleIt () {
   msb += carry;
 }
 
-ConcreteValue &ConcreteValue128Bits::operator/= (const ConcreteValue &divisor) {
+ConcreteValue128Bits &ConcreteValue128Bits::operator/= (const ConcreteValue &divisor) {
   ConcreteValue128Bits remainder;
   divide (*this, divisor, *this, remainder);
   return *this;
 }
 
-ConcreteValue &ConcreteValue128Bits::operator%= (const ConcreteValue &divisor) {
+ConcreteValue128Bits &ConcreteValue128Bits::operator%= (const ConcreteValue &divisor) {
   ConcreteValue128Bits quotient;
   divide (*this, divisor, quotient, *this);
   return *this;
 }
 
-ConcreteValue &ConcreteValue128Bits::operator^= (const ConcreteValue &pattern) {
+ConcreteValue128Bits &ConcreteValue128Bits::operator^= (const ConcreteValue &pattern) {
   const ConcreteValue128Bits tmp (pattern);
   lsb ^= tmp.lsb;
   msb ^= tmp.msb;

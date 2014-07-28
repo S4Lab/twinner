@@ -12,6 +12,7 @@
 
 #include "ConcreteValue64Bits.h"
 
+#include "ConcreteValue32Bits.h"
 #include "ConcreteValue128Bits.h"
 
 #include "edu/sharif/twinner/util/memory.h"
@@ -27,7 +28,9 @@ ConcreteValueAbstractImp (), value (_value) {
 
 ConcreteValue64Bits::ConcreteValue64Bits (const ConcreteValue &cv) :
 ConcreteValueAbstractImp () {
-  if (dynamic_cast<const ConcreteValue64Bits *> (&cv)) {
+  if (dynamic_cast<const ConcreteValue32Bits *> (&cv)) {
+    value = static_cast<const ConcreteValue32Bits *> (&cv)->getValue ();
+  } else if (dynamic_cast<const ConcreteValue64Bits *> (&cv)) {
     value = static_cast<const ConcreteValue64Bits *> (&cv)->getValue ();
   } else if (dynamic_cast<const ConcreteValue128Bits *> (&cv)) {
     value = static_cast<const ConcreteValue128Bits *> (&cv)->getLsb ();
@@ -151,25 +154,25 @@ ConcreteValue64Bits &ConcreteValue64Bits::operator|= (const ConcreteValue &mask)
   return *this;
 }
 
-ConcreteValue &ConcreteValue64Bits::operator*= (const ConcreteValue &mul) {
+ConcreteValue64Bits &ConcreteValue64Bits::operator*= (const ConcreteValue &mul) {
   const ConcreteValue64Bits tmp (mul);
   value *= tmp.value;
   return *this;
 }
 
-ConcreteValue &ConcreteValue64Bits::operator/= (const ConcreteValue &divisor) {
+ConcreteValue64Bits &ConcreteValue64Bits::operator/= (const ConcreteValue &divisor) {
   const ConcreteValue64Bits tmp (value);
   value /= tmp.value;
   return *this;
 }
 
-ConcreteValue &ConcreteValue64Bits::operator%= (const ConcreteValue &divisor) {
+ConcreteValue64Bits &ConcreteValue64Bits::operator%= (const ConcreteValue &divisor) {
   const ConcreteValue64Bits tmp (divisor);
   value %= tmp.value;
   return *this;
 }
 
-ConcreteValue &ConcreteValue64Bits::operator^= (const ConcreteValue &pattern) {
+ConcreteValue64Bits &ConcreteValue64Bits::operator^= (const ConcreteValue &pattern) {
   const ConcreteValue64Bits tmp (pattern);
   value ^= tmp.value;
   return *this;
