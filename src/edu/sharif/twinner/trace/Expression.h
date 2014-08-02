@@ -53,8 +53,6 @@ private:
   Expression (const std::list < ExpressionToken * > &stk, ConcreteValue *concreteValue);
 
 protected:
-  Expression (const Expression &exp);
-
   /**
    * Instantiates an expression with given concrete value and leaves its internal stack
    * of symbols uninitialized to be filled by a child implementation. It also takes
@@ -65,6 +63,8 @@ protected:
   Expression (ConcreteValue *lastConcreteValue, bool isOverwriting);
 
 public:
+  Expression (const Expression &exp);
+
   /**
    * Deletes all hold expression tokens and destruct the expression instance.
    */

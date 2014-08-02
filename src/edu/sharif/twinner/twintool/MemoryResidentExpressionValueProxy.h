@@ -33,10 +33,11 @@ public:
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const;
 
-  virtual edu::sharif::twinner::trace::Expression *
+  virtual edu::sharif::twinner::trace::Expression
   setExpressionWithoutChangeNotification (
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const;
+  bool isMemoryEaAligned () const;
 
   virtual void valueIsChanged (
       edu::sharif::twinner::trace::Trace *trace,
