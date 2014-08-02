@@ -43,7 +43,7 @@ public:
 
   virtual ConcreteValue64Bits *twosComplement () const;
 
-  virtual ConcreteValue64Bits *clone () const;
+  virtual ConcreteValue *clone (int length = -1) const;
 
   UINT64 getValue () const;
 

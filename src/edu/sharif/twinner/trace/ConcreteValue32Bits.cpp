@@ -84,8 +84,18 @@ UINT32 ConcreteValue32Bits::getValue () const {
   return value;
 }
 
-ConcreteValue32Bits *ConcreteValue32Bits::clone () const {
-  return new ConcreteValue32Bits (value);
+ConcreteValue *ConcreteValue32Bits::clone (int length) const {
+  switch (length) {
+  case -1:
+  case 32:
+    return new ConcreteValue32Bits (value);
+  case 64:
+    return new ConcreteValue64Bits (value);
+  case 128:
+    return new ConcreteValue128Bits (0, value);
+  default:
+    throw std::runtime_error ("ConcreteValue32Bits::clone (length): Unsupported length");
+  }
 }
 
 ConcreteValue32Bits *ConcreteValue32Bits::loadFromBinaryStream (std::ifstream &in) {

@@ -114,8 +114,18 @@ ConcreteValue128Bits *ConcreteValue128Bits::twosComplement () const {
   return tmp;
 }
 
-ConcreteValue128Bits *ConcreteValue128Bits::clone () const {
-  return new ConcreteValue128Bits (*this);
+ConcreteValue *ConcreteValue128Bits::clone (int length) const {
+  switch (length) {
+  case 32:
+    return new ConcreteValue32Bits (UINT32 (lsb));
+  case 64:
+    return new ConcreteValue64Bits (lsb);
+  case -1:
+  case 128:
+    return new ConcreteValue128Bits (msb, lsb);
+  default:
+    throw std::runtime_error ("ConcreteValue128Bits::clone (length): Unsupported length");
+  }
 }
 
 UINT64 ConcreteValue128Bits::getLsb () const {

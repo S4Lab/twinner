@@ -64,7 +64,14 @@ public:
    */
   virtual ConcreteValue *twosComplement () const = 0;
 
-  virtual ConcreteValue *clone () const = 0;
+  /**
+   * Clones the concrete value object. For values of length else of -1, the concrete
+   * value will be casted to hold a length-bits value (at most).
+   *
+   * @param length The max precision of resulting value (in bits) or -1 (for no change)
+   * @return The cloned concrete value
+   */
+  virtual ConcreteValue *clone (int length = -1) const = 0;
 
   static ConcreteValue *loadFromBinaryStream (std::ifstream &in);
 
