@@ -32,11 +32,19 @@ private:
   typedef edu::sharif::twinner::trace::ConcreteValue ConcreteValue;
 
   REG reg;
-  const ConcreteValue &regVal;
+  ConcreteValue *regVal;
 
 public:
+  /**
+   * Constructs a proxy for register expression values. It clones and cast the regVal
+   * based on bit-length of the reg.
+   *
+   * @param reg The underlying registers which access to it is wrapped by this proxy
+   * @param regVal The concrete value which is supposed to be found in the reg
+   */
   RegisterResidentExpressionValueProxy (REG reg, const ConcreteValue &regVal);
   RegisterResidentExpressionValueProxy (REG reg);
+  virtual ~RegisterResidentExpressionValueProxy ();
 
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const;

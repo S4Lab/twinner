@@ -29,12 +29,14 @@ public:
   /**
    * Instantiates an expression containing a new (yet unused) symbol,
    * initiated from a register.
+   * ASSERT: The precision of concreteValue must match with precision of reg
    */
   ExpressionImp (REG reg, const ConcreteValue &concreteValue, int generationIndex);
 
   /**
    * Instantiates an expression containing a new (yet unused) symbol,
    * initiated from a memory address.
+   * ASSERT: The precision of concreteValue must match with precision of memory location
    */
   ExpressionImp (ADDRINT memoryEa, const ConcreteValue &concreteValue,
       int generationIndex, bool isOverwriting = false);

@@ -30,6 +30,7 @@ ExpressionImp::ExpressionImp (REG reg, const ConcreteValue &concreteValue,
     int generationIndex) :
 Expression (concreteValue.clone (), false) {
   const REG enclosingReg = REG_FullRegName (reg);
+  //TODO: Check whether concreteValue should be casted to 64-bits precision for symbol
   stack.push_back (new RegisterEmergedSymbol
                    (enclosingReg, concreteValue, generationIndex));
   if (enclosingReg != reg) {

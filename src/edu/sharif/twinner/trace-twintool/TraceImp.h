@@ -51,6 +51,7 @@ public:
 
   /**
    * The getter searches segments backwards to find queried value.
+   * ASSERT: The precision of regval must match with precision of reg
    */
   virtual Expression *getSymbolicExpressionByRegister (REG reg,
       const ConcreteValue &regval, Expression *newExpression = 0);
@@ -63,6 +64,7 @@ public:
 
   /**
    * The getter searches segments backwards to find queried value.
+   * ASSERT: The precision of memval must match with precision of memoryEa location
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
       const ConcreteValue &memval, Expression *newExpression = 0);

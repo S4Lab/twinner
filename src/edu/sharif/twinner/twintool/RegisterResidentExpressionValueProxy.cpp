@@ -27,11 +27,16 @@ namespace twintool {
 
 RegisterResidentExpressionValueProxy::RegisterResidentExpressionValueProxy (REG _reg,
     const ConcreteValue &_regVal) :
-reg (_reg), regVal (_regVal) {
+reg (_reg), regVal (_regVal.clone (REG_Size (_reg) * 8)) {
 }
 
 RegisterResidentExpressionValueProxy::RegisterResidentExpressionValueProxy (REG _reg) :
-reg (_reg), regVal (edu::sharif::twinner::trace::ConcreteValue64Bits (0)) {
+reg (_reg), regVal (edu::sharif::twinner::trace::ConcreteValue64Bits (0)
+.clone (REG_Size (_reg) * 8)) {
+}
+
+RegisterResidentExpressionValueProxy::~RegisterResidentExpressionValueProxy () {
+  delete regVal;
 }
 
 edu::sharif::twinner::trace::Expression *
