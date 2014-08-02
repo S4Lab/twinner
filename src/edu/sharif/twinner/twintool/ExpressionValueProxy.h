@@ -32,8 +32,14 @@ namespace twintool {
  */
 class ExpressionValueProxy {
 
+private:
+  ExpressionValueProxy (const ExpressionValueProxy &evp); /// disable copy-constructor
+
 protected:
 
+  /**
+   * Protected constructor prevents direct instantiation of this interface
+   */
   ExpressionValueProxy () {
   }
 

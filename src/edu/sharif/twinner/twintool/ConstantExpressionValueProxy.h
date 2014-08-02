@@ -29,18 +29,23 @@ private:
 public:
 
   /**
-   * Ownership of exp is not kept. Instantiator should take care of it.
-   * @param exp The expression which getter method will return upon requests.
-   * @param size The size of the underlying expression in bits.
+   * An expression object will be created to hold the given concrete value.
+   * The concrete value will be cloned and casted to size-bits precision before being
+   * used.
+   *
+   * @param val The concrete value which is hold in the served constant expression.
+   * @param size The size (bit precision) of the underlying expression in bits.
    */
-  ConstantExpressionValueProxy (edu::sharif::twinner::trace::Expression *exp, int size);
+  ConstantExpressionValueProxy (const edu::sharif::twinner::trace::ConcreteValue &val,
+      int _size);
+  ~ConstantExpressionValueProxy ();
 
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const;
 
   virtual void valueIsChanged (
       edu::sharif::twinner::trace::Trace *trace,
-      edu::sharif::twinner::trace::Expression *changedExp) const;
+      const edu::sharif::twinner::trace::Expression &changedExp) const;
 };
 
 }

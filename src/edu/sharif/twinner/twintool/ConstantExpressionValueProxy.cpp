@@ -23,9 +23,13 @@ namespace twinner {
 namespace twintool {
 
 ConstantExpressionValueProxy::ConstantExpressionValueProxy (
-    edu::sharif::twinner::trace::Expression *_exp, int _size) :
-exp (_exp), size (_size) {
-  exp->truncate (_size);
+    const edu::sharif::twinner::trace::ConcreteValue &concreteValue, int _size) :
+exp (new edu::sharif::twinner::trace::ExpressionImp (concreteValue.clone (_size))),
+size (_size) {
+}
+
+ConstantExpressionValueProxy::~ConstantExpressionValueProxy () {
+  delete exp;
 }
 
 edu::sharif::twinner::trace::Expression *ConstantExpressionValueProxy::getExpression (
@@ -35,7 +39,7 @@ edu::sharif::twinner::trace::Expression *ConstantExpressionValueProxy::getExpres
 
 void ConstantExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
-    edu::sharif::twinner::trace::Expression *changedExp) const {
+    const edu::sharif::twinner::trace::Expression &changedExp) const {
   throw std::runtime_error ("Constant expression is not supposed to be changed");
 }
 

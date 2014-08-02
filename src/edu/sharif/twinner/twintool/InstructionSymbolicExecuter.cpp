@@ -181,11 +181,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
   logger << std::hex << "analysisRoutineDstRegSrcImd(INS: "
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src imd: 0x" << srcImmediateValue << '\n';
-  edu::sharif::twinner::trace::Expression *srcexp =
-      new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      ConstantExpressionValueProxy (srcexp, REG_Size (dstReg) * 8));
-  delete srcexp;
+      ConstantExpressionValueProxy (srcImmediateValue, REG_Size (dstReg) * 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -291,11 +288,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
   }
   logger << std::hex << ": dst mem addr: 0x" << dstMemoryEa
       << ", src imd: 0x" << srcImmediateValue << '\n';
-  edu::sharif::twinner::trace::Expression *srcexp =
-      new edu::sharif::twinner::trace::ExpressionImp (srcImmediateValue);
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-      ConstantExpressionValueProxy (srcexp, memReadBytes * 8));
-  delete srcexp;
+      ConstantExpressionValueProxy (srcImmediateValue, memReadBytes * 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -356,11 +350,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
       << insAssemblyStr << ") [AFTER execution of instruction]: dst reg: "
       << REG_StringShort (dstReg) << ", dst reg value: 0x"
       << dstRegVal << '\n';
-  edu::sharif::twinner::trace::Expression *srcexp =
-      new edu::sharif::twinner::trace::ExpressionImp (dstRegVal);
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      ConstantExpressionValueProxy (srcexp, REG_Size (dstReg) * 8));
-  delete srcexp;
+      ConstantExpressionValueProxy (dstRegVal, REG_Size (dstReg) * 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
