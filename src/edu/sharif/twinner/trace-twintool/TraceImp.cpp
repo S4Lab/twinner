@@ -270,6 +270,9 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
             (ADDRINT (record.address), ConcreteValue64Bits (record.concreteValueLsb),
              index, true);
       } else {
+        edu::sharif::twinner::util::Logger::warning () << "A 128-bits memory symbol "
+            "is found in the symbols file, while only 64-bits memory symbols are "
+            "supposed to be transferred between Twinner and TwinTool.\n";
         exp = new ExpressionImp
             (ADDRINT (record.address),
              ConcreteValue128Bits (record.concreteValueMsb, record.concreteValueLsb),

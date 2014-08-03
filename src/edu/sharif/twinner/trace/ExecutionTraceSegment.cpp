@@ -30,7 +30,13 @@ namespace trace {
 ExecutionTraceSegment::ExecutionTraceSegment (const std::map < REG, Expression * > &regi,
     const std::map < ADDRINT, Expression * > &memo,
     const std::list < const Constraint * > &cnrt) :
-registerToExpression (regi), memoryAddressToExpression (memo), pathConstraints (cnrt) {
+registerToExpression (regi), memoryAddressTo64BitsExpression (memo), pathConstraints (cnrt) {
+  /*
+   * This constructor is called by Twinner to reacquire registers/memory/constraints
+   * info and use them to build its behavioral model.
+   * So other (128/32 bits) memory addresses won't be addressed and are not required to
+   * be initialized at this time.
+   */
 }
 
 ExecutionTraceSegment::ExecutionTraceSegment () {
@@ -39,7 +45,14 @@ ExecutionTraceSegment::ExecutionTraceSegment () {
 ExecutionTraceSegment::ExecutionTraceSegment (
     const std::map < REG, Expression * > &regMap,
     const std::map < ADDRINT, Expression * > &memMap) :
-registerToExpression (regMap), memoryAddressToExpression (memMap) {
+registerToExpression (regMap), memoryAddressTo64BitsExpression (memMap) {
+  /*
+   * TODO: Initialize memoryAddressTo128BitsExpression and memoryAddressTo32BitsExpression
+   * based on memoryAddressTo64BitsExpression map.
+   * This constructor is called by TwinTool and so other (128/32 bits) memory addresses
+   * may be accessed too.
+   * Also overlapping registers must be initialized based on their enclosing registers.
+   */
 }
 
 ExecutionTraceSegment::~ExecutionTraceSegment () {
@@ -49,12 +62,17 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
     delete exp;
   }
   registerToExpression.clear ();
-  for (std::map < ADDRINT, Expression * >::iterator it =
-      memoryAddressToExpression.begin (); it != memoryAddressToExpression.end (); ++it) {
-    Expression *exp = it->second;
-    delete exp;
+  std::map < ADDRINT, Expression * > *memToExp[]
+      = {&memoryAddressTo128BitsExpression, &memoryAddressTo64BitsExpression,
+         &memoryAddressTo32BitsExpression, 0};
+  for (int i = 0; memToExp[i]; ++i) {
+    for (std::map < ADDRINT, Expression * >::iterator it = memToExp[i]->begin ();
+        it != memToExp[i]->end (); ++it) {
+      Expression *exp = it->second;
+      delete exp;
+    }
+    memToExp[i]->clear ();
   }
-  memoryAddressToExpression.clear ();
   while (!pathConstraints.empty ()) {
     delete pathConstraints.front ();
     pathConstraints.pop_front ();
@@ -253,11 +271,12 @@ void ExecutionTraceSegment::addPathConstraint (const Constraint *c) {
 }
 
 void ExecutionTraceSegment::saveToBinaryStream (std::ofstream &out) const {
+  // USE CASE: TwinTool saves segments, so Twinner can read them back
   const char *segmentMagicString = "SEG";
   out.write (segmentMagicString, 3);
 
   saveMapToBinaryStream (out, "REG", registerToExpression);
-  saveMapToBinaryStream (out, "MEM", memoryAddressToExpression);
+  saveMapToBinaryStream (out, "MEM", memoryAddressTo64BitsExpression);
   saveListToBinaryStream (out, "CON", pathConstraints);
 }
 
@@ -279,6 +298,7 @@ void ExecutionTraceSegment::saveMapToBinaryStream (std::ofstream &out,
 }
 
 ExecutionTraceSegment *ExecutionTraceSegment::loadFromBinaryStream (std::ifstream &in) {
+  // USE CASE: Twinner loads segments which were saved by TwinTool
   char segmentMagicString[3];
   in.read (segmentMagicString, 3);
   if (strncmp (segmentMagicString, "SEG", 3) != 0) {
@@ -286,6 +306,8 @@ ExecutionTraceSegment *ExecutionTraceSegment::loadFromBinaryStream (std::ifstrea
         ("Unexpected magic string while loading trace segment from binary stream");
   }
   std::map < REG, Expression * > regi;
+  // The memo only contains 64-bits memory symbols (+ 128/64-bits reg symbols of course)
+  // Also the precision of ADDRINT is 64-bits (both memory cells and formulas are 64-bits)
   std::map < ADDRINT, Expression * > memo;
   std::list < const Constraint * > cnrt;
   loadMapFromBinaryStream (in, "REG", regi);
