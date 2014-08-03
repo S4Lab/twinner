@@ -61,16 +61,17 @@ Expression *TraceImp::tryToGetSymbolicExpressionByRegister (REG reg) const {
       (reg, &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
 }
 
-Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-    const ConcreteValue &memval) const throw (WrongStateException) {
+Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
+    ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException) {
   return tryToGetSymbolicExpressionImplementation
-      (memoryEa, memval,
+      (size, memoryEa, memval,
        &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
 }
 
-Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) const {
+Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
+    ADDRINT memoryEa) const {
   return tryToGetSymbolicExpressionImplementation
-      (memoryEa, &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
+      (size, memoryEa, &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
 }
 
 void throw_exception_about_unexpected_change_in_memory_or_register_address
@@ -79,7 +80,7 @@ void throw_exception_about_unexpected_change_in_memory_or_register_address
 (ADDRINT address, const ConcreteValue &expectedVal, const ConcreteValue &currentVal);
 
 template < typename T >
-Expression *TraceImp::tryToGetSymbolicExpressionImplementation (T address,
+Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T address,
     const ConcreteValue &val,
     typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
 throw (WrongStateException) {
@@ -88,7 +89,7 @@ throw (WrongStateException) {
     // searches segments starting from the current towards the oldest one
     ExecutionTraceSegment *seg = *it;
     try {
-      Expression *exp = (seg->*method) (address, val);
+      Expression *exp = (seg->*method) (size, address, val);
       if (exp) {
         return exp;
       }
@@ -139,29 +140,29 @@ Expression *TraceImp::getSymbolicExpressionByRegister (REG reg,
        &ExecutionTraceSegment::getSymbolicExpressionByRegister);
 }
 
-Expression *TraceImp::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+Expression *TraceImp::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
     const ConcreteValue &memval, Expression *newExpression) {
   return getSymbolicExpressionImplementation
-      (memoryEa, memval, newExpression,
+      (size, memoryEa, memval, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByMemoryAddress,
        &ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress);
 }
 
-Expression *TraceImp::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+Expression *TraceImp::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
     Expression *newExpression) {
   return getSymbolicExpressionImplementation
-      (memoryEa, newExpression,
+      (size, memoryEa, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByMemoryAddress,
        &ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress);
 }
 
 template < typename T >
-Expression *TraceImp::getSymbolicExpressionImplementation (T address,
+Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
     const ConcreteValue &val, Expression *newExpression,
     typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
     typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod) {
   try {
-    Expression *exp = (this->*tryToGetMethod) (address, val);
+    Expression *exp = (this->*tryToGetMethod) (size, address, val);
     if (exp) { // exp exists and its val matches with expected value
       return exp;
     } // exp does not exist at all, so it's OK to create a new one
@@ -177,7 +178,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (T address,
   if (!newExpression) {
     newExpression = new ExpressionImp (address, val, currentSegmentIndex);
   }
-  return (getCurrentTraceSegment ()->*getMethod) (address, val, newExpression);
+  return (getCurrentTraceSegment ()->*getMethod) (size, address, val, newExpression);
 }
 
 template < typename T >

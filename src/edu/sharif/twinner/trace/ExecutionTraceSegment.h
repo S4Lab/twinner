@@ -49,25 +49,23 @@ public:
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
       const ConcreteValue &regval) const throw (WrongStateException);
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg) const;
-  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      const ConcreteValue &memval) const throw (WrongStateException);
-  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) const;
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException);
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa) const;
 
   virtual Expression *getSymbolicExpressionByRegister (REG reg,
       const ConcreteValue &regval, Expression *newExpression);
   virtual Expression *getSymbolicExpressionByRegister (REG reg,
       Expression *newExpression);
-  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const ConcreteValue &memval, Expression *newExpression);
-  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       Expression *newExpression);
 
-  virtual Expression *setSymbolicExpressionByRegister (REG reg, const Expression *exp);
-  virtual Expression *setSymbolic128BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *setSymbolicExpressionByRegister (int regsize, REG reg,
       const Expression *exp);
-  virtual Expression *setSymbolic64BitsExpressionByMemoryAddress (ADDRINT memoryEa,
-      const Expression *exp);
-  virtual Expression *setSymbolic32BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *setSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const Expression *exp);
 
   virtual void addPathConstraint (const Constraint *c);
@@ -92,8 +90,8 @@ private:
   Expression *getSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
       const KEY key, Expression *newExpression);
   template < typename KEY >
-  Expression *setSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
-      const KEY key, const Expression *exp);
+  Expression *setSymbolicExpressionImplementation (int size,
+      std::map < KEY, Expression * > &map, const KEY key, const Expression *exp);
 
   template <typename ADDRESS>
   void saveMapToBinaryStream (std::ofstream &out,

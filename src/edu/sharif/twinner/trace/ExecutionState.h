@@ -78,6 +78,7 @@ public:
    * The getter returns current value stored in one register.
    * Ownership of returned expression is kept and caller should clone it if required.
    * Returned expression can be changed if desired.
+   * ASSERT: The precision of regval must match with precision of reg.
    *
    * @param reg The register which its value is returned.
    * @param regval The concrete value which currently lives in given register.
@@ -104,24 +105,27 @@ public:
    * The getter returns current value stored in one memory address.
    * Ownership of returned expression is kept and caller should clone it if required.
    * Returned expression can be changed if desired.
+   * ASSERT: The precision of memval must match with precision of memoryEa location.
    *
+   * @param size The bit-precision of the memory location which its value is being read.
    * @param memoryEa The memory effective address which its value will be returned.
    * @param memval The concrete value which currently lives at given memory address.
    * @return symbolic expression which is living at the given memory address at current
    * state or 0/null if there is no such expression.
    */
-  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      const ConcreteValue &memval) const throw (WrongStateException) = 0;
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException) = 0;
 
   /**
    * Overloads of tryToGetSymbolicExpressionByMemoryAddress (memoryEa, memval) method.
    * This overload does not take care of concrete values.
-   * 
+   *
+   * @param size The bit-precision of the memory location which its value is being read.
    * @param memoryEa The memory effective address which its value will be returned.
    * @return symbolic expression which is living at the given memory address at current
    * state or 0/null if there is no such expression.
    */
-  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa) const = 0;
 
   /**
@@ -135,6 +139,7 @@ public:
    * of the program or not).
    * Ownership of returned expression is kept and caller should clone it if required.
    * Returned expression can be changed if desired.
+   * ASSERT: The precision of regval must match with precision of reg.
    *
    * @param reg The register which its value is returned.
    * @param regval The concrete value which currently lives in given register.
@@ -169,13 +174,15 @@ public:
    * of the program or not).
    * Ownership of returned expression is kept and caller should clone it if required.
    * Returned expression can be changed if desired.
+   * ASSERT: The precision of memval must match with size; precision of memoryEa location.
    *
+   * @param size The bit-precision of the memory location which its value is being read.
    * @param memoryEa The memory effective address which its value will be returned.
    * @param memval The concrete value which currently lives at given memory address.
    * @param newExpression The expression which will be set if there was no current value.
    * @return symbolic expression which is living at the given memory address at current state.
    */
-  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const ConcreteValue &memval, Expression *newExpression) = 0;
 
   /**
@@ -185,23 +192,26 @@ public:
    * no expression, regardless of its last concrete value, were being kept at asked
    * address, a new symbol will be created.
    *
+   * @param size The bit-precision of the memory location which its value is being read.
    * @param memoryEa The memory effective address which its value will be returned.
    * @param newExpression The expression which will be set if there was no current value.
    * @return symbolic expression which is living at the given memory address at current state.
    */
-  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       Expression *newExpression) = 0;
 
   /**
    * The setter clones given expression and stores it as the new value living
    * in given register. It takes ownership of the cloned object.
+   * The exp will be casted to regsize-bits in order to fit in the reg.
    *
+   * @param regsize Size of the reg in bits (the exp will be casted to this size)
    * @param reg The register which its value is being set.
    * @param exp The expression which will be cloned and will determine new value of
    * given register.
    * @return The cloned expression which is set in given register will be returned.
    */
-  virtual Expression *setSymbolicExpressionByRegister (REG reg,
+  virtual Expression *setSymbolicExpressionByRegister (int regsize, REG reg,
       const Expression *exp) = 0;
 
   /**
@@ -209,17 +219,15 @@ public:
    * in given memory address. It takes ownership of the cloned object.
    * The memory address must be aligned. For example, for 64 bits expressions, the
    * address must be multiple of 8 bytes.
+   * The exp will be casted to fit in memoryEa location.
    *
+   * @param size The bit-precision of memory location which its value is being written.
    * @param memoryEa The memory effective address which its value is being set.
    * @param exp The expression which will be cloned and will determine new value of
    * given memory address.
    * @return The cloned expression which is set at given address will be returned.
    */
-  virtual Expression *setSymbolic128BitsExpressionByMemoryAddress (ADDRINT memoryEa,
-      const Expression *exp) = 0;
-  virtual Expression *setSymbolic64BitsExpressionByMemoryAddress (ADDRINT memoryEa,
-      const Expression *exp) = 0;
-  virtual Expression *setSymbolic32BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *setSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const Expression *exp) = 0;
 
   /**

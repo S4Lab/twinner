@@ -97,26 +97,15 @@ Expression *Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
-Expression *Trace::setSymbolicExpressionByRegister (REG reg, const Expression *exp) {
-  return getCurrentTraceSegment ()->setSymbolicExpressionByRegister (reg, exp);
+Expression *Trace::setSymbolicExpressionByRegister (int regsize, REG reg,
+    const Expression *exp) {
+  return getCurrentTraceSegment ()->setSymbolicExpressionByRegister (regsize, reg, exp);
 }
 
-Expression *Trace::setSymbolic128BitsExpressionByMemoryAddress (ADDRINT memoryEa,
+Expression *Trace::setSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
     const Expression *exp) {
-  return getCurrentTraceSegment ()->setSymbolic128BitsExpressionByMemoryAddress
-      (memoryEa, exp);
-}
-
-Expression *Trace::setSymbolic64BitsExpressionByMemoryAddress (ADDRINT memoryEa,
-    const Expression *exp) {
-  return getCurrentTraceSegment ()->setSymbolic64BitsExpressionByMemoryAddress
-      (memoryEa, exp);
-}
-
-Expression *Trace::setSymbolic32BitsExpressionByMemoryAddress (ADDRINT memoryEa,
-    const Expression *exp) {
-  return getCurrentTraceSegment ()->setSymbolic32BitsExpressionByMemoryAddress
-      (memoryEa, exp);
+  return getCurrentTraceSegment ()->setSymbolicExpressionByMemoryAddress
+      (size, memoryEa, exp);
 }
 
 void Trace::addPathConstraint (const Constraint *c) {

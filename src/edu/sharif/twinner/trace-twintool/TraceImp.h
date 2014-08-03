@@ -41,13 +41,14 @@ public:
   /**
    * Searches backwards to find queried values.
    */
-  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      const ConcreteValue &memval) const throw (WrongStateException);
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException);
 
   /**
    * Searches backwards to find queried values.
    */
-  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) const;
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa) const;
 
   /**
    * The getter searches segments backwards to find queried value.
@@ -66,13 +67,13 @@ public:
    * The getter searches segments backwards to find queried value.
    * ASSERT: The precision of memval must match with precision of memoryEa location
    */
-  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const ConcreteValue &memval, Expression *newExpression = 0);
 
   /**
    * The getter searches segments backwards to find queried value.
    */
-  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       Expression *newExpression = 0);
 
 private:
@@ -99,7 +100,7 @@ private:
   };
 
   template < typename T >
-  Expression *tryToGetSymbolicExpressionImplementation (T address,
+  Expression *tryToGetSymbolicExpressionImplementation (int size, T address,
       const ConcreteValue &val,
       typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
   throw (WrongStateException);
@@ -109,7 +110,8 @@ private:
       TraceSegmentTypeWithoutConcreteValue method) const;
 
   template < typename T >
-  Expression *getSymbolicExpressionImplementation (T address, const ConcreteValue &val,
+  Expression *getSymbolicExpressionImplementation (int size, T address,
+      const ConcreteValue &val,
       Expression *newExpression,
       typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
       typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod);

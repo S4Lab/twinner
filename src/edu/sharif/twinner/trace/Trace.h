@@ -76,6 +76,7 @@ public:
 
   /**
    * Searches backwards to find queried values.
+   * ASSERT: The precision of regval must match with precision of reg
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
       const ConcreteValue &regval) const throw (WrongStateException);
@@ -87,17 +88,20 @@ public:
 
   /**
    * Searches backwards to find queried values.
+   * ASSERT: The precision of memval must match with precision of memoryEa location
    */
-  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-      const ConcreteValue &memval) const throw (WrongStateException);
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException);
 
   /**
    * Searches backwards to find queried values.
    */
-  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) const;
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa) const;
 
   /**
    * The getter searches segments backwards to find queried value.
+   * ASSERT: The precision of regval must match with precision of reg
    */
   virtual Expression *getSymbolicExpressionByRegister (REG reg,
       const ConcreteValue &regval, Expression *newExpression = 0);
@@ -110,30 +114,30 @@ public:
 
   /**
    * The getter searches segments backwards to find queried value.
+   * ASSERT: The precision of memval must match with precision of memoryEa location
    */
-  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const ConcreteValue &memval, Expression *newExpression = 0);
 
   /**
    * The getter searches segments backwards to find queried value.
    */
-  virtual Expression *getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+  virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       Expression *newExpression = 0);
 
   /**
    * The setter, uses most recent trace segment for setting the new value.
+   * The exp will be casted to fit in reg.
    */
-  virtual Expression *setSymbolicExpressionByRegister (REG reg, const Expression *exp);
+  virtual Expression *setSymbolicExpressionByRegister (int regsize, REG reg,
+      const Expression *exp);
 
   /**
    * The setter, uses most recent trace segment for setting the new value.
+   * The exp will be casted to fit in memoryEa location.
    */
-  virtual Expression *setSymbolic128BitsExpressionByMemoryAddress (ADDRINT memoryEa,
-      const Expression *exp);
-  virtual Expression *setSymbolic64BitsExpressionByMemoryAddress (ADDRINT memoryEa,
-      const Expression *exp);
-  virtual Expression *setSymbolic32BitsExpressionByMemoryAddress (ADDRINT memoryEa,
-      const Expression *exp);
+  virtual Expression *setSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa, const Expression *exp);
 
   /**
    * The constraint will be added to the most recent trace segment.

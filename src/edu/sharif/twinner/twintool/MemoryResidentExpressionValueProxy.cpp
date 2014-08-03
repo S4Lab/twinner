@@ -71,16 +71,7 @@ MemoryResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression *exp) const {
   if (isMemoryEaAligned ()) {
-    switch (memReadBytes) {
-    case 16:
-      return *trace->setSymbolic128BitsExpressionByMemoryAddress (memoryEa, exp);
-    case 8:
-      return *trace->setSymbolic64BitsExpressionByMemoryAddress (memoryEa, exp);
-    case 4:
-      return *trace->setSymbolic32BitsExpressionByMemoryAddress (memoryEa, exp);
-    default:
-      throw std::runtime_error ("Memory setting size is not supported");
-    }
+    return *trace->setSymbolicExpressionByMemoryAddress (memReadBytes * 8, memoryEa, exp);
   } else {
     //TODO: Divide exp into two expressions and set them at two aligned addresses
     throw std::runtime_error ("Unaligned memory write is not implemented");

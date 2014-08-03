@@ -88,15 +88,38 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg
   return tryToGetSymbolicExpressionImplementation (registerToExpression, reg);
 }
 
-Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (int size,
     ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException) {
-  return tryToGetSymbolicExpressionImplementation
-      (memoryAddressToExpression, memoryEa, memval);
+  switch (size) {
+  case 128:
+    return tryToGetSymbolicExpressionImplementation
+        (memoryAddressTo128BitsExpression, memoryEa, memval);
+  case 64:
+    return tryToGetSymbolicExpressionImplementation
+        (memoryAddressTo64BitsExpression, memoryEa, memval);
+  case 32:
+    return tryToGetSymbolicExpressionImplementation
+        (memoryAddressTo32BitsExpression, memoryEa, memval);
+  default:
+    throw std::runtime_error ("Memory read size is not supported");
+  }
 }
 
-Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (int size,
     ADDRINT memoryEa) const {
-  return tryToGetSymbolicExpressionImplementation (memoryAddressToExpression, memoryEa);
+  switch (size) {
+  case 128:
+    return tryToGetSymbolicExpressionImplementation
+        (memoryAddressTo128BitsExpression, memoryEa);
+  case 64:
+    return tryToGetSymbolicExpressionImplementation
+        (memoryAddressTo64BitsExpression, memoryEa);
+  case 32:
+    return tryToGetSymbolicExpressionImplementation
+        (memoryAddressTo32BitsExpression, memoryEa);
+  default:
+    throw std::runtime_error ("Memory read size is not supported");
+  }
 }
 
 template < typename Address >
@@ -161,16 +184,38 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg,
   return getSymbolicExpressionImplementation (registerToExpression, reg, newExpression);
 }
 
-Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-    const ConcreteValue &memval, Expression *newExpression) {
-  return getSymbolicExpressionImplementation
-      (memoryAddressToExpression, memoryEa, memval, newExpression);
+Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int size,
+    ADDRINT memoryEa, const ConcreteValue &memval, Expression *newExpression) {
+  switch (size) {
+  case 128:
+    return getSymbolicExpressionImplementation
+        (memoryAddressTo128BitsExpression, memoryEa, memval, newExpression);
+  case 64:
+    return getSymbolicExpressionImplementation
+        (memoryAddressTo64BitsExpression, memoryEa, memval, newExpression);
+  case 32:
+    return getSymbolicExpressionImplementation
+        (memoryAddressTo32BitsExpression, memoryEa, memval, newExpression);
+  default:
+    throw std::runtime_error ("Memory read size is not supported");
+  }
 }
 
-Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
-    Expression *newExpression) {
-  return getSymbolicExpressionImplementation
-      (memoryAddressToExpression, memoryEa, newExpression);
+Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int size,
+    ADDRINT memoryEa, Expression *newExpression) {
+  switch (size) {
+  case 128:
+    return getSymbolicExpressionImplementation
+        (memoryAddressTo128BitsExpression, memoryEa, newExpression);
+  case 64:
+    return getSymbolicExpressionImplementation
+        (memoryAddressTo64BitsExpression, memoryEa, newExpression);
+  case 32:
+    return getSymbolicExpressionImplementation
+        (memoryAddressTo32BitsExpression, memoryEa, newExpression);
+  default:
+    throw std::runtime_error ("Memory read size is not supported");
+  }
 }
 
 template < typename KEY >
@@ -225,37 +270,37 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
   return newExpression;
 }
 
-Expression *ExecutionTraceSegment::setSymbolicExpressionByRegister (REG reg,
+Expression *ExecutionTraceSegment::setSymbolicExpressionByRegister (int regsize, REG reg,
     const Expression *exp) {
-  return setSymbolicExpressionImplementation (registerToExpression, reg, exp);
+  return setSymbolicExpressionImplementation
+      (regsize, registerToExpression, reg, exp);
 }
 
-Expression *ExecutionTraceSegment::setSymbolic128BitsExpressionByMemoryAddress (
+Expression *ExecutionTraceSegment::setSymbolicExpressionByMemoryAddress (int size,
     ADDRINT memoryEa, const Expression *exp) {
-  return setSymbolicExpressionImplementation
-      (memoryAddressTo128BitsExpression, memoryEa, exp);
-}
-
-Expression *ExecutionTraceSegment::setSymbolic64BitsExpressionByMemoryAddress (
-    ADDRINT memoryEa, const Expression *exp) {
-  return setSymbolicExpressionImplementation
-      (memoryAddressTo64BitsExpression, memoryEa, exp);
-}
-
-Expression *ExecutionTraceSegment::setSymbolic32BitsExpressionByMemoryAddress (
-    ADDRINT memoryEa, const Expression *exp) {
-  return setSymbolicExpressionImplementation
-      (memoryAddressTo32BitsExpression, memoryEa, exp);
+  switch (size) {
+  case 128:
+    return setSymbolicExpressionImplementation
+        (128, memoryAddressTo128BitsExpression, memoryEa, exp);
+  case 64:
+    return setSymbolicExpressionImplementation
+        (64, memoryAddressTo64BitsExpression, memoryEa, exp);
+  case 32:
+    return setSymbolicExpressionImplementation
+        (32, memoryAddressTo32BitsExpression, memoryEa, exp);
+  default:
+    throw std::runtime_error ("Memory setting size is not supported");
+  }
 }
 
 template < typename KEY >
-Expression *ExecutionTraceSegment::setSymbolicExpressionImplementation (
+Expression *ExecutionTraceSegment::setSymbolicExpressionImplementation (int size,
     std::map < KEY, Expression * > &map, const KEY key,
     const Expression *nonOwnedExpression) {
   typedef typename std::map < KEY, Expression * >::iterator MapIterator;
   // The nonOwnedExpression is owned by caller.
   // We must clone it and take ownership of the cloned object.
-  Expression *exp = nonOwnedExpression->clone ();
+  Expression *exp = nonOwnedExpression->clone (size);
   std::pair < MapIterator, bool > res = map.insert (make_pair (key, exp));
   if (!res.second) { // another expression already exists. overwriting...
     // old expression is owned by us; so it should be deleted before loosing its pointer!
