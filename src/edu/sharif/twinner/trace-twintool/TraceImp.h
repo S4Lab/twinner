@@ -30,13 +30,13 @@ public:
   /**
    * Searches backwards to find queried values.
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
       const ConcreteValue &regval) const throw (WrongStateException);
 
   /**
    * Searches backwards to find queried values.
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg) const;
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg) const;
 
   /**
    * Searches backwards to find queried values.
@@ -54,13 +54,13 @@ public:
    * The getter searches segments backwards to find queried value.
    * ASSERT: The precision of regval must match with precision of reg
    */
-  virtual Expression *getSymbolicExpressionByRegister (REG reg,
+  virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       const ConcreteValue &regval, Expression *newExpression = 0);
 
   /**
    * The getter searches segments backwards to find queried value.
    */
-  virtual Expression *getSymbolicExpressionByRegister (REG reg,
+  virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       Expression *newExpression = 0);
 
   /**
@@ -81,22 +81,23 @@ private:
   template < typename T >
   struct TryToGetSymbolicExpressionMethod {
 
-    typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address,
+    typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (int size, T address,
         const ConcreteValue &val) const;
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
-        T address) const;
-    typedef Expression *(TraceImp::*TraceType) (T address,
+        int size, T address) const;
+    typedef Expression *(TraceImp::*TraceType) (int size, T address,
         const ConcreteValue &val) const;
-    typedef Expression *(TraceImp::*TraceTypeWithoutConcreteValue) (T address) const;
+    typedef Expression *(TraceImp::*TraceTypeWithoutConcreteValue) (int size,
+        T address) const;
   };
 
   template < typename T >
   struct GetSymbolicExpressionMethod {
 
-    typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (T address,
+    typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (int size, T address,
         const ConcreteValue &val, Expression *newExpression);
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
-        T address, Expression *newExpression);
+        int size, T address, Expression *newExpression);
   };
 
   template < typename T >
@@ -105,7 +106,7 @@ private:
       typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
   throw (WrongStateException);
   template < typename T >
-  Expression *tryToGetSymbolicExpressionImplementation (T address,
+  Expression *tryToGetSymbolicExpressionImplementation (int size, T address,
       typename TryToGetSymbolicExpressionMethod < T >::
       TraceSegmentTypeWithoutConcreteValue method) const;
 
@@ -116,7 +117,7 @@ private:
       typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
       typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod);
   template < typename T >
-  Expression *getSymbolicExpressionImplementation (T address,
+  Expression *getSymbolicExpressionImplementation (int size, T address,
       Expression *newExpression,
       typename TryToGetSymbolicExpressionMethod < T >::
       TraceTypeWithoutConcreteValue tryToGetMethod,

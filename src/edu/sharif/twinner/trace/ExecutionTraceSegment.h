@@ -46,17 +46,17 @@ public:
       const std::map < ADDRINT, Expression * > &memMap);
   virtual ~ExecutionTraceSegment ();
 
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
       const ConcreteValue &regval) const throw (WrongStateException);
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg) const;
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg) const;
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException);
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa) const;
 
-  virtual Expression *getSymbolicExpressionByRegister (REG reg,
+  virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       const ConcreteValue &regval, Expression *newExpression);
-  virtual Expression *getSymbolicExpressionByRegister (REG reg,
+  virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       Expression *newExpression);
   virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const ConcreteValue &memval, Expression *newExpression);
@@ -111,7 +111,7 @@ public:
       const edu::sharif::twinner::util::Logger &logger) const;
 
   const std::map < REG, Expression * > &getRegisterToExpression () const;
-  const std::map < ADDRINT, Expression * > &getMemoryAddressToExpression () const;
+  const std::map < ADDRINT, Expression * > &getMemoryAddressTo64BitsExpression () const;
   const std::list < const Constraint * > &getPathConstraints () const;
 
   void setSyscall (Syscall syscall);

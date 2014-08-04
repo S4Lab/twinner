@@ -18,6 +18,10 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace trace {
+
+class ConcreteValue;
+}
 namespace twintool {
 
 class ConstantExpressionValueProxy : public ExpressionValueProxy {

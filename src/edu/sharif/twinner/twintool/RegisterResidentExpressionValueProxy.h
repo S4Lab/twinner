@@ -62,8 +62,7 @@ public:
 
 private:
   void putExpressionInLeastSignificantBitsOfRegister (
-      edu::sharif::twinner::trace::Trace *trace,
-      REG r, int bits,
+      edu::sharif::twinner::trace::Trace *trace, int rsize, REG r, int bits,
       const edu::sharif::twinner::trace::Expression &exp) const;
 
   enum RegisterType {

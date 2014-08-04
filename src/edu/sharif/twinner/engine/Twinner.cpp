@@ -362,7 +362,7 @@ std::map < int, std::set < ADDRINT > > gather_symbols_addresses_of_trace (
 void extract_memory_addresses_of_trace_segment (
     std::map < int, std::set < ADDRINT > > &addr,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
-  edu::sharif::twinner::util::foreach (segment->getMemoryAddressToExpression (),
+  edu::sharif::twinner::util::foreach (segment->getMemoryAddressTo64BitsExpression (),
                                        &extract_memory_addresses_of_expression,
                                        addr);
   edu::sharif::twinner::util::foreach (segment->getRegisterToExpression (),
@@ -424,7 +424,7 @@ void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &out,
     const edu::sharif::twinner::trace::ExecutionTraceSegment *segment) {
   out.indented () << "/*Memory Changes*/\n";
   const std::map < ADDRINT, edu::sharif::twinner::trace::Expression * > &memToExp =
-      segment->getMemoryAddressToExpression ();
+      segment->getMemoryAddressTo64BitsExpression ();
   edu::sharif::twinner::util::foreach (memToExp, &code_memory_changes, out);
 }
 

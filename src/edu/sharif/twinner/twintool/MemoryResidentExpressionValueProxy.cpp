@@ -62,10 +62,10 @@ MemoryResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression *exp) const {
   if (isMemoryEaAligned ()) {
-    edu::sharif::twinner::trace::Expression *exp =
+    edu::sharif::twinner::trace::Expression *newExp =
         trace->setSymbolicExpressionByMemoryAddress (getSize (), memoryEa, exp);
-    truncate (exp);
-    return *exp;
+    truncate (newExp);
+    return *newExp;
   } else {
     //TODO: Divide exp into two expressions and set them at two aligned addresses
     throw std::runtime_error ("Unaligned memory write is not implemented");
@@ -80,7 +80,7 @@ void MemoryResidentExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression &changedExp) const {
   edu::sharif::twinner::util::Logger::loquacious () << "(memory value is changed to "
-      << changedExp << ")\n";
+      << &changedExp << ")\n";
   // ASSERT: changedExp was returned from setExpressionWithoutChangeNotification () method
   if (isMemoryEaAligned ()) {
     propagateChangeUpwards (getSize (), memoryEa, trace, changedExp);
@@ -98,12 +98,12 @@ void MemoryResidentExpressionValueProxy::propagateChangeDownwards (int size,
     edu::sharif::twinner::trace::Expression *exp = changedExp.clone ();
     exp->truncate (size);
     trace->setSymbolicExpressionByMemoryAddress (size, memoryEa + size / 8, exp);
-    propagateChangeDownwards (size, memoryEa + size / 8, exp);
+    propagateChangeDownwards (size, memoryEa + size / 8, trace, *exp);
     delete exp;
     exp = changedExp.clone ();
     exp->shiftToRight (size);
     trace->setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
-    propagateChangeDownwards (size, memoryEa, exp);
+    propagateChangeDownwards (size, memoryEa, trace, *exp);
     delete exp;
   }
 }
@@ -132,7 +132,7 @@ void MemoryResidentExpressionValueProxy::propagateChangeUpwards (int size,
       const edu::sharif::twinner::trace::Expression *neighbor =
           trace->getSymbolicExpressionByMemoryAddress (size, memoryEa - size / 8, *cvObj);
       delete cvObj;
-      exp = neighbor.clone (2 * size);
+      exp = neighbor->clone (2 * size);
       exp->shiftToRight (size);
       exp->bitwiseOr (&changedExp); // changedExp will be cloned internally
       memoryEa -= size / 8;

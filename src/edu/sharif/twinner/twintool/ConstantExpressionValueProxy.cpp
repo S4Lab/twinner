@@ -10,12 +10,12 @@
  * This file is part of Twinner project.
  */
 
-#include <stdexcept>
-
 #include "ConstantExpressionValueProxy.h"
 
-#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace-twintool/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/ConcreteValue.h"
+
+#include <stdexcept>
 
 namespace edu {
 namespace sharif {

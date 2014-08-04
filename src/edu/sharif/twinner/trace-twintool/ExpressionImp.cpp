@@ -15,7 +15,9 @@
 #include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/Constant.h"
+#include "edu/sharif/twinner/trace/ConcreteValue128Bits.h"
 #include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
+#include "edu/sharif/twinner/trace/ConcreteValue32Bits.h"
 
 namespace edu {
 namespace sharif {
@@ -48,7 +50,43 @@ Expression (concreteValue.clone (), isOverwriting) {
       return;
     }
   }
-  stack.push_back (new MemoryEmergedSymbol (memoryEa, concreteValue, generationIndex));
+  switch (concreteValue.getSize ()) {
+  case 128:
+  {
+    const ConcreteValue128Bits *cv =
+        static_cast<const ConcreteValue128Bits *> (&concreteValue);
+    stack.push_back (new MemoryEmergedSymbol
+                     (memoryEa + 8 /* little endian*/,
+                      ConcreteValue64Bits (cv->getMsb ()), generationIndex));
+    stack.push_back (new Constant (64));
+    stack.push_back (new Operator (Operator::SHIFT_LEFT));
+    stack.push_back (new MemoryEmergedSymbol
+                     (memoryEa, ConcreteValue64Bits (cv->getLsb ()), generationIndex));
+    stack.push_back (new Operator (Operator::BITWISE_OR));
+    break;
+  }
+  case 64:
+    stack.push_back (new MemoryEmergedSymbol (memoryEa, concreteValue, generationIndex));
+    break;
+  case 32:
+    if (memoryEa % 8 == 0) {
+      stack.push_back (new MemoryEmergedSymbol
+                       (memoryEa, ConcreteValue64Bits (concreteValue), generationIndex));
+      stack.push_back (new Constant ((1ull << 32) - 1));
+      stack.push_back (new Operator (Operator::BITWISE_AND));
+    } else {
+      stack.push_back (new MemoryEmergedSymbol
+                       (memoryEa - 8,
+                        ConcreteValue64Bits (concreteValue.toUint64 () << 32),
+                        generationIndex));
+      stack.push_back (new Constant (32));
+      stack.push_back (new Operator (Operator::SHIFT_RIGHT));
+    }
+    break;
+  default:
+    throw std::runtime_error ("ExpressionImp::ExpressionImp (...): "
+                              "Unsupported concrete value size");
+  }
 }
 
 ExpressionImp::ExpressionImp (const ConcreteValue &value) :

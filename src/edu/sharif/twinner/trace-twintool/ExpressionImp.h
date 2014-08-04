@@ -37,6 +37,7 @@ public:
    * Instantiates an expression containing a new (yet unused) symbol,
    * initiated from a memory address.
    * ASSERT: The precision of concreteValue must match with precision of memory location
+   * ASSERT: memoryEa is aligned (based on size of the concrete value)
    */
   ExpressionImp (ADDRINT memoryEa, const ConcreteValue &concreteValue,
       int generationIndex, bool isOverwriting = false);

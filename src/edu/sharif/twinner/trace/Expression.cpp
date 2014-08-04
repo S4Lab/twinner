@@ -43,6 +43,15 @@ lastConcreteValue (exp.lastConcreteValue->clone ()), isOverwriting (false) {
   }
 }
 
+Expression::Expression (int size, const Expression &exp) :
+lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
+  for (std::list < ExpressionToken * >::const_iterator it = exp.stack.begin ();
+      it != exp.stack.end (); ++it) {
+    const ExpressionToken *et = *it;
+    stack.push_back (et->clone ());
+  }
+}
+
 Expression::Expression (ConcreteValue *concreteValue, bool _isOverwriting) :
 lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
 }
@@ -275,8 +284,8 @@ void Expression::negate () {
   stack.push_back (new Operator (Operator::NEGATE));
 }
 
-Expression *Expression::clone () const {
-  return new Expression (*this);
+Expression *Expression::clone (int size) const {
+  return new Expression (size, *this);
 }
 
 void Expression::saveToBinaryStream (std::ofstream &out) const {

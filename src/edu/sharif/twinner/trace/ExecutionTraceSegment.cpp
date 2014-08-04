@@ -16,6 +16,7 @@
 #include "Constraint.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/iterationtools.h"
 
 #include <utility>
 #include <stdexcept>
@@ -79,12 +80,15 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
   }
 }
 
-Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg,
-    const ConcreteValue &regval) const throw (WrongStateException) {
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (int size,
+    REG reg, const ConcreteValue &regval) const throw (WrongStateException) {
+  UNUSED_VARIABLE (size);
   return tryToGetSymbolicExpressionImplementation (registerToExpression, reg, regval);
 }
 
-Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (REG reg) const {
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (int size,
+    REG reg) const {
+  UNUSED_VARIABLE (size);
   return tryToGetSymbolicExpressionImplementation (registerToExpression, reg);
 }
 
@@ -173,14 +177,16 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
   }
 }
 
-Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg,
+Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (int size, REG reg,
     const ConcreteValue &regval, Expression *newExpression) {
+  UNUSED_VARIABLE (size);
   return getSymbolicExpressionImplementation (registerToExpression, reg, regval,
                                               newExpression);
 }
 
-Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (REG reg,
+Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (int size, REG reg,
     Expression *newExpression) {
+  UNUSED_VARIABLE (size);
   return getSymbolicExpressionImplementation (registerToExpression, reg, newExpression);
 }
 
@@ -393,7 +399,7 @@ void ExecutionTraceSegment::printRegistersValues (
 
 void ExecutionTraceSegment::printMemoryAddressesValues (
     const edu::sharif::twinner::util::Logger &logger) const {
-  logger << memoryAddressToExpression;
+  logger << memoryAddressTo64BitsExpression;
 }
 
 void ExecutionTraceSegment::printPathConstraints (
@@ -417,8 +423,8 @@ ExecutionTraceSegment::getRegisterToExpression () const {
 }
 
 const std::map < ADDRINT, Expression * > &
-ExecutionTraceSegment::getMemoryAddressToExpression () const {
-  return memoryAddressToExpression;
+ExecutionTraceSegment::getMemoryAddressTo64BitsExpression () const {
+  return memoryAddressTo64BitsExpression;
 }
 
 const std::list < const Constraint * > &

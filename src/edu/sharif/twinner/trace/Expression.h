@@ -52,6 +52,16 @@ private:
    */
   Expression (const std::list < ExpressionToken * > &stk, ConcreteValue *concreteValue);
 
+  /**
+   * Instantiates an expression based on the given exp.
+   * This constructor is the same as copy-constructor with one difference: here, the
+   * concrete value is casted to size-bits precision. For size == -1, no cast will happen.
+   *
+   * @param size The bit-precision of the concrete value of the instantiated expression.
+   * @param exp The expression which is going to be cloned to create this new expression.
+   */
+  Expression (int size, const Expression &exp);
+
 protected:
   /**
    * Instantiates an expression with given concrete value and leaves its internal stack
@@ -192,7 +202,7 @@ public:
    */
   void negate ();
 
-  virtual Expression *clone () const;
+  virtual Expression *clone (int size = -1) const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static Expression *loadFromBinaryStream (std::ifstream &in);

@@ -60,39 +60,41 @@ Trace::~Trace () {
   }
 }
 
-Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg,
+Expression *Trace::tryToGetSymbolicExpressionByRegister (int size, REG reg,
     const ConcreteValue &regval) const throw (WrongStateException) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
-Expression *Trace::tryToGetSymbolicExpressionByRegister (REG reg) const {
+Expression *Trace::tryToGetSymbolicExpressionByRegister (int size, REG reg) const {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
-Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
     const ConcreteValue &memval) const throw (WrongStateException) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
-Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (ADDRINT memoryEa) const {
+Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (int size,
+    ADDRINT memoryEa) const {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
-Expression *Trace::getSymbolicExpressionByRegister (REG reg, const ConcreteValue &regval,
+Expression *Trace::getSymbolicExpressionByRegister (int size, REG reg,
+    const ConcreteValue &regval, Expression *newExpression) {
+  throw std::runtime_error ("PIN infrastructure is not available");
+}
+
+Expression *Trace::getSymbolicExpressionByRegister (int size, REG reg,
     Expression *newExpression) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
-Expression *Trace::getSymbolicExpressionByRegister (REG reg, Expression *newExpression) {
-  throw std::runtime_error ("PIN infrastructure is not available");
-}
-
-Expression *Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+Expression *Trace::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
     const ConcreteValue &memval, Expression *newExpression) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
-Expression *Trace::getSymbolicExpressionByMemoryAddress (ADDRINT memoryEa,
+Expression *Trace::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
     Expression *newExpression) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }

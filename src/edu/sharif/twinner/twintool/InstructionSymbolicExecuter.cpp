@@ -605,7 +605,7 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   delete conditionExp; // this is cloned by cc and is not required anymore
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
-  dst.setExpression (trace, *srcexp);
+  dst.setExpression (trace, srcexp);
   delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -624,7 +624,7 @@ void InstructionSymbolicExecuter::pushAnalysisRoutine (
       << "\tadjusting rsp...";
   //TODO: check for current value of RSP too
   edu::sharif::twinner::trace::Expression *rsp =
-      trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
+      trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
     // When check for current value of RSP get added, this condition can be removed.
     rsp->minus (8);
@@ -647,7 +647,7 @@ void InstructionSymbolicExecuter::popAnalysisRoutine (
       << "\tadjusting rsp...";
   //TODO: check for current value of RSP too
   edu::sharif::twinner::trace::Expression *rsp =
-      trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
+      trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
     // When check for current value of RSP get added, this condition can be removed.
     rsp->add (8);
@@ -818,7 +818,7 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
   edu::sharif::twinner::util::Logger::loquacious () << "callAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
-      trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
+      trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
     edu::sharif::twinner::util::Logger::loquacious ()
         << "\tadjusting rsp...";
@@ -843,7 +843,7 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
   edu::sharif::twinner::util::Logger::loquacious () << "retAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
-      trace->tryToGetSymbolicExpressionByRegister (REG_RSP);
+      trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
     edu::sharif::twinner::util::Logger::loquacious ()
         << "\tadjusting rsp...";
@@ -1212,8 +1212,9 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
   edu::sharif::twinner::util::Logger::loquacious ()
       << "adjustDivisionMultiplicationOperands(...) hook...";
   edu::sharif::twinner::trace::ConcreteValue64Bits os = operandSize;
+  UINT64 osval = os.getValue ();
   REG leftReg, rightReg;
-  switch (os.getValue ()) {
+  switch (osval) {
   case 8:
     leftReg = REG_AH;
     rightReg = REG_AL;
@@ -1242,9 +1243,9 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
   ConcreteValue *rightVal =
       edu::sharif::twinner::util::readRegisterContent (context, rightReg);
   edu::sharif::twinner::trace::Expression *leftExp =
-      trace->getSymbolicExpressionByRegister (leftReg);
+      trace->getSymbolicExpressionByRegister (osval, leftReg);
   edu::sharif::twinner::trace::Expression *rightExp =
-      trace->getSymbolicExpressionByRegister (rightReg);
+      trace->getSymbolicExpressionByRegister (osval, rightReg);
   leftExp->setLastConcreteValue (leftVal);
   rightExp->setLastConcreteValue (rightVal);
   edu::sharif::twinner::util::Logger::loquacious ()

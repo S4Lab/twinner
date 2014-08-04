@@ -45,7 +45,8 @@ public:
   }
 
   const char *what () const throw () {
-    return "Execution state differ from what we expected (probably, user space memory is changed by a syscall).";
+    return "Execution state differ from what we expected "
+    "(probably, user space memory is changed by a syscall).";
   }
 
   const ConcreteValue &getCurrentStateValue () const {
@@ -78,8 +79,9 @@ public:
    * The getter returns current value stored in one register.
    * Ownership of returned expression is kept and caller should clone it if required.
    * Returned expression can be changed if desired.
-   * ASSERT: The precision of regval must match with precision of reg.
+   * ASSERT: The precision of regval must match with size; the precision of reg.
    *
+   * @param size The size of the reg in bits.
    * @param reg The register which its value is returned.
    * @param regval The concrete value which currently lives in given register.
    * @return symbolic expression which is living in given register at current state
@@ -88,18 +90,19 @@ public:
    * @except Throws a WrongStateException, if the last concrete value of the reg's
    * corresponding expression differs from expected @c regval value.
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
       const ConcreteValue &regval) const throw (WrongStateException) = 0;
 
   /**
    * Overload of tryToGetSymbolicExpressionByRegister (reg, regval) method.
    * This overload does not take care of concrete values.
    *
+   * @param size The size of the reg in bits.
    * @param reg The register which its value is returned.
    * @return symbolic expression which is living in given register at current state
    * or 0/null if there is no such expression.
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg) const = 0;
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg) const = 0;
 
   /**
    * The getter returns current value stored in one memory address.
@@ -139,14 +142,15 @@ public:
    * of the program or not).
    * Ownership of returned expression is kept and caller should clone it if required.
    * Returned expression can be changed if desired.
-   * ASSERT: The precision of regval must match with precision of reg.
+   * ASSERT: The precision of regval must match with size; the precision of reg.
    *
+   * @param size The size of the reg in bits.
    * @param reg The register which its value is returned.
    * @param regval The concrete value which currently lives in given register.
    * @param newExpression The expression which will be set if there was no current value.
    * @return symbolic expression which is living in register at current state.
    */
-  virtual Expression *getSymbolicExpressionByRegister (REG reg,
+  virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       const ConcreteValue &regval, Expression *newExpression) = 0;
 
   /**
@@ -155,12 +159,13 @@ public:
    * expression kept in asked register, it will be returned and only when no expression,
    * regardless of its last concrete value, were being kept in asked register, a new
    * symbol will be created.
-   * 
+   *
+   * @param size The size of the reg in bits.
    * @param reg The register which its value is returned.
    * @param newExpression The expression which will be set if there was no current value.
    * @return symbolic expression which is living in register at current state.
    */
-  virtual Expression *getSymbolicExpressionByRegister (REG reg,
+  virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       Expression *newExpression) = 0;
 
   /**

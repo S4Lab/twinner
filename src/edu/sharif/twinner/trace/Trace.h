@@ -78,13 +78,13 @@ public:
    * Searches backwards to find queried values.
    * ASSERT: The precision of regval must match with precision of reg
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg,
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
       const ConcreteValue &regval) const throw (WrongStateException);
 
   /**
    * Searches backwards to find queried values.
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (REG reg) const;
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg) const;
 
   /**
    * Searches backwards to find queried values.
@@ -103,13 +103,13 @@ public:
    * The getter searches segments backwards to find queried value.
    * ASSERT: The precision of regval must match with precision of reg
    */
-  virtual Expression *getSymbolicExpressionByRegister (REG reg,
+  virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       const ConcreteValue &regval, Expression *newExpression = 0);
 
   /**
    * The getter searches segments backwards to find queried value.
    */
-  virtual Expression *getSymbolicExpressionByRegister (REG reg,
+  virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       Expression *newExpression = 0);
 
   /**

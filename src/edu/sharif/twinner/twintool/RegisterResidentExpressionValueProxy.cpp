@@ -42,25 +42,24 @@ RegisterResidentExpressionValueProxy::~RegisterResidentExpressionValueProxy () {
 edu::sharif::twinner::trace::Expression *
 RegisterResidentExpressionValueProxy::getExpression (
     edu::sharif::twinner::trace::Trace *trace) const {
-  return trace->getSymbolicExpressionByRegister (reg, regVal)->clone ();
+  return trace->getSymbolicExpressionByRegister (getSize (), reg, *regVal)->clone ();
 }
 
 edu::sharif::twinner::trace::Expression
 RegisterResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression *exp) const {
-  edu::sharif::twinner::trace::Expression *exp =
+  edu::sharif::twinner::trace::Expression *newExp =
       trace->setSymbolicExpressionByRegister (getSize (), reg, exp);
-  truncate (exp);
-  return *exp;
+  truncate (newExp);
+  return *newExp;
 }
 
-void RegisterResidentExpressionValueProxy::putExpressionInLeastSignificantBitsOfRegister
-(edu::sharif::twinner::trace::Trace *trace,
-    REG r, int bits,
+void RegisterResidentExpressionValueProxy::putExpressionInLeastSignificantBitsOfRegister (
+    edu::sharif::twinner::trace::Trace *trace, int rsize, REG r, int bits,
     const edu::sharif::twinner::trace::Expression &exp) const {
   edu::sharif::twinner::trace::Expression *dst =
-      trace->getSymbolicExpressionByRegister (r);
+      trace->getSymbolicExpressionByRegister (rsize, r);
   dst->makeLeastSignificantBitsZero (bits);
   dst->binaryOperation
       (new edu::sharif::twinner::trace::Operator
@@ -71,7 +70,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression &changedExp) const {
   edu::sharif::twinner::util::Logger::loquacious () << "(register value is changed to "
-      << changedExp << ")\n";
+      << &changedExp << ")\n";
   int regIndex = getRegisterIndex (reg);
   if (regIndex == -1) {
     edu::sharif::twinner::util::Logger::warning ()
@@ -79,18 +78,18 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
         " Unhandled register: " << REG_StringShort (reg) << '\n';
     return;
   }
-  edu::sharif::twinner::trace::Expression *reg16;
-  const edu::sharif::twinner::trace::Expression *constReg16;
+  const edu::sharif::twinner::trace::Expression *constReg16 = &changedExp;
+  edu::sharif::twinner::trace::Expression *reg16 = 0;
   edu::sharif::twinner::trace::Expression *temp;
   RegisterType regType = getRegisterType (reg);
   switch (regType) {
   case REG_32_BITS_TYPE:
-    trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (regIndex, 0),
-                                            changedExp);
+    trace->setSymbolicExpressionByRegister
+        (64, getOverlappingRegisterByIndex (regIndex, 0), &changedExp);
     break;
   case REG_8_BITS_UPPER_HALF_TYPE:
     reg16 = trace->getSymbolicExpressionByRegister
-        (getOverlappingRegisterByIndex (regIndex, 2));
+        (16, getOverlappingRegisterByIndex (regIndex, 2));
     reg16->truncate (8);
     temp = changedExp.clone (16);
     temp->shiftToLeft (8);
@@ -105,11 +104,11 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
   }
   switch (regType) {
   case REG_64_BITS_TYPE:
-    trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (regIndex, 1),
-                                            changedExp)->truncate (32);
+    trace->setSymbolicExpressionByRegister
+        (32, getOverlappingRegisterByIndex (regIndex, 1), &changedExp)->truncate (32);
   case REG_32_BITS_TYPE:
     reg16 = trace->setSymbolicExpressionByRegister
-        (getOverlappingRegisterByIndex (regIndex, 2), changedExp);
+        (16, getOverlappingRegisterByIndex (regIndex, 2), &changedExp);
     reg16->truncate (16);
   case REG_16_BITS_TYPE:
     if (getOverlappingRegisterByIndex (regIndex, 3) != REG_INVALID_) {
@@ -119,29 +118,28 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
         temp = reg16->clone (16);
       }
       temp->shiftToRight (8);
-      trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (regIndex, 3),
-                                              temp);
+      trace->setSymbolicExpressionByRegister
+          (8, getOverlappingRegisterByIndex (regIndex, 3), temp);
       delete temp;
     }
-    trace->setSymbolicExpressionByRegister (getOverlappingRegisterByIndex (regIndex, 4),
-                                            changedExp)->truncate (8);
+    trace->setSymbolicExpressionByRegister
+        (8, getOverlappingRegisterByIndex (regIndex, 4), &changedExp)->truncate (8);
     if (regType != REG_16_BITS_TYPE) {
       break;
     }
-    constReg16 = &changedExp;
   case REG_8_BITS_UPPER_HALF_TYPE:
     putExpressionInLeastSignificantBitsOfRegister
-        (trace, getOverlappingRegisterByIndex (regIndex, 0), 16, *constReg16);
+        (trace, 64, getOverlappingRegisterByIndex (regIndex, 0), 16, *constReg16);
     putExpressionInLeastSignificantBitsOfRegister
-        (trace, getOverlappingRegisterByIndex (regIndex, 1), 16, *constReg16);
+        (trace, 32, getOverlappingRegisterByIndex (regIndex, 1), 16, *constReg16);
     break;
   case REG_8_BITS_LOWER_HALF_TYPE:
     putExpressionInLeastSignificantBitsOfRegister
-        (trace, getOverlappingRegisterByIndex (regIndex, 0), 8, changedExp);
+        (trace, 64, getOverlappingRegisterByIndex (regIndex, 0), 8, changedExp);
     putExpressionInLeastSignificantBitsOfRegister
-        (trace, getOverlappingRegisterByIndex (regIndex, 1), 8, changedExp);
+        (trace, 32, getOverlappingRegisterByIndex (regIndex, 1), 8, changedExp);
     putExpressionInLeastSignificantBitsOfRegister
-        (trace, getOverlappingRegisterByIndex (regIndex, 2), 8, changedExp);
+        (trace, 16, getOverlappingRegisterByIndex (regIndex, 2), 8, changedExp);
     break;
   }
 }
