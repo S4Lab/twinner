@@ -580,14 +580,12 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "movsxAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      dst.setExpressionWithoutChangeNotification (trace, srcexp);
   // src is either reg or mem. So src is mutable
   const int size = static_cast<const MutableExpressionValueProxy &> (src).getSize ();
   // size is at most 32 bits
+  // FIXME: If size < 32 bits, w/o 16/8-bits concrete values support, isNegative is wrong
   const bool isNegative = srcexp->getLastConcreteValue ().isNegative ();
-  edu::sharif::twinner::trace::Expression *conditionExp = srcexp;
+  edu::sharif::twinner::trace::Expression *conditionExp = srcexp->clone ();
   conditionExp->minus (1ull << (size - 1));
   edu::sharif::twinner::trace::Constraint *cc;
   if (isNegative) {
@@ -596,9 +594,8 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
         (conditionExp, edu::sharif::twinner::trace::Constraint::NON_NEGATIVE,
          disassembledInstruction);
     edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operations...";
-    dstexp->truncate (size);
-    dstexp->minus (1ull << size);
-    dstexp->truncate (dst.getSize ());
+    srcexp->truncate (size); // FIXME: This line is redundant after support of 16/8-bits
+    srcexp->minus (1ull << size);
   } else {
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy positive condition...";
     cc = new edu::sharif::twinner::trace::Constraint
@@ -607,7 +604,9 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   }
   delete conditionExp; // this is cloned by cc and is not required anymore
   trace->addPathConstraint (cc);
-  dst.valueIsChanged (trace, dstexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  dst.setExpression (trace, *srcexp);
+  delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1175,23 +1174,18 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
     const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "divAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting left dst exp...";
-  edu::sharif::twinner::trace::Expression *leftDstExp =
-      leftDst.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting right dst exp...";
-  edu::sharif::twinner::trace::Expression *rightDstExp =
-      rightDst.getExpression (trace);
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting left dst exp...";
+  edu::sharif::twinner::trace::Expression *leftDstExp = leftDst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting right dst exp...";
+  edu::sharif::twinner::trace::Expression *rightDstExp = rightDst.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tpreparing left-right in both dst regs...";
   operandSize = leftDst.getSize ();
   leftDstExp->shiftToLeft (operandSize);
   leftDstExp->bitwiseOr (rightDstExp);
-  rightDstExp = rightDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
-  // now leftDstExp is not connected but rightDstExp is connected to related registers
+  delete rightDstExp;
+  rightDstExp = leftDstExp->clone ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tcalculating quotient (right) and remainder (left) of division...";
   leftDstExp->binaryOperation
@@ -1203,13 +1197,14 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
   delete srcexp;
   leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
   delete leftDstExp;
+  rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
+  delete rightDstExp;
   // At this point, symbolic quotient and remainder are calculated correctly.
   // but concrete values are not! So we need to register a hook to synchronize concrete
   // values too (we can also calculate them in assembly, but it's not required).
 
   hook = &InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
@@ -1266,8 +1261,8 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
         RegisterResidentExpressionValueProxy (leftReg, *leftVal);
     const MutableExpressionValueProxy &right =
         RegisterResidentExpressionValueProxy (rightReg, *rightVal);
-    left.valueIsChanged (trace, leftExp);
-    right.valueIsChanged (trace, rightExp);
+    left.valueIsChanged (trace, *leftExp);
+    right.valueIsChanged (trace, *rightExp);
   }
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\toverlapping registers are updated.\n";
@@ -1279,16 +1274,10 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
     const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "mulAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting left dst exp...";
-  edu::sharif::twinner::trace::Expression *leftDstExp =
-      leftDst.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting right dst exp...";
-  edu::sharif::twinner::trace::Expression *rightDstExp =
-      rightDst.getExpression (trace);
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *leftDstExp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting right dst exp...";
+  edu::sharif::twinner::trace::Expression *rightDstExp = rightDst.getExpression (trace);
   operandSize = leftDst.getSize ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tmultiplying (left-right = right * src; size=0x"
@@ -1297,12 +1286,12 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::MULTIPLY), srcexp);
   delete srcexp;
-  leftDstExp = leftDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
+  leftDstExp = rightDstExp->clone ();
   leftDstExp->shiftToRight (operandSize);
   rightDstExp->truncate (operandSize);
   leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
-  rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
   delete leftDstExp;
+  rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
   delete rightDstExp;
   // At this point, symbolic multiplication result is calculated correctly.
   // but concrete values are not! So we need to register a hook to synchronize concrete

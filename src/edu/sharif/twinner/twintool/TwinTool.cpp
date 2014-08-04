@@ -276,11 +276,15 @@ edu::sharif::twinner::trace::ConcreteValue *readRegisterContent (
   case 8:
     value = buffer.qword[0];
     break;
+  case 16:
+    return new edu::sharif::twinner::trace::ConcreteValue128Bits
+        (buffer.qword[1], buffer.qword[0]);
   default:
     throw std::runtime_error ("util::readRegisterContent (...) method: "
                               "Size of requested register is unsupported.");
   }
-  return new edu::sharif::twinner::trace::ConcreteValue64Bits (value);
+  return edu::sharif::twinner::trace::ConcreteValue64Bits (value).clone
+      (REG_Size (reg) * 8);
 }
 
 UINT64 readMemoryContent (ADDRINT memoryEa) {
