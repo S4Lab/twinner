@@ -41,10 +41,17 @@ public:
 
   virtual void valueIsChanged (
       edu::sharif::twinner::trace::Trace *trace,
-      edu::sharif::twinner::trace::Expression *changedExp) const;
+      const edu::sharif::twinner::trace::Expression &changedExp) const;
 
-  virtual void truncate (edu::sharif::twinner::trace::Expression *exp) const;
   virtual int getSize () const;
+
+private:
+  void propagateChangeDownwards (int size, ADDRINT memoryEa,
+      edu::sharif::twinner::trace::Trace *trace,
+      const edu::sharif::twinner::trace::Expression &changedExp) const;
+  void propagateChangeUpwards (int size, ADDRINT memoryEa,
+      edu::sharif::twinner::trace::Trace *trace,
+      const edu::sharif::twinner::trace::Expression &changedExp) const;
 };
 
 }

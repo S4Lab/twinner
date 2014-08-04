@@ -35,33 +35,24 @@ memoryEa (_memoryEa), memReadBytes (_memReadBytes) {
 edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::getExpression (
     edu::sharif::twinner::trace::Trace *trace) const {
-  edu::sharif::twinner::trace::Expression *exp;
+  if (!isMemoryEaAligned ()) {
+    //TODO: Get two aligned exp and merge them in response
+    throw std::runtime_error ("Unaligned memory read is not implemented");
+  }
+  edu::sharif::twinner::trace::ConcreteValue *cv;
   if (memReadBytes == 16) {
     const UINT64 cvlsb = edu::sharif::twinner::util::readMemoryContent (memoryEa);
     const UINT64 cvmsb = edu::sharif::twinner::util::readMemoryContent (memoryEa + 8);
-    const edu::sharif::twinner::trace::Expression *explsb =
-        trace->getSymbolicExpressionByMemoryAddress
-        (memoryEa,
-         edu::sharif::twinner::trace::ConcreteValue64Bits (cvlsb));
-    exp = trace->getSymbolicExpressionByMemoryAddress
-        (memoryEa + 8,
-         edu::sharif::twinner::trace::ConcreteValue64Bits (cvmsb))->clone ();
-
-    exp->shiftToLeft (64);
-    exp->bitwiseOr (explsb);
-    exp->setLastConcreteValue
-        (new edu::sharif::twinner::trace::ConcreteValue128Bits (cvmsb, cvlsb));
-  } else if (0 <= memReadBytes && memReadBytes <= 8) {
-    const UINT64 cv = edu::sharif::twinner::util::readMemoryContent (memoryEa);
-    exp = trace->getSymbolicExpressionByMemoryAddress
-        (memoryEa, edu::sharif::twinner::trace::ConcreteValue64Bits (cv))->clone ();
-    if (memReadBytes != 8) { // < 8
-      exp->truncate (memReadBytes * 8);
-    }
+    cv = new edu::sharif::twinner::trace::ConcreteValue128Bits (cvmsb, cvlsb);
   } else {
-    throw std::runtime_error
-        ("For getting an expression from memory, "
-         "memReadBytes must be provided to the constructor of expression proxy class.");
+    const UINT64 cvval = edu::sharif::twinner::util::readMemoryContent (memoryEa);
+    cv = edu::sharif::twinner::trace::ConcreteValue64Bits (cvval).clone (getSize ());
+  }
+  edu::sharif::twinner::trace::Expression *exp =
+      trace->getSymbolicExpressionByMemoryAddress (getSize (), memoryEa, *cv)->clone ();
+  delete cv;
+  if (memReadBytes < 4) { // FIXME: Remove after supporting 16/8-bits concrete values
+    exp->truncate (memReadBytes * 8);
   }
   return exp;
 }
@@ -71,30 +62,14 @@ MemoryResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression *exp) const {
   if (isMemoryEaAligned ()) {
-    return *trace->setSymbolicExpressionByMemoryAddress (memReadBytes * 8, memoryEa, exp);
+    edu::sharif::twinner::trace::Expression *exp =
+        trace->setSymbolicExpressionByMemoryAddress (getSize (), memoryEa, exp);
+    truncate (exp);
+    return *exp;
   } else {
     //TODO: Divide exp into two expressions and set them at two aligned addresses
     throw std::runtime_error ("Unaligned memory write is not implemented");
   }
-  /*
-    const UINT64 cv = edu::sharif::twinner::util::readMemoryContent (memoryEa);
-    edu::sharif::twinner::trace::Expression *newexp =
-        new edu::sharif::twinner::trace::ExpressionImp
-        (memoryEa, edu::sharif::twinner::trace::ConcreteValue64Bits (cv),
-         trace->getCurrentSegmentIndex ());
-    edu::sharif::twinner::trace::Expression *bigexp =
-        trace->getSymbolicExpressionByMemoryAddress (memoryEa, newexp);
-    if (bigexp != newexp) {
-      delete newexp;
-    }
-    edu::sharif::twinner::trace::Expression *truncatedExp = exp->clone ();
-    truncatedExp->truncate (memReadBytes * 8);
-    const UINT64 mask = ~((1ull << (memReadBytes * 8)) - 1);
-    bigexp->bitwiseAnd (mask);
-    bigexp->bitwiseOr (truncatedExp);
-    delete truncatedExp;
-    return bigexp;
-   */
 }
 
 bool MemoryResidentExpressionValueProxy::isMemoryEaAligned () const {
@@ -103,20 +78,77 @@ bool MemoryResidentExpressionValueProxy::isMemoryEaAligned () const {
 
 void MemoryResidentExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
-    edu::sharif::twinner::trace::Expression *changedExp) const {
+    const edu::sharif::twinner::trace::Expression &changedExp) const {
   edu::sharif::twinner::util::Logger::loquacious () << "(memory value is changed to "
       << changedExp << ")\n";
-  // TODO: implement
-  // NOTE: Before implementing this function, the FIXME in
-  // the setExpressionWithoutChangeNotification method must be resolved.
+  // ASSERT: changedExp was returned from setExpressionWithoutChangeNotification () method
+  if (isMemoryEaAligned ()) {
+    propagateChangeUpwards (getSize (), memoryEa, trace, changedExp);
+    propagateChangeDownwards (getSize (), memoryEa, trace, changedExp);
+  } else {
+    throw std::runtime_error ("Unaligned memory write is not implemented");
+  }
 }
 
-void MemoryResidentExpressionValueProxy::truncate (
-    edu::sharif::twinner::trace::Expression *exp) const {
-  exp->truncate (getSize ());
+void MemoryResidentExpressionValueProxy::propagateChangeDownwards (int size,
+    ADDRINT memoryEa, edu::sharif::twinner::trace::Trace *trace,
+    const edu::sharif::twinner::trace::Expression &changedExp) const {
+  size /= 2;
+  if (size >= 32) {
+    edu::sharif::twinner::trace::Expression *exp = changedExp.clone ();
+    exp->truncate (size);
+    trace->setSymbolicExpressionByMemoryAddress (size, memoryEa + size / 8, exp);
+    propagateChangeDownwards (size, memoryEa + size / 8, exp);
+    delete exp;
+    exp = changedExp.clone ();
+    exp->shiftToRight (size);
+    trace->setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
+    propagateChangeDownwards (size, memoryEa, exp);
+    delete exp;
+  }
+}
+
+void MemoryResidentExpressionValueProxy::propagateChangeUpwards (int size,
+    ADDRINT memoryEa, edu::sharif::twinner::trace::Trace *trace,
+    const edu::sharif::twinner::trace::Expression &changedExp) const {
+  if (size <= 64) {
+    edu::sharif::twinner::trace::Expression *exp;
+    if (memoryEa % (size / 4) == 0) { // (2*size)-bits aligned
+      const UINT64 cv =
+          edu::sharif::twinner::util::readMemoryContent (memoryEa + size / 8);
+      edu::sharif::twinner::trace::ConcreteValue *cvObj =
+          edu::sharif::twinner::trace::ConcreteValue64Bits (cv).clone (size);
+      const edu::sharif::twinner::trace::Expression *neighbor =
+          trace->getSymbolicExpressionByMemoryAddress (size, memoryEa + size / 8, *cvObj);
+      delete cvObj;
+      exp = changedExp.clone (2 * size);
+      exp->shiftToRight (size);
+      exp->bitwiseOr (neighbor); // neighbor will be cloned internally
+    } else {
+      const UINT64 cv =
+          edu::sharif::twinner::util::readMemoryContent (memoryEa - size / 8);
+      edu::sharif::twinner::trace::ConcreteValue *cvObj =
+          edu::sharif::twinner::trace::ConcreteValue64Bits (cv).clone (size);
+      const edu::sharif::twinner::trace::Expression *neighbor =
+          trace->getSymbolicExpressionByMemoryAddress (size, memoryEa - size / 8, *cvObj);
+      delete cvObj;
+      exp = neighbor.clone (2 * size);
+      exp->shiftToRight (size);
+      exp->bitwiseOr (&changedExp); // changedExp will be cloned internally
+      memoryEa -= size / 8;
+    }
+    size *= 2;
+    trace->setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
+    propagateChangeUpwards (size, memoryEa, trace, *exp);
+    delete exp;
+  }
 }
 
 int MemoryResidentExpressionValueProxy::getSize () const {
+  if (memReadBytes < 0) {
+    throw std::runtime_error
+        ("memReadBytes is not provided to the constructor of expression proxy class.");
+  }
   return memReadBytes * 8;
 }
 

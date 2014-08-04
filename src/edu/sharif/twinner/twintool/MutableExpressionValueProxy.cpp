@@ -25,6 +25,11 @@ void MutableExpressionValueProxy::setExpression (
   valueIsChanged (trace, setExpressionWithoutChangeNotification (trace, exp));
 }
 
+void MutableExpressionValueProxy::truncate (
+    edu::sharif::twinner::trace::Expression *exp) const {
+  exp->truncate (getSize ());
+}
+
 }
 }
 }

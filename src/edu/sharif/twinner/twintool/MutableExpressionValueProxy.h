@@ -70,7 +70,7 @@ public:
    * Underlying expression won't be touched at all.
    * @param exp The expression who should be truncated to be fitted in this expression.
    */
-  virtual void truncate (edu::sharif::twinner::trace::Expression *exp) const = 0;
+  virtual void truncate (edu::sharif::twinner::trace::Expression *exp) const;
 
   /**
    * Finds size of the underlying expression container. For example memory read/write

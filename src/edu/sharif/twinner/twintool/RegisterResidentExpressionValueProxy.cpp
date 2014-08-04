@@ -205,11 +205,6 @@ int RegisterResidentExpressionValueProxy::getRegisterIndex (REG reg) const {
   }
 }
 
-void RegisterResidentExpressionValueProxy::truncate (
-    edu::sharif::twinner::trace::Expression *exp) const {
-  exp->truncate (getSize ());
-}
-
 int RegisterResidentExpressionValueProxy::getSize () const {
   return REG_Size (reg) * 8;
 }

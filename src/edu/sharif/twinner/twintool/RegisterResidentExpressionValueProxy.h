@@ -58,7 +58,6 @@ public:
       edu::sharif::twinner::trace::Trace *trace,
       edu::sharif::twinner::trace::Expression *changedExp) const;
 
-  virtual void truncate (edu::sharif::twinner::trace::Expression *exp) const;
   virtual int getSize () const;
 
 private:
