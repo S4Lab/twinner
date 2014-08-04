@@ -49,14 +49,14 @@ public:
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const;
 
-  virtual edu::sharif::twinner::trace::Expression *
+  virtual edu::sharif::twinner::trace::Expression
   setExpressionWithoutChangeNotification (
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const;
 
   virtual void valueIsChanged (
       edu::sharif::twinner::trace::Trace *trace,
-      edu::sharif::twinner::trace::Expression *changedExp) const;
+      const edu::sharif::twinner::trace::Expression &changedExp) const;
 
   virtual int getSize () const;
 
@@ -64,7 +64,7 @@ private:
   void putExpressionInLeastSignificantBitsOfRegister (
       edu::sharif::twinner::trace::Trace *trace,
       REG r, int bits,
-      edu::sharif::twinner::trace::Expression *exp) const;
+      const edu::sharif::twinner::trace::Expression &exp) const;
 
   enum RegisterType {
 
