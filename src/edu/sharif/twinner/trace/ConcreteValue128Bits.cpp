@@ -26,19 +26,19 @@ namespace twinner {
 namespace trace {
 
 ConcreteValue128Bits::ConcreteValue128Bits () :
-ConcreteValueAbstractImp (), msb (0), lsb (0) {
+ConcreteValueAbstractImp<128> (), msb (0), lsb (0) {
 }
 
 ConcreteValue128Bits::ConcreteValue128Bits (UINT64 _msb, UINT64 _lsb) :
-ConcreteValueAbstractImp (), msb (_msb), lsb (_lsb) {
+ConcreteValueAbstractImp<128> (), msb (_msb), lsb (_lsb) {
 }
 
 ConcreteValue128Bits::ConcreteValue128Bits (const PIN_REGISTER &value) :
-ConcreteValueAbstractImp (), msb (value.qword[1]), lsb (value.qword[0]) {
+ConcreteValueAbstractImp<128> (), msb (value.qword[1]), lsb (value.qword[0]) {
 }
 
 ConcreteValue128Bits::ConcreteValue128Bits (const ConcreteValue &cv) :
-ConcreteValueAbstractImp () {
+ConcreteValueAbstractImp<128> () {
   if (dynamic_cast<const ConcreteValue32Bits *> (&cv)) {
     lsb = static_cast<const ConcreteValue32Bits *> (&cv)->getValue ();
     msb = 0;
@@ -80,7 +80,7 @@ void ConcreteValue128Bits::saveToBinaryStream (std::ofstream &out) const {
 void ConcreteValue128Bits::writeToMemoryAddress (ADDRINT memoryEa) const {
   const UINT64 qword[] = {lsb, msb};
   edu::sharif::twinner::util::writeMemoryContent
-      (memoryEa, (const UINT8 *) qword, sizeof (qword));
+      (memoryEa, (const UINT8 *) qword, 2 * sizeof (UINT64));
 }
 
 void ConcreteValue128Bits::writeToRegister (CONTEXT *context, REG reg) const {
@@ -266,7 +266,7 @@ void ConcreteValue128Bits::divide (
                               "Division by zero!");
   } else if (divisor > dividend) {
     quotient = 0;
-    remainder = dividend;
+    remainder = (ConcreteValue &) dividend;
   } else if (divisor == dividend) {
     quotient = 1;
     remainder = 0;

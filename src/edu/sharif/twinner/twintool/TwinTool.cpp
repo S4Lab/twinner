@@ -294,14 +294,6 @@ UINT64 readMemoryContent (ADDRINT memoryEa) {
   return currentConcreteValue;
 }
 
-VOID writeMemoryContent (ADDRINT memoryEa, const UINT64 value) {
-  PIN_SafeCopy ((VOID *) memoryEa, (const VOID *) &value, sizeof (value));
-}
-
-VOID writeMemoryContent (ADDRINT memoryEa, const UINT32 value) {
-  PIN_SafeCopy ((VOID *) memoryEa, (const VOID *) &value, sizeof (value));
-}
-
 VOID writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
   PIN_SafeCopy ((VOID *) memoryEa, (const VOID *) value, size);
 }

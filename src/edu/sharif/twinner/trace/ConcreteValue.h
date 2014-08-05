@@ -36,6 +36,7 @@ public:
   virtual ~ConcreteValue ();
 
   virtual ConcreteValue &operator= (UINT64 value) = 0;
+  virtual ConcreteValue &operator= (const ConcreteValue &v) = 0;
 
   virtual void writeToMemoryAddress (ADDRINT memoryEa) const = 0;
   virtual void writeToRegister (CONTEXT *context, REG reg) const = 0;

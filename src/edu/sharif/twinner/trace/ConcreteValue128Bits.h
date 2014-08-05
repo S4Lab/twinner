@@ -33,7 +33,7 @@ public:
   virtual ~ConcreteValue128Bits ();
 
   virtual ConcreteValue128Bits &operator= (UINT64 value);
-  ConcreteValue128Bits &operator= (const ConcreteValue &value);
+  virtual ConcreteValue128Bits &operator= (const ConcreteValue &value);
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
 

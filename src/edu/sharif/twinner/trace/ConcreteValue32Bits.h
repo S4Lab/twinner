@@ -20,56 +20,20 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-class ConcreteValue32Bits : public ConcreteValueAbstractImp<32> {
-
-private:
-  UINT32 value;
+class ConcreteValue32Bits : public ConcreteValueAbstractImp<32, UINT32> {
 
 public:
   ConcreteValue32Bits (UINT32 value);
   ConcreteValue32Bits (const ConcreteValue &cv);
   virtual ~ConcreteValue32Bits ();
 
-  virtual ConcreteValue32Bits &operator= (UINT64 value);
-  ConcreteValue32Bits &operator= (const ConcreteValue &value);
-
-  virtual void saveToBinaryStream (std::ofstream &out) const;
-
-  virtual void writeToMemoryAddress (ADDRINT memoryEa) const;
   virtual void writeToRegister (CONTEXT *context, REG reg) const;
-
-  friend std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
-      const ConcreteValue32Bits &me);
 
   virtual ConcreteValue32Bits *twosComplement () const;
 
   virtual ConcreteValue *clone (int length = -1) const;
 
-  UINT32 getValue () const;
-
   static ConcreteValue32Bits *loadFromBinaryStream (std::ifstream &in);
-
-  virtual UINT64 toUint64 () const {
-    return getValue ();
-  }
-
-  virtual bool operator> (const ConcreteValue &cv) const;
-  virtual bool greaterThan (const ConcreteValue &cv) const;
-  virtual bool operator== (const ConcreteValue &cv) const;
-
-  virtual ConcreteValue32Bits &operator-= (const ConcreteValue &cv);
-  virtual ConcreteValue32Bits &operator+= (const ConcreteValue &cv);
-
-  virtual ConcreteValue32Bits &operator&= (const ConcreteValue &mask);
-  virtual ConcreteValue32Bits &operator|= (const ConcreteValue &mask);
-
-  virtual ConcreteValue32Bits &operator*= (const ConcreteValue &mul);
-  virtual ConcreteValue32Bits &operator/= (const ConcreteValue &divisor);
-  virtual ConcreteValue32Bits &operator%= (const ConcreteValue &divisor);
-  virtual ConcreteValue32Bits &operator^= (const ConcreteValue &pattern);
-
-  virtual ConcreteValue32Bits &operator>>= (const ConcreteValue &bits);
-  virtual ConcreteValue32Bits &operator<<= (const ConcreteValue &bits);
 };
 
 }
