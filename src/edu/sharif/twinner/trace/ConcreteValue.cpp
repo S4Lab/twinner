@@ -12,6 +12,7 @@
 
 #include "ConcreteValue.h"
 
+#include "ConcreteValue16Bits.h"
 #include "ConcreteValue32Bits.h"
 #include "ConcreteValue64Bits.h"
 #include "ConcreteValue128Bits.h"
@@ -33,6 +34,8 @@ ConcreteValue *ConcreteValue::loadFromBinaryStream (std::ifstream &in) {
   UINT32 size;
   in.read ((char *) &size, sizeof (size));
   switch (size) {
+  case 16:
+    return ConcreteValue16Bits::loadFromBinaryStream (in);
   case 32:
     return ConcreteValue32Bits::loadFromBinaryStream (in);
   case 64:

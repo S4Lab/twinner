@@ -15,6 +15,7 @@
 
 #include "ConcreteValue128Bits.h"
 
+#include "ConcreteValue16Bits.h"
 #include "ConcreteValue32Bits.h"
 #include "ConcreteValue64Bits.h"
 
@@ -39,7 +40,10 @@ ConcreteValueAbstractImp<128> (), msb (value.qword[1]), lsb (value.qword[0]) {
 
 ConcreteValue128Bits::ConcreteValue128Bits (const ConcreteValue &cv) :
 ConcreteValueAbstractImp<128> () {
-  if (dynamic_cast<const ConcreteValue32Bits *> (&cv)) {
+  if (dynamic_cast<const ConcreteValue16Bits *> (&cv)) {
+    lsb = static_cast<const ConcreteValue16Bits *> (&cv)->getValue ();
+    msb = 0;
+  } else if (dynamic_cast<const ConcreteValue32Bits *> (&cv)) {
     lsb = static_cast<const ConcreteValue32Bits *> (&cv)->getValue ();
     msb = 0;
   } else if (dynamic_cast<const ConcreteValue64Bits *> (&cv)) {
@@ -116,6 +120,8 @@ ConcreteValue128Bits *ConcreteValue128Bits::twosComplement () const {
 
 ConcreteValue *ConcreteValue128Bits::clone (int length) const {
   switch (length) {
+  case 16:
+    return new ConcreteValue16Bits (UINT16 (lsb));
   case 32:
     return new ConcreteValue32Bits (UINT32 (lsb));
   case 64:
