@@ -76,13 +76,33 @@ Expression (concreteValue.clone (), isOverwriting) {
       stack.push_back (new Operator (Operator::BITWISE_AND));
     } else {
       stack.push_back (new MemoryEmergedSymbol
-                       (memoryEa - 8,
+                       (memoryEa - 4,
                         ConcreteValue64Bits (concreteValue.toUint64 () << 32),
                         generationIndex));
       stack.push_back (new Constant (32));
       stack.push_back (new Operator (Operator::SHIFT_RIGHT));
     }
     break;
+  case 16:
+  {
+    const int offset = memoryEa % 8;
+    if (offset == 0) {
+      stack.push_back (new MemoryEmergedSymbol
+                       (memoryEa, ConcreteValue64Bits (concreteValue), generationIndex));
+    } else {
+      stack.push_back (new MemoryEmergedSymbol
+                       (memoryEa - offset,
+                        ConcreteValue64Bits (concreteValue.toUint64 () << (offset * 8)),
+                        generationIndex));
+      stack.push_back (new Constant (offset * 8));
+      stack.push_back (new Operator (Operator::SHIFT_RIGHT));
+    }
+    if (offset < 6) {
+      stack.push_back (new Constant ((1ull << 16) - 1));
+      stack.push_back (new Operator (Operator::BITWISE_AND));
+    }
+    break;
+  }
   default:
     throw std::runtime_error ("ExpressionImp::ExpressionImp (...): "
                               "Unsupported concrete value size");

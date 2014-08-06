@@ -21,6 +21,8 @@
 
 #include "edu/sharif/twinner/util/memory.h"
 
+#include <sstream>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -130,7 +132,9 @@ ConcreteValue *ConcreteValue128Bits::clone (int length) const {
   case 128:
     return new ConcreteValue128Bits (msb, lsb);
   default:
-    throw std::runtime_error ("ConcreteValue128Bits::clone (length): Unsupported length");
+    std::stringstream ss;
+    ss << "ConcreteValue128Bits::clone (" << length << "): Unsupported length";
+    throw std::runtime_error (ss.str ());
   }
 }
 
