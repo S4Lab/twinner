@@ -33,6 +33,7 @@ private:
   std::map < ADDRINT, Expression * > memoryAddressTo64BitsExpression;
   std::map < ADDRINT, Expression * > memoryAddressTo32BitsExpression;
   std::map < ADDRINT, Expression * > memoryAddressTo16BitsExpression;
+  std::map < ADDRINT, Expression * > memoryAddressTo8BitsExpression;
   std::list < const Constraint * > pathConstraints;
   /// Each execution trace segment is terminated with some syscall.
   Syscall syscall;

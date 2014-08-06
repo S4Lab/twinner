@@ -51,9 +51,6 @@ MemoryResidentExpressionValueProxy::getExpression (
   edu::sharif::twinner::trace::Expression *exp =
       trace->getSymbolicExpressionByMemoryAddress (getSize (), memoryEa, *cv)->clone ();
   delete cv;
-  if (memReadBytes < 2) { // FIXME: Remove after supporting 8-bits concrete values
-    exp->truncate (memReadBytes * 8);
-  }
   return exp;
 }
 

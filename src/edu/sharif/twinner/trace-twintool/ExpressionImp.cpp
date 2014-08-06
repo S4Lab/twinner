@@ -17,7 +17,6 @@
 #include "edu/sharif/twinner/trace/Constant.h"
 #include "edu/sharif/twinner/trace/ConcreteValue128Bits.h"
 #include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
-#include "edu/sharif/twinner/trace/ConcreteValue32Bits.h"
 
 namespace edu {
 namespace sharif {
@@ -50,7 +49,7 @@ Expression (concreteValue.clone (), isOverwriting) {
       return;
     }
   }
-  switch (concreteValue.getSize ()) {
+  switch (const int cvsize = concreteValue.getSize ()) {
   case 128:
   {
     const ConcreteValue128Bits *cv =
@@ -69,21 +68,8 @@ Expression (concreteValue.clone (), isOverwriting) {
     stack.push_back (new MemoryEmergedSymbol (memoryEa, concreteValue, generationIndex));
     break;
   case 32:
-    if (memoryEa % 8 == 0) {
-      stack.push_back (new MemoryEmergedSymbol
-                       (memoryEa, ConcreteValue64Bits (concreteValue), generationIndex));
-      stack.push_back (new Constant ((1ull << 32) - 1));
-      stack.push_back (new Operator (Operator::BITWISE_AND));
-    } else {
-      stack.push_back (new MemoryEmergedSymbol
-                       (memoryEa - 4,
-                        ConcreteValue64Bits (concreteValue.toUint64 () << 32),
-                        generationIndex));
-      stack.push_back (new Constant (32));
-      stack.push_back (new Operator (Operator::SHIFT_RIGHT));
-    }
-    break;
   case 16:
+  case 8:
   {
     const int offset = memoryEa % 8;
     if (offset == 0) {
@@ -97,8 +83,8 @@ Expression (concreteValue.clone (), isOverwriting) {
       stack.push_back (new Constant (offset * 8));
       stack.push_back (new Operator (Operator::SHIFT_RIGHT));
     }
-    if (offset < 6) {
-      stack.push_back (new Constant ((1ull << 16) - 1));
+    if (offset < 8 - (cvsize / 8)) {
+      stack.push_back (new Constant ((1ull << cvsize) - 1));
       stack.push_back (new Operator (Operator::BITWISE_AND));
     }
     break;

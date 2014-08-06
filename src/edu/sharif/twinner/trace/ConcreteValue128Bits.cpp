@@ -15,6 +15,7 @@
 
 #include "ConcreteValue128Bits.h"
 
+#include "ConcreteValue8Bits.h"
 #include "ConcreteValue16Bits.h"
 #include "ConcreteValue32Bits.h"
 #include "ConcreteValue64Bits.h"
@@ -42,21 +43,12 @@ ConcreteValueAbstractImp<128> (), msb (value.qword[1]), lsb (value.qword[0]) {
 
 ConcreteValue128Bits::ConcreteValue128Bits (const ConcreteValue &cv) :
 ConcreteValueAbstractImp<128> () {
-  if (dynamic_cast<const ConcreteValue16Bits *> (&cv)) {
-    lsb = static_cast<const ConcreteValue16Bits *> (&cv)->getValue ();
-    msb = 0;
-  } else if (dynamic_cast<const ConcreteValue32Bits *> (&cv)) {
-    lsb = static_cast<const ConcreteValue32Bits *> (&cv)->getValue ();
-    msb = 0;
-  } else if (dynamic_cast<const ConcreteValue64Bits *> (&cv)) {
-    lsb = static_cast<const ConcreteValue64Bits *> (&cv)->getValue ();
-    msb = 0;
-  } else if (dynamic_cast<const ConcreteValue128Bits *> (&cv)) {
+  if (dynamic_cast<const ConcreteValue128Bits *> (&cv)) {
     lsb = static_cast<const ConcreteValue128Bits *> (&cv)->getLsb ();
     msb = static_cast<const ConcreteValue128Bits *> (&cv)->getMsb ();
   } else {
-    throw std::runtime_error ("ConcreteValue64Bits instantiation problem "
-                              "(copying from unknown type).");
+    lsb = cv.toUint64 ();
+    msb = 0;
   }
 }
 
@@ -122,6 +114,8 @@ ConcreteValue128Bits *ConcreteValue128Bits::twosComplement () const {
 
 ConcreteValue *ConcreteValue128Bits::clone (int length) const {
   switch (length) {
+  case 8:
+    return new ConcreteValue8Bits (UINT8 (lsb));
   case 16:
     return new ConcreteValue16Bits (UINT16 (lsb));
   case 32:

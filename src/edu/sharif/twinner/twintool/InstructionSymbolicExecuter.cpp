@@ -583,7 +583,6 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   // src is either reg or mem. So src is mutable
   const int size = static_cast<const MutableExpressionValueProxy &> (src).getSize ();
   // size is at most 32 bits
-  // FIXME: If size < 32 bits, w/o 16/8-bits concrete values support, isNegative is wrong
   const bool isNegative = srcexp->getLastConcreteValue ().isNegative ();
   edu::sharif::twinner::trace::Expression *conditionExp = srcexp->clone ();
   conditionExp->minus (1ull << (size - 1));
@@ -594,7 +593,7 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
         (conditionExp, edu::sharif::twinner::trace::Constraint::NON_NEGATIVE,
          disassembledInstruction);
     edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operations...";
-    srcexp->truncate (size); // FIXME: This line is redundant after support of 16/8-bits
+    srcexp->truncate (size); // This line is redundant
     srcexp->minus (1ull << size);
   } else {
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy positive condition...";

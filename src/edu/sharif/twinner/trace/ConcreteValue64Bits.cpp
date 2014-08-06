@@ -12,6 +12,7 @@
 
 #include "ConcreteValue64Bits.h"
 
+#include "ConcreteValue8Bits.h"
 #include "ConcreteValue16Bits.h"
 #include "ConcreteValue32Bits.h"
 #include "ConcreteValue128Bits.h"
@@ -49,6 +50,8 @@ ConcreteValue64Bits *ConcreteValue64Bits::twosComplement () const {
 
 ConcreteValue *ConcreteValue64Bits::clone (int length) const {
   switch (length) {
+  case 8:
+    return new ConcreteValue8Bits (UINT8 (value));
   case 16:
     return new ConcreteValue16Bits (UINT16 (value));
   case 32:

@@ -65,7 +65,8 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
   registerToExpression.clear ();
   std::map < ADDRINT, Expression * > *memToExp[]
       = {&memoryAddressTo128BitsExpression, &memoryAddressTo64BitsExpression,
-         &memoryAddressTo32BitsExpression, &memoryAddressTo16BitsExpression, 0};
+         &memoryAddressTo32BitsExpression, &memoryAddressTo16BitsExpression,
+         &memoryAddressTo8BitsExpression, 0};
   for (int i = 0; memToExp[i]; ++i) {
     for (std::map < ADDRINT, Expression * >::iterator it = memToExp[i]->begin ();
         it != memToExp[i]->end (); ++it) {
@@ -107,6 +108,9 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (in
   case 16:
     return tryToGetSymbolicExpressionImplementation
         (memoryAddressTo16BitsExpression, memoryEa, memval);
+  case 8:
+    return tryToGetSymbolicExpressionImplementation
+        (memoryAddressTo8BitsExpression, memoryEa, memval);
   default:
     throw std::runtime_error ("Memory read size is not supported");
   }
@@ -127,6 +131,9 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (in
   case 16:
     return tryToGetSymbolicExpressionImplementation
         (memoryAddressTo16BitsExpression, memoryEa);
+  case 8:
+    return tryToGetSymbolicExpressionImplementation
+        (memoryAddressTo8BitsExpression, memoryEa);
   default:
     throw std::runtime_error ("Memory read size is not supported");
   }
@@ -211,6 +218,9 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int siz
   case 16:
     return getSymbolicExpressionImplementation
         (memoryAddressTo16BitsExpression, memoryEa, memval, newExpression);
+  case 8:
+    return getSymbolicExpressionImplementation
+        (memoryAddressTo8BitsExpression, memoryEa, memval, newExpression);
   default:
     throw std::runtime_error ("Memory read size is not supported");
   }
@@ -231,6 +241,9 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int siz
   case 16:
     return getSymbolicExpressionImplementation
         (memoryAddressTo16BitsExpression, memoryEa, newExpression);
+  case 8:
+    return getSymbolicExpressionImplementation
+        (memoryAddressTo8BitsExpression, memoryEa, newExpression);
   default:
     throw std::runtime_error ("Memory read size is not supported");
   }
@@ -309,6 +322,9 @@ Expression *ExecutionTraceSegment::setSymbolicExpressionByMemoryAddress (int siz
   case 16:
     return setSymbolicExpressionImplementation
         (16, memoryAddressTo16BitsExpression, memoryEa, exp);
+  case 8:
+    return setSymbolicExpressionImplementation
+        (8, memoryAddressTo8BitsExpression, memoryEa, exp);
   default:
     throw std::runtime_error ("Memory setting size is not supported");
   }
