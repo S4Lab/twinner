@@ -22,8 +22,6 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-//TODO: support other types else of UINT64 too
-
 class Constant : public Operand {
 
 private:

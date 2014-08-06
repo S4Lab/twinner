@@ -122,23 +122,17 @@ const Logger &Logger::operator<< (
 
 const Logger &Logger::operator<< (
     const edu::sharif::twinner::trace::ConcreteValue &value) const {
-  const edu::sharif::twinner::trace::ConcreteValue64Bits *valueimp =
-      dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue64Bits *> (&value);
-  if (valueimp) {
-    return (*this) << "ConcreteValue64Bits(0x" << std::hex
-        << valueimp->getValue () << ')';
-  } else {
+  if (dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *> (&value)) {
     const edu::sharif::twinner::trace::ConcreteValue128Bits *value128imp =
-        dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *> (&value);
-    if (value128imp) {
-      std::stringstream ss;
-      ss << "ConcreteValue128Bits(0x" << std::hex
-          << value128imp->getMsb () << std::setw (16) << std::setfill ('0')
-          << value128imp->getLsb () << ')';
-      return (*this) << ss.str ();
-    } else {
-      return (*this) << "ConcreteValue(unsupported-type)";
-    }
+        static_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *> (&value);
+    std::stringstream ss;
+    ss << "ConcreteValue128Bits(0x" << std::hex
+        << value128imp->getMsb () << std::setw (16) << std::setfill ('0')
+        << value128imp->getLsb () << ')';
+    return (*this) << ss.str ();
+  } else {
+    return (*this) << "ConcreteValue" << value.getSize () << "Bits(0x" << std::hex
+        << value.toUint64 () << ')';
   }
 }
 
