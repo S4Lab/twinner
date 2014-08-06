@@ -53,7 +53,16 @@ ConcreteValue *ConcreteValue::loadFromBinaryStream (std::ifstream &in) {
 
 std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
     const ConcreteValue &cv) {
-  if (dynamic_cast<const ConcreteValue64Bits *> (&cv)) {
+  if (dynamic_cast<const ConcreteValue8Bits *> (&cv)) {
+    return stream << static_cast<const ConcreteValue8Bits &> (cv);
+
+  } else if (dynamic_cast<const ConcreteValue16Bits *> (&cv)) {
+    return stream << static_cast<const ConcreteValue16Bits &> (cv);
+
+  } else if (dynamic_cast<const ConcreteValue32Bits *> (&cv)) {
+    return stream << static_cast<const ConcreteValue32Bits &> (cv);
+
+  } else if (dynamic_cast<const ConcreteValue64Bits *> (&cv)) {
     return stream << static_cast<const ConcreteValue64Bits &> (cv);
 
   } else if (dynamic_cast<const ConcreteValue128Bits *> (&cv)) {
