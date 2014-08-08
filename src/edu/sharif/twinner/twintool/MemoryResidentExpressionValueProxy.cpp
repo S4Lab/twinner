@@ -121,6 +121,8 @@ void MemoryResidentExpressionValueProxy::propagateChangeUpwards (int size,
       exp = neighbor->clone (2 * size); // MSB
       exp->shiftToLeft (size);
       exp->bitwiseOr (&changedExp); // changedExp will be cloned internally
+      //XXX: Following downwards check is only necessary when neighbor is newly created
+      propagateChangeDownwards (size, memoryEa + size / 8, trace, *neighbor);
     } else { // changedExp is right-side (i.e. MSB in little-endian)
       const UINT64 cv =
           edu::sharif::twinner::util::readMemoryContent (memoryEa - size / 8);
@@ -133,6 +135,8 @@ void MemoryResidentExpressionValueProxy::propagateChangeUpwards (int size,
       exp->shiftToLeft (size);
       exp->bitwiseOr (neighbor); // neighbor will be cloned internally
       memoryEa -= size / 8;
+      //XXX: Following downwards check is only necessary when neighbor is newly created
+      propagateChangeDownwards (size, memoryEa, trace, *neighbor);
     }
     size *= 2;
     trace->setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
