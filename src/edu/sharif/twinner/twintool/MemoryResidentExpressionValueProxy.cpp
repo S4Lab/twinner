@@ -29,7 +29,7 @@ namespace twintool {
 
 MemoryResidentExpressionValueProxy::MemoryResidentExpressionValueProxy (
     ADDRINT _memoryEa, int _memReadBytes) :
-memoryEa (_memoryEa), memReadBytes (_memReadBytes) {
+    memoryEa (_memoryEa), memReadBytes (_memReadBytes) {
 }
 
 edu::sharif::twinner::trace::Expression *
@@ -93,14 +93,14 @@ void MemoryResidentExpressionValueProxy::propagateChangeDownwards (int size,
   size /= 2;
   if (size >= 32) {
     edu::sharif::twinner::trace::Expression *exp = changedExp.clone ();
-    exp->truncate (size);
-    trace->setSymbolicExpressionByMemoryAddress (size, memoryEa + size / 8, exp);
-    propagateChangeDownwards (size, memoryEa + size / 8, trace, *exp);
-    delete exp;
-    exp = changedExp.clone ();
-    exp->shiftToRight (size);
+    exp->truncate (size); // LSB (left-side in little-endian)
     trace->setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
     propagateChangeDownwards (size, memoryEa, trace, *exp);
+    delete exp;
+    exp = changedExp.clone ();
+    exp->shiftToRight (size); // MSB (right-side in little-endian)
+    trace->setSymbolicExpressionByMemoryAddress (size, memoryEa + size / 8, exp);
+    propagateChangeDownwards (size, memoryEa + size / 8, trace, *exp);
     delete exp;
   }
 }
@@ -118,10 +118,10 @@ void MemoryResidentExpressionValueProxy::propagateChangeUpwards (int size,
       const edu::sharif::twinner::trace::Expression *neighbor =
           trace->getSymbolicExpressionByMemoryAddress (size, memoryEa + size / 8, *cvObj);
       delete cvObj;
-      exp = changedExp.clone (2 * size);
-      exp->shiftToRight (size);
-      exp->bitwiseOr (neighbor); // neighbor will be cloned internally
-    } else {
+      exp = neighbor->clone (2 * size); // MSB
+      exp->shiftToLeft (size);
+      exp->bitwiseOr (&changedExp); // changedExp will be cloned internally
+    } else { // changedExp is right-side (i.e. MSB in little-endian)
       const UINT64 cv =
           edu::sharif::twinner::util::readMemoryContent (memoryEa - size / 8);
       edu::sharif::twinner::trace::ConcreteValue *cvObj =
@@ -129,9 +129,9 @@ void MemoryResidentExpressionValueProxy::propagateChangeUpwards (int size,
       const edu::sharif::twinner::trace::Expression *neighbor =
           trace->getSymbolicExpressionByMemoryAddress (size, memoryEa - size / 8, *cvObj);
       delete cvObj;
-      exp = neighbor->clone (2 * size);
-      exp->shiftToRight (size);
-      exp->bitwiseOr (&changedExp); // changedExp will be cloned internally
+      exp = changedExp.clone (2 * size); // MSB
+      exp->shiftToLeft (size);
+      exp->bitwiseOr (neighbor); // neighbor will be cloned internally
       memoryEa -= size / 8;
     }
     size *= 2;
