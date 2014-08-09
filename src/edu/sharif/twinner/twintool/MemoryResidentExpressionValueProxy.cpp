@@ -36,8 +36,27 @@ edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::getExpression (
     edu::sharif::twinner::trace::Trace *trace) const {
   if (!isMemoryEaAligned ()) {
-    //TODO: Get two aligned exp and merge them in response
-    throw std::runtime_error ("Unaligned memory read is not implemented");
+    /**
+     * Example for 64-bits (each character is showing one byte):
+     * Memory state:           0 1 2 3 4 5 6 7 8 9 a b c d e f
+     *                               X Y Z W P Q R T
+     * Expected expression (little-endian): T R Q P W Z Y X
+     * reading two 64-bits from memory:    P W Z Y X 2 1 0      f e d c b T R Q
+     * After shift & truncation:           - - - P W Z Y X      T R Q - - - - -
+     * After bitwise or:                   T R Q P W Z Y X
+     */
+    MemoryResidentExpressionValueProxy leftProxy
+        (memoryEa - (memoryEa % memReadBytes), memReadBytes);
+    MemoryResidentExpressionValueProxy rightProxy
+        (memoryEa - (memoryEa % memReadBytes) + memReadBytes, memReadBytes);
+    edu::sharif::twinner::trace::Expression *leftExp = leftProxy.getExpression (trace);
+    edu::sharif::twinner::trace::Expression *rightExp = rightProxy.getExpression (trace);
+    leftExp->shiftToRight (8 * (memoryEa % memReadBytes));
+    rightExp->shiftToLeft (8 * (8 - (memoryEa % memReadBytes)));
+    rightExp->truncate (memReadBytes * 8);
+    leftExp->bitwiseOr (rightExp);
+    delete rightExp;
+    return leftExp;
   }
   edu::sharif::twinner::trace::ConcreteValue *cv;
   if (memReadBytes == 16) {
