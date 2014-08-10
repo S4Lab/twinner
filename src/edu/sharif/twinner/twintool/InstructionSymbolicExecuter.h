@@ -346,7 +346,7 @@ private:
 
   /**
    * PCMPEQB is a packed compare equality check which works byte-wise. The src and dst
-   * are compared together byte-by-byte and those byte which are/aren't equal will be
+   * are compared together byte-by-byte and those bytes which are/aren't equal will be
    * filed with 1 (0xFF) / 0 (0x00) in the dst reg.
    */
   void pcmpeqbAnalysisRoutine (

@@ -31,11 +31,11 @@ namespace trace {
 
 Expression::Expression (const std::list < ExpressionToken * > &stk,
     ConcreteValue *concreteValue) :
-stack (stk), lastConcreteValue (concreteValue), isOverwriting (false) {
+    stack (stk), lastConcreteValue (concreteValue), isOverwriting (false) {
 }
 
 Expression::Expression (const Expression &exp) :
-lastConcreteValue (exp.lastConcreteValue->clone ()), isOverwriting (false) {
+    lastConcreteValue (exp.lastConcreteValue->clone ()), isOverwriting (false) {
   for (std::list < ExpressionToken * >::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const ExpressionToken *et = *it;
@@ -44,7 +44,7 @@ lastConcreteValue (exp.lastConcreteValue->clone ()), isOverwriting (false) {
 }
 
 Expression::Expression (int size, const Expression &exp) :
-lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
+    lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
   for (std::list < ExpressionToken * >::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const ExpressionToken *et = *it;
@@ -53,7 +53,7 @@ lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
 }
 
 Expression::Expression (ConcreteValue *concreteValue, bool _isOverwriting) :
-lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
+    lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
 }
 
 Expression::~Expression () {
@@ -193,10 +193,9 @@ void Expression::shiftToLeft (ConcreteValue *bits) {
     stack.push_back (new Operator (Operator::SHIFT_LEFT));
     (*lastConcreteValue) <<= *bits;
   } else {
-    ConcreteValue64Bits tmp = *bits;
     UINT64 val = 1;
     // shift-to-left by n bits is equivalent to multiplication by 2^n
-    val <<= tmp.getValue ();
+    val <<= bits->toUint64 ();
     stack.push_back (new Constant (val));
     stack.push_back (new Operator (Operator::MULTIPLY));
     (*lastConcreteValue) <<= *bits;

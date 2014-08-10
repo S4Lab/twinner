@@ -37,15 +37,15 @@ namespace twintool {
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     std::ifstream &symbolsFileInputStream, bool _disabled) :
-trace (new edu::sharif::twinner::trace::TraceImp (symbolsFileInputStream)),
-trackedReg (REG_INVALID_), operandSize (-1), hook (0),
-disabled (_disabled) {
+    trace (new edu::sharif::twinner::trace::TraceImp (symbolsFileInputStream)),
+    trackedReg (REG_INVALID_), operandSize (-1), hook (0),
+    disabled (_disabled) {
 }
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (bool _disabled) :
-trace (new edu::sharif::twinner::trace::TraceImp ()),
-trackedReg (REG_INVALID_), operandSize (-1), hook (0),
-disabled (_disabled) {
+    trace (new edu::sharif::twinner::trace::TraceImp ()),
+    trackedReg (REG_INVALID_), operandSize (-1), hook (0),
+    disabled (_disabled) {
 }
 
 edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () const {
@@ -565,14 +565,11 @@ void InstructionSymbolicExecuter::movAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "movAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
   delete srcexp;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::movsxAnalysisRoutine (

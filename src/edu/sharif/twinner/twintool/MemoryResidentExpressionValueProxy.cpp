@@ -52,7 +52,7 @@ MemoryResidentExpressionValueProxy::getExpression (
     edu::sharif::twinner::trace::Expression *leftExp = leftProxy.getExpression (trace);
     edu::sharif::twinner::trace::Expression *rightExp = rightProxy.getExpression (trace);
     leftExp->shiftToRight (8 * (memoryEa % memReadBytes));
-    rightExp->shiftToLeft (8 * (8 - (memoryEa % memReadBytes)));
+    rightExp->shiftToLeft (8 * (memReadBytes - (memoryEa % memReadBytes)));
     rightExp->truncate (memReadBytes * 8);
     leftExp->bitwiseOr (rightExp);
     delete rightExp;
