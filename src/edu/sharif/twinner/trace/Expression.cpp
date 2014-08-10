@@ -264,12 +264,30 @@ void Expression::bitwiseOr (const Expression *mask) {
 }
 
 void Expression::makeLeastSignificantBitsZero (int bits) {
-  UINT64 mask = 1;
-  mask <<= bits;
-  mask = ~(mask - 1);
+  ConcreteValue *mask;
+  const int size = lastConcreteValue->getSize ();
+  if (bits > size) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Cannot make " << std::dec << bits << " bits zero.\n";
+    throw std::runtime_error ("Expression::makeLeastSignificantBitsZero(...): "
+                              "number of bits is too large");
+  } else if (bits == 128) {
+    mask = new ConcreteValue128Bits (UINT64 (0), UINT64 (0));
+  } else if (bits > 64) {
+    mask = new ConcreteValue128Bits (~((1ull << (bits - 64)) - 1), UINT64 (0));
+  } else if (bits == 64) {
+    mask = new ConcreteValue128Bits (UINT64 (1), UINT64 (0));
+  } else { // < 64
+    mask = new ConcreteValue128Bits (UINT64 (1), ~((1ull << bits) - 1));
+  }
+  if (size != 128) {
+    ConcreteValue *temp = mask->clone (size);
+    delete mask;
+    mask = temp;
+  }
   stack.push_back (new Constant (mask));
   stack.push_back (new Operator (Operator::BITWISE_AND));
-  (*lastConcreteValue) &= mask;
+  (*lastConcreteValue) &= (*mask);
 }
 
 void Expression::negate () {
