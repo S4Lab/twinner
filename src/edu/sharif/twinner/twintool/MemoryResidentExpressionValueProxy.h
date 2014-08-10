@@ -52,6 +52,16 @@ private:
   void propagateChangeUpwards (int size, ADDRINT memoryEa,
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression &changedExp) const;
+
+  /// returned expression is linked to the underlying expression (clone it to de-link)
+  edu::sharif::twinner::trace::Expression *alignedMemoryRead (int size,
+      edu::sharif::twinner::trace::Trace *trace) const;
+  edu::sharif::twinner::trace::Expression alignedMemoryWrite (int size,
+      edu::sharif::twinner::trace::Trace *trace,
+      const edu::sharif::twinner::trace::Expression *exp) const;
+  edu::sharif::twinner::trace::Expression unalignedMemoryWrite (int size,
+      edu::sharif::twinner::trace::Trace *trace,
+      const edu::sharif::twinner::trace::Expression *exp) const;
 };
 
 }
