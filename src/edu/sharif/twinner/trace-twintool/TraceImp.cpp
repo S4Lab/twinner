@@ -166,9 +166,9 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
 
   } catch (const WrongStateException &e) {
     const ConcreteValue &currentValue = e.getCurrentStateValue ();
-    edu::sharif::twinner::util::Logger::debug () << "Unexpected value (0x"
+    edu::sharif::twinner::util::Logger::debug () << "Unexpected value ("
         << std::hex << currentValue
-        << ") was found (instead of 0x" << val << "). "
+        << ") was found (instead of " << val << "). "
         "Probably, a new symbol is required to describe it.\n";
   }
   // instantiate and set a new expression in the current segment

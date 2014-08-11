@@ -131,8 +131,8 @@ const Logger &Logger::operator<< (
         << value128imp->getLsb () << ')';
     return (*this) << ss.str ();
   } else {
-    return (*this) << "ConcreteValue" << value.getSize () << "Bits(0x" << std::hex
-        << value.toUint64 () << ')';
+    return (*this) << "ConcreteValue" << std::dec << value.getSize () << "Bits(0x"
+        << std::hex << value.toUint64 () << ')';
   }
 }
 
