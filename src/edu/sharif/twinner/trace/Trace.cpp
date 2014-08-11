@@ -38,7 +38,7 @@ inline void write_map_entry (std::ofstream &out,
 
 Trace::Trace (const std::list < ExecutionTraceSegment * > &list,
     edu::sharif::twinner::util::MemoryManager *_memoryManager) :
-segments (list), memoryManager (_memoryManager) {
+    segments (list), memoryManager (_memoryManager) {
   currentSegmentIterator = segments.end ();
   if (currentSegmentIterator != segments.begin ()) {
     currentSegmentIterator--;
@@ -47,7 +47,7 @@ segments (list), memoryManager (_memoryManager) {
 }
 
 Trace::Trace () :
-memoryManager (edu::sharif::twinner::util::MemoryManager::allocateInstance ()) {
+    memoryManager (edu::sharif::twinner::util::MemoryManager::allocateInstance ()) {
   segments.push_front (new ExecutionTraceSegment ());
   currentSegmentIterator = segments.begin ();
   currentSegmentIndex = 0;
@@ -61,7 +61,7 @@ Trace::~Trace () {
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByRegister (int size, REG reg,
-    const ConcreteValue &regval) const throw (WrongStateException) {
+    const ConcreteValue &regval) const /* @throw (WrongStateException) */ {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
@@ -70,7 +70,7 @@ Expression *Trace::tryToGetSymbolicExpressionByRegister (int size, REG reg) cons
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-    const ConcreteValue &memval) const throw (WrongStateException) {
+    const ConcreteValue &memval) const /* @throw (WrongStateException) */ {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 

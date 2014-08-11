@@ -210,9 +210,9 @@ public:
   const std::list < ExpressionToken * > &getStack () const;
 
   void checkConcreteValueReg (REG reg,
-      const ConcreteValue &concreteVal) const throw (WrongStateException);
+      const ConcreteValue &concreteVal) const /* @throw (WrongStateException) */;
   void checkConcreteValueMemory (ADDRINT memoryEa,
-      const ConcreteValue &concreteVal) throw (WrongStateException);
+      const ConcreteValue &concreteVal) /* @throw (WrongStateException) */;
 
   bool operator== (const Expression &exp) const;
 

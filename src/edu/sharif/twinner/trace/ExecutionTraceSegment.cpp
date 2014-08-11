@@ -14,6 +14,7 @@
 
 #include "Expression.h"
 #include "Constraint.h"
+#include "WrongStateException.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
@@ -31,7 +32,7 @@ namespace trace {
 ExecutionTraceSegment::ExecutionTraceSegment (const std::map < REG, Expression * > &regi,
     const std::map < ADDRINT, Expression * > &memo,
     const std::list < const Constraint * > &cnrt) :
-registerToExpression (regi), memoryAddressTo64BitsExpression (memo), pathConstraints (cnrt) {
+    registerToExpression (regi), memoryAddressTo64BitsExpression (memo), pathConstraints (cnrt) {
   /*
    * This constructor is called by Twinner to reacquire registers/memory/constraints
    * info and use them to build its behavioral model.
@@ -46,7 +47,7 @@ ExecutionTraceSegment::ExecutionTraceSegment () {
 ExecutionTraceSegment::ExecutionTraceSegment (
     const std::map < REG, Expression * > &regMap,
     const std::map < ADDRINT, Expression * > &memMap) :
-registerToExpression (regMap), memoryAddressTo64BitsExpression (memMap) {
+    registerToExpression (regMap), memoryAddressTo64BitsExpression (memMap) {
   /*
    * TODO: Initialize memoryAddressTo128BitsExpression and memoryAddressTo32BitsExpression
    * and memoryAddressTo16BitsExpression based on memoryAddressTo64BitsExpression map.
@@ -82,7 +83,7 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (int size,
-    REG reg, const ConcreteValue &regval) const throw (WrongStateException) {
+    REG reg, const ConcreteValue &regval) const /* @throw (WrongStateException) */ {
   UNUSED_VARIABLE (size);
   return tryToGetSymbolicExpressionImplementation (registerToExpression, reg, regval);
 }
@@ -94,7 +95,8 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (int siz
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (int size,
-    ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException) {
+    ADDRINT memoryEa, const ConcreteValue &memval) const
+/* @throw (WrongStateException) */ {
   switch (size) {
   case 128:
     return tryToGetSymbolicExpressionImplementation
@@ -154,7 +156,7 @@ template < typename KEY >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
     const std::map < KEY, Expression * > &map, const KEY key,
     const ConcreteValue &concreteVal) const
-throw (WrongStateException) {
+/* @throw (WrongStateException) */ {
   typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;

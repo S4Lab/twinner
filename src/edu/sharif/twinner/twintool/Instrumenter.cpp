@@ -40,33 +40,33 @@ inline void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > 
 Instrumenter::Instrumenter (std::ifstream &symbolsFileInputStream,
     const string &_traceFilePath, const std::string &_disassemblyFilePath,
     bool _disabled) :
-traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-ise (new InstructionSymbolicExecuter (symbolsFileInputStream, _disabled)),
-isWithinInitialStateDetectionMode (false),
-disabled (_disabled),
-totalCountOfInstructions (0) {
+    traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
+    ise (new InstructionSymbolicExecuter (symbolsFileInputStream, _disabled)),
+    isWithinInitialStateDetectionMode (false),
+    disabled (_disabled),
+    totalCountOfInstructions (0) {
   initialize ();
 }
 
 Instrumenter::Instrumenter (const std::set < ADDRINT > &_candidateAddresses,
     const std::string &_traceFilePath, const std::string &_disassemblyFilePath,
     bool _disabled) :
-traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-ise (new InstructionSymbolicExecuter (_disabled)),
-candidateAddresses (_candidateAddresses),
-isWithinInitialStateDetectionMode (true),
-disabled (_disabled),
-totalCountOfInstructions (0) {
+    traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
+    ise (new InstructionSymbolicExecuter (_disabled)),
+    candidateAddresses (_candidateAddresses),
+    isWithinInitialStateDetectionMode (true),
+    disabled (_disabled),
+    totalCountOfInstructions (0) {
   initialize ();
 }
 
 Instrumenter::Instrumenter (const string &_traceFilePath,
     const std::string &_disassemblyFilePath, bool _disabled) :
-traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-ise (new InstructionSymbolicExecuter (_disabled)),
-isWithinInitialStateDetectionMode (false),
-disabled (_disabled),
-totalCountOfInstructions (0) {
+    traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
+    ise (new InstructionSymbolicExecuter (_disabled)),
+    isWithinInitialStateDetectionMode (false),
+    disabled (_disabled),
+    totalCountOfInstructions (0) {
   initialize ();
 }
 

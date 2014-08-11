@@ -27,17 +27,19 @@
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
 
+#include "UnexpectedChangeException.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
 TraceImp::TraceImp () :
-Trace () {
+    Trace () {
 }
 
 TraceImp::TraceImp (std::ifstream &symbolsFileInputStream) :
-Trace (1 /* Invoking dummy constructor of parent class to stop adding segments there*/) {
+    Trace (1 /* Invoking dummy constructor of parent class to stop adding segments there*/) {
   memoryManager = edu::sharif::twinner::util::MemoryManager::allocateInstance ();
   loadInitializedSymbolsFromBinaryStream (symbolsFileInputStream);
   currentSegmentIterator = segments.end ();
@@ -51,7 +53,7 @@ TraceImp::~TraceImp () {
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByRegister (int size, REG reg,
-    const ConcreteValue &regval) const throw (WrongStateException) {
+    const ConcreteValue &regval) const /* @throw (WrongStateException) */ {
   return tryToGetSymbolicExpressionImplementation
       (size, reg, regval, &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
 }
@@ -62,7 +64,8 @@ Expression *TraceImp::tryToGetSymbolicExpressionByRegister (int size, REG reg) c
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
-    ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException) {
+    ADDRINT memoryEa, const ConcreteValue &memval) const
+/* throw (WrongStateException) */ {
   return tryToGetSymbolicExpressionImplementation
       (size, memoryEa, memval,
        &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
@@ -74,16 +77,11 @@ Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
       (size, memoryEa, &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
 }
 
-void throw_exception_about_unexpected_change_in_memory_or_register_address
-(REG reg, const ConcreteValue &expectedVal, const ConcreteValue &currentVal);
-void throw_exception_about_unexpected_change_in_memory_or_register_address
-(ADDRINT address, const ConcreteValue &expectedVal, const ConcreteValue &currentVal);
-
 template < typename T >
 Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T address,
     const ConcreteValue &val,
     typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
-throw (WrongStateException) {
+/* @throw (WrongStateException) */ {
   for (std::list < ExecutionTraceSegment * >::iterator it = currentSegmentIterator;
       it != segments.end (); ++it) {
     // searches segments starting from the current towards the oldest one
@@ -98,8 +96,7 @@ throw (WrongStateException) {
         const ConcreteValue &currentValue = e.getCurrentStateValue ();
         getCurrentTraceSegment ()->printRegistersValues
             (edu::sharif::twinner::util::Logger::loquacious ());
-        throw_exception_about_unexpected_change_in_memory_or_register_address
-            (address, val, currentValue);
+        throw UnexpectedChangeException (address, val, currentValue);
       } else {
         throw e;
       }
@@ -292,29 +289,6 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
     }
   }
   return new ExecutionTraceSegment (regMap, memMap);
-}
-
-void throw_exception_about_unexpected_change_in_memory_or_register_address
-(REG reg, const ConcreteValue &expectedVal, const ConcreteValue &currentVal) {
-  std::string addr = REG_StringShort (reg);
-  std::stringstream ss;
-  ss << "Value of an address changed unexpectedly"
-      " without any interfering syscall\n"
-      "\tExpected " << expectedVal << ", Got " << currentVal
-      << "; at register " << addr.c_str () << " (code: 0x" << (unsigned int) reg << ")";
-  edu::sharif::twinner::util::Logger::error () << ss.str () << '\n';
-  throw std::runtime_error (ss.str ());
-}
-
-void throw_exception_about_unexpected_change_in_memory_or_register_address
-(ADDRINT address, const ConcreteValue &expectedVal, const ConcreteValue &currentVal) {
-  std::stringstream ss;
-  ss << "Value of an address changed unexpectedly"
-      " without any interfering syscall\n"
-      "\tExpected " << expectedVal << ", Got " << currentVal
-      << "; at address 0x" << address;
-  edu::sharif::twinner::util::Logger::error () << ss.str () << '\n';
-  throw std::runtime_error (ss.str ());
 }
 
 }

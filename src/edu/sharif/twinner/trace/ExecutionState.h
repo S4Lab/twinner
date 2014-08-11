@@ -30,30 +30,6 @@ class Expression;
 class Constraint;
 class ConcreteValue;
 
-/**
- * This exception indicates that current execution state differs from the expected state.
- */
-class WrongStateException : public std::exception {
-
-private:
-  const ConcreteValue &currentValue;
-
-public:
-
-  WrongStateException (const ConcreteValue &_currentValue) :
-      currentValue (_currentValue) {
-  }
-
-  const char *what () const throw () {
-    return "Execution state differ from what we expected "
-    "(probably, user space memory is changed by a syscall).";
-  }
-
-  const ConcreteValue &getCurrentStateValue () const {
-    return currentValue;
-  }
-};
-
 /*
  * @interface This interface, specifies that current execution state, including
  * symbolic expressions living in memory addresses or registers and path constraints,
@@ -91,7 +67,7 @@ public:
    * corresponding expression differs from expected @c regval value.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const ConcreteValue &regval) const throw (WrongStateException) = 0;
+      const ConcreteValue &regval) const /* @throw (WrongStateException) */ = 0;
 
   /**
    * Overload of tryToGetSymbolicExpressionByRegister (reg, regval) method.
@@ -117,7 +93,8 @@ public:
    * state or 0/null if there is no such expression.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
-      ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException) = 0;
+      ADDRINT memoryEa, const ConcreteValue &memval) const
+  /* @throw (WrongStateException) */ = 0;
 
   /**
    * Overloads of tryToGetSymbolicExpressionByMemoryAddress (memoryEa, memval) method.

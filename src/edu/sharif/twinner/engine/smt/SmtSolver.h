@@ -28,18 +28,6 @@ namespace engine {
 namespace smt {
 
 /**
- * This exception indicates that constraints are unsatisfiable simultaneously.
- */
-class UnsatisfiableConstraintsException : public std::exception {
-
-public:
-
-  const char *what () const throw () {
-    return "Constraints are unsatisfiable simultaneously.";
-  }
-};
-
-/**
  * @interface Satisfiability Modulo Theories (SMT) solver is an interface to
  * interact (bridge pattern) with external SMT solver programs/libraries.
  * It also implemnets singleton functionality to hide implementation more transparent.
@@ -68,7 +56,7 @@ public:
   virtual void solveConstraints (
       const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
       std::set < const edu::sharif::twinner::trace::Symbol * > &symbols)
-  throw (UnsatisfiableConstraintsException) = 0;
+  /* @throw (UnsatisfiableConstraintsException) */ = 0;
 
   static void init (SmtSolver *instance);
   static SmtSolver *getInstance ();

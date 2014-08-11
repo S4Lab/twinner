@@ -23,6 +23,7 @@
 #include "ConcreteValue64Bits.h"
 #include "Symbol.h"
 #include "ConcreteValue128Bits.h"
+#include "WrongStateException.h"
 
 namespace edu {
 namespace sharif {
@@ -321,7 +322,7 @@ const std::list < ExpressionToken * > &Expression::getStack () const {
 }
 
 void Expression::checkConcreteValueReg (REG reg, const ConcreteValue &concreteVal) const
-throw (WrongStateException) {
+/* @throw (WrongStateException) */ {
   if (*lastConcreteValue == concreteVal) {
     return;
   }
@@ -332,7 +333,7 @@ throw (WrongStateException) {
 
 void Expression::checkConcreteValueMemory (ADDRINT memoryEa,
     const ConcreteValue &concreteVal)
-throw (WrongStateException) {
+/* @throw (WrongStateException) */ {
   if (*lastConcreteValue == concreteVal) {
     isOverwriting = false; // overwriting just works at first getting/synchronization
     return;

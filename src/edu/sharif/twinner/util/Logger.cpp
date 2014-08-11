@@ -37,7 +37,7 @@ const char *Logger::DEBUG_COLOR = "\x1B[32m"; // GREEN
 const char *Logger::LOQUACIOUS_COLOR = "\x1B[34m"; // BLUE
 
 Logger::Logger (bool _enabled, const char *type, const char *_color) :
-enabled (_enabled), color (_color) {
+    enabled (_enabled), color (_color) {
   if (enabled) {
     std::cout << '[' << TYPE_COLOR << type << NORMAL_COLOR << "]: ";
   }

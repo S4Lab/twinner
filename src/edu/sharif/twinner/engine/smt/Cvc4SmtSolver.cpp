@@ -13,6 +13,7 @@
 #include "Cvc4SmtSolver.h"
 
 #include "ConstraintToCvc4ExprConverter.h"
+#include "UnsatisfiableConstraintsException.h"
 
 #include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
@@ -29,7 +30,7 @@ void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
     std::set < const edu::sharif::twinner::trace::Symbol * > &satSolution);
 
 Cvc4SmtSolver::Cvc4SmtSolver () :
-SmtSolver () {
+    SmtSolver () {
 }
 
 Cvc4SmtSolver::~Cvc4SmtSolver () {
@@ -38,7 +39,7 @@ Cvc4SmtSolver::~Cvc4SmtSolver () {
 void Cvc4SmtSolver::solveConstraints (
     const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
     std::set < const edu::sharif::twinner::trace::Symbol * > &satSolution)
-throw (UnsatisfiableConstraintsException) {
+/* @throw (UnsatisfiableConstraintsException) */ {
   edu::sharif::twinner::util::Logger::loquacious ()
       << "Cvc4SmtSolver::solveConstraints (...)\n";
   ExprManager em;

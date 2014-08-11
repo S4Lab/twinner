@@ -81,7 +81,7 @@ MY_FILTER = $(foreach p,$(2),$(if $(findstring $(1),$(p)),$(p),))
 
 TWINNER_SRC := $(shell find edu -name \*.cpp; find edu -type d -exec mkdir -p $(OBJDIR)'{}' \;)
 TWINNER_OBJ := $(patsubst %.cpp,$(OBJDIR)%$(OBJ_SUFFIX), $(TWINNER_SRC))
-TWINNER_SUB_TRACE_OBJ := $(call MY_FILTER,/trace/,$(TWINNER_OBJ)) $(call MY_FILTER,/util/,$(TWINNER_OBJ))
+TWINNER_SUB_TRACE_OBJ := $(call MY_FILTER,/trace/,$(TWINNER_OBJ)) $(call MY_FILTER,/util/,$(TWINNER_OBJ)) $(call MY_FILTER,/exception/,$(TWINNER_OBJ))
 TWINNER_SUB_TWINTOOL_OBJ := $(call MY_FILTER,/twintool/,$(TWINNER_OBJ)) $(call MY_FILTER,/trace-twintool/,$(TWINNER_OBJ))
 TWINNER_SUB_ENGINE_OBJ := $(call MY_FILTER,/engine/,$(TWINNER_OBJ)) $(call MY_FILTER,/cli/,$(TWINNER_OBJ))
 TWINNER_DEP := $(TWINNER_OBJ:.o=.d)

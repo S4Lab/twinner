@@ -49,10 +49,11 @@ public:
   virtual ~ExecutionTraceSegment ();
 
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const ConcreteValue &regval) const throw (WrongStateException);
+      const ConcreteValue &regval) const /* @throw (WrongStateException) */;
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg) const;
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
-      ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException);
+      ADDRINT memoryEa, const ConcreteValue &memval) const
+  /* @throw (WrongStateException) */;
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa) const;
 
@@ -80,7 +81,7 @@ private:
   Expression *tryToGetSymbolicExpressionImplementation (
       const std::map < KEY, Expression * > &map, const KEY key,
       const ConcreteValue &concreteVal) const
-  throw (WrongStateException);
+  /* @throw (WrongStateException) */;
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
       const std::map < KEY, Expression * > &map, const KEY key) const;

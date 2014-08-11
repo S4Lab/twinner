@@ -79,7 +79,7 @@ public:
    * ASSERT: The precision of regval must match with precision of reg
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const ConcreteValue &regval) const throw (WrongStateException);
+      const ConcreteValue &regval) const /* @throw (WrongStateException) */;
 
   /**
    * Searches backwards to find queried values.
@@ -91,7 +91,8 @@ public:
    * ASSERT: The precision of memval must match with precision of memoryEa location
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
-      ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException);
+      ADDRINT memoryEa, const ConcreteValue &memval) const
+  /* @throw (WrongStateException) */;
 
   /**
    * Searches backwards to find queried values.

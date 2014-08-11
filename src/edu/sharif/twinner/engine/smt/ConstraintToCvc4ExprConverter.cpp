@@ -28,7 +28,7 @@ namespace smt {
 
 ConstraintToCvc4ExprConverter::ConstraintToCvc4ExprConverter (ExprManager &_em,
     const std::list < const edu::sharif::twinner::trace::Constraint * > &_constraints) :
-em (_em), constraints (_constraints), initialized (false) {
+    em (_em), constraints (_constraints), initialized (false) {
   type = em.mkBitVectorType (128);
 
   zero = em.mkConst (BitVector (128, UINT64 (0)));
@@ -133,13 +133,10 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
     }
     case edu::sharif::twinner::trace::Operator::Binary:
     {
-      Expr rightOperand =
-          convertExpressionToCvc4Expr (symbols, --top);
-      Expr leftOperand =
-          convertExpressionToCvc4Expr (symbols, --top);
-      return em.mkExpr
-          (convertOperatorIdentifierToCvc4Kind (op->getIdentifier ()),
-           leftOperand, rightOperand);
+      Expr rightOperand = convertExpressionToCvc4Expr (symbols, --top);
+      Expr leftOperand = convertExpressionToCvc4Expr (symbols, --top);
+      return em.mkExpr (convertOperatorIdentifierToCvc4Kind (op->getIdentifier ()),
+                        leftOperand, rightOperand);
     }
     default:
       throw std::runtime_error ("Unknown operator type");

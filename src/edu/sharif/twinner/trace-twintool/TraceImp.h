@@ -31,7 +31,7 @@ public:
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const ConcreteValue &regval) const throw (WrongStateException);
+      const ConcreteValue &regval) const /* @throw (WrongStateException) */;
 
   /**
    * Searches backwards to find queried values.
@@ -42,7 +42,8 @@ public:
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
-      ADDRINT memoryEa, const ConcreteValue &memval) const throw (WrongStateException);
+      ADDRINT memoryEa, const ConcreteValue &memval) const
+  /* @throw (WrongStateException) */;
 
   /**
    * Searches backwards to find queried values.
@@ -104,7 +105,7 @@ private:
   Expression *tryToGetSymbolicExpressionImplementation (int size, T address,
       const ConcreteValue &val,
       typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
-  throw (WrongStateException);
+  /* @throw (WrongStateException) */;
   template < typename T >
   Expression *tryToGetSymbolicExpressionImplementation (int size, T address,
       typename TryToGetSymbolicExpressionMethod < T >::
