@@ -58,7 +58,7 @@ void Cvc4SmtSolver::solveConstraints (
       ConstraintToCvc4ExprConverter (em, constraints).convert (symbols);
   try {
     edu::sharif::twinner::util::Logger::loquacious ()
-        << "starting SmtEngine::checkSat(" << totalConstraint << ")\n";
+        << "starting SmtEngine::checkSat(...)\n";
     Result res = smt.checkSat (totalConstraint);
     edu::sharif::twinner::util::Logger::loquacious ()
         << "checkSat(...) returned: " << res << '\n';

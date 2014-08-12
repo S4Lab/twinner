@@ -28,19 +28,19 @@ namespace twinner {
 namespace trace {
 
 Constraint::Constraint (ComparisonType _type, uint32_t instr) :
-mainExp (0), auxExp (0),
-type (_type), instruction (instr) {
+    mainExp (0), auxExp (0),
+    type (_type), instruction (instr) {
 }
 
 Constraint::Constraint (const Expression *_exp, ComparisonType _type, uint32_t instr) :
-mainExp (_exp->clone ()), auxExp (0),
-type (_type), instruction (instr) {
+    mainExp (_exp->clone ()), auxExp (0),
+    type (_type), instruction (instr) {
 }
 
 Constraint::Constraint (const Expression *_mainExp, const Expression *_auxExp,
     ComparisonType _type, uint32_t instr) :
-mainExp (_mainExp->clone ()), auxExp (_auxExp->clone ()),
-type (_type), instruction (instr) {
+    mainExp (_mainExp->clone ()), auxExp (_auxExp->clone ()),
+    type (_type), instruction (instr) {
 }
 
 Constraint::~Constraint () {
@@ -77,9 +77,9 @@ std::string Constraint::toString () const {
   if (type < MAXIMUM_SINGLE_OPERAND_CODED_CONSTRAINT) {
     ss << mainExp->toString ();
   } else if (type < MAXIMUM_UNSIGNED_TWO_OPERANDS_CODED_CONSTRAINT) {
-    ss << "unsigned {" << mainExp->toString () << "}";
+    ss << "/*unsigned {*/" << mainExp->toString () << "/*}*/";
   } else {
-    ss << "signed {" << mainExp->toString () << "}";
+    ss << "/*signed {*/" << mainExp->toString () << "/*}*/";
   }
   switch (type) {
   case NON_POSITIVE:

@@ -60,7 +60,8 @@ public:
 
   friend std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
       const ConcreteValueAbstractImp<bits, ValueType> &me) {
-    return stream << "0x" << std::hex << (unsigned int) me.value;
+    // ASSERT: bits <= 64
+    return stream << "0x" << std::hex << UINT64 (me.value);
   }
 
   virtual bool isNegative () const {

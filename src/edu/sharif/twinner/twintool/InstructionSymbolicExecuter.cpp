@@ -1044,10 +1044,8 @@ void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "pmovmskbAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tpreparing mask-byte(src)...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tpreparing mask-byte(src)...";
   edu::sharif::twinner::trace::Expression *maskbyte =
       new edu::sharif::twinner::trace::ExpressionImp (); // zero-filled
   // src is a reg and is mutable
