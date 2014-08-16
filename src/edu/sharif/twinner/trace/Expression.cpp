@@ -94,6 +94,12 @@ void Expression::convertToInfixExpression (std::list < ExpressionToken * > &st,
       convertToInfixExpression (st, operand);
       ss << op->toString () << operand.str ();
       break;
+    case Operator::FunctionalBinary:
+      convertToInfixExpression (st, operand); // right operand
+      ss << op->toString () /*function name*/ << " (";
+      convertToInfixExpression (st, ss); // left operand
+      ss << ", " << operand.str () << ')';
+      break;
     case Operator::Binary:
       convertToInfixExpression (st, operand); // right operand
       ss << '(';

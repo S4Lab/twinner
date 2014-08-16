@@ -44,6 +44,7 @@ public:
 
     Unary,
     Binary,
+    FunctionalBinary
   };
 
 private:

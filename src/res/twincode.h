@@ -86,6 +86,13 @@ public:
     return (value | v);
   }
 
+  UINT128 operator>> (int bits) const {
+    if (bits % 8 != 0) {
+      throw std::runtime_error ("128-bits shifting is only available in byte multiples");
+    }
+    return _mm_srli_si128 (value, bits / 8);
+  }
+
   UINT128 operator/ (UINT64 divisor) const {
     return value / divisor;
   }
@@ -95,6 +102,38 @@ public:
   }
 };
 
+static inline UINT128 logicalShiftToLeft (const UINT128 &v, int bits) {
+  if (bits % 8 != 0) {
+    throw std::runtime_error ("128-bits shifting is only available in byte multiples");
+  }
+  const UINT128::builtin128 b = v;
+  return _mm_slli_si128 (b, bits / 8);
+}
+
+static inline UINT128 logicalShiftToLeft (const UINT64 &v, int bits) {
+  const UINT64 u[] = {v << bits /*lsb*/, v >> (64 - bits)/*msb*/};
+  return UINT128 (u);
+}
+
+static inline UINT128 arithmeticShiftToRight (const UINT128 &v, int bits) {
+  const UINT128::builtin128 b = v;
+
+  union {
+
+    UINT64 v64[2];
+    UINT128::builtin128 v128;
+  } u;
+  _mm_store_si128 (&u.v128, b);
+  u.v64[0] = (u.v64[1] << (64 - bits)) | (u.v64[0] >> bits);
+  const signed long long int s = u.v64[1];
+  u.v64[1] = (s >> bits);
+  return u.v128;
+}
+
+static inline UINT64 arithmeticShiftToRight (const UINT64 &v, int bits) {
+  const signed long long int s = v;
+  return (s >> bits);
+}
 
 struct RegistersSet {
 

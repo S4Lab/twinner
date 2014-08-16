@@ -22,11 +22,11 @@ namespace twinner {
 namespace trace {
 
 Operator::Operator (OperatorIdentifier _oi) :
-ExpressionToken (), oi (_oi) {
+    ExpressionToken (), oi (_oi) {
 }
 
 Operator::Operator (const Operator &op) :
-ExpressionToken (op), oi (op.oi) {
+    ExpressionToken (op), oi (op.oi) {
 }
 
 Operator *Operator::clone () const {
@@ -119,11 +119,11 @@ std::string Operator::toString () const {
   case BITWISE_OR:
     return "|";
   case SHIFT_LEFT:
-    return "<<";
+    return "logicalShiftToLeft";
   case SHIFT_RIGHT:
     return ">>";
   case ARITHMETIC_SHIFT_RIGHT:
-    return "(arithmetic)>>";
+    return "arithmeticShiftToRight";
   default:
     throw std::runtime_error ("Operator::toString(...): Non-handled operator identifier");
   }
@@ -132,6 +132,8 @@ std::string Operator::toString () const {
 Operator::OperatorType Operator::getType () const {
   if (oi == NEGATE) {
     return Unary;
+  } else if (oi == ARITHMETIC_SHIFT_RIGHT || oi == SHIFT_LEFT) {
+    return FunctionalBinary;
   } else {
     return Binary;
   }
