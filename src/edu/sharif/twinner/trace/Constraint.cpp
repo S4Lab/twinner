@@ -116,9 +116,9 @@ std::string Constraint::toString () const {
   if (type < MAXIMUM_SINGLE_OPERAND_CODED_CONSTRAINT) {
     ss << "0";
   } else if (type < MAXIMUM_UNSIGNED_TWO_OPERANDS_CODED_CONSTRAINT) {
-    ss << "unsigned {" << auxExp->toString () << "}";
+    ss << "/*unsigned {*/" << auxExp->toString () << "/*}*/";
   } else {
-    ss << "signed {" << auxExp->toString () << "}";
+    ss << "/*signed {*/" << auxExp->toString () << "/*}*/";
   }
   return ss.str ();
 }

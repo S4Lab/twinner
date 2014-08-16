@@ -296,10 +296,15 @@ void code_registers_symbols_initiation_into_twin_code (std::stringstream &out,
                                   "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "rsp", "rbp",
                                   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
   };
-  out << "const UINT64 " << registersNames[0] << "_" << index <<
+  out << std::dec << "const UINT64 " << registersNames[0] << "_" << index <<
       " = regs." << registersNames[0];
   for (int i = 1; i < 16; ++i) {
     out << ", " << registersNames[i] << "_" << index << " = regs." << registersNames[i];
+  }
+  out << ";\n";
+  out << std::dec << "const UINT128 xmm0_" << index << " = UINT128 (regs.xmm0)";
+  for (int i = 1; i < 16; ++i) {
+    out << ", xmm" << i << "_" << index << " = UINT128 (regs.xmm" << i << ")";
   }
   out << ";\n";
 }

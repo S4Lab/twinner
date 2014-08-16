@@ -30,19 +30,19 @@ namespace twinner {
 namespace trace {
 
 ConcreteValue128Bits::ConcreteValue128Bits () :
-ConcreteValueAbstractImp<128> (), msb (0), lsb (0) {
+    ConcreteValueAbstractImp<128> (), msb (0), lsb (0) {
 }
 
 ConcreteValue128Bits::ConcreteValue128Bits (UINT64 _msb, UINT64 _lsb) :
-ConcreteValueAbstractImp<128> (), msb (_msb), lsb (_lsb) {
+    ConcreteValueAbstractImp<128> (), msb (_msb), lsb (_lsb) {
 }
 
 ConcreteValue128Bits::ConcreteValue128Bits (const PIN_REGISTER &value) :
-ConcreteValueAbstractImp<128> (), msb (value.qword[1]), lsb (value.qword[0]) {
+    ConcreteValueAbstractImp<128> (), msb (value.qword[1]), lsb (value.qword[0]) {
 }
 
 ConcreteValue128Bits::ConcreteValue128Bits (const ConcreteValue &cv) :
-ConcreteValueAbstractImp<128> () {
+    ConcreteValueAbstractImp<128> () {
   if (dynamic_cast<const ConcreteValue128Bits *> (&cv)) {
     lsb = static_cast<const ConcreteValue128Bits *> (&cv)->getLsb ();
     msb = static_cast<const ConcreteValue128Bits *> (&cv)->getMsb ();
@@ -92,7 +92,17 @@ void ConcreteValue128Bits::writeToRegister (CONTEXT *context, REG reg) const {
 std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
     const ConcreteValue128Bits &me) {
   std::stringstream ss;
-  ss << "0x" << std::hex << me.msb << std::setw (16) << std::setfill ('0') << me.lsb;
+  //ss << "0x" << std::hex << me.msb << std::setw (16) << std::setfill ('0') << me.lsb;
+
+  union {
+
+    UINT32 v32[4];
+    UINT64 v64[2];
+  } value;
+  value.v64[0] = me.lsb;
+  value.v64[1] = me.msb;
+  ss << "UINT128 (0x" << std::hex << value.v32[3] << ", 0x" << value.v32[2]
+      << ", 0x" << value.v32[1] << ", 0x" << value.v32[0] << ")";
   return stream << ss.str ();
 }
 

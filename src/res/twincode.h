@@ -13,7 +13,88 @@
 #ifndef TWINCODE_H
 #define	TWINCODE_H
 
-typedef unsigned long long int UINT64;
+#include <x86intrin.h>
+#include <inttypes.h>
+#include <stdexcept>
+
+typedef uint32_t UINT32;
+typedef uint64_t UINT64;
+
+class UINT128 {
+
+public:
+  typedef __m128i builtin128;
+  typedef __m64 builtin64;
+
+private:
+  builtin128 value;
+
+public:
+
+  UINT128 (const builtin128 &v) : value (v) {
+  }
+
+  UINT128 (const UINT32 a, const UINT32 b, const UINT32 c, const UINT32 d) {
+    value = _mm_set_epi32 (a, b, c, d);
+  }
+
+  UINT128 (const UINT64 *v) {
+
+    union {
+
+      UINT32 v32[4];
+      UINT64 v64[2];
+    } u;
+    u.v64[0] = v[0];
+    u.v64[1] = v[1];
+    value = _mm_set_epi32 (u.v32[3], u.v32[2], u.v32[1], u.v32[0]);
+  }
+
+  UINT128 &operator= (const builtin128 &v) {
+    value = v;
+    return *this;
+  }
+
+  operator builtin128 () const {
+    return value;
+  }
+
+  UINT128 operator^ (const UINT128 &v) const {
+    return _mm_xor_si128 (value, v.value);
+  }
+
+  UINT128 operator& (const UINT128 &v) const {
+    return _mm_and_si128 (value, v.value);
+  }
+
+  UINT64 operator& (const UINT64 &v) const {
+
+    union {
+
+      UINT64 v64[2];
+      builtin128 v128;
+    } u;
+    _mm_store_si128 (&u.v128, value);
+    return u.v64[0] & v;
+  }
+
+  UINT128 operator| (const UINT128 &v) const {
+    return _mm_or_si128 (value, v.value);
+  }
+
+  UINT128 operator| (const UINT64 &v) const {
+    return (value | v);
+  }
+
+  UINT128 operator/ (UINT64 divisor) const {
+    return value / divisor;
+  }
+
+  UINT128 operator% (UINT64 divisor) const {
+    return value % divisor;
+  }
+};
+
 
 struct RegistersSet {
 
@@ -33,6 +114,22 @@ struct RegistersSet {
   UINT64 r13;
   UINT64 r14;
   UINT64 r15;
+  UINT64 xmm0[2];
+  UINT64 xmm1[2];
+  UINT64 xmm2[2];
+  UINT64 xmm3[2];
+  UINT64 xmm4[2];
+  UINT64 xmm5[2];
+  UINT64 xmm6[2];
+  UINT64 xmm7[2];
+  UINT64 xmm8[2];
+  UINT64 xmm9[2];
+  UINT64 xmm10[2];
+  UINT64 xmm11[2];
+  UINT64 xmm12[2];
+  UINT64 xmm13[2];
+  UINT64 xmm14[2];
+  UINT64 xmm15[2];
 };
 
 #define SAVING_REGISTERS_COMMANDS(REGID) \
@@ -51,7 +148,23 @@ struct RegistersSet {
     "movq   %%r12,  96+%"   #REGID "\n\t" \
     "movq   %%r13,  104+%"  #REGID "\n\t" \
     "movq   %%r14,  112+%"  #REGID "\n\t" \
-    "movq   %%r15,  120+%"  #REGID "\n\t"
+    "movq   %%r15,  120+%"  #REGID "\n\t" \
+    "movdqa %%xmm0, 128+%"  #REGID "\n\t" \
+    "movdqa %%xmm1, 144+%"  #REGID "\n\t" \
+    "movdqa %%xmm2, 160+%"  #REGID "\n\t" \
+    "movdqa %%xmm3, 176+%"  #REGID "\n\t" \
+    "movdqa %%xmm4, 192+%"  #REGID "\n\t" \
+    "movdqa %%xmm5, 208+%"  #REGID "\n\t" \
+    "movdqa %%xmm6, 224+%"  #REGID "\n\t" \
+    "movdqa %%xmm7, 240+%"  #REGID "\n\t" \
+    "movdqa %%xmm8, 256+%"  #REGID "\n\t" \
+    "movdqa %%xmm9, 272+%"  #REGID "\n\t" \
+    "movdqa %%xmm10,288+%"  #REGID "\n\t" \
+    "movdqa %%xmm11,304+%"  #REGID "\n\t" \
+    "movdqa %%xmm12,320+%"  #REGID "\n\t" \
+    "movdqa %%xmm13,336+%"  #REGID "\n\t" \
+    "movdqa %%xmm14,352+%"  #REGID "\n\t" \
+    "movdqa %%xmm15,368+%"  #REGID "\n\t"
 
 #define LOADING_REGISTERS_COMMANDS(REGID) \
     "movq   64+%"   #REGID ", %%r8\n\t" \
@@ -69,6 +182,22 @@ struct RegistersSet {
     "movq   32+%"   #REGID ", %%rdi\n\t" \
     "movq   40+%"   #REGID ", %%rsi\n\t" \
     "movq   48+%"   #REGID ", %%rsp\n\t" \
+    "movdqa 128+%"  #REGID ", %%xmm0\n\t" \
+    "movdqa 144+%"  #REGID ", %%xmm1\n\t" \
+    "movdqa 160+%"  #REGID ", %%xmm2\n\t" \
+    "movdqa 176+%"  #REGID ", %%xmm3\n\t" \
+    "movdqa 192+%"  #REGID ", %%xmm4\n\t" \
+    "movdqa 208+%"  #REGID ", %%xmm5\n\t" \
+    "movdqa 224+%"  #REGID ", %%xmm6\n\t" \
+    "movdqa 240+%"  #REGID ", %%xmm7\n\t" \
+    "movdqa 256+%"  #REGID ", %%xmm8\n\t" \
+    "movdqa 272+%"  #REGID ", %%xmm9\n\t" \
+    "movdqa 288+%"  #REGID ", %%xmm10\n\t" \
+    "movdqa 304+%"  #REGID ", %%xmm11\n\t" \
+    "movdqa 320+%"  #REGID ", %%xmm12\n\t" \
+    "movdqa 336+%"  #REGID ", %%xmm13\n\t" \
+    "movdqa 352+%"  #REGID ", %%xmm14\n\t" \
+    "movdqa 368+%"  #REGID ", %%xmm15\n\t" \
     "movq   56+%"   #REGID ", %%rbp\n\t"
 
 #define SAVE_REGISTERS(REGS) \
@@ -77,8 +206,8 @@ struct RegistersSet {
     : "=o" (REGS) \
   )
 
-struct RegistersSet setRegistersValuesAndInvokeSyscall (struct RegistersSet regs) {
-  static struct RegistersSet currentRegs; // static => to be coded independent of rsp and so on
+static struct RegistersSet setRegistersValuesAndInvokeSyscall (struct RegistersSet regs) {
+  static struct RegistersSet currentRegs; // static => to be coded independent of rbp
   SAVE_REGISTERS (currentRegs);
   static struct RegistersSet resultingRegs;
   asm (
