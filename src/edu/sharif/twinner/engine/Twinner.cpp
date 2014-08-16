@@ -273,7 +273,14 @@ void Twinner::codeTracesIntoTwinCode (
   out << '\t';
   code_registers_symbols_initiation_into_twin_code (out, 0);
   codeInitialValuesIntoTwinCode (out, initialValues);
-  edu::sharif::twinner::util::foreach (traces, &code_trace_into_twin_code, out);
+  int i = 0;
+  for (std::list < const edu::sharif::twinner::trace::Trace * >::iterator it =
+      traces.begin (); it != traces.end (); ++it) {
+    out << "\t// coding trace #" << i << '\n';
+    code_trace_into_twin_code (out, *it);
+    out << "\t// end of trace #" << i << '\n';
+    ++i;
+  }
   out << "}\n";
   edu::sharif::twinner::util::Logger::info () << out.str ();
 
