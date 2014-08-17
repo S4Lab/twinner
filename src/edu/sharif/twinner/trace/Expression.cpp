@@ -74,6 +74,10 @@ void Expression::setLastConcreteValue (ConcreteValue *value) {
   lastConcreteValue = value;
 }
 
+void Expression::setOverwriting (bool overwriting) {
+  isOverwriting = overwriting;
+}
+
 std::string Expression::toString () const {
   std::list < ExpressionToken * > st = std::list < ExpressionToken * > (stack);
   std::stringstream ss;

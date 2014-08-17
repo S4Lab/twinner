@@ -119,6 +119,12 @@ public:
 
   void setSyscall (Syscall syscall);
   Syscall getSyscall () const;
+
+private:
+  void initializeOverlappingMemoryLocationsDownwards (int size,
+      ADDRINT memoryEa, const Expression &changedExp);
+  void initializeOverlappingMemoryLocationsUpwards (ADDRINT memoryEa,
+      const Expression &expression);
 };
 
 }

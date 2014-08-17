@@ -49,12 +49,18 @@ ExecutionTraceSegment::ExecutionTraceSegment (
     const std::map < ADDRINT, Expression * > &memMap) :
     registerToExpression (regMap), memoryAddressTo64BitsExpression (memMap) {
   /*
-   * TODO: Initialize memoryAddressTo128BitsExpression and memoryAddressTo32BitsExpression
-   * and memoryAddressTo16BitsExpression based on memoryAddressTo64BitsExpression map.
    * This constructor is called by TwinTool and so other (128/32 bits) memory addresses
    * may be accessed too.
    * Also overlapping registers must be initialized based on their enclosing registers.
    */
+  for (std::map < ADDRINT, Expression * >::const_iterator it = memMap.begin ();
+      it != memMap.end (); ++it) {
+    const ADDRINT memoryEa = it->first;
+    const Expression *exp = it->second;
+    initializeOverlappingMemoryLocationsDownwards (64, memoryEa, *exp);
+    initializeOverlappingMemoryLocationsUpwards (memoryEa, *exp);
+  }
+  //TODO: Assign overlapping registers based on value of their enclosing registers
 }
 
 ExecutionTraceSegment::~ExecutionTraceSegment () {
@@ -80,6 +86,39 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
     delete pathConstraints.front ();
     pathConstraints.pop_front ();
   }
+}
+
+void ExecutionTraceSegment::initializeOverlappingMemoryLocationsDownwards (int size,
+    ADDRINT memoryEa, const Expression &expression) {
+  size /= 2;
+  if (size >= 8) {
+    Expression *exp = expression.clone ();
+    exp->truncate (size); // LSB (left-side in little-endian)
+    setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
+    initializeOverlappingMemoryLocationsDownwards (size, memoryEa, *exp);
+    delete exp;
+    exp = expression.clone ();
+    exp->shiftToRight (size); // MSB (right-side in little-endian)
+    setSymbolicExpressionByMemoryAddress (size, memoryEa + size / 8, exp);
+    initializeOverlappingMemoryLocationsDownwards (size, memoryEa + size / 8, *exp);
+    delete exp;
+  }
+}
+
+void ExecutionTraceSegment::initializeOverlappingMemoryLocationsUpwards (ADDRINT memoryEa,
+    const Expression &expression) {
+  if (memoryEa % 16 == 0) { // 128-bits aligned
+    const Expression *neighbor =
+        tryToGetSymbolicExpressionByMemoryAddress (64, memoryEa + 8);
+    if (neighbor) {
+      Expression *exp = neighbor->clone (128); // MSB
+      exp->shiftToLeft (64);
+      exp->bitwiseOr (&expression); // expression will be cloned internally
+      exp->setOverwriting (true); // equal to expression.isOverwriting field
+      setSymbolicExpressionByMemoryAddress (128, memoryEa, exp);
+      delete exp;
+    } // else // in this case, the 128-bits expression won't be read and is not needed
+  } // else // the aligned expression will cover this case too.
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (int size,

@@ -87,6 +87,8 @@ public:
    */
   void setLastConcreteValue (ConcreteValue *value);
 
+  void setOverwriting (bool overwriting);
+
   std::string toString () const;
   void convertToInfixExpression (std::list < ExpressionToken * > &st,
       std::stringstream &ss) const;

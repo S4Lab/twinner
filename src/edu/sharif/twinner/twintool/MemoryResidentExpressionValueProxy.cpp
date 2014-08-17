@@ -179,7 +179,7 @@ void MemoryResidentExpressionValueProxy::propagateChangeDownwards (int size,
     ADDRINT memoryEa, edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression &changedExp) const {
   size /= 2;
-  if (size >= 32) {
+  if (size >= 8) {
     edu::sharif::twinner::trace::Expression *exp = changedExp.clone ();
     exp->truncate (size); // LSB (left-side in little-endian)
     trace->setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
