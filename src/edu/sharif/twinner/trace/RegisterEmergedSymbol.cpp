@@ -14,6 +14,8 @@
 
 #include "ConcreteValue64Bits.h"
 #include "ConcreteValue128Bits.h"
+#include "ExecutionTraceSegment.h"
+#include "Expression.h"
 
 #include <sstream>
 
@@ -349,6 +351,28 @@ REG RegisterEmergedSymbol::getOverlappingRegisterByIndex (int external, int inte
     {REG_R15, REG_R15D, REG_R15W, REG_INVALID_, REG_R15B},
   };
   return registers[external][internal];
+}
+
+void RegisterEmergedSymbol::initializeSubRegisters (REG reg,
+    ExecutionTraceSegment *segment, const Expression & expression) {
+  int regIndex = getRegisterIndex (reg);
+  if (regIndex == -1) { // e.g. xmm registers
+    return;
+  }
+  segment->setSymbolicExpressionByRegister
+      (32, getOverlappingRegisterByIndex (regIndex, 1), &expression)->truncate (32);
+  Expression *reg16 = segment->setSymbolicExpressionByRegister
+      (16, getOverlappingRegisterByIndex (regIndex, 2), &expression);
+  reg16->truncate (16);
+  if (getOverlappingRegisterByIndex (regIndex, 3) != REG_INVALID_) {
+    edu::sharif::twinner::trace::Expression *temp = reg16->clone (16);
+    temp->shiftToRight (8);
+    segment->setSymbolicExpressionByRegister
+        (8, getOverlappingRegisterByIndex (regIndex, 3), temp);
+    delete temp;
+  }
+  segment->setSymbolicExpressionByRegister
+      (8, getOverlappingRegisterByIndex (regIndex, 4), &expression)->truncate (8);
 }
 
 }

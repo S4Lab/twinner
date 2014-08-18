@@ -20,6 +20,9 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+class ExecutionTraceSegment;
+class Expression;
+
 class RegisterEmergedSymbol : public Symbol {
 
 private:
@@ -93,6 +96,18 @@ public:
    * @return The register with given family and intra-family indices.
    */
   static REG getOverlappingRegisterByIndex (int external, int internal);
+
+  /**
+   * Initializes all overlapping sub-registers of the given register, assuming the
+   * register is already initialized with the given expression itself.
+   * ASSERT: The given reg must be a full register: reg == REG_FullRegName (reg)
+   *
+   * @param reg The register which its sub-registers must be initialized.
+   * @param segment The segment which initialization should take place in it.
+   * @param expression The current value of register which should be cloned for subregs.
+   */
+  static void initializeSubRegisters (REG reg,
+      ExecutionTraceSegment *segment, const Expression &expression);
 };
 
 }

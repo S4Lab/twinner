@@ -18,6 +18,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
+#include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
 
 #include <utility>
 #include <stdexcept>
@@ -60,7 +61,12 @@ ExecutionTraceSegment::ExecutionTraceSegment (
     initializeOverlappingMemoryLocationsDownwards (64, memoryEa, *exp);
     initializeOverlappingMemoryLocationsUpwards (memoryEa, *exp);
   }
-  //TODO: Assign overlapping registers based on value of their enclosing registers
+  for (std::map < REG, Expression * >::const_iterator it = regMap.begin ();
+      it != regMap.end (); ++it) {
+    const REG reg = it->first;
+    const Expression *exp = it->second;
+    RegisterEmergedSymbol::initializeSubRegisters (reg, this, *exp);
+  }
 }
 
 ExecutionTraceSegment::~ExecutionTraceSegment () {
