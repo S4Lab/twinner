@@ -164,6 +164,9 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
       return exp;
     } // exp does not exist at all, so it's OK to create a new one
 
+  } catch (const UnexpectedChangeException &e) {
+    throw e;
+
   } catch (const WrongStateException &e) {
     const ConcreteValue &currentValue = e.getCurrentStateValue ();
     edu::sharif::twinner::util::Logger::debug () << "Unexpected value ("
@@ -267,6 +270,9 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
         exp = new ExpressionImp
             (ADDRINT (record.address), ConcreteValue64Bits (record.concreteValueLsb),
              index, true);
+        edu::sharif::twinner::util::Logger::loquacious () << "loading symbol: 0x"
+            << std::hex << ADDRINT (record.address) << " -> "
+            << exp << '\n';
       } else {
         edu::sharif::twinner::util::Logger::warning () << "A 128-bits memory symbol "
             "is found in the symbols file, while only 64-bits memory symbols are "
