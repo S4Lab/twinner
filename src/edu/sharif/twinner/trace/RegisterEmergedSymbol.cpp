@@ -23,16 +23,16 @@ namespace twinner {
 namespace trace {
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (const RegisterEmergedSymbol &s) :
-Symbol (s), address (s.address) {
+    Symbol (s), address (s.address) {
 }
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (REG addr) :
-Symbol (), address (addr) {
+    Symbol (), address (addr) {
 }
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (REG _address,
     const ConcreteValue &concreteValue, int generationIndex) :
-Symbol (concreteValue, generationIndex), address (_address) {
+    Symbol (concreteValue, generationIndex), address (_address) {
 }
 
 RegisterEmergedSymbol *RegisterEmergedSymbol::clone () const {
@@ -277,6 +277,78 @@ bool RegisterEmergedSymbol::is128BitsRegister (REG reg) {
   default:
     return false;
   }
+}
+
+RegisterEmergedSymbol::RegisterType RegisterEmergedSymbol::getRegisterType (REG reg,
+    int sizeInBytes) {
+  RegisterType regType = (RegisterType) sizeInBytes; // 8, 4, 2, 1
+  if (regType == REG_8_BITS_LOWER_HALF_TYPE) {
+    if (reg == REG_AH || reg == REG_BH || reg == REG_CH || reg == REG_DH) {
+      regType = REG_8_BITS_UPPER_HALF_TYPE;
+    }
+  }
+  return regType;
+}
+
+int RegisterEmergedSymbol::getRegisterIndex (REG reg) {
+  switch (reg) {
+  case REG_RAX:
+    return 0;
+  case REG_RBX:
+    return 1;
+  case REG_RCX:
+    return 2;
+  case REG_RDX:
+    return 3;
+  case REG_RDI:
+    return 4;
+  case REG_RSI:
+    return 5;
+  case REG_RSP:
+    return 6;
+  case REG_RBP:
+    return 7;
+  case REG_R8:
+    return 8;
+  case REG_R9:
+    return 9;
+  case REG_R10:
+    return 10;
+  case REG_R11:
+    return 11;
+  case REG_R12:
+    return 12;
+  case REG_R13:
+    return 13;
+  case REG_R14:
+    return 14;
+  case REG_R15:
+    return 15;
+  default:
+    return -1;
+  }
+}
+
+REG RegisterEmergedSymbol::getOverlappingRegisterByIndex (int external, int internal) {
+  const REG registers[][5] = {
+    {REG_RAX, REG_EAX, REG_AX, REG_AH, REG_AL}, // 0
+    {REG_RBX, REG_EBX, REG_BX, REG_BH, REG_BL},
+    {REG_RCX, REG_ECX, REG_CX, REG_CH, REG_CL},
+    {REG_RDX, REG_EDX, REG_DX, REG_DH, REG_DL},
+    {REG_RDI, REG_EDI, REG_DI, REG_INVALID_, REG_DIL}, // 4
+    {REG_RSI, REG_ESI, REG_SI, REG_INVALID_, REG_SIL},
+    {REG_RSP, REG_ESP, REG_SP, REG_INVALID_, REG_SPL},
+    {REG_RBP, REG_EBP, REG_BP, REG_INVALID_, REG_BPL},
+    {REG_R8, REG_R8D, REG_R8W, REG_INVALID_, REG_R8B}, // 8
+    {REG_R9, REG_R9D, REG_R9W, REG_INVALID_, REG_R9B},
+    {REG_R10, REG_R10D, REG_R10W, REG_INVALID_, REG_R10B},
+    {REG_R11, REG_R11D, REG_R11W, REG_INVALID_, REG_R11B},
+    {REG_R12, REG_R12D, REG_R12W, REG_INVALID_, REG_R12B}, // 12
+    {REG_R13, REG_R13D, REG_R13W, REG_INVALID_, REG_R13B},
+    {REG_R14, REG_R14D, REG_R14W, REG_INVALID_, REG_R14B},
+    {REG_R15, REG_R15D, REG_R15W, REG_INVALID_, REG_R15B},
+  };
+  return registers[external][internal];
 }
 
 }

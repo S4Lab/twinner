@@ -48,6 +48,51 @@ private:
   const char *getRegisterName () const;
   static REG getRegisterFromName (const std::string &name);
   static bool is128BitsRegister (REG reg);
+
+public:
+
+  enum RegisterType {
+
+    REG_64_BITS_TYPE = 8,
+    REG_32_BITS_TYPE = 4,
+    REG_16_BITS_TYPE = 2,
+    REG_8_BITS_LOWER_HALF_TYPE = 1,
+    REG_8_BITS_UPPER_HALF_TYPE = 3,
+  };
+
+  /**
+   * Returns type of the given reg.
+   * ASSERT: sizeInBytes == REG_Size (reg).
+   *
+   * @param reg The register which its type is queried.
+   * @param registerSize The size of the given reg in bytes.
+   * @return The type of the queried register.
+   */
+  static RegisterType getRegisterType (REG reg, int sizeInBytes);
+
+  /**
+   * Gives an index specifying type of the reg. Overlapping registers share one id.
+   * The given reg must be a full register; if another register encloses the given
+   * register, -1 will be returned instead of the real id.
+   * ASSERT: The given reg must be a full register: reg == REG_FullRegName (reg)
+   *
+   * @param reg The register which index of its enclosing register is asked.
+   * @return Index of the enclosing register of the given register.
+   */
+  static int getRegisterIndex (REG reg);
+
+  /**
+   * Gets register index (external; see getRegisterIndex method) and returns the
+   * specific register based on the internal index.
+   * The intra-family index of register indicates which one of overlapping registers is
+   * queried. Values 0, 1, 2, 3, 4 are used for 64, 32, 16, higher-8, and lower-8 bits
+   * registers same as the coding scheme which is used in the RegisterType enum type.
+   *
+   * @param external The family index of the asked register.
+   * @param internal The intra-family index of register.
+   * @return The register with given family and intra-family indices.
+   */
+  static REG getOverlappingRegisterByIndex (int external, int internal);
 };
 
 }
