@@ -19,6 +19,7 @@
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/Expression.h"
 
 #include <utility>
 #include <stdexcept>
@@ -94,18 +95,24 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
   }
 }
 
+void ExecutionTraceSegment::setOverwritingMemoryExpression (int size,
+    ADDRINT memoryEa, const Expression *expression) {
+  Expression *exp = setSymbolicExpressionByMemoryAddress (size, memoryEa, expression);
+  exp->setOverwriting (true);
+}
+
 void ExecutionTraceSegment::initializeOverlappingMemoryLocationsDownwards (int size,
     ADDRINT memoryEa, const Expression &expression) {
   size /= 2;
   if (size >= 8) {
     Expression *exp = expression.clone ();
     exp->truncate (size); // LSB (left-side in little-endian)
-    setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
+    setOverwritingMemoryExpression (size, memoryEa, exp);
     initializeOverlappingMemoryLocationsDownwards (size, memoryEa, *exp);
     delete exp;
     exp = expression.clone ();
     exp->shiftToRight (size); // MSB (right-side in little-endian)
-    setSymbolicExpressionByMemoryAddress (size, memoryEa + size / 8, exp);
+    setOverwritingMemoryExpression (size, memoryEa + size / 8, exp);
     initializeOverlappingMemoryLocationsDownwards (size, memoryEa + size / 8, *exp);
     delete exp;
   }
@@ -120,8 +127,7 @@ void ExecutionTraceSegment::initializeOverlappingMemoryLocationsUpwards (ADDRINT
       Expression *exp = neighbor->clone (128); // MSB
       exp->shiftToLeft (64);
       exp->bitwiseOr (&expression); // expression will be cloned internally
-      exp->setOverwriting (true); // equal to expression.isOverwriting field
-      setSymbolicExpressionByMemoryAddress (128, memoryEa, exp);
+      setOverwritingMemoryExpression (128, memoryEa, exp);
       delete exp;
     } // else // in this case, the 128-bits expression won't be read and is not needed
   } // else // the aligned expression will cover this case too.

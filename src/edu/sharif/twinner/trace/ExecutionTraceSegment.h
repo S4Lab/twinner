@@ -125,6 +125,8 @@ private:
       ADDRINT memoryEa, const Expression &changedExp);
   void initializeOverlappingMemoryLocationsUpwards (ADDRINT memoryEa,
       const Expression &expression);
+  void setOverwritingMemoryExpression (int size,
+      ADDRINT memoryEa, const Expression *expression);
 };
 
 }
