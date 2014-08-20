@@ -64,6 +64,13 @@ private:
   edu::sharif::twinner::trace::Expression unalignedMemoryWrite (int size,
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const;
+
+  /// temporary state to ignore a neighbor during change propagation in valueIsChanged ()
+  mutable const edu::sharif::twinner::trace::Expression *ignoredNeighborExpression;
+  mutable ADDRINT ignoredNeighborAddress;
+
+  const edu::sharif::twinner::trace::Expression *getNeighborExpression (int size,
+      ADDRINT address, edu::sharif::twinner::trace::Trace *trace) const;
 };
 
 }
