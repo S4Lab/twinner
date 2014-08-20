@@ -98,7 +98,7 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
             (edu::sharif::twinner::util::Logger::loquacious ());
         throw UnexpectedChangeException (address, val, currentValue);
       } else {
-        throw e;
+        throw;
       }
     }
   }
@@ -165,7 +165,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
     } // exp does not exist at all, so it's OK to create a new one
 
   } catch (const UnexpectedChangeException &e) {
-    throw e;
+    throw;
 
   } catch (const WrongStateException &e) {
     const ConcreteValue &currentValue = e.getCurrentStateValue ();
