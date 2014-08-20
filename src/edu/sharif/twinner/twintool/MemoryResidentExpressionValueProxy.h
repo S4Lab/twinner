@@ -24,9 +24,11 @@ namespace twintool {
 
 class MemoryResidentExpressionValueProxy : public MutableExpressionValueProxy {
 
-public:
+private:
   ADDRINT memoryEa;
   int memReadBytes;
+
+public:
 
   MemoryResidentExpressionValueProxy (ADDRINT memoryEa, int memReadBytes = -1);
 
