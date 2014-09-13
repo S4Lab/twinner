@@ -22,7 +22,7 @@ namespace twinner {
 namespace twintool {
 
 Flags::Flags () :
-leftExp (0), rightExp (0) {
+    leftExp (0), rightExp (0) {
 }
 
 Flags::~Flags () {
@@ -55,6 +55,12 @@ edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForLessOrEq
     bool &lessOrEqual, uint32_t instruction) const {
   return edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
       (lessOrEqual, leftExp, rightExp, instruction);
+}
+
+edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForLessCase (
+    bool &less, uint32_t instruction) const {
+  return edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
+      (less, leftExp, rightExp, instruction);
 }
 
 edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForBelowOrEqualCase (

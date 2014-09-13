@@ -82,6 +82,18 @@ public:
 
   /**
    * Instantiates a new constraint object denoting that whether underlying expression
+   * matches with less (L) condition. The last concrete value of the expression
+   * indicates that L should be satisfied or its negate should be satisfied.
+   * @param instruction The instruction which was cause of this constraint instantiation.
+   * @param less Indicates whether requested constraint is created or its negated.
+   *
+   * @return A new constraint instance denoting whether current eflags matches with L.
+   */
+  edu::sharif::twinner::trace::Constraint *instantiateConstraintForLessCase (
+      bool &less, uint32_t instruction) const;
+
+  /**
+   * Instantiates a new constraint object denoting that whether underlying expression
    * matches with below or equal (BE) condition. The last concrete value of the expression
    * indicates that BE should be satisfied or its negate should be satisfied.
    * @param instruction The instruction which was cause of this constraint instantiation.
