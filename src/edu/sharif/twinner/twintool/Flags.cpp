@@ -69,6 +69,12 @@ edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForBelowOrE
       (belowOrEqual, leftExp, rightExp, instruction);
 }
 
+edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForBelowCase (
+    bool &below, uint32_t instruction) const {
+  return edu::sharif::twinner::trace::Constraint::instantiateBelowConstraint
+      (below, leftExp, rightExp, instruction);
+}
+
 edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForSignCase (
     bool &sign, uint32_t instruction) const {
   return edu::sharif::twinner::trace::Constraint::instantiateSignConstraint

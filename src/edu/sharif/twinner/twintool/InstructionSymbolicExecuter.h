@@ -285,6 +285,11 @@ private:
   void jnbeAnalysisRoutine (bool branchTaken);
 
   /**
+   * JNB jumps if CF=0 which means that corresponding expression was > 0
+   */
+  void jnbAnalysisRoutine (bool branchTaken);
+
+  /**
    * JS jumps if SF=1 which means that corresponding expression was < 0
    */
   void jsAnalysisRoutine (bool branchTaken);

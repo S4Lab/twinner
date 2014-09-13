@@ -824,6 +824,20 @@ void InstructionSymbolicExecuter::jnbeAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::jnbAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::util::Logger::loquacious () << "jnbAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  bool below;
+  edu::sharif::twinner::trace::Constraint *cc =
+      eflags.instantiateConstraintForBelowCase (below, disassembledInstruction);
+  if (below == branchTaken) {
+    throw std::runtime_error ("JNB branching and last known EFLAGS state do not match");
+  }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraint (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::jsAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jsAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -1518,6 +1532,8 @@ InstructionSymbolicExecuter::convertOpcodeToConditionalBranchAnalysisRoutine (
     return &InstructionSymbolicExecuter::jbeAnalysisRoutine;
   case XED_ICLASS_JNBE:
     return &InstructionSymbolicExecuter::jnbeAnalysisRoutine;
+  case XED_ICLASS_JNB:
+    return &InstructionSymbolicExecuter::jnbAnalysisRoutine;
   case XED_ICLASS_JS:
     return &InstructionSymbolicExecuter::jsAnalysisRoutine;
   default:
