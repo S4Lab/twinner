@@ -265,6 +265,11 @@ private:
   void jleAnalysisRoutine (bool branchTaken);
 
   /**
+   * JNLE jumps if ZF=0 and SF=OF which means that corresponding expression was > 0
+   */
+  void jnleAnalysisRoutine (bool branchTaken);
+
+  /**
    * JBE jumps if ZF=1 or CF=1 which means that corresponding expression was <= 0
    */
   void jbeAnalysisRoutine (bool branchTaken);

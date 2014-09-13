@@ -126,6 +126,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_JLE, JMP_CC_INS_MODELS));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_JNLE, JMP_CC_INS_MODELS));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_JBE, JMP_CC_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_JNBE, JMP_CC_INS_MODELS));
