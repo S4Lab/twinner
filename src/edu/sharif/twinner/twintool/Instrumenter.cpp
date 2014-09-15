@@ -109,8 +109,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_POP, POP_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_NOP, NOP_INS_MODELS));
-  managedInstructions.insert // ignoring JMP as it has no effect in formulas
-      (make_pair (XED_ICLASS_JMP, NOP_INS_MODELS));
+  managedInstructions.insert // Some jumps change RSP (probably PIN is hiding some of instructions)
+      (make_pair (XED_ICLASS_JMP, JMP_INS_MODELS));
   managedInstructions.insert // ignoring syscall as it is handled by callback routines
       (make_pair (XED_ICLASS_SYSCALL, NOP_INS_MODELS));
   managedInstructions.insert
@@ -248,7 +248,6 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_POP:
     return getInstructionModelForPopInstruction (ins);
   case XED_ICLASS_NOP:
-  case XED_ICLASS_JMP:
   case XED_ICLASS_SYSCALL:
     return NOP_INS_MODELS;
   case XED_ICLASS_RDTSC:
@@ -266,6 +265,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
       return JMP_CC_INS_MODELS;
     case XED_CATEGORY_CALL:
     case XED_CATEGORY_RET:
+    case XED_CATEGORY_UNCOND_BR:
       return DST_RSP_SRC_CALL;
     default:
       return getInstructionModelForNormalInstruction (ins);

@@ -307,6 +307,15 @@ private:
   void retAnalysisRoutine (const CONTEXT *context, const ConcreteValue &rspRegVal);
 
   /**
+   * JMP instruction performs an unconditional jump.
+   * Normally we do not need to track jumps. However due to a bug in PIN, some
+   * instructions coming after some JMP instructions are not get instrumented.
+   * So JMP may change value of RSP without any notice.
+   * This hook is for maintaining the value of RSP.
+   */
+  void jmpAnalysisRoutine (const CONTEXT *context, const ConcreteValue &rspRegVal);
+
+  /**
    * SHL shifts dst to left as much as indicated by src.
    */
   void shlAnalysisRoutine (const MutableExpressionValueProxy &dst,

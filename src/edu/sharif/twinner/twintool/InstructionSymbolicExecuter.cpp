@@ -902,6 +902,31 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
+    const ConcreteValue &rspRegVal) {
+  edu::sharif::twinner::util::Logger::loquacious () << "jmpAnalysisRoutine(...)\n"
+      << "\tgetting rsp reg exp...";
+  edu::sharif::twinner::trace::Expression *rsp =
+      trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
+  if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
+    const ConcreteValue &oldVal = rsp->getLastConcreteValue ();
+    if (oldVal != rspRegVal) { // This jump had side-effect on RSP
+      edu::sharif::twinner::util::Logger::debug () << "\tadjusting rsp...";
+      if (oldVal < rspRegVal) {
+        ConcreteValue *cv = rspRegVal.clone ();
+        (*cv) -= oldVal;
+        rsp->add (cv); // some items have been popped out of stack and RSP is incremented
+      } else { // oldVal > rspRegVal
+        ConcreteValue *cv = oldVal.clone ();
+        (*cv) -= rspRegVal;
+        rsp->minus (cv); // some items have been pushed into stack and RSP is decremented
+      }
+      // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
+    }
+  }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::shlAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "shlAnalysisRoutine(...)\n"
@@ -1553,6 +1578,9 @@ InstructionSymbolicExecuter::convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
   case XED_ICLASS_RET_FAR:
   case XED_ICLASS_RET_NEAR:
     return &InstructionSymbolicExecuter::retAnalysisRoutine;
+  case XED_ICLASS_JMP_FAR:
+  case XED_ICLASS_JMP:
+    return &InstructionSymbolicExecuter::jmpAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Suddenly Changed Register: Unknown opcode: " << OPCODE_StringShort (op) << '\n';

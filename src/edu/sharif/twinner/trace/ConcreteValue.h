@@ -121,6 +121,10 @@ public:
   virtual bool greaterThan (const ConcreteValue &cv) const = 0;
   virtual bool operator== (const ConcreteValue &cv) const = 0;
 
+  bool operator!= (const ConcreteValue &cv) const {
+    return !((*this) == cv);
+  }
+
   bool operator< (UINT64 value) const;
   bool operator<= (UINT64 value) const;
   bool operator>= (UINT64 value) const;
