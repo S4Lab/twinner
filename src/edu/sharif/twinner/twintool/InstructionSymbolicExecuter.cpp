@@ -583,6 +583,9 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   const bool isNegative = srcexp->getLastConcreteValue ().isNegative ();
   edu::sharif::twinner::trace::Expression *conditionExp = srcexp->clone ();
   conditionExp->minus (1ull << (size - 1));
+  edu::sharif::twinner::trace::Expression *signExtendedExp =
+      srcexp->clone (dst.getSize ());
+  delete srcexp;
   edu::sharif::twinner::trace::Constraint *cc;
   if (isNegative) {
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy negative condition...";
@@ -590,8 +593,7 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
         (conditionExp, edu::sharif::twinner::trace::Constraint::NON_NEGATIVE,
          disassembledInstruction);
     edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operations...";
-    srcexp->truncate (size); // This line is redundant
-    srcexp->minus (1ull << size);
+    signExtendedExp->minus (1ull << size);
   } else {
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy positive condition...";
     cc = new edu::sharif::twinner::trace::Constraint
@@ -601,8 +603,8 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   delete conditionExp; // this is cloned by cc and is not required anymore
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
-  dst.setExpression (trace, srcexp);
-  delete srcexp;
+  dst.setExpression (trace, signExtendedExp);
+  delete signExtendedExp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
