@@ -30,10 +30,18 @@ class Flags {
 private:
   edu::sharif::twinner::trace::Expression *leftExp;
   edu::sharif::twinner::trace::Expression *rightExp;
+  bool df;
 
 public:
   Flags ();
   ~Flags ();
+
+  /**
+   * Get direction flag (DF). When DF == 1, the index register in string operations will
+   * be decremented and when DF == 0, it will be incremented.
+   * @return true iff DF is set.
+   */
+  bool getDirectionFlag () const;
 
   /**
    * Sets all flags based on given expression. It's assumed that given

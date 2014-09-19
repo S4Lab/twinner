@@ -22,12 +22,16 @@ namespace twinner {
 namespace twintool {
 
 Flags::Flags () :
-    leftExp (0), rightExp (0) {
+    leftExp (0), rightExp (0), df (false) {
 }
 
 Flags::~Flags () {
   delete leftExp;
   delete rightExp;
+}
+
+bool Flags::getDirectionFlag () const {
+  return df;
 }
 
 void Flags::setFlags (edu::sharif::twinner::trace::Expression *exp) {
