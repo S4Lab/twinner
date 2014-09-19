@@ -183,6 +183,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_DEC, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
   managedInstructions.insert
       (make_pair (XED_ICLASS_SETNZ, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_SCASB, STRING_OPERATION_REG_MEM));
 }
 
 Instrumenter::~Instrumenter () {
@@ -267,6 +269,9 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
     case XED_CATEGORY_RET:
     case XED_CATEGORY_UNCOND_BR:
       return DST_RSP_SRC_CALL;
+    case XED_CATEGORY_STRINGOP:
+      return INS_OperandIsReg (ins, 0) ?
+          STRING_OPERATION_REG_MEM : STRING_OPERATION_MEM_MEM;
     default:
       return getInstructionModelForNormalInstruction (ins);
     }
@@ -658,6 +663,18 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
+    break;
+  }
+  case STRING_OPERATION_REG_MEM:
+  {
+    const REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertPredicatedCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineStrOpRegMem,
+                              IARG_PTR, ise, IARG_UINT32, op,
+                              IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                              IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                              IARG_UINT32, REG_RDI, IARG_REG_VALUE, REG_RDI,
+                              IARG_UINT32, insAssembly,
+                              IARG_END);
     break;
   }
   default:

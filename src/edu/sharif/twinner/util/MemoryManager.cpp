@@ -25,11 +25,11 @@ namespace util {
 MemoryManager *MemoryManager::me = 0;
 
 MemoryManager::MemoryManager (uint32_t _capacity) :
-capacity (_capacity), memory (new char[_capacity]), afterLastAllocatedByteIndex (0) {
+    capacity (_capacity), memory (new char[_capacity]), afterLastAllocatedByteIndex (0) {
 }
 
 MemoryManager::MemoryManager (uint32_t _capacity, char *_memory) :
-capacity (_capacity), memory (_memory), afterLastAllocatedByteIndex (_capacity) {
+    capacity (_capacity), memory (_memory), afterLastAllocatedByteIndex (_capacity) {
 }
 
 MemoryManager::~MemoryManager () {

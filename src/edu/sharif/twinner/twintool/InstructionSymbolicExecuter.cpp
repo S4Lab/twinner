@@ -403,6 +403,32 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineTwoRegOneMem (
+    DoubleDestinationsAnalysisRoutine routine,
+    REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
+    REG dstRightReg, const ConcreteValue &dstRightRegVal,
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineTwoRegOneMem(INS: "
+      << insAssemblyStr << "): left dst reg: " << REG_StringShort (dstLeftReg)
+      << ", right dst reg: " << REG_StringShort (dstRightReg)
+      << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
+      << '\n';
+  (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
+      RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
+      MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::analysisRoutineAfterOperandLessInstruction (
     OperandLessAnalysisRoutine routine,
     const CONTEXT *context,
@@ -1367,6 +1393,27 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::scasAnalysisRoutine (
+    const MutableExpressionValueProxy &dstReg,
+    const MutableExpressionValueProxy &srcReg,
+    const ExpressionValueProxy &srcMem) {
+  edu::sharif::twinner::util::Logger::loquacious () << "scasAnalysisRoutine(...)\n";
+  cmpAnalysisRoutine (dstReg, srcMem); // comparing AL/AX/EAX/RAX with memory
+  edu::sharif::twinner::trace::Expression *exp = srcReg.getExpression (trace);
+  if (eflags.getDirectionFlag ()) { // DF == 1
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tdecrementing index register...";
+    exp->minus (dstReg.getSize () / 8);
+  } else { // DF == 0
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tincrementing index register...";
+    exp->add (dstReg.getSize () / 8);
+  }
+  srcReg.setExpression (trace, exp);
+  delete exp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) {
   edu::sharif::twinner::util::Logger::loquacious () << "rdtscAnalysisRoutine(...)\n";
   /**
@@ -1533,6 +1580,8 @@ InstructionSymbolicExecuter::convertOpcodeToDoubleDestinationsAnalysisRoutine (
     return &InstructionSymbolicExecuter::divAnalysisRoutine;
   case XED_ICLASS_MUL:
     return &InstructionSymbolicExecuter::mulAnalysisRoutine;
+  case XED_ICLASS_SCASB:
+    return &InstructionSymbolicExecuter::scasAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Double Destinations: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
@@ -1890,6 +1939,22 @@ VOID analysisRoutineDstMemSrcImplicit (VOID *iseptr, UINT32 opcode,
 VOID analysisRoutineInitializeRegisters (VOID *iseptr, CONTEXT *context) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineInitializeRegisters (context);
+}
+
+VOID analysisRoutineStrOpRegMem (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineTwoRegOneMem
+      (ise->convertOpcodeToDoubleDestinationsAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg,
+       edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       (REG) srcReg,
+       edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       srcMemoryEa, memReadBytes,
+       insAssembly);
 }
 
 }

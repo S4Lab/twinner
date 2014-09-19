@@ -141,6 +141,11 @@ public:
       REG dstRightReg, const ConcreteValue &dstRightRegVal,
       REG srcReg, const ConcreteValue &srcRegVal,
       UINT32 insAssembly);
+  void analysisRoutineTwoRegOneMem (DoubleDestinationsAnalysisRoutine routine,
+      REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
+      REG dstRightReg, const ConcreteValue &dstRightRegVal,
+      ADDRINT srcMemoryEa, UINT32 memReadBytes,
+      UINT32 insAssembly);
   void analysisRoutineAfterOperandLessInstruction (OperandLessAnalysisRoutine routine,
       const CONTEXT *context,
       UINT32 insAssembly);
@@ -407,6 +412,15 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * SCAS instruction compares AL/AX/EAX/RAX (the dstReg) and a given srcMem value
+   * which is pointed to by the DI/EDI/RDI (the srcReg) and sets the EFLAGS based on
+   * the comparison result.
+   */
+  void scasAnalysisRoutine (const MutableExpressionValueProxy &dstReg,
+      const MutableExpressionValueProxy &srcReg,
+      const ExpressionValueProxy &srcMem);
+
+  /**
    * This hook adjusts concrete values of division/multiplication operands
    * and also propagates their values to overlapping registers.
    */
@@ -539,6 +553,11 @@ VOID analysisRoutineDstMemSrcImplicit (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa, UINT32 memReadBytes,
     UINT32 insAssembly);
 VOID analysisRoutineInitializeRegisters (VOID *iseptr, CONTEXT *context);
+VOID analysisRoutineStrOpRegMem (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 insAssembly);
 
 }
 }
