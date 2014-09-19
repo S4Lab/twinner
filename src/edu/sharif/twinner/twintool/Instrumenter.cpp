@@ -675,6 +675,21 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                               IARG_UINT32, REG_RDI, IARG_REG_VALUE, REG_RDI,
                               IARG_UINT32, insAssembly,
                               IARG_END);
+    const BOOL repe = INS_RepPrefix (ins);
+    const BOOL repne = INS_RepnePrefix (ins);
+    if (repe || repne) {
+      REG repreg = INS_RepCountRegister (ins);
+      if (repreg == REG_INVALID ()) {
+        throw std::runtime_error ("INS_Rep(ne)Prefix conflicts INS_RepCountRegister");
+      }
+      INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineRepPrefix,
+                      IARG_PTR, ise, IARG_UINT32, op,
+                      IARG_UINT32, repreg, IARG_REG_VALUE, repreg,
+                      IARG_EXECUTING,
+                      IARG_UINT32, repe,
+                      IARG_UINT32, insAssembly,
+                      IARG_END);
+    }
     break;
   }
   default:

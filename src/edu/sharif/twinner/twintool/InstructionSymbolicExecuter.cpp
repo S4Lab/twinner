@@ -497,6 +497,27 @@ void InstructionSymbolicExecuter::analysisRoutineInitializeRegisters (
   PIN_ExecuteAt (context); // never returns
 }
 
+void InstructionSymbolicExecuter::analysisRoutineRepEqualOrRepNotEqualPrefix (REG repReg,
+    const ConcreteValue &repRegVal, BOOL executing, BOOL repEqual,
+    UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineRepEqualOrRepNotEqualPrefix(INS: "
+      << insAssemblyStr << "): rep reg: " << REG_StringShort (repReg)
+      << ", executing: " << executing
+      << ", rep equal: " << repEqual << '\n';
+  repAnalysisRoutine (RegisterResidentExpressionValueProxy (repReg, repRegVal),
+                      executing, repEqual);
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
     ConcreteValue *value =
@@ -952,6 +973,33 @@ void InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
       // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
     }
   }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
+void InstructionSymbolicExecuter::repAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, bool executing, bool repEqual) {
+  edu::sharif::twinner::util::Logger::loquacious () << "repAnalysisRoutine(...)\n"
+      << "\tgetting dst (rep) reg exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  bool zero;
+  edu::sharif::twinner::trace::Constraint *cc =
+      edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+      (zero, dstexp, 0, disassembledInstruction);
+  if (zero == executing) {
+    throw std::runtime_error ("REP count and executing state do not match");
+  }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraint (cc);
+  if (executing) {
+    edu::sharif::twinner::util::Logger::loquacious () << "\tchecking eflags...";
+    cc = eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
+    // if zero == repEqual then predicated instruction will be executed once again
+    trace->addPathConstraint (cc);
+    edu::sharif::twinner::util::Logger::loquacious () << "\tdecrementing count reg...";
+    dstexp->minus (1);
+    dst.setExpression (trace, dstexp);
+  }
+  delete dstexp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1954,6 +2002,18 @@ VOID analysisRoutineStrOpRegMem (VOID *iseptr, UINT32 opcode,
        (REG) srcReg,
        edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
        srcMemoryEa, memReadBytes,
+       insAssembly);
+}
+
+VOID analysisRoutineRepPrefix (VOID *iseptr, UINT32 opcode,
+    UINT32 repReg, ADDRINT repRegVal,
+    UINT32 executing, UINT32 repEqual,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineRepEqualOrRepNotEqualPrefix
+      ((REG) repReg,
+       edu::sharif::twinner::trace::ConcreteValue64Bits (repRegVal),
+       executing, repEqual,
        insAssembly);
 }
 

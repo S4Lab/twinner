@@ -158,6 +158,9 @@ public:
   void analysisRoutineRunHooks (const CONTEXT *context);
   /// This call does not return to caller
   void analysisRoutineInitializeRegisters (CONTEXT *context) const;
+  void analysisRoutineRepEqualOrRepNotEqualPrefix (REG repReg,
+      const ConcreteValue &repRegVal, BOOL executing, BOOL repEqual,
+      UINT32 insAssembly);
 
 private:
 
@@ -319,6 +322,9 @@ private:
    * This hook is for maintaining the value of RSP.
    */
   void jmpAnalysisRoutine (const CONTEXT *context, const ConcreteValue &rspRegVal);
+
+  void repAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      bool executing, bool repEqual);
 
   /**
    * SHL shifts dst to left as much as indicated by src.
@@ -557,6 +563,10 @@ VOID analysisRoutineStrOpRegMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
     UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 insAssembly);
+VOID analysisRoutineRepPrefix (VOID *iseptr, UINT32 opcode,
+    UINT32 repReg, ADDRINT repRegVal,
+    UINT32 executing, UINT32 repEqual,
     UINT32 insAssembly);
 
 }
