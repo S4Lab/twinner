@@ -66,6 +66,13 @@ public:
   virtual ConcreteValue *twosComplement () const = 0;
 
   /**
+   * Instantiates a new concrete value object holding the bitwise negated value of this
+   * concrete value. Caller should delete the returned object.
+   * @return The bitwise negated of this concrete value.
+   */
+  virtual ConcreteValue *bitwiseNegated () const = 0;
+
+  /**
    * Clones the concrete value object. For values of length else of -1, the concrete
    * value will be casted to hold a length-bits value (at most).
    *

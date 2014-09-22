@@ -122,6 +122,10 @@ ConcreteValue128Bits *ConcreteValue128Bits::twosComplement () const {
   return tmp;
 }
 
+ConcreteValue128Bits *ConcreteValue128Bits::bitwiseNegated () const {
+  return new ConcreteValue128Bits (~msb, ~lsb);
+}
+
 ConcreteValue *ConcreteValue128Bits::clone (int length) const {
   switch (length) {
   case 8:

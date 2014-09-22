@@ -27,11 +27,11 @@ namespace twinner {
 namespace trace {
 
 ConcreteValue64Bits::ConcreteValue64Bits (UINT64 _value) :
-ConcreteValueAbstractImp<64, UINT64> (_value) {
+    ConcreteValueAbstractImp<64, UINT64> (_value) {
 }
 
 ConcreteValue64Bits::ConcreteValue64Bits (const ConcreteValue &cv) :
-ConcreteValueAbstractImp<64, UINT64> (cv.toUint64 ()) {
+    ConcreteValueAbstractImp<64, UINT64> (cv.toUint64 ()) {
 }
 
 ConcreteValue64Bits::~ConcreteValue64Bits () {
@@ -46,6 +46,10 @@ void ConcreteValue64Bits::writeToRegister (CONTEXT *context, REG reg) const {
 
 ConcreteValue64Bits *ConcreteValue64Bits::twosComplement () const {
   return new ConcreteValue64Bits ((~value) + 1);
+}
+
+ConcreteValue64Bits *ConcreteValue64Bits::bitwiseNegated () const {
+  return new ConcreteValue64Bits (~value);
 }
 
 ConcreteValue *ConcreteValue64Bits::clone (int length) const {

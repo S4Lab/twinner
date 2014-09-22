@@ -30,6 +30,7 @@ public:
   virtual void writeToRegister (CONTEXT *context, REG reg) const;
 
   virtual ConcreteValue32Bits *twosComplement () const;
+  virtual ConcreteValue32Bits *bitwiseNegated () const;
 
   virtual ConcreteValue *clone (int length = -1) const;
 
