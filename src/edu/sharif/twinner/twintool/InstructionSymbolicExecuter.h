@@ -141,6 +141,11 @@ public:
       REG dstRightReg, const ConcreteValue &dstRightRegVal,
       REG srcReg, const ConcreteValue &srcRegVal,
       UINT32 insAssembly);
+  void analysisRoutineTwoDstRegOneSrcMem (DoubleDestinationsAnalysisRoutine routine,
+      REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
+      REG dstRightReg, const ConcreteValue &dstRightRegVal,
+      ADDRINT srcMemoryEa, UINT32 memReadBytes,
+      UINT32 insAssembly);
   void analysisRoutineTwoRegOneMem (DoubleDestinationsAnalysisRoutine routine,
       REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
       REG dstRightReg, const ConcreteValue &dstRightRegVal,
@@ -435,6 +440,15 @@ private:
       const ExpressionValueProxy &srcMem);
 
   /**
+   * LEAVE instruction:
+   *   spReg <- fpReg
+   *   fpReg <- pop-from-stack
+   */
+  void leaveAnalysisRoutine (const MutableExpressionValueProxy &fpReg,
+      const MutableExpressionValueProxy &spReg,
+      const ExpressionValueProxy &srcMem);
+
+  /**
    * This hook adjusts concrete values of division/multiplication operands
    * and also propagates their values to overlapping registers.
    */
@@ -555,6 +569,11 @@ VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstLeftReg, ADDRINT dstLeftRegVal,
     UINT32 dstRightReg, ADDRINT dstRightRegVal,
     UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 insAssembly);
+VOID analysisRoutineTwoDstRegOneSrcMem (VOID *iseptr, UINT32 opcode,
+    UINT32 dstLeftReg, ADDRINT dstLeftRegVal,
+    UINT32 dstRightReg, ADDRINT dstRightRegVal,
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
     UINT32 insAssembly);
 VOID analysisRoutineAfterOperandLess (VOID *iseptr, UINT32 opcode,
     const CONTEXT *context,

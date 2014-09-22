@@ -148,6 +148,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_RET_FAR, RET_INS_MODELS));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_LEAVE, LEAVE_INS_MODELS));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_SHL, SHIFT_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_SHR, SHIFT_INS_MODELS));
@@ -263,6 +265,8 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_DEC:
   case XED_ICLASS_SETNZ:
     return INS_OperandIsReg (ins, 0) ? DST_REG_SRC_IMPLICIT : DST_MEM_SRC_IMPLICIT;
+  case XED_ICLASS_LEAVE:
+    return LEAVE_INS_MODELS;
   default:
     switch (INS_Category (ins)) {
     case XED_CATEGORY_COND_BR:
@@ -692,6 +696,19 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                       IARG_UINT32, insAssembly,
                       IARG_END);
     }
+    break;
+  }
+  case LEAVE_INS_MODELS:
+  {
+    const REG fpreg = INS_OperandReg (ins, 2);
+    const REG spreg = INS_OperandReg (ins, 3);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineTwoDstRegOneSrcMem,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, fpreg, IARG_REG_VALUE, fpreg,
+                    IARG_UINT32, spreg, IARG_REG_VALUE, spreg,
+                    IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
     break;
   }
   default:
