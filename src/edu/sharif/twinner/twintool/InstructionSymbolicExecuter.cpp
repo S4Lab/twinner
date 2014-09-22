@@ -1349,8 +1349,8 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
     const CONTEXT *context, const ConcreteValue &operandSize) {
   edu::sharif::twinner::util::Logger::loquacious ()
       << "adjustDivisionMultiplicationOperands(...) hook...";
-  edu::sharif::twinner::trace::ConcreteValue64Bits os = operandSize;
-  UINT64 osval = os.getValue ();
+  const edu::sharif::twinner::trace::ConcreteValue64Bits os = operandSize;
+  const UINT64 osval = os.toUint64 ();
   REG leftReg, rightReg;
   switch (osval) {
   case 8:
@@ -1388,7 +1388,7 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
   rightExp->setLastConcreteValue (rightVal);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tconcrete values are adjusted...";
-  if (os.getValue () == 8) { // AX == AH:AL
+  if (osval == 8) { // AX == AH:AL
     leftExp->shiftToLeft (8);
     leftExp->binaryOperation
         (new edu::sharif::twinner::trace::Operator
