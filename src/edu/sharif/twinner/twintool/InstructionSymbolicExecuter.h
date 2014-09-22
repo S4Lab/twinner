@@ -388,6 +388,14 @@ private:
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
 
   /**
+   * PMINUB is a packed minimum finding for unsigned bytes.
+   * Packed unsigned bytes which are stored in dst and src wil be compared to find their
+   * minimum values. Minimum values will be stored in the dst.
+   */
+  void pminubAnalysisRoutine (
+      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+
+  /**
    * BSF is bit scan forward instruction which searches for the least significant 1 bit
    * in the src and sets its index in the dst. The index is placed as a constant in dst
    * and a constraint is added to indicate that the noted bit was set.
