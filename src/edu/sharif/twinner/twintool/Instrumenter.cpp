@@ -180,6 +180,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOVDQU, MOV_INS_WITH_LARGE_REG_INS_MODELS));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_MOVDQA, MOV_INS_WITH_LARGE_REG_INS_MODELS));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_BSF, DST_REG_SRC_EITHER_REG_OR_MEM));
   managedInstructions.insert
       (make_pair (XED_ICLASS_INC, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));

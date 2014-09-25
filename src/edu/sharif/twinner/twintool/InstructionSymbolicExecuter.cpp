@@ -1630,6 +1630,7 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_MOV:
   case XED_ICLASS_MOVZX:
   case XED_ICLASS_MOVDQU:
+  case XED_ICLASS_MOVDQA:
     return &InstructionSymbolicExecuter::movAnalysisRoutine;
   case XED_ICLASS_MOVSX:
   case XED_ICLASS_MOVSXD:
