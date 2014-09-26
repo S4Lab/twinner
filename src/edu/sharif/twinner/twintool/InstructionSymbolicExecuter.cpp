@@ -1660,6 +1660,7 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_AND:
     return &InstructionSymbolicExecuter::andAnalysisRoutine;
   case XED_ICLASS_OR:
+  case XED_ICLASS_POR:
     return &InstructionSymbolicExecuter::orAnalysisRoutine;
   case XED_ICLASS_PXOR:
   case XED_ICLASS_XOR:
