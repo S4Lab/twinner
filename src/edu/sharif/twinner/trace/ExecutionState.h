@@ -91,6 +91,9 @@ public:
    * @param memval The concrete value which currently lives at given memory address.
    * @return symbolic expression which is living at the given memory address at current
    * state or 0/null if there is no such expression.
+   *
+   * @except Throws a WrongStateException, if the last concrete value of the mem's
+   * corresponding expression differs from expected @c memval value.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa, const ConcreteValue &memval) const
@@ -126,9 +129,16 @@ public:
    * @param regval The concrete value which currently lives in given register.
    * @param newExpression The expression which will be set if there was no current value.
    * @return symbolic expression which is living in register at current state.
+   *
+   * @except Throws an UnexpectedChangeException, if 1. there exists some set exp in the
+   * last/current execution state (so its concrete value must match with the
+   * expected @c regval value) AND 2. concrete values differ AND 3. there was no syscall
+   * between corresponding instructions (since when the last concrete value had been
+   * captured till now) thus there must be some ignored instruction in the trace.
    */
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
-      const ConcreteValue &regval, Expression *newExpression) = 0;
+      const ConcreteValue &regval, Expression *newExpression) = 0
+  /* @throw (UnexpectedChangeException) */;
 
   /**
    * Overload of getSymbolicExpressionByRegister (reg, regval, newExpression)
@@ -163,9 +173,16 @@ public:
    * @param memval The concrete value which currently lives at given memory address.
    * @param newExpression The expression which will be set if there was no current value.
    * @return symbolic expression which is living at the given memory address at current state.
+   *
+   * @except Throws an UnexpectedChangeException, if 1. there exists some set exp in the
+   * last/current execution trace segment (so its concrete value must match with the
+   * expected @c memval value) AND 2. concrete values differ AND 3. there was no syscall
+   * between corresponding instructions (since when the last concrete value had been
+   * captured till now) thus there must be some ignored instruction in the trace.
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-      const ConcreteValue &memval, Expression *newExpression) = 0;
+      const ConcreteValue &memval, Expression *newExpression) = 0
+  /* @throw (UnexpectedChangeException) */;
 
   /**
    * Overload of getSymbolicExpressionByMemoryAddress (memoryEa, memval, newExpression)

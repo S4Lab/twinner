@@ -122,7 +122,8 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
 }
 
 Expression *TraceImp::getSymbolicExpressionByRegister (int size, REG reg,
-    const ConcreteValue &regval, Expression *newExpression) {
+    const ConcreteValue &regval, Expression *newExpression)
+/* @throw (UnexpectedChangeException) */ {
   return getSymbolicExpressionImplementation
       (size, reg, regval, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByRegister,
@@ -138,7 +139,8 @@ Expression *TraceImp::getSymbolicExpressionByRegister (int size, REG reg,
 }
 
 Expression *TraceImp::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-    const ConcreteValue &memval, Expression *newExpression) {
+    const ConcreteValue &memval, Expression *newExpression)
+/* @throw (UnexpectedChangeException) */ {
   return getSymbolicExpressionImplementation
       (size, memoryEa, memval, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByMemoryAddress,
@@ -157,7 +159,8 @@ template < typename T >
 Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
     const ConcreteValue &val, Expression *newExpression,
     typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
-    typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod) {
+    typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod)
+/* @throw (UnexpectedChangeException) */ {
   try {
     Expression *exp = (this->*tryToGetMethod) (size, address, val);
     if (exp) { // exp exists and its val matches with expected value
