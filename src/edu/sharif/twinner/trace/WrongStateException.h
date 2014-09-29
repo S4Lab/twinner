@@ -28,18 +28,26 @@ class ConcreteValue;
 class WrongStateException : public edu::sharif::twinner::exception::AbstractException {
 
 private:
+  const ConcreteValue &expectedValue;
   const ConcreteValue &currentValue;
 
 public:
 
-  WrongStateException (const ConcreteValue &_currentValue) :
+  WrongStateException (const ConcreteValue &_expectedValue,
+      const ConcreteValue &_currentValue) :
       AbstractException ("Execution state differ from what we expected "
       "(probably, user space memory is changed by a syscall)."),
+      expectedValue (_expectedValue), currentValue (_currentValue) {
+  }
+
+  WrongStateException (const std::string &msg, const ConcreteValue &_expectedValue,
+      const ConcreteValue &_currentValue) :
+      AbstractException (msg), expectedValue (_expectedValue),
       currentValue (_currentValue) {
   }
 
-  WrongStateException (const std::string &msg, const ConcreteValue &_currentValue) :
-      AbstractException (msg), currentValue (_currentValue) {
+  const ConcreteValue &getExpectedStateValue () const {
+    return expectedValue;
   }
 
   const ConcreteValue &getCurrentStateValue () const {

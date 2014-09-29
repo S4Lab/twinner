@@ -27,13 +27,13 @@ public:
   UnexpectedChangeException (REG reg, const ConcreteValue &expectedVal,
       const ConcreteValue &currentVal) :
       WrongStateException (prepareRegisterMessage (reg, expectedVal, currentVal),
-      currentVal) {
+      expectedVal, currentVal) {
   }
 
   UnexpectedChangeException (ADDRINT address, const ConcreteValue &expectedVal,
       const ConcreteValue &currentVal) :
       WrongStateException (prepareMemoryMessage (address, expectedVal, currentVal),
-      currentVal) {
+      expectedVal, currentVal) {
   }
 
   static const std::string prepareRegisterMessage (REG reg,

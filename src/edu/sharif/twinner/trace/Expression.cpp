@@ -339,7 +339,7 @@ void Expression::checkConcreteValueReg (REG reg, const ConcreteValue &concreteVa
   }
   // for reg case, isOverwriting is false for sure
   // overwriting is done after syscall instructions instead
-  throw WrongStateException (*lastConcreteValue);
+  throw WrongStateException (concreteVal, *lastConcreteValue);
 }
 
 void Expression::checkConcreteValueMemory (ADDRINT memoryEa,
@@ -350,7 +350,7 @@ void Expression::checkConcreteValueMemory (ADDRINT memoryEa,
     return;
   }
   if (!isOverwriting) {
-    throw WrongStateException (*lastConcreteValue);
+    throw WrongStateException (concreteVal, *lastConcreteValue);
   }
   isOverwriting = false;
   lastConcreteValue->writeToMemoryAddress (memoryEa);
