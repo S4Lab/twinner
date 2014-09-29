@@ -27,6 +27,7 @@
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/memory.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
+#include "edu/sharif/twinner/trace/WrongStateException.h"
 
 #include <stdexcept>
 
@@ -941,6 +942,25 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
       // some items have been pushed into stack by CALL and so RSP is decremented
       ConcreteValue *cv = oldVal.clone ();
       (*cv) -= rspRegVal;
+      if ((*cv) == 8) {
+        edu::sharif::twinner::util::Logger::loquacious ()
+            << "\tupdating stack (pushing the ret address)...";
+        MemoryResidentExpressionValueProxy stack (rspRegVal.toUint64 (), 8);
+        try {
+          edu::sharif::twinner::trace::Expression *exp = stack.getExpression (trace);
+          delete exp;
+
+        } catch (const edu::sharif::twinner::trace::WrongStateException &e) {
+          const edu::sharif::twinner::trace::Expression *exp =
+              new edu::sharif::twinner::trace::ExpressionImp (e.getExpectedStateValue ());
+          stack.setExpression (trace, exp);
+          delete exp;
+        }
+      } else {
+        edu::sharif::twinner::util::Logger::warning ()
+            << "CALL decremented RSP more/less than 8 bytes;"
+            " check for CALL_FAR instruction!\n";
+      }
       rsp->minus (cv);
       // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
 
