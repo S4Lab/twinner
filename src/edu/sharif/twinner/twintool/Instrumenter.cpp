@@ -95,6 +95,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOVSXD, // 2 models (r <- sign-extend(r/m))
                   MOV_ZX_AND_SX_INS_MODELS));
+  managedInstructions.insert // xmm <- r/m  OR  r/m <- xmm
+      (make_pair (XED_ICLASS_MOVD, DST_LARGE_REG_SRC_EITHER_REG_OR_MEM_OR_VICE_VERSA));
   managedInstructions.insert
       (make_pair (XED_ICLASS_CMOVBE, DST_REG_SRC_EITHER_REG_OR_MEM));
   managedInstructions.insert
@@ -335,6 +337,8 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
       return DST_LARGE_REG_SRC_LARGE_REG;
     } else if (!destRegIsXmm && sourceRegIsXmm) {
       return DST_REG_SRC_LARGE_REG;
+    } else if (destRegIsXmm && !sourceRegIsXmm) {
+      return DST_LARGE_REG_SRC_REG;
     } else {
       if (INS_OperandCount (ins) > 2 && INS_OperandIsReg (ins, 2)
           && REG_is_gr_any_size (INS_OperandReg (ins, 2))) {
@@ -453,6 +457,18 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_UINT32, srcreg, IARG_REG_CONST_REFERENCE, srcreg,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_LARGE_REG_SRC_REG:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    REG srcreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstLargeRegSrcReg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
+                    IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
