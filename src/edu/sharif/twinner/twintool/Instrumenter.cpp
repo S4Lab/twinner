@@ -338,7 +338,11 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
     const bool destRegIsXmm = REG_is_xmm (INS_OperandReg (ins, 0));
     const bool sourceRegIsXmm = REG_is_xmm (INS_OperandReg (ins, 1));
     if (destRegIsXmm && sourceRegIsXmm) {
-      return DST_LARGE_REG_SRC_LARGE_REG;
+      if (INS_OperandCount (ins) > 2 && INS_OperandIsImmediate (ins, 2)) {
+        return DST_LARGE_REG_SRC_LARGE_REG_AUX_IMD;
+      } else {
+        return DST_LARGE_REG_SRC_LARGE_REG;
+      }
     } else if (!destRegIsXmm && sourceRegIsXmm) {
       return DST_REG_SRC_LARGE_REG;
     } else if (destRegIsXmm && !sourceRegIsXmm) {
@@ -359,7 +363,11 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
   } else if (destIsReg && sourceIsMem) {
     const bool destRegIsXmm = REG_is_xmm (INS_OperandReg (ins, 0));
     if (destRegIsXmm) {
-      return DST_LARGE_REG_SRC_MEM;
+      if (INS_OperandCount (ins) > 2 && INS_OperandIsImmediate (ins, 2)) {
+        return DST_LARGE_REG_SRC_MEM_AUX_IMD;
+      } else {
+        return DST_LARGE_REG_SRC_MEM;
+      }
     } else {
       return DST_REG_SRC_MEM;
     }
@@ -489,6 +497,19 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_END);
     break;
   }
+  case DST_LARGE_REG_SRC_LARGE_REG_AUX_IMD:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    REG srcreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstLargeRegSrcLargeRegAuxImd,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
+                    IARG_UINT32, srcreg, IARG_REG_CONST_REFERENCE, srcreg,
+                    IARG_ADDRINT, INS_OperandImmediate (ins, 2),
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
   case DST_LARGE_REG_SRC_MEM:
   {
     REG dstreg = INS_OperandReg (ins, 0);
@@ -496,6 +517,18 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_LARGE_REG_SRC_MEM_AUX_IMD:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstLargeRegSrcMemAuxImd,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
+                    IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_ADDRINT, INS_OperandImmediate (ins, 2),
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;

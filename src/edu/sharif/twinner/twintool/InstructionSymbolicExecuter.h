@@ -47,6 +47,9 @@ private:
       const MutableExpressionValueProxy &leftDst,
       const MutableExpressionValueProxy &rightDst,
       const ExpressionValueProxy &src);
+  typedef void (InstructionSymbolicExecuter::*DoubleSourcesAnalysisRoutine) (
+      const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &leftSrc, const ExpressionValueProxy &rightSrc);
   typedef void (InstructionSymbolicExecuter::*ConditionalBranchAnalysisRoutine) (
       bool branchTaken);
   typedef void (InstructionSymbolicExecuter::*Hook) (const CONTEXT *context,
@@ -94,9 +97,19 @@ public:
       REG srcReg, const ConcreteValue &srcRegVal,
       REG auxReg, const ConcreteValue &auxRegVal,
       UINT32 insAssembly);
+  void analysisRoutineDstRegSrcRegAuxImd (DoubleSourcesAnalysisRoutine routine,
+      REG dstReg, const ConcreteValue &dstRegVal,
+      REG srcReg, const ConcreteValue &srcRegVal,
+      const ConcreteValue &auxImmediateValue,
+      UINT32 insAssembly);
   void analysisRoutineDstRegSrcMem (AnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
+      UINT32 insAssembly);
+  void analysisRoutineDstRegSrcMemAuxImd (DoubleSourcesAnalysisRoutine routine,
+      REG dstReg, const ConcreteValue &dstRegVal,
+      ADDRINT srcMemoryEa, UINT32 memReadBytes,
+      const ConcreteValue &auxImmediateValue,
       UINT32 insAssembly);
   void analysisRoutineDstRegSrcImd (AnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
@@ -499,6 +512,8 @@ public:
       OPCODE op) const;
   DoubleDestinationsAnalysisRoutine convertOpcodeToDoubleDestinationsAnalysisRoutine (
       OPCODE op) const;
+  DoubleSourcesAnalysisRoutine convertOpcodeToDoubleSourcesAnalysisRoutine (
+      OPCODE op) const;
   ConditionalBranchAnalysisRoutine convertOpcodeToConditionalBranchAnalysisRoutine (
       OPCODE op) const;
   SuddenlyChangedRegAnalysisRoutine convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
@@ -534,9 +549,19 @@ VOID analysisRoutineDstLargeRegSrcLargeReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, const PIN_REGISTER *dstRegVal,
     UINT32 srcReg, const PIN_REGISTER *srcRegVal,
     UINT32 insAssembly);
+VOID analysisRoutineDstLargeRegSrcLargeRegAuxImd (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, const PIN_REGISTER *dstRegVal,
+    UINT32 srcReg, const PIN_REGISTER *srcRegVal,
+    ADDRINT auxImmediateValue,
+    UINT32 insAssembly);
 VOID analysisRoutineDstLargeRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, const PIN_REGISTER *dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    UINT32 insAssembly);
+VOID analysisRoutineDstLargeRegSrcMemAuxImd (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, const PIN_REGISTER *dstRegVal,
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    ADDRINT auxImmediateValue,
     UINT32 insAssembly);
 VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
