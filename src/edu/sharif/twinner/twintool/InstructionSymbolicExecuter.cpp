@@ -1392,6 +1392,44 @@ void InstructionSymbolicExecuter::punpcklbwAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::punpcklwdAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "punpcklwdAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  const int size = dst.getSize ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tunpacking and interleaving low-data word-to-double-word...";
+  edu::sharif::twinner::trace::Expression *res = dstexp->clone ();
+  res->truncate (16);
+  // dst: d3 d2 d1 d0 | src: s3 s2 s1 s0 (di and si are 16-bits/word)
+  // res: s3 d3 s2 d2 s1 d1 s0 d0
+  UINT64 wordMask = 0xFFFF;
+  const edu::sharif::twinner::trace::Expression *operand = srcexp;
+  int wordsNumber = size / 32;
+  for (int k = 0; k < 2; ++k) {
+    for (int i = 0; i < wordsNumber; ++i) {
+      const int shift = (i + 1) * 16;
+      edu::sharif::twinner::trace::Expression *nextWord = operand->clone (size);
+      nextWord->bitwiseAnd (wordMask);
+      nextWord->shiftToLeft (shift);
+      res->bitwiseOr (nextWord);
+      delete nextWord;
+      wordMask <<= 16;
+    }
+    wordMask = 0xFFFF0000;
+    operand = dstexp;
+    --wordsNumber;
+  }
+  dst.setExpression (trace, res);
+  delete res;
+  delete srcexp;
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::bsfAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "bsfAnalysisRoutine(...)\n"
@@ -1735,6 +1773,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::pminubAnalysisRoutine;
   case XED_ICLASS_PUNPCKLBW:
     return &InstructionSymbolicExecuter::punpcklbwAnalysisRoutine;
+  case XED_ICLASS_PUNPCKLWD:
+    return &InstructionSymbolicExecuter::punpcklwdAnalysisRoutine;
   case XED_ICLASS_BSF:
     return &InstructionSymbolicExecuter::bsfAnalysisRoutine;
   default:

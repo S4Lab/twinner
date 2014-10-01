@@ -409,6 +409,14 @@ private:
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
 
   /**
+   * PUNPCKLWD is a packed operation which "unpacks" low-data from src-dst and interleaves
+   * them and put the result in the dst.
+   *  -- word to double-word
+   */
+  void punpcklwdAnalysisRoutine (
+      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+
+  /**
    * BSF is bit scan forward instruction which searches for the least significant 1 bit
    * in the src and sets its index in the dst. The index is placed as a constant in dst
    * and a constraint is added to indicate that the noted bit was set.
