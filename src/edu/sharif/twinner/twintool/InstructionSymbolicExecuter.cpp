@@ -1368,20 +1368,22 @@ void InstructionSymbolicExecuter::punpcklbwAnalysisRoutine (
   res->truncate (8);
   // dst: d3 d2 d1 d0 | src: s3 s2 s1 s0
   // res: s3 d3 s2 d2 s1 d1 s0 d0
-  UINT64 byteMask = 0xFF00;
+  UINT64 byteMask = 0xFF;
   const edu::sharif::twinner::trace::Expression *operand = srcexp;
-  for (int bytesNumber = 4; bytesNumber >= 3; --bytesNumber) {
+  int bytesNumber = size / 16;
+  for (int k = 0; k < 2; ++k) {
     for (int i = 0; i < bytesNumber; ++i) {
       const int shift = (i + 1) * 8;
       edu::sharif::twinner::trace::Expression *nextByte = operand->clone (size);
-      nextByte->shiftToLeft (shift);
       nextByte->bitwiseAnd (byteMask);
+      nextByte->shiftToLeft (shift);
       res->bitwiseOr (nextByte);
       delete nextByte;
-      byteMask <<= 16;
+      byteMask <<= 8;
     }
-    byteMask = 0x00FF0000;
+    byteMask = 0xFF00;
     operand = dstexp;
+    --bytesNumber;
   }
   dst.setExpression (trace, res);
   delete res;

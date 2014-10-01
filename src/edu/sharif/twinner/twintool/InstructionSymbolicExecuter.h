@@ -403,6 +403,7 @@ private:
   /**
    * PUNPCKLBW is a packed operation which "unpacks" low-data from src-dst and interleaves
    * them and put the result in the dst.
+   *  -- byte to word
    */
   void punpcklbwAnalysisRoutine (
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
