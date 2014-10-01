@@ -179,6 +179,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_PXOR, PCMPEQX_INS_MODELS));
   managedInstructions.insert // packed min of unsigned bytes
       (make_pair (XED_ICLASS_PMINUB, DST_REG_SRC_EITHER_REG_OR_MEM_ANY_SIZE));
+  managedInstructions.insert // unpack low data
+      (make_pair (XED_ICLASS_PUNPCKLBW, DST_LARGE_REG_SRC_EITHER_LARGE_REG_OR_MEM));
   managedInstructions.insert
       (make_pair (XED_ICLASS_POR, DST_REG_SRC_EITHER_REG_OR_MEM_ANY_SIZE));
   managedInstructions.insert
