@@ -669,6 +669,45 @@ void InstructionSymbolicExecuter::cmpxchgAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::pshufdAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
+    const ExpressionValueProxy &order) {
+  edu::sharif::twinner::util::Logger::loquacious () << "pshufdAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting order byte...";
+  const edu::sharif::twinner::trace::Expression *orderexp = order.getExpression (trace);
+
+  struct OrderByte {
+
+    unsigned int b0 : 2;
+    unsigned int b1 : 2;
+    unsigned int b2 : 2;
+    unsigned int b3 : 2;
+  } orderByte;
+  *reinterpret_cast<UINT8 *> (&orderByte) =
+      UINT8 (orderexp->getLastConcreteValue ().toUint64 ());
+  delete orderexp;
+  const unsigned int ob[] = {orderByte.b0, orderByte.b1, orderByte.b2, orderByte.b3};
+  edu::sharif::twinner::trace::Expression *res =
+      new edu::sharif::twinner::trace::ExpressionImp
+      (new edu::sharif::twinner::trace::ConcreteValue128Bits ());
+  edu::sharif::twinner::util::Logger::loquacious () << "\tshuffling words...";
+  for (int i = 0; i < 4; ++i) {
+    edu::sharif::twinner::trace::Expression *exp = srcexp->clone ();
+    exp->shiftToRight (ob[i] * 32);
+    exp->truncate (32);
+    exp->shiftToLeft (i * 32);
+    res->bitwiseOr (exp);
+    delete exp;
+  }
+  delete srcexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  dst.setExpression (trace, res);
+  delete res;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::xchgAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const MutableExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "xchgAnalysisRoutine(...)\n"
@@ -1888,6 +1927,8 @@ InstructionSymbolicExecuter::DoubleSourcesAnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToDoubleSourcesAnalysisRoutine (
     OPCODE op) const {
   switch (op) {
+  case XED_ICLASS_PSHUFD:
+    return &InstructionSymbolicExecuter::pshufdAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Double Sources: Unknown opcode: " << OPCODE_StringShort (op) << '\n';

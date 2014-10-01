@@ -210,6 +210,14 @@ private:
       const ExpressionValueProxy &src, const MutableExpressionValueProxy &aux);
 
   /**
+   * PSHUFD is packed shuffle for double words. The 8-bits order argument is consisted
+   * of 4 parts of 2-bits index numbers. Each index indicates that which double word
+   * from the src operand should be placed in the next double word place of the dst.
+   */
+  void pshufdAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src, const ExpressionValueProxy &order);
+
+  /**
    * XCHG instruction exchanges values of dst (r/m) and src (r) atomically
    */
   void xchgAnalysisRoutine (const MutableExpressionValueProxy &dst,
