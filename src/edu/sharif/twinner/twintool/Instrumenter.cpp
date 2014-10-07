@@ -168,6 +168,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_MUL, DST_REG_REG_SRC_REG));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_CDQE, DST_REG_SRC_REG));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_TEST, TEST_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_RDTSC, OPERAND_LESS)); // read time-stamp counter

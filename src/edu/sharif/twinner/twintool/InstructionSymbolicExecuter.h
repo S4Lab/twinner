@@ -389,6 +389,13 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * CDQE sign-extends src and puts it in dst.
+   * RAX <- sign-extend (EAX)
+   */
+  void cdqeAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * TEST performs AND between arguments, temporarily, and sets ZF, SF, and PF based
    * on result. Also CF and OF are set to zero. AF is undefined.
    */
