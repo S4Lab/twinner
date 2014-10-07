@@ -519,6 +519,12 @@ private:
    */
   void setnzAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
+  /**
+   * NOT one's complements the opr.
+   * opr <- NOT(opr)
+   */
+  void notAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
   MutableSourceAnalysisRoutine convertOpcodeToMutableSourceAnalysisRoutine (

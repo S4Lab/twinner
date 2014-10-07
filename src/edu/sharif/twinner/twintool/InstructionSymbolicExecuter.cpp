@@ -1845,6 +1845,19 @@ void InstructionSymbolicExecuter::setnzAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::notAnalysisRoutine (
+    const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::util::Logger::loquacious () << "notAnalysisRoutine(...)\n"
+      << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = opr.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tnegating...";
+  dstexp->negate ();
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  opr.setExpression (trace, dstexp);
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -2049,6 +2062,8 @@ InstructionSymbolicExecuter::convertOpcodeToSingleOperandAnalysisRoutine (
     return &InstructionSymbolicExecuter::decAnalysisRoutine;
   case XED_ICLASS_SETNZ:
     return &InstructionSymbolicExecuter::setnzAnalysisRoutine;
+  case XED_ICLASS_NOT:
+    return &InstructionSymbolicExecuter::notAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Single Operand: Unknown opcode: " << OPCODE_StringShort (op) << '\n';

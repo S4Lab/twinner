@@ -304,13 +304,14 @@ void Expression::makeLeastSignificantBitsZero (int bits) {
 
 void Expression::negate () {
   Operator *op = dynamic_cast<Operator *> (stack.back ());
-  if (op) {
-    if (op->getIdentifier () == Operator::NEGATE) {
-      stack.pop_back ();
-      return;
-    }
+  if (op && op->getIdentifier () == Operator::NEGATE) {
+    stack.pop_back ();
+  } else {
+    stack.push_back (new Operator (Operator::NEGATE));
   }
-  stack.push_back (new Operator (Operator::NEGATE));
+  ConcreteValue *neg = lastConcreteValue->bitwiseNegated ();
+  delete lastConcreteValue;
+  lastConcreteValue = neg;
 }
 
 Expression *Expression::clone (int size) const {
