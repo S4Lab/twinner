@@ -371,6 +371,13 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * ROR rotates right the dst as much as indicated by src.
+   * Also the LSB of src (which will be moved to the new MSB) will be set in CF.
+   */
+  void rorAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * AND bitwise ands dst with src as its mask.
    */
   void andAnalysisRoutine (const MutableExpressionValueProxy &dst,

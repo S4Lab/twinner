@@ -1227,6 +1227,25 @@ void InstructionSymbolicExecuter::sarAnalysisRoutine (
       << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::rorAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "rorAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *lsb = dstexp->clone ();
+  lsb->truncate (1);
+  // TODO: set lsb as the carry flag (CF) value
+  delete lsb;
+  edu::sharif::twinner::util::Logger::loquacious () << "\trotating-right operation...";
+  dstexp->rotateToRight (srcexp);
+  delete srcexp;
+  dst.setExpression (trace, dstexp);
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::andAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "andAnalysisRoutine(...)\n"
@@ -1893,6 +1912,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::shrAnalysisRoutine;
   case XED_ICLASS_SAR:
     return &InstructionSymbolicExecuter::sarAnalysisRoutine;
+  case XED_ICLASS_ROR:
+    return &InstructionSymbolicExecuter::rorAnalysisRoutine;
   case XED_ICLASS_AND:
     return &InstructionSymbolicExecuter::andAnalysisRoutine;
   case XED_ICLASS_OR:
