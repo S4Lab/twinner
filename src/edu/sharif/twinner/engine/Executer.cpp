@@ -46,14 +46,14 @@ const char *Executer::DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE =
 
 Executer::Executer (std::string pinLauncher, std::string twintool,
     std::string inputBinary, std::string _inputArguments) :
-baseCommand (pinLauncher
-+ " -t " + twintool
-+ " -symbols " + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
-+ " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
-+ " -memory " + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
-+ " -verbose " + edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString ()
-+ " -main -- " + inputBinary),
-inputArguments (_inputArguments) {
+    baseCommand (pinLauncher
+    + " -t " + twintool
+    + " -symbols " + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
+    + " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
+    + " -memory " + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
+    + " -verbose " + edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString ()
+    + " -main -- " + inputBinary),
+    inputArguments (_inputArguments) {
 }
 
 void Executer::setCandidateAddresses (const std::set < ADDRINT > &addresses) const {

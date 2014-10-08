@@ -492,6 +492,9 @@ void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
 
 void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
     const edu::sharif::twinner::trace::Constraint * const &constraint) {
+  if (constraint->isTrivial ()) {
+    return;
+  }
 
   repeat (aux.depth) {
     aux.out << '\t';
