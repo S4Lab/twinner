@@ -223,6 +223,20 @@ void Expression::shiftToLeft (const Expression *bits) {
   binaryOperation (new Operator (Operator::SHIFT_LEFT), bits);
 }
 
+void Expression::rotateToRight (ConcreteValue *bits) {
+  stack.push_back (new Constant (bits));
+  stack.push_back (new Operator (Operator::ROTATE_RIGHT));
+  lastConcreteValue->rotateToRight (*bits);
+}
+
+void Expression::rotateToRight (int bits) {
+  rotateToRight (new ConcreteValue64Bits (bits));
+}
+
+void Expression::rotateToRight (const Expression *bits) {
+  binaryOperation (new Operator (Operator::ROTATE_RIGHT), bits);
+}
+
 void Expression::minus (ConcreteValue *immediate) {
   stack.push_back (new Constant (immediate));
   stack.push_back (new Operator (Operator::MINUS));

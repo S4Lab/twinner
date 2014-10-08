@@ -146,6 +146,20 @@ public:
   void shiftToLeft (const Expression *bits);
 
   /**
+   * Rotates the expression to right as much as the given count of bits.
+   * @param bits Count of bits that this expression should be rotated upon towards right.
+   */
+  void rotateToRight (ConcreteValue *bits);
+  void rotateToRight (int bits);
+
+  /**
+   * Rotates the expression to right as much as the given symbolic value/expression.
+   * @param bits Count of bits (symbolically) that this expression should be
+   * rotated upon towards right.
+   */
+  void rotateToRight (const Expression *bits);
+
+  /**
    * Decrement this expression as much as the given immediate value.
    * @param immediate The value which its value will be decremented from this expression.
    */

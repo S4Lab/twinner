@@ -179,6 +179,12 @@ public:
     value <<= cvValue;
     return *this;
   }
+
+  virtual ConcreteValueAbstractImp<bits, ValueType> &rotateToRight (const ConcreteValue &cv) {
+    const ValueType cvValue = cv.toUint64 ();
+    value = (value << (bits - cvValue)) | (value >> cvValue);
+    return *this;
+  }
 };
 
 template<>

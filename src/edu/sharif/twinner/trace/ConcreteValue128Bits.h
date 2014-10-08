@@ -78,6 +78,8 @@ public:
   virtual ConcreteValue128Bits &operator>>= (const ConcreteValue &bits);
   virtual ConcreteValue128Bits &operator<<= (const ConcreteValue &bits);
 
+  virtual ConcreteValue128Bits &rotateToRight (const ConcreteValue &bits);
+
 private:
 
   struct ResultCarry {

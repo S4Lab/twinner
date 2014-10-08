@@ -374,6 +374,21 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator<<= (const ConcreteValue &bi
   return *this;
 }
 
+ConcreteValue128Bits &ConcreteValue128Bits::rotateToRight (const ConcreteValue &bits) {
+  int n = bits.toUint64 ();
+  if (n > 63) {
+    UINT64 tmp = lsb;
+    lsb = msb;
+    msb = tmp;
+    n -= 64;
+  }
+  if (n > 0) {
+    lsb = (msb << (64 - n)) | (lsb >> n);
+    msb = (lsb << (64 - n)) | (msb >> n);
+  }
+  return *this;
+}
+
 }
 }
 }

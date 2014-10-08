@@ -149,6 +149,10 @@ ConcreteValue &ConcreteValue::operator<<= (UINT64 bits) {
   return (*this) <<= ConcreteValue64Bits (bits);
 }
 
+ConcreteValue &ConcreteValue::rotateToRight (UINT64 bits) {
+  return this->rotateToRight (ConcreteValue64Bits (bits));
+}
+
 }
 }
 }

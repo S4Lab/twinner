@@ -93,6 +93,11 @@ void Operator::apply (ConcreteValue &dst, const ConcreteValue &src) const {
     delete tmp;
     break;
   }
+  case ROTATE_RIGHT:
+    dst.rotateToRight (src);
+    break;
+  case ROTATE_LEFT:
+    // TODO: Implement
   default:
     throw std::runtime_error ("Operator::apply(...): Non-handled operator identifier");
   }
@@ -124,6 +129,10 @@ std::string Operator::toString () const {
     return ">>";
   case ARITHMETIC_SHIFT_RIGHT:
     return "arithmeticShiftToRight";
+  case ROTATE_RIGHT:
+    return "rotateToRight";
+  case ROTATE_LEFT:
+    return "rotateToLeft";
   default:
     throw std::runtime_error ("Operator::toString(...): Non-handled operator identifier");
   }

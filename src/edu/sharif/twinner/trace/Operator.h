@@ -38,6 +38,7 @@ public:
     BITWISE_AND, BITWISE_OR,
     SHIFT_LEFT, SHIFT_RIGHT,
     ARITHMETIC_SHIFT_RIGHT,
+    ROTATE_RIGHT, ROTATE_LEFT,
   };
 
   enum OperatorType {

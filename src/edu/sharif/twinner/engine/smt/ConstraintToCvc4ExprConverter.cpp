@@ -215,6 +215,8 @@ Kind ConstraintToCvc4ExprConverter::convertOperatorIdentifierToCvc4Kind (
     return kind::BITVECTOR_LSHR;
   case edu::sharif::twinner::trace::Operator::ARITHMETIC_SHIFT_RIGHT:
     return kind::BITVECTOR_ASHR;
+  case edu::sharif::twinner::trace::Operator::ROTATE_RIGHT:
+    return kind::BITVECTOR_ROTATE_RIGHT;
   default:
     throw std::runtime_error ("Unknown Operator Identifier");
   }
