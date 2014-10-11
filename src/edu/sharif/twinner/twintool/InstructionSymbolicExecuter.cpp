@@ -737,6 +737,7 @@ void InstructionSymbolicExecuter::movAnalysisRoutine (
 
 void InstructionSymbolicExecuter::movsxAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  // TODO: Replace with a native sign-extension implementation
   edu::sharif::twinner::util::Logger::loquacious () << "movsxAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1314,6 +1315,7 @@ void InstructionSymbolicExecuter::xorAnalysisRoutine (
 
 void InstructionSymbolicExecuter::cdqeAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  // TODO: Replace with a native sign-extension implementation
   edu::sharif::twinner::util::Logger::loquacious () << "cdqeAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);

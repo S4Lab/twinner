@@ -141,7 +141,9 @@ std::string Operator::toString () const {
 }
 
 Operator::OperatorType Operator::getType () const {
-  if (oi == NEGATE) {
+  if (oi == SIGN_EXTEND) {
+    return SignExtension;
+  } else if (oi == NEGATE) {
     return Unary;
   } else if (oi == ARITHMETIC_SHIFT_RIGHT || oi == SHIFT_LEFT) {
     return FunctionalBinary;

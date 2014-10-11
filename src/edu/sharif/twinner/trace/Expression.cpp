@@ -96,6 +96,15 @@ void Expression::convertToInfixExpression (std::list < ExpressionToken * > &st,
   if (op) {
     std::stringstream operand;
     switch (op->getType ()) {
+    case Operator::SignExtension:
+      ss << op->toString () << '_';
+      convertToInfixExpression (st, ss); // target size
+      ss << '_';
+      convertToInfixExpression (st, ss); // source size
+      ss << " (";
+      convertToInfixExpression (st, ss); // main operand (to be sign extended)
+      ss << ')';
+      break;
     case Operator::Unary:
       convertToInfixExpression (st, operand);
       ss << op->toString () << operand.str ();

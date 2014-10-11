@@ -44,6 +44,7 @@ public:
 
   enum OperatorType {
 
+    SignExtension,
     Unary,
     Binary,
     FunctionalBinary
