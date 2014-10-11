@@ -80,12 +80,6 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOVZX, // 2 models (r <- zero-extend(r/m))
                   MOV_ZX_AND_SX_INS_MODELS));
-  /*
-   * Sign extension <=> add dummy conditions
-   *    | small value => without change
-   *    | large value => minus half of max value (to become signed)
-   */
-  // TODO: Consider using CAST operator instead of subtracting from the MAX to sign-extend
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOVSX, // 2 models (r <- sign-extend(r/m))
                   MOV_ZX_AND_SX_INS_MODELS));

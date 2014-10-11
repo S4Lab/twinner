@@ -737,35 +737,13 @@ void InstructionSymbolicExecuter::movAnalysisRoutine (
 
 void InstructionSymbolicExecuter::movsxAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
-  // TODO: Replace with a native sign-extension implementation
   edu::sharif::twinner::util::Logger::loquacious () << "movsxAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
-  // src is either reg or mem. So src is mutable
-  const int size = static_cast<const MutableExpressionValueProxy &> (src).getSize ();
-  // size is at most 32 bits
-  const bool isNegative = srcexp->getLastConcreteValue ().isNegative ();
-  edu::sharif::twinner::trace::Expression *conditionExp = srcexp->clone ();
-  conditionExp->minus (1ull << (size - 1));
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsign-extending...";
   edu::sharif::twinner::trace::Expression *signExtendedExp =
-      srcexp->clone (dst.getSize ());
+      srcexp->signExtended (dst.getSize ());
   delete srcexp;
-  edu::sharif::twinner::trace::Constraint *cc;
-  if (isNegative) {
-    edu::sharif::twinner::util::Logger::loquacious () << "\tdummy negative condition...";
-    cc = new edu::sharif::twinner::trace::Constraint
-        (conditionExp, edu::sharif::twinner::trace::Constraint::NON_NEGATIVE,
-         disassembledInstruction, true);
-    edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operations...";
-    signExtendedExp->minus (1ull << size);
-  } else {
-    edu::sharif::twinner::util::Logger::loquacious () << "\tdummy positive condition...";
-    cc = new edu::sharif::twinner::trace::Constraint
-        (conditionExp, edu::sharif::twinner::trace::Constraint::NEGATIVE,
-         disassembledInstruction, true);
-  }
-  delete conditionExp; // this is cloned by cc and is not required anymore
-  trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   dst.setExpression (trace, signExtendedExp);
   delete signExtendedExp;
