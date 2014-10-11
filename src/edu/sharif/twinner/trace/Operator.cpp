@@ -143,12 +143,12 @@ std::string Operator::toString () const {
 Operator::OperatorType Operator::getType () const {
   if (oi == SIGN_EXTEND) {
     return SignExtension;
-  } else if (oi == NEGATE) {
+  } else if (oi < MAX_UNARY_OPERATOR_IDENTIFIER) {
     return Unary;
-  } else if (oi == ARITHMETIC_SHIFT_RIGHT || oi == SHIFT_LEFT) {
-    return FunctionalBinary;
-  } else {
+  } else if (oi < MAX_BINARY_OPERATOR_IDENTIFIER) {
     return Binary;
+  } else {
+    return FunctionalBinary;
   }
 }
 
