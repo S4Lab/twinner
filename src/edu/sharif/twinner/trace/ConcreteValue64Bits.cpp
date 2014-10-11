@@ -52,6 +52,17 @@ ConcreteValue64Bits *ConcreteValue64Bits::bitwiseNegated () const {
   return new ConcreteValue64Bits (~value);
 }
 
+ConcreteValue *ConcreteValue64Bits::signExtended (int length) const {
+  if (length != 128) {
+    throw std::runtime_error ("The only available target for sign extension from 64-bits is 128-bits");
+  }
+  if (isNegative ()) {
+    return new ConcreteValue128Bits (-1, value);
+  } else {
+    return new ConcreteValue128Bits (0, value);
+  }
+}
+
 ConcreteValue *ConcreteValue64Bits::clone (int length) const {
   switch (length) {
   case 8:

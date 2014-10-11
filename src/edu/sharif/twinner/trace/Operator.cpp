@@ -133,6 +133,8 @@ std::string Operator::toString () const {
     return "rotateToRight";
   case ROTATE_LEFT:
     return "rotateToLeft";
+  case SIGN_EXTEND:
+    return "signExtend";
   default:
     throw std::runtime_error ("Operator::toString(...): Non-handled operator identifier");
   }

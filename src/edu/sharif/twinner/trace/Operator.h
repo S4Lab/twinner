@@ -30,6 +30,7 @@ public:
 
   enum OperatorIdentifier {
 
+    SIGN_EXTEND,
     ADD, MINUS,
     MULTIPLY, DIVIDE,
     REMAINDER,

@@ -76,6 +76,16 @@ public:
     return value;
   }
 
+  ConcreteValue *signExtended (int length) const {
+    if (isNegative ()) {
+      ConcreteValue *val = clone (length);
+      (*val) -= (1ull << bits);
+      return val;
+    } else { // sign/zero extension are the same for positive concrete values
+      return clone (length);
+    }
+  }
+
   virtual int getSize () const {
     return bits;
   }
@@ -186,6 +196,12 @@ public:
     return *this;
   }
 };
+
+template<> inline
+ConcreteValue *ConcreteValueAbstractImp<64, UINT64>::signExtended (int length) const {
+  throw std::runtime_error
+      ("64-bits sign-extension is not supported by ConcreteValueAbstractImp");
+}
 
 template<>
 class ConcreteValueAbstractImp<128, UINT64> : public ConcreteValue {

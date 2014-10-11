@@ -73,6 +73,18 @@ public:
   virtual ConcreteValue *bitwiseNegated () const = 0;
 
   /**
+   * Instantiates a new concrete value object holding the sign extended value of this
+   * concrete value. Caller should delete the returned object.
+   * The resulting concrete value will hold a length-bits value.
+   * NOTE: The caller is responsible to validate the length parameter to be greater than
+   * the current size of this concrete value.
+   *
+   * @param length The max precision of resulting value (in bits)
+   * @return The bitwise negated of this concrete value.
+   */
+  virtual ConcreteValue *signExtended (int length) const = 0;
+
+  /**
    * Clones the concrete value object. For values of length else of -1, the concrete
    * value will be casted to hold a length-bits value (at most).
    *

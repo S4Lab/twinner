@@ -126,6 +126,10 @@ ConcreteValue128Bits *ConcreteValue128Bits::bitwiseNegated () const {
   return new ConcreteValue128Bits (~msb, ~lsb);
 }
 
+ConcreteValue *ConcreteValue128Bits::signExtended (int length) const {
+  throw std::runtime_error ("Larger than 128-bits concrete values are not supported for sign-extension");
+}
+
 ConcreteValue *ConcreteValue128Bits::clone (int length) const {
   switch (length) {
   case 8:

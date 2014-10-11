@@ -24,6 +24,8 @@
 #include "Symbol.h"
 #include "ConcreteValue128Bits.h"
 #include "WrongStateException.h"
+#include "edu/sharif/twinner/trace/ConcreteValue.h"
+#include "edu/sharif/twinner/trace/Constant.h"
 
 namespace edu {
 namespace sharif {
@@ -326,6 +328,22 @@ void Expression::negate () {
   ConcreteValue *neg = lastConcreteValue->bitwiseNegated ();
   delete lastConcreteValue;
   lastConcreteValue = neg;
+}
+
+Expression *Expression::signExtended (int size) const {
+  const int mySize = lastConcreteValue->getSize ();
+  if (size < mySize) {
+    throw std::runtime_error ("Sign-extension cannot truncate the expression");
+  } else if (size == mySize) { // no change is required
+    return clone (size);
+  } else {
+    Expression *exp = clone (size);
+    exp->stack.push_back (new Constant (mySize));
+    exp->stack.push_back (new Constant (size));
+    exp->stack.push_back (new Operator (Operator::SIGN_EXTEND));
+    exp->setLastConcreteValue (lastConcreteValue->signExtended (size));
+    return exp;
+  }
 }
 
 Expression *Expression::clone (int size) const {

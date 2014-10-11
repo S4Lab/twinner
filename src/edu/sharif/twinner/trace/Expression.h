@@ -218,6 +218,14 @@ public:
    */
   void negate ();
 
+  /**
+   * Similar to the clone() method, but it needs to clone to a larger "size" and also
+   * sign extends the expression (while the clone method zero extends it).
+   *
+   * @param size The maximum size (in bits) that resulting sign-extended exp can hold.
+   * @return The sign-extend(this) which can hold size-bits values.
+   */
+  virtual Expression *signExtended (int size) const;
   virtual Expression *clone (int size = -1) const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;

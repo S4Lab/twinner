@@ -49,6 +49,7 @@ public:
   virtual ConcreteValue128Bits *twosComplement () const;
   virtual ConcreteValue128Bits *bitwiseNegated () const;
 
+  virtual ConcreteValue *signExtended (int length) const;
   virtual ConcreteValue *clone (int length = -1) const;
 
   UINT64 getLsb () const;
