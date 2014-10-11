@@ -132,6 +132,7 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
           (convertOperatorIdentifierToCvc4Kind (op->getIdentifier ()), operand);
     }
     case edu::sharif::twinner::trace::Operator::Binary:
+    case edu::sharif::twinner::trace::Operator::FunctionalBinary:
     {
       Expr rightOperand = convertExpressionToCvc4Expr (symbols, --top);
       Expr leftOperand = convertExpressionToCvc4Expr (symbols, --top);
