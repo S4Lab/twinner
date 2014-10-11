@@ -86,6 +86,10 @@ private:
   Expr convertExpressionToCvc4Expr (std::map<std::string, Expr> &symbols,
       std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator &top);
 
+  UINT64 extractConstantUint64 (
+      std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator &top);
+  Expr signExtendCvc4Expr (Expr &operand, UINT64 source, UINT64 target);
+
   Kind convertOperatorIdentifierToCvc4Kind (
       edu::sharif::twinner::trace::Operator::OperatorIdentifier oi);
 };

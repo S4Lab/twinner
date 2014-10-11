@@ -125,6 +125,13 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
       dynamic_cast<const edu::sharif::twinner::trace::Operator *> (token);
   if (op) {
     switch (op->getType ()) {
+    case edu::sharif::twinner::trace::Operator::SignExtension:
+    {
+      const UINT64 target = extractConstantUint64 (--top);
+      const UINT64 source = extractConstantUint64 (--top);
+      Expr operand = convertExpressionToCvc4Expr (symbols, --top);
+      return signExtendCvc4Expr (operand, source, target);
+    }
     case edu::sharif::twinner::trace::Operator::Unary:
     {
       Expr operand = convertExpressionToCvc4Expr (symbols, --top);
@@ -187,6 +194,31 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
   } else {
     throw std::runtime_error ("Missing expression token");
   }
+}
+
+UINT64 ConstraintToCvc4ExprConverter::extractConstantUint64 (
+    std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator &top) {
+  const edu::sharif::twinner::trace::ExpressionToken *token = *top;
+  if (dynamic_cast<const edu::sharif::twinner::trace::Constant *> (token)) {
+    const edu::sharif::twinner::trace::Constant *constantToken =
+        static_cast<const edu::sharif::twinner::trace::Constant *> (token);
+    const edu::sharif::twinner::trace::ConcreteValue &value =
+        constantToken->getValue ();
+    return value.toUint64 ();
+  } else {
+    throw std::runtime_error ("No constant UINT64 found");
+  }
+}
+
+Expr ConstraintToCvc4ExprConverter::signExtendCvc4Expr (Expr &operand,
+    UINT64 source, UINT64 target) {
+  // TODO: Change BV-types instead of truncating expressions and eliminate below EXTRACT
+  Expr srcExp = em.mkExpr (kind::BITVECTOR_EXTRACT,
+                           em.mkConst (BitVectorExtract (source - 1, 0)),
+                           operand);
+  return em.mkExpr (kind::BITVECTOR_SIGN_EXTEND,
+                    em.mkConst (BitVectorSignExtend (target - source)),
+                    srcExp);
 }
 
 Kind ConstraintToCvc4ExprConverter::convertOperatorIdentifierToCvc4Kind (
