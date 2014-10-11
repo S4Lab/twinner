@@ -754,14 +754,14 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy negative condition...";
     cc = new edu::sharif::twinner::trace::Constraint
         (conditionExp, edu::sharif::twinner::trace::Constraint::NON_NEGATIVE,
-         disassembledInstruction);
+         disassembledInstruction, true);
     edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operations...";
     signExtendedExp->minus (1ull << size);
   } else {
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy positive condition...";
     cc = new edu::sharif::twinner::trace::Constraint
         (conditionExp, edu::sharif::twinner::trace::Constraint::NEGATIVE,
-         disassembledInstruction);
+         disassembledInstruction, true);
   }
   delete conditionExp; // this is cloned by cc and is not required anymore
   trace->addPathConstraint (cc);
@@ -1331,14 +1331,14 @@ void InstructionSymbolicExecuter::cdqeAnalysisRoutine (
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy negative condition...";
     cc = new edu::sharif::twinner::trace::Constraint
         (conditionExp, edu::sharif::twinner::trace::Constraint::NON_NEGATIVE,
-         disassembledInstruction);
+         disassembledInstruction, true);
     edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operations...";
     signExtendedExp->minus (1ull << size);
   } else {
     edu::sharif::twinner::util::Logger::loquacious () << "\tdummy positive condition...";
     cc = new edu::sharif::twinner::trace::Constraint
         (conditionExp, edu::sharif::twinner::trace::Constraint::NEGATIVE,
-         disassembledInstruction);
+         disassembledInstruction, true);
   }
   delete conditionExp; // this is cloned by cc and is not required anymore
   trace->addPathConstraint (cc);
@@ -1427,13 +1427,13 @@ void InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine (
       trace->addPathConstraint
           (new edu::sharif::twinner::trace::Constraint
            (ithByteSrc, edu::sharif::twinner::trace::Constraint::ZERO,
-            disassembledInstruction));
+            disassembledInstruction, false));
       *c = 0xFF;
     } else { // non-equal
       trace->addPathConstraint
           (new edu::sharif::twinner::trace::Constraint
            (ithByteSrc, edu::sharif::twinner::trace::Constraint::NON_ZERO,
-            disassembledInstruction));
+            disassembledInstruction, false));
       *c = 0x00;
     }
     delete ithByteSrc;
@@ -1609,7 +1609,7 @@ void InstructionSymbolicExecuter::bsfAnalysisRoutine (
   edu::sharif::twinner::trace::Constraint *cc =
       new edu::sharif::twinner::trace::Constraint
       (conditionExp, edu::sharif::twinner::trace::Constraint::ZERO,
-       disassembledInstruction);
+       disassembledInstruction, false);
   delete conditionExp;
   trace->addPathConstraint (cc);
   edu::sharif::twinner::util::Logger::loquacious ()

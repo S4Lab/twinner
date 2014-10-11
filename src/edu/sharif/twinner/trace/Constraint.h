@@ -73,11 +73,16 @@ public:
    * (in)equality which is specified by type. Expression is cloned and deleted upon
    * destruction of constraint object.
    * Given expression is compared against zero (e.g. exp >= 0).
+   * If the comparison type is a signed one (e.g. exp < 0), then the needsSignExtension
+   * parameter must be set true to request for sign extension of exp before comparison.
+   *
    * @param exp The expression which will be cloned and should satisfy (in)equality.
    * @param type Indicates the (in)equality which exp should satisfy it.
    * @param instruction The instruction which is cause of this constraint instantiation.
+   * @param needsSignExtension Indicates that exp should be sign extended
    */
-  Constraint (const Expression *exp, ComparisonType type, uint32_t instruction);
+  Constraint (const Expression *exp,
+      ComparisonType type, uint32_t instruction, bool needsSignExtension);
 
   /**
    * Constructs a constraint indicating that given expressions should obey the
@@ -85,13 +90,17 @@ public:
    * destruction of constraint object.
    * First expression is left-hand-side and second expression is right-hand-side in the
    * formula (e.g. mainExp >= auxExp).
+   * If the comparison type is a signed one (e.g. exp < 0), then the needsSignExtension
+   * parameter must be set true to request for sign extension of exp before comparison.
+   *
    * @param mainExp The left-hand-side expression.
    * @param auxExp The right-hand-side expression.
    * @param type Indicates the (in)equality which given expressions should satisfy it.
    * @param instruction The instruction which is cause of this constraint instantiation.
+   * @param needsSignExtension Indicates that exp should be sign extended
    */
   Constraint (const Expression *mainExp, const Expression *auxExp,
-      ComparisonType type, uint32_t instruction);
+      ComparisonType type, uint32_t instruction, bool needsSignExtension);
 
   ~Constraint ();
 

@@ -17,6 +17,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "ConcreteValue.h"
+#include "edu/sharif/twinner/trace/Expression.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -32,14 +33,16 @@ Constraint::Constraint (ComparisonType _type, uint32_t instr) :
     type (_type), instruction (instr) {
 }
 
-Constraint::Constraint (const Expression *_exp, ComparisonType _type, uint32_t instr) :
-    mainExp (_exp->clone ()), auxExp (0),
+Constraint::Constraint (const Expression *_exp,
+    ComparisonType _type, uint32_t instr, bool needsSignExtension) :
+    mainExp (needsSignExtension ? _exp->signExtended (128) : _exp->clone ()), auxExp (0),
     type (_type), instruction (instr) {
 }
 
 Constraint::Constraint (const Expression *_mainExp, const Expression *_auxExp,
-    ComparisonType _type, uint32_t instr) :
-    mainExp (_mainExp->clone ()), auxExp (_auxExp->clone ()),
+    ComparisonType _type, uint32_t instr, bool needsSignExtension) :
+    mainExp (needsSignExtension ? _mainExp->signExtended (128) : _mainExp->clone ()),
+    auxExp (needsSignExtension ? _auxExp->signExtended (128) : _auxExp->clone ()),
     type (_type), instruction (instr) {
 }
 
@@ -142,37 +145,37 @@ uint32_t Constraint::getCausingInstructionIdentifier () const {
 Constraint *Constraint::instantiateNegatedConstraint () const {
   switch (type) {
   case NON_POSITIVE:
-    return new Constraint (mainExp, POSITIVE, instruction);
+    return new Constraint (mainExp, POSITIVE, instruction, true);
   case BELOW_OR_EQUAL:
-    return new Constraint (mainExp, auxExp, ABOVE, instruction);
+    return new Constraint (mainExp, auxExp, ABOVE, instruction, false);
   case LESS_OR_EQUAL:
-    return new Constraint (mainExp, auxExp, GREATER, instruction);
+    return new Constraint (mainExp, auxExp, GREATER, instruction, true);
   case NON_NEGATIVE:
-    return new Constraint (mainExp, NEGATIVE, instruction);
+    return new Constraint (mainExp, NEGATIVE, instruction, true);
   case ABOVE_OR_EQUAL:
-    return new Constraint (mainExp, auxExp, BELOW, instruction);
+    return new Constraint (mainExp, auxExp, BELOW, instruction, false);
   case GREATER_OR_EQUAL:
-    return new Constraint (mainExp, auxExp, LESS, instruction);
+    return new Constraint (mainExp, auxExp, LESS, instruction, true);
   case POSITIVE:
-    return new Constraint (mainExp, NON_POSITIVE, instruction);
+    return new Constraint (mainExp, NON_POSITIVE, instruction, true);
   case ABOVE:
-    return new Constraint (mainExp, auxExp, BELOW_OR_EQUAL, instruction);
+    return new Constraint (mainExp, auxExp, BELOW_OR_EQUAL, instruction, false);
   case GREATER:
-    return new Constraint (mainExp, auxExp, LESS_OR_EQUAL, instruction);
+    return new Constraint (mainExp, auxExp, LESS_OR_EQUAL, instruction, true);
   case NEGATIVE:
-    return new Constraint (mainExp, NON_NEGATIVE, instruction);
+    return new Constraint (mainExp, NON_NEGATIVE, instruction, true);
   case BELOW:
-    return new Constraint (mainExp, auxExp, ABOVE_OR_EQUAL, instruction);
+    return new Constraint (mainExp, auxExp, ABOVE_OR_EQUAL, instruction, false);
   case LESS:
-    return new Constraint (mainExp, auxExp, GREATER_OR_EQUAL, instruction);
+    return new Constraint (mainExp, auxExp, GREATER_OR_EQUAL, instruction, true);
   case ZERO:
-    return new Constraint (mainExp, NON_ZERO, instruction);
+    return new Constraint (mainExp, NON_ZERO, instruction, false);
   case EQUAL:
-    return new Constraint (mainExp, auxExp, NON_EQUAL, instruction);
+    return new Constraint (mainExp, auxExp, NON_EQUAL, instruction, false);
   case NON_ZERO:
-    return new Constraint (mainExp, ZERO, instruction);
+    return new Constraint (mainExp, ZERO, instruction, false);
   case NON_EQUAL:
-    return new Constraint (mainExp, auxExp, EQUAL, instruction);
+    return new Constraint (mainExp, auxExp, EQUAL, instruction, false);
   default:
     throw std::runtime_error ("Unknown ComparisonType");
   }
@@ -192,7 +195,8 @@ Constraint *Constraint::instantiateBelowConstraint (bool &below,
     const Expression *mainExp, const Expression *auxExp, uint32_t instruction) {
   if (auxExp) {
     below = mainExp->getLastConcreteValue () < auxExp->getLastConcreteValue ();
-    return new Constraint (mainExp, auxExp, below ? BELOW : ABOVE_OR_EQUAL, instruction);
+    return new Constraint (mainExp, auxExp, below ? BELOW : ABOVE_OR_EQUAL,
+                           instruction, false);
   } else {
     below = false; // unsigned value can not be below zero
     return 0;
@@ -203,8 +207,8 @@ Constraint *Constraint::instantiateBelowOrEqualConstraint (bool &belowOrEqual,
     const Expression *mainExp, const Expression *auxExp, uint32_t instruction) {
   if (auxExp) {
     belowOrEqual = mainExp->getLastConcreteValue () <= auxExp->getLastConcreteValue ();
-    return new Constraint
-        (mainExp, auxExp, belowOrEqual ? BELOW_OR_EQUAL : ABOVE, instruction);
+    return new Constraint (mainExp, auxExp, belowOrEqual ? BELOW_OR_EQUAL : ABOVE,
+                           instruction, false);
   } else {
     return Constraint::instantiateEqualConstraint
         (belowOrEqual, mainExp, auxExp, instruction);
@@ -215,10 +219,12 @@ Constraint *Constraint::instantiateLessConstraint (bool &less,
     const Expression *mainExp, const Expression *auxExp, uint32_t instruction) {
   if (auxExp) {
     less = mainExp->getLastConcreteValue ().lessThan (auxExp->getLastConcreteValue ());
-    return new Constraint (mainExp, auxExp, less ? LESS : GREATER_OR_EQUAL, instruction);
+    return new Constraint (mainExp, auxExp, less ? LESS : GREATER_OR_EQUAL,
+                           instruction, true);
   } else {
     less = mainExp->getLastConcreteValue ().lessThan (0);
-    return new Constraint (mainExp, less ? NEGATIVE : NON_NEGATIVE, instruction);
+    return new Constraint (mainExp, less ? NEGATIVE : NON_NEGATIVE,
+                           instruction, true);
   }
 }
 
@@ -227,11 +233,12 @@ Constraint *Constraint::instantiateLessOrEqualConstraint (bool &lessOrEqual,
   if (auxExp) {
     lessOrEqual = mainExp->getLastConcreteValue ().lessThanOrEqualTo
         (auxExp->getLastConcreteValue ());
-    return new Constraint
-        (mainExp, auxExp, lessOrEqual ? LESS_OR_EQUAL : GREATER, instruction);
+    return new Constraint (mainExp, auxExp, lessOrEqual ? LESS_OR_EQUAL : GREATER,
+                           instruction, true);
   } else {
     lessOrEqual = mainExp->getLastConcreteValue ().lessThanOrEqualTo (0);
-    return new Constraint (mainExp, lessOrEqual ? NON_POSITIVE : POSITIVE, instruction);
+    return new Constraint (mainExp, lessOrEqual ? NON_POSITIVE : POSITIVE,
+                           instruction, true);
   }
 }
 
@@ -239,10 +246,11 @@ Constraint *Constraint::instantiateEqualConstraint (bool &equal,
     const Expression *mainExp, const Expression *auxExp, uint32_t instruction) {
   if (auxExp) {
     equal = mainExp->getLastConcreteValue () == auxExp->getLastConcreteValue ();
-    return new Constraint (mainExp, auxExp, equal ? EQUAL : NON_EQUAL, instruction);
+    return new Constraint (mainExp, auxExp, equal ? EQUAL : NON_EQUAL,
+                           instruction, false);
   } else {
     equal = mainExp->getLastConcreteValue ().isZero ();
-    return new Constraint (mainExp, equal ? ZERO : NON_ZERO, instruction);
+    return new Constraint (mainExp, equal ? ZERO : NON_ZERO, instruction, false);
   }
 }
 
