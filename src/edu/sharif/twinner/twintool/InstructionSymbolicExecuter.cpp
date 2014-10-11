@@ -1291,43 +1291,6 @@ void InstructionSymbolicExecuter::xorAnalysisRoutine (
       << "\tdone\n";
 }
 
-void InstructionSymbolicExecuter::cdqeAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
-  // TODO: Replace with a native sign-extension implementation
-  edu::sharif::twinner::util::Logger::loquacious () << "cdqeAnalysisRoutine(...)\n"
-      << "\tgetting src exp...";
-  edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
-  // src is reg; which is mutable
-  const int size = static_cast<const MutableExpressionValueProxy &> (src).getSize ();
-  // size is supposed to be 32 bits
-  const bool isNegative = srcexp->getLastConcreteValue ().isNegative ();
-  edu::sharif::twinner::trace::Expression *conditionExp = srcexp->clone ();
-  conditionExp->minus (1ull << (size - 1));
-  edu::sharif::twinner::trace::Expression *signExtendedExp =
-      srcexp->clone (dst.getSize ());
-  delete srcexp;
-  edu::sharif::twinner::trace::Constraint *cc;
-  if (isNegative) {
-    edu::sharif::twinner::util::Logger::loquacious () << "\tdummy negative condition...";
-    cc = new edu::sharif::twinner::trace::Constraint
-        (conditionExp, edu::sharif::twinner::trace::Constraint::NON_NEGATIVE,
-         disassembledInstruction, true);
-    edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operations...";
-    signExtendedExp->minus (1ull << size);
-  } else {
-    edu::sharif::twinner::util::Logger::loquacious () << "\tdummy positive condition...";
-    cc = new edu::sharif::twinner::trace::Constraint
-        (conditionExp, edu::sharif::twinner::trace::Constraint::NEGATIVE,
-         disassembledInstruction, true);
-  }
-  delete conditionExp; // this is cloned by cc and is not required anymore
-  trace->addPathConstraint (cc);
-  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
-  dst.setExpression (trace, signExtendedExp);
-  delete signExtendedExp;
-  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
-}
-
 void InstructionSymbolicExecuter::testAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "testAnalysisRoutine(...)\n"
@@ -1867,6 +1830,7 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_MOVDQU:
   case XED_ICLASS_MOVDQA:
     return &InstructionSymbolicExecuter::movAnalysisRoutine;
+  case XED_ICLASS_CDQE:
   case XED_ICLASS_MOVSX:
   case XED_ICLASS_MOVSXD:
     return &InstructionSymbolicExecuter::movsxAnalysisRoutine;
@@ -1902,8 +1866,6 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_PXOR:
   case XED_ICLASS_XOR:
     return &InstructionSymbolicExecuter::xorAnalysisRoutine;
-  case XED_ICLASS_CDQE:
-    return &InstructionSymbolicExecuter::cdqeAnalysisRoutine;
   case XED_ICLASS_TEST:
     return &InstructionSymbolicExecuter::testAnalysisRoutine;
   case XED_ICLASS_PMOVMSKB:
