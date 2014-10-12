@@ -216,9 +216,16 @@ Expr ConstraintToCvc4ExprConverter::signExtendCvc4Expr (Expr &operand,
   Expr srcExp = em.mkExpr (kind::BITVECTOR_EXTRACT,
                            em.mkConst (BitVectorExtract (source - 1, 0)),
                            operand);
-  return em.mkExpr (kind::BITVECTOR_SIGN_EXTEND,
-                    em.mkConst (BitVectorSignExtend (target - source)),
-                    srcExp);
+  Expr singExtended = em.mkExpr (kind::BITVECTOR_SIGN_EXTEND,
+                                 em.mkConst (BitVectorSignExtend (target - source)),
+                                 srcExp);
+  if (target == 128) {
+    return singExtended;
+  } else {
+    return em.mkExpr (kind::BITVECTOR_ZERO_EXTEND,
+                      em.mkConst (BitVectorZeroExtend (128 - target)),
+                      singExtended);
+  }
 }
 
 Kind ConstraintToCvc4ExprConverter::convertOperatorIdentifierToCvc4Kind (
