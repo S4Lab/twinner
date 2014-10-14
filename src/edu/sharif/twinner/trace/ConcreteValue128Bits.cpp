@@ -73,7 +73,7 @@ void ConcreteValue128Bits::saveToBinaryStream (std::ofstream &out) const {
   const UINT32 size = 128;
   out.write ((const char *) &size, sizeof (size));
   out.write ((const char *) &lsb, sizeof (lsb));
-  out.write ((const char *) &lsb, sizeof (msb));
+  out.write ((const char *) &msb, sizeof (msb));
 }
 
 void ConcreteValue128Bits::writeToMemoryAddress (ADDRINT memoryEa) const {
