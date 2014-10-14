@@ -354,7 +354,7 @@ REG RegisterEmergedSymbol::getOverlappingRegisterByIndex (int external, int inte
 }
 
 void RegisterEmergedSymbol::initializeSubRegisters (REG reg,
-    ExecutionTraceSegment *segment, const Expression & expression) {
+    ExecutionTraceSegment *segment, const Expression &expression) {
   int regIndex = getRegisterIndex (reg);
   if (regIndex == -1) { // e.g. xmm registers
     return;

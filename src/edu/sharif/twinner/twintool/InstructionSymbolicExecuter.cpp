@@ -1237,9 +1237,7 @@ void InstructionSymbolicExecuter::andAnalysisRoutine (
       dst.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tbinary operation...";
-  dstexp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::BITWISE_AND), srcexp);
+  dstexp->bitwiseAnd (srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
   eflags.setFlags (dstexp);
@@ -1305,9 +1303,7 @@ void InstructionSymbolicExecuter::testAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tbinary operation...";
   edu::sharif::twinner::trace::Expression *tmpexp = dstexp;
-  tmpexp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::BITWISE_AND), srcexp);
+  tmpexp->bitwiseAnd (srcexp);
   delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tsetting EFLAGS...";

@@ -175,9 +175,7 @@ void Expression::truncate (int bits) {
   } else { // < 64
     mask = new ConcreteValue64Bits ((1ull << bits) - 1);
   }
-  stack.push_back (new Constant (mask));
-  stack.push_back (new Operator (Operator::BITWISE_AND));
-  (*lastConcreteValue) &= (*mask);
+  bitwiseAnd (mask);
 }
 
 void Expression::shiftToRight (ConcreteValue *bits) {
@@ -322,9 +320,7 @@ void Expression::makeLeastSignificantBitsZero (int bits) {
     delete mask;
     mask = temp;
   }
-  stack.push_back (new Constant (mask));
-  stack.push_back (new Operator (Operator::BITWISE_AND));
-  (*lastConcreteValue) &= (*mask);
+  bitwiseAnd (mask);
 }
 
 void Expression::negate () {
