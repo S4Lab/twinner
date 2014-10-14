@@ -19,6 +19,11 @@ all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
 %.out: %.s
 	gcc -g $< -o $@
 
+expression-operations-concrete-value-test.out: expression-operations-concrete-value-test.cpp
+	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o expression-operations-concrete-value-test.o expression-operations-concrete-value-test.cpp
+	g++ -o expression-operations-concrete-value-test.out expression-operations-concrete-value-test.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/search/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o ../deploy/obj-intel64/edu/sharif/twinner/exception/AbstractException.o -lcvc4 -lgmp
+
+
 clean:
 	rm -f *.out *~
 
