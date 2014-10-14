@@ -32,6 +32,7 @@ using namespace CVC4;
 #include <list>
 
 #include "edu/sharif/twinner/trace/Operator.h"
+#include "pin.H"
 
 namespace edu {
 namespace sharif {

@@ -24,12 +24,12 @@ namespace twinner {
 namespace trace {
 
 ExpressionImp::ExpressionImp (const ExpressionImp &exp) :
-Expression (exp) {
+    Expression (exp) {
 }
 
 ExpressionImp::ExpressionImp (REG reg, const ConcreteValue &concreteValue,
     int generationIndex) :
-Expression (concreteValue.clone (), false) {
+    Expression (concreteValue.clone (), false) {
   const REG enclosingReg = REG_FullRegName (reg);
   //TODO: Check whether concreteValue should be casted to 64-bits precision for symbol
   stack.push_back (new RegisterEmergedSymbol
@@ -41,7 +41,7 @@ Expression (concreteValue.clone (), false) {
 
 ExpressionImp::ExpressionImp (ADDRINT memoryEa, const ConcreteValue &concreteValue,
     int generationIndex, bool isOverwriting) :
-Expression (concreteValue.clone (), isOverwriting) {
+    Expression (concreteValue.clone (), isOverwriting) {
   if (!isOverwriting) {
     if (memoryEa < 0x7f0000000000ull) { // FIXME: Generalize this code
       // this temporary code assumes that everything out of stack (including heap) is constant
@@ -96,17 +96,17 @@ Expression (concreteValue.clone (), isOverwriting) {
 }
 
 ExpressionImp::ExpressionImp (const ConcreteValue &value) :
-Expression (value.clone (), false) {
+    Expression (value.clone (), false) {
   stack.push_back (new Constant (value));
 }
 
 ExpressionImp::ExpressionImp (ConcreteValue *value) :
-Expression (value, false) {
+    Expression (value, false) {
   stack.push_back (new Constant (*value));
 }
 
 ExpressionImp::ExpressionImp (UINT64 value) :
-Expression (new ConcreteValue64Bits (value), false) {
+    Expression (new ConcreteValue64Bits (value), false) {
   stack.push_back (new Constant (new ConcreteValue64Bits (value)));
 }
 

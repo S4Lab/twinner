@@ -15,8 +15,6 @@
 
 #include "ExpressionToken.h"
 
-#include "pin.H"
-
 namespace edu {
 namespace sharif {
 namespace twinner {

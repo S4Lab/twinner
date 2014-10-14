@@ -18,6 +18,7 @@
 #include "ConcreteValue128Bits.h"
 
 #include "edu/sharif/twinner/util/memory.h"
+#include "edu/sharif/twinner/util/Logger.h"
 
 #include <sstream>
 
