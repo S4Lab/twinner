@@ -115,6 +115,29 @@ int main () {
   Logger::debug () << "Constraint: " << con << '\n';
   Logger::debug () << "Type is '<=': " << lessOrEqual << '\n';
 
+  Logger::info () << "Testing save/load to/from file...\n";
+  const char *path = "tmp.dat";
+  std::ofstream out;
+  out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
+  if (!out.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not write trace info:"
+      " Error in open function: " << path << '\n';
+    return false;
+  }
+  Logger::debug () << "Saving constraint: " << con << '\n';
+  con->saveToBinaryStream (out);
+  out.close ();
+  std::ifstream in;
+  in.open (path, ios_base::in | ios_base::binary);
+  if (!in.is_open ()) {
+    edu::sharif::twinner::util::Logger::error () << "Can not read trace info:"
+      " Error in open function: " << path << '\n';
+    return 0;
+  }
+  const Constraint *cc = Constraint::loadFromBinaryStream (in);
+  in.close ();
+  Logger::debug () << "Loaded constraint is: " << cc << '\n';
+
   return 0;
 }
 
