@@ -80,8 +80,9 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa, const ConcreteValue &concreteVal
                        (memoryEa - offset,
                         ConcreteValue64Bits (concreteValue.toUint64 () << (offset * 8)),
                         generationIndex));
-      stack.push_back (new Constant (offset * 8));
-      stack.push_back (new Operator (Operator::SHIFT_RIGHT));
+      // Using division instead of shift-to-right to match with Expression implementation
+      stack.push_back (new Constant (1ull << (offset * 8)));
+      stack.push_back (new Operator (Operator::DIVIDE));
     }
     if (offset < 8 - (cvsize / 8)) {
       stack.push_back (new Constant ((1ull << cvsize) - 1));
