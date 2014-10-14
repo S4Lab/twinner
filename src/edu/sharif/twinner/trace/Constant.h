@@ -32,6 +32,7 @@ public:
   Constant (const ConcreteValue &val);
   Constant (ConcreteValue *val);
 
+  void setValue (const ConcreteValue &value);
   virtual Constant *clone () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;

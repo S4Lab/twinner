@@ -271,9 +271,26 @@ void Expression::add (UINT64 immediate) {
 }
 
 void Expression::bitwiseAnd (ConcreteValue *mask) {
-  stack.push_back (new Constant (mask));
-  stack.push_back (new Operator (Operator::BITWISE_AND));
-  (*lastConcreteValue) &= *mask;
+  Constant *lastConstantMask = 0;
+  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
+    lastConstantMask = static_cast<Constant *> (stack.back ());
+
+  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
+    std::list < ExpressionToken * >::iterator it = stack.end ();
+    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::BITWISE_AND) {
+      lastConstantMask = dynamic_cast<Constant *> (*--it);
+    }
+  }
+  if (lastConstantMask) {
+    (*lastConcreteValue) &= *mask;
+    (*mask) &= lastConstantMask->getValue ();
+    lastConstantMask->setValue (*mask);
+    delete mask;
+  } else {
+    stack.push_back (new Constant (mask));
+    stack.push_back (new Operator (Operator::BITWISE_AND));
+    (*lastConcreteValue) &= *mask;
+  }
 }
 
 void Expression::bitwiseAnd (UINT64 mask) {

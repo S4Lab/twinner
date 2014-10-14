@@ -23,19 +23,23 @@ namespace twinner {
 namespace trace {
 
 Constant::Constant (const Constant &c) :
-Operand (c) {
+    Operand (c) {
 }
 
 Constant::Constant (UINT64 val) :
-Operand (ConcreteValue64Bits (val)) {
+    Operand (ConcreteValue64Bits (val)) {
 }
 
 Constant::Constant (const ConcreteValue &val) :
-Operand (val) {
+    Operand (val) {
 }
 
 Constant::Constant (ConcreteValue *val) :
-Operand (val) {
+    Operand (val) {
+}
+
+void Constant::setValue (const ConcreteValue &value) {
+  (*concreteValue) = value;
 }
 
 Constant *Constant::clone () const {
