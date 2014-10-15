@@ -122,7 +122,8 @@ public:
 
 private:
   void initializeOverlappingMemoryLocationsDownwards (int size,
-      ADDRINT memoryEa, const Expression &changedExp);
+      ADDRINT memoryEa, const Expression &changedExp,
+      bool shouldTruncate = false, int shiftAmount = 0);
   void initializeOverlappingMemoryLocationsUpwards (ADDRINT memoryEa,
       const Expression &expression);
   void setOverwritingMemoryExpression (int size,
