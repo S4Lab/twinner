@@ -58,6 +58,16 @@ public:
       std::set < const edu::sharif::twinner::trace::Symbol * > &symbols)
   /* @throw (UnsatisfiableConstraintsException) */ = 0;
 
+  /**
+   * Simplifies the given constraint and returns an equivalent but simpler constraint.
+   * Caller is responsible for deleting the instantiated returned constraint object.
+   *
+   * @param constraint The constraint which should be simplified.
+   * @return A constraint which is equivalent to given one, but simpler; owned by caller
+   */
+  virtual const edu::sharif::twinner::trace::Constraint *simplifyConstraint (
+      const edu::sharif::twinner::trace::Constraint *constraint) = 0;
+
   static void init (SmtSolver *instance);
   static SmtSolver *getInstance ();
   void destroy ();

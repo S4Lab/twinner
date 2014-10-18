@@ -76,6 +76,11 @@ void Cvc4SmtSolver::solveConstraints (
   throw UnsatisfiableConstraintsException ();
 }
 
+const edu::sharif::twinner::trace::Constraint *Cvc4SmtSolver::simplifyConstraint (
+    const edu::sharif::twinner::trace::Constraint *constraint) {
+  return constraint;
+}
+
 void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
     std::set < const edu::sharif::twinner::trace::Symbol * > &satSolution) {
   edu::sharif::twinner::util::Logger log =

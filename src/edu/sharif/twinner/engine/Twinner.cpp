@@ -499,7 +499,11 @@ void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
   repeat (aux.depth) {
     aux.out << '\t';
   }
-  aux.out << "if (" << constraint->toString () << ") {\n";
+  const edu::sharif::twinner::trace::Constraint *simplifiedConstraint =
+      edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+      ->simplifyConstraint (constraint);
+  aux.out << "if (" << simplifiedConstraint->toString () << ") {\n";
+  delete simplifiedConstraint;
   aux.depth++;
 }
 
