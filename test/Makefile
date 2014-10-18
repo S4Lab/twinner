@@ -6,7 +6,8 @@ TARGETS := simple-condition-test \
 	assembly-mov-sizes \
 	registers-state-manipulation \
 	multi-path-with-printf-leafs-test
-TWIN_TARGETS := multi-path-with-printf-leafs-test
+TWIN_TARGETS := simple-condition-test \
+	multi-path-with-printf-leafs-test
 
 all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
 
