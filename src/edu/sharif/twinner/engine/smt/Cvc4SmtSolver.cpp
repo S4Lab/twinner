@@ -78,7 +78,26 @@ void Cvc4SmtSolver::solveConstraints (
 
 const edu::sharif::twinner::trace::Constraint *Cvc4SmtSolver::simplifyConstraint (
     const edu::sharif::twinner::trace::Constraint *constraint) const {
-  return constraint;
+  //  edu::sharif::twinner::util::Logger::loquacious ()
+  //      << "Cvc4SmtSolver::simplifyConstraint (...)\n";
+  ExprManager em;
+  SmtEngine smt (&em);
+  /*
+   * QF_ means disable quantifiers
+   * BV means enable bit-vectors
+   */
+  smt.setLogic ("QF_BV");
+  smt.setOption ("produce-models", true);
+  //  smt.setOption ("trace", "smt");
+
+  std::list < const edu::sharif::twinner::trace::Constraint * > constraints;
+  constraints.push_back (constraint);
+  ConstraintToCvc4ExprConverter converter (em, false, constraints);
+  std::map<std::string, Expr> symbols;
+  Expr cvc4Constraint = converter.convert (symbols);
+  Expr simple = smt.simplify (cvc4Constraint);
+  edu::sharif::twinner::util::Logger::loquacious () << simple << '\n';
+  return converter.convertBack (simple);
 }
 
 void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,

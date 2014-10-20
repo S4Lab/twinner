@@ -50,6 +50,11 @@ Expr ConstraintToCvc4ExprConverter::convert (std::map<std::string, Expr> &symbol
   return totalConstraint;
 }
 
+edu::sharif::twinner::trace::Constraint *ConstraintToCvc4ExprConverter::convertBack (
+    Expr exp) {
+  return 0;
+}
+
 void ConstraintToCvc4ExprConverter::addConstraint (Expr constraint) {
   if (initialized) {
     totalConstraint = totalConstraint.andExpr (constraint);
