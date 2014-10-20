@@ -55,7 +55,7 @@ public:
    */
   virtual void solveConstraints (
       const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-      std::set < const edu::sharif::twinner::trace::Symbol * > &symbols)
+      std::set < const edu::sharif::twinner::trace::Symbol * > &symbols) const
   /* @throw (UnsatisfiableConstraintsException) */ = 0;
 
   /**
@@ -66,7 +66,7 @@ public:
    * @return A constraint which is equivalent to given one, but simpler; owned by caller
    */
   virtual const edu::sharif::twinner::trace::Constraint *simplifyConstraint (
-      const edu::sharif::twinner::trace::Constraint *constraint) = 0;
+      const edu::sharif::twinner::trace::Constraint *constraint) const = 0;
 
   static void init (SmtSolver *instance);
   static SmtSolver *getInstance ();

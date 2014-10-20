@@ -70,10 +70,23 @@ private:
   bool initialized;
   Expr totalConstraint;
 
+  bool limitSymbols;
+
 public:
-  ConstraintToCvc4ExprConverter (ExprManager &_em,
+  ConstraintToCvc4ExprConverter (ExprManager &_em, bool _limitSymbols,
       const std::list < const edu::sharif::twinner::trace::Constraint * > &_constraints);
 
+  /**
+   * Converts given constraints to CVC4 Expr instances, takes care of symbols by placing
+   * them in the given map to report them as name -> Expr mapping. Also same symbol is
+   * mapped to same Expr. And for 64-bits symbols, a 128-bits Expr will be created which
+   * is afterwards limited to 64-bits by adding a constraint saying exp < 2^64 and so
+   * becomes a 64-bits Expr in practice. This behavior may be changed whenever multiple
+   * bitvector lengths were supported by this converter.
+   *
+   * @param symbols The output map of symbol name to its Expr instance.
+   * @return An Expr representing all given constraints (specified by the constructor).
+   */
   Expr convert (std::map<std::string, Expr> &symbols);
 
 private:

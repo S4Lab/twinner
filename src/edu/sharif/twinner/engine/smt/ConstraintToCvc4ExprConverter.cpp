@@ -27,8 +27,10 @@ namespace engine {
 namespace smt {
 
 ConstraintToCvc4ExprConverter::ConstraintToCvc4ExprConverter (ExprManager &_em,
+    bool _limitSymbols,
     const std::list < const edu::sharif::twinner::trace::Constraint * > &_constraints) :
-    em (_em), constraints (_constraints), initialized (false) {
+    em (_em), constraints (_constraints), initialized (false),
+    limitSymbols (_limitSymbols) {
   type = em.mkBitVectorType (128);
 
   zero = em.mkConst (BitVector (128, UINT64 (0)));
@@ -153,7 +155,7 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
   } else if (dynamic_cast<const edu::sharif::twinner::trace::Symbol *> (token)) {
     const edu::sharif::twinner::trace::Symbol *symbolToken =
         static_cast<const edu::sharif::twinner::trace::Symbol *> (token);
-    std::string name = symbolToken->toString ();
+    const std::string name = symbolToken->toString ();
     std::map<std::string, Expr>::const_iterator it = symbols.find (name);
     if (it != symbols.end ()) {
       return it->second;

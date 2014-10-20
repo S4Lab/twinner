@@ -38,7 +38,7 @@ Cvc4SmtSolver::~Cvc4SmtSolver () {
 
 void Cvc4SmtSolver::solveConstraints (
     const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-    std::set < const edu::sharif::twinner::trace::Symbol * > &satSolution)
+    std::set < const edu::sharif::twinner::trace::Symbol * > &satSolution) const
 /* @throw (UnsatisfiableConstraintsException) */ {
   edu::sharif::twinner::util::Logger::loquacious ()
       << "Cvc4SmtSolver::solveConstraints (...)\n";
@@ -55,7 +55,7 @@ void Cvc4SmtSolver::solveConstraints (
   std::map<std::string, Expr> symbols;
   // FIXME: all operations that are supposed to overflow, must use explicit bitwise and
   Expr totalConstraint =
-      ConstraintToCvc4ExprConverter (em, constraints).convert (symbols);
+      ConstraintToCvc4ExprConverter (em, true, constraints).convert (symbols);
   try {
     edu::sharif::twinner::util::Logger::loquacious ()
         << "starting SmtEngine::checkSat(...)\n";
@@ -77,7 +77,7 @@ void Cvc4SmtSolver::solveConstraints (
 }
 
 const edu::sharif::twinner::trace::Constraint *Cvc4SmtSolver::simplifyConstraint (
-    const edu::sharif::twinner::trace::Constraint *constraint) {
+    const edu::sharif::twinner::trace::Constraint *constraint) const {
   return constraint;
 }
 
