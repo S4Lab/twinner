@@ -166,7 +166,7 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
       return it->second;
     } else {
       Expr sym = em.mkVar (name, type);
-      if (symbolToken->getValue ().getSize () == 64) {
+      if (symbolToken->getValue ().getSize () == 64 && limitSymbols) {
         addConstraint (em.mkExpr (kind::BITVECTOR_ULT, sym, max64));
       }
       symbols.insert (std::make_pair (name, sym));
