@@ -10,10 +10,10 @@
  * This file is part of Twinner project.
  */
 
-#ifndef EXPRESSION_FOR_TWINTOOL_H
-#define EXPRESSION_FOR_TWINTOOL_H
+#ifndef EXPRESSION_IMP_H
+#define EXPRESSION_IMP_H
 
-#include "edu/sharif/twinner/trace/Expression.h"
+#include "Expression.h"
 
 namespace edu {
 namespace sharif {

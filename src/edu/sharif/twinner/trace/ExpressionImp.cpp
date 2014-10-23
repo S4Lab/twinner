@@ -12,11 +12,11 @@
 
 #include "ExpressionImp.h"
 
-#include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
-#include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
-#include "edu/sharif/twinner/trace/Constant.h"
-#include "edu/sharif/twinner/trace/ConcreteValue128Bits.h"
-#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
+#include "RegisterEmergedSymbol.h"
+#include "MemoryEmergedSymbol.h"
+#include "Constant.h"
+#include "ConcreteValue128Bits.h"
+#include "ConcreteValue64Bits.h"
 
 namespace edu {
 namespace sharif {

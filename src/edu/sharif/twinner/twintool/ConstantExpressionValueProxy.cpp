@@ -12,7 +12,7 @@
 
 #include "ConstantExpressionValueProxy.h"
 
-#include "edu/sharif/twinner/trace-twintool/ExpressionImp.h"
+#include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/ConcreteValue.h"
 
 #include <stdexcept>
@@ -24,8 +24,8 @@ namespace twintool {
 
 ConstantExpressionValueProxy::ConstantExpressionValueProxy (
     const edu::sharif::twinner::trace::ConcreteValue &concreteValue, int _size) :
-exp (new edu::sharif::twinner::trace::ExpressionImp (concreteValue.clone (_size))),
-size (_size) {
+    exp (new edu::sharif::twinner::trace::ExpressionImp (concreteValue.clone (_size))),
+    size (_size) {
 }
 
 ConstantExpressionValueProxy::~ConstantExpressionValueProxy () {

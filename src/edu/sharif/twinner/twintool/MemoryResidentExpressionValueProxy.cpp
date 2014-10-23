@@ -17,7 +17,7 @@
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/ConcreteValue128Bits.h"
-#include "edu/sharif/twinner/trace-twintool/ExpressionImp.h"
+#include "edu/sharif/twinner/trace/ExpressionImp.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/memory.h"
