@@ -131,6 +131,9 @@ private:
   void loadInitializedSymbolsFromBinaryStream (std::ifstream &in);
   ExecutionTraceSegment *loadSingleSegmentSymbolsRecordsFromBinaryStream (int index,
       std::ifstream &in);
+
+  Expression *instantiateExpression (REG addr, const ConcreteValue &val, int index);
+  Expression *instantiateExpression (ADDRINT addr, const ConcreteValue &val, int index);
 };
 
 }

@@ -179,7 +179,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
   }
   // instantiate and set a new expression in the current segment
   if (!newExpression) {
-    newExpression = new ExpressionImp (address, val, currentSegmentIndex);
+    newExpression = instantiateExpression (address, val, currentSegmentIndex);
   }
   return (getCurrentTraceSegment ()->*getMethod) (size, address, val, newExpression);
 }
@@ -205,7 +205,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
      * Callers who care about concrete value of the created expression, are not allowed
      * to pass null for the newExpression argument.
      */
-    newExpression = new ExpressionImp
+    newExpression = instantiateExpression
         (address, ConcreteValue64Bits (0), currentSegmentIndex);
   }
   return (getCurrentTraceSegment ()->*getMethod) (size, address, newExpression);
@@ -250,10 +250,10 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
     case REGISTER_128_BITS_SYMBOL_TYPE:
     {
       if (record.type == REGISTER_64_BITS_SYMBOL_TYPE) {
-        exp = new ExpressionImp
+        exp = instantiateExpression
             (REG (record.address), ConcreteValue64Bits (record.concreteValueLsb), index);
       } else {
-        exp = new ExpressionImp
+        exp = instantiateExpression
             (REG (record.address),
              ConcreteValue128Bits (record.concreteValueMsb, record.concreteValueLsb),
              index);
@@ -298,6 +298,21 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
     }
   }
   return new ExecutionTraceSegment (regMap, memMap);
+}
+
+Expression *TraceImp::instantiateExpression (REG address, const ConcreteValue &value,
+    int index) {
+  const REG enclosingReg = REG_FullRegName (address);
+  Expression *exp = new ExpressionImp (enclosingReg, value, index);
+  if (enclosingReg != address) {
+    exp->truncate (REG_Size (address) * 8);
+  }
+  return exp;
+}
+
+Expression *TraceImp::instantiateExpression (ADDRINT address, const ConcreteValue &value,
+    int index) {
+  return new ExpressionImp (address, value, index);
 }
 
 }

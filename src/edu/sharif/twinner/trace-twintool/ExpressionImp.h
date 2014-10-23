@@ -30,6 +30,7 @@ public:
    * Instantiates an expression containing a new (yet unused) symbol,
    * initiated from a register.
    * ASSERT: The precision of concreteValue must match with precision of reg
+   * ASSERT: reg == REG_FullRegName (reg)
    */
   ExpressionImp (REG reg, const ConcreteValue &concreteValue, int generationIndex);
 

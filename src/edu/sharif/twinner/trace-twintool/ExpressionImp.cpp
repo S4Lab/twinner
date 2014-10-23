@@ -30,13 +30,8 @@ ExpressionImp::ExpressionImp (const ExpressionImp &exp) :
 ExpressionImp::ExpressionImp (REG reg, const ConcreteValue &concreteValue,
     int generationIndex) :
     Expression (concreteValue.clone (), false) {
-  const REG enclosingReg = REG_FullRegName (reg);
   //TODO: Check whether concreteValue should be casted to 64-bits precision for symbol
-  stack.push_back (new RegisterEmergedSymbol
-                   (enclosingReg, concreteValue, generationIndex));
-  if (enclosingReg != reg) {
-    truncate (REG_Size (reg) * 8);
-  }
+  stack.push_back (new RegisterEmergedSymbol (reg, concreteValue, generationIndex));
 }
 
 ExpressionImp::ExpressionImp (ADDRINT memoryEa, const ConcreteValue &concreteValue,
@@ -55,7 +50,7 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa, const ConcreteValue &concreteVal
     const ConcreteValue128Bits *cv =
         static_cast<const ConcreteValue128Bits *> (&concreteValue);
     stack.push_back (new MemoryEmergedSymbol
-                     (memoryEa + 8 /* little endian*/,
+                     (memoryEa + 8, // little endian
                       ConcreteValue64Bits (cv->getMsb ()), generationIndex));
     stack.push_back (new Constant (64));
     stack.push_back (new Operator (Operator::SHIFT_LEFT));
