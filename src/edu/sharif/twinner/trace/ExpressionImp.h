@@ -20,6 +20,8 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+class Symbol;
+
 class ExpressionImp : public Expression {
 
 private:
@@ -42,6 +44,14 @@ public:
    */
   ExpressionImp (ADDRINT memoryEa, const ConcreteValue &concreteValue,
       int generationIndex, bool isOverwriting = false);
+
+  /**
+   * Instantiates an expression containing the given symbol.
+   * Ownership of the given symbol is kept by the expression.
+   * The concrete value of the given symbol will be used as the last concrete value of
+   * the expression too.
+   */
+  ExpressionImp (Symbol *symbol);
 
   /**
    * Instantiates an expression containing a constant value (non-symbolic).

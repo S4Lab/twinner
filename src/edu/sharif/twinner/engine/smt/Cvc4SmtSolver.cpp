@@ -96,7 +96,6 @@ const edu::sharif::twinner::trace::Constraint *Cvc4SmtSolver::simplifyConstraint
   std::map<std::string, Expr> symbols;
   Expr cvc4Constraint = converter.convert (symbols);
   Expr simple = smt.simplify (cvc4Constraint);
-  edu::sharif::twinner::util::Logger::loquacious () << simple << '\n';
   return converter.convertBack (simple);
 }
 

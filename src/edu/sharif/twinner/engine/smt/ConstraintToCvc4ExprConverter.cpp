@@ -12,11 +12,12 @@
 
 #include "ConstraintToCvc4ExprConverter.h"
 
-#include "edu/sharif/twinner/trace/ConcreteValue.h"
+#include "edu/sharif/twinner/trace/ConcreteValue128Bits.h"
+#include "edu/sharif/twinner/trace/ExpressionImp.h"
+#include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/Constant.h"
 #include "edu/sharif/twinner/trace/Symbol.h"
-#include "edu/sharif/twinner/trace/Expression.h"
-#include "edu/sharif/twinner/trace/Constraint.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 
@@ -52,7 +53,7 @@ Expr ConstraintToCvc4ExprConverter::convert (std::map<std::string, Expr> &symbol
 
 edu::sharif::twinner::trace::Constraint *ConstraintToCvc4ExprConverter::convertBack (
     Expr exp) {
-  return 0;
+  return convertCvc4ExprToConstraint (exp);
 }
 
 void ConstraintToCvc4ExprConverter::addConstraint (Expr constraint) {
@@ -111,6 +112,124 @@ Expr ConstraintToCvc4ExprConverter::convertConstraintToCvc4Expr (
     default:
       throw std::runtime_error ("Unknown Comparison Type");
     }
+  }
+}
+
+edu::sharif::twinner::trace::Constraint *
+ConstraintToCvc4ExprConverter::convertCvc4ExprToConstraint (Expr &exp) {
+  if (exp.getNumChildren () != 2) {
+    throw std::runtime_error ("CVC4 Expr must have exactly two children");
+  }
+  Expr::const_iterator it = exp.begin ();
+  Expr mainExp = *it++;
+  Expr auxExp = *it;
+  if (auxExp == zero) {
+    return convertCvc4ExprToConstraint
+        (exprVsZeroKindToComparisonType (exp.getKind ()), mainExp);
+  } else if (mainExp == zero) {
+    return convertCvc4ExprToConstraint
+        (exprVsZeroKindToReversedComparisonType (exp.getKind ()), auxExp);
+  } else {
+    return convertCvc4ExprToConstraint
+        (exprVsExprKindToComparisonType (exp.getKind ()), mainExp, auxExp);
+  }
+}
+
+edu::sharif::twinner::trace::Constraint *
+ConstraintToCvc4ExprConverter::convertCvc4ExprToConstraint (
+    edu::sharif::twinner::trace::Constraint::ComparisonType type,
+    Expr &mainExp) {
+  edu::sharif::twinner::trace::Expression *exp = convertCvc4ExprToExpression (mainExp);
+  edu::sharif::twinner::trace::Constraint *constraint =
+      new edu::sharif::twinner::trace::Constraint (exp, type, 0, false);
+  delete exp;
+  return constraint; // mainExp <op-type> zero
+}
+
+edu::sharif::twinner::trace::Constraint *
+ConstraintToCvc4ExprConverter::convertCvc4ExprToConstraint (
+    edu::sharif::twinner::trace::Constraint::ComparisonType type,
+    Expr &mainExp, Expr &auxExp) {
+  edu::sharif::twinner::trace::Expression *exp1 = convertCvc4ExprToExpression (mainExp);
+  edu::sharif::twinner::trace::Expression *exp2 = convertCvc4ExprToExpression (auxExp);
+  edu::sharif::twinner::trace::Constraint *constraint =
+      new edu::sharif::twinner::trace::Constraint (exp1, exp2, type, 0, false);
+  delete exp1;
+  delete exp2;
+  return constraint; // mainExp <op-type> auxExp
+}
+
+edu::sharif::twinner::trace::Constraint::ComparisonType
+ConstraintToCvc4ExprConverter::exprVsZeroKindToComparisonType (Kind kind) const {
+  switch (kind) {
+  case kind::BITVECTOR_SGE:
+    return edu::sharif::twinner::trace::Constraint::NON_NEGATIVE;
+  case kind::BITVECTOR_SGT:
+    return edu::sharif::twinner::trace::Constraint::POSITIVE;
+  case kind::BITVECTOR_SLE:
+    return edu::sharif::twinner::trace::Constraint::NON_POSITIVE;
+  case kind::BITVECTOR_SLT:
+    return edu::sharif::twinner::trace::Constraint::NEGATIVE;
+  case kind::DISTINCT:
+    return edu::sharif::twinner::trace::Constraint::NON_ZERO;
+  case kind::EQUAL:
+    return edu::sharif::twinner::trace::Constraint::ZERO;
+  default:
+    edu::sharif::twinner::util::Logger::error () << "Got " << kind
+        << " expression Kind unexpectedly.\n";
+    throw std::runtime_error ("Unexpected CVC4 Expr Kind");
+  }
+}
+
+edu::sharif::twinner::trace::Constraint::ComparisonType
+ConstraintToCvc4ExprConverter::exprVsZeroKindToReversedComparisonType (Kind kind) const {
+  switch (kind) {
+  case kind::BITVECTOR_SGE:
+    return edu::sharif::twinner::trace::Constraint::NEGATIVE;
+  case kind::BITVECTOR_SGT:
+    return edu::sharif::twinner::trace::Constraint::NON_POSITIVE;
+  case kind::BITVECTOR_SLE:
+    return edu::sharif::twinner::trace::Constraint::POSITIVE;
+  case kind::BITVECTOR_SLT:
+    return edu::sharif::twinner::trace::Constraint::NON_NEGATIVE;
+  case kind::DISTINCT:
+    return edu::sharif::twinner::trace::Constraint::ZERO;
+  case kind::EQUAL:
+    return edu::sharif::twinner::trace::Constraint::NON_ZERO;
+  default:
+    edu::sharif::twinner::util::Logger::error () << "Got " << kind
+        << " expression Kind unexpectedly.\n";
+    throw std::runtime_error ("Unexpected CVC4 Expr Kind");
+  }
+}
+
+edu::sharif::twinner::trace::Constraint::ComparisonType
+ConstraintToCvc4ExprConverter::exprVsExprKindToComparisonType (Kind kind) const {
+  switch (kind) {
+  case kind::BITVECTOR_UGE:
+    return edu::sharif::twinner::trace::Constraint::ABOVE_OR_EQUAL;
+  case kind::BITVECTOR_UGT:
+    return edu::sharif::twinner::trace::Constraint::ABOVE;
+  case kind::BITVECTOR_ULE:
+    return edu::sharif::twinner::trace::Constraint::BELOW_OR_EQUAL;
+  case kind::BITVECTOR_ULT:
+    return edu::sharif::twinner::trace::Constraint::BELOW;
+  case kind::BITVECTOR_SGE:
+    return edu::sharif::twinner::trace::Constraint::GREATER_OR_EQUAL;
+  case kind::BITVECTOR_SGT:
+    return edu::sharif::twinner::trace::Constraint::GREATER;
+  case kind::BITVECTOR_SLE:
+    return edu::sharif::twinner::trace::Constraint::LESS_OR_EQUAL;
+  case kind::BITVECTOR_SLT:
+    return edu::sharif::twinner::trace::Constraint::LESS;
+  case kind::DISTINCT:
+    return edu::sharif::twinner::trace::Constraint::NON_EQUAL;
+  case kind::EQUAL:
+    return edu::sharif::twinner::trace::Constraint::EQUAL;
+  default:
+    edu::sharif::twinner::util::Logger::error () << "Got " << kind
+        << " expression Kind unexpectedly.\n";
+    throw std::runtime_error ("Unknown CVC4 Expr Kind");
   }
 }
 
@@ -201,6 +320,62 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
   } else {
     throw std::runtime_error ("Missing expression token");
   }
+}
+
+edu::sharif::twinner::trace::Expression *
+ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
+  if (exp.isConst ()) {
+    Type t = exp.getType (false);
+    if (t != type) {
+      edu::sharif::twinner::util::Logger::error () << "Got type " << t.toString ()
+          << " while expected type " << type.toString () << ".\n";
+      throw std::runtime_error ("Unexpected Expr type");
+    }
+    const Integer &val = exp.getConst <BitVector> ().getValue ();
+    const UINT32 v1 = UINT32 (val.modByPow2 (32).getUnsignedLong ()); // least-significant
+    const UINT32 v2 = UINT32 (val.modByPow2 (64).divByPow2 (32).getUnsignedLong ());
+    const UINT32 v3 = UINT32 (val.modByPow2 (96).divByPow2 (64).getUnsignedLong ());
+    const UINT32 v4 = UINT32 (val.divByPow2 (96).getUnsignedLong ()); // most-significant
+    const UINT64 high = (UINT64 (v4) << 32) | v3;
+    const UINT64 low = (UINT64 (v2) << 32) | v1;
+    return new edu::sharif::twinner::trace::ExpressionImp
+        (new edu::sharif::twinner::trace::ConcreteValue128Bits (high, low));
+  } else if (exp.isVariable ()) {
+    std::string variableName = exp.toString ();
+    if (variableName.at (0) == 'm') { // memory symbol
+      return new edu::sharif::twinner::trace::ExpressionImp
+          (edu::sharif::twinner::trace::MemoryEmergedSymbol::fromNameAndValue
+           (variableName, 0, 0, 0, 0)); // TODO: Handle value
+    } else { // register symbol
+      return new edu::sharif::twinner::trace::ExpressionImp
+          (edu::sharif::twinner::trace::RegisterEmergedSymbol::fromNameAndValue
+           (variableName, 0, 0, 0, 0));
+    }
+  } else switch (exp.getKind ()) {
+    case kind::BITVECTOR_SIGN_EXTEND:
+    {
+      const Expr numberOfExtensionBits = exp.getOperator ();
+      const int bits = numberOfExtensionBits.getConst <BitVectorSignExtend> ();
+      Expr child = *exp.begin ();
+      // ASSERT: child.getKind () == kind::BITVECTOR_SIGN_EXTEND_OP
+      const Expr extractionInterval = child.getOperator ();
+      // ASSERT: extractionInterval.getConst <BitVectorExtract> ().low == 0
+      const int sourceBits = extractionInterval.getConst <BitVectorExtract> ().high + 1;
+      const int targetBits = sourceBits + bits;
+      Expr grandchild = *child.begin ();
+      edu::sharif::twinner::trace::Expression *operand =
+          convertCvc4ExprToExpression (grandchild);
+      edu::sharif::twinner::trace::Expression *source = operand->clone (sourceBits);
+      delete operand;
+      edu::sharif::twinner::trace::Expression *target = source->signExtended (targetBits);
+      delete source;
+      return target;
+    }
+      // TODO: Implement following operator types: NEGATE, ADD, MINUS, MULTIPLY, DIVIDE, REMAINDER, XOR, BITWISE_AND, BITWISE_OR, SHIFT_RIGHT, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
+    default:
+      throw std::runtime_error ("Unexpected Expr Kind");
+    }
+  return 0;
 }
 
 UINT64 ConstraintToCvc4ExprConverter::extractConstantUint64 (

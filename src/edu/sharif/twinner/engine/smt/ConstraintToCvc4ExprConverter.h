@@ -32,6 +32,8 @@ using namespace CVC4;
 #include <list>
 
 #include "edu/sharif/twinner/trace/Operator.h"
+#include "edu/sharif/twinner/trace/Constraint.h"
+
 #include "pin.H"
 
 namespace edu {
@@ -102,11 +104,26 @@ private:
 
   Expr convertConstraintToCvc4Expr (std::map<std::string, Expr> &symbols,
       const edu::sharif::twinner::trace::Constraint *constraint);
+  edu::sharif::twinner::trace::Constraint *convertCvc4ExprToConstraint (Expr &exp);
+  edu::sharif::twinner::trace::Constraint *convertCvc4ExprToConstraint (
+      edu::sharif::twinner::trace::Constraint::ComparisonType type,
+      Expr &mainExp);
+  edu::sharif::twinner::trace::Constraint *convertCvc4ExprToConstraint (
+      edu::sharif::twinner::trace::Constraint::ComparisonType type,
+      Expr &mainExp, Expr &auxExp);
+
+  edu::sharif::twinner::trace::Constraint::ComparisonType
+  exprVsZeroKindToComparisonType (Kind kind) const;
+  edu::sharif::twinner::trace::Constraint::ComparisonType
+  exprVsZeroKindToReversedComparisonType (Kind kind) const;
+  edu::sharif::twinner::trace::Constraint::ComparisonType
+  exprVsExprKindToComparisonType (Kind kind) const;
 
   Expr convertExpressionToCvc4Expr (std::map<std::string, Expr> &symbols,
       const edu::sharif::twinner::trace::Expression *exp);
   Expr convertExpressionToCvc4Expr (std::map<std::string, Expr> &symbols,
       std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator &top);
+  edu::sharif::twinner::trace::Expression *convertCvc4ExprToExpression (Expr &exp);
 
   UINT64 extractConstantUint64 (
       std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator &top);

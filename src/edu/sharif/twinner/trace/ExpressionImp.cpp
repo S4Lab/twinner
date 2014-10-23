@@ -91,6 +91,11 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa, const ConcreteValue &concreteVal
   }
 }
 
+ExpressionImp::ExpressionImp (Symbol *symbol) :
+    Expression (symbol->getValue ().clone (), false) {
+  stack.push_back (symbol);
+}
+
 ExpressionImp::ExpressionImp (const ConcreteValue &value) :
     Expression (value.clone (), false) {
   stack.push_back (new Constant (value));
