@@ -270,6 +270,10 @@ void Expression::add (UINT64 immediate) {
   add (new ConcreteValue64Bits (immediate));
 }
 
+void Expression::add (const Expression *exp) {
+  binaryOperation (new Operator (Operator::ADD), exp);
+}
+
 void Expression::bitwiseAnd (ConcreteValue *mask) {
   Constant *lastConstantMask = 0;
   if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {

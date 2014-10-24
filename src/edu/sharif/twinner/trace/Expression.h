@@ -180,6 +180,12 @@ public:
   void add (UINT64 immediate);
 
   /**
+   * Increment this expression as much as the given exp expression.
+   * @param exp The expression indicating how much this expression should be incremented.
+   */
+  void add (const Expression *exp);
+
+  /**
    * Bitwise AND of this expression and given mask value.
    * @param mask The mask value which should be bitwise-and-ed by this expression.
    */
