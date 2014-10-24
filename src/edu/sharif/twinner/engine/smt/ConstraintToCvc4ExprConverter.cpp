@@ -466,7 +466,21 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       delete rightExp;
       return leftExp;
     }
-      // TODO: Implement following operator types: NEGATE, MINUS, MULTIPLY, DIVIDE, REMAINDER, XOR, BITWISE_AND, BITWISE_OR, SHIFT_RIGHT, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
+    case kind::BITVECTOR_NEG:
+    {
+      if (exp.getNumChildren () != 1) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
+            << "): CVC4 BITVECTOR_NEG needs exactly one child\n";
+        throw std::runtime_error ("CVC4 Expr must have exactly one children");
+      }
+      Expr child = *exp.begin ();
+      edu::sharif::twinner::trace::Expression *resExp =
+          convertCvc4ExprToExpression (child);
+      resExp->negate ();
+      return resExp;
+    }
+      // TODO: Implement following operator types: MINUS, MULTIPLY, DIVIDE, REMAINDER, XOR, BITWISE_AND, BITWISE_OR, SHIFT_RIGHT, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
     default:
       edu::sharif::twinner::util::Logger::error ()
           << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
