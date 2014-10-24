@@ -117,7 +117,19 @@ Expr ConstraintToCvc4ExprConverter::convertConstraintToCvc4Expr (
 
 edu::sharif::twinner::trace::Constraint *
 ConstraintToCvc4ExprConverter::convertCvc4ExprToConstraint (Expr &exp) {
+  if (exp.getNumChildren () == 1 && exp.getKind () == kind::NOT) {
+    Expr con = *exp.begin ();
+    edu::sharif::twinner::trace::Constraint *constraint =
+        convertCvc4ExprToConstraint (con);
+    edu::sharif::twinner::trace::Constraint *notConstraint =
+        constraint->instantiateNegatedConstraint ();
+    delete constraint;
+    return notConstraint;
+  }
   if (exp.getNumChildren () != 2) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "ConstraintToCvc4ExprConverter::convertCvc4ExprToConstraint (" << exp
+        << "): CVC4 Expr must have exactly two children\n";
     throw std::runtime_error ("CVC4 Expr must have exactly two children");
   }
   Expr::const_iterator it = exp.begin ();
