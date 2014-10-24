@@ -60,7 +60,19 @@ Expr ConstraintToCvc4ExprConverter::convert (std::map<std::string, Expr> &symbol
 
 edu::sharif::twinner::trace::Constraint *ConstraintToCvc4ExprConverter::convertBack (
     Expr exp) {
-  return convertCvc4ExprToConstraint (exp);
+  if (exp.getKind () == kind::CONST_BOOLEAN) {
+    const bool state = exp.getConst <bool> ();
+    const edu::sharif::twinner::trace::Expression *zero =
+        new edu::sharif::twinner::trace::ExpressionImp ();
+    edu::sharif::twinner::trace::Constraint *res =
+        new edu::sharif::twinner::trace::Constraint
+        (zero, state ? edu::sharif::twinner::trace::Constraint::ZERO
+         : edu::sharif::twinner::trace::Constraint::NON_ZERO, 0, false);
+    delete zero;
+    return res;
+  } else {
+    return convertCvc4ExprToConstraint (exp);
+  }
 }
 
 void ConstraintToCvc4ExprConverter::addConstraint (Expr constraint) {
