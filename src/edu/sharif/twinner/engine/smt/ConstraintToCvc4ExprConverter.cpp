@@ -415,12 +415,19 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       const int leftExpBitLength = bitLength;
       edu::sharif::twinner::trace::Expression *rightExp =
           convertCvc4ExprToExpression (right);
-      edu::sharif::twinner::trace::Expression *length =
-          new edu::sharif::twinner::trace::ExpressionImp (bitLength);
-      leftExp->shiftToLeft (length);
-      delete length;
-      leftExp->bitwiseOr (rightExp);
-      delete rightExp;
+      if (!leftExp->isTrivial () || !leftExp->getLastConcreteValue ().isZero ()) {
+        edu::sharif::twinner::trace::Expression *length =
+            new edu::sharif::twinner::trace::ExpressionImp (bitLength);
+        leftExp->shiftToLeft (length);
+        delete length;
+        if (!rightExp->isTrivial () || !rightExp->getLastConcreteValue ().isZero ()) {
+          leftExp->bitwiseOr (rightExp);
+        }
+        delete rightExp;
+      } else {
+        delete leftExp;
+        leftExp = rightExp;
+      }
       bitLength += leftExpBitLength;
       return leftExp;
     }
