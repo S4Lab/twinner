@@ -24,6 +24,13 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace util {
+
+inline const Logger &operator<< (const Logger &log, Kind kind) {
+  return log.actualWrite (kind);
+}
+
+}
 namespace engine {
 namespace smt {
 
@@ -385,6 +392,9 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
     }
       // TODO: Implement following operator types: NEGATE, ADD, MINUS, MULTIPLY, DIVIDE, REMAINDER, XOR, BITWISE_AND, BITWISE_OR, SHIFT_RIGHT, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
     default:
+      edu::sharif::twinner::util::Logger::error ()
+          << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
+          << "): Unexpected Expr Kind. It is " << exp.getKind () << '\n';
       throw std::runtime_error ("Unexpected Expr Kind");
     }
   return 0;
