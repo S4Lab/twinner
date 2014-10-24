@@ -373,21 +373,26 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       const Expr numberOfExtensionBits = exp.getOperator ();
       const int extensionAmount = numberOfExtensionBits.getConst <BitVectorSignExtend> ();
       Expr child = *exp.begin ();
-      // ASSERT: child.getKind () == kind::BITVECTOR_SIGN_EXTEND_OP
-      const Expr extractionInterval = child.getOperator ();
-      const int low = extractionInterval.getConst <BitVectorExtract> ().low;
-      int high = extractionInterval.getConst <BitVectorExtract> ().high;
-      Expr grandchild = *child.begin ();
-      edu::sharif::twinner::trace::Expression *operand =
-          convertCvc4ExprToExpression (grandchild);
-      if (low > 0) {
-        edu::sharif::twinner::trace::Expression *lowBits =
-            new edu::sharif::twinner::trace::ExpressionImp (low);
-        operand->shiftToRight (lowBits);
-        delete lowBits;
-        high -= low; // now we should extract [high,0] and sign-extend it
+      edu::sharif::twinner::trace::Expression *operand;
+      int sourceBits;
+      if (child.getKind () != kind::BITVECTOR_EXTRACT) {
+        operand = convertCvc4ExprToExpression (child);
+        sourceBits = bitLength;
+      } else {
+        const Expr extractionInterval = child.getOperator ();
+        const int low = extractionInterval.getConst <BitVectorExtract> ().low;
+        int high = extractionInterval.getConst <BitVectorExtract> ().high;
+        Expr grandchild = *child.begin ();
+        operand = convertCvc4ExprToExpression (grandchild);
+        if (low > 0) {
+          edu::sharif::twinner::trace::Expression *lowBits =
+              new edu::sharif::twinner::trace::ExpressionImp (low);
+          operand->shiftToRight (lowBits);
+          delete lowBits;
+          high -= low; // now we should extract [high,0] and sign-extend it
+        }
+        sourceBits = high + 1;
       }
-      const int sourceBits = high + 1;
       const int targetBits = sourceBits + extensionAmount;
       edu::sharif::twinner::trace::Expression *source = operand->clone (sourceBits);
       delete operand;
