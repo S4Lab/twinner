@@ -412,34 +412,38 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
     }
     case kind::BITVECTOR_CONCAT:
     {
-      if (exp.getNumChildren () != 2) {
+      const int numberOfChildren = exp.getNumChildren ();
+      if (numberOfChildren < 2) {
         edu::sharif::twinner::util::Logger::error ()
             << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
-            << "): CVC4 BITVECTOR_CONCAT needs exactly two children\n";
-        throw std::runtime_error ("CVC4 Expr must have exactly two children");
+            << "): CVC4 BITVECTOR_CONCAT needs at least two children\n";
+        throw std::runtime_error ("CVC4 Expr must have at least two children");
       }
       Expr::const_iterator it = exp.begin ();
       Expr left = *it++;
-      Expr right = *it;
       edu::sharif::twinner::trace::Expression *leftExp =
           convertCvc4ExprToExpression (left);
-      const int leftExpBitLength = bitLength;
-      edu::sharif::twinner::trace::Expression *rightExp =
-          convertCvc4ExprToExpression (right);
-      if (!leftExp->isTrivial () || !leftExp->getLastConcreteValue ().isZero ()) {
-        edu::sharif::twinner::trace::Expression *length =
-            new edu::sharif::twinner::trace::ExpressionImp (bitLength);
-        leftExp->shiftToLeft (length);
-        delete length;
-        if (!rightExp->isTrivial () || !rightExp->getLastConcreteValue ().isZero ()) {
-          leftExp->bitwiseOr (rightExp);
+      int totalLength = bitLength;
+      do {
+        Expr right = *it++;
+        edu::sharif::twinner::trace::Expression *rightExp =
+            convertCvc4ExprToExpression (right);
+        if (!leftExp->isTrivial () || !leftExp->getLastConcreteValue ().isZero ()) {
+          edu::sharif::twinner::trace::Expression *length =
+              new edu::sharif::twinner::trace::ExpressionImp (bitLength);
+          leftExp->shiftToLeft (length);
+          delete length;
+          if (!rightExp->isTrivial () || !rightExp->getLastConcreteValue ().isZero ()) {
+            leftExp->bitwiseOr (rightExp);
+          }
+          delete rightExp;
+        } else {
+          delete leftExp;
+          leftExp = rightExp;
         }
-        delete rightExp;
-      } else {
-        delete leftExp;
-        leftExp = rightExp;
-      }
-      bitLength += leftExpBitLength;
+        totalLength += bitLength;
+      } while (it != exp.end ());
+      bitLength = totalLength;
       return leftExp;
     }
     case kind::BITVECTOR_PLUS:
