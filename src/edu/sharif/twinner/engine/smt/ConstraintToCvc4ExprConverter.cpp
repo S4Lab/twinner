@@ -344,12 +344,7 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
 edu::sharif::twinner::trace::Expression *
 ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
   if (exp.isConst ()) {
-    Type t = exp.getType (false);
-    if (t != type) {
-      edu::sharif::twinner::util::Logger::error () << "Got type " << t.toString ()
-          << " while expected type " << type.toString () << ".\n";
-      throw std::runtime_error ("Unexpected Expr type");
-    }
+    // as size of Constant is <= 128-bits, following code does not lose precision
     const Integer &val = exp.getConst <BitVector> ().getValue ();
     const UINT32 v1 = UINT32 (val.modByPow2 (32).getUnsignedLong ()); // least-significant
     const UINT32 v2 = UINT32 (val.modByPow2 (64).divByPow2 (32).getUnsignedLong ());
