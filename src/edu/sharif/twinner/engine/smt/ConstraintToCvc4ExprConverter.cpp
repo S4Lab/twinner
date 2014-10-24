@@ -394,8 +394,11 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       const int targetBits = sourceBits + extensionAmount;
       edu::sharif::twinner::trace::Expression *source = operand->clone (sourceBits);
       delete operand;
-      edu::sharif::twinner::trace::Expression *target = source->signExtended (targetBits);
+      edu::sharif::twinner::trace::Expression *target = source->signExtended (128);
       delete source;
+      if (targetBits < 128) {
+        target->truncate (targetBits);
+      }
       return target;
     }
       // TODO: Implement following operator types: NEGATE, ADD, MINUS, MULTIPLY, DIVIDE, REMAINDER, XOR, BITWISE_AND, BITWISE_OR, SHIFT_RIGHT, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
