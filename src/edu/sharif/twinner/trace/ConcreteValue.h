@@ -45,6 +45,13 @@ public:
       const ConcreteValue &me);
 
   /**
+   * Converts this concrete value to hex string without any prefic (there is no 0x).
+   *
+   * @return The hex string representing this concrete value.
+   */
+  virtual std::string toHexString () const = 0;
+
+  /**
    * Interpreting this concrete value as a signed value which is encoded using
    * two's complement rules, return true iff the value is negative.
    *

@@ -17,6 +17,8 @@
 
 #include "edu/sharif/twinner/util/memory.h"
 
+#include <sstream>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -62,6 +64,12 @@ public:
       const ConcreteValueAbstractImp<bits, ValueType> &me) {
     // ASSERT: bits <= 64
     return stream << "0x" << std::hex << UINT64 (me.value);
+  }
+
+  virtual std::string toHexString () const {
+    std::stringstream ss;
+    ss << std::hex << UINT64 (value);
+    return ss.str ();
   }
 
   virtual bool isNegative () const {

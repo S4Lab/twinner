@@ -93,7 +93,6 @@ void ConcreteValue128Bits::writeToRegister (CONTEXT *context, REG reg) const {
 std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
     const ConcreteValue128Bits &me) {
   std::stringstream ss;
-  //ss << "0x" << std::hex << me.msb << std::setw (16) << std::setfill ('0') << me.lsb;
 
   union {
 
@@ -105,6 +104,12 @@ std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
   ss << "UINT128 (0x" << std::hex << value.v32[3] << ", 0x" << value.v32[2]
       << ", 0x" << value.v32[1] << ", 0x" << value.v32[0] << ")";
   return stream << ss.str ();
+}
+
+std::string ConcreteValue128Bits::toHexString () const {
+  std::stringstream ss;
+  ss << std::hex << msb << std::setw (16) << std::setfill ('0') << lsb;
+  return ss.str ();
 }
 
 bool ConcreteValue128Bits::isNegative () const {

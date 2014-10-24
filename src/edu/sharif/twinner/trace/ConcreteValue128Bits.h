@@ -42,6 +42,7 @@ public:
 
   friend std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
       const ConcreteValue128Bits &me);
+  virtual std::string toHexString () const;
 
   virtual bool isNegative () const;
   virtual bool isZero () const;

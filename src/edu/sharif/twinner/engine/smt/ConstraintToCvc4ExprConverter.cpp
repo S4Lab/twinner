@@ -316,13 +316,7 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
         static_cast<const edu::sharif::twinner::trace::Constant *> (token);
     const edu::sharif::twinner::trace::ConcreteValue &value =
         constantToken->getValue ();
-    std::string valstr;
-    {
-      std::stringstream ss;
-      ss << value;
-      ss.ignore (2);
-      ss >> valstr;
-    }
+    std::string valstr = value.toHexString ();
     std::map<std::string, Expr>::const_iterator it = constants.find (valstr);
     if (it != constants.end ()) {
       return it->second;
