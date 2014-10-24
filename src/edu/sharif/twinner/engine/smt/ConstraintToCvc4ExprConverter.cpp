@@ -344,6 +344,7 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
 edu::sharif::twinner::trace::Expression *
 ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
   if (exp.isConst ()) {
+    bitLength = BitVectorType (exp.getType (false)).getSize ();
     // as size of Constant is <= 128-bits, following code does not lose precision
     const Integer &val = exp.getConst <BitVector> ().getValue ();
     const UINT32 v1 = UINT32 (val.modByPow2 (32).getUnsignedLong ()); // least-significant
@@ -355,6 +356,7 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
     return new edu::sharif::twinner::trace::ExpressionImp
         (new edu::sharif::twinner::trace::ConcreteValue128Bits (high, low));
   } else if (exp.isVariable ()) {
+    bitLength = 128;
     std::string variableName = exp.toString ();
     if (variableName.at (0) == 'm') { // memory symbol
       return new edu::sharif::twinner::trace::ExpressionImp
@@ -394,7 +396,33 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       if (targetBits < 128) {
         target->truncate (targetBits);
       }
+      bitLength = targetBits;
       return target;
+    }
+    case kind::BITVECTOR_CONCAT:
+    {
+      if (exp.getNumChildren () != 2) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
+            << "): CVC4 BITVECTOR_CONCAT needs exactly two children\n";
+        throw std::runtime_error ("CVC4 Expr must have exactly two children");
+      }
+      Expr::const_iterator it = exp.begin ();
+      Expr left = *it++;
+      Expr right = *it;
+      edu::sharif::twinner::trace::Expression *leftExp =
+          convertCvc4ExprToExpression (left);
+      const int leftExpBitLength = bitLength;
+      edu::sharif::twinner::trace::Expression *rightExp =
+          convertCvc4ExprToExpression (right);
+      edu::sharif::twinner::trace::Expression *length =
+          new edu::sharif::twinner::trace::ExpressionImp (bitLength);
+      leftExp->shiftToLeft (length);
+      delete length;
+      leftExp->bitwiseOr (rightExp);
+      delete rightExp;
+      bitLength += leftExpBitLength;
+      return leftExp;
     }
       // TODO: Implement following operator types: NEGATE, ADD, MINUS, MULTIPLY, DIVIDE, REMAINDER, XOR, BITWISE_AND, BITWISE_OR, SHIFT_RIGHT, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
     default:

@@ -74,6 +74,8 @@ private:
 
   bool limitSymbols;
 
+  UINT64 bitLength;
+
 public:
   ConstraintToCvc4ExprConverter (ExprManager &_em, bool _limitSymbols,
       const std::list < const edu::sharif::twinner::trace::Constraint * > &_constraints);
