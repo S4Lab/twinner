@@ -374,16 +374,24 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
     case kind::BITVECTOR_SIGN_EXTEND:
     {
       const Expr numberOfExtensionBits = exp.getOperator ();
-      const int bits = numberOfExtensionBits.getConst <BitVectorSignExtend> ();
+      const int extensionAmount = numberOfExtensionBits.getConst <BitVectorSignExtend> ();
       Expr child = *exp.begin ();
       // ASSERT: child.getKind () == kind::BITVECTOR_SIGN_EXTEND_OP
       const Expr extractionInterval = child.getOperator ();
-      // ASSERT: extractionInterval.getConst <BitVectorExtract> ().low == 0
-      const int sourceBits = extractionInterval.getConst <BitVectorExtract> ().high + 1;
-      const int targetBits = sourceBits + bits;
+      const int low = extractionInterval.getConst <BitVectorExtract> ().low;
+      int high = extractionInterval.getConst <BitVectorExtract> ().high;
       Expr grandchild = *child.begin ();
       edu::sharif::twinner::trace::Expression *operand =
           convertCvc4ExprToExpression (grandchild);
+      if (low > 0) {
+        edu::sharif::twinner::trace::Expression *lowBits =
+            new edu::sharif::twinner::trace::ExpressionImp (low);
+        operand->shiftToRight (lowBits);
+        delete lowBits;
+        high -= low; // now we should extract [high,0] and sign-extend it
+      }
+      const int sourceBits = high + 1;
+      const int targetBits = sourceBits + extensionAmount;
       edu::sharif::twinner::trace::Expression *source = operand->clone (sourceBits);
       delete operand;
       edu::sharif::twinner::trace::Expression *target = source->signExtended (targetBits);
