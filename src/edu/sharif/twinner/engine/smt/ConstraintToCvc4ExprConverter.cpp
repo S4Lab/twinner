@@ -303,7 +303,14 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
     {
       Expr rightOperand = convertExpressionToCvc4Expr (symbols, --top);
       Expr leftOperand = convertExpressionToCvc4Expr (symbols, --top);
-      return em.mkExpr (convertOperatorIdentifierToCvc4Kind (op->getIdentifier ()),
+      const edu::sharif::twinner::trace::Operator::OperatorIdentifier opid =
+          op->getIdentifier ();
+      if (opid == edu::sharif::twinner::trace::Operator::REMAINDER
+          || opid == edu::sharif::twinner::trace::Operator::DIVIDE) {
+        // Adding (divisor!=zero) constraint
+        addConstraint (em.mkExpr (kind::DISTINCT, rightOperand, zero));
+      }
+      return em.mkExpr (convertOperatorIdentifierToCvc4Kind (opid),
                         leftOperand, rightOperand);
     }
     default:
