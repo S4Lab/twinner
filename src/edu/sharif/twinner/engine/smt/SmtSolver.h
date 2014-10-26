@@ -65,8 +65,21 @@ public:
    * @param constraint The constraint which should be simplified.
    * @return A constraint which is equivalent to given one, but simpler; owned by caller
    */
-  virtual const edu::sharif::twinner::trace::Constraint *simplifyConstraint (
-      const edu::sharif::twinner::trace::Constraint *constraint) const = 0;
+  virtual std::list < const edu::sharif::twinner::trace::Constraint * >
+  simplifyConstraint (const edu::sharif::twinner::trace::Constraint *
+      constraint) const = 0;
+
+  /**
+   * Same as above method, but allows a list of constraints to be inputted.
+   * These constraints will be BOOLEAN-ANDed before simplification. The returned
+   * constraint is owned by the caller and should be "delete"ed.
+   *
+   * @param constraints List of constraints that their AND should be simplified.
+   * @return A constraints which is equivalent to AND of given ones, but simpler.
+   */
+  virtual std::list < const edu::sharif::twinner::trace::Constraint * >
+  simplifyConstraints (std::list < const edu::sharif::twinner::trace::Constraint * >
+      constraints) const = 0;
 
   static void init (SmtSolver *instance);
   static SmtSolver *getInstance ();

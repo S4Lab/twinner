@@ -99,7 +99,7 @@ public:
    * @param exp The CVC4 Expr expression to converted back to Twinner's format.
    * @return The Twinner's format constraint of the given expression.
    */
-  edu::sharif::twinner::trace::Constraint *convertBack (Expr exp);
+  std::list < const edu::sharif::twinner::trace::Constraint * > convertBack (Expr exp);
 
 private:
   void addConstraint (Expr constraint);

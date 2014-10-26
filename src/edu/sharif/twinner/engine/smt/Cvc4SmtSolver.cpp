@@ -76,8 +76,17 @@ void Cvc4SmtSolver::solveConstraints (
   throw UnsatisfiableConstraintsException ();
 }
 
-const edu::sharif::twinner::trace::Constraint *Cvc4SmtSolver::simplifyConstraint (
+std::list < const edu::sharif::twinner::trace::Constraint * >
+Cvc4SmtSolver::simplifyConstraint (
     const edu::sharif::twinner::trace::Constraint *constraint) const {
+  std::list < const edu::sharif::twinner::trace::Constraint * > constraints;
+  constraints.push_back (constraint);
+  return simplifyConstraints (constraints);
+}
+
+std::list < const edu::sharif::twinner::trace::Constraint * >
+Cvc4SmtSolver::simplifyConstraints (
+    std::list < const edu::sharif::twinner::trace::Constraint * > constraints) const {
   //  edu::sharif::twinner::util::Logger::loquacious ()
   //      << "Cvc4SmtSolver::simplifyConstraint (...)\n";
   ExprManager em;
@@ -90,8 +99,6 @@ const edu::sharif::twinner::trace::Constraint *Cvc4SmtSolver::simplifyConstraint
   smt.setOption ("produce-models", true);
   //  smt.setOption ("trace", "smt");
 
-  std::list < const edu::sharif::twinner::trace::Constraint * > constraints;
-  constraints.push_back (constraint);
   ConstraintToCvc4ExprConverter converter (em, false, constraints);
   std::map<std::string, Expr> symbols;
   Expr cvc4Constraint = converter.convert (symbols);

@@ -32,8 +32,11 @@ public:
       std::set < const edu::sharif::twinner::trace::Symbol * > &symbols) const
   /* @throws (UnsatisfiableConstraintsException) */;
 
-  virtual const edu::sharif::twinner::trace::Constraint *simplifyConstraint (
-      const edu::sharif::twinner::trace::Constraint *constraint) const;
+  virtual std::list < const edu::sharif::twinner::trace::Constraint * >
+  simplifyConstraint (const edu::sharif::twinner::trace::Constraint *constraint) const;
+  virtual std::list < const edu::sharif::twinner::trace::Constraint * >
+  simplifyConstraints (
+      std::list < const edu::sharif::twinner::trace::Constraint * > constraints) const;
 };
 
 }
