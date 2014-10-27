@@ -496,28 +496,34 @@ void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
     return;
   }
 
-  repeat (aux.depth) {
-    aux.out << '\t';
-  }
   std::list < const edu::sharif::twinner::trace::Constraint * > simplifiedConstraints =
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
       ->simplifyConstraint (constraint);
-  aux.out << "if (";
+  std::stringstream out;
   bool first = true;
   for (std::list < const edu::sharif::twinner::trace::Constraint * >::const_iterator it =
       simplifiedConstraints.begin (); it != simplifiedConstraints.end (); ++it) {
     const edu::sharif::twinner::trace::Constraint *simplifiedConstraint = *it;
+    if (simplifiedConstraint->isTrivial ()) {
+      continue;
+    }
     if (first) {
-      aux.out << '(';
+      out << '(';
       first = false;
     } else {
-      aux.out << " && (";
+      out << " && (";
     }
-    aux.out << simplifiedConstraint->toString () << ')';
+    out << simplifiedConstraint->toString () << ')';
     delete simplifiedConstraint;
   }
-  aux.out << ") {\n";
-  aux.depth++;
+  if (!first) {
+
+    repeat (aux.depth) {
+      aux.out << '\t';
+    }
+    aux.out << "if (" << out.str () << ") {\n";
+    aux.depth++;
+  }
 }
 
 template < typename Key, typename Value >
