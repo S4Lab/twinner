@@ -554,7 +554,7 @@ Kind ConstraintToCvc4ExprConverter::convertOperatorIdentifierToCvc4Kind (
   case edu::sharif::twinner::trace::Operator::DIVIDE:
     return kind::BITVECTOR_UDIV;
   case edu::sharif::twinner::trace::Operator::REMAINDER:
-    return kind::BITVECTOR_UREM;
+    return kind::BITVECTOR_UREM_TOTAL;
   case edu::sharif::twinner::trace::Operator::NEGATE:
     return kind::BITVECTOR_NEG;
   case edu::sharif::twinner::trace::Operator::XOR:
