@@ -500,7 +500,28 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       resExp->negate ();
       return resExp;
     }
-      // TODO: Implement following operator types: MINUS, MULTIPLY, DIVIDE, REMAINDER, XOR, BITWISE_AND, BITWISE_OR, SHIFT_RIGHT, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
+    case kind::BITVECTOR_UREM_TOTAL:
+    {
+      if (exp.getNumChildren () != 2) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
+            << "): CVC4 BITVECTOR_UREM_TOTAL needs exactly two children\n";
+        throw std::runtime_error ("CVC4 Expr must have exactly two children");
+      }
+      Expr::const_iterator it = exp.begin ();
+      Expr left = *it++;
+      Expr right = *it;
+      edu::sharif::twinner::trace::Expression *leftExp =
+          convertCvc4ExprToExpression (left);
+      edu::sharif::twinner::trace::Expression *rightExp =
+          convertCvc4ExprToExpression (right);
+      leftExp->binaryOperation
+          (new edu::sharif::twinner::trace::Operator
+           (edu::sharif::twinner::trace::Operator::REMAINDER), rightExp);
+      delete rightExp;
+      return leftExp;
+    }
+      // TODO: Implement following operator types: MINUS, MULTIPLY, DIVIDE, XOR, BITWISE_AND, BITWISE_OR, SHIFT_RIGHT, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
     default:
       edu::sharif::twinner::util::Logger::error ()
           << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
