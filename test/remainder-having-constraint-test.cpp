@@ -70,6 +70,7 @@ int main () {
     }
     out << simplifiedConstraint->toString () << ')';
   }
+  out << '\n';
 
   return 0;
 }
