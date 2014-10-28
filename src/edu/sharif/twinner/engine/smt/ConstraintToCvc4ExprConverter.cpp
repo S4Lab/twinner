@@ -60,19 +60,15 @@ Expr ConstraintToCvc4ExprConverter::convert (std::map<std::string, Expr> &symbol
 
 std::list < const edu::sharif::twinner::trace::Constraint * >
 ConstraintToCvc4ExprConverter::convertBack (Expr exp) {
-  if (exp.getKind () == kind::AND && exp.getNumChildren () == 2) {
-    Expr::const_iterator it = exp.begin ();
-    Expr left = *it++;
-    Expr right = *it++;
-    std::list < const edu::sharif::twinner::trace::Constraint * > leftList =
-        convertBack (left);
-    std::list < const edu::sharif::twinner::trace::Constraint * > rightList =
-        convertBack (right);
-    leftList.insert (leftList.end (), rightList.begin (), rightList.end ());
-    return leftList;
-  }
   std::list < const edu::sharif::twinner::trace::Constraint * > lst;
-  if (exp.getKind () == kind::CONST_BOOLEAN) {
+  if (exp.getKind () == kind::AND) {
+    for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
+      Expr child = *it;
+      std::list < const edu::sharif::twinner::trace::Constraint * > constraints =
+          convertBack (child);
+      lst.insert (lst.end (), constraints.begin (), constraints.end ());
+    }
+  } else if (exp.getKind () == kind::CONST_BOOLEAN) {
     const bool state = exp.getConst <bool> ();
     const edu::sharif::twinner::trace::Expression *zero =
         new edu::sharif::twinner::trace::ExpressionImp ();
