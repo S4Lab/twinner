@@ -87,8 +87,6 @@ inline void check_symbol_type_and_add_it_to_set (
 inline void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
     TwinCodeGenerationAux &aux,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
-inline void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
-    const edu::sharif::twinner::trace::Constraint * const &constraint);
 
 inline void delete_symbol (const edu::sharif::twinner::trace::Symbol * const &symbol);
 
@@ -420,8 +418,35 @@ void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
   edu::sharif::twinner::util::foreach
       (addresses, &code_symbol_initiation_into_twin_code, aux);
-  edu::sharif::twinner::util::foreach (segment->getPathConstraints (),
-                                       &code_constraint_into_twin_code, aux);
+  std::list < const edu::sharif::twinner::trace::Constraint * > simplifiedConstraints =
+      edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+      ->simplifyConstraints (segment->getPathConstraints ());
+  std::stringstream out;
+  bool first = true;
+  for (std::list < const edu::sharif::twinner::trace::Constraint * >
+      ::const_reverse_iterator it = simplifiedConstraints.rbegin ();
+      it != simplifiedConstraints.rend (); ++it) {
+    const edu::sharif::twinner::trace::Constraint *simplifiedConstraint = *it;
+    if (simplifiedConstraint->isTrivial ()) {
+      continue;
+    }
+    if (first) {
+      out << '(';
+      first = false;
+    } else {
+      out << " && (";
+    }
+    out << simplifiedConstraint->toString () << ')';
+    delete simplifiedConstraint;
+  }
+  if (!first) {
+
+    repeat (aux.depth) {
+      aux.out << '\t';
+    }
+    aux.out << "if (" << out.str () << ") {\n";
+    aux.depth++;
+  }
   std::stringstream indentation;
 
   repeat (aux.depth) {
@@ -488,42 +513,6 @@ void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
   }
   out.indented () << "regs = setRegistersValuesAndInvokeSyscall (regs);\n";
   code_registers_symbols_initiation_into_twin_code (out.indented (), ++index);
-}
-
-void code_constraint_into_twin_code (TwinCodeGenerationAux &aux,
-    const edu::sharif::twinner::trace::Constraint * const &constraint) {
-  if (constraint->isTrivial ()) {
-    return;
-  }
-
-  std::list < const edu::sharif::twinner::trace::Constraint * > simplifiedConstraints =
-      edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
-      ->simplifyConstraint (constraint);
-  std::stringstream out;
-  bool first = true;
-  for (std::list < const edu::sharif::twinner::trace::Constraint * >::const_iterator it =
-      simplifiedConstraints.begin (); it != simplifiedConstraints.end (); ++it) {
-    const edu::sharif::twinner::trace::Constraint *simplifiedConstraint = *it;
-    if (simplifiedConstraint->isTrivial ()) {
-      continue;
-    }
-    if (first) {
-      out << '(';
-      first = false;
-    } else {
-      out << " && (";
-    }
-    out << simplifiedConstraint->toString () << ')';
-    delete simplifiedConstraint;
-  }
-  if (!first) {
-
-    repeat (aux.depth) {
-      aux.out << '\t';
-    }
-    aux.out << "if (" << out.str () << ") {\n";
-    aux.depth++;
-  }
 }
 
 template < typename Key, typename Value >
