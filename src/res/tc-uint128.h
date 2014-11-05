@@ -11,7 +11,7 @@
  */
 
 #ifndef TC_UINT128_H
-#define	TC_UINT128_H
+#define TC_UINT128_H
 
 class UINT128 {
 

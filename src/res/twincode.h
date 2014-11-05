@@ -11,7 +11,7 @@
  */
 
 #ifndef TWINCODE_H
-#define	TWINCODE_H
+#define TWINCODE_H
 
 #include <x86intrin.h>
 #include <inttypes.h>
@@ -28,6 +28,7 @@ typedef int32_t INT32;
 typedef int64_t INT64;
 
 #include "tc-uint128.h"
+#include "tc-sign-extension.h"
 #include "tc-registers.h"
 
 #endif	/* twincode.h */

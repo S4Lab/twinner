@@ -11,7 +11,7 @@
  */
 
 #ifndef TC_REGISTERS_H
-#define	TC_REGISTERS_H
+#define TC_REGISTERS_H
 
 struct RegistersSet {
 
