@@ -12,7 +12,7 @@ TWIN_TARGETS := simple-condition-test \
 all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
 
 %.twin.out: %.twin.c
-	g++ -g $(INCLUDEPATH) $< -o $@
+	g++ -std=c++11 -g $(INCLUDEPATH) $< -o $@
 
 %.s: %.c
 	gcc -g $(INCLUDEPATH) -S $<
