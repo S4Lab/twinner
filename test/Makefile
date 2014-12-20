@@ -8,7 +8,8 @@ TARGETS := simple-condition-test \
 	multi-path-with-printf-leafs-test \
 	upx-test
 TWIN_TARGETS := simple-condition-test \
-	multi-path-with-printf-leafs-test
+	multi-path-with-printf-leafs-test \
+	upx-test
 
 all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
 
