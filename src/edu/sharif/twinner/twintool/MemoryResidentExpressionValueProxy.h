@@ -17,6 +17,8 @@
 
 #include "pin.H"
 
+#include <map>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -50,10 +52,14 @@ public:
 private:
   void propagateChangeDownwards (int size, ADDRINT memoryEa,
       edu::sharif::twinner::trace::Trace *trace,
-      const edu::sharif::twinner::trace::Expression &changedExp) const;
+      const edu::sharif::twinner::trace::Expression &changedExp, bool ownExp) const;
   void propagateChangeUpwards (int size, ADDRINT memoryEa,
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression &changedExp) const;
+
+  void actualPropagateChangeDownwards (int size,
+      ADDRINT memoryEa, edu::sharif::twinner::trace::Trace *trace,
+      const edu::sharif::twinner::trace::Expression *exp) const;
 
   /// returned expression is linked to the underlying expression (clone it to de-link)
   edu::sharif::twinner::trace::Expression *alignedMemoryRead (int size,
@@ -65,12 +71,15 @@ private:
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const;
 
-  /// temporary state to ignore a neighbor during change propagation in valueIsChanged ()
-  mutable const edu::sharif::twinner::trace::Expression *ignoredNeighborExpression;
-  mutable ADDRINT ignoredNeighborAddress;
+  /// temporary cache of any used exp during change propagation in valueIsChanged ()
+  typedef std::map < std::pair < ADDRINT, int >,
+  std::pair < const edu::sharif::twinner::trace::Expression *, bool > >
+  AddrSizeToExpMap; // (addr, size) -> (exp*, owned?)
+  mutable AddrSizeToExpMap expCache;
 
   const edu::sharif::twinner::trace::Expression *getNeighborExpression (int size,
-      ADDRINT address, edu::sharif::twinner::trace::Trace *trace) const;
+      ADDRINT address, edu::sharif::twinner::trace::Trace *trace,
+      bool &readFromCache) const;
 };
 
 }

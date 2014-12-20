@@ -29,8 +29,7 @@ namespace twintool {
 
 MemoryResidentExpressionValueProxy::MemoryResidentExpressionValueProxy (
     ADDRINT _memoryEa, int _memReadBytes) :
-    memoryEa (_memoryEa), memReadBytes (_memReadBytes),
-    ignoredNeighborExpression (0), ignoredNeighborAddress (0) {
+    memoryEa (_memoryEa), memReadBytes (_memReadBytes) {
 }
 
 edu::sharif::twinner::trace::Expression *
@@ -154,11 +153,12 @@ void MemoryResidentExpressionValueProxy::valueIsChanged (
     const edu::sharif::twinner::trace::Expression &changedExp) const {
   edu::sharif::twinner::util::Logger::debug () << "(memory value is changed to "
       << &changedExp << ")\n";
+  expCache.clear ();
   const int size = getSize ();
   // ASSERT: changedExp was returned from setExpressionWithoutChangeNotification () method
   if (isMemoryEaAligned ()) {
+    propagateChangeDownwards (size, memoryEa, trace, changedExp, false);
     propagateChangeUpwards (size, memoryEa, trace, changedExp);
-    propagateChangeDownwards (size, memoryEa, trace, changedExp);
   } else {
     const ADDRINT leftAlignedAddress = memoryEa - (memoryEa % memReadBytes);
     const ADDRINT rightAlignedAddress = leftAlignedAddress + memReadBytes;
@@ -174,75 +174,93 @@ void MemoryResidentExpressionValueProxy::valueIsChanged (
         trace->getSymbolicExpressionByMemoryAddress (size, leftAlignedAddress);
     const edu::sharif::twinner::trace::Expression *right =
         trace->getSymbolicExpressionByMemoryAddress (size, rightAlignedAddress);
-    propagateChangeDownwards (size, leftAlignedAddress, trace, *left);
-    propagateChangeDownwards (size, rightAlignedAddress, trace, *right);
-    ignoredNeighborExpression = right;
-    ignoredNeighborAddress = rightAlignedAddress;
+    propagateChangeDownwards (size, leftAlignedAddress, trace, *left, false);
+    propagateChangeDownwards (size, rightAlignedAddress, trace, *right, false);
     propagateChangeUpwards (size, leftAlignedAddress, trace, *left);
-    ignoredNeighborExpression = 0;
-    ignoredNeighborAddress = 0;
-
-    ignoredNeighborExpression = left;
-    ignoredNeighborAddress = leftAlignedAddress;
     propagateChangeUpwards (size, rightAlignedAddress, trace, *right);
-    ignoredNeighborExpression = 0;
-    ignoredNeighborAddress = 0;
+  }
+  for (AddrSizeToExpMap::iterator it = expCache.begin (); it != expCache.end (); ++it) {
+    std::pair < const edu::sharif::twinner::trace::Expression *, bool > &p = it->second;
+    if (p.second) {
+      delete p.first;
+    }
   }
 }
 
 void MemoryResidentExpressionValueProxy::propagateChangeDownwards (int size,
     ADDRINT memoryEa, edu::sharif::twinner::trace::Trace *trace,
-    const edu::sharif::twinner::trace::Expression &changedExp) const {
+    const edu::sharif::twinner::trace::Expression &changedExp, bool ownExp) const {
+  expCache.insert (make_pair (make_pair (memoryEa, size),
+                              make_pair (&changedExp, ownExp)));
   size /= 2;
   if (size >= 8) {
-    if (memoryEa != ignoredNeighborAddress) {
+    if (expCache.find (make_pair (memoryEa, size)) == expCache.end ()) {
       edu::sharif::twinner::trace::Expression *exp = changedExp.clone ();
       exp->truncate (size); // LSB (left-side in little-endian)
-      trace->setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
-      propagateChangeDownwards (size, memoryEa, trace, *exp);
-      delete exp;
+      actualPropagateChangeDownwards (size, memoryEa, trace, exp);
+      // exp is now owned by the expCache and will be deleted by it later
     }
-    if (memoryEa + size / 8 != ignoredNeighborAddress) {
+    memoryEa += size / 8;
+    if (expCache.find (make_pair (memoryEa, size)) == expCache.end ()) {
       edu::sharif::twinner::trace::Expression *exp = changedExp.clone ();
       exp->shiftToRight (size); // MSB (right-side in little-endian)
-      trace->setSymbolicExpressionByMemoryAddress (size, memoryEa + size / 8, exp);
-      propagateChangeDownwards (size, memoryEa + size / 8, trace, *exp);
-      delete exp;
+      actualPropagateChangeDownwards (size, memoryEa, trace, exp);
+      // exp is now owned by the expCache and will be deleted by it later
     }
   }
+}
+
+void MemoryResidentExpressionValueProxy::actualPropagateChangeDownwards (int size,
+    ADDRINT memoryEa, edu::sharif::twinner::trace::Trace *trace,
+    const edu::sharif::twinner::trace::Expression *exp) const {
+  trace->setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
+  propagateChangeDownwards (size, memoryEa, trace, *exp, true);
 }
 
 void MemoryResidentExpressionValueProxy::propagateChangeUpwards (int size,
     ADDRINT memoryEa, edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression &changedExp) const {
   if (size <= 64) {
+    const bool twoSizeBitsAligned = (memoryEa % (size / 4) == 0);
+    ADDRINT neighborEa;
+    if (twoSizeBitsAligned) {
+      neighborEa = memoryEa + size / 8;
+    } else { // changedExp is right-side (i.e. MSB in little-endian)
+      memoryEa -= size / 8;
+      neighborEa = memoryEa;
+    }
+    bool visited = false;
+    const edu::sharif::twinner::trace::Expression *neighbor =
+        getNeighborExpression (size, neighborEa, trace, visited);
+    if (!visited) {
+      propagateChangeDownwards (size, neighborEa, trace, *neighbor, false);
+    }
     edu::sharif::twinner::trace::Expression *exp;
-    if (memoryEa % (size / 4) == 0) { // (2*size)-bits aligned
-      const edu::sharif::twinner::trace::Expression *neighbor =
-          getNeighborExpression (size, memoryEa + size / 8, trace);
+    if (twoSizeBitsAligned) {
       exp = neighbor->clone (2 * size); // MSB
       exp->shiftToLeft (size);
       exp->bitwiseOr (&changedExp); // changedExp will be cloned internally
-      //XXX: Following downwards check is only necessary when neighbor is newly created
-      if (neighbor != ignoredNeighborExpression) {
-        propagateChangeDownwards (size, memoryEa + size / 8, trace, *neighbor);
-      }
-    } else { // changedExp is right-side (i.e. MSB in little-endian)
-      const edu::sharif::twinner::trace::Expression *neighbor =
-          getNeighborExpression (size, memoryEa - size / 8, trace);
+    } else {
       exp = changedExp.clone (2 * size); // MSB
       exp->shiftToLeft (size);
       exp->bitwiseOr (neighbor); // neighbor will be cloned internally
-      memoryEa -= size / 8;
-      //XXX: Following downwards check is only necessary when neighbor is newly created
-      if (neighbor != ignoredNeighborExpression) {
-        propagateChangeDownwards (size, memoryEa, trace, *neighbor);
-      }
     }
     size *= 2;
     trace->setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
+    std::pair < AddrSizeToExpMap::iterator, bool > res =
+        expCache.insert (make_pair (make_pair (memoryEa, size),
+                                    make_pair (exp, true)));
+    if (!res.second) {
+      std::pair < const edu::sharif::twinner::trace::Expression *, bool > &p =
+          res.first->second;
+      if (p.second) {
+        delete p.first;
+      }
+      p.first = exp;
+      p.second = true;
+      // exp is now owned by the expCache and will be deleted by it later
+    }
     propagateChangeUpwards (size, memoryEa, trace, *exp);
-    delete exp;
   }
 }
 
@@ -256,9 +274,12 @@ int MemoryResidentExpressionValueProxy::getSize () const {
 
 const edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::getNeighborExpression (int size,
-    ADDRINT address, edu::sharif::twinner::trace::Trace *trace) const {
-  if (address == ignoredNeighborAddress) {
-    return ignoredNeighborExpression;
+    ADDRINT address, edu::sharif::twinner::trace::Trace *trace,
+    bool &readFromCache) const {
+  AddrSizeToExpMap::const_iterator it = expCache.find (make_pair (address, size));
+  if (it != expCache.end ()) {
+    readFromCache = true;
+    return it->second.first;
   }
   const UINT64 cv = edu::sharif::twinner::util::readMemoryContent (address);
   edu::sharif::twinner::trace::ConcreteValue *cvObj =
@@ -266,6 +287,7 @@ MemoryResidentExpressionValueProxy::getNeighborExpression (int size,
   const edu::sharif::twinner::trace::Expression *neighbor =
       trace->getSymbolicExpressionByMemoryAddress (size, address, *cvObj);
   delete cvObj;
+  readFromCache = false;
   return neighbor;
 }
 
