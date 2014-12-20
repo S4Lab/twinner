@@ -2352,6 +2352,11 @@ VOID analysisRoutineDstMemSrcImplicit (VOID *iseptr, UINT32 opcode,
 }
 
 VOID analysisRoutineInitializeRegisters (VOID *iseptr, CONTEXT *context) {
+  static bool executed = false;
+  if (executed) {
+    return;
+  }
+  executed = true;
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineInitializeRegisters (context);
 }
