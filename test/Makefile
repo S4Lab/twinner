@@ -5,7 +5,8 @@ TARGETS := simple-condition-test \
 	simple-condition-test.twin \
 	assembly-mov-sizes \
 	registers-state-manipulation \
-	multi-path-with-printf-leafs-test
+	multi-path-with-printf-leafs-test \
+	upx-test
 TWIN_TARGETS := simple-condition-test \
 	multi-path-with-printf-leafs-test
 
@@ -19,6 +20,9 @@ all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
 
 %.out: %.s
 	gcc -g $< -o $@
+
+upx-test.out: upx-test.c
+	gcc -g -static -o upx-test.out upx-test.c
 
 expression-operations-concrete-value-test.out: expression-operations-concrete-value-test.cpp
 	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o expression-operations-concrete-value-test.o expression-operations-concrete-value-test.cpp
