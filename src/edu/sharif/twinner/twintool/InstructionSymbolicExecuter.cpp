@@ -326,11 +326,13 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
     logger << "analysisRoutineDstMemSrcImd(INS: "
         << insAssemblyStr << ")";
   } else {
+    // FIXME: This else-part is unreachable code
     disassembledInstruction = 0;
     logger << "analysisRoutineDstMemSrcImd()";
   }
   const UINT32 maxReadSizeInBytes = srcImmediateValue.getSize () / 8;
   if (memReadBytes > maxReadSizeInBytes) {
+    // FIXME: This then-part is unreachable code
     edu::sharif::twinner::util::Logger::warning () << std::hex
         << "memReadBytes was 0x" << memReadBytes << " which is larger than size of "
         "srcImmediateValue (which is just 0x" << maxReadSizeInBytes << " bytes)"
