@@ -49,10 +49,8 @@ ConstraintToCvc4ExprConverter::ConstraintToCvc4ExprConverter (ExprManager &_em,
 }
 
 Expr ConstraintToCvc4ExprConverter::convert (std::map<std::string, Expr> &symbols) {
-  std::list < const edu::sharif::twinner::trace::Constraint * >::const_iterator it =
-      constraints.begin ();
-  addConstraint (convertConstraintToCvc4Expr (symbols, *it));
-  while (++it != constraints.end ()) {
+  for (std::list < const edu::sharif::twinner::trace::Constraint * >::const_iterator it =
+      constraints.begin (); it != constraints.end (); ++it) {
     addConstraint (convertConstraintToCvc4Expr (symbols, *it));
   }
   return totalConstraint;

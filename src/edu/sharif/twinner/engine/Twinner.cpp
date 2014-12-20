@@ -246,9 +246,9 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
     set < const edu::sharif::twinner::trace::Symbol * > &symbols) {
   //TODO: Refactor these codes out of this class (to a search strategy class)
   std::list < const edu::sharif::twinner::trace::Constraint * > clist;
+  ctree->dumpTree ();
   while (ctree->getNextConstraintsList (clist)) {
     try {
-      ctree->dumpTree ();
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->solveConstraints
           (clist, symbols);
       return true;

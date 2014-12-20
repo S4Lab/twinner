@@ -99,6 +99,10 @@ Cvc4SmtSolver::simplifyConstraints (
   smt.setOption ("produce-models", true);
   //  smt.setOption ("trace", "smt");
 
+  if (constraints.empty ()) {
+    std::list < const edu::sharif::twinner::trace::Constraint * > emptyList;
+    return emptyList;
+  }
   ConstraintToCvc4ExprConverter converter (em, false, constraints);
   std::map<std::string, Expr> symbols;
   Expr cvc4Constraint = converter.convert (symbols);
