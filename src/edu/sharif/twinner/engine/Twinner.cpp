@@ -343,13 +343,13 @@ void code_trace_into_twin_code (std::stringstream &out,
                                0 // index
   };
   out << "\t{\n";
-  const std::map < int, std::set < ADDRINT > > addresses =
+  std::map < int, std::set < ADDRINT > > addresses =
       gather_symbols_addresses_of_trace (trace);
   for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
       ::const_reverse_iterator it = trace->getTraceSegments ().rbegin ();
       it != trace->getTraceSegments ().rend (); ++it) {
     edu::sharif::twinner::trace::ExecutionTraceSegment * const segment = *it;
-    code_segment_into_twin_code (addresses.at (aux.index), aux, segment);
+    code_segment_into_twin_code (addresses[aux.index], aux, segment);
   }
   for (unsigned int j = aux.depth - 1; j > 0; --j) {
 
