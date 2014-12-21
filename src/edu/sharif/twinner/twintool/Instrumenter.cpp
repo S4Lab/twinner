@@ -398,6 +398,9 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
   } else if (destIsReg && sourceIsAdg) {
     return DST_REG_SRC_ADG;
 
+  } else if (destIsMem && sourceIsMem) {
+    return DST_MEM_SRC_MEM;
+
   } else {
     throw std::runtime_error ("Unknown instruction model");
   }
@@ -646,7 +649,20 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMem,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 1,
-                    IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_MEMORYOP_EA, 0,
+                    IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_REG_SRC_STK:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMem,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                    IARG_MEMORYOP_EA, 0,
+                    IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -656,7 +672,19 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMem,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
-                    IARG_MEMORYOP_EA, 1, IARG_MEMORYREAD_SIZE,
+                    IARG_MEMORYOP_EA, 1,
+                    IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_MEM_SRC_MEM:
+  {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMem,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_MEMORYOP_EA, 0,
+                    IARG_MEMORYOP_EA, 1,
+                    IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
