@@ -289,6 +289,14 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * ADC has 5 models. It is Add with carry.
+   * r += r/m/i
+   * m += r/i
+   */
+  void adcAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * SUB has 5 models
    * r -= r/m/i
    * m -= r/i

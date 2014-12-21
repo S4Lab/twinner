@@ -904,22 +904,40 @@ void InstructionSymbolicExecuter::addAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "addAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      dst.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tbinary operation...";
-  dstexp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::ADD), srcexp);
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
+  dstexp->add (srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
   eflags.setFlags (dstexp);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
+void InstructionSymbolicExecuter::adcAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "adcAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
+  const int size = dstexp->getLastConcreteValue ().getSize ();
+  edu::sharif::twinner::trace::Expression *doublePrecision = dstexp->clone (size * 2);
+  delete dstexp;
+  doublePrecision->add (srcexp);
+  delete srcexp;
+  edu::sharif::twinner::trace::Expression *carry = doublePrecision->clone ();
+  carry->shiftToRight (size);
+  doublePrecision->add (carry);
+  delete carry;
+  doublePrecision->truncate (size);
+  dstexp = doublePrecision->clone (size);
+  delete doublePrecision;
+  dst.setExpression (trace, dstexp);
+  eflags.setFlags (dstexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::subAnalysisRoutine (
@@ -1940,6 +1958,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::cmovnbeAnalysisRoutine;
   case XED_ICLASS_ADD:
     return &InstructionSymbolicExecuter::addAnalysisRoutine;
+  case XED_ICLASS_ADC:
+    return &InstructionSymbolicExecuter::adcAnalysisRoutine;
   case XED_ICLASS_SUB:
     return &InstructionSymbolicExecuter::subAnalysisRoutine;
   case XED_ICLASS_CMP:

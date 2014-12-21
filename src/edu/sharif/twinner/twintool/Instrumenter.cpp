@@ -109,6 +109,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_ADD, COMMON_INS_MODELS));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_ADC, COMMON_INS_MODELS));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_SUB, COMMON_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_CMP, COMMON_INS_MODELS));
