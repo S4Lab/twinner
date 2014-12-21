@@ -45,6 +45,7 @@ private:
   std::string pin;
   std::string twin;
   std::string arguments;
+  bool main; // just analyze after the main() function
 
   std::list < const edu::sharif::twinner::trace::Trace * > traces;
   edu::sharif::twinner::engine::search::ConstraintTree *ctree;
@@ -58,6 +59,7 @@ public:
   void setPinLauncherPath (std::string pin);
   void setTwinBinaryPath (std::string twin);
   void setInputBinaryArguments (std::string arguments);
+  void setJustAnalyzeMainRoutine (bool main);
 
   void generateTwinBinary ();
 

@@ -45,14 +45,14 @@ const char *Executer::DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE =
     "/tmp/twinner/memory.dat";
 
 Executer::Executer (std::string pinLauncher, std::string twintool,
-    std::string inputBinary, std::string _inputArguments) :
+    std::string inputBinary, std::string _inputArguments, bool main) :
     baseCommand (pinLauncher
     + " -t " + twintool
     + " -symbols " + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
     + " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
     + " -memory " + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
     + " -verbose " + edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString ()
-    + " -main -- " + inputBinary),
+    + (main ? " -main -- " : " -- ") + inputBinary),
     inputArguments (_inputArguments) {
 }
 

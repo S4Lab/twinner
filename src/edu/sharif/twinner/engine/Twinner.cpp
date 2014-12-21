@@ -144,6 +144,10 @@ void Twinner::setInputBinaryArguments (string arguments) {
   this->arguments = arguments;
 }
 
+void Twinner::setJustAnalyzeMainRoutine (bool main) {
+  this->main = main;
+}
+
 /**
  * Generates twin code and twin binary.
  * Steps:
@@ -167,7 +171,7 @@ void Twinner::setInputBinaryArguments (string arguments) {
  * and initialize remaining addresses in the Twin code.
  */
 void Twinner::generateTwinBinary () {
-  Executer ex (pin, twintool, input, arguments);
+  Executer ex (pin, twintool, input, arguments, main);
   set < const edu::sharif::twinner::trace::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;

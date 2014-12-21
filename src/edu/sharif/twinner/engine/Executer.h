@@ -62,7 +62,7 @@ private:
 
 public:
   Executer (std::string pinLauncher, std::string twintool, std::string inputBinary,
-      std::string inputArguments);
+      std::string inputArguments, bool main);
 
   void setCandidateAddresses (const std::set < ADDRINT > &addresses) const;
   void setSymbolsValues (
