@@ -623,10 +623,11 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   case DST_STK_SRC_REG:
   {
     REG srcreg = INS_OperandReg (ins, 0);
-    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcReg,
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcRegAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
                     IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
@@ -634,10 +635,11 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_STK_SRC_IMD:
   {
-    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcImd,
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcImdAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_ADDRINT, INS_OperandImmediate (ins, 0),
+                    IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
                     IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
@@ -646,10 +648,11 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_STK_SRC_MEM:
   {
-    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMem,
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMemAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 1,
                     IARG_MEMORYOP_EA, 0,
+                    IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
                     IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
@@ -658,10 +661,11 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   case DST_REG_SRC_STK:
   {
     REG dstreg = INS_OperandReg (ins, 0);
-    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMem,
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMemAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_MEMORYOP_EA, 0,
+                    IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
                     IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
@@ -669,10 +673,11 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_MEM_SRC_STK:
   {
-    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMem,
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMemAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_MEMORYOP_EA, 1,
+                    IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
                     IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);

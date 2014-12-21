@@ -106,6 +106,12 @@ public:
       REG dstReg, const ConcreteValue &dstRegVal,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
       UINT32 insAssembly);
+  void analysisRoutineDstRegSrcMemAuxReg (AuxOperandHavingAnalysisRoutine routine,
+      REG dstReg, const ConcreteValue &dstRegVal,
+      ADDRINT srcMemoryEa,
+      REG auxReg, const ConcreteValue &auxRegVal,
+      UINT32 memReadBytes,
+      UINT32 insAssembly);
   void analysisRoutineDstRegSrcMemAuxImd (DoubleSourcesAnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
@@ -136,9 +142,21 @@ public:
       const ConcreteValue &srcImmediateValue,
       UINT32 memReadBytes,
       UINT32 insAssembly);
+  void analysisRoutineDstMemSrcImdAuxReg (AuxOperandHavingAnalysisRoutine routine,
+      ADDRINT dstMemoryEa,
+      const ConcreteValue &srcImmediateValue,
+      REG auxReg, const ConcreteValue &auxRegVal,
+      UINT32 memReadBytes,
+      UINT32 insAssembly);
   void analysisRoutineDstMemSrcMem (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
+      UINT32 insAssembly);
+  void analysisRoutineDstMemSrcMemAuxReg (AuxOperandHavingAnalysisRoutine routine,
+      ADDRINT dstMemoryEa,
+      ADDRINT srcMemoryEa,
+      REG auxReg, const ConcreteValue &auxRegVal,
+      UINT32 memReadBytes,
       UINT32 insAssembly);
   void analysisRoutineConditionalBranch (ConditionalBranchAnalysisRoutine routine,
       BOOL branchTaken,
@@ -588,6 +606,12 @@ VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
     UINT32 insAssembly);
+VOID analysisRoutineDstRegSrcMemAuxReg (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    ADDRINT srcMemoryEa,
+    UINT32 auxReg, ADDRINT auxRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly);
 VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcImmediateValue,
@@ -618,9 +642,21 @@ VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
     ADDRINT srcImmediateValue,
     UINT32 memReadBytes,
     UINT32 insAssembly);
+VOID analysisRoutineDstMemSrcImdAuxReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    ADDRINT srcImmediateValue,
+    UINT32 auxReg, ADDRINT auxRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly);
 VOID analysisRoutineDstMemSrcMem (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    UINT32 insAssembly);
+VOID analysisRoutineDstMemSrcMemAuxReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    ADDRINT srcMemoryEa,
+    UINT32 auxReg, ADDRINT auxRegVal,
+    UINT32 memReadBytes,
     UINT32 insAssembly);
 VOID analysisRoutineConditionalBranch (VOID *iseptr, UINT32 opcode,
     BOOL branchTaken,
