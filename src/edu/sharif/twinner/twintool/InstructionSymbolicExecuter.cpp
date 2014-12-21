@@ -880,6 +880,26 @@ void InstructionSymbolicExecuter::popAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::lodsdAnalysisRoutine (
+    const MutableExpressionValueProxy &dstReg, const ExpressionValueProxy &srcMem,
+    const MutableExpressionValueProxy &rsi) {
+  edu::sharif::twinner::util::Logger::loquacious () << "lodsdAnalysisRoutine(...)\n";
+  movAnalysisRoutine (dstReg, srcMem);
+  edu::sharif::twinner::trace::Expression *rsiexp = rsi.getExpression (trace);
+  if (eflags.getDirectionFlag ()) { // DF == 1
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tdecrementing rsi/index register...";
+    rsiexp->minus (dstReg.getSize () / 8);
+  } else { // DF == 0
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tincrementing rsi/index register...";
+    rsiexp->add (dstReg.getSize () / 8);
+  }
+  rsi.setExpression (trace, rsiexp);
+  delete rsiexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::addAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "addAnalysisRoutine(...)\n"
@@ -1988,6 +2008,8 @@ InstructionSymbolicExecuter::convertOpcodeToAuxOperandHavingAnalysisRoutine (
     return &InstructionSymbolicExecuter::pushAnalysisRoutine;
   case XED_ICLASS_POP:
     return &InstructionSymbolicExecuter::popAnalysisRoutine;
+  case XED_ICLASS_LODSD:
+    return &InstructionSymbolicExecuter::lodsdAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Having an auxiliary third (dst) operand: Unknown opcode: "

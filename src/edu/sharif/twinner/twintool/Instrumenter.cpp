@@ -200,6 +200,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_NOT, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
   managedInstructions.insert
       (make_pair (XED_ICLASS_SCASB, STRING_OPERATION_REG_MEM));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_LODSD, DST_REG_SRC_MEM_AUX_RSI));
 }
 
 Instrumenter::~Instrumenter () {
@@ -279,6 +281,8 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
     return INS_OperandIsReg (ins, 0) ? DST_REG_SRC_IMPLICIT : DST_MEM_SRC_IMPLICIT;
   case XED_ICLASS_LEAVE:
     return LEAVE_INS_MODELS;
+  case XED_ICLASS_LODSD:
+    return DST_REG_SRC_MEM_AUX_RSI;
   default:
     switch (INS_Category (ins)) {
     case XED_CATEGORY_COND_BR:
@@ -543,6 +547,19 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_REG_SRC_MEM_AUX_RSI:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMemAuxReg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                    IARG_MEMORYOP_EA, 0,
+                    IARG_UINT32, REG_RSI, IARG_REG_VALUE, REG_RSI,
+                    IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;

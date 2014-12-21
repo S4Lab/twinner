@@ -273,6 +273,14 @@ private:
       const MutableExpressionValueProxy &aux);
 
   /**
+   * LODSD is load string double word
+   * eax/dst-reg <- [rsi]
+   */
+  void lodsdAnalysisRoutine (const MutableExpressionValueProxy &dstReg,
+      const ExpressionValueProxy &srcMem,
+      const MutableExpressionValueProxy &rsi);
+
+  /**
    * ADD has 5 models
    * r += r/m/i
    * m += r/i
