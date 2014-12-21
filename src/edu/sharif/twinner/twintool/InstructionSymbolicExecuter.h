@@ -261,14 +261,16 @@ private:
    * m <- r/m/i
    */
   void pushAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+      const ExpressionValueProxy &src,
+      const MutableExpressionValueProxy &aux);
 
   /**
    * POP has 2 models
    * r/m <- m
    */
   void popAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+      const ExpressionValueProxy &src,
+      const MutableExpressionValueProxy &aux);
 
   /**
    * ADD has 5 models

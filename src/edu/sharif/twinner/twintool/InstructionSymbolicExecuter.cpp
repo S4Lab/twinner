@@ -847,49 +847,37 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::pushAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
+    const MutableExpressionValueProxy &rsp) {
   edu::sharif::twinner::util::Logger::loquacious () << "pushAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
   delete srcexp;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tadjusting rsp...";
-  //TODO: check for current value of RSP too
-  edu::sharif::twinner::trace::Expression *rsp =
-      trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
-  if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
-    // When check for current value of RSP get added, this condition can be removed.
-    rsp->minus (8);
-  }
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsp...";
+  edu::sharif::twinner::trace::Expression *rspexp = rsp.getExpression (trace);
+  rspexp->minus (8);
+  rsp.setExpression (trace, rspexp);
+  delete rspexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::popAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
+    const MutableExpressionValueProxy &rsp) {
   edu::sharif::twinner::util::Logger::loquacious () << "popAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
   delete srcexp;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tadjusting rsp...";
-  //TODO: check for current value of RSP too
-  edu::sharif::twinner::trace::Expression *rsp =
-      trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
-  if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
-    // When check for current value of RSP get added, this condition can be removed.
-    rsp->add (8);
-  }
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsp...";
+  edu::sharif::twinner::trace::Expression *rspexp = rsp.getExpression (trace);
+  rspexp->add (8);
+  rsp.setExpression (trace, rspexp);
+  delete rspexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::addAnalysisRoutine (
@@ -1930,10 +1918,6 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::cmovbeAnalysisRoutine;
   case XED_ICLASS_CMOVNBE:
     return &InstructionSymbolicExecuter::cmovnbeAnalysisRoutine;
-  case XED_ICLASS_PUSH:
-    return &InstructionSymbolicExecuter::pushAnalysisRoutine;
-  case XED_ICLASS_POP:
-    return &InstructionSymbolicExecuter::popAnalysisRoutine;
   case XED_ICLASS_ADD:
     return &InstructionSymbolicExecuter::addAnalysisRoutine;
   case XED_ICLASS_SUB:
@@ -2000,6 +1984,10 @@ InstructionSymbolicExecuter::convertOpcodeToAuxOperandHavingAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_CMPXCHG:
     return &InstructionSymbolicExecuter::cmpxchgAnalysisRoutine;
+  case XED_ICLASS_PUSH:
+    return &InstructionSymbolicExecuter::pushAnalysisRoutine;
+  case XED_ICLASS_POP:
+    return &InstructionSymbolicExecuter::popAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Having an auxiliary third (dst) operand: Unknown opcode: "
