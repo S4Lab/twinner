@@ -1,0 +1,21 @@
+CF = Carry Flag = bit 0 of EFLAGS (for unsigned operation)
+SF = Sign Flag = bit 7 of EFLAGS = the left-most bit of the result
+OF = Overflow Flag = bit 11 of EFLAGS (for signed/two's-complement operation)
+
+           <--- CF                     CF --->
+unsigned:     0, 1, ..., 127, 128, ..., 255
+                         <-- OF -->
+signed:       0, 1, ..., 127, -128, ..., -1
+
+                    OF = CF xor SF
+
+    0x11       0x11
+ -  0x01  == + 0xFF
+--------------------
+    0x10      0x110        -> OF=0,SF=0,CF=0
+                |
+                |--> In ADD, the carry indicates CF
+                     But in SUB, the second operand will be two's complemented
+                                 and added to the first operand and similarly
+                                 the carry will be negated to indicate the CF.
+
