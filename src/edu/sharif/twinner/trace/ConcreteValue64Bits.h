@@ -33,9 +33,11 @@ public:
   virtual ConcreteValue64Bits *bitwiseNegated () const;
 
   virtual ConcreteValue *signExtended (int length) const;
-  virtual ConcreteValue *clone (int length = -1) const;
 
   static ConcreteValue64Bits *loadFromBinaryStream (std::ifstream &in);
+
+protected:
+  virtual ConcreteValue *realClone (int length) const;
 };
 
 }

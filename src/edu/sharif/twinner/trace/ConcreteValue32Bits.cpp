@@ -33,6 +33,7 @@ ConcreteValue32Bits::ConcreteValue32Bits (UINT32 _value) :
 
 ConcreteValue32Bits::ConcreteValue32Bits (const ConcreteValue &cv) :
     ConcreteValueAbstractImp<32, UINT32> (cv.toUint64 ()) {
+  cf = cv.getCarryBit ();
 }
 
 ConcreteValue32Bits::~ConcreteValue32Bits () {
@@ -46,14 +47,16 @@ void ConcreteValue32Bits::writeToRegister (CONTEXT *context, REG reg) const {
 }
 
 ConcreteValue32Bits *ConcreteValue32Bits::twosComplement () const {
-  return new ConcreteValue32Bits ((~value) + 1);
+  ConcreteValue32Bits *cv = new ConcreteValue32Bits ((~value) + 1);
+  cv->setCarryBit (value != 0);
+  return cv;
 }
 
 ConcreteValue32Bits *ConcreteValue32Bits::bitwiseNegated () const {
   return new ConcreteValue32Bits (~value);
 }
 
-ConcreteValue *ConcreteValue32Bits::clone (int length) const {
+ConcreteValue *ConcreteValue32Bits::realClone (int length) const {
   switch (length) {
   case 8:
     return new ConcreteValue8Bits (UINT8 (value));

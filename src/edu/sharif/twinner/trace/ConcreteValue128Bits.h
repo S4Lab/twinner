@@ -24,6 +24,7 @@ class ConcreteValue128Bits : public ConcreteValueAbstractImp<128> {
 
 private:
   UINT64 msb, lsb; // most/least significant byte
+  bool cf;
 
 public:
   ConcreteValue128Bits ();
@@ -44,6 +45,9 @@ public:
       const ConcreteValue128Bits &me);
   virtual std::string toHexString () const;
 
+  virtual bool getCarryBit () const;
+  virtual void setCarryBit (bool cf);
+
   virtual bool isNegative () const;
   virtual bool isZero () const;
 
@@ -51,7 +55,6 @@ public:
   virtual ConcreteValue128Bits *bitwiseNegated () const;
 
   virtual ConcreteValue *signExtended (int length) const;
-  virtual ConcreteValue *clone (int length = -1) const;
 
   UINT64 getLsb () const;
   UINT64 getMsb () const;
@@ -82,7 +85,12 @@ public:
 
   virtual ConcreteValue128Bits &rotateToRight (const ConcreteValue &bits);
 
+protected:
+  virtual ConcreteValue *realClone (int length) const;
+
 private:
+  bool wouldSummationHaveCarry (UINT64 a, UINT64 b) const;
+  bool getNthBit (UINT64 value, int n) const;
 
   struct ResultCarry {
 

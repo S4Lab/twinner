@@ -51,6 +51,7 @@ ConcreteValue128Bits::ConcreteValue128Bits (const ConcreteValue &cv) :
     lsb = cv.toUint64 ();
     msb = 0;
   }
+  cf = cv.getCarryBit ();
 }
 
 ConcreteValue128Bits::~ConcreteValue128Bits () {
@@ -66,6 +67,7 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator= (const ConcreteValue &valu
   ConcreteValue128Bits tmp (value);
   msb = tmp.msb;
   lsb = tmp.lsb;
+  cf = tmp.cf;
   return *this;
 }
 
@@ -112,6 +114,14 @@ std::string ConcreteValue128Bits::toHexString () const {
   return ss.str ();
 }
 
+bool ConcreteValue128Bits::getCarryBit () const {
+  return cf;
+}
+
+void ConcreteValue128Bits::setCarryBit (bool cf) {
+  this->cf = cf;
+}
+
 bool ConcreteValue128Bits::isNegative () const {
   //return msb != 0 || (lsb >= (1ull << (size - 1)));
   return (msb >= (1ull << 63));
@@ -122,9 +132,10 @@ bool ConcreteValue128Bits::isZero () const {
 }
 
 ConcreteValue128Bits *ConcreteValue128Bits::twosComplement () const {
-  ConcreteValue128Bits *tmp = new ConcreteValue128Bits (~msb, ~lsb);
+  ConcreteValue128Bits *tmp = bitwiseNegated ();
   ConcreteValue &tt = *tmp;
   tt += UINT64 (1);
+  tmp->setCarryBit (msb != 0 || lsb != 0);
   return tmp;
 }
 
@@ -136,7 +147,7 @@ ConcreteValue *ConcreteValue128Bits::signExtended (int length) const {
   throw std::runtime_error ("Larger than 128-bits concrete values are not supported for sign-extension");
 }
 
-ConcreteValue *ConcreteValue128Bits::clone (int length) const {
+ConcreteValue *ConcreteValue128Bits::realClone (int length) const {
   switch (length) {
   case 8:
     return new ConcreteValue8Bits (UINT8 (lsb));
@@ -212,36 +223,44 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator-= (const ConcreteValue &cv)
   const ConcreteValue128Bits *tmp2 = tmp1.twosComplement ();
   (*this) += *tmp2;
   delete tmp2;
+  cf = !cf;
   return (*this);
 }
 
 ConcreteValue128Bits &ConcreteValue128Bits::operator+= (const ConcreteValue &cv) {
   const ConcreteValue128Bits tmp (cv);
-  int carry;
-  bool myMsbIsSet = ((lsb & (1ull << 63)) != 0);
-  bool cvMsbIsSet = ((tmp.lsb & (1ull << 63)) != 0);
-  if (myMsbIsSet && cvMsbIsSet) {
-    carry = 1;
-  } else if (!myMsbIsSet && !cvMsbIsSet) {
-    carry = 0;
+  const int carry = wouldSummationHaveCarry (lsb, tmp.lsb) ? 1 : 0;
+  const bool sumOfMsbBitsHasCarry = wouldSummationHaveCarry (msb, tmp.msb);
+  lsb += tmp.lsb;
+  msb += tmp.msb;
+  cf = sumOfMsbBitsHasCarry || wouldSummationHaveCarry (msb, carry);
+  msb += carry;
+  return *this;
+}
+
+bool ConcreteValue128Bits::wouldSummationHaveCarry (UINT64 first, UINT64 second) const {
+  const bool firstMsbIsSet = ((first & (1ull << 63)) != 0);
+  const bool secondMsbIsSet = ((second & (1ull << 63)) != 0);
+  if (firstMsbIsSet && secondMsbIsSet) {
+    return true;
+  } else if (!firstMsbIsSet && !secondMsbIsSet) {
+    return false;
   } else { // one MSB is set and another is not set
-    const UINT64 first63BitsOfMyValue = (lsb & ((1ull << 63) - 1));
-    const UINT64 first63BitsOfCvValue = (tmp.lsb & ((1ull << 63) - 1));
-    if (first63BitsOfMyValue + first63BitsOfCvValue >= (1ull << 63)) {
-      carry = 1;
+    const UINT64 first63BitsOfFirstValue = (first & ((1ull << 63) - 1));
+    const UINT64 first63BitsOfSecondValue = (second & ((1ull << 63) - 1));
+    if (first63BitsOfFirstValue + first63BitsOfSecondValue >= (1ull << 63)) {
+      return true;
     } else {
-      carry = 0;
+      return false;
     }
   }
-  lsb += tmp.lsb;
-  msb += tmp.msb + carry;
-  return *this;
 }
 
 ConcreteValue128Bits &ConcreteValue128Bits::operator&= (const ConcreteValue &mask) {
   const ConcreteValue128Bits tmp (mask);
   lsb &= tmp.lsb;
   msb &= tmp.msb;
+  cf = false;
   return *this;
 }
 
@@ -249,6 +268,7 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator|= (const ConcreteValue &mas
   const ConcreteValue128Bits tmp (mask);
   lsb |= tmp.lsb;
   msb |= tmp.msb;
+  cf = false;
   return *this;
 }
 
@@ -349,18 +369,25 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator^= (const ConcreteValue &pat
   const ConcreteValue128Bits tmp (pattern);
   lsb ^= tmp.lsb;
   msb ^= tmp.msb;
+  cf = false;
   return *this;
 }
 
 ConcreteValue128Bits &ConcreteValue128Bits::operator>>= (const ConcreteValue &bits) {
-  if (bits > 127) {
+  if (bits > 128) {
+    msb = lsb = cf = 0;
+  } else if (bits == 128) {
+    cf = (msb >> 63) & 0x1;
     msb = lsb = 0;
   } else {
-    const int n = (ConcreteValue64Bits (bits)).getValue ();
+    int n = (ConcreteValue64Bits (bits)).getValue ();
     if (n > 63) {
-      lsb = (msb >> (n - 64));
+      n -= 64;
+      cf = getNthBit (msb, n);
+      lsb = (msb >> n);
       msb = 0;
     } else if (n > 0) {
+      cf = getNthBit (lsb, n);
       lsb = (msb << (64 - n)) | (lsb >> n);
       msb >>= n;
     }
@@ -368,15 +395,29 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator>>= (const ConcreteValue &bi
   return *this;
 }
 
+bool ConcreteValue128Bits::getNthBit (UINT64 value, int n) const {
+  if (n == 1) {
+    return value & 0x1;
+  } else {
+    return (value >> (n - 1)) & 0x1;
+  }
+}
+
 ConcreteValue128Bits &ConcreteValue128Bits::operator<<= (const ConcreteValue &bits) {
-  if (bits > 127) {
+  if (bits > 128) {
+    msb = lsb = cf = 0;
+  } else if (bits == 128) {
+    cf = lsb & 0x1;
     msb = lsb = 0;
   } else {
-    const int n = (ConcreteValue64Bits (bits)).getValue ();
+    int n = (ConcreteValue64Bits (bits)).getValue ();
     if (n > 63) {
-      msb = (lsb << (n - 64));
+      n -= 64;
+      cf = (lsb >> (64 - n)) & 0x1;
+      msb = (lsb << n);
       lsb = 0;
     } else if (n > 0) {
+      cf = (msb >> (64 - n)) & 0x1;
       msb = (msb << n) | (lsb >> (64 - n));
       lsb <<= n;
     }

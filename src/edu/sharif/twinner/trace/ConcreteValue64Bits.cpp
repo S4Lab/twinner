@@ -32,6 +32,7 @@ ConcreteValue64Bits::ConcreteValue64Bits (UINT64 _value) :
 
 ConcreteValue64Bits::ConcreteValue64Bits (const ConcreteValue &cv) :
     ConcreteValueAbstractImp<64, UINT64> (cv.toUint64 ()) {
+  cf = cv.getCarryBit ();
 }
 
 ConcreteValue64Bits::~ConcreteValue64Bits () {
@@ -45,7 +46,9 @@ void ConcreteValue64Bits::writeToRegister (CONTEXT *context, REG reg) const {
 }
 
 ConcreteValue64Bits *ConcreteValue64Bits::twosComplement () const {
-  return new ConcreteValue64Bits ((~value) + 1);
+  ConcreteValue64Bits *cv = new ConcreteValue64Bits ((~value) + 1);
+  cv->setCarryBit (value != 0);
+  return cv;
 }
 
 ConcreteValue64Bits *ConcreteValue64Bits::bitwiseNegated () const {
@@ -63,7 +66,7 @@ ConcreteValue *ConcreteValue64Bits::signExtended (int length) const {
   }
 }
 
-ConcreteValue *ConcreteValue64Bits::clone (int length) const {
+ConcreteValue *ConcreteValue64Bits::realClone (int length) const {
   switch (length) {
   case 8:
     return new ConcreteValue8Bits (UINT8 (value));

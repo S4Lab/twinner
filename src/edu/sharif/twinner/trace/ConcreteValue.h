@@ -51,6 +51,14 @@ public:
    */
   virtual std::string toHexString () const = 0;
 
+  virtual bool getCarryBit () const = 0;
+  virtual void setCarryBit (bool cf) = 0;
+
+  virtual bool getOverflowBit () const {
+    const bool SF = isNegative ();
+    return SF ^ getCarryBit ();
+  }
+
   /**
    * Interpreting this concrete value as a signed value which is encoded using
    * two's complement rules, return true iff the value is negative.
@@ -98,8 +106,16 @@ public:
    * @param length The max precision of resulting value (in bits) or -1 (for no change)
    * @return The cloned concrete value
    */
-  virtual ConcreteValue *clone (int length = -1) const = 0;
+  ConcreteValue *clone (int length = -1) const {
+    ConcreteValue *cv = realClone (length);
+    cv->setCarryBit (getCarryBit ());
+    return cv;
+  }
 
+protected:
+  virtual ConcreteValue *realClone (int length) const = 0;
+
+public:
   static ConcreteValue *loadFromBinaryStream (std::ifstream &in);
 
   /**

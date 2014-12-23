@@ -30,6 +30,7 @@ class ConcreteValueAbstractImp : public ConcreteValue {
 
 protected:
   ValueType value;
+  bool cf;
 
 public:
 
@@ -46,6 +47,7 @@ public:
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator= (const ConcreteValue &v) {
     value = v.toUint64 ();
+    cf = v.getCarryBit ();
     return *this;
   }
 
@@ -70,6 +72,14 @@ public:
     std::stringstream ss;
     ss << std::hex << UINT64 (value);
     return ss.str ();
+  }
+
+  virtual bool getCarryBit () const {
+    return cf;
+  }
+
+  virtual void setCarryBit (bool cf) {
+    this->cf = cf;
   }
 
   virtual bool isNegative () const {
@@ -140,24 +150,29 @@ public:
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator-= (const ConcreteValue &cv) {
     const ValueType cvValue = cv.toUint64 ();
+    cf = (value < cvValue);
     value -= cvValue;
     return *this;
   }
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator+= (const ConcreteValue &cv) {
     const ValueType cvValue = cv.toUint64 ();
+    const ValueType maxValue = ValueType (-1);
+    cf = (value > maxValue - cvValue);
     value += cvValue;
     return *this;
   }
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator&= (const ConcreteValue &cv) {
     const ValueType cvValue = cv.toUint64 ();
+    cf = false;
     value &= cvValue;
     return *this;
   }
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator|= (const ConcreteValue &cv) {
     const ValueType cvValue = cv.toUint64 ();
+    cf = false;
     value |= cvValue;
     return *this;
   }
@@ -182,18 +197,25 @@ public:
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator^= (const ConcreteValue &cv) {
     const ValueType cvValue = cv.toUint64 ();
+    cf = false;
     value ^= cvValue;
     return *this;
   }
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator>>= (const ConcreteValue &cv) {
     const ValueType cvValue = cv.toUint64 ();
+    if (cvValue == 1) {
+      cf = value & 0x1;
+    } else {
+      cf = (value >> (cvValue - 1)) & 0x1;
+    }
     value >>= cvValue;
     return *this;
   }
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator<<= (const ConcreteValue &cv) {
     const ValueType cvValue = cv.toUint64 ();
+    cf = (value >> (bits - cvValue)) & 0x1;
     value <<= cvValue;
     return *this;
   }

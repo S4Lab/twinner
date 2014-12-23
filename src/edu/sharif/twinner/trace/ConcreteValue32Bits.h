@@ -32,9 +32,10 @@ public:
   virtual ConcreteValue32Bits *twosComplement () const;
   virtual ConcreteValue32Bits *bitwiseNegated () const;
 
-  virtual ConcreteValue *clone (int length = -1) const;
-
   static ConcreteValue32Bits *loadFromBinaryStream (std::ifstream &in);
+
+protected:
+  virtual ConcreteValue *realClone (int length) const;
 };
 
 }
