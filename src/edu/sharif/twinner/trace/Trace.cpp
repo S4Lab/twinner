@@ -114,7 +114,7 @@ void Trace::addPathConstraint (const Constraint *c) {
   if (c) {
     getCurrentTraceSegment ()->addPathConstraint (c);
   } else {
-    edu::sharif::twinner::util::Logger::warning () << "Trace::addPathConstraint (null)\n";
+    edu::sharif::twinner::util::Logger::debug () << "Trace::addPathConstraint (null)\n";
   }
 }
 

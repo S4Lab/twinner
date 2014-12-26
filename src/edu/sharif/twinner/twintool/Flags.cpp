@@ -24,7 +24,9 @@ namespace twinner {
 namespace twintool {
 
 Flags::Flags () :
-    leftExp (0), rightExp (0), df (false) {
+    leftExp (0), rightExp (0), op (UNDEFINED_OPGROUP),
+    of (DEFAULT_FSTATE), df (CLEAR_FSTATE), sf (DEFAULT_FSTATE), zf (DEFAULT_FSTATE),
+    pf (DEFAULT_FSTATE), cf (DEFAULT_FSTATE) {
 }
 
 Flags::~Flags () {
@@ -33,22 +35,19 @@ Flags::~Flags () {
 }
 
 bool Flags::getDirectionFlag () const {
-  return df;
+  return df == SET_FSTATE;
 }
 
-void Flags::setFlags (edu::sharif::twinner::trace::Expression *exp) {
-  delete leftExp;
-  leftExp = exp;
-  delete rightExp;
-  rightExp = 0;
-}
-
-void Flags::setFlags (edu::sharif::twinner::trace::Expression *exp1,
+void Flags::setFlags (OperationGroup operation,
+    edu::sharif::twinner::trace::Expression *exp1,
     edu::sharif::twinner::trace::Expression *exp2) {
   delete leftExp;
   leftExp = exp1;
   delete rightExp;
   rightExp = exp2;
+
+  op = operation;
+  of = sf = zf = pf = cf = DEFAULT_FSTATE;
 }
 
 edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForZeroCase (

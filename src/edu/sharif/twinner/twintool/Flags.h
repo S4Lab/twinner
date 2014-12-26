@@ -27,10 +27,37 @@ namespace twintool {
 
 class Flags {
 
+public:
+
+  enum OperationGroup {
+
+    UNDEFINED_OPGROUP,
+    SUB_OPGROUP,
+    ADD_OPGROUP,
+    // rightExp is null and OF=CF=0 in AND_OPGROUP operation group
+    AND_OPGROUP,
+  };
+
+  enum FlagState {
+
+    UNDEFINED_FSTATE,
+    DEFAULT_FSTATE,
+    SET_FSTATE,
+    CLEAR_FSTATE,
+  };
+
 private:
   edu::sharif::twinner::trace::Expression *leftExp;
   edu::sharif::twinner::trace::Expression *rightExp;
-  bool df;
+
+  OperationGroup op;
+
+  FlagState of; // overflow flag
+  FlagState df; // direction flag
+  FlagState sf; // sign flag
+  FlagState zf; // zero flag
+  FlagState pf; // parity flag
+  FlagState cf; // carry flag
 
 public:
   Flags ();
@@ -44,25 +71,19 @@ public:
   bool getDirectionFlag () const;
 
   /**
-   * Sets all flags based on given expression. It's assumed that given
-   * expression is owned by this object.
-   * This method is used for unsigned cases (e.g. TEST instruction) where flags can be
-   * determined by just inspecting bits of the concrete value of the given expression.
-   * @param exp The expression which flags are set based on it.
-   */
-  void setFlags (edu::sharif::twinner::trace::Expression *exp);
-
-  /**
    * Sets all flags based on comparison of given expressions. It's assumed that given
    * expressions are owned by this object.
    * This method is used for signed and unsigned cases (e.g. CMP instruction) where flags
-   * are determined by signed or unsigned subtraction (i.e. exp1 - exp2) and the actual
-   * operation should be selected during constraint instantiation.
+   * are determined by signed or unsigned subtraction (i.e. exp1 - exp2) or other
+   * operations as indicated by the operations argument. The actual constraint type
+   * will be determined during constraint instantiation according to used jump type.
+   *
+   * @param operation The operation group which must be performed between exp1 and exp2
    * @param exp1 The first expression which flags are set based on it.
-   * @param exp2 The second expression which flags are set based on it.
+   * @param exp2 The second expression which flags are set based on it. This may be null.
    */
-  void setFlags (edu::sharif::twinner::trace::Expression *exp1,
-      edu::sharif::twinner::trace::Expression *exp2);
+  void setFlags (OperationGroup operation, edu::sharif::twinner::trace::Expression *exp1,
+      edu::sharif::twinner::trace::Expression *exp2 = 0);
 
   /**
    * Instantiates a new constraint object denoting ZF's (zero flag) state. The last
