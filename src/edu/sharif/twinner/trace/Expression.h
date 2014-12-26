@@ -173,6 +173,13 @@ public:
   void minus (const Expression *exp);
 
   /**
+   * Instantiates an expression indicating the two's complement of this expression.
+   * Caller should delete the returned expression.
+   * @return The two's complement of this expression.
+   */
+  Expression *twosComplement () const;
+
+  /**
    * Increment this expression as much as the given immediate value.
    * @param immediate The value which its value will be added to this expression.
    */

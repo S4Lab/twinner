@@ -26,6 +26,7 @@
 #include "WrongStateException.h"
 #include "edu/sharif/twinner/trace/ConcreteValue.h"
 #include "edu/sharif/twinner/trace/Constant.h"
+#include "ExpressionImp.h"
 
 namespace edu {
 namespace sharif {
@@ -258,6 +259,14 @@ void Expression::minus (UINT64 immediate) {
 
 void Expression::minus (const Expression *exp) {
   binaryOperation (new Operator (Operator::MINUS), exp);
+}
+
+Expression *Expression::twosComplement () const {
+  ConcreteValue *cv = lastConcreteValue->clone ();
+  (*cv) = 0;
+  Expression *zero = new ExpressionImp (cv);
+  zero->minus (this);
+  return zero;
 }
 
 void Expression::add (ConcreteValue *immediate) {
