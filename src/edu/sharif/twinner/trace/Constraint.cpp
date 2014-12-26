@@ -231,16 +231,17 @@ Constraint *Constraint::instantiateLessConstraint (bool &less,
 
 Constraint *Constraint::instantiateLessOrEqualConstraint (bool &lessOrEqual,
     const Expression *mainExp, const Expression *auxExp, uint32_t instruction) {
-  if (auxExp) {
-    lessOrEqual = mainExp->getLastConcreteValue ().lessThanOrEqualTo
-        (auxExp->getLastConcreteValue ());
-    return new Constraint (mainExp, auxExp, lessOrEqual ? LESS_OR_EQUAL : GREATER,
-                           instruction, true);
-  } else {
-    lessOrEqual = mainExp->getLastConcreteValue ().lessThanOrEqualTo (0);
-    return new Constraint (mainExp, lessOrEqual ? NON_POSITIVE : POSITIVE,
-                           instruction, true);
-  }
+  lessOrEqual = mainExp->getLastConcreteValue ().lessThanOrEqualTo
+      (auxExp->getLastConcreteValue ());
+  return new Constraint (mainExp, auxExp, lessOrEqual ? LESS_OR_EQUAL : GREATER,
+                         instruction, true);
+}
+
+Constraint *Constraint::instantiateLessOrEqualConstraint (bool &lessOrEqual,
+    const Expression *mainExp, uint32_t instruction) {
+  lessOrEqual = mainExp->getLastConcreteValue ().lessThanOrEqualTo (0);
+  return new Constraint (mainExp, lessOrEqual ? NON_POSITIVE : POSITIVE,
+                         instruction, true);
 }
 
 Constraint *Constraint::instantiateEqualConstraint (bool &equal,
