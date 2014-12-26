@@ -52,8 +52,48 @@ void Flags::setFlags (OperationGroup operation,
 
 edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForZeroCase (
     bool &zero, uint32_t instruction) const {
-  return edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
-      (zero, leftExp, rightExp, instruction);
+  switch (zf) {
+  case UNDEFINED_FSTATE:
+    edu::sharif::twinner::util::Logger::warning ()
+        << "Using ZF while is in undefined state (assuming that it is CLEAR)\n";
+  case CLEAR_FSTATE:
+    zero = false;
+    break;
+  case SET_FSTATE:
+    zero = true;
+    break;
+  case DEFAULT_FSTATE:
+    if (rightExp) {
+      if (op == SUB_OPGROUP) {
+        return edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+            (zero, leftExp, rightExp, instruction);
+      } else if (op == ADD_OPGROUP) {
+        edu::sharif::twinner::trace::Expression *negativeOfRightExp =
+            rightExp->twosComplement ();
+        edu::sharif::twinner::trace::Constraint *res =
+            edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+            (zero, leftExp, negativeOfRightExp, instruction);
+        delete negativeOfRightExp;
+        return res;
+      } else {
+        edu::sharif::twinner::util::Logger::error ()
+            << "Unexpected operation group (0x" << std::hex << int (op) << ")\n";
+      }
+    } else {
+      if (op == AND_OPGROUP) {
+        return edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+            (zero, leftExp, instruction);
+      } else {
+        edu::sharif::twinner::util::Logger::error ()
+            << "Unexpected operation group (0x" << std::hex << int (op) << ")\n";
+      }
+    }
+    break;
+  default:
+    edu::sharif::twinner::util::Logger::error ()
+        << "Unknown state for ZF (0x" << std::hex << int (zf) << ")\n";
+  }
+  return 0;
 }
 
 edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForLessOrEqualCase (
