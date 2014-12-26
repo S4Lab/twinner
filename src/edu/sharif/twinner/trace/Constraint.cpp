@@ -246,14 +246,15 @@ Constraint *Constraint::instantiateLessOrEqualConstraint (bool &lessOrEqual,
 
 Constraint *Constraint::instantiateEqualConstraint (bool &equal,
     const Expression *mainExp, const Expression *auxExp, uint32_t instruction) {
-  if (auxExp) {
-    equal = mainExp->getLastConcreteValue () == auxExp->getLastConcreteValue ();
-    return new Constraint (mainExp, auxExp, equal ? EQUAL : NON_EQUAL,
-                           instruction, false);
-  } else {
-    equal = mainExp->getLastConcreteValue ().isZero ();
-    return new Constraint (mainExp, equal ? ZERO : NON_ZERO, instruction, false);
-  }
+  equal = mainExp->getLastConcreteValue () == auxExp->getLastConcreteValue ();
+  return new Constraint (mainExp, auxExp, equal ? EQUAL : NON_EQUAL,
+                         instruction, false);
+}
+
+Constraint *Constraint::instantiateEqualConstraint (bool &equal,
+    const Expression *mainExp, uint32_t instruction) {
+  equal = mainExp->getLastConcreteValue ().isZero ();
+  return new Constraint (mainExp, equal ? ZERO : NON_ZERO, instruction, false);
 }
 
 Constraint *Constraint::instantiateSignConstraint (bool &sign,
