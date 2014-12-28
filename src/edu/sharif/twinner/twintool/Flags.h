@@ -25,18 +25,11 @@ class Constraint;
 }
 namespace twintool {
 
+class OperationGroup;
+
 class Flags {
 
 public:
-
-  enum OperationGroup {
-
-    UNDEFINED_OPGROUP,
-    SUB_OPGROUP,
-    ADD_OPGROUP,
-    // rightExp is null and OF=CF=0 in AND_OPGROUP operation group
-    AND_OPGROUP,
-  };
 
   enum FlagState {
 
@@ -50,7 +43,7 @@ private:
   edu::sharif::twinner::trace::Expression *leftExp;
   edu::sharif::twinner::trace::Expression *rightExp;
 
-  OperationGroup op;
+  OperationGroup *op;
 
   FlagState of; // overflow flag
   FlagState df; // direction flag
@@ -82,7 +75,7 @@ public:
    * @param exp1 The first expression which flags are set based on it.
    * @param exp2 The second expression which flags are set based on it. This may be null.
    */
-  void setFlags (OperationGroup operation, edu::sharif::twinner::trace::Expression *exp1,
+  void setFlags (OperationGroup *operation, edu::sharif::twinner::trace::Expression *exp1,
       edu::sharif::twinner::trace::Expression *exp2 = 0);
 
   /**

@@ -12,6 +12,8 @@
 
 #include "Flags.h"
 
+#include "OperationGroup.h"
+
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 #include "edu/sharif/twinner/trace/ConcreteValue.h"
@@ -24,7 +26,7 @@ namespace twinner {
 namespace twintool {
 
 Flags::Flags () :
-    leftExp (0), rightExp (0), op (UNDEFINED_OPGROUP),
+    leftExp (0), rightExp (0), op (0),
     of (DEFAULT_FSTATE), df (CLEAR_FSTATE), sf (DEFAULT_FSTATE), zf (DEFAULT_FSTATE),
     pf (DEFAULT_FSTATE), cf (DEFAULT_FSTATE) {
 }
@@ -38,7 +40,7 @@ bool Flags::getDirectionFlag () const {
   return df == SET_FSTATE;
 }
 
-void Flags::setFlags (OperationGroup operation,
+void Flags::setFlags (OperationGroup *operation,
     edu::sharif::twinner::trace::Expression *exp1,
     edu::sharif::twinner::trace::Expression *exp2) {
   delete leftExp;
@@ -63,32 +65,7 @@ edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForZeroCase
     zero = true;
     break;
   case DEFAULT_FSTATE:
-    if (rightExp) {
-      if (op == SUB_OPGROUP) {
-        return edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
-            (zero, leftExp, rightExp, instruction);
-      } else if (op == ADD_OPGROUP) {
-        edu::sharif::twinner::trace::Expression *negativeOfRightExp =
-            rightExp->twosComplement ();
-        edu::sharif::twinner::trace::Constraint *res =
-            edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
-            (zero, leftExp, negativeOfRightExp, instruction);
-        delete negativeOfRightExp;
-        return res;
-      } else {
-        edu::sharif::twinner::util::Logger::error ()
-            << "Unexpected operation group (0x" << std::hex << int (op) << ")\n";
-      }
-    } else {
-      if (op == AND_OPGROUP) {
-        return edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
-            (zero, leftExp, instruction);
-      } else {
-        edu::sharif::twinner::util::Logger::error ()
-            << "Unexpected operation group (0x" << std::hex << int (op) << ")\n";
-      }
-    }
-    break;
+    return op->instantiateConstraintForZeroCase (zero, leftExp, rightExp, instruction);
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown state for ZF (0x" << std::hex << int (zf) << ")\n";
@@ -113,86 +90,19 @@ edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForLessOrEq
       edu::sharif::twinner::util::Logger::warning ()
           << "Using OF while is in undefined state (assuming that it is CLEAR)\n";
     case CLEAR_FSTATE:
-      if (op == SUB_OPGROUP) {
-        edu::sharif::twinner::trace::Expression *exp = leftExp->clone ();
-        exp->minus (rightExp);
-        edu::sharif::twinner::trace::Constraint *res =
-            edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
-            (lessOrEqual, exp, instruction);
-        delete exp;
-        return res;
-      } else if (op == ADD_OPGROUP) {
-        edu::sharif::twinner::trace::Expression *exp = leftExp->clone ();
-        exp->add (rightExp);
-        edu::sharif::twinner::trace::Constraint *res =
-            edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
-            (lessOrEqual, exp, instruction);
-        delete exp;
-        return res;
-      } else if (op == AND_OPGROUP) {
-        edu::sharif::twinner::trace::Constraint *res =
-            edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
-            (lessOrEqual, leftExp, instruction);
-        return res;
-      } else {
-        edu::sharif::twinner::util::Logger::error ()
-            << "Unexpected operation group (0x" << std::hex << int (op) << ")\n";
-      }
+      return op->operationResultIsLessOrEqualWithZero
+          (lessOrEqual, leftExp, rightExp, instruction);
     case SET_FSTATE:
-      if (op == SUB_OPGROUP) {
-        edu::sharif::twinner::trace::Expression *exp = leftExp->clone ();
-        exp->minus (rightExp);
-        edu::sharif::twinner::trace::Constraint *res =
-            edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
-            (lessOrEqual, exp, instruction);
-        lessOrEqual = !lessOrEqual;
-        delete exp;
-        return res;
-      } else if (op == ADD_OPGROUP) {
-        edu::sharif::twinner::trace::Expression *exp = leftExp->clone ();
-        exp->add (rightExp);
-        edu::sharif::twinner::trace::Constraint *res =
-            edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
-            (lessOrEqual, exp, instruction);
-        lessOrEqual = !lessOrEqual;
-        delete exp;
-        return res;
-      } else if (op == AND_OPGROUP) {
-        edu::sharif::twinner::trace::Constraint *res =
-            edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
-            (lessOrEqual, leftExp, instruction);
-        lessOrEqual = !lessOrEqual;
-        return res;
-      } else {
-        edu::sharif::twinner::util::Logger::error ()
-            << "Unexpected operation group (0x" << std::hex << int (op) << ")\n";
-      }
+      edu::sharif::twinner::trace::Constraint *res = op->operationResultIsLessThanZero
+          (lessOrEqual, leftExp, rightExp, instruction);
+      lessOrEqual = !lessOrEqual;
+      return res;
     case DEFAULT_FSTATE:
       if (sf != DEFAULT_FSTATE) {
-        throw "Not implemented yet";
+        throw std::runtime_error ("Not implemented yet");
       }
-      if (rightExp) {
-        if (op == SUB_OPGROUP) {
-          return edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
-              (lessOrEqual, leftExp, rightExp, instruction);
-        } else if (op == ADD_OPGROUP) {
-          edu::sharif::twinner::trace::Expression *negativeOfRightExp =
-              rightExp->twosComplement ();
-          edu::sharif::twinner::trace::Constraint *res =
-              edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
-              (lessOrEqual, leftExp, negativeOfRightExp, instruction);
-          delete negativeOfRightExp;
-          return res;
-        } else {
-          edu::sharif::twinner::util::Logger::error ()
-              << "Unexpected operation group (0x" << std::hex << int (op) << ")\n";
-        }
-      } else {
-        // AND_OPGROUP clears OF
-        edu::sharif::twinner::util::Logger::error ()
-            << "Unexpected operation group (0x" << std::hex << int (op) << ")\n";
-      }
-      break;
+      return op->instantiateConstraintForLessOrEqualCase
+          (lessOrEqual, leftExp, rightExp, instruction);
     default:
       edu::sharif::twinner::util::Logger::error ()
           << "Unknown state for OF (0x" << std::hex << int (of) << ")\n";
@@ -220,30 +130,9 @@ edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForLessCase
     return res;
   case DEFAULT_FSTATE:
     if (sf != DEFAULT_FSTATE) {
-      throw "Not implemented yet";
+      throw std::runtime_error ("Not implemented yet");
     }
-    if (rightExp) {
-      if (op == SUB_OPGROUP) {
-        return edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
-            (less, leftExp, rightExp, instruction);
-      } else if (op == ADD_OPGROUP) {
-        edu::sharif::twinner::trace::Expression *negativeOfRightExp =
-            rightExp->twosComplement ();
-        edu::sharif::twinner::trace::Constraint *res =
-            edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
-            (less, leftExp, negativeOfRightExp, instruction);
-        delete negativeOfRightExp;
-        return res;
-      } else {
-        edu::sharif::twinner::util::Logger::error ()
-            << "Unexpected operation group (0x" << std::hex << int (op) << ")\n";
-      }
-    } else {
-      // TEST_OPGROUP clears OF
-      edu::sharif::twinner::util::Logger::error ()
-          << "Unexpected operation group (0x" << std::hex << int (op) << ")\n";
-    }
-    break;
+    return op->instantiateConstraintForLessCase (less, leftExp, rightExp, instruction);
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown state for OF (0x" << std::hex << int (of) << ")\n";
@@ -253,12 +142,18 @@ edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForLessCase
 
 edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForBelowOrEqualCase (
     bool &belowOrEqual, uint32_t instruction) const {
+  if (cf != DEFAULT) {
+    throw "Not implemented yet";
+  }
   return edu::sharif::twinner::trace::Constraint::instantiateBelowOrEqualConstraint
       (belowOrEqual, leftExp, rightExp, instruction);
 }
 
 edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForBelowCase (
     bool &below, uint32_t instruction) const {
+  if (cf != DEFAULT) {
+    throw "Not implemented yet";
+  }
   return edu::sharif::twinner::trace::Constraint::instantiateBelowConstraint
       (below, leftExp, rightExp, instruction);
 }
