@@ -151,11 +151,23 @@ edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForBelowOrE
 
 edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForBelowCase (
     bool &below, uint32_t instruction) const {
-  if (cf != DEFAULT) {
-    throw "Not implemented yet";
+  switch (cf) {
+  case UNDEFINED_FSTATE:
+    edu::sharif::twinner::util::Logger::warning ()
+        << "Using CF while is in undefined state (assuming that it is CLEAR)\n";
+  case CLEAR_FSTATE:
+    below = false;
+    return 0;
+  case SET_FSTATE:
+    below = true;
+    return 0;
+  case DEFAULT_FSTATE:
+    return op->instantiateConstraintForBelowCase (below, leftExp, rightExp, instruction);
+  default:
+    edu::sharif::twinner::util::Logger::error ()
+        << "Unknown state for CF (0x" << std::hex << int (cf) << ")\n";
   }
-  return edu::sharif::twinner::trace::Constraint::instantiateBelowConstraint
-      (below, leftExp, rightExp, instruction);
+  return 0;
 }
 
 edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForSignCase (

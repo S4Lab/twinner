@@ -72,6 +72,15 @@ SubtractOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrEqu
 }
 
 edu::sharif::twinner::trace::Constraint *
+SubtractOperationGroup::instantiateConstraintForBelowCase (bool &below,
+    const edu::sharif::twinner::trace::Expression *mainExp,
+    const edu::sharif::twinner::trace::Expression *auxExp,
+    uint32_t instruction) const {
+  return edu::sharif::twinner::trace::Constraint::instantiateBelowConstraint
+      (below, mainExp, auxExp, instruction);
+}
+
+edu::sharif::twinner::trace::Constraint *
 SubtractOperationGroup::operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
@@ -155,6 +164,26 @@ AdditionOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrEqu
 }
 
 edu::sharif::twinner::trace::Constraint *
+AdditionOperationGroup::instantiateConstraintForBelowCase (bool &below,
+    const edu::sharif::twinner::trace::Expression *mainExp,
+    const edu::sharif::twinner::trace::Expression *auxExp,
+    uint32_t instruction) const {
+  if (!auxExp) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "AdditionOperationGroup needs two expressions (auxExp is null)\n";
+    throw std::runtime_error
+        ("AdditionOperationGroup::instantiateConstraintForBelowCase (): auxExp is null");
+  }
+  edu::sharif::twinner::trace::Expression *negativeOfRightExp = auxExp->twosComplement ();
+  edu::sharif::twinner::trace::Constraint *res =
+      edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
+      (below, mainExp, negativeOfRightExp, instruction);
+  delete negativeOfRightExp;
+  below = !below;
+  return res;
+}
+
+edu::sharif::twinner::trace::Constraint *
 AdditionOperationGroup::operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
@@ -222,6 +251,18 @@ BitwiseAndOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrE
       << "BitwiseAndOperationGroup always clears OF and so this code is unreachable!\n";
   throw std::runtime_error
       ("BitwiseAndOperationGroup::instantiateConstraintForLessOrEqualCase ():"
+       " unreachable code");
+}
+
+edu::sharif::twinner::trace::Constraint *
+BitwiseAndOperationGroup::instantiateConstraintForBelowCase (bool &below,
+    const edu::sharif::twinner::trace::Expression *mainExp,
+    const edu::sharif::twinner::trace::Expression *auxExp,
+    uint32_t instruction) const {
+  edu::sharif::twinner::util::Logger::error ()
+      << "BitwiseAndOperationGroup always clears CF and so this code is unreachable!\n";
+  throw std::runtime_error
+      ("BitwiseAndOperationGroup::instantiateConstraintForBelowCase ():"
        " unreachable code");
 }
 

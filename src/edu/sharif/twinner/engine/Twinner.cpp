@@ -122,6 +122,7 @@ Twinner::Twinner () :
 
 Twinner::~Twinner () {
   delete ctree;
+  edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->destroy ();
 }
 
 void Twinner::setInputBinaryPath (string input) {
