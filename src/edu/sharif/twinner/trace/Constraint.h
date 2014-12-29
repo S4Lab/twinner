@@ -128,17 +128,27 @@ public:
       const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
   static Constraint *instantiateBelowOrEqualConstraint (bool &belowOrEqual,
       const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
+  static Constraint *instantiateBelowOrEqualConstraint (bool &belowOrEqual,
+      const Expression *mainExp, uint32_t instruction);
 
   static Constraint *instantiateLessConstraint (bool &less,
       const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
+  static Constraint *instantiateLessConstraint (bool &less,
+      const Expression *mainExp, uint32_t instruction);
   static Constraint *instantiateLessOrEqualConstraint (bool &lessOrEqual,
       const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
+  static Constraint *instantiateLessOrEqualConstraint (bool &lessOrEqual,
+      const Expression *mainExp, uint32_t instruction);
 
   static Constraint *instantiateEqualConstraint (bool &equal,
       const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
+  static Constraint *instantiateEqualConstraint (bool &equal,
+      const Expression *mainExp, uint32_t instruction);
 
   static Constraint *instantiateSignConstraint (bool &sign,
       const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
+  static Constraint *instantiateSignConstraint (bool &sign,
+      const Expression *mainExp, uint32_t instruction);
 };
 
 }

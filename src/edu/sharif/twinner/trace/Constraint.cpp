@@ -193,26 +193,22 @@ bool Constraint::isTrivial () const {
 
 Constraint *Constraint::instantiateBelowConstraint (bool &below,
     const Expression *mainExp, const Expression *auxExp, uint32_t instruction) {
-  if (auxExp) {
-    below = mainExp->getLastConcreteValue () < auxExp->getLastConcreteValue ();
-    return new Constraint (mainExp, auxExp, below ? BELOW : ABOVE_OR_EQUAL,
-                           instruction, false);
-  } else {
-    below = false; // unsigned value can not be below zero
-    return 0;
-  }
+  below = mainExp->getLastConcreteValue () < auxExp->getLastConcreteValue ();
+  return new Constraint (mainExp, auxExp, below ? BELOW : ABOVE_OR_EQUAL,
+                         instruction, false);
 }
 
 Constraint *Constraint::instantiateBelowOrEqualConstraint (bool &belowOrEqual,
     const Expression *mainExp, const Expression *auxExp, uint32_t instruction) {
-  if (auxExp) {
-    belowOrEqual = mainExp->getLastConcreteValue () <= auxExp->getLastConcreteValue ();
-    return new Constraint (mainExp, auxExp, belowOrEqual ? BELOW_OR_EQUAL : ABOVE,
-                           instruction, false);
-  } else {
-    return Constraint::instantiateEqualConstraint
-        (belowOrEqual, mainExp, auxExp, instruction);
-  }
+  belowOrEqual = mainExp->getLastConcreteValue () <= auxExp->getLastConcreteValue ();
+  return new Constraint (mainExp, auxExp, belowOrEqual ? BELOW_OR_EQUAL : ABOVE,
+                         instruction, false);
+}
+
+Constraint *Constraint::instantiateBelowOrEqualConstraint (bool &belowOrEqual,
+    const Expression *mainExp, uint32_t instruction) {
+  // check for mainExp == 0 instead
+  return Constraint::instantiateEqualConstraint (belowOrEqual, mainExp, instruction);
 }
 
 Constraint *Constraint::instantiateLessConstraint (bool &less,
@@ -259,15 +255,16 @@ Constraint *Constraint::instantiateEqualConstraint (bool &equal,
 
 Constraint *Constraint::instantiateSignConstraint (bool &sign,
     const Expression *mainExp, const Expression *auxExp, uint32_t instruction) {
-  if (auxExp) {
-    Expression *exp = mainExp->clone ();
-    exp->minus (auxExp);
-    Constraint *c = Constraint::instantiateLessConstraint (sign, exp, 0, instruction);
-    delete exp;
-    return c;
-  } else {
-    return Constraint::instantiateLessConstraint (sign, mainExp, 0, instruction);
-  }
+  Expression *exp = mainExp->clone ();
+  exp->minus (auxExp);
+  Constraint *c = Constraint::instantiateLessConstraint (sign, exp, instruction);
+  delete exp;
+  return c;
+}
+
+Constraint *Constraint::instantiateSignConstraint (bool &sign,
+    const Expression *mainExp, uint32_t instruction) {
+  return Constraint::instantiateLessConstraint (sign, mainExp, instruction);
 }
 
 }
