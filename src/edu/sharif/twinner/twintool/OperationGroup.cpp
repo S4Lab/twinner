@@ -90,6 +90,18 @@ SubtractOperationGroup::instantiateConstraintForBelowCase (bool &below,
 }
 
 std::list <edu::sharif::twinner::trace::Constraint *>
+SubtractOperationGroup::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
+    const edu::sharif::twinner::trace::Expression *mainExp,
+    const edu::sharif::twinner::trace::Expression *auxExp,
+    uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateBelowOrEqualConstraint
+       (belowOrEqual, mainExp, auxExp, instruction));
+  return list;
+}
+
+std::list <edu::sharif::twinner::trace::Constraint *>
 SubtractOperationGroup::operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
@@ -193,6 +205,26 @@ AdditionOperationGroup::instantiateConstraintForBelowCase (bool &below,
   return list;
 }
 
+std::list <edu::sharif::twinner::trace::Constraint *>
+AdditionOperationGroup::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
+    const edu::sharif::twinner::trace::Expression *mainExp,
+    const edu::sharif::twinner::trace::Expression *auxExp,
+    uint32_t instruction) const {
+  if (!auxExp) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "AdditionOperationGroup needs two expressions (auxExp is null)\n";
+    throw std::runtime_error
+        ("AdditionOperationGroup::instantiateConstraintForBelowCase (): auxExp is null");
+  }
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  edu::sharif::twinner::trace::Expression *negativeOfRightExp = auxExp->twosComplement ();
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateBelowConstraint
+       (belowOrEqual, mainExp, negativeOfRightExp, instruction));
+  delete negativeOfRightExp;
+  belowOrEqual = !belowOrEqual;
+  return list;
+}
 
 std::list <edu::sharif::twinner::trace::Constraint *>
 AdditionOperationGroup::operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
@@ -280,6 +312,15 @@ BitwiseAndOperationGroup::instantiateConstraintForBelowCase (bool &below,
   throw std::runtime_error
       ("BitwiseAndOperationGroup::instantiateConstraintForBelowCase ():"
        " unreachable code");
+}
+
+std::list <edu::sharif::twinner::trace::Constraint *>
+BitwiseAndOperationGroup::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
+    const edu::sharif::twinner::trace::Expression *mainExp,
+    const edu::sharif::twinner::trace::Expression *auxExp,
+    uint32_t instruction) const {
+  // CF is clear, so below-or-equal should just check for ZF=1
+  return instantiateConstraintForZeroCase (belowOrEqual, mainExp, auxExp, instruction);
 }
 
 std::list <edu::sharif::twinner::trace::Constraint *>

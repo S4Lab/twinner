@@ -57,6 +57,11 @@ public:
       const edu::sharif::twinner::trace::Expression *mainExp,
       const edu::sharif::twinner::trace::Expression *auxExp,
       uint32_t instruction) const = 0;
+  virtual std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
+      const edu::sharif::twinner::trace::Expression *mainExp,
+      const edu::sharif::twinner::trace::Expression *auxExp,
+      uint32_t instruction) const = 0;
 
   virtual std::list <edu::sharif::twinner::trace::Constraint *>
   operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
@@ -95,6 +100,11 @@ public:
       uint32_t instruction) const;
   virtual std::list <edu::sharif::twinner::trace::Constraint *>
   instantiateConstraintForBelowCase (bool &below,
+      const edu::sharif::twinner::trace::Expression *mainExp,
+      const edu::sharif::twinner::trace::Expression *auxExp,
+      uint32_t instruction) const;
+  virtual std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
       const edu::sharif::twinner::trace::Expression *mainExp,
       const edu::sharif::twinner::trace::Expression *auxExp,
       uint32_t instruction) const;
@@ -139,6 +149,11 @@ public:
       const edu::sharif::twinner::trace::Expression *mainExp,
       const edu::sharif::twinner::trace::Expression *auxExp,
       uint32_t instruction) const;
+  virtual std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
+      const edu::sharif::twinner::trace::Expression *mainExp,
+      const edu::sharif::twinner::trace::Expression *auxExp,
+      uint32_t instruction) const;
 
   virtual std::list <edu::sharif::twinner::trace::Constraint *>
   operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
@@ -177,6 +192,11 @@ public:
       uint32_t instruction) const;
   virtual std::list <edu::sharif::twinner::trace::Constraint *>
   instantiateConstraintForBelowCase (bool &below,
+      const edu::sharif::twinner::trace::Expression *mainExp,
+      const edu::sharif::twinner::trace::Expression *auxExp,
+      uint32_t instruction) const;
+  virtual std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
       const edu::sharif::twinner::trace::Expression *mainExp,
       const edu::sharif::twinner::trace::Expression *auxExp,
       uint32_t instruction) const;

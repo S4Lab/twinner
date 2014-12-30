@@ -152,9 +152,42 @@ Flags::instantiateConstraintForLessCase (bool &less, uint32_t instruction) const
 std::list <edu::sharif::twinner::trace::Constraint *>
 Flags::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
     uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  switch (zf) {
+  case UNDEFINED_FSTATE:
+    edu::sharif::twinner::util::Logger::warning ()
+        << "Using ZF while is in undefined state (assuming that it is CLEAR)\n";
+  case CLEAR_FSTATE:
+    list = instantiateConstraintForBelowCase (belowOrEqual, instruction);
+    break;
+  case SET_FSTATE:
+    belowOrEqual = true;
+    break;
+  case DEFAULT_FSTATE:
+    switch (cf) {
+    case UNDEFINED_FSTATE:
+      edu::sharif::twinner::util::Logger::warning ()
+          << "Using CF while is in undefined state (assuming that it is CLEAR)\n";
+    case CLEAR_FSTATE:
+      list = instantiateConstraintForZeroCase (belowOrEqual, instruction);
+      break;
+    case SET_FSTATE:
+      belowOrEqual = true;
+      break;
+    case DEFAULT_FSTATE:
+      list = op->instantiateConstraintForBelowOrEqualCase
+          (belowOrEqual, leftExp, rightExp, instruction);
+      break;
+    default:
+      edu::sharif::twinner::util::Logger::error ()
+          << "Unknown state for CF (0x" << std::hex << int (cf) << ")\n";
+    }
+    break;
+  default:
+    edu::sharif::twinner::util::Logger::error ()
+        << "Unknown state for ZF (0x" << std::hex << int (zf) << ")\n";
   }
-  return edu::sharif::twinner::trace::Constraint::instantiateBelowOrEqualConstraint
-      (belowOrEqual, leftExp, rightExp, instruction);
+  return list;
 }
 
 std::list <edu::sharif::twinner::trace::Constraint *>
