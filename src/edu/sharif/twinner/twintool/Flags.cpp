@@ -215,8 +215,25 @@ Flags::instantiateConstraintForBelowCase (bool &below, uint32_t instruction) con
 
 std::list <edu::sharif::twinner::trace::Constraint *>
 Flags::instantiateConstraintForSignCase (bool &sign, uint32_t instruction) const {
-  return edu::sharif::twinner::trace::Constraint::instantiateSignConstraint
-      (sign, leftExp, rightExp, instruction);
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  switch (sf) {
+  case UNDEFINED_FSTATE:
+    edu::sharif::twinner::util::Logger::warning ()
+        << "Using SF while is in undefined state (assuming that it is CLEAR)\n";
+  case CLEAR_FSTATE:
+    sign = false;
+    break;
+  case SET_FSTATE:
+    sign = true;
+    break;
+  case DEFAULT_FSTATE:
+    list = op->operationResultIsLessThanZero (sign, leftExp, rightExp, instruction);
+    break;
+  default:
+    edu::sharif::twinner::util::Logger::error ()
+        << "Unknown state for SF (0x" << std::hex << int (sf) << ")\n";
+  }
+  return list;
 }
 
 }
