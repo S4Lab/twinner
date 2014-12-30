@@ -11,6 +11,7 @@
  */
 
 #include <stdexcept>
+#include <list>
 
 #include "OperationGroup.h"
 
@@ -32,7 +33,7 @@ OperationGroup::~OperationGroup () {
 SubtractOperationGroup::SubtractOperationGroup () {
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 SubtractOperationGroup::instantiateConstraintForZeroCase (bool &zero,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
@@ -43,11 +44,13 @@ SubtractOperationGroup::instantiateConstraintForZeroCase (bool &zero,
     throw std::runtime_error
         ("SubtractOperationGroup::instantiateConstraintForZeroCase (): auxExp is null");
   }
-  return edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
-      (zero, mainExp, auxExp, instruction);
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  list.push_back (edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+                  (zero, mainExp, auxExp, instruction));
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 SubtractOperationGroup::instantiateConstraintForLessCase (bool &less,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
@@ -58,60 +61,68 @@ SubtractOperationGroup::instantiateConstraintForLessCase (bool &less,
     throw std::runtime_error
         ("SubtractOperationGroup::instantiateConstraintForLessCase (): auxExp is null");
   }
-  return edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
-      (less, mainExp, auxExp, instruction);
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  list.push_back (edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
+                  (less, mainExp, auxExp, instruction));
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 SubtractOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
     uint32_t instruction) const {
-  return edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
-      (lessOrEqual, mainExp, auxExp, instruction);
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  list.push_back (edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
+                  (lessOrEqual, mainExp, auxExp, instruction));
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 SubtractOperationGroup::instantiateConstraintForBelowCase (bool &below,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
     uint32_t instruction) const {
-  return edu::sharif::twinner::trace::Constraint::instantiateBelowConstraint
-      (below, mainExp, auxExp, instruction);
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  list.push_back (edu::sharif::twinner::trace::Constraint::instantiateBelowConstraint
+                  (below, mainExp, auxExp, instruction));
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 SubtractOperationGroup::operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
     uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
   edu::sharif::twinner::trace::Expression *exp = mainExp->clone ();
   exp->minus (auxExp);
-  edu::sharif::twinner::trace::Constraint *res =
-      edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
-      (lessOrEqual, exp, instruction);
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
+       (lessOrEqual, exp, instruction));
   delete exp;
-  return res;
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 SubtractOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
     uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
   edu::sharif::twinner::trace::Expression *exp = mainExp->clone ();
   exp->minus (auxExp);
-  edu::sharif::twinner::trace::Constraint *res =
-      edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
-      (lessOrEqual, exp, instruction);
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
+       (lessOrEqual, exp, instruction));
   delete exp;
-  return res;
+  return list;
 }
 
 AdditionOperationGroup::AdditionOperationGroup () {
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 AdditionOperationGroup::instantiateConstraintForZeroCase (bool &zero,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
@@ -122,12 +133,13 @@ AdditionOperationGroup::instantiateConstraintForZeroCase (bool &zero,
     throw std::runtime_error
         ("AdditionOperationGroup::instantiateConstraintForZeroCase (): auxExp is null");
   }
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
   edu::sharif::twinner::trace::Expression *negativeOfRightExp = auxExp->twosComplement ();
-  edu::sharif::twinner::trace::Constraint *res =
-      edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
-      (zero, mainExp, negativeOfRightExp, instruction);
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+       (zero, mainExp, negativeOfRightExp, instruction));
   delete negativeOfRightExp;
-  return res;
+  return list;
 }
 
 edu::sharif::twinner::trace::Constraint *
@@ -141,80 +153,81 @@ AdditionOperationGroup::instantiateConstraintForLessCase (bool &less,
     throw std::runtime_error
         ("AdditionOperationGroup::instantiateConstraintForLessCase (): auxExp is null");
   }
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
   edu::sharif::twinner::trace::Expression *negativeOfRightExp = auxExp->twosComplement ();
-  edu::sharif::twinner::trace::Constraint *res =
-      edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
-      (less, mainExp, negativeOfRightExp, instruction);
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
+       (less, mainExp, negativeOfRightExp, instruction));
   delete negativeOfRightExp;
-  return res;
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 AdditionOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
     uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
   edu::sharif::twinner::trace::Expression *negativeOfRightExp =
       auxExp->twosComplement ();
-  edu::sharif::twinner::trace::Constraint *res =
-      edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
-      (lessOrEqual, mainExp, negativeOfRightExp, instruction);
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
+       (lessOrEqual, mainExp, negativeOfRightExp, instruction));
   delete negativeOfRightExp;
-  return res;
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 AdditionOperationGroup::instantiateConstraintForBelowCase (bool &below,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
     uint32_t instruction) const {
-  if (!auxExp) {
-    edu::sharif::twinner::util::Logger::error ()
-        << "AdditionOperationGroup needs two expressions (auxExp is null)\n";
-    throw std::runtime_error
-        ("AdditionOperationGroup::instantiateConstraintForBelowCase (): auxExp is null");
+  std::list <edu::sharif::twinner::trace::Constraint *> list =
+      instantiateConstraintForBelowOrEqualCase (below, mainExp, auxExp, instruction);
+  if (below) {
+    bool zero;
+    list.push_back (edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+                    (zero, mainExp, instruction));
+    below && = !zero;
   }
-  edu::sharif::twinner::trace::Expression *negativeOfRightExp = auxExp->twosComplement ();
-  edu::sharif::twinner::trace::Constraint *res =
-      edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
-      (below, mainExp, negativeOfRightExp, instruction);
-  delete negativeOfRightExp;
-  below = !below;
-  return res;
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+
+std::list <edu::sharif::twinner::trace::Constraint *>
 AdditionOperationGroup::operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
     uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
   edu::sharif::twinner::trace::Expression *exp = mainExp->clone ();
   exp->add (auxExp);
-  edu::sharif::twinner::trace::Constraint *res =
-      edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
-      (lessOrEqual, exp, instruction);
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
+       (lessOrEqual, exp, instruction));
   delete exp;
-  return res;
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 AdditionOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
     uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
   edu::sharif::twinner::trace::Expression *exp = mainExp->clone ();
   exp->add (auxExp);
-  edu::sharif::twinner::trace::Constraint *res =
-      edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
-      (lessOrEqual, exp, instruction);
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
+       (lessOrEqual, exp, instruction));
   delete exp;
-  return res;
+  return list;
 }
 
 BitwiseAndOperationGroup::BitwiseAndOperationGroup () {
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 BitwiseAndOperationGroup::instantiateConstraintForZeroCase (bool &zero,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
@@ -226,11 +239,14 @@ BitwiseAndOperationGroup::instantiateConstraintForZeroCase (bool &zero,
         ("BitwiseAndOperationGroup::instantiateConstraintForZeroCase ():"
          " auxExp is not null");
   }
-  return edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
-      (zero, mainExp, instruction);
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+       (zero, mainExp, instruction));
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 BitwiseAndOperationGroup::instantiateConstraintForLessCase (bool &less,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
@@ -242,7 +258,7 @@ BitwiseAndOperationGroup::instantiateConstraintForLessCase (bool &less,
        " unreachable code");
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 BitwiseAndOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
@@ -254,7 +270,7 @@ BitwiseAndOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrE
        " unreachable code");
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 BitwiseAndOperationGroup::instantiateConstraintForBelowCase (bool &below,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
@@ -266,26 +282,28 @@ BitwiseAndOperationGroup::instantiateConstraintForBelowCase (bool &below,
        " unreachable code");
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 BitwiseAndOperationGroup::operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
     uint32_t instruction) const {
-  edu::sharif::twinner::trace::Constraint *res =
-      edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
-      (lessOrEqual, mainExp, instruction);
-  return res;
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateLessOrEqualConstraint
+       (lessOrEqual, mainExp, instruction));
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 BitwiseAndOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
     uint32_t instruction) const {
-  edu::sharif::twinner::trace::Constraint *res =
-      edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
-      (lessOrEqual, mainExp, instruction);
-  return res;
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  list.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
+       (lessOrEqual, mainExp, instruction));
+  return list;
 }
 
 }

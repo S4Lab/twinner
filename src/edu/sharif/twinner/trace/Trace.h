@@ -145,7 +145,8 @@ public:
   /**
    * The constraint will be added to the most recent trace segment.
    */
-  virtual void addPathConstraint (const Constraint *c);
+  virtual void addPathConstraints (
+      const std::list <edu::sharif::twinner::trace::Constraint *> &c);
 
   void syscallInvoked (Syscall s);
   void syscallReturned (CONTEXT *context) const;

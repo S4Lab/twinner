@@ -87,8 +87,8 @@ public:
    *
    * @return A new constraint instance denoting current zero flag's state.
    */
-  edu::sharif::twinner::trace::Constraint *instantiateConstraintForZeroCase (bool &zero,
-      uint32_t instruction) const;
+  std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForZeroCase (bool &zero, uint32_t instruction) const;
 
   /**
    * Instantiates a new constraint object denoting that whether underlying expression
@@ -99,8 +99,8 @@ public:
    *
    * @return A new constraint instance denoting whether current eflags matches with LE.
    */
-  edu::sharif::twinner::trace::Constraint *instantiateConstraintForLessOrEqualCase (
-      bool &lessOrEqual, uint32_t instruction) const;
+  std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForLessOrEqualCase (bool &lessOrEqual, uint32_t instruction) const;
 
   /**
    * Instantiates a new constraint object denoting that whether underlying expression
@@ -111,8 +111,8 @@ public:
    *
    * @return A new constraint instance denoting whether current eflags matches with L.
    */
-  edu::sharif::twinner::trace::Constraint *instantiateConstraintForLessCase (
-      bool &less, uint32_t instruction) const;
+  std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForLessCase (bool &less, uint32_t instruction) const;
 
   /**
    * Instantiates a new constraint object denoting that whether underlying expression
@@ -123,7 +123,8 @@ public:
    *
    * @return A new constraint instance denoting whether current eflags matches with BE.
    */
-  edu::sharif::twinner::trace::Constraint *instantiateConstraintForBelowOrEqualCase (
+  std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForBelowOrEqualCase (
       bool &belowOrEqual, uint32_t instruction) const;
 
   /**
@@ -133,10 +134,10 @@ public:
    * @param instruction The instruction which was cause of this constraint instantiation.
    * @param below Indicates whether requested constraint is created or its negated.
    *
-   * @return A new constraint instance denoting whether current eflags matches with B.
+   * @return Two constraint instances denoting whether current eflags matches with B.
    */
-  edu::sharif::twinner::trace::Constraint *instantiateConstraintForBelowCase (
-      bool &below, uint32_t instruction) const;
+  std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForBelowCase (bool &below, uint32_t instruction) const;
 
   /**
    * Instantiates a new constraint object denoting that whether underlying expression
@@ -147,8 +148,8 @@ public:
    *
    * @return A new constraint instance denoting whether current eflags matches with S.
    */
-  edu::sharif::twinner::trace::Constraint *instantiateConstraintForSignCase (
-      bool &sign, uint32_t instruction) const;
+  std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForSignCase (bool &sign, uint32_t instruction) const;
 };
 
 }

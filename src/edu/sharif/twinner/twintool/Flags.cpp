@@ -52,8 +52,9 @@ void Flags::setFlags (OperationGroup *operation,
   of = sf = zf = pf = cf = DEFAULT_FSTATE;
 }
 
-edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForZeroCase (
-    bool &zero, uint32_t instruction) const {
+std::list <edu::sharif::twinner::trace::Constraint *>
+Flags::instantiateConstraintForZeroCase (bool &zero, uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
   switch (zf) {
   case UNDEFINED_FSTATE:
     edu::sharif::twinner::util::Logger::warning ()
@@ -65,22 +66,26 @@ edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForZeroCase
     zero = true;
     break;
   case DEFAULT_FSTATE:
-    return op->instantiateConstraintForZeroCase (zero, leftExp, rightExp, instruction);
+    list = op->instantiateConstraintForZeroCase (zero, leftExp, rightExp, instruction);
+    break;
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown state for ZF (0x" << std::hex << int (zf) << ")\n";
   }
-  return 0;
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForLessOrEqualCase (
-    bool &lessOrEqual, uint32_t instruction) const {
+std::list <edu::sharif::twinner::trace::Constraint *>
+Flags::instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
+    uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
   switch (zf) {
   case UNDEFINED_FSTATE:
     edu::sharif::twinner::util::Logger::warning ()
         << "Using ZF while is in undefined state (assuming that it is CLEAR)\n";
   case CLEAR_FSTATE:
-    return instantiateConstraintForLessCase (lessOrEqual, instruction);
+    list = instantiateConstraintForLessCase (lessOrEqual, instruction);
+    break;
   case SET_FSTATE:
     lessOrEqual = true;
     break;
@@ -90,19 +95,21 @@ edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForLessOrEq
       edu::sharif::twinner::util::Logger::warning ()
           << "Using OF while is in undefined state (assuming that it is CLEAR)\n";
     case CLEAR_FSTATE:
-      return op->operationResultIsLessOrEqualWithZero
+      list = op->operationResultIsLessOrEqualWithZero
           (lessOrEqual, leftExp, rightExp, instruction);
+      break;
     case SET_FSTATE:
-      edu::sharif::twinner::trace::Constraint *res = op->operationResultIsLessThanZero
+      list = op->operationResultIsLessThanZero
           (lessOrEqual, leftExp, rightExp, instruction);
       lessOrEqual = !lessOrEqual;
-      return res;
+      break;
     case DEFAULT_FSTATE:
       if (sf != DEFAULT_FSTATE) {
         throw std::runtime_error ("Not implemented yet");
       }
-      return op->instantiateConstraintForLessOrEqualCase
+      list = op->instantiateConstraintForLessOrEqualCase
           (lessOrEqual, leftExp, rightExp, instruction);
+      break;
     default:
       edu::sharif::twinner::util::Logger::error ()
           << "Unknown state for OF (0x" << std::hex << int (of) << ")\n";
@@ -112,66 +119,69 @@ edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForLessOrEq
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown state for ZF (0x" << std::hex << int (zf) << ")\n";
   }
-  return 0;
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForLessCase (
-    bool &less, uint32_t instruction) const {
+std::list <edu::sharif::twinner::trace::Constraint *>
+Flags::instantiateConstraintForLessCase (bool &less, uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
   switch (of) {
   case UNDEFINED_FSTATE:
     edu::sharif::twinner::util::Logger::warning ()
         << "Using OF while is in undefined state (assuming that it is CLEAR)\n";
   case CLEAR_FSTATE:
-    return instantiateConstraintForSignCase (less, instruction);
+    list = instantiateConstraintForSignCase (less, instruction);
+    break;
   case SET_FSTATE:
-    edu::sharif::twinner::trace::Constraint *res =
-        instantiateConstraintForSignCase (less, instruction);
+    list = instantiateConstraintForSignCase (less, instruction);
     less = !less;
-    return res;
+    break;
   case DEFAULT_FSTATE:
     if (sf != DEFAULT_FSTATE) {
       throw std::runtime_error ("Not implemented yet");
     }
-    return op->instantiateConstraintForLessCase (less, leftExp, rightExp, instruction);
+    list = op->instantiateConstraintForLessCase (less, leftExp, rightExp, instruction);
+    break;
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown state for OF (0x" << std::hex << int (of) << ")\n";
   }
-  return 0;
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForBelowOrEqualCase (
-    bool &belowOrEqual, uint32_t instruction) const {
-  if (cf != DEFAULT) {
-    throw "Not implemented yet";
+std::list <edu::sharif::twinner::trace::Constraint *>
+Flags::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
+    uint32_t instruction) const {
   }
   return edu::sharif::twinner::trace::Constraint::instantiateBelowOrEqualConstraint
       (belowOrEqual, leftExp, rightExp, instruction);
 }
 
-edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForBelowCase (
-    bool &below, uint32_t instruction) const {
+std::list <edu::sharif::twinner::trace::Constraint *>
+Flags::instantiateConstraintForBelowCase (bool &below, uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
   switch (cf) {
   case UNDEFINED_FSTATE:
     edu::sharif::twinner::util::Logger::warning ()
         << "Using CF while is in undefined state (assuming that it is CLEAR)\n";
   case CLEAR_FSTATE:
     below = false;
-    return 0;
+    break;
   case SET_FSTATE:
     below = true;
-    return 0;
+    break;
   case DEFAULT_FSTATE:
-    return op->instantiateConstraintForBelowCase (below, leftExp, rightExp, instruction);
+    list = op->instantiateConstraintForBelowCase (below, leftExp, rightExp, instruction);
+    break;
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown state for CF (0x" << std::hex << int (cf) << ")\n";
   }
-  return 0;
+  return list;
 }
 
-edu::sharif::twinner::trace::Constraint *Flags::instantiateConstraintForSignCase (
-    bool &sign, uint32_t instruction) const {
+std::list <edu::sharif::twinner::trace::Constraint *>
+Flags::instantiateConstraintForSignCase (bool &sign, uint32_t instruction) const {
   return edu::sharif::twinner::trace::Constraint::instantiateSignConstraint
       (sign, leftExp, rightExp, instruction);
 }
