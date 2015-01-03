@@ -15,6 +15,10 @@
 
 #include "OperationGroup.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/trace/Constraint.h"
+#include "edu/sharif/twinner/trace/Expression.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -22,7 +26,14 @@ namespace twintool {
 
 const OperationGroup *OperationGroup::SUB_OPGROUP = new SubtractOperationGroup ();
 const OperationGroup *OperationGroup::ADD_OPGROUP = new AdditionOperationGroup ();
+const OperationGroup *OperationGroup::ADD_WITH_CARRY_OPGROUP = NULL; // TODO: Implement
+const OperationGroup *OperationGroup::SHIFT_LEFT_OPGROUP = NULL; // TODO: Implement
+const OperationGroup *OperationGroup::SHIFT_RIGHT_OPGROUP = NULL; // TODO: Implement
+const OperationGroup *OperationGroup::SHIFT_ARITHMETIC_RIGHT_OPGROUP =
+    NULL; // TODO: Implement
 const OperationGroup *OperationGroup::AND_OPGROUP = new BitwiseAndOperationGroup ();
+const OperationGroup *OperationGroup::INCREMENT_OPGROUP = NULL; // TODO: Implement
+const OperationGroup *OperationGroup::DECREMENT_OPGROUP = NULL; // TODO: Implement
 
 OperationGroup::OperationGroup () {
 }
@@ -154,7 +165,7 @@ AdditionOperationGroup::instantiateConstraintForZeroCase (bool &zero,
   return list;
 }
 
-edu::sharif::twinner::trace::Constraint *
+std::list <edu::sharif::twinner::trace::Constraint *>
 AdditionOperationGroup::instantiateConstraintForLessCase (bool &less,
     const edu::sharif::twinner::trace::Expression *mainExp,
     const edu::sharif::twinner::trace::Expression *auxExp,
@@ -200,7 +211,7 @@ AdditionOperationGroup::instantiateConstraintForBelowCase (bool &below,
     bool zero;
     list.push_back (edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
                     (zero, mainExp, instruction));
-    below && = !zero;
+    below = below && !zero;
   }
   return list;
 }

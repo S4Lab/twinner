@@ -14,6 +14,7 @@
 #define FLAGS_H
 
 #include <stdint.h>
+#include <list>
 
 namespace edu {
 namespace sharif {
@@ -40,10 +41,10 @@ public:
   };
 
 private:
-  edu::sharif::twinner::trace::Expression *leftExp;
-  edu::sharif::twinner::trace::Expression *rightExp;
+  const edu::sharif::twinner::trace::Expression *leftExp;
+  const edu::sharif::twinner::trace::Expression *rightExp;
 
-  OperationGroup *op;
+  const OperationGroup *op;
 
   FlagState of; // overflow flag
   FlagState df; // direction flag
@@ -75,8 +76,9 @@ public:
    * @param exp1 The first expression which flags are set based on it.
    * @param exp2 The second expression which flags are set based on it. This may be null.
    */
-  void setFlags (OperationGroup *operation, edu::sharif::twinner::trace::Expression *exp1,
-      edu::sharif::twinner::trace::Expression *exp2 = 0);
+  void setFlags (const OperationGroup *operation,
+      const edu::sharif::twinner::trace::Expression *exp1,
+      const edu::sharif::twinner::trace::Expression *exp2 = 0);
 
   /**
    * Instantiates a new constraint object denoting ZF's (zero flag) state. The last

@@ -230,13 +230,14 @@ public:
       const Expression *exp) = 0;
 
   /**
-   * Adds the given constraint to current series of path constraints.
+   * Adds given constraints to current series of path constraints.
    * All path constraints must be satisfied simultaneously, in order to reach to the
    * current execution state in the running program.
    *
-   * @param c The constraint which is being added.
+   * @param c The constraints which are being added.
    */
-  virtual void addPathConstraint (const Constraint *c) = 0;
+  virtual void addPathConstraints (
+      const std::list <edu::sharif::twinner::trace::Constraint *> &c) = 0;
 
   /**
    * Prints values of all registers (both symbolic and concrete values). Only registers

@@ -16,6 +16,7 @@
 #include "RegisterResidentExpressionValueProxy.h"
 #include "MemoryResidentExpressionValueProxy.h"
 #include "ConstantExpressionValueProxy.h"
+#include "OperationGroup.h"
 
 #include "edu/sharif/twinner/trace-twintool/TraceImp.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
@@ -712,11 +713,11 @@ void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "cmovbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool belowOrEqual;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForBelowOrEqualCase
       (belowOrEqual, disassembledInstruction);
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   if (belowOrEqual) {
     edu::sharif::twinner::util::Logger::loquacious () << "\texecuting the actual move...";
     movAnalysisRoutine (dst, src);
@@ -731,11 +732,11 @@ void InstructionSymbolicExecuter::cmovnbeAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "cmovnbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool belowOrEqual;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForBelowOrEqualCase
       (belowOrEqual, disassembledInstruction);
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   if (!belowOrEqual) {
     edu::sharif::twinner::util::Logger::loquacious () << "\texecuting the actual move...";
     movAnalysisRoutine (dst, src);
@@ -753,7 +754,7 @@ void InstructionSymbolicExecuter::cmpxchgAnalysisRoutine (
   cmpAnalysisRoutine (aux, dst);
   edu::sharif::twinner::util::Logger::loquacious () << "\texchange part...";
   bool zero;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
   if (zero) { // equal
     movAnalysisRoutine (dst, src);
@@ -761,7 +762,7 @@ void InstructionSymbolicExecuter::cmpxchgAnalysisRoutine (
     movAnalysisRoutine (aux, dst);
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -906,12 +907,13 @@ void InstructionSymbolicExecuter::addAnalysisRoutine (
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  const edu::sharif::twinner::trace::Expression *dstexpOrig = dst.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
   dstexp->add (srcexp);
-  delete srcexp;
   dst.setExpression (trace, dstexp);
-  eflags.setFlags (dstexp);
+  delete dstexp;
+  eflags.setFlags (OperationGroup::ADD_OPGROUP, dstexpOrig, srcexp);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -921,22 +923,21 @@ void InstructionSymbolicExecuter::adcAnalysisRoutine (
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  const edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
   const int size = dstexp->getLastConcreteValue ().getSize ();
   edu::sharif::twinner::trace::Expression *doublePrecision = dstexp->clone (size * 2);
-  delete dstexp;
   doublePrecision->add (srcexp);
-  delete srcexp;
   edu::sharif::twinner::trace::Expression *carry = doublePrecision->clone ();
   carry->shiftToRight (size);
   doublePrecision->add (carry);
   delete carry;
   doublePrecision->truncate (size);
-  dstexp = doublePrecision->clone (size);
+  const edu::sharif::twinner::trace::Expression *truncexp = doublePrecision->clone (size);
   delete doublePrecision;
-  dst.setExpression (trace, dstexp);
-  eflags.setFlags (dstexp);
+  dst.setExpression (trace, truncexp);
+  delete truncexp;
+  eflags.setFlags (OperationGroup::ADD_WITH_CARRY_OPGROUP, dstexp, srcexp);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -944,33 +945,27 @@ void InstructionSymbolicExecuter::subAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "subAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      dst.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tbinary operation...";
-  dstexp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::MINUS), srcexp);
-  delete srcexp;
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexpOrig = dst.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
+  edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
+  dstexp->minus (srcexp);
   dst.setExpression (trace, dstexp);
-  eflags.setFlags (dstexp);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  delete dstexp;
+  eflags.setFlags (OperationGroup::SUB_OPGROUP, dstexpOrig, srcexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::cmpAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "cmpAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  const edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting EFLAGS...";
-  eflags.setFlags (dstexp, srcexp); // dstexp - srcexp
+  eflags.setFlags (OperationGroup::SUB_OPGROUP, dstexp, srcexp);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -978,27 +973,24 @@ void InstructionSymbolicExecuter::leaAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "leaAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   dst.setExpression (trace, srcexp);
   delete srcexp;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jnzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool zero;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
   if (zero == branchTaken) {
     throw std::runtime_error ("JNZ branching and last known EFLAGS state do not match");
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1006,13 +998,13 @@ void InstructionSymbolicExecuter::jzAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool zero;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
   if (zero != branchTaken) {
     throw std::runtime_error ("JZ branching and last known EFLAGS state do not match");
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1020,14 +1012,14 @@ void InstructionSymbolicExecuter::jleAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jleAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool lessOrEqual;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForLessOrEqualCase
       (lessOrEqual, disassembledInstruction);
   if (lessOrEqual != branchTaken) {
     throw std::runtime_error ("JLE branching and last known EFLAGS state do not match");
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1035,14 +1027,14 @@ void InstructionSymbolicExecuter::jnleAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jnleAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool lessOrEqual;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForLessOrEqualCase
       (lessOrEqual, disassembledInstruction);
   if (lessOrEqual == branchTaken) {
     throw std::runtime_error ("JNLE branching and last known EFLAGS state do not match");
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1050,13 +1042,13 @@ void InstructionSymbolicExecuter::jnlAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jnlAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool less;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForLessCase (less, disassembledInstruction);
   if (less == branchTaken) {
     throw std::runtime_error ("JNL branching and last known EFLAGS state do not match");
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1064,14 +1056,14 @@ void InstructionSymbolicExecuter::jbeAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool belowOrEqual;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForBelowOrEqualCase
       (belowOrEqual, disassembledInstruction);
   if (belowOrEqual != branchTaken) {
     throw std::runtime_error ("JBE branching and last known EFLAGS state do not match");
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1079,14 +1071,14 @@ void InstructionSymbolicExecuter::jnbeAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jnbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool belowOrEqual;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForBelowOrEqualCase
       (belowOrEqual, disassembledInstruction);
   if (belowOrEqual == branchTaken) {
     throw std::runtime_error ("JNBE branching and last known EFLAGS state do not match");
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1094,13 +1086,13 @@ void InstructionSymbolicExecuter::jnbAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jnbAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool below;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForBelowCase (below, disassembledInstruction);
   if (below == branchTaken) {
     throw std::runtime_error ("JNB branching and last known EFLAGS state do not match");
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1108,13 +1100,13 @@ void InstructionSymbolicExecuter::jsAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jsAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool sign;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForSignCase (sign, disassembledInstruction);
   if (sign != branchTaken) {
     throw std::runtime_error ("JS branching and last known EFLAGS state do not match");
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1225,17 +1217,18 @@ void InstructionSymbolicExecuter::repAnalysisRoutine (
     throw std::runtime_error ("REP count and executing state do not match");
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  std::list <edu::sharif::twinner::trace::Constraint *> ccList;
   if (executing) {
     edu::sharif::twinner::util::Logger::loquacious () << "\tchecking eflags...";
-    cc = eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
+    ccList = eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
     // if zero == repEqual then predicated instruction will be executed once again
-    trace->addPathConstraint (cc);
     edu::sharif::twinner::util::Logger::loquacious () << "\tdecrementing count reg...";
     dstexp->minus (1);
     dst.setExpression (trace, dstexp);
   }
   delete dstexp;
+  ccList.push_front (cc);
+  trace->addPathConstraints (ccList);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1243,14 +1236,11 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "shlAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      dst.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tshifting operation...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexpOrig = dst.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
+  edu::sharif::twinner::util::Logger::loquacious () << "\tshifting operation...";
   if (dynamic_cast<const ConstantExpressionValueProxy *> (&src) != 0) {
     // src was an immediate value
     dstexp->shiftToLeft (srcexp->getLastConcreteValue ().clone ());
@@ -1258,48 +1248,40 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
     // src was CL register
     dstexp->shiftToLeft (srcexp);
   }
-  delete srcexp;
   // truncate bits which are shifted left, outside of dst boundaries
   dst.truncate (dstexp);
   dst.setExpression (trace, dstexp);
-  eflags.setFlags (dstexp);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  delete dstexp;
+  eflags.setFlags (OperationGroup::SHIFT_LEFT_OPGROUP, dstexpOrig, srcexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::shrAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "shrAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      dst.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tshifting operation...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexpOrig = dst.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
+  edu::sharif::twinner::util::Logger::loquacious () << "\tshifting operation...";
   dstexp->shiftToRight (srcexp);
-  delete srcexp;
   dst.setExpression (trace, dstexp);
-  eflags.setFlags (dstexp);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  delete dstexp;
+  eflags.setFlags (OperationGroup::SHIFT_RIGHT_OPGROUP, dstexpOrig, srcexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::sarAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "sarAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      dst.getExpression (trace);
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexpOrig = dst.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
   const int size = dst.getSize ();
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tshifting operation...";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tshifting operation...";
   dstexp->arithmeticShiftToRight (srcexp);
   {//TODO: Remove following code when all sizes have their own concrete value imps.
     const ConcreteValue &srcval = srcexp->getLastConcreteValue ();
@@ -1321,11 +1303,10 @@ void InstructionSymbolicExecuter::sarAnalysisRoutine (
       delete tmp;
     }
   }
-  delete srcexp;
   dst.setExpression (trace, dstexp);
-  eflags.setFlags (dstexp);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  delete dstexp;
+  eflags.setFlags (OperationGroup::SHIFT_ARITHMETIC_RIGHT_OPGROUP, dstexpOrig, srcexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::rorAnalysisRoutine (
@@ -1351,88 +1332,62 @@ void InstructionSymbolicExecuter::andAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "andAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      dst.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tbinary operation...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
   dstexp->bitwiseAnd (srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
-  eflags.setFlags (dstexp);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  eflags.setFlags (OperationGroup::AND_OPGROUP, dstexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::orAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "orAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      dst.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tbinary operation...";
-  dstexp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::BITWISE_OR), srcexp);
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
+  dstexp->bitwiseOr (srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
-  eflags.setFlags (dstexp);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  eflags.setFlags (OperationGroup::AND_OPGROUP, dstexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::xorAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "xorAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      dst.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tbinary operation...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
   dstexp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::XOR), srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
-  eflags.setFlags (dstexp);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  eflags.setFlags (OperationGroup::AND_OPGROUP, dstexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::testAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "testAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
-      src.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      dst.getExpression (trace);
-
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tbinary operation...";
-  edu::sharif::twinner::trace::Expression *tmpexp = dstexp;
-  tmpexp->bitwiseAnd (srcexp);
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
+  dstexp->bitwiseAnd (srcexp);
   delete srcexp;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting EFLAGS...";
-  eflags.setFlags (tmpexp);
-  // TODO: Inform eflags about CF and OF which must be zero.
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting EFLAGS...";
+  eflags.setFlags (OperationGroup::AND_OPGROUP, dstexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
@@ -1454,12 +1409,10 @@ void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
     delete ithBit;
   }
   delete srcexp;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting dst exp...";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   dst.setExpression (trace, maskbyte);
   delete maskbyte;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine (
@@ -1473,6 +1426,8 @@ void InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine (
   const int size = dst.getSize ();
   ConcreteValue *result = dstexp->getLastConcreteValue ().clone ();
   *result = 0;
+  std::list <edu::sharif::twinner::trace::Constraint *> cc;
+  bool equal;
   for (int i = 0; i < size; i += 8) {
     edu::sharif::twinner::trace::Expression *ithByteSrc = srcexp->clone ();
     edu::sharif::twinner::trace::Expression *ithByteDst = dstexp->clone ();
@@ -1483,36 +1438,25 @@ void InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine (
     //    edu::sharif::twinner::util::Logger::warning () << "byte: " << i
     //        << " from src: " << ithByteSrc << " and from dst: " << ithByteDst << "\n";
     ithByteSrc->minus (ithByteDst);
+    cc.push_back (edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+                  (equal, ithByteSrc, disassembledInstruction));
     ConcreteValue *c = dstexp->getLastConcreteValue ().clone ();
-    if (ithByteSrc->getLastConcreteValue ().isZero ()) { // equal
-      trace->addPathConstraint
-          (new edu::sharif::twinner::trace::Constraint
-           (ithByteSrc, edu::sharif::twinner::trace::Constraint::ZERO,
-            disassembledInstruction, false));
-      *c = 0xFF;
-    } else { // non-equal
-      trace->addPathConstraint
-          (new edu::sharif::twinner::trace::Constraint
-           (ithByteSrc, edu::sharif::twinner::trace::Constraint::NON_ZERO,
-            disassembledInstruction, false));
-      *c = 0x00;
-    }
+    *c = equal ? 0xFF : 0x00;
     delete ithByteSrc;
     delete ithByteDst;
     (*c) <<= i;
     (*result) |= (*c);
     delete c;
   }
+  trace->addPathConstraints (cc);
   delete srcexp;
   delete dstexp;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting dst exp...";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   const edu::sharif::twinner::trace::Expression *resexp =
       new edu::sharif::twinner::trace::ExpressionImp (result);
   dst.setExpression (trace, resexp);
   delete resexp;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::pminubAnalysisRoutine (
@@ -1526,6 +1470,8 @@ void InstructionSymbolicExecuter::pminubAnalysisRoutine (
   const int size = dst.getSize ();
   ConcreteValue *mask = dstexp->getLastConcreteValue ().clone ();
   *mask = 0;
+  std::list <edu::sharif::twinner::trace::Constraint *> cc;
+  bool below;
   for (int i = 0; i < size; i += 8) {
     edu::sharif::twinner::trace::Expression *ithByteSrc = srcexp->clone ();
     edu::sharif::twinner::trace::Expression *ithByteDst = dstexp->clone ();
@@ -1533,11 +1479,8 @@ void InstructionSymbolicExecuter::pminubAnalysisRoutine (
     ithByteSrc->bitwiseAnd (0xFF);
     ithByteDst->shiftToRight (i);
     ithByteDst->bitwiseAnd (0xFF);
-    bool below;
-    edu::sharif::twinner::trace::Constraint *cc =
-        edu::sharif::twinner::trace::Constraint::instantiateBelowConstraint
-        (below, ithByteSrc, ithByteDst, disassembledInstruction);
-    trace->addPathConstraint (cc);
+    cc.push_back (edu::sharif::twinner::trace::Constraint::instantiateBelowConstraint
+                  (below, ithByteSrc, ithByteDst, disassembledInstruction));
     if (below) {
       ConcreteValue *c = dstexp->getLastConcreteValue ().clone ();
       *c = 0xFF;
@@ -1548,6 +1491,7 @@ void InstructionSymbolicExecuter::pminubAnalysisRoutine (
     delete ithByteSrc;
     delete ithByteDst;
   }
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\ttransferring (mask & src) to (dst) for mask=" << (*mask);
   dstexp->bitwiseAnd (mask->bitwiseNegated ());
@@ -1655,26 +1599,23 @@ void InstructionSymbolicExecuter::bsfAnalysisRoutine (
   }
   edu::sharif::twinner::trace::Expression *indexexp =
       new edu::sharif::twinner::trace::ExpressionImp (i);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tsetting dst exp...";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   dst.setExpression (trace, indexexp);
   delete indexexp;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tadding constraint...";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   edu::sharif::twinner::trace::Expression *conditionExp = srcexp;
   edu::sharif::twinner::trace::ConcreteValue *bit = cv.clone ();
   (*bit) = 1;
   (*bit) <<= i;
   conditionExp->truncate (i + 1);
   conditionExp->minus (bit); // takes ownership of bit
-  edu::sharif::twinner::trace::Constraint *cc =
-      new edu::sharif::twinner::trace::Constraint
-      (conditionExp, edu::sharif::twinner::trace::Constraint::ZERO,
-       disassembledInstruction, false);
+  std::list <edu::sharif::twinner::trace::Constraint *> cc;
+  cc.push_back (new edu::sharif::twinner::trace::Constraint
+                (conditionExp, edu::sharif::twinner::trace::Constraint::ZERO,
+                 disassembledInstruction, false));
   delete conditionExp;
-  trace->addPathConstraint (cc);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  trace->addPathConstraints (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::divAnalysisRoutine (
@@ -1808,8 +1749,7 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
   // values too (we can also calculate them in assembly, but it's not required).
 
   hook = &InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands;
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::scasAnalysisRoutine (
@@ -1881,26 +1821,27 @@ void InstructionSymbolicExecuter::incAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::util::Logger::loquacious () << "incAnalysisRoutine(...)\n"
       << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp =
-      opr.getExpression (trace);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tincrementing...";
+  const edu::sharif::twinner::trace::Expression *dstexpOrig = opr.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
+  edu::sharif::twinner::util::Logger::loquacious () << "\tincrementing...";
   dstexp->add (1);
   opr.setExpression (trace, dstexp);
-  eflags.setFlags (dstexp);
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "\tdone\n";
+  delete dstexp;
+  eflags.setFlags (OperationGroup::INCREMENT_OPGROUP, dstexpOrig);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::decAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::util::Logger::loquacious () << "decAnalysisRoutine(...)\n"
       << "\tgetting dst exp...";
-  edu::sharif::twinner::trace::Expression *dstexp = opr.getExpression (trace);
+  const edu::sharif::twinner::trace::Expression *dstexpOrig = opr.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tdecrementing...";
   dstexp->minus (1);
   opr.setExpression (trace, dstexp);
-  eflags.setFlags (dstexp);
+  delete dstexp;
+  eflags.setFlags (OperationGroup::DECREMENT_OPGROUP, dstexpOrig);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1909,10 +1850,10 @@ void InstructionSymbolicExecuter::setnzAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "setnzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool zero;
-  edu::sharif::twinner::trace::Constraint *cc =
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
       eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraint (cc);
+  trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   edu::sharif::twinner::trace::Expression *dstexp;
   if (!zero) {

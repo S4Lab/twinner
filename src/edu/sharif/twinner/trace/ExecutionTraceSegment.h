@@ -71,7 +71,8 @@ public:
   virtual Expression *setSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const Expression *exp);
 
-  virtual void addPathConstraint (const Constraint *c);
+  virtual void addPathConstraints (
+      const std::list <edu::sharif::twinner::trace::Constraint *> &c);
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static ExecutionTraceSegment *loadFromBinaryStream (std::ifstream &in);

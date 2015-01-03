@@ -35,7 +35,13 @@ public:
 
   static const OperationGroup *SUB_OPGROUP;
   static const OperationGroup *ADD_OPGROUP;
+  static const OperationGroup *ADD_WITH_CARRY_OPGROUP;
+  static const OperationGroup *SHIFT_LEFT_OPGROUP;
+  static const OperationGroup *SHIFT_RIGHT_OPGROUP;
+  static const OperationGroup *SHIFT_ARITHMETIC_RIGHT_OPGROUP;
   static const OperationGroup *AND_OPGROUP;
+  static const OperationGroup *INCREMENT_OPGROUP;
+  static const OperationGroup *DECREMENT_OPGROUP;
 
   virtual std::list <edu::sharif::twinner::trace::Constraint *>
   instantiateConstraintForZeroCase (bool &zero,

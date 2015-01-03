@@ -410,8 +410,12 @@ Expression *ExecutionTraceSegment::setSymbolicExpressionImplementation (int size
   return exp;
 }
 
-void ExecutionTraceSegment::addPathConstraint (const Constraint *c) {
-  pathConstraints.push_back (c);
+void ExecutionTraceSegment::addPathConstraints (
+    const std::list <edu::sharif::twinner::trace::Constraint *> &c) {
+  for (std::list <edu::sharif::twinner::trace::Constraint *>::const_iterator it =
+      c.begin (); it != c.end (); ++it) {
+    pathConstraints.push_back (*it);
+  }
 }
 
 void ExecutionTraceSegment::saveToBinaryStream (std::ofstream &out) const {

@@ -40,9 +40,9 @@ bool Flags::getDirectionFlag () const {
   return df == SET_FSTATE;
 }
 
-void Flags::setFlags (OperationGroup *operation,
-    edu::sharif::twinner::trace::Expression *exp1,
-    edu::sharif::twinner::trace::Expression *exp2) {
+void Flags::setFlags (const OperationGroup *operation,
+    const edu::sharif::twinner::trace::Expression *exp1,
+    const edu::sharif::twinner::trace::Expression *exp2) {
   delete leftExp;
   leftExp = exp1;
   delete rightExp;
