@@ -270,9 +270,26 @@ Expression *Expression::twosComplement () const {
 }
 
 void Expression::add (ConcreteValue *immediate) {
-  stack.push_back (new Constant (immediate));
-  stack.push_back (new Operator (Operator::ADD));
-  (*lastConcreteValue) += *immediate;
+  Constant *lastConstant = 0;
+  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
+    lastConstant = static_cast<Constant *> (stack.back ());
+
+  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
+    std::list < ExpressionToken * >::iterator it = stack.end ();
+    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::ADD) {
+      lastConstant = dynamic_cast<Constant *> (*--it);
+    }
+  }
+  if (lastConstant) {
+    (*lastConcreteValue) += *immediate;
+    (*immediate) += lastConstant->getValue ();
+    lastConstant->setValue (*immediate);
+    delete immediate;
+  } else {
+    stack.push_back (new Constant (immediate));
+    stack.push_back (new Operator (Operator::ADD));
+    (*lastConcreteValue) += *immediate;
+  }
 }
 
 void Expression::add (UINT64 immediate) {
@@ -280,7 +297,12 @@ void Expression::add (UINT64 immediate) {
 }
 
 void Expression::add (const Expression *exp) {
-  binaryOperation (new Operator (Operator::ADD), exp);
+  if (exp->isTrivial ()) {
+    // FIXME: Make sure that last concrete value is always valid at this point
+    add (exp->getLastConcreteValue ().clone ());
+  } else {
+    binaryOperation (new Operator (Operator::ADD), exp);
+  }
 }
 
 void Expression::bitwiseAnd (ConcreteValue *mask) {
