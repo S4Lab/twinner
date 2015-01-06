@@ -65,6 +65,14 @@ public:
   bool getDirectionFlag () const;
 
   /**
+   * Get carry flag (CF) as a symbolic expressions based on the last operation which
+   * affected the CF. Caller owns the returned expression.
+   *
+   * @return The expressions which indicates state of CF.
+   */
+  edu::sharif::twinner::trace::Expression *getCarryFlag () const;
+
+  /**
    * Sets all flags based on comparison of given expressions. It's assumed that given
    * expressions are owned by this object.
    * This method is used for signed and unsigned cases (e.g. CMP instruction) where flags

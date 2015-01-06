@@ -142,6 +142,23 @@ SubtractOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
   return list;
 }
 
+edu::sharif::twinner::trace::Expression *SubtractOperationGroup::getCarryExpression (
+    const edu::sharif::twinner::trace::Expression *mainExp,
+    const edu::sharif::twinner::trace::Expression *auxExp) const {
+  const int size = mainExp->getLastConcreteValue ().getSize ();
+  if (size > 64) {
+    throw std::runtime_error ("SubtractOperationGroup::getCarryExpression (...):"
+                              " Too large bit-length for expression");
+  }
+  edu::sharif::twinner::trace::Expression *doublePrecision = mainExp->clone (size * 2);
+  doublePrecision->minus (auxExp);
+  doublePrecision->shiftToRight (size);
+  edu::sharif::twinner::trace::Expression *truncexp = doublePrecision->clone (size);
+  delete doublePrecision;
+  truncexp->bitwiseAnd (0x1);
+  return truncexp;
+}
+
 AdditionOperationGroup::AdditionOperationGroup () {
 }
 
@@ -267,6 +284,22 @@ AdditionOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
   return list;
 }
 
+edu::sharif::twinner::trace::Expression *AdditionOperationGroup::getCarryExpression (
+    const edu::sharif::twinner::trace::Expression *mainExp,
+    const edu::sharif::twinner::trace::Expression *auxExp) const {
+  const int size = mainExp->getLastConcreteValue ().getSize ();
+  if (size > 64) {
+    throw std::runtime_error ("AdditionOperationGroup::getCarryExpression (...):"
+                              " Too large bit-length for expression");
+  }
+  edu::sharif::twinner::trace::Expression *doublePrecision = mainExp->clone (size * 2);
+  doublePrecision->add (auxExp);
+  doublePrecision->shiftToRight (size);
+  edu::sharif::twinner::trace::Expression *truncexp = doublePrecision->clone (size);
+  delete doublePrecision;
+  return truncexp;
+}
+
 BitwiseAndOperationGroup::BitwiseAndOperationGroup () {
 }
 
@@ -356,6 +389,15 @@ BitwiseAndOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
       (edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
        (lessOrEqual, mainExp, instruction));
   return list;
+}
+
+edu::sharif::twinner::trace::Expression *BitwiseAndOperationGroup::getCarryExpression (
+    const edu::sharif::twinner::trace::Expression *mainExp,
+    const edu::sharif::twinner::trace::Expression *auxExp) const {
+  edu::sharif::twinner::util::Logger::error ()
+      << "BitwiseAndOperationGroup always clears CF and so this code is unreachable!\n";
+  throw std::runtime_error
+      ("BitwiseAndOperationGroup::getCarryExpression (): unreachable code");
 }
 
 }

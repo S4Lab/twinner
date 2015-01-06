@@ -43,6 +43,10 @@ public:
   static const OperationGroup *INCREMENT_OPGROUP;
   static const OperationGroup *DECREMENT_OPGROUP;
 
+  virtual edu::sharif::twinner::trace::Expression *getCarryExpression (
+      const edu::sharif::twinner::trace::Expression *mainExp,
+      const edu::sharif::twinner::trace::Expression *auxExp) const = 0;
+
   virtual std::list <edu::sharif::twinner::trace::Constraint *>
   instantiateConstraintForZeroCase (bool &zero,
       const edu::sharif::twinner::trace::Expression *mainExp,
@@ -89,6 +93,10 @@ private:
   friend class OperationGroup;
 
 public:
+  virtual edu::sharif::twinner::trace::Expression *getCarryExpression (
+      const edu::sharif::twinner::trace::Expression *mainExp,
+      const edu::sharif::twinner::trace::Expression *auxExp) const;
+
   virtual std::list <edu::sharif::twinner::trace::Constraint *>
   instantiateConstraintForZeroCase (bool &zero,
       const edu::sharif::twinner::trace::Expression *mainExp,
@@ -135,6 +143,10 @@ private:
   friend class OperationGroup;
 
 public:
+  virtual edu::sharif::twinner::trace::Expression *getCarryExpression (
+      const edu::sharif::twinner::trace::Expression *mainExp,
+      const edu::sharif::twinner::trace::Expression *auxExp) const;
+
   virtual std::list <edu::sharif::twinner::trace::Constraint *>
   instantiateConstraintForZeroCase (bool &zero,
       const edu::sharif::twinner::trace::Expression *mainExp,
@@ -181,6 +193,10 @@ private:
   friend class OperationGroup;
 
 public:
+  virtual edu::sharif::twinner::trace::Expression *getCarryExpression (
+      const edu::sharif::twinner::trace::Expression *mainExp,
+      const edu::sharif::twinner::trace::Expression *auxExp) const;
+
   virtual std::list <edu::sharif::twinner::trace::Constraint *>
   instantiateConstraintForZeroCase (bool &zero,
       const edu::sharif::twinner::trace::Expression *mainExp,

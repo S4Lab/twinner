@@ -40,6 +40,24 @@ bool Flags::getDirectionFlag () const {
   return df == SET_FSTATE;
 }
 
+edu::sharif::twinner::trace::Expression *Flags::getCarryFlag () const {
+  switch (cf) {
+  case UNDEFINED_FSTATE:
+    edu::sharif::twinner::util::Logger::warning ()
+        << "Using CF while is in undefined state (assuming that it is CLEAR)\n";
+  case CLEAR_FSTATE:
+    return new edu::sharif::twinner::trace::ExpressionImp ();
+  case SET_FSTATE:
+    return new edu::sharif::twinner::trace::ExpressionImp (1);
+  case DEFAULT_FSTATE:
+    return op->getCarryExpression (leftExp, rightExp);
+  default:
+    edu::sharif::twinner::util::Logger::error ()
+        << "Unknown state for CF (0x" << std::hex << int (cf) << ")\n";
+    throw std::runtime_error ("Unknown CF state");
+  }
+}
+
 void Flags::setFlags (const OperationGroup *operation,
     const edu::sharif::twinner::trace::Expression *exp1,
     const edu::sharif::twinner::trace::Expression *exp2) {
