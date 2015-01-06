@@ -924,20 +924,17 @@ void InstructionSymbolicExecuter::adcAnalysisRoutine (
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
   const edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting carry exp...";
+  const edu::sharif::twinner::trace::Expression *carryexp = eflags.getCarryFlag ();
+  edu::sharif::twinner::trace::Expression *exp = carryexp->clone ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
-  const int size = dstexp->getLastConcreteValue ().getSize ();
-  edu::sharif::twinner::trace::Expression *doublePrecision = dstexp->clone (size * 2);
-  doublePrecision->add (srcexp);
-  edu::sharif::twinner::trace::Expression *carry = doublePrecision->clone ();
-  carry->shiftToRight (size);
-  doublePrecision->add (carry);
-  delete carry;
-  doublePrecision->truncate (size);
-  const edu::sharif::twinner::trace::Expression *truncexp = doublePrecision->clone (size);
-  delete doublePrecision;
-  dst.setExpression (trace, truncexp);
-  delete truncexp;
-  eflags.setFlags (OperationGroup::ADD_WITH_CARRY_OPGROUP, dstexp, srcexp);
+  exp->add (srcexp);
+  exp->add (dstexp);
+  dst.setExpression (trace, exp);
+  delete exp;
+  // TODO: set flags based on 3 expressions...
+  delete carryexp;
+  eflags.setFlags (0, dstexp, srcexp);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 

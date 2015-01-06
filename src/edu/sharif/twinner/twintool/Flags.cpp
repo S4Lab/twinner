@@ -14,7 +14,7 @@
 
 #include "OperationGroup.h"
 
-#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 #include "edu/sharif/twinner/trace/ConcreteValue.h"
 
