@@ -52,6 +52,12 @@ void Flags::setFlags (const OperationGroup *operation,
   of = sf = zf = pf = cf = DEFAULT_FSTATE;
 }
 
+void Flags::setFlags (const OperationGroup *operation,
+    const edu::sharif::twinner::trace::Expression *exp) {
+  setFlags (operation, exp, 0);
+  of = cf = CLEAR_FSTATE;
+}
+
 std::list <edu::sharif::twinner::trace::Constraint *>
 Flags::instantiateConstraintForZeroCase (bool &zero, uint32_t instruction) const {
   std::list <edu::sharif::twinner::trace::Constraint *> list;

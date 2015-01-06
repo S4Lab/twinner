@@ -78,7 +78,16 @@ public:
    */
   void setFlags (const OperationGroup *operation,
       const edu::sharif::twinner::trace::Expression *exp1,
-      const edu::sharif::twinner::trace::Expression *exp2 = 0);
+      const edu::sharif::twinner::trace::Expression *exp2);
+
+  /**
+   * Same as setFlags (operation, exp, 0), but also clears OF and CF.
+   *
+   * @param operation The operation group which operate on exp or its results is exp
+   * @param exp The main expression which may be an operand or result of operation
+   */
+  void setFlags (const OperationGroup *operation,
+      const edu::sharif::twinner::trace::Expression *exp);
 
   /**
    * Instantiates a new constraint object denoting ZF's (zero flag) state. The last
