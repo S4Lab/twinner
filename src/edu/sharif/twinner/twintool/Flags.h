@@ -25,8 +25,10 @@ class Expression;
 class Constraint;
 }
 namespace twintool {
+namespace operationgroup {
 
 class OperationGroup;
+}
 
 class Flags {
 
@@ -41,7 +43,7 @@ public:
   };
 
 private:
-  const OperationGroup *op;
+  const edu::sharif::twinner::twintool::operationgroup::OperationGroup *op;
 
   FlagState of; // overflow flag
   FlagState df; // direction flag
@@ -79,7 +81,8 @@ public:
    *
    * @param operation The operation group which must be performed to set flags.
    */
-  void setFlags (const OperationGroup *operation);
+  void setFlags (
+      const edu::sharif::twinner::twintool::operationgroup::OperationGroup *operation);
 
   /**
    * Sets or clears the OF independent of other flags.
