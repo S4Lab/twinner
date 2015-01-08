@@ -26,14 +26,13 @@ namespace twinner {
 namespace twintool {
 
 Flags::Flags () :
-    leftExp (0), rightExp (0), op (0),
+    op (0),
     of (DEFAULT_FSTATE), df (CLEAR_FSTATE), sf (DEFAULT_FSTATE), zf (DEFAULT_FSTATE),
     pf (DEFAULT_FSTATE), cf (DEFAULT_FSTATE) {
 }
 
 Flags::~Flags () {
-  delete leftExp;
-  delete rightExp;
+  delete op;
 }
 
 bool Flags::getDirectionFlag () const {
@@ -50,7 +49,7 @@ edu::sharif::twinner::trace::Expression *Flags::getCarryFlag () const {
   case SET_FSTATE:
     return new edu::sharif::twinner::trace::ExpressionImp (1);
   case DEFAULT_FSTATE:
-    return op->getCarryExpression (leftExp, rightExp);
+    return op->getCarryExpression ();
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown state for CF (0x" << std::hex << int (cf) << ")\n";
@@ -58,22 +57,18 @@ edu::sharif::twinner::trace::Expression *Flags::getCarryFlag () const {
   }
 }
 
-void Flags::setFlags (const OperationGroup *operation,
-    const edu::sharif::twinner::trace::Expression *exp1,
-    const edu::sharif::twinner::trace::Expression *exp2) {
-  delete leftExp;
-  leftExp = exp1;
-  delete rightExp;
-  rightExp = exp2;
-
+void Flags::setFlags (const OperationGroup *operation) {
+  delete op;
   op = operation;
   of = sf = zf = pf = cf = DEFAULT_FSTATE;
 }
 
-void Flags::setFlags (const OperationGroup *operation,
-    const edu::sharif::twinner::trace::Expression *exp) {
-  setFlags (operation, exp, 0);
-  of = cf = CLEAR_FSTATE;
+void Flags::setOverflowFlag (bool set) {
+  of = set ? SET_FSTATE : CLEAR_FSTATE;
+}
+
+void Flags::setCarryFlag (bool set) {
+  cf = set ? SET_FSTATE : CLEAR_FSTATE;
 }
 
 std::list <edu::sharif::twinner::trace::Constraint *>
@@ -90,7 +85,7 @@ Flags::instantiateConstraintForZeroCase (bool &zero, uint32_t instruction) const
     zero = true;
     break;
   case DEFAULT_FSTATE:
-    list = op->instantiateConstraintForZeroCase (zero, leftExp, rightExp, instruction);
+    list = op->instantiateConstraintForZeroCase (zero, instruction);
     break;
   default:
     edu::sharif::twinner::util::Logger::error ()
@@ -119,20 +114,17 @@ Flags::instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
       edu::sharif::twinner::util::Logger::warning ()
           << "Using OF while is in undefined state (assuming that it is CLEAR)\n";
     case CLEAR_FSTATE:
-      list = op->operationResultIsLessOrEqualWithZero
-          (lessOrEqual, leftExp, rightExp, instruction);
+      list = op->operationResultIsLessOrEqualWithZero (lessOrEqual, instruction);
       break;
     case SET_FSTATE:
-      list = op->operationResultIsLessThanZero
-          (lessOrEqual, leftExp, rightExp, instruction);
+      list = op->operationResultIsLessThanZero (lessOrEqual, instruction);
       lessOrEqual = !lessOrEqual;
       break;
     case DEFAULT_FSTATE:
       if (sf != DEFAULT_FSTATE) {
         throw std::runtime_error ("Not implemented yet");
       }
-      list = op->instantiateConstraintForLessOrEqualCase
-          (lessOrEqual, leftExp, rightExp, instruction);
+      list = op->instantiateConstraintForLessOrEqualCase (lessOrEqual, instruction);
       break;
     default:
       edu::sharif::twinner::util::Logger::error ()
@@ -164,7 +156,7 @@ Flags::instantiateConstraintForLessCase (bool &less, uint32_t instruction) const
     if (sf != DEFAULT_FSTATE) {
       throw std::runtime_error ("Not implemented yet");
     }
-    list = op->instantiateConstraintForLessCase (less, leftExp, rightExp, instruction);
+    list = op->instantiateConstraintForLessCase (less, instruction);
     break;
   default:
     edu::sharif::twinner::util::Logger::error ()
@@ -199,8 +191,7 @@ Flags::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
       belowOrEqual = true;
       break;
     case DEFAULT_FSTATE:
-      list = op->instantiateConstraintForBelowOrEqualCase
-          (belowOrEqual, leftExp, rightExp, instruction);
+      list = op->instantiateConstraintForBelowOrEqualCase (belowOrEqual, instruction);
       break;
     default:
       edu::sharif::twinner::util::Logger::error ()
@@ -228,7 +219,7 @@ Flags::instantiateConstraintForBelowCase (bool &below, uint32_t instruction) con
     below = true;
     break;
   case DEFAULT_FSTATE:
-    list = op->instantiateConstraintForBelowCase (below, leftExp, rightExp, instruction);
+    list = op->instantiateConstraintForBelowCase (below, instruction);
     break;
   default:
     edu::sharif::twinner::util::Logger::error ()
@@ -251,7 +242,7 @@ Flags::instantiateConstraintForSignCase (bool &sign, uint32_t instruction) const
     sign = true;
     break;
   case DEFAULT_FSTATE:
-    list = op->operationResultIsLessThanZero (sign, leftExp, rightExp, instruction);
+    list = op->operationResultIsLessThanZero (sign, instruction);
     break;
   default:
     edu::sharif::twinner::util::Logger::error ()

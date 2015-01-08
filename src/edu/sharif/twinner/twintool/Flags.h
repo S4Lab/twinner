@@ -41,9 +41,6 @@ public:
   };
 
 private:
-  const edu::sharif::twinner::trace::Expression *leftExp;
-  const edu::sharif::twinner::trace::Expression *rightExp;
-
   const OperationGroup *op;
 
   FlagState of; // overflow flag
@@ -73,29 +70,30 @@ public:
   edu::sharif::twinner::trace::Expression *getCarryFlag () const;
 
   /**
-   * Sets all flags based on comparison of given expressions. It's assumed that given
-   * expressions are owned by this object.
+   * Sets all flags based on given operation group.
+   * The operation group contains required expressions and is owned by this flags object.
    * This method is used for signed and unsigned cases (e.g. CMP instruction) where flags
    * are determined by signed or unsigned subtraction (i.e. exp1 - exp2) or other
    * operations as indicated by the operations argument. The actual constraint type
-   * will be determined during constraint instantiation according to used jump type.
+   * will be determined during constraint instantiation according to the used jump type.
    *
-   * @param operation The operation group which must be performed between exp1 and exp2
-   * @param exp1 The first expression which flags are set based on it.
-   * @param exp2 The second expression which flags are set based on it. This may be null.
+   * @param operation The operation group which must be performed to set flags.
    */
-  void setFlags (const OperationGroup *operation,
-      const edu::sharif::twinner::trace::Expression *exp1,
-      const edu::sharif::twinner::trace::Expression *exp2);
+  void setFlags (const OperationGroup *operation);
 
   /**
-   * Same as setFlags (operation, exp, 0), but also clears OF and CF.
+   * Sets or clears the OF independent of other flags.
    *
-   * @param operation The operation group which operate on exp or its results is exp
-   * @param exp The main expression which may be an operand or result of operation
+   * @param set Indicates whether OF should be set or cleared
    */
-  void setFlags (const OperationGroup *operation,
-      const edu::sharif::twinner::trace::Expression *exp);
+  void setOverflowFlag (bool set);
+
+  /**
+   * Sets or clears the CF independent of other flags.
+   *
+   * @param set Indicates whether CF should be set or cleared
+   */
+  void setCarryFlag (bool set);
 
   /**
    * Instantiates a new constraint object denoting ZF's (zero flag) state. The last

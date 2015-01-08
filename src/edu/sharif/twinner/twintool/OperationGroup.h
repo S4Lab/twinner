@@ -14,6 +14,7 @@
 #define OPERATION_GROUP_H
 
 #include <stdint.h>
+#include <string>
 
 namespace edu {
 namespace sharif {
@@ -33,205 +34,166 @@ protected:
 public:
   virtual ~OperationGroup ();
 
-  static const OperationGroup *SUB_OPGROUP;
-  static const OperationGroup *ADD_OPGROUP;
-  static const OperationGroup *ADD_WITH_CARRY_OPGROUP;
-  static const OperationGroup *SHIFT_LEFT_OPGROUP;
-  static const OperationGroup *SHIFT_RIGHT_OPGROUP;
-  static const OperationGroup *SHIFT_ARITHMETIC_RIGHT_OPGROUP;
-  static const OperationGroup *AND_OPGROUP;
-  static const OperationGroup *INCREMENT_OPGROUP;
-  static const OperationGroup *DECREMENT_OPGROUP;
+  typedef edu::sharif::twinner::trace::Expression Expression;
+  typedef Expression *ExpressionPtr;
+  typedef const Expression *ConstExpressionPtr;
 
-  virtual edu::sharif::twinner::trace::Expression *getCarryExpression (
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp) const = 0;
+  typedef edu::sharif::twinner::trace::Constraint Constraint;
+  typedef Constraint *ConstraintPtr;
 
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForZeroCase (bool &zero,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const = 0;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForLessCase (bool &less,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const = 0;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const = 0;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForBelowCase (bool &below,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const = 0;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const = 0;
+  virtual ExpressionPtr getCarryExpression () const = 0;
 
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
+  virtual std::list <ConstraintPtr> instantiateConstraintForZeroCase (bool &zero,
       uint32_t instruction) const = 0;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  operationResultIsLessThanZero (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
+  virtual std::list <ConstraintPtr> instantiateConstraintForLessCase (bool &less,
+      uint32_t instruction) const = 0;
+  virtual std::list <ConstraintPtr> instantiateConstraintForLessOrEqualCase (
+      bool &lessOrEqual, uint32_t instruction) const = 0;
+  virtual std::list <ConstraintPtr> instantiateConstraintForBelowCase (bool &below,
+      uint32_t instruction) const = 0;
+  virtual std::list <ConstraintPtr> instantiateConstraintForBelowOrEqualCase (
+      bool &belowOrEqual, uint32_t instruction) const = 0;
+
+  virtual std::list <ConstraintPtr> operationResultIsLessOrEqualWithZero (
+      bool &lessOrEqual, uint32_t instruction) const = 0;
+  virtual std::list <ConstraintPtr> operationResultIsLessThanZero (bool &lessOrEqual,
       uint32_t instruction) const = 0;
 };
 
-class SubtractOperationGroup : public OperationGroup {
+template <int N>
+class NaryOperationGroup : public OperationGroup {
 
-private:
-  SubtractOperationGroup ();
+protected:
+  ConstExpressionPtr exp[N];
 
-  friend class OperationGroup;
+  NaryOperationGroup () :
+      OperationGroup () {
+  }
+
+  NaryOperationGroup (ConstExpressionPtr exp1) :
+      OperationGroup () {
+    exp[0] = exp1;
+  }
+
+  NaryOperationGroup (ConstExpressionPtr exp1, ConstExpressionPtr exp2) :
+      OperationGroup () {
+    exp[0] = exp1;
+    exp[1] = exp2;
+  }
+
+  NaryOperationGroup (ConstExpressionPtr exp1, ConstExpressionPtr exp2,
+      ConstExpressionPtr exp3) :
+      OperationGroup () {
+    exp[0] = exp1;
+    exp[1] = exp2;
+    exp[2] = exp3;
+  }
 
 public:
-  virtual edu::sharif::twinner::trace::Expression *getCarryExpression (
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp) const;
 
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForZeroCase (bool &zero,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForLessCase (bool &less,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForBelowCase (bool &below,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
+  virtual ~NaryOperationGroup () {
+    for (int i = 0; i < N; ++i) {
+      delete exp[i];
+    }
+  }
+};
 
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
+class DummyOperationGroup : public NaryOperationGroup<0> {
+
+private:
+  const std::string name;
+
+public:
+  DummyOperationGroup (const char *name);
+
+  virtual ExpressionPtr getCarryExpression () const;
+
+  virtual std::list <ConstraintPtr> instantiateConstraintForZeroCase (bool &zero,
       uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  operationResultIsLessThanZero (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
+  virtual std::list <ConstraintPtr> instantiateConstraintForLessCase (bool &less,
+      uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForLessOrEqualCase (
+      bool &lessOrEqual, uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForBelowCase (bool &below,
+      uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForBelowOrEqualCase (
+      bool &belowOrEqual, uint32_t instruction) const;
+
+  virtual std::list <ConstraintPtr> operationResultIsLessOrEqualWithZero (
+      bool &lessOrEqual, uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> operationResultIsLessThanZero (bool &lessOrEqual,
       uint32_t instruction) const;
 };
 
-class AdditionOperationGroup : public OperationGroup {
-
-private:
-  AdditionOperationGroup ();
-
-  friend class OperationGroup;
+class SubtractOperationGroup : public NaryOperationGroup<2> {
 
 public:
-  virtual edu::sharif::twinner::trace::Expression *getCarryExpression (
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp) const;
+  SubtractOperationGroup (ConstExpressionPtr mainExp, ConstExpressionPtr auxExp);
 
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForZeroCase (bool &zero,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForLessCase (bool &less,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForBelowCase (bool &below,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
+  virtual ExpressionPtr getCarryExpression () const;
 
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
+  virtual std::list <ConstraintPtr> instantiateConstraintForZeroCase (bool &zero,
       uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  operationResultIsLessThanZero (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
+  virtual std::list <ConstraintPtr> instantiateConstraintForLessCase (bool &less,
+      uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForLessOrEqualCase (
+      bool &lessOrEqual, uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForBelowCase (bool &below,
+      uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForBelowOrEqualCase (
+      bool &belowOrEqual, uint32_t instruction) const;
+
+  virtual std::list <ConstraintPtr> operationResultIsLessOrEqualWithZero (
+      bool &lessOrEqual, uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> operationResultIsLessThanZero (bool &lessOrEqual,
       uint32_t instruction) const;
 };
 
-class BitwiseAndOperationGroup : public OperationGroup {
-
-private:
-  BitwiseAndOperationGroup ();
-
-  friend class OperationGroup;
+class AdditionOperationGroup : public NaryOperationGroup<2> {
 
 public:
-  virtual edu::sharif::twinner::trace::Expression *getCarryExpression (
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp) const;
+  AdditionOperationGroup (ConstExpressionPtr mainExp, ConstExpressionPtr auxExp);
 
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForZeroCase (bool &zero,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForLessCase (bool &less,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForBelowCase (bool &below,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
-      uint32_t instruction) const;
+  virtual ExpressionPtr getCarryExpression () const;
 
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
+  virtual std::list <ConstraintPtr> instantiateConstraintForZeroCase (bool &zero,
       uint32_t instruction) const;
-  virtual std::list <edu::sharif::twinner::trace::Constraint *>
-  operationResultIsLessThanZero (bool &lessOrEqual,
-      const edu::sharif::twinner::trace::Expression *mainExp,
-      const edu::sharif::twinner::trace::Expression *auxExp,
+  virtual std::list <ConstraintPtr> instantiateConstraintForLessCase (bool &less,
+      uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForLessOrEqualCase (
+      bool &lessOrEqual, uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForBelowCase (bool &below,
+      uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForBelowOrEqualCase (
+      bool &belowOrEqual, uint32_t instruction) const;
+
+  virtual std::list <ConstraintPtr> operationResultIsLessOrEqualWithZero (
+      bool &lessOrEqual, uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> operationResultIsLessThanZero (bool &lessOrEqual,
+      uint32_t instruction) const;
+};
+
+class BitwiseAndOperationGroup : public NaryOperationGroup<1> {
+
+public:
+  BitwiseAndOperationGroup (ConstExpressionPtr mainExp);
+
+  virtual ExpressionPtr getCarryExpression () const;
+
+  virtual std::list <ConstraintPtr> instantiateConstraintForZeroCase (bool &zero,
+      uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForLessCase (bool &less,
+      uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForLessOrEqualCase (
+      bool &lessOrEqual, uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForBelowCase (bool &below,
+      uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> instantiateConstraintForBelowOrEqualCase (
+      bool &belowOrEqual, uint32_t instruction) const;
+
+  virtual std::list <ConstraintPtr> operationResultIsLessOrEqualWithZero (
+      bool &lessOrEqual, uint32_t instruction) const;
+  virtual std::list <ConstraintPtr> operationResultIsLessThanZero (bool &lessOrEqual,
       uint32_t instruction) const;
 };
 
