@@ -20,6 +20,7 @@
 #include "edu/sharif/twinner/twintool/operationgroup/DummyOperationGroup.h"
 #include "edu/sharif/twinner/twintool/operationgroup/SubtractOperationGroup.h"
 #include "edu/sharif/twinner/twintool/operationgroup/AdditionOperationGroup.h"
+#include "edu/sharif/twinner/twintool/operationgroup/AddWithCarryOperationGroup.h"
 #include "edu/sharif/twinner/twintool/operationgroup/BitwiseAndOperationGroup.h"
 
 #include "edu/sharif/twinner/trace-twintool/TraceImp.h"
@@ -938,11 +939,9 @@ void InstructionSymbolicExecuter::adcAnalysisRoutine (
   exp->add (dstexp);
   dst.setExpression (trace, exp);
   delete exp;
-  delete dstexp;
-  delete srcexp;
-  delete carryexp;
-  eflags.setFlags (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
-                   ("AdditionWithCarryOperationGroup"));
+  eflags.setFlags
+      (new edu::sharif::twinner::twintool::operationgroup::AddWithCarryOperationGroup
+       (dstexp, srcexp, carryexp));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
