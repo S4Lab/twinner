@@ -85,8 +85,9 @@ AdditionOperationGroup::instantiateConstraintForBelowCase (bool &below,
       instantiateConstraintForBelowOrEqualCase (below, instruction);
   if (below) {
     bool zero;
-    list.push_back (OperationGroup::Constraint::instantiateEqualConstraint
-                    (zero, exp[0], instruction));
+    std::list <OperationGroup::ConstraintPtr> l2 =
+        instantiateConstraintForZeroCase (zero, instruction);
+    list.insert (list.end (), l2.begin (), l2.end ());
     below = below && !zero;
   }
   return list;
