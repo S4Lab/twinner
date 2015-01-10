@@ -185,6 +185,9 @@ public:
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator/= (const ConcreteValue &cv) {
     const ValueType cvValue = cv.toUint64 ();
+    if (cvValue == 0) {
+      throw std::runtime_error ("division by zero");
+    }
     value /= cvValue;
     return *this;
   }

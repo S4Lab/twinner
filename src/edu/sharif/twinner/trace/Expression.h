@@ -206,6 +206,19 @@ public:
   void multiply (const Expression *exp);
 
   /**
+   * Divides this expression by the given immediate value.
+   * @param immediate The value that this expression will be divided by it.
+   */
+  void divide (ConcreteValue *immediate);
+  void divide (UINT64 immediate);
+
+  /**
+   * Divides this expression by the given exp expression.
+   * @param exp The expression that this expression will be divided by it.
+   */
+  void divide (const Expression *exp);
+
+  /**
    * Bitwise AND of this expression and given mask value.
    * @param mask The mask value which should be bitwise-and-ed by this expression.
    */

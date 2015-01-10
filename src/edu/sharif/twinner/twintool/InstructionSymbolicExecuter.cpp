@@ -1674,9 +1674,7 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
   leftDstExp->binaryOperation
       (new edu::sharif::twinner::trace::Operator
        (edu::sharif::twinner::trace::Operator::REMAINDER), srcexp);
-  rightDstExp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::DIVIDE), srcexp);
+  rightDstExp->divide (srcexp);
   delete srcexp;
   leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
   delete leftDstExp;

@@ -186,11 +186,9 @@ void Expression::shiftToRight (ConcreteValue *bits) {
     (*lastConcreteValue) >>= *bits;
   } else {
     // shift-to-right by n bits is equivalent to division by 2^n
-    UINT64 val = (1ull << bits->toUint64 ());
+    const UINT64 val = (1ull << bits->toUint64 ());
     if (val > 1) {
-      stack.push_back (new Constant (val));
-      stack.push_back (new Operator (Operator::DIVIDE));
-      (*lastConcreteValue) >>= *bits;
+      divide (val);
     }
     delete bits;
   }
@@ -336,6 +334,44 @@ void Expression::multiply (const Expression *exp) {
     multiply (exp->getLastConcreteValue ().clone ());
   } else {
     binaryOperation (new Operator (Operator::MULTIPLY), exp);
+  }
+}
+
+void Expression::divide (ConcreteValue *immediate) {
+  Constant *lastConstant = 0;
+  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
+    lastConstant = static_cast<Constant *> (stack.back ());
+
+  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
+    std::list < ExpressionToken * >::iterator it = stack.end ();
+    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::MULTIPLY) {
+      lastConstant = dynamic_cast<Constant *> (*--it);
+    }
+  }
+  if (lastConstant) {
+    (*lastConcreteValue) /= *immediate;
+    ConcreteValue *cv = lastConstant->getValue ().clone ();
+    (*cv) /= (*immediate);
+    lastConstant->setValue (*cv);
+    delete immediate;
+    delete cv;
+  } else {
+    stack.push_back (new Constant (immediate));
+    stack.push_back (new Operator (Operator::DIVIDE));
+    (*lastConcreteValue) /= *immediate;
+  }
+}
+
+void Expression::divide (UINT64 immediate) {
+  divide (new ConcreteValue64Bits (immediate));
+}
+
+void Expression::divide (const Expression *exp) {
+  if (exp->isTrivial ()) {
+    // FIXME: Make sure that last concrete value is always valid at this point
+    divide (exp->getLastConcreteValue ().clone ());
+  } else {
+    binaryOperation (new Operator (Operator::DIVIDE), exp);
   }
 }
 
