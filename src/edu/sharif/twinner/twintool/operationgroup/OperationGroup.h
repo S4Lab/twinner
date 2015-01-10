@@ -45,15 +45,15 @@ public:
   virtual ExpressionPtr getCarryExpression () const = 0;
 
   virtual std::list <ConstraintPtr> instantiateConstraintForZeroCase (bool &zero,
-      uint32_t instruction) const = 0;
+      uint32_t instruction) const = 0; // ZF == 1
   virtual std::list <ConstraintPtr> instantiateConstraintForLessCase (bool &less,
-      uint32_t instruction) const = 0;
+      uint32_t instruction) const = 0; // SF != OF
   virtual std::list <ConstraintPtr> instantiateConstraintForLessOrEqualCase (
-      bool &lessOrEqual, uint32_t instruction) const = 0;
+      bool &lessOrEqual, uint32_t instruction) const = 0; // SF != OF || ZF == 1
   virtual std::list <ConstraintPtr> instantiateConstraintForBelowCase (bool &below,
-      uint32_t instruction) const = 0;
+      uint32_t instruction) const = 0; // CF == 1
   virtual std::list <ConstraintPtr> instantiateConstraintForBelowOrEqualCase (
-      bool &belowOrEqual, uint32_t instruction) const = 0;
+      bool &belowOrEqual, uint32_t instruction) const = 0; // CF == 1 || ZF == 1
 
   virtual std::list <ConstraintPtr> operationResultIsLessOrEqualWithZero (
       bool &lessOrEqual, uint32_t instruction) const = 0;
