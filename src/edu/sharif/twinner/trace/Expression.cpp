@@ -217,9 +217,7 @@ void Expression::shiftToLeft (ConcreteValue *bits) {
     // shift-to-left by n bits is equivalent to multiplication by 2^n
     UINT64 val = (1ull << bits->toUint64 ());
     if (val > 1) {
-      stack.push_back (new Constant (val));
-      stack.push_back (new Operator (Operator::MULTIPLY));
-      (*lastConcreteValue) <<= *bits;
+      multiply (val);
     }
     delete bits;
   }
@@ -306,9 +304,26 @@ void Expression::add (const Expression *exp) {
 }
 
 void Expression::multiply (ConcreteValue *immediate) {
-  stack.push_back (new Constant (immediate));
-  stack.push_back (new Operator (Operator::MULTIPLY));
-  (*lastConcreteValue) *= *immediate;
+  Constant *lastConstant = 0;
+  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
+    lastConstant = static_cast<Constant *> (stack.back ());
+
+  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
+    std::list < ExpressionToken * >::iterator it = stack.end ();
+    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::MULTIPLY) {
+      lastConstant = dynamic_cast<Constant *> (*--it);
+    }
+  }
+  if (lastConstant) {
+    (*lastConcreteValue) *= *immediate;
+    (*immediate) *= lastConstant->getValue ();
+    lastConstant->setValue (*immediate);
+    delete immediate;
+  } else {
+    stack.push_back (new Constant (immediate));
+    stack.push_back (new Operator (Operator::MULTIPLY));
+    (*lastConcreteValue) *= *immediate;
+  }
 }
 
 void Expression::multiply (UINT64 immediate) {
@@ -316,7 +331,12 @@ void Expression::multiply (UINT64 immediate) {
 }
 
 void Expression::multiply (const Expression *exp) {
-  binaryOperation (new Operator (Operator::MULTIPLY), exp);
+  if (exp->isTrivial ()) {
+    // FIXME: Make sure that last concrete value is always valid at this point
+    multiply (exp->getLastConcreteValue ().clone ());
+  } else {
+    binaryOperation (new Operator (Operator::MULTIPLY), exp);
+  }
 }
 
 void Expression::bitwiseAnd (ConcreteValue *mask) {
