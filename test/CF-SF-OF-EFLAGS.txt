@@ -7,12 +7,16 @@ unsigned:     0, 1, ..., 127, 128, ..., 255
                          <-- OF -->
 signed:       0, 1, ..., 127, -128, ..., -1
 
-                    OF = CF xor SF
+                    OF = CO xor CI
+         CO = Carry out = The CF for addition and not of CF for subtract
+         CI = Carry in = The bit which is going to be added to
+                       two MSBs of two operands to produce the SF
 
     0x11       0x11
  -  0x01  == + 0xFF
 --------------------
     0x10      0x110        -> OF=0,SF=0,CF=0
+                |          -> CO=1,CI=1,OF=0=CO xor CI
                 |
                 |--> In ADD, the carry indicates CF
                      But in SUB, the second operand will be two's complemented
