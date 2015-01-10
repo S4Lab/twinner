@@ -193,6 +193,19 @@ public:
   void add (const Expression *exp);
 
   /**
+   * Multiply this expression with the given immediate value.
+   * @param immediate The value which will be multiplied by this expression.
+   */
+  void multiply (ConcreteValue *immediate);
+  void multiply (UINT64 immediate);
+
+  /**
+   * Multiply this expression with the given exp expression.
+   * @param exp The expression which will be multiplied by this expression.
+   */
+  void multiply (const Expression *exp);
+
+  /**
    * Bitwise AND of this expression and given mask value.
    * @param mask The mask value which should be bitwise-and-ed by this expression.
    */

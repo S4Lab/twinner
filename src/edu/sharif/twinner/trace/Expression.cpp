@@ -305,6 +305,20 @@ void Expression::add (const Expression *exp) {
   }
 }
 
+void Expression::multiply (ConcreteValue *immediate) {
+  stack.push_back (new Constant (immediate));
+  stack.push_back (new Operator (Operator::MULTIPLY));
+  (*lastConcreteValue) *= *immediate;
+}
+
+void Expression::multiply (UINT64 immediate) {
+  multiply (new ConcreteValue64Bits (immediate));
+}
+
+void Expression::multiply (const Expression *exp) {
+  binaryOperation (new Operator (Operator::MULTIPLY), exp);
+}
+
 void Expression::bitwiseAnd (ConcreteValue *mask) {
   Constant *lastConstantMask = 0;
   if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {

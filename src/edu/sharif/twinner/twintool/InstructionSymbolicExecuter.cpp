@@ -1766,9 +1766,7 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tmultiplying (left-right = right * src; size=0x"
       << std::hex << operandSize << ")...";
-  rightDstExp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::MULTIPLY), srcexp);
+  rightDstExp->multiply (srcexp);
   delete srcexp;
   leftDstExp = rightDstExp->clone ();
   leftDstExp->shiftToRight (operandSize);
