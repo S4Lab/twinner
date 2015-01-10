@@ -54,11 +54,6 @@ public:
   virtual bool getCarryBit () const = 0;
   virtual void setCarryBit (bool cf) = 0;
 
-  virtual bool getOverflowBit () const {
-    const bool SF = isNegative ();
-    return SF ^ getCarryBit ();
-  }
-
   /**
    * Interpreting this concrete value as a signed value which is encoded using
    * two's complement rules, return true iff the value is negative.
