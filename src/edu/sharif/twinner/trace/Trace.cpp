@@ -313,6 +313,22 @@ const edu::sharif::twinner::util::MemoryManager *Trace::getMemoryManager () cons
   return memoryManager;
 }
 
+void Trace::printMemoryUsageStats (
+    const edu::sharif::twinner::util::Logger &logger) const {
+  logger << "Trace has " << segments.size () << " segments overall\n";
+  int i = 0;
+  int size = 0;
+  for (std::list < ExecutionTraceSegment * >::const_iterator it = segments.begin ();
+      it != segments.end (); ++it) {
+    const ExecutionTraceSegment *seg = *it;
+    logger << "Segment #" << i++ << ": ";
+    size += seg->printMemoryUsageStats (logger);
+    logger << '\n';
+  }
+  logger << "Total size of trace is approximately equal to "
+      << std::dec << size << " bytes\n";
+}
+
 }
 }
 }

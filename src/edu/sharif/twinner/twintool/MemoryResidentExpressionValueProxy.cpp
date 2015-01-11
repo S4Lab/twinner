@@ -185,6 +185,7 @@ void MemoryResidentExpressionValueProxy::valueIsChanged (
       delete p.first;
     }
   }
+  // trace->printMemoryUsageStats (edu::sharif::twinner::util::Logger::debug ());
 }
 
 void MemoryResidentExpressionValueProxy::propagateChangeDownwards (int size,

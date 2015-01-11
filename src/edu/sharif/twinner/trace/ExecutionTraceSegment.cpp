@@ -529,6 +529,46 @@ ExecutionTraceSegment::getPathConstraints () const {
   return pathConstraints;
 }
 
+template <typename Addr>
+int ExecutionTraceSegment::calcSizeInBytes (
+    const std::map < Addr, Expression * > &map) const {
+  int size = 0;
+  for (typename std::map < Addr, Expression * >::const_iterator it = map.begin ();
+      it != map.end (); ++it) {
+    size += sizeof (typename std::map < Addr, Expression * >::value_type);
+    const std::list < ExpressionToken * > &stack = it->second->getStack ();
+    for (std::list < ExpressionToken * >::const_iterator it2 = stack.begin ();
+        it2 != stack.end (); ++it2) {
+      size += sizeof (std::list < ExpressionToken * >::value_type);
+      const ExpressionToken *token = *it2;
+      size += sizeof (*token);
+    }
+  }
+  return size;
+}
+
+int ExecutionTraceSegment::printMemoryUsageStats (
+    const edu::sharif::twinner::util::Logger &logger) const {
+  const int memTo128bExpSize = calcSizeInBytes (memoryAddressTo128BitsExpression);
+  const int memTo64bExpSize = calcSizeInBytes (memoryAddressTo64BitsExpression);
+  const int memTo32bExpSize = calcSizeInBytes (memoryAddressTo32BitsExpression);
+  const int memTo16bExpSize = calcSizeInBytes (memoryAddressTo16BitsExpression);
+  const int memTo8bExpSize = calcSizeInBytes (memoryAddressTo8BitsExpression);
+  const int memSize = memTo128bExpSize + memTo64bExpSize
+      + memTo32bExpSize + memTo16bExpSize + memTo8bExpSize;
+  const int regToExpSize = calcSizeInBytes (registerToExpression);
+  const int total = memSize + regToExpSize;
+  logger << std::dec << total << " bytes consisting of "
+      << memSize << " bytes for memory symbols ("
+      << memTo128bExpSize << " bytes for 128, "
+      << memTo64bExpSize << " for 64, "
+      << memTo32bExpSize << " for 32, "
+      << memTo16bExpSize << " for 16, "
+      << memTo8bExpSize << " for 8 bits map)"
+      " and " << regToExpSize << " bytes for register symbols";
+  return total;
+}
+
 void ExecutionTraceSegment::setSyscall (Syscall _syscall) {
   syscall = _syscall;
 }

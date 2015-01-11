@@ -118,10 +118,15 @@ public:
   const std::map < ADDRINT, Expression * > &getMemoryAddressTo64BitsExpression () const;
   const std::list < const Constraint * > &getPathConstraints () const;
 
+  int printMemoryUsageStats (const edu::sharif::twinner::util::Logger &logger) const;
+
   void setSyscall (Syscall syscall);
   Syscall getSyscall () const;
 
 private:
+  template <typename Addr>
+  int calcSizeInBytes (const std::map < Addr, Expression * > &map) const;
+
   void initializeOverlappingMemoryLocationsDownwards (int size,
       ADDRINT memoryEa, const Expression &changedExp,
       bool shouldTruncate = false, int shiftAmount = 0);
