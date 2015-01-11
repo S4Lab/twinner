@@ -181,9 +181,18 @@ void Expression::truncate (int bits) {
 
 void Expression::shiftToRight (ConcreteValue *bits) {
   if ((*bits) >= 64) {
-    stack.push_back (new Constant (bits));
-    stack.push_back (new Operator (Operator::SHIFT_RIGHT));
     (*lastConcreteValue) >>= *bits;
+    if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
+      Constant *lastConstant = static_cast<Constant *> (stack.back ());
+      ConcreteValue *cv = lastConstant->getValue ().clone ();
+      (*cv) >>= (*bits);
+      lastConstant->setValue (*cv);
+      delete bits;
+      delete cv;
+    } else {
+      stack.push_back (new Constant (bits));
+      stack.push_back (new Operator (Operator::SHIFT_RIGHT));
+    }
   } else {
     // shift-to-right by n bits is equivalent to division by 2^n
     const UINT64 val = (1ull << bits->toUint64 ());
@@ -199,7 +208,12 @@ void Expression::shiftToRight (int bits) {
 }
 
 void Expression::shiftToRight (const Expression *bits) {
-  binaryOperation (new Operator (Operator::SHIFT_RIGHT), bits);
+  if (bits->isTrivial ()) {
+    // FIXME: Make sure that last concrete value is always valid at this point
+    shiftToRight (bits->getLastConcreteValue ().clone ());
+  } else {
+    binaryOperation (new Operator (Operator::SHIFT_RIGHT), bits);
+  }
 }
 
 void Expression::arithmeticShiftToRight (const Expression *bits) {
