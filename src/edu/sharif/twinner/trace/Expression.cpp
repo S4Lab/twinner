@@ -244,9 +244,28 @@ void Expression::rotateToRight (const Expression *bits) {
 }
 
 void Expression::minus (ConcreteValue *immediate) {
-  stack.push_back (new Constant (immediate));
-  stack.push_back (new Operator (Operator::MINUS));
-  (*lastConcreteValue) -= *immediate;
+  Constant *lastConstant = 0;
+  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
+    lastConstant = static_cast<Constant *> (stack.back ());
+
+  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
+    std::list < ExpressionToken * >::iterator it = stack.end ();
+    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::ADD) {
+      lastConstant = dynamic_cast<Constant *> (*--it);
+    }
+  }
+  if (lastConstant) {
+    (*lastConcreteValue) -= *immediate;
+    ConcreteValue *cv = lastConstant->getValue ().clone ();
+    (*cv) -= (*immediate);
+    lastConstant->setValue (*cv);
+    delete immediate;
+    delete cv;
+  } else {
+    stack.push_back (new Constant (immediate));
+    stack.push_back (new Operator (Operator::MINUS));
+    (*lastConcreteValue) -= *immediate;
+  }
 }
 
 void Expression::minus (UINT64 immediate) {
@@ -254,7 +273,12 @@ void Expression::minus (UINT64 immediate) {
 }
 
 void Expression::minus (const Expression *exp) {
-  binaryOperation (new Operator (Operator::MINUS), exp);
+  if (exp->isTrivial ()) {
+    // FIXME: Make sure that last concrete value is always valid at this point
+    minus (exp->getLastConcreteValue ().clone ());
+  } else {
+    binaryOperation (new Operator (Operator::MINUS), exp);
+  }
 }
 
 Expression *Expression::twosComplement () const {
