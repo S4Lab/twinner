@@ -425,6 +425,31 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator<<= (const ConcreteValue &bi
   return *this;
 }
 
+ConcreteValue128Bits &ConcreteValue128Bits::arithmeticShiftToRight (
+    const ConcreteValue &cv) {
+  const bool signBit = msb >> 63;
+  (*this) >>= cv;
+  if (signBit) {
+    int n = cv.toUint64 ();
+    UINT64 *pattern;
+    if (n > 63) {
+      msb = UINT64 (-1);
+      pattern = &lsb;
+      n -= 64;
+    } else {
+      pattern = &msb;
+    }
+    if (n > 0) { // n most significant bits of *pattern should be set
+      UINT64 mask = 1;
+      mask <<= n;
+      mask -= 1;
+      mask <<= 64 - n;
+      (*pattern) |= mask;
+    }
+  }
+  return *this;
+}
+
 ConcreteValue128Bits &ConcreteValue128Bits::rotateToRight (const ConcreteValue &bits) {
   int n = bits.toUint64 ();
   if (n > 63) {

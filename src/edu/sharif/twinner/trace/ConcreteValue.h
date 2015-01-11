@@ -187,6 +187,7 @@ public:
   virtual ConcreteValue &operator>>= (const ConcreteValue &bits) = 0;
   virtual ConcreteValue &operator<<= (const ConcreteValue &bits) = 0;
 
+  virtual ConcreteValue &arithmeticShiftToRight (const ConcreteValue &bits) = 0;
   virtual ConcreteValue &rotateToRight (const ConcreteValue &bits) = 0;
 
   ConcreteValue &operator-= (UINT64 cv);
@@ -199,6 +200,7 @@ public:
   ConcreteValue &operator^= (UINT64 pattern);
   ConcreteValue &operator>>= (UINT64 bits);
   ConcreteValue &operator<<= (UINT64 bits);
+  ConcreteValue &arithmeticShiftToRight (UINT64 bits);
   ConcreteValue &rotateToRight (UINT64 bits);
 };
 

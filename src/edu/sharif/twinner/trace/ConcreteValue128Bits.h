@@ -83,6 +83,7 @@ public:
   virtual ConcreteValue128Bits &operator>>= (const ConcreteValue &bits);
   virtual ConcreteValue128Bits &operator<<= (const ConcreteValue &bits);
 
+  virtual ConcreteValue128Bits &arithmeticShiftToRight (const ConcreteValue &cv);
   virtual ConcreteValue128Bits &rotateToRight (const ConcreteValue &bits);
 
 protected:

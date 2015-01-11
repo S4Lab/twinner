@@ -77,22 +77,8 @@ void Operator::apply (ConcreteValue &dst, const ConcreteValue &src) const {
     dst >>= src;
     break;
   case ARITHMETIC_SHIFT_RIGHT:
-  {
-    ConcreteValue *tmp = dst.clone ();
-    (*tmp) >>= dst.getSize () - 1;
-    dst >>= src;
-    if ((*tmp) == 1) {
-      (*tmp) <<= src;
-      (*tmp) -= 1;
-      ConcreteValue *size = src.twosComplement ();
-      (*size) += dst.getSize ();
-      (*tmp) <<= (*size);
-      delete size;
-      dst |= (*tmp);
-    }
-    delete tmp;
+    dst.arithmeticShiftToRight (src);
     break;
-  }
   case ROTATE_RIGHT:
     dst.rotateToRight (src);
     break;

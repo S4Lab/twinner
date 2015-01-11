@@ -223,6 +223,21 @@ public:
     return *this;
   }
 
+  virtual ConcreteValueAbstractImp<bits, ValueType> &arithmeticShiftToRight (
+      const ConcreteValue &cv) {
+    const bool signBit = value >> (bits - 1);
+    (*this) >>= cv;
+    if (signBit) {
+      const UINT64 cvValue = cv.toUint64 ();
+      ValueType mask = 1;
+      mask <<= cvValue;
+      mask -= 1;
+      mask <<= bits - cvValue;
+      value |= mask;
+    }
+    return *this;
+  }
+
   virtual ConcreteValueAbstractImp<bits, ValueType> &rotateToRight (const ConcreteValue &cv) {
     const UINT64 cvValue = cv.toUint64 ();
     value = (value << (bits - cvValue)) | (value >> cvValue);
