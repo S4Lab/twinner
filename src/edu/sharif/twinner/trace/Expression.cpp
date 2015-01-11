@@ -584,12 +584,17 @@ Expression *Expression::signExtended (int size) const {
   } else if (size == mySize) { // no change is required
     return clone (size);
   } else {
-    Expression *exp = clone (size);
-    exp->stack.push_back (new Constant (mySize));
-    exp->stack.push_back (new Constant (size));
-    exp->stack.push_back (new Operator (Operator::SIGN_EXTEND));
-    exp->setLastConcreteValue (lastConcreteValue->signExtended (size));
-    return exp;
+    if (isTrivial ()) {
+      // FIXME: Make sure that last concrete value is always valid at this point
+      return new ExpressionImp (lastConcreteValue->signExtended (size));
+    } else {
+      Expression *exp = clone (size);
+      exp->stack.push_back (new Constant (mySize));
+      exp->stack.push_back (new Constant (size));
+      exp->stack.push_back (new Operator (Operator::SIGN_EXTEND));
+      exp->setLastConcreteValue (lastConcreteValue->signExtended (size));
+      return exp;
+    }
   }
 }
 
