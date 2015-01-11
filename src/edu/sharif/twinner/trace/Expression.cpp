@@ -216,8 +216,32 @@ void Expression::shiftToRight (const Expression *bits) {
   }
 }
 
+void Expression::arithmeticShiftToRight (ConcreteValue *bits) {
+  lastConcreteValue->arithmeticShiftToRight (*bits);
+  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
+    Constant *lastConstant = static_cast<Constant *> (stack.back ());
+    ConcreteValue *cv = lastConstant->getValue ().clone ();
+    cv->arithmeticShiftToRight (*bits);
+    lastConstant->setValue (*cv);
+    delete bits;
+    delete cv;
+  } else {
+    stack.push_back (new Constant (bits));
+    stack.push_back (new Operator (Operator::ARITHMETIC_SHIFT_RIGHT));
+  }
+}
+
+void Expression::arithmeticShiftToRight (int bits) {
+  arithmeticShiftToRight (new ConcreteValue64Bits (bits));
+}
+
 void Expression::arithmeticShiftToRight (const Expression *bits) {
-  binaryOperation (new Operator (Operator::ARITHMETIC_SHIFT_RIGHT), bits);
+  if (bits->isTrivial ()) {
+    // FIXME: Make sure that last concrete value is always valid at this point
+    arithmeticShiftToRight (bits->getLastConcreteValue ().clone ());
+  } else {
+    binaryOperation (new Operator (Operator::ARITHMETIC_SHIFT_RIGHT), bits);
+  }
 }
 
 void Expression::shiftToLeft (ConcreteValue *bits) {

@@ -125,6 +125,14 @@ public:
   void shiftToRight (const Expression *bits);
 
   /**
+   * Arithmetic shifts the expression to right as much as the given count of bits.
+   * @param bits Count of bits that this expression should be arithmetically shifted
+   * upon to right.
+   */
+  void arithmeticShiftToRight (ConcreteValue *bits);
+  void arithmeticShiftToRight (int bits);
+
+  /**
    * Arithmetic shifts the expression to right as much as the given symbolic expression.
    * @param bits Count of bits (symbolically) that this expression should be
    * arithmetically shifted to right.
