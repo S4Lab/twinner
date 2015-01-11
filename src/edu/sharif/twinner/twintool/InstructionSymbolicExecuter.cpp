@@ -1391,9 +1391,7 @@ void InstructionSymbolicExecuter::xorAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
   edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
-  dstexp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::XOR), srcexp);
+  dstexp->bitwiseXor (srcexp);
   delete srcexp;
   dst.setExpression (trace, dstexp);
   eflags.setFlags

@@ -480,6 +480,42 @@ void Expression::bitwiseOr (const Expression *mask) {
   }
 }
 
+void Expression::bitwiseXor (ConcreteValue *mask) {
+  Constant *lastConstantMask = 0;
+  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
+    lastConstantMask = static_cast<Constant *> (stack.back ());
+
+  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
+    std::list < ExpressionToken * >::iterator it = stack.end ();
+    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::XOR) {
+      lastConstantMask = dynamic_cast<Constant *> (*--it);
+    }
+  }
+  if (lastConstantMask) {
+    (*lastConcreteValue) ^= *mask;
+    (*mask) ^= lastConstantMask->getValue ();
+    lastConstantMask->setValue (*mask);
+    delete mask;
+  } else {
+    stack.push_back (new Constant (mask));
+    stack.push_back (new Operator (Operator::XOR));
+    (*lastConcreteValue) ^= *mask;
+  }
+}
+
+void Expression::bitwiseXor (UINT64 mask) {
+  bitwiseXor (new ConcreteValue64Bits (mask));
+}
+
+void Expression::bitwiseXor (const Expression *mask) {
+  if (mask->isTrivial ()) {
+    // FIXME: Make sure that last concrete value is always valid at this point
+    bitwiseXor (mask->getLastConcreteValue ().clone ());
+  } else {
+    binaryOperation (new Operator (Operator::XOR), mask);
+  }
+}
+
 void Expression::makeLeastSignificantBitsZero (int bits) {
   ConcreteValue *mask;
   const int size = lastConcreteValue->getSize ();

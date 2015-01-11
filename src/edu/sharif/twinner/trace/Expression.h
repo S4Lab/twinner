@@ -245,6 +245,19 @@ public:
   void bitwiseOr (const Expression *mask);
 
   /**
+   * Bitwise XOR of this expression and given mask value.
+   * @param mask The mask value which should be xor-ed by this expression.
+   */
+  void bitwiseXor (ConcreteValue *mask);
+  void bitwiseXor (UINT64 mask);
+
+  /**
+   * Bitwise XOR of this expression and the given symbolic value/expression.
+   * @param mask The mask (symbolically) that this expression should be XOR-ed with it.
+   */
+  void bitwiseXor (const Expression *mask);
+
+  /**
    * Sets the given count of bits, from least significant bits, to zero.
    * @param bits Count of least significant bits which should be set to zero.
    */
