@@ -16,7 +16,7 @@
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
-#include "edu/sharif/twinner/trace/ConcreteValue.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 

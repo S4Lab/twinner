@@ -18,7 +18,7 @@
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 #include "edu/sharif/twinner/trace/Expression.h"
-#include "edu/sharif/twinner/trace/ConcreteValue.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
 namespace edu {
 namespace sharif {

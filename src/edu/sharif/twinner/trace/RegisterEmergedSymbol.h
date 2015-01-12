@@ -33,7 +33,8 @@ private:
   RegisterEmergedSymbol (REG address);
 
 public:
-  RegisterEmergedSymbol (REG address, const ConcreteValue &concreteValue,
+  RegisterEmergedSymbol (REG address,
+      const edu::sharif::twinner::trace::ConcreteValue &concreteValue,
       int generationIndex);
 
   virtual RegisterEmergedSymbol *clone () const;

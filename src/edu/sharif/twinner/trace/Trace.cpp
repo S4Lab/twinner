@@ -26,7 +26,7 @@
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
-#include "ConcreteValue.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
 namespace edu {
 namespace sharif {
@@ -61,7 +61,8 @@ Trace::~Trace () {
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByRegister (int size, REG reg,
-    const ConcreteValue &regval) const /* @throw (WrongStateException) */ {
+    const edu::sharif::twinner::trace::ConcreteValue &regval) const
+/* @throw (WrongStateException) */ {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
@@ -70,7 +71,8 @@ Expression *Trace::tryToGetSymbolicExpressionByRegister (int size, REG reg) cons
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-    const ConcreteValue &memval) const /* @throw (WrongStateException) */ {
+    const edu::sharif::twinner::trace::ConcreteValue &memval) const
+/* @throw (WrongStateException) */ {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
@@ -80,7 +82,7 @@ Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (int size,
 }
 
 Expression *Trace::getSymbolicExpressionByRegister (int size, REG reg,
-    const ConcreteValue &regval, Expression *newExpression) {
+    const edu::sharif::twinner::trace::ConcreteValue &regval, Expression *newExpression) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
@@ -90,7 +92,7 @@ Expression *Trace::getSymbolicExpressionByRegister (int size, REG reg,
 }
 
 Expression *Trace::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-    const ConcreteValue &memval, Expression *newExpression) {
+    const edu::sharif::twinner::trace::ConcreteValue &memval, Expression *newExpression) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 

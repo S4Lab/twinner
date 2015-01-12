@@ -16,8 +16,10 @@
 #include "Expression.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
-#include "ConcreteValue.h"
+
 #include "edu/sharif/twinner/trace/Expression.h"
+
+#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
 #include <stdexcept>
 #include <fstream>

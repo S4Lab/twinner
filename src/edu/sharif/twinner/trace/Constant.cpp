@@ -13,7 +13,8 @@
 #include <sstream>
 
 #include "Constant.h"
-#include "ConcreteValue64Bits.h"
+
+#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 
@@ -27,18 +28,18 @@ Constant::Constant (const Constant &c) :
 }
 
 Constant::Constant (UINT64 val) :
-    Operand (ConcreteValue64Bits (val)) {
+    Operand (edu::sharif::twinner::trace::ConcreteValue64Bits (val)) {
 }
 
-Constant::Constant (const ConcreteValue &val) :
+Constant::Constant (const edu::sharif::twinner::trace::ConcreteValue &val) :
     Operand (val) {
 }
 
-Constant::Constant (ConcreteValue *val) :
+Constant::Constant (edu::sharif::twinner::trace::ConcreteValue *val) :
     Operand (val) {
 }
 
-void Constant::setValue (const ConcreteValue &value) {
+void Constant::setValue (const edu::sharif::twinner::trace::ConcreteValue &value) {
   (*concreteValue) = value;
 }
 
@@ -52,7 +53,8 @@ void Constant::saveToBinaryStream (std::ofstream &out) const {
 }
 
 Constant *Constant::loadFromBinaryStream (std::ifstream &in) {
-  return new Constant (ConcreteValue::loadFromBinaryStream (in));
+  return new Constant
+      (edu::sharif::twinner::trace::ConcreteValue::loadFromBinaryStream (in));
 }
 
 std::string Constant::toString () const {

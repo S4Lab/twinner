@@ -12,9 +12,10 @@
 
 #include "Operator.h"
 
-#include "ConcreteValue.h"
 #include "Expression.h"
 #include "Constant.h"
+
+#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -68,7 +69,8 @@ bool Operator::doesSupportSimplification () const {
   }
 }
 
-bool Operator::apply (Expression *exp, ConcreteValue *operand) {
+bool Operator::apply (Expression *exp,
+    edu::sharif::twinner::trace::ConcreteValue *operand) {
   switch (oi) {
   case ADD:
   {
@@ -109,7 +111,7 @@ bool Operator::apply (Expression *exp, ConcreteValue *operand) {
     }
     if (lastConstant) {
       (*exp->lastConcreteValue) -= *operand;
-      ConcreteValue *cv = lastConstant->getValue ().clone ();
+      edu::sharif::twinner::trace::ConcreteValue *cv = lastConstant->getValue ().clone ();
       (*cv) -= (*operand);
       lastConstant->setValue (*cv);
       delete operand;
@@ -161,7 +163,7 @@ bool Operator::apply (Expression *exp, ConcreteValue *operand) {
     }
     if (lastConstant) {
       (*exp->lastConcreteValue) /= *operand;
-      ConcreteValue *cv = lastConstant->getValue ().clone ();
+      edu::sharif::twinner::trace::ConcreteValue *cv = lastConstant->getValue ().clone ();
       (*cv) /= (*operand);
       lastConstant->setValue (*cv);
       delete operand;
@@ -273,7 +275,7 @@ bool Operator::apply (Expression *exp, ConcreteValue *operand) {
       (*exp->lastConcreteValue) >>= *operand;
       if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
         Constant *lastConstant = static_cast<Constant *> (exp->stack.back ());
-        ConcreteValue *cv = lastConstant->getValue ().clone ();
+        edu::sharif::twinner::trace::ConcreteValue *cv = lastConstant->getValue ().clone ();
         (*cv) >>= (*operand);
         lastConstant->setValue (*cv);
         delete operand;
@@ -299,7 +301,7 @@ bool Operator::apply (Expression *exp, ConcreteValue *operand) {
     exp->lastConcreteValue->arithmeticShiftToRight (*operand);
     if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
       Constant *lastConstant = static_cast<Constant *> (exp->stack.back ());
-      ConcreteValue *cv = lastConstant->getValue ().clone ();
+      edu::sharif::twinner::trace::ConcreteValue *cv = lastConstant->getValue ().clone ();
       cv->arithmeticShiftToRight (*operand);
       lastConstant->setValue (*cv);
       delete operand;
@@ -325,7 +327,8 @@ bool Operator::apply (Expression *exp, ConcreteValue *operand) {
   }
 }
 
-void Operator::apply (ConcreteValue &dst, const ConcreteValue &src) const {
+void Operator::apply (edu::sharif::twinner::trace::ConcreteValue &dst,
+    const edu::sharif::twinner::trace::ConcreteValue &src) const {
   switch (oi) {
   case ADD:
     dst += src;

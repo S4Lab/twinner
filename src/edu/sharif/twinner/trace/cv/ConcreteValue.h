@@ -11,9 +11,9 @@
  */
 
 #ifndef CONCRETE_VALUE_H
-#define	CONCRETE_VALUE_H
+#define CONCRETE_VALUE_H
 
-#include "Savable.h"
+#include "edu/sharif/twinner/trace/Savable.h"
 
 #include <pin.H>
 

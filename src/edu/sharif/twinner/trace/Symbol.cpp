@@ -12,23 +12,24 @@
 
 #include "Symbol.h"
 
-#include "ConcreteValue.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-Symbol::Symbol (const ConcreteValue &_concreteValue, int _generationIndex) :
-Operand (_concreteValue), generationIndex (_generationIndex) {
+Symbol::Symbol (const edu::sharif::twinner::trace::ConcreteValue &_concreteValue,
+    int _generationIndex) :
+    Operand (_concreteValue), generationIndex (_generationIndex) {
 }
 
 Symbol::Symbol (const Symbol &s) :
-Operand (s), generationIndex (s.generationIndex) {
+    Operand (s), generationIndex (s.generationIndex) {
 }
 
 Symbol::Symbol () :
-Operand (), generationIndex (0) {
+    Operand (), generationIndex (0) {
 }
 
 void Symbol::saveToBinaryStream (std::ofstream &out) const {
@@ -38,7 +39,7 @@ void Symbol::saveToBinaryStream (std::ofstream &out) const {
 
 void Symbol::loadFromBinaryStream (std::ifstream &in) {
   delete concreteValue;
-  concreteValue = ConcreteValue::loadFromBinaryStream (in);
+  concreteValue = edu::sharif::twinner::trace::ConcreteValue::loadFromBinaryStream (in);
   in.read ((char *) &generationIndex, sizeof (generationIndex));
 }
 

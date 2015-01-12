@@ -12,7 +12,7 @@
 
 #include "ConstraintToCvc4ExprConverter.h"
 
-#include "edu/sharif/twinner/trace/ConcreteValue128Bits.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"

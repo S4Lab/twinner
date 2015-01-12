@@ -22,8 +22,8 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
-#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
-#include "edu/sharif/twinner/trace/ConcreteValue128Bits.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 
 using namespace std;
 

@@ -55,7 +55,8 @@ protected:
    */
   int generationIndex;
 
-  Symbol (const ConcreteValue &concreteValue, int generationIndex);
+  Symbol (const edu::sharif::twinner::trace::ConcreteValue &concreteValue,
+      int generationIndex);
   Symbol (const Symbol &s);
   Symbol ();
 

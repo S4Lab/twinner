@@ -28,25 +28,25 @@ class ConcreteValue;
 class Operand : public ExpressionToken {
 
 protected:
-  ConcreteValue *concreteValue;
+  edu::sharif::twinner::trace::ConcreteValue *concreteValue;
 
   Operand ();
   /**
    * Instantiates a new operand and clones the given concrete value for it.
    * @param cv The concrete value which its clone will be used as value of this operand.
    */
-  Operand (const ConcreteValue &cv);
+  Operand (const edu::sharif::twinner::trace::ConcreteValue &cv);
   /**
    * Instantiates a new operand and takes ownership of the given concrete value for it.
    * @param cv The concrete value which its ownership is taken for instantiated operand.
    */
-  Operand (ConcreteValue *cv);
+  Operand (edu::sharif::twinner::trace::ConcreteValue *cv);
   Operand (const Operand &op);
 
 public:
   ~Operand ();
 
-  const ConcreteValue &getValue () const;
+  const edu::sharif::twinner::trace::ConcreteValue &getValue () const;
 };
 
 }

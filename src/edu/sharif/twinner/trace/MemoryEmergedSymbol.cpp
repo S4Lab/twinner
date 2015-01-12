@@ -14,8 +14,8 @@
 
 #include "MemoryEmergedSymbol.h"
 
-#include "ConcreteValue64Bits.h"
-#include "ConcreteValue128Bits.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 
@@ -25,16 +25,17 @@ namespace twinner {
 namespace trace {
 
 MemoryEmergedSymbol::MemoryEmergedSymbol (const MemoryEmergedSymbol &s) :
-Symbol (s), address (s.address) {
+    Symbol (s), address (s.address) {
 }
 
 MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT addr) :
-Symbol (), address (addr) {
+    Symbol (), address (addr) {
 }
 
 MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT _address,
-    const ConcreteValue &concreteValue, int generationIndex) :
-Symbol (concreteValue, generationIndex), address (_address) {
+    const edu::sharif::twinner::trace::ConcreteValue &concreteValue,
+    int generationIndex) :
+    Symbol (concreteValue, generationIndex), address (_address) {
 }
 
 MemoryEmergedSymbol *MemoryEmergedSymbol::clone () const {
@@ -45,17 +46,22 @@ std::pair < int, SymbolRecord >
 MemoryEmergedSymbol::toSymbolRecord () const {
   SymbolRecord record;
   record.address = address;
-  if (dynamic_cast<const ConcreteValue64Bits *> (concreteValue)) {
+  if (dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue64Bits *>
+      (concreteValue)) {
     record.type = MEMORY_64_BITS_SYMBOL_TYPE;
     record.concreteValueLsb =
-        static_cast<const ConcreteValue64Bits *> (concreteValue)->getValue ();
+        static_cast<const edu::sharif::twinner::trace::ConcreteValue64Bits *>
+        (concreteValue)->getValue ();
     record.concreteValueMsb = 0;
-  } else if (dynamic_cast<const ConcreteValue128Bits *> (concreteValue)) {
+  } else if (dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+      (concreteValue)) {
     record.type = MEMORY_128_BITS_SYMBOL_TYPE;
     record.concreteValueLsb =
-        static_cast<const ConcreteValue128Bits *> (concreteValue)->getLsb ();
+        static_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+        (concreteValue)->getLsb ();
     record.concreteValueMsb =
-        static_cast<const ConcreteValue128Bits *> (concreteValue)->getMsb ();
+        static_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+        (concreteValue)->getMsb ();
   } else {
     throw std::runtime_error ("MemoryEmergedSymbol::toSymbolRecord () method: "
                               "Unsupported concrete value type.");
@@ -89,7 +95,9 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::fromNameAndValue (const std::string &n
   ADDRINT address;
   int generationIndex;
   ss >> dummy >> std::hex >> address >> dummy >> generationIndex;
-  return new MemoryEmergedSymbol (address, ConcreteValue64Bits (value), generationIndex);
+  return new MemoryEmergedSymbol
+      (address, edu::sharif::twinner::trace::ConcreteValue64Bits (value),
+       generationIndex);
 }
 
 std::string MemoryEmergedSymbol::toString () const {

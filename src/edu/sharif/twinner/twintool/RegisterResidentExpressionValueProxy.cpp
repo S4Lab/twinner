@@ -19,7 +19,7 @@
 #include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
-#include "edu/sharif/twinner/trace/ConcreteValue64Bits.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 
 namespace edu {
 namespace sharif {

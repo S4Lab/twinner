@@ -90,8 +90,9 @@ public:
    * @param cv The owned concrete value that is used as operand of this operation.
    * @return true iff the operator is not used and operation is applied directly.
    */
-  bool apply (Expression *exp, ConcreteValue *cv);
-  void apply (ConcreteValue &dst, const ConcreteValue &src) const;
+  bool apply (Expression *exp, edu::sharif::twinner::trace::ConcreteValue *cv);
+  void apply (edu::sharif::twinner::trace::ConcreteValue &dst,
+      const edu::sharif::twinner::trace::ConcreteValue &src) const;
 
   virtual std::string toString () const;
 

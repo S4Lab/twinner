@@ -12,7 +12,7 @@
 
 #include "Operand.h"
 
-#include "ConcreteValue.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
 namespace edu {
 namespace sharif {
@@ -20,26 +20,26 @@ namespace twinner {
 namespace trace {
 
 Operand::Operand () :
-ExpressionToken (), concreteValue (0) {
+    ExpressionToken (), concreteValue (0) {
 }
 
-Operand::Operand (const ConcreteValue &cv) :
-ExpressionToken (), concreteValue (cv.clone ()) {
+Operand::Operand (const edu::sharif::twinner::trace::ConcreteValue &cv) :
+    ExpressionToken (), concreteValue (cv.clone ()) {
 }
 
-Operand::Operand (ConcreteValue *cv) :
-ExpressionToken (), concreteValue (cv) {
+Operand::Operand (edu::sharif::twinner::trace::ConcreteValue *cv) :
+    ExpressionToken (), concreteValue (cv) {
 }
 
 Operand::Operand (const Operand &op) :
-ExpressionToken (op), concreteValue (op.concreteValue->clone ()) {
+    ExpressionToken (op), concreteValue (op.concreteValue->clone ()) {
 }
 
 Operand::~Operand () {
   delete concreteValue;
 }
 
-const ConcreteValue &Operand::getValue () const {
+const edu::sharif::twinner::trace::ConcreteValue &Operand::getValue () const {
   return *concreteValue;
 }
 

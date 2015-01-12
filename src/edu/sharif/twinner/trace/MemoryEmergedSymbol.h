@@ -30,7 +30,8 @@ private:
   MemoryEmergedSymbol (ADDRINT address);
 
 public:
-  MemoryEmergedSymbol (ADDRINT address, const ConcreteValue &concreteValue,
+  MemoryEmergedSymbol (ADDRINT address,
+      const edu::sharif::twinner::trace::ConcreteValue &concreteValue,
       int generationIndex);
 
   virtual MemoryEmergedSymbol *clone () const;

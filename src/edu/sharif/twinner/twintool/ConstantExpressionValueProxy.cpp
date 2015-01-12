@@ -13,7 +13,7 @@
 #include "ConstantExpressionValueProxy.h"
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
-#include "edu/sharif/twinner/trace/ConcreteValue.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
 #include <stdexcept>
 

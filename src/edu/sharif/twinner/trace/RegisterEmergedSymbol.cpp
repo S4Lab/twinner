@@ -12,10 +12,11 @@
 
 #include "RegisterEmergedSymbol.h"
 
-#include "ConcreteValue64Bits.h"
-#include "ConcreteValue128Bits.h"
 #include "ExecutionTraceSegment.h"
 #include "Expression.h"
+
+#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 
 #include <sstream>
 
@@ -33,7 +34,8 @@ RegisterEmergedSymbol::RegisterEmergedSymbol (REG addr) :
 }
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (REG _address,
-    const ConcreteValue &concreteValue, int generationIndex) :
+    const edu::sharif::twinner::trace::ConcreteValue &concreteValue,
+    int generationIndex) :
     Symbol (concreteValue, generationIndex), address (_address) {
 }
 
@@ -44,17 +46,22 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::clone () const {
 std::pair < int, SymbolRecord > RegisterEmergedSymbol::toSymbolRecord () const {
   SymbolRecord record;
   record.address = address;
-  if (dynamic_cast<const ConcreteValue64Bits *> (concreteValue)) {
+  if (dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue64Bits *>
+      (concreteValue)) {
     record.type = REGISTER_64_BITS_SYMBOL_TYPE;
     record.concreteValueLsb =
-        static_cast<const ConcreteValue64Bits *> (concreteValue)->getValue ();
+        static_cast<const edu::sharif::twinner::trace::ConcreteValue64Bits *>
+        (concreteValue)->getValue ();
     record.concreteValueMsb = 0;
-  } else if (dynamic_cast<const ConcreteValue128Bits *> (concreteValue)) {
+  } else if (dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+      (concreteValue)) {
     record.type = REGISTER_128_BITS_SYMBOL_TYPE;
     record.concreteValueLsb =
-        static_cast<const ConcreteValue128Bits *> (concreteValue)->getLsb ();
+        static_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+        (concreteValue)->getLsb ();
     record.concreteValueMsb =
-        static_cast<const ConcreteValue128Bits *> (concreteValue)->getMsb ();
+        static_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+        (concreteValue)->getMsb ();
   } else {
     throw std::runtime_error ("RegisterEmergedSymbol::toSymbolRecord () method: "
                               "Unsupported concrete value type.");
@@ -87,7 +94,8 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::strin
     const UINT64 high = (UINT64 (v4) << 32) | v3;
     const UINT64 low = (UINT64 (v2) << 32) | v1;
     return new RegisterEmergedSymbol
-        (reg, ConcreteValue128Bits (high, low), generationIndex);
+        (reg, edu::sharif::twinner::trace::ConcreteValue128Bits (high, low),
+         generationIndex);
 
   } else {
     if (v4 != 0 || v3 != 0) {
@@ -95,7 +103,8 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::strin
                                 "Illegal value: This register is only 64 bits.");
     }
     const UINT64 value = (UINT64 (v2) << 32) | v1;
-    return new RegisterEmergedSymbol (reg, ConcreteValue64Bits (value), generationIndex);
+    return new RegisterEmergedSymbol
+        (reg, edu::sharif::twinner::trace::ConcreteValue64Bits (value), generationIndex);
   }
 }
 
