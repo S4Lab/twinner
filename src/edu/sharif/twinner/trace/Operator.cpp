@@ -10,11 +10,14 @@
  * This file is part of Twinner project.
  */
 
+#include "Operator.h"
+
+#include "ConcreteValue.h"
+#include "Expression.h"
+#include "Constant.h"
+
 #include <fstream>
 #include <stdexcept>
-
-#include "Operator.h"
-#include "ConcreteValue.h"
 
 namespace edu {
 namespace sharif {
@@ -42,6 +45,284 @@ Operator *Operator::loadFromBinaryStream (std::ifstream &in) {
   OperatorIdentifier oi;
   in.read ((char *) &oi, sizeof (oi));
   return new Operator (oi);
+}
+
+bool Operator::doesSupportSimplification () const {
+  switch (oi) {
+  case ADD:
+  case MINUS:
+  case MULTIPLY:
+  case DIVIDE:
+    //  case REMAINDER:
+  case XOR:
+  case BITWISE_AND:
+  case BITWISE_OR:
+  case SHIFT_LEFT:
+  case SHIFT_RIGHT:
+  case ARITHMETIC_SHIFT_RIGHT:
+  case ROTATE_RIGHT:
+    //  case ROTATE_LEFT:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool Operator::apply (Expression *exp, ConcreteValue *operand) {
+  switch (oi) {
+  case ADD:
+  {
+    Constant *lastConstant = 0;
+    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
+      lastConstant = static_cast<Constant *> (exp->stack.back ());
+
+    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
+      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
+      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::ADD) {
+        lastConstant = dynamic_cast<Constant *> (*--it);
+      }
+    }
+    if (lastConstant) {
+      (*exp->lastConcreteValue) += *operand;
+      (*operand) += lastConstant->getValue ();
+      lastConstant->setValue (*operand);
+      delete operand;
+      return true;
+    } else {
+      exp->stack.push_back (new Constant (operand));
+      exp->stack.push_back (this);
+      (*exp->lastConcreteValue) += *operand;
+      return false;
+    }
+  }
+  case MINUS:
+  {
+    Constant *lastConstant = 0;
+    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
+      lastConstant = static_cast<Constant *> (exp->stack.back ());
+
+    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
+      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
+      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::ADD) {
+        lastConstant = dynamic_cast<Constant *> (*--it);
+      }
+    }
+    if (lastConstant) {
+      (*exp->lastConcreteValue) -= *operand;
+      ConcreteValue *cv = lastConstant->getValue ().clone ();
+      (*cv) -= (*operand);
+      lastConstant->setValue (*cv);
+      delete operand;
+      delete cv;
+      return true;
+    } else {
+      exp->stack.push_back (new Constant (operand));
+      exp->stack.push_back (this);
+      (*exp->lastConcreteValue) -= *operand;
+      return false;
+    }
+  }
+  case MULTIPLY:
+  {
+    Constant *lastConstant = 0;
+    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
+      lastConstant = static_cast<Constant *> (exp->stack.back ());
+
+    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
+      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
+      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::MULTIPLY) {
+        lastConstant = dynamic_cast<Constant *> (*--it);
+      }
+    }
+    if (lastConstant) {
+      (*exp->lastConcreteValue) *= *operand;
+      (*operand) *= lastConstant->getValue ();
+      lastConstant->setValue (*operand);
+      delete operand;
+      return true;
+    } else {
+      exp->stack.push_back (new Constant (operand));
+      exp->stack.push_back (this);
+      (*exp->lastConcreteValue) *= *operand;
+      return false;
+    }
+  }
+  case DIVIDE:
+  {
+    Constant *lastConstant = 0;
+    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
+      lastConstant = static_cast<Constant *> (exp->stack.back ());
+
+    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
+      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
+      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::MULTIPLY) {
+        lastConstant = dynamic_cast<Constant *> (*--it);
+      }
+    }
+    if (lastConstant) {
+      (*exp->lastConcreteValue) /= *operand;
+      ConcreteValue *cv = lastConstant->getValue ().clone ();
+      (*cv) /= (*operand);
+      lastConstant->setValue (*cv);
+      delete operand;
+      delete cv;
+      return true;
+    } else {
+      exp->stack.push_back (new Constant (operand));
+      exp->stack.push_back (this);
+      (*exp->lastConcreteValue) /= *operand;
+      return false;
+    }
+  }
+    //  case REMAINDER:
+  case XOR:
+  {
+    Constant *lastConstantMask = 0;
+    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
+      lastConstantMask = static_cast<Constant *> (exp->stack.back ());
+
+    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
+      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
+      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::XOR) {
+        lastConstantMask = dynamic_cast<Constant *> (*--it);
+      }
+    }
+    if (lastConstantMask) {
+      (*exp->lastConcreteValue) ^= *operand;
+      (*operand) ^= lastConstantMask->getValue ();
+      lastConstantMask->setValue (*operand);
+      delete operand;
+      return true;
+    } else {
+      exp->stack.push_back (new Constant (operand));
+      exp->stack.push_back (this);
+      (*exp->lastConcreteValue) ^= *operand;
+      return false;
+    }
+  }
+  case BITWISE_AND:
+  {
+    Constant *lastConstantMask = 0;
+    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
+      lastConstantMask = static_cast<Constant *> (exp->stack.back ());
+
+    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
+      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
+      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::BITWISE_AND) {
+        lastConstantMask = dynamic_cast<Constant *> (*--it);
+      }
+    }
+    if (lastConstantMask) {
+      (*exp->lastConcreteValue) &= *operand;
+      (*operand) &= lastConstantMask->getValue ();
+      lastConstantMask->setValue (*operand);
+      delete operand;
+      return true;
+    } else {
+      exp->stack.push_back (new Constant (operand));
+      exp->stack.push_back (this);
+      (*exp->lastConcreteValue) &= *operand;
+      return false;
+    }
+  }
+  case BITWISE_OR:
+  {
+    Constant *lastConstantMask = 0;
+    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
+      lastConstantMask = static_cast<Constant *> (exp->stack.back ());
+
+    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
+      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
+      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::BITWISE_OR) {
+        lastConstantMask = dynamic_cast<Constant *> (*--it);
+      }
+    }
+    if (lastConstantMask) {
+      (*exp->lastConcreteValue) |= *operand;
+      (*operand) |= lastConstantMask->getValue ();
+      lastConstantMask->setValue (*operand);
+      delete operand;
+      return true;
+    } else {
+      exp->stack.push_back (new Constant (operand));
+      exp->stack.push_back (this);
+      (*exp->lastConcreteValue) |= *operand;
+      return false;
+    }
+  }
+  case SHIFT_LEFT:
+  {
+    if ((*operand) >= 64) {
+      exp->stack.push_back (new Constant (operand));
+      exp->stack.push_back (this);
+      (*exp->lastConcreteValue) <<= *operand;
+      return false;
+    } else {
+      // shift-to-left by n bits is equivalent to multiplication by 2^n
+      UINT64 val = (1ull << operand->toUint64 ());
+      delete operand;
+      if (val > 1) {
+        exp->multiply (val);
+      }
+      return true;
+    }
+  }
+  case SHIFT_RIGHT:
+  {
+    if ((*operand) >= 64) {
+      (*exp->lastConcreteValue) >>= *operand;
+      if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
+        Constant *lastConstant = static_cast<Constant *> (exp->stack.back ());
+        ConcreteValue *cv = lastConstant->getValue ().clone ();
+        (*cv) >>= (*operand);
+        lastConstant->setValue (*cv);
+        delete operand;
+        delete cv;
+        return true; // means that this operator is not used and can be deleted.
+      } else {
+        exp->stack.push_back (new Constant (operand));
+        exp->stack.push_back (this);
+        return false; // means that this operator is owned by exp since now
+      }
+    } else {
+      // shift-to-right by n bits is equivalent to division by 2^n
+      const UINT64 val = (1ull << operand->toUint64 ());
+      delete operand;
+      if (val > 1) {
+        exp->divide (val);
+      }
+      return true; // means that this operator is not used and can be deleted.
+    }
+  }
+  case ARITHMETIC_SHIFT_RIGHT:
+  {
+    exp->lastConcreteValue->arithmeticShiftToRight (*operand);
+    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
+      Constant *lastConstant = static_cast<Constant *> (exp->stack.back ());
+      ConcreteValue *cv = lastConstant->getValue ().clone ();
+      cv->arithmeticShiftToRight (*operand);
+      lastConstant->setValue (*cv);
+      delete operand;
+      delete cv;
+      return true;
+    } else {
+      exp->stack.push_back (new Constant (operand));
+      exp->stack.push_back (this);
+      return false;
+    }
+  }
+  case ROTATE_RIGHT:
+  {
+    exp->stack.push_back (new Constant (operand));
+    exp->stack.push_back (this);
+    exp->lastConcreteValue->rotateToRight (*operand);
+    return false;
+  }
+    //  case ROTATE_LEFT:
+  default:
+    throw std::runtime_error ("Operator::apply(Expression *, ConcreteValue *):"
+                              " Non-handled operator identifier");
+  }
 }
 
 void Operator::apply (ConcreteValue &dst, const ConcreteValue &src) const {
@@ -85,7 +366,8 @@ void Operator::apply (ConcreteValue &dst, const ConcreteValue &src) const {
   case ROTATE_LEFT:
     // TODO: Implement
   default:
-    throw std::runtime_error ("Operator::apply(...): Non-handled operator identifier");
+    throw std::runtime_error ("Operator::apply(ConcreteValue &, const ConcreteValue &):"
+                              " Non-handled operator identifier");
   }
 }
 

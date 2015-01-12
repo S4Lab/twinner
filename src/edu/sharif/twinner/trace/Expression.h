@@ -42,6 +42,8 @@ protected:
 private:
   ConcreteValue *lastConcreteValue;
 
+  friend class Operator;
+
   bool isOverwriting;
 
   /**
@@ -76,13 +78,15 @@ public:
   Expression (const Expression &exp);
 
   /**
-   * Deletes all hold expression tokens and destruct the expression instance.
+   * Deletes all hold expression tokens and destructs the expression instance.
    */
   ~Expression ();
 
   const ConcreteValue &getLastConcreteValue () const;
+
   /**
    * Set last concrete value to given object and take ownership of it.
+   *
    * @param value The new concrete value which is assumed to be owned by this object.
    */
   void setLastConcreteValue (ConcreteValue *value);
@@ -99,10 +103,32 @@ public:
    * The op operator is assumed to be owned by this expression object.
    * But exp will be kept untouched and its inner expression tokens will be cloned.
    * The exp may or may not be the same as this object.
+   * If exp is a trivial expression, this method tries to simplify and apply it directly.
+   *
    * @param op The owned operator which mediates between this and exp expression objects.
    * @param exp The given constant expression which its clone should be applied by op.
    */
   void binaryOperation (Operator *op, const Expression *exp);
+
+  /**
+   * Same as `binaryOperation (Operator *op, const Expression *exp)` but tries to
+   * simplify the concrete operand and apply it directly. If it isn't possible, it
+   * applies the operation without simplification.
+   * The cv is assumed to be owned by this expression object.
+   *
+   * @param op The owned operator which mediates between this and cv objects.
+   * @param cv The owned concrete value which should be applied by op.
+   */
+  void binaryOperation (Operator *op, ConcreteValue *cv);
+
+  /**
+   * Same as `binaryOperation (Operator *op, ConcreteValue *cv)` method.
+   * It converts given cv to ConcreteValue and calls the main binaryOperation method.
+   *
+   * @param op The owned operator which mediates between this and cv.
+   * @param cv The value that should be converted to ConcreteValue to be used.
+   */
+  void binaryOperation (Operator *op, UINT64 cv);
 
   /**
    * Truncates the expression to occupy at most a given count of bits.
@@ -111,74 +137,66 @@ public:
   void truncate (int bits);
 
   /**
-   * Shifts the expression to right as much as the given count of bits.
-   * @param bits Count of bits that this expression should be shifted upon to right.
+   * Shifts the expression to right as much as the given symbolic/concrete
+   * expression/value.
+   *
+   * @param operand Count of bits (symbolically or concretely) that this expression should
+   * be shifted upon to right.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
    */
-  void shiftToRight (ConcreteValue *bits);
-  void shiftToRight (int bits);
+  template <typename ValueOrExp>
+  void shiftToRight (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::SHIFT_RIGHT), operand);
+  }
 
   /**
-   * Shifts the expression to right as much as the given symbolic value/expression.
-   * @param bits Count of bits (symbolically) that this expression should be
-   * shifted upon to right.
+   * Arithmetic shifts the expression to right as much as the given symbolic/concrete
+   * count of bits.
+   *
+   * @param operand Count of bits (symbolically or concretely) that this expression should
+   * be arithmetically shifted upon to right.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
    */
-  void shiftToRight (const Expression *bits);
+  template <typename ValueOrExp>
+  void arithmeticShiftToRight (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::ARITHMETIC_SHIFT_RIGHT), operand);
+  }
 
   /**
-   * Arithmetic shifts the expression to right as much as the given count of bits.
-   * @param bits Count of bits that this expression should be arithmetically shifted
-   * upon to right.
+   * Shifts the expression to left as much as the given symbolic/concrete count of bits.
+   *
+   * @param operand Count of bits (symbolically or concretely) that this expression should
+   * be shifted upon to left.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
    */
-  void arithmeticShiftToRight (ConcreteValue *bits);
-  void arithmeticShiftToRight (int bits);
+  template <typename ValueOrExp>
+  void shiftToLeft (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::SHIFT_LEFT), operand);
+  }
 
   /**
-   * Arithmetic shifts the expression to right as much as the given symbolic expression.
-   * @param bits Count of bits (symbolically) that this expression should be
-   * arithmetically shifted to right.
+   * Rotates the expression to right as much as the given symbolic/concrete count of bits.
+   *
+   * @param operand Count of bits (symbolically or concretely) that this expression should
+   * be rotated upon towards right.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
    */
-  void arithmeticShiftToRight (const Expression *bits);
+  template <typename ValueOrExp>
+  void rotateToRight (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::ROTATE_RIGHT), operand);
+  }
 
   /**
-   * Shifts the expression to left as much as the given count of bits.
-   * @param bits Count of bits that this expression should be shifted upon to left.
+   * Decrement this expression as much as the given symbolic/concrete value.
+   *
+   * @param operand The value (symbolically or concretely) which its value will be
+   * decremented from this expression.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
    */
-  void shiftToLeft (ConcreteValue *bits);
-  void shiftToLeft (int bits);
-
-  /**
-   * Shifts the expression to left as much as the given symbolic value/expression.
-   * @param bits Count of bits (symbolically) that this expression should be
-   * shifted upon to left.
-   */
-  void shiftToLeft (const Expression *bits);
-
-  /**
-   * Rotates the expression to right as much as the given count of bits.
-   * @param bits Count of bits that this expression should be rotated upon towards right.
-   */
-  void rotateToRight (ConcreteValue *bits);
-  void rotateToRight (int bits);
-
-  /**
-   * Rotates the expression to right as much as the given symbolic value/expression.
-   * @param bits Count of bits (symbolically) that this expression should be
-   * rotated upon towards right.
-   */
-  void rotateToRight (const Expression *bits);
-
-  /**
-   * Decrement this expression as much as the given immediate value.
-   * @param immediate The value which its value will be decremented from this expression.
-   */
-  void minus (ConcreteValue *immediate);
-  void minus (UINT64 immediate);
-
-  /**
-   * Decrement this expression as much as the given exp expression.
-   * @param exp The expression indicating how much this expression should be decremented.
-   */
-  void minus (const Expression *exp);
+  template <typename ValueOrExp>
+  void minus (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::MINUS), operand);
+  }
 
   /**
    * Instantiates an expression indicating the two's complement of this expression.
@@ -188,82 +206,76 @@ public:
   Expression *twosComplement () const;
 
   /**
-   * Increment this expression as much as the given immediate value.
-   * @param immediate The value which its value will be added to this expression.
+   * Increment this expression as much as the given symbolic/concrete value.
+   *
+   * @param operand The value (symbolically or concretely) which its value will be
+   * added to this expression.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
    */
-  void add (ConcreteValue *immediate);
-  void add (UINT64 immediate);
+  template <typename ValueOrExp>
+  void add (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::ADD), operand);
+  }
 
   /**
-   * Increment this expression as much as the given exp expression.
-   * @param exp The expression indicating how much this expression should be incremented.
+   * Multiply this expression with the given symbolic/concrete value.
+   *
+   * @param operand The value (symbolically or concretely) which will be
+   * multiplied by this expression.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
    */
-  void add (const Expression *exp);
+  template <typename ValueOrExp>
+  void multiply (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::MULTIPLY), operand);
+  }
 
   /**
-   * Multiply this expression with the given immediate value.
-   * @param immediate The value which will be multiplied by this expression.
+   * Divides this expression by the given symbolic/concrete value.
+   *
+   * @param operand The value (symbolically or concretely) that this expression will be
+   * divided by it.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
    */
-  void multiply (ConcreteValue *immediate);
-  void multiply (UINT64 immediate);
+  template <typename ValueOrExp>
+  void divide (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::DIVIDE), operand);
+  }
 
   /**
-   * Multiply this expression with the given exp expression.
-   * @param exp The expression which will be multiplied by this expression.
+   * Bitwise AND of this expression and given symbolic/concrete mask value.
+   *
+   * @param operand The value (symbolically or concretely) that this expression will be
+   * bitwise-and-ed by it.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
    */
-  void multiply (const Expression *exp);
+  template <typename ValueOrExp>
+  void bitwiseAnd (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::BITWISE_AND), operand);
+  }
 
   /**
-   * Divides this expression by the given immediate value.
-   * @param immediate The value that this expression will be divided by it.
+   * Bitwise OR of this expression and given symbolic/concrete mask value.
+   *
+   * @param operand The value (symbolically or concretely) that this expression will be
+   * bitwise-or-ed by it.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
    */
-  void divide (ConcreteValue *immediate);
-  void divide (UINT64 immediate);
+  template <typename ValueOrExp>
+  void bitwiseOr (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::BITWISE_OR), operand);
+  }
 
   /**
-   * Divides this expression by the given exp expression.
-   * @param exp The expression that this expression will be divided by it.
+   * Bitwise XOR of this expression and given symbolic/concrete mask value.
+   *
+   * @param operand The value (symbolically or concretely) that this expression will be
+   * xor-ed by it.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
    */
-  void divide (const Expression *exp);
-
-  /**
-   * Bitwise AND of this expression and given mask value.
-   * @param mask The mask value which should be bitwise-and-ed by this expression.
-   */
-  void bitwiseAnd (ConcreteValue *mask);
-  void bitwiseAnd (UINT64 mask);
-
-  /**
-   * Bitwise AND of this expression and the given symbolic value/expression.
-   * @param mask The mask (symbolically) that this expression should be AND-ed with it.
-   */
-  void bitwiseAnd (const Expression *mask);
-
-  /**
-   * Bitwise OR of this expression and given mask value.
-   * @param mask The mask value which should be bitwise-or-ed by this expression.
-   */
-  void bitwiseOr (ConcreteValue *mask);
-  void bitwiseOr (UINT64 mask);
-
-  /**
-   * Bitwise OR of this expression and the given symbolic value/expression.
-   * @param mask The mask (symbolically) that this expression should be OR-ed with it.
-   */
-  void bitwiseOr (const Expression *mask);
-
-  /**
-   * Bitwise XOR of this expression and given mask value.
-   * @param mask The mask value which should be xor-ed by this expression.
-   */
-  void bitwiseXor (ConcreteValue *mask);
-  void bitwiseXor (UINT64 mask);
-
-  /**
-   * Bitwise XOR of this expression and the given symbolic value/expression.
-   * @param mask The mask (symbolically) that this expression should be XOR-ed with it.
-   */
-  void bitwiseXor (const Expression *mask);
+  template <typename ValueOrExp>
+  void bitwiseXor (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::XOR), operand);
+  }
 
   /**
    * Sets the given count of bits, from least significant bits, to zero.

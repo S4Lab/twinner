@@ -21,6 +21,7 @@ namespace twinner {
 namespace trace {
 
 class ConcreteValue;
+class Expression;
 
 class Operator : public ExpressionToken {
 
@@ -68,6 +69,28 @@ public:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static Operator *loadFromBinaryStream (std::ifstream &in);
 
+  /**
+   * Indicates whether this operator supports expression simplification and direct
+   * application for constant operands.
+   *
+   * @return true iff the `apply (Expression *, ConcreteValue *)` method has a chance
+   * to simplify the expression.
+   */
+  bool doesSupportSimplification () const;
+
+  /**
+   * Applies this operator on given expression and concrete value objects.
+   * This modifies internal state of exp to make it equal with `exp <this> cv`.
+   * Also, if it's possible to simplify the operation and avoid applying it symbolically,
+   * this method applies the operation directly and returns true. Otherwise it returns
+   * false to inform caller that this operator is saved in internal state of exp and
+   * is owned by the exp since then.
+   *
+   * @param exp The expression which its state will be changed by applying this operator.
+   * @param cv The owned concrete value that is used as operand of this operation.
+   * @return true iff the operator is not used and operation is applied directly.
+   */
+  bool apply (Expression *exp, ConcreteValue *cv);
   void apply (ConcreteValue &dst, const ConcreteValue &src) const;
 
   virtual std::string toString () const;

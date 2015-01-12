@@ -12,21 +12,19 @@
 
 #include "Expression.h"
 
-#include <stdexcept>
-#include <fstream>
-#include <sstream>
-
-#include "edu/sharif/twinner/util/Logger.h"
-#include "edu/sharif/twinner/util/memory.h"
-
 #include "Constant.h"
 #include "ConcreteValue64Bits.h"
 #include "Symbol.h"
 #include "ConcreteValue128Bits.h"
 #include "WrongStateException.h"
-#include "edu/sharif/twinner/trace/ConcreteValue.h"
-#include "edu/sharif/twinner/trace/Constant.h"
 #include "ExpressionImp.h"
+
+#include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/memory.h"
+
+#include <stdexcept>
+#include <fstream>
+#include <sstream>
 
 namespace edu {
 namespace sharif {
@@ -138,6 +136,11 @@ void Expression::unaryOperation (Operator op, const Expression *exp) {
 }
 
 void Expression::binaryOperation (Operator *op, const Expression *exp) {
+  if (op->doesSupportSimplification () && exp->isTrivial ()) {
+    // FIXME: Make sure that last concrete value is always valid at this point
+    binaryOperation (op, exp->getLastConcreteValue ().clone ());
+    return;
+  }
   /**
    * It's possible that this object and given constant expression object be the same.
    * In that case changing this object while searching the given expression can
@@ -146,18 +149,21 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
    * before applying any change to this object.
    */
   Expression *copy = exp->clone ();
-  for (std::list < ExpressionToken * >::iterator it = copy->stack.begin ();
-      it != copy->stack.end (); ++it) {
-    /**
-     * The token's ownership is taken by this object. So the copy temporary expression
-     * must not be deleted (to avoid deleting tokens which are currently owned by this
-     * object).
-     */
-    ExpressionToken *token = *it;
-    stack.push_back (token);
-  }
+  stack.insert (stack.end (), copy->stack.begin (), copy->stack.end ());
+  copy->stack.clear ();
+  delete copy;
   stack.push_back (op);
   op->apply (*lastConcreteValue, *(exp->lastConcreteValue));
+}
+
+void Expression::binaryOperation (Operator *op, ConcreteValue *cv) {
+  if (op->apply (this, cv)) {
+    delete op; // in this case operation is simplified and op is not used.
+  }
+}
+
+void Expression::binaryOperation (Operator *op, UINT64 cv) {
+  binaryOperation (op, new ConcreteValue64Bits (cv));
 }
 
 void Expression::truncate (int bits) {
@@ -179,365 +185,12 @@ void Expression::truncate (int bits) {
   bitwiseAnd (mask);
 }
 
-void Expression::shiftToRight (ConcreteValue *bits) {
-  if ((*bits) >= 64) {
-    (*lastConcreteValue) >>= *bits;
-    if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-      Constant *lastConstant = static_cast<Constant *> (stack.back ());
-      ConcreteValue *cv = lastConstant->getValue ().clone ();
-      (*cv) >>= (*bits);
-      lastConstant->setValue (*cv);
-      delete bits;
-      delete cv;
-    } else {
-      stack.push_back (new Constant (bits));
-      stack.push_back (new Operator (Operator::SHIFT_RIGHT));
-    }
-  } else {
-    // shift-to-right by n bits is equivalent to division by 2^n
-    const UINT64 val = (1ull << bits->toUint64 ());
-    if (val > 1) {
-      divide (val);
-    }
-    delete bits;
-  }
-}
-
-void Expression::shiftToRight (int bits) {
-  shiftToRight (new ConcreteValue64Bits (bits));
-}
-
-void Expression::shiftToRight (const Expression *bits) {
-  if (bits->isTrivial ()) {
-    // FIXME: Make sure that last concrete value is always valid at this point
-    shiftToRight (bits->getLastConcreteValue ().clone ());
-  } else {
-    binaryOperation (new Operator (Operator::SHIFT_RIGHT), bits);
-  }
-}
-
-void Expression::arithmeticShiftToRight (ConcreteValue *bits) {
-  lastConcreteValue->arithmeticShiftToRight (*bits);
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    Constant *lastConstant = static_cast<Constant *> (stack.back ());
-    ConcreteValue *cv = lastConstant->getValue ().clone ();
-    cv->arithmeticShiftToRight (*bits);
-    lastConstant->setValue (*cv);
-    delete bits;
-    delete cv;
-  } else {
-    stack.push_back (new Constant (bits));
-    stack.push_back (new Operator (Operator::ARITHMETIC_SHIFT_RIGHT));
-  }
-}
-
-void Expression::arithmeticShiftToRight (int bits) {
-  arithmeticShiftToRight (new ConcreteValue64Bits (bits));
-}
-
-void Expression::arithmeticShiftToRight (const Expression *bits) {
-  if (bits->isTrivial ()) {
-    // FIXME: Make sure that last concrete value is always valid at this point
-    arithmeticShiftToRight (bits->getLastConcreteValue ().clone ());
-  } else {
-    binaryOperation (new Operator (Operator::ARITHMETIC_SHIFT_RIGHT), bits);
-  }
-}
-
-void Expression::shiftToLeft (ConcreteValue *bits) {
-  if ((*bits) >= 64) {
-    stack.push_back (new Constant (bits));
-    stack.push_back (new Operator (Operator::SHIFT_LEFT));
-    (*lastConcreteValue) <<= *bits;
-  } else {
-    // shift-to-left by n bits is equivalent to multiplication by 2^n
-    UINT64 val = (1ull << bits->toUint64 ());
-    if (val > 1) {
-      multiply (val);
-    }
-    delete bits;
-  }
-}
-
-void Expression::shiftToLeft (int bits) {
-  shiftToLeft (new ConcreteValue64Bits (bits));
-}
-
-void Expression::shiftToLeft (const Expression *bits) {
-  binaryOperation (new Operator (Operator::SHIFT_LEFT), bits);
-}
-
-void Expression::rotateToRight (ConcreteValue *bits) {
-  stack.push_back (new Constant (bits));
-  stack.push_back (new Operator (Operator::ROTATE_RIGHT));
-  lastConcreteValue->rotateToRight (*bits);
-}
-
-void Expression::rotateToRight (int bits) {
-  rotateToRight (new ConcreteValue64Bits (bits));
-}
-
-void Expression::rotateToRight (const Expression *bits) {
-  binaryOperation (new Operator (Operator::ROTATE_RIGHT), bits);
-}
-
-void Expression::minus (ConcreteValue *immediate) {
-  Constant *lastConstant = 0;
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstant = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::ADD) {
-      lastConstant = dynamic_cast<Constant *> (*--it);
-    }
-  }
-  if (lastConstant) {
-    (*lastConcreteValue) -= *immediate;
-    ConcreteValue *cv = lastConstant->getValue ().clone ();
-    (*cv) -= (*immediate);
-    lastConstant->setValue (*cv);
-    delete immediate;
-    delete cv;
-  } else {
-    stack.push_back (new Constant (immediate));
-    stack.push_back (new Operator (Operator::MINUS));
-    (*lastConcreteValue) -= *immediate;
-  }
-}
-
-void Expression::minus (UINT64 immediate) {
-  minus (new ConcreteValue64Bits (immediate));
-}
-
-void Expression::minus (const Expression *exp) {
-  if (exp->isTrivial ()) {
-    // FIXME: Make sure that last concrete value is always valid at this point
-    minus (exp->getLastConcreteValue ().clone ());
-  } else {
-    binaryOperation (new Operator (Operator::MINUS), exp);
-  }
-}
-
 Expression *Expression::twosComplement () const {
   ConcreteValue *cv = lastConcreteValue->clone ();
   (*cv) = 0;
   Expression *zero = new ExpressionImp (cv);
   zero->minus (this);
   return zero;
-}
-
-void Expression::add (ConcreteValue *immediate) {
-  Constant *lastConstant = 0;
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstant = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::ADD) {
-      lastConstant = dynamic_cast<Constant *> (*--it);
-    }
-  }
-  if (lastConstant) {
-    (*lastConcreteValue) += *immediate;
-    (*immediate) += lastConstant->getValue ();
-    lastConstant->setValue (*immediate);
-    delete immediate;
-  } else {
-    stack.push_back (new Constant (immediate));
-    stack.push_back (new Operator (Operator::ADD));
-    (*lastConcreteValue) += *immediate;
-  }
-}
-
-void Expression::add (UINT64 immediate) {
-  add (new ConcreteValue64Bits (immediate));
-}
-
-void Expression::add (const Expression *exp) {
-  if (exp->isTrivial ()) {
-    // FIXME: Make sure that last concrete value is always valid at this point
-    add (exp->getLastConcreteValue ().clone ());
-  } else {
-    binaryOperation (new Operator (Operator::ADD), exp);
-  }
-}
-
-void Expression::multiply (ConcreteValue *immediate) {
-  Constant *lastConstant = 0;
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstant = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::MULTIPLY) {
-      lastConstant = dynamic_cast<Constant *> (*--it);
-    }
-  }
-  if (lastConstant) {
-    (*lastConcreteValue) *= *immediate;
-    (*immediate) *= lastConstant->getValue ();
-    lastConstant->setValue (*immediate);
-    delete immediate;
-  } else {
-    stack.push_back (new Constant (immediate));
-    stack.push_back (new Operator (Operator::MULTIPLY));
-    (*lastConcreteValue) *= *immediate;
-  }
-}
-
-void Expression::multiply (UINT64 immediate) {
-  multiply (new ConcreteValue64Bits (immediate));
-}
-
-void Expression::multiply (const Expression *exp) {
-  if (exp->isTrivial ()) {
-    // FIXME: Make sure that last concrete value is always valid at this point
-    multiply (exp->getLastConcreteValue ().clone ());
-  } else {
-    binaryOperation (new Operator (Operator::MULTIPLY), exp);
-  }
-}
-
-void Expression::divide (ConcreteValue *immediate) {
-  Constant *lastConstant = 0;
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstant = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::MULTIPLY) {
-      lastConstant = dynamic_cast<Constant *> (*--it);
-    }
-  }
-  if (lastConstant) {
-    (*lastConcreteValue) /= *immediate;
-    ConcreteValue *cv = lastConstant->getValue ().clone ();
-    (*cv) /= (*immediate);
-    lastConstant->setValue (*cv);
-    delete immediate;
-    delete cv;
-  } else {
-    stack.push_back (new Constant (immediate));
-    stack.push_back (new Operator (Operator::DIVIDE));
-    (*lastConcreteValue) /= *immediate;
-  }
-}
-
-void Expression::divide (UINT64 immediate) {
-  divide (new ConcreteValue64Bits (immediate));
-}
-
-void Expression::divide (const Expression *exp) {
-  if (exp->isTrivial ()) {
-    // FIXME: Make sure that last concrete value is always valid at this point
-    divide (exp->getLastConcreteValue ().clone ());
-  } else {
-    binaryOperation (new Operator (Operator::DIVIDE), exp);
-  }
-}
-
-void Expression::bitwiseAnd (ConcreteValue *mask) {
-  Constant *lastConstantMask = 0;
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstantMask = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::BITWISE_AND) {
-      lastConstantMask = dynamic_cast<Constant *> (*--it);
-    }
-  }
-  if (lastConstantMask) {
-    (*lastConcreteValue) &= *mask;
-    (*mask) &= lastConstantMask->getValue ();
-    lastConstantMask->setValue (*mask);
-    delete mask;
-  } else {
-    stack.push_back (new Constant (mask));
-    stack.push_back (new Operator (Operator::BITWISE_AND));
-    (*lastConcreteValue) &= *mask;
-  }
-}
-
-void Expression::bitwiseAnd (UINT64 mask) {
-  bitwiseAnd (new ConcreteValue64Bits (mask));
-}
-
-void Expression::bitwiseAnd (const Expression *mask) {
-  binaryOperation (new Operator (Operator::BITWISE_AND), mask);
-}
-
-void Expression::bitwiseOr (ConcreteValue *mask) {
-  Constant *lastConstantMask = 0;
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstantMask = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::BITWISE_OR) {
-      lastConstantMask = dynamic_cast<Constant *> (*--it);
-    }
-  }
-  if (lastConstantMask) {
-    (*lastConcreteValue) |= *mask;
-    (*mask) |= lastConstantMask->getValue ();
-    lastConstantMask->setValue (*mask);
-    delete mask;
-  } else {
-    stack.push_back (new Constant (mask));
-    stack.push_back (new Operator (Operator::BITWISE_OR));
-    (*lastConcreteValue) |= *mask;
-  }
-}
-
-void Expression::bitwiseOr (UINT64 mask) {
-  bitwiseOr (new ConcreteValue64Bits (mask));
-}
-
-void Expression::bitwiseOr (const Expression *mask) {
-  if (mask->isTrivial ()) {
-    // FIXME: Make sure that last concrete value is always valid at this point
-    bitwiseOr (mask->getLastConcreteValue ().clone ());
-  } else {
-    binaryOperation (new Operator (Operator::BITWISE_OR), mask);
-  }
-}
-
-void Expression::bitwiseXor (ConcreteValue *mask) {
-  Constant *lastConstantMask = 0;
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstantMask = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::XOR) {
-      lastConstantMask = dynamic_cast<Constant *> (*--it);
-    }
-  }
-  if (lastConstantMask) {
-    (*lastConcreteValue) ^= *mask;
-    (*mask) ^= lastConstantMask->getValue ();
-    lastConstantMask->setValue (*mask);
-    delete mask;
-  } else {
-    stack.push_back (new Constant (mask));
-    stack.push_back (new Operator (Operator::XOR));
-    (*lastConcreteValue) ^= *mask;
-  }
-}
-
-void Expression::bitwiseXor (UINT64 mask) {
-  bitwiseXor (new ConcreteValue64Bits (mask));
-}
-
-void Expression::bitwiseXor (const Expression *mask) {
-  if (mask->isTrivial ()) {
-    // FIXME: Make sure that last concrete value is always valid at this point
-    bitwiseXor (mask->getLastConcreteValue ().clone ());
-  } else {
-    binaryOperation (new Operator (Operator::XOR), mask);
-  }
 }
 
 void Expression::makeLeastSignificantBitsZero (int bits) {
