@@ -28,7 +28,11 @@ namespace trace {
 
 class Expression;
 class Constraint;
+
+namespace cv {
+
 class ConcreteValue;
+}
 
 /*
  * @interface This interface, specifies that current execution state, including
@@ -67,7 +71,8 @@ public:
    * corresponding expression differs from expected @c regval value.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const ConcreteValue &regval) const /* @throw (WrongStateException) */ = 0;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval) const
+  /* @throw (WrongStateException) */ = 0;
 
   /**
    * Overload of tryToGetSymbolicExpressionByRegister (reg, regval) method.
@@ -96,7 +101,8 @@ public:
    * corresponding expression differs from expected @c memval value.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
-      ADDRINT memoryEa, const ConcreteValue &memval) const
+      ADDRINT memoryEa,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval) const
   /* @throw (WrongStateException) */ = 0;
 
   /**
@@ -137,8 +143,8 @@ public:
    * captured till now) thus there must be some ignored instruction in the trace.
    */
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
-      const ConcreteValue &regval, Expression *newExpression) = 0
-  /* @throw (UnexpectedChangeException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+      Expression *newExpression) = 0 /* @throw (UnexpectedChangeException) */;
 
   /**
    * Overload of getSymbolicExpressionByRegister (reg, regval, newExpression)
@@ -181,8 +187,8 @@ public:
    * captured till now) thus there must be some ignored instruction in the trace.
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-      const ConcreteValue &memval, Expression *newExpression) = 0
-  /* @throw (UnexpectedChangeException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+      Expression *newExpression) = 0 /* @throw (UnexpectedChangeException) */;
 
   /**
    * Overload of getSymbolicExpressionByMemoryAddress (memoryEa, memval, newExpression)

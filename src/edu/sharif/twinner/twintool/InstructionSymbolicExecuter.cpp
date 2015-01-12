@@ -707,7 +707,7 @@ void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
 
   } else if (operandSize > 0) {
     (this->*hook) (context,
-        edu::sharif::twinner::trace::ConcreteValue64Bits (operandSize));
+        edu::sharif::twinner::trace::cv::ConcreteValue64Bits (operandSize));
     operandSize = -1;
   }
   hook = 0;
@@ -793,7 +793,7 @@ void InstructionSymbolicExecuter::pshufdAnalysisRoutine (
   const unsigned int ob[] = {orderByte.b0, orderByte.b1, orderByte.b2, orderByte.b3};
   edu::sharif::twinner::trace::Expression *res =
       new edu::sharif::twinner::trace::ExpressionImp
-      (new edu::sharif::twinner::trace::ConcreteValue128Bits ());
+      (new edu::sharif::twinner::trace::cv::ConcreteValue128Bits ());
   edu::sharif::twinner::util::Logger::loquacious () << "\tshuffling words...";
   for (int i = 0; i < 4; ++i) {
     edu::sharif::twinner::trace::Expression *exp = srcexp->clone ();
@@ -1616,10 +1616,10 @@ void InstructionSymbolicExecuter::bsfAnalysisRoutine (
       << "\tgetting src exp...";
   edu::sharif::twinner::trace::Expression *srcexp =
       src.getExpression (trace);
-  const edu::sharif::twinner::trace::ConcreteValue &cv = srcexp->getLastConcreteValue ();
+  const edu::sharif::twinner::trace::cv::ConcreteValue &cv = srcexp->getLastConcreteValue ();
   UINT64 i = 0;
   for (unsigned int s = cv.getSize (); i < s; ++i) {
-    edu::sharif::twinner::trace::ConcreteValue *bit = cv.clone ();
+    edu::sharif::twinner::trace::cv::ConcreteValue *bit = cv.clone ();
     (*bit) >>= i;
     (*bit) &= 1;
     if ((*bit) == 1) {
@@ -1635,7 +1635,7 @@ void InstructionSymbolicExecuter::bsfAnalysisRoutine (
   delete indexexp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   edu::sharif::twinner::trace::Expression *conditionExp = srcexp;
-  edu::sharif::twinner::trace::ConcreteValue *bit = cv.clone ();
+  edu::sharif::twinner::trace::cv::ConcreteValue *bit = cv.clone ();
   (*bit) = 1;
   (*bit) <<= i;
   conditionExp->truncate (i + 1);
@@ -1688,7 +1688,7 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
     const CONTEXT *context, const ConcreteValue &operandSize) {
   edu::sharif::twinner::util::Logger::loquacious ()
       << "adjustDivisionMultiplicationOperands(...) hook...";
-  const edu::sharif::twinner::trace::ConcreteValue64Bits os = operandSize;
+  const edu::sharif::twinner::trace::cv::ConcreteValue64Bits os = operandSize;
   const UINT64 osval = os.toUint64 ();
   REG leftReg, rightReg;
   switch (osval) {
@@ -2132,8 +2132,8 @@ VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
-       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
        insAssembly);
 }
 
@@ -2144,8 +2144,8 @@ VOID analysisRoutineDstRegSrcMutableReg (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcMutableReg
       (ise->convertOpcodeToMutableSourceAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
-       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
        insAssembly);
 }
 
@@ -2157,9 +2157,9 @@ VOID analysisRoutineDstRegSrcRegAuxReg (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcRegAuxReg
       (ise->convertOpcodeToAuxOperandHavingAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
-       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
-       (REG) auxReg, edu::sharif::twinner::trace::ConcreteValue64Bits (auxRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
+       (REG) auxReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxRegVal),
        insAssembly);
 }
 
@@ -2170,8 +2170,8 @@ VOID analysisRoutineDstRegSrcLargeReg (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
-       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*srcRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue128Bits (*srcRegVal),
        insAssembly);
 }
 
@@ -2182,8 +2182,8 @@ VOID analysisRoutineDstLargeRegSrcReg (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*dstRegVal),
-       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue128Bits (*dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
        insAssembly);
 }
 
@@ -2194,8 +2194,8 @@ VOID analysisRoutineDstLargeRegSrcLargeReg (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*dstRegVal),
-       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*srcRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue128Bits (*dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue128Bits (*srcRegVal),
        insAssembly);
 }
 
@@ -2207,9 +2207,9 @@ VOID analysisRoutineDstLargeRegSrcLargeRegAuxImd (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcRegAuxImd
       (ise->convertOpcodeToDoubleSourcesAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*dstRegVal),
-       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*srcRegVal),
-       edu::sharif::twinner::trace::ConcreteValue64Bits (auxImmediateValue),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue128Bits (*dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue128Bits (*srcRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxImmediateValue),
        insAssembly);
 }
 
@@ -2220,7 +2220,7 @@ VOID analysisRoutineDstLargeRegSrcMem (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcMem
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*dstRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue128Bits (*dstRegVal),
        srcMemoryEa, memReadBytes,
        insAssembly);
 }
@@ -2233,9 +2233,9 @@ VOID analysisRoutineDstLargeRegSrcMemAuxImd (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcMemAuxImd
       (ise->convertOpcodeToDoubleSourcesAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*dstRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue128Bits (*dstRegVal),
        srcMemoryEa, memReadBytes,
-       edu::sharif::twinner::trace::ConcreteValue64Bits (auxImmediateValue),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxImmediateValue),
        insAssembly);
 }
 
@@ -2246,7 +2246,7 @@ VOID analysisRoutineDstRegSrcMem (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcMem
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
        srcMemoryEa, memReadBytes,
        insAssembly);
 }
@@ -2260,9 +2260,9 @@ VOID analysisRoutineDstRegSrcMemAuxReg (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcMemAuxReg
       (ise->convertOpcodeToAuxOperandHavingAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
        srcMemoryEa,
-       (REG) auxReg, edu::sharif::twinner::trace::ConcreteValue64Bits (auxRegVal),
+       (REG) auxReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxRegVal),
        memReadBytes,
        insAssembly);
 }
@@ -2274,8 +2274,8 @@ VOID analysisRoutineDstRegSrcImd (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcImd
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
-       edu::sharif::twinner::trace::ConcreteValue64Bits (srcImmediateValue),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcImmediateValue),
        insAssembly);
 }
 
@@ -2288,7 +2288,7 @@ VOID analysisRoutineDstMemSrcReg (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineDstMemSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
-       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
        memReadBytes,
        insAssembly);
 }
@@ -2302,7 +2302,7 @@ VOID analysisRoutineDstMemSrcMutableReg (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineDstMemSrcMutableReg
       (ise->convertOpcodeToMutableSourceAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
-       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
        memReadBytes,
        insAssembly);
 }
@@ -2317,8 +2317,8 @@ VOID analysisRoutineDstMemSrcRegAuxReg (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineDstMemSrcRegAuxReg
       (ise->convertOpcodeToAuxOperandHavingAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
-       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
-       (REG) auxReg, edu::sharif::twinner::trace::ConcreteValue64Bits (auxRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
+       (REG) auxReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxRegVal),
        memReadBytes,
        insAssembly);
 }
@@ -2332,7 +2332,7 @@ VOID analysisRoutineDstMemSrcLargeReg (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineDstMemSrcReg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
-       (REG) srcReg, edu::sharif::twinner::trace::ConcreteValue128Bits (*srcRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue128Bits (*srcRegVal),
        memReadBytes,
        insAssembly);
 }
@@ -2346,7 +2346,7 @@ VOID analysisRoutineDstMemSrcImd (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineDstMemSrcImd
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
-       edu::sharif::twinner::trace::ConcreteValue64Bits (srcImmediateValue),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcImmediateValue),
        memReadBytes,
        insAssembly);
 }
@@ -2361,8 +2361,8 @@ VOID analysisRoutineDstMemSrcImdAuxReg (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineDstMemSrcImdAuxReg
       (ise->convertOpcodeToAuxOperandHavingAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
-       edu::sharif::twinner::trace::ConcreteValue64Bits (srcImmediateValue),
-       (REG) auxReg, edu::sharif::twinner::trace::ConcreteValue64Bits (auxRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcImmediateValue),
+       (REG) auxReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxRegVal),
        memReadBytes,
        insAssembly);
 }
@@ -2390,7 +2390,7 @@ VOID analysisRoutineDstMemSrcMemAuxReg (VOID *iseptr, UINT32 opcode,
       (ise->convertOpcodeToAuxOperandHavingAnalysisRoutine ((OPCODE) opcode),
        dstMemoryEa,
        srcMemoryEa,
-       (REG) auxReg, edu::sharif::twinner::trace::ConcreteValue64Bits (auxRegVal),
+       (REG) auxReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxRegVal),
        memReadBytes,
        insAssembly);
 }
@@ -2411,7 +2411,7 @@ VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcAdg
       (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
        insAssembly);
 }
 
@@ -2434,11 +2434,11 @@ VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineTwoDstRegOneSrcReg
       (ise->convertOpcodeToDoubleDestinationsAnalysisRoutine ((OPCODE) opcode),
        (REG) dstLeftReg,
-       edu::sharif::twinner::trace::ConcreteValue64Bits (dstLeftRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstLeftRegVal),
        (REG) dstRightReg,
-       edu::sharif::twinner::trace::ConcreteValue64Bits (dstRightRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRightRegVal),
        (REG) srcReg,
-       edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
        insAssembly);
 }
 
@@ -2451,9 +2451,9 @@ VOID analysisRoutineTwoDstRegOneSrcMem (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineTwoDstRegOneSrcMem
       (ise->convertOpcodeToDoubleDestinationsAnalysisRoutine ((OPCODE) opcode),
        (REG) dstLeftReg,
-       edu::sharif::twinner::trace::ConcreteValue64Bits (dstLeftRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstLeftRegVal),
        (REG) dstRightReg,
-       edu::sharif::twinner::trace::ConcreteValue64Bits (dstRightRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRightRegVal),
        srcMemoryEa, memReadBytes,
        insAssembly);
 }
@@ -2479,7 +2479,7 @@ VOID analysisRoutineDstRegSrcImplicit (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineDstRegSrcImplicit
       (ise->convertOpcodeToSingleOperandAnalysisRoutine ((OPCODE) opcode),
-       (REG) dstReg, edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
        insAssembly);
 }
 
@@ -2512,9 +2512,9 @@ VOID analysisRoutineStrOpRegMem (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineTwoRegOneMem
       (ise->convertOpcodeToDoubleDestinationsAnalysisRoutine ((OPCODE) opcode),
        (REG) dstReg,
-       edu::sharif::twinner::trace::ConcreteValue64Bits (dstRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
        (REG) srcReg,
-       edu::sharif::twinner::trace::ConcreteValue64Bits (srcRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
        srcMemoryEa, memReadBytes,
        insAssembly);
 }
@@ -2526,7 +2526,7 @@ VOID analysisRoutineRepPrefix (VOID *iseptr, UINT32 opcode,
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
   ise->analysisRoutineRepEqualOrRepNotEqualPrefix
       ((REG) repReg,
-       edu::sharif::twinner::trace::ConcreteValue64Bits (repRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (repRegVal),
        executing, repEqual,
        insAssembly);
 }

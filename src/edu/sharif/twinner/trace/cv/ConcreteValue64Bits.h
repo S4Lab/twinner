@@ -19,6 +19,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
 
 class ConcreteValue64Bits : public ConcreteValueAbstractImp<64, UINT64> {
 
@@ -40,6 +41,7 @@ protected:
   virtual ConcreteValue *realClone (int length) const;
 };
 
+}
 }
 }
 }

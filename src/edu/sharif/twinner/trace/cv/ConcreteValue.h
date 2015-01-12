@@ -21,13 +21,14 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
 
 /**
  * @interface ConcreteValue is responsible for keeping and applying arithmetic/logical
  * operations on a concrete value. Implementations of this interface may support different
  * length (e.g. 64 bits implementation using UINT64) values.
  */
-class ConcreteValue : public Savable {
+class ConcreteValue : public edu::sharif::twinner::trace::Savable {
 
 protected:
   ConcreteValue ();
@@ -204,6 +205,7 @@ public:
   ConcreteValue &rotateToRight (UINT64 bits);
 };
 
+}
 }
 }
 }

@@ -26,6 +26,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
 
 ConcreteValue::ConcreteValue () {
 }
@@ -159,6 +160,7 @@ ConcreteValue &ConcreteValue::rotateToRight (UINT64 bits) {
   return this->rotateToRight (ConcreteValue64Bits (bits));
 }
 
+}
 }
 }
 }

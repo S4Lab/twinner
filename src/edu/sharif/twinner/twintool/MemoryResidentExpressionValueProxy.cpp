@@ -15,9 +15,10 @@
 #include "MemoryResidentExpressionValueProxy.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/ExpressionImp.h"
+
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
-#include "edu/sharif/twinner/trace/ExpressionImp.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/memory.h"
@@ -65,14 +66,14 @@ MemoryResidentExpressionValueProxy::getExpression (
 edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::alignedMemoryRead (int size,
     edu::sharif::twinner::trace::Trace *trace) const {
-  edu::sharif::twinner::trace::ConcreteValue *cv;
+  edu::sharif::twinner::trace::cv::ConcreteValue *cv;
   if (size == 128) {
     const UINT64 cvlsb = edu::sharif::twinner::util::readMemoryContent (memoryEa);
     const UINT64 cvmsb = edu::sharif::twinner::util::readMemoryContent (memoryEa + 8);
-    cv = new edu::sharif::twinner::trace::ConcreteValue128Bits (cvmsb, cvlsb);
+    cv = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits (cvmsb, cvlsb);
   } else {
     const UINT64 cvval = edu::sharif::twinner::util::readMemoryContent (memoryEa);
-    cv = edu::sharif::twinner::trace::ConcreteValue64Bits (cvval).clone (size);
+    cv = edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cvval).clone (size);
   }
   edu::sharif::twinner::trace::Expression *exp =
       trace->getSymbolicExpressionByMemoryAddress (size, memoryEa, *cv);
@@ -283,8 +284,8 @@ MemoryResidentExpressionValueProxy::getNeighborExpression (int size,
     return it->second.first;
   }
   const UINT64 cv = edu::sharif::twinner::util::readMemoryContent (address);
-  edu::sharif::twinner::trace::ConcreteValue *cvObj =
-      edu::sharif::twinner::trace::ConcreteValue64Bits (cv).clone (size);
+  edu::sharif::twinner::trace::cv::ConcreteValue *cvObj =
+      edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv).clone (size);
   const edu::sharif::twinner::trace::Expression *neighbor =
       trace->getSymbolicExpressionByMemoryAddress (size, address, *cvObj);
   delete cvObj;

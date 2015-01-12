@@ -24,20 +24,23 @@ class UnexpectedChangeException : public WrongStateException {
 
 public:
 
-  UnexpectedChangeException (REG reg, const ConcreteValue &expectedVal,
-      const ConcreteValue &currentVal) :
+  UnexpectedChangeException (REG reg,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &expectedVal,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &currentVal) :
       WrongStateException (prepareRegisterMessage (reg, expectedVal, currentVal),
       expectedVal, currentVal) {
   }
 
-  UnexpectedChangeException (ADDRINT address, const ConcreteValue &expectedVal,
-      const ConcreteValue &currentVal) :
+  UnexpectedChangeException (ADDRINT address,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &expectedVal,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &currentVal) :
       WrongStateException (prepareMemoryMessage (address, expectedVal, currentVal),
       expectedVal, currentVal) {
   }
 
   static const std::string prepareRegisterMessage (REG reg,
-      const ConcreteValue &expectedVal, const ConcreteValue &currentVal) {
+      const edu::sharif::twinner::trace::cv::ConcreteValue &expectedVal,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &currentVal) {
     const std::string addr = REG_StringShort (reg);
     std::stringstream ss;
     ss << "Value of an address changed unexpectedly"
@@ -48,7 +51,8 @@ public:
   }
 
   static const std::string prepareMemoryMessage (ADDRINT address,
-      const ConcreteValue &expectedVal, const ConcreteValue &currentVal) {
+      const edu::sharif::twinner::trace::cv::ConcreteValue &expectedVal,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &currentVal) {
     std::stringstream ss;
     ss << "Value of an address changed unexpectedly"
         " without any interfering syscall\n"

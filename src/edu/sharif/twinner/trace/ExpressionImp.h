@@ -35,7 +35,7 @@ public:
    * ASSERT: reg == REG_FullRegName (reg)
    */
   ExpressionImp (REG reg,
-      const edu::sharif::twinner::trace::ConcreteValue &concreteValue,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
       int generationIndex);
 
   /**
@@ -45,7 +45,7 @@ public:
    * ASSERT: memoryEa is aligned (based on size of the concrete value)
    */
   ExpressionImp (ADDRINT memoryEa,
-      const edu::sharif::twinner::trace::ConcreteValue &concreteValue,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
       int generationIndex, bool isOverwriting = false);
 
   /**
@@ -59,13 +59,13 @@ public:
   /**
    * Instantiates an expression containing a constant value (non-symbolic).
    */
-  ExpressionImp (const edu::sharif::twinner::trace::ConcreteValue &value);
+  ExpressionImp (const edu::sharif::twinner::trace::cv::ConcreteValue &value);
 
   /**
    * Instantiates an expression containing a constant value (non-symbolic) and takes
    * ownership of the given concrete value.
    */
-  ExpressionImp (edu::sharif::twinner::trace::ConcreteValue *value);
+  ExpressionImp (edu::sharif::twinner::trace::cv::ConcreteValue *value);
 
   /**
    * Instantiates an expression containing a constant value (non-symbolic).

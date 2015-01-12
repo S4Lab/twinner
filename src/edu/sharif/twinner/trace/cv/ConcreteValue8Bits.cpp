@@ -25,6 +25,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
 
 ConcreteValue8Bits::ConcreteValue8Bits (UINT8 _value) :
     ConcreteValueAbstractImp<8, UINT8> (_value) {
@@ -81,6 +82,7 @@ ConcreteValue8Bits *ConcreteValue8Bits::loadFromBinaryStream (std::ifstream &in)
   return new ConcreteValue8Bits (value);
 }
 
+}
 }
 }
 }

@@ -23,11 +23,11 @@ Operand::Operand () :
     ExpressionToken (), concreteValue (0) {
 }
 
-Operand::Operand (const edu::sharif::twinner::trace::ConcreteValue &cv) :
+Operand::Operand (const edu::sharif::twinner::trace::cv::ConcreteValue &cv) :
     ExpressionToken (), concreteValue (cv.clone ()) {
 }
 
-Operand::Operand (edu::sharif::twinner::trace::ConcreteValue *cv) :
+Operand::Operand (edu::sharif::twinner::trace::cv::ConcreteValue *cv) :
     ExpressionToken (), concreteValue (cv) {
 }
 
@@ -39,7 +39,7 @@ Operand::~Operand () {
   delete concreteValue;
 }
 
-const edu::sharif::twinner::trace::ConcreteValue &Operand::getValue () const {
+const edu::sharif::twinner::trace::cv::ConcreteValue &Operand::getValue () const {
   return *concreteValue;
 }
 

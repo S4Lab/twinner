@@ -23,7 +23,7 @@ namespace util {
 /**
  * Caller is owner of the returned concrete value object.
  */
-edu::sharif::twinner::trace::ConcreteValue *readRegisterContent (
+edu::sharif::twinner::trace::cv::ConcreteValue *readRegisterContent (
     const CONTEXT *context, REG reg);
 
 UINT64 readMemoryContent (ADDRINT memoryEa);

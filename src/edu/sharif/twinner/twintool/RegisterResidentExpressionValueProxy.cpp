@@ -18,8 +18,9 @@
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
 
-#include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
+
+#include "edu/sharif/twinner/util/Logger.h"
 
 namespace edu {
 namespace sharif {
@@ -32,7 +33,7 @@ RegisterResidentExpressionValueProxy::RegisterResidentExpressionValueProxy (REG 
 }
 
 RegisterResidentExpressionValueProxy::RegisterResidentExpressionValueProxy (REG _reg) :
-    reg (_reg), regVal (edu::sharif::twinner::trace::ConcreteValue64Bits (0)
+    reg (_reg), regVal (edu::sharif::twinner::trace::cv::ConcreteValue64Bits (0)
     .clone (REG_Size (_reg) * 8)) {
 }
 

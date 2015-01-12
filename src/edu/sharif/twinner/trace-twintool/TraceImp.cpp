@@ -53,7 +53,8 @@ TraceImp::~TraceImp () {
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByRegister (int size, REG reg,
-    const ConcreteValue &regval) const /* @throw (WrongStateException) */ {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &regval) const
+/* @throw (WrongStateException) */ {
   return tryToGetSymbolicExpressionImplementation
       (size, reg, regval, &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
 }
@@ -64,7 +65,7 @@ Expression *TraceImp::tryToGetSymbolicExpressionByRegister (int size, REG reg) c
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
-    ADDRINT memoryEa, const ConcreteValue &memval) const
+    ADDRINT memoryEa, const edu::sharif::twinner::trace::cv::ConcreteValue &memval) const
 /* throw (WrongStateException) */ {
   return tryToGetSymbolicExpressionImplementation
       (size, memoryEa, memval,
@@ -79,7 +80,7 @@ Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
 
 template < typename T >
 Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T address,
-    const ConcreteValue &val,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &val,
     typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
 /* @throw (WrongStateException) */ {
   for (std::list < ExecutionTraceSegment * >::iterator it = currentSegmentIterator;
@@ -93,7 +94,8 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
       }
     } catch (const WrongStateException &e) {
       if (it == currentSegmentIterator) {
-        const ConcreteValue &currentValue = e.getCurrentStateValue ();
+        const edu::sharif::twinner::trace::cv::ConcreteValue &currentValue =
+            e.getCurrentStateValue ();
         getCurrentTraceSegment ()->printRegistersValues
             (edu::sharif::twinner::util::Logger::loquacious ());
         throw UnexpectedChangeException (address, val, currentValue);
@@ -122,8 +124,8 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
 }
 
 Expression *TraceImp::getSymbolicExpressionByRegister (int size, REG reg,
-    const ConcreteValue &regval, Expression *newExpression)
-/* @throw (UnexpectedChangeException) */ {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+    Expression *newExpression) /* @throw (UnexpectedChangeException) */ {
   return getSymbolicExpressionImplementation
       (size, reg, regval, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByRegister,
@@ -139,8 +141,8 @@ Expression *TraceImp::getSymbolicExpressionByRegister (int size, REG reg,
 }
 
 Expression *TraceImp::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-    const ConcreteValue &memval, Expression *newExpression)
-/* @throw (UnexpectedChangeException) */ {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+    Expression *newExpression) /* @throw (UnexpectedChangeException) */ {
   return getSymbolicExpressionImplementation
       (size, memoryEa, memval, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByMemoryAddress,
@@ -157,7 +159,7 @@ Expression *TraceImp::getSymbolicExpressionByMemoryAddress (int size, ADDRINT me
 
 template < typename T >
 Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
-    const ConcreteValue &val, Expression *newExpression,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &val, Expression *newExpression,
     typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
     typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod)
 /* @throw (UnexpectedChangeException) */ {
@@ -171,7 +173,8 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
     throw;
 
   } catch (const WrongStateException &e) {
-    const ConcreteValue &currentValue = e.getCurrentStateValue ();
+    const edu::sharif::twinner::trace::cv::ConcreteValue &currentValue =
+        e.getCurrentStateValue ();
     edu::sharif::twinner::util::Logger::debug () << "Unexpected value ("
         << std::hex << currentValue
         << ") was found (instead of " << val << "). "
@@ -206,7 +209,8 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
      * to pass null for the newExpression argument.
      */
     newExpression = instantiateExpression
-        (address, ConcreteValue64Bits (0), currentSegmentIndex);
+        (address, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (0),
+         currentSegmentIndex);
   }
   return (getCurrentTraceSegment ()->*getMethod) (size, address, newExpression);
 }
@@ -251,11 +255,13 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
     {
       if (record.type == REGISTER_64_BITS_SYMBOL_TYPE) {
         exp = instantiateExpression
-            (REG (record.address), ConcreteValue64Bits (record.concreteValueLsb), index);
+            (REG (record.address), edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+             (record.concreteValueLsb), index);
       } else {
         exp = instantiateExpression
             (REG (record.address),
-             ConcreteValue128Bits (record.concreteValueMsb, record.concreteValueLsb),
+             edu::sharif::twinner::trace::cv::ConcreteValue128Bits
+             (record.concreteValueMsb, record.concreteValueLsb),
              index);
       }
       std::pair < std::map < REG, Expression * >::iterator, bool > res =
@@ -271,7 +277,9 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
     {
       if (record.type == MEMORY_64_BITS_SYMBOL_TYPE) {
         exp = new ExpressionImp
-            (ADDRINT (record.address), ConcreteValue64Bits (record.concreteValueLsb),
+            (ADDRINT (record.address),
+             edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+             (record.concreteValueLsb),
              index, true);
         edu::sharif::twinner::util::Logger::loquacious () << "loading symbol: 0x"
             << std::hex << ADDRINT (record.address) << " -> "
@@ -282,7 +290,8 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
             "supposed to be transferred between Twinner and TwinTool.\n";
         exp = new ExpressionImp
             (ADDRINT (record.address),
-             ConcreteValue128Bits (record.concreteValueMsb, record.concreteValueLsb),
+             edu::sharif::twinner::trace::cv::ConcreteValue128Bits
+             (record.concreteValueMsb, record.concreteValueLsb),
              index, true);
       }
       std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
@@ -300,8 +309,8 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
   return new ExecutionTraceSegment (regMap, memMap);
 }
 
-Expression *TraceImp::instantiateExpression (REG address, const ConcreteValue &value,
-    int index) {
+Expression *TraceImp::instantiateExpression (REG address,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &value, int index) {
   const REG enclosingReg = REG_FullRegName (address);
   Expression *exp = new ExpressionImp (enclosingReg, value, index);
   if (enclosingReg != address) {
@@ -310,7 +319,8 @@ Expression *TraceImp::instantiateExpression (REG address, const ConcreteValue &v
   return exp;
 }
 
-Expression *TraceImp::instantiateExpression (ADDRINT address, const ConcreteValue &value,
+Expression *TraceImp::instantiateExpression (ADDRINT address,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &value,
     int index) {
   return new ExpressionImp (address, value, index);
 }

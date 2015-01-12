@@ -19,8 +19,10 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
 
 class ConcreteValue;
+}
 
 /**
  * This exception indicates that current execution state differs from the expected state.
@@ -28,29 +30,29 @@ class ConcreteValue;
 class WrongStateException : public edu::sharif::twinner::exception::AbstractException {
 
 private:
-  const ConcreteValue &expectedValue;
-  const ConcreteValue &currentValue;
+  const edu::sharif::twinner::trace::cv::ConcreteValue &expectedValue;
+  const edu::sharif::twinner::trace::cv::ConcreteValue &currentValue;
 
 public:
 
-  WrongStateException (const ConcreteValue &_expectedValue,
-      const ConcreteValue &_currentValue) :
+  WrongStateException (const edu::sharif::twinner::trace::cv::ConcreteValue &_expectedVal,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &_currentVal) :
       AbstractException ("Execution state differ from what we expected "
       "(probably, user space memory is changed by a syscall)."),
-      expectedValue (_expectedValue), currentValue (_currentValue) {
+      expectedValue (_expectedVal), currentValue (_currentVal) {
   }
 
-  WrongStateException (const std::string &msg, const ConcreteValue &_expectedValue,
-      const ConcreteValue &_currentValue) :
-      AbstractException (msg), expectedValue (_expectedValue),
-      currentValue (_currentValue) {
+  WrongStateException (const std::string &msg,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &_expectedVal,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &_currentVal) :
+      AbstractException (msg), expectedValue (_expectedVal), currentValue (_currentVal) {
   }
 
-  const ConcreteValue &getExpectedStateValue () const {
+  const edu::sharif::twinner::trace::cv::ConcreteValue &getExpectedStateValue () const {
     return expectedValue;
   }
 
-  const ConcreteValue &getCurrentStateValue () const {
+  const edu::sharif::twinner::trace::cv::ConcreteValue &getCurrentStateValue () const {
     return currentValue;
   }
 };

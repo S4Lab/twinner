@@ -340,7 +340,7 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
   } else if (dynamic_cast<const edu::sharif::twinner::trace::Constant *> (token)) {
     const edu::sharif::twinner::trace::Constant *constantToken =
         static_cast<const edu::sharif::twinner::trace::Constant *> (token);
-    const edu::sharif::twinner::trace::ConcreteValue &value =
+    const edu::sharif::twinner::trace::cv::ConcreteValue &value =
         constantToken->getValue ();
     std::string valstr = value.toHexString ();
     std::map<std::string, Expr>::const_iterator it = constants.find (valstr);
@@ -374,7 +374,7 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
     const UINT64 high = (UINT64 (v4) << 32) | v3;
     const UINT64 low = (UINT64 (v2) << 32) | v1;
     return new edu::sharif::twinner::trace::ExpressionImp
-        (new edu::sharif::twinner::trace::ConcreteValue128Bits (high, low));
+        (new edu::sharif::twinner::trace::cv::ConcreteValue128Bits (high, low));
   } else if (exp.isVariable ()) {
     bitLength = 128;
     std::string variableName = exp.toString ();
@@ -529,7 +529,7 @@ UINT64 ConstraintToCvc4ExprConverter::extractConstantUint64 (
   if (dynamic_cast<const edu::sharif::twinner::trace::Constant *> (token)) {
     const edu::sharif::twinner::trace::Constant *constantToken =
         static_cast<const edu::sharif::twinner::trace::Constant *> (token);
-    const edu::sharif::twinner::trace::ConcreteValue &value =
+    const edu::sharif::twinner::trace::cv::ConcreteValue &value =
         constantToken->getValue ();
     return value.toUint64 ();
   } else {

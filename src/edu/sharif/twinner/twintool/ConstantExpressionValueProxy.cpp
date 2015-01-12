@@ -23,7 +23,7 @@ namespace twinner {
 namespace twintool {
 
 ConstantExpressionValueProxy::ConstantExpressionValueProxy (
-    const edu::sharif::twinner::trace::ConcreteValue &concreteValue, int _size) :
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue, int _size) :
     exp (new edu::sharif::twinner::trace::ExpressionImp (concreteValue.clone (_size))),
     size (_size) {
 }

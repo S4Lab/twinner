@@ -79,7 +79,7 @@ public:
    * ASSERT: The precision of regval must match with precision of reg
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const edu::sharif::twinner::trace::ConcreteValue &regval) const
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval) const
   /* @throw (WrongStateException) */;
 
   /**
@@ -92,7 +92,7 @@ public:
    * ASSERT: The precision of memval must match with precision of memoryEa location
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
-      ADDRINT memoryEa, const edu::sharif::twinner::trace::ConcreteValue &memval) const
+      ADDRINT memoryEa, const edu::sharif::twinner::trace::cv::ConcreteValue &memval) const
   /* @throw (WrongStateException) */;
 
   /**
@@ -106,7 +106,7 @@ public:
    * ASSERT: The precision of regval must match with precision of reg
    */
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
-      const edu::sharif::twinner::trace::ConcreteValue &regval,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
       Expression *newExpression = 0) /* @throw (UnexpectedChangeException) */;
 
   /**
@@ -120,7 +120,7 @@ public:
    * ASSERT: The precision of memval must match with precision of memoryEa location
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-      const edu::sharif::twinner::trace::ConcreteValue &memval,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
       Expression *newExpression = 0) /* @throw (UnexpectedChangeException) */;
 
   /**

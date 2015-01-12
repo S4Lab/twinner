@@ -19,8 +19,10 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
 
 class ConcreteValue;
+}
 class Expression;
 
 class Operator : public ExpressionToken {
@@ -90,9 +92,9 @@ public:
    * @param cv The owned concrete value that is used as operand of this operation.
    * @return true iff the operator is not used and operation is applied directly.
    */
-  bool apply (Expression *exp, edu::sharif::twinner::trace::ConcreteValue *cv);
-  void apply (edu::sharif::twinner::trace::ConcreteValue &dst,
-      const edu::sharif::twinner::trace::ConcreteValue &src) const;
+  bool apply (Expression *exp, edu::sharif::twinner::trace::cv::ConcreteValue *cv);
+  void apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &src) const;
 
   virtual std::string toString () const;
 

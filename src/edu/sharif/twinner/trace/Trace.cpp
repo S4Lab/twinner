@@ -61,7 +61,7 @@ Trace::~Trace () {
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByRegister (int size, REG reg,
-    const edu::sharif::twinner::trace::ConcreteValue &regval) const
+    const edu::sharif::twinner::trace::cv::ConcreteValue &regval) const
 /* @throw (WrongStateException) */ {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
@@ -71,7 +71,7 @@ Expression *Trace::tryToGetSymbolicExpressionByRegister (int size, REG reg) cons
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-    const edu::sharif::twinner::trace::ConcreteValue &memval) const
+    const edu::sharif::twinner::trace::cv::ConcreteValue &memval) const
 /* @throw (WrongStateException) */ {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
@@ -82,7 +82,7 @@ Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (int size,
 }
 
 Expression *Trace::getSymbolicExpressionByRegister (int size, REG reg,
-    const edu::sharif::twinner::trace::ConcreteValue &regval, Expression *newExpression) {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &regval, Expression *newExpression) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
@@ -92,7 +92,7 @@ Expression *Trace::getSymbolicExpressionByRegister (int size, REG reg,
 }
 
 Expression *Trace::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-    const edu::sharif::twinner::trace::ConcreteValue &memval, Expression *newExpression) {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &memval, Expression *newExpression) {
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 

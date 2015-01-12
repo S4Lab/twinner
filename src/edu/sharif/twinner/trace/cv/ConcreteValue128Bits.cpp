@@ -29,6 +29,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
 
 ConcreteValue128Bits::ConcreteValue128Bits () :
     ConcreteValueAbstractImp<128> (), msb (0), lsb (0) {
@@ -465,6 +466,7 @@ ConcreteValue128Bits &ConcreteValue128Bits::rotateToRight (const ConcreteValue &
   return *this;
 }
 
+}
 }
 }
 }

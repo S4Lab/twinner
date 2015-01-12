@@ -33,7 +33,7 @@ MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT addr) :
 }
 
 MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT _address,
-    const edu::sharif::twinner::trace::ConcreteValue &concreteValue,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex) :
     Symbol (concreteValue, generationIndex), address (_address) {
 }
@@ -46,21 +46,21 @@ std::pair < int, SymbolRecord >
 MemoryEmergedSymbol::toSymbolRecord () const {
   SymbolRecord record;
   record.address = address;
-  if (dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue64Bits *>
+  if (dynamic_cast<const edu::sharif::twinner::trace::cv::ConcreteValue64Bits *>
       (concreteValue)) {
     record.type = MEMORY_64_BITS_SYMBOL_TYPE;
     record.concreteValueLsb =
-        static_cast<const edu::sharif::twinner::trace::ConcreteValue64Bits *>
+        static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue64Bits *>
         (concreteValue)->getValue ();
     record.concreteValueMsb = 0;
-  } else if (dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+  } else if (dynamic_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
       (concreteValue)) {
     record.type = MEMORY_128_BITS_SYMBOL_TYPE;
     record.concreteValueLsb =
-        static_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+        static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
         (concreteValue)->getLsb ();
     record.concreteValueMsb =
-        static_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+        static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
         (concreteValue)->getMsb ();
   } else {
     throw std::runtime_error ("MemoryEmergedSymbol::toSymbolRecord () method: "
@@ -96,7 +96,7 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::fromNameAndValue (const std::string &n
   int generationIndex;
   ss >> dummy >> std::hex >> address >> dummy >> generationIndex;
   return new MemoryEmergedSymbol
-      (address, edu::sharif::twinner::trace::ConcreteValue64Bits (value),
+      (address, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value),
        generationIndex);
 }
 

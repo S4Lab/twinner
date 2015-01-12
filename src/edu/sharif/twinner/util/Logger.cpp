@@ -121,10 +121,10 @@ const Logger &Logger::operator<< (
 }
 
 const Logger &Logger::operator<< (
-    const edu::sharif::twinner::trace::ConcreteValue &value) const {
-  if (dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *> (&value)) {
-    const edu::sharif::twinner::trace::ConcreteValue128Bits *value128imp =
-        static_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *> (&value);
+    const edu::sharif::twinner::trace::cv::ConcreteValue &value) const {
+  if (dynamic_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *> (&value)) {
+    const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *value128imp =
+        static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *> (&value);
     std::stringstream ss;
     ss << "ConcreteValue128Bits(0x" << std::hex
         << value128imp->getMsb () << std::setw (16) << std::setfill ('0')

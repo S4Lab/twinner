@@ -23,6 +23,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
 
 template<unsigned int bits, /* bits must be a multiple of 8 */
 typename ValueType = UINT64 /* bits-length type */>
@@ -267,6 +268,7 @@ public:
   }
 };
 
+}
 }
 }
 }

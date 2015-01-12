@@ -143,7 +143,8 @@ void ExecutionTraceSegment::initializeOverlappingMemoryLocationsUpwards (ADDRINT
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (int size,
-    REG reg, const ConcreteValue &regval) const /* @throw (WrongStateException) */ {
+    REG reg, const edu::sharif::twinner::trace::cv::ConcreteValue &regval) const
+/* @throw (WrongStateException) */ {
   UNUSED_VARIABLE (size);
   return tryToGetSymbolicExpressionImplementation (registerToExpression, reg, regval);
 }
@@ -155,7 +156,7 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (int siz
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (int size,
-    ADDRINT memoryEa, const ConcreteValue &memval) const
+    ADDRINT memoryEa, const edu::sharif::twinner::trace::cv::ConcreteValue &memval) const
 /* @throw (WrongStateException) */ {
   switch (size) {
   case 128:
@@ -203,19 +204,19 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (in
 
 template < typename Address >
 void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
-    Address address, const ConcreteValue &concreteVal);
+    Address address, const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal);
 
 template < >
 void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
-    REG reg, const ConcreteValue &concreteVal);
+    REG reg, const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal);
 template < >
 void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
-    ADDRINT address, const ConcreteValue &concreteVal);
+    ADDRINT address, const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal);
 
 template < typename KEY >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
     const std::map < KEY, Expression * > &map, const KEY key,
-    const ConcreteValue &concreteVal) const
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
 /* @throw (WrongStateException) */ {
   typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
@@ -231,13 +232,13 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
 
 template < >
 void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
-    REG reg, const ConcreteValue &concreteVal) {
+    REG reg, const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) {
   exp->checkConcreteValueReg (reg, concreteVal);
 }
 
 template < >
 void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
-    ADDRINT memoryEa, const ConcreteValue &concreteVal) {
+    ADDRINT memoryEa, const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) {
   exp->checkConcreteValueMemory (memoryEa, concreteVal);
 }
 
@@ -253,7 +254,8 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
 }
 
 Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (int size, REG reg,
-    const ConcreteValue &regval, Expression *newExpression) {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+    Expression *newExpression) {
   UNUSED_VARIABLE (size);
   return getSymbolicExpressionImplementation (registerToExpression, reg, regval,
                                               newExpression);
@@ -266,7 +268,8 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (int size, RE
 }
 
 Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int size,
-    ADDRINT memoryEa, const ConcreteValue &memval, Expression *newExpression) {
+    ADDRINT memoryEa, const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+    Expression *newExpression) {
   switch (size) {
   case 128:
     return getSymbolicExpressionImplementation
@@ -314,7 +317,8 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int siz
 template < typename KEY >
 Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
     std::map < KEY, Expression * > &map, const KEY key,
-    const ConcreteValue &currentConcreteValue, Expression *newExpression) {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &currentConcreteValue,
+    Expression *newExpression) {
   typedef typename std::map < KEY, Expression * >::iterator MapIterator;
   try {
     Expression *exp = tryToGetSymbolicExpressionImplementation

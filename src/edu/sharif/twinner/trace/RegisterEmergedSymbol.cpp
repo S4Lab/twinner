@@ -34,7 +34,7 @@ RegisterEmergedSymbol::RegisterEmergedSymbol (REG addr) :
 }
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (REG _address,
-    const edu::sharif::twinner::trace::ConcreteValue &concreteValue,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex) :
     Symbol (concreteValue, generationIndex), address (_address) {
 }
@@ -46,21 +46,21 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::clone () const {
 std::pair < int, SymbolRecord > RegisterEmergedSymbol::toSymbolRecord () const {
   SymbolRecord record;
   record.address = address;
-  if (dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue64Bits *>
+  if (dynamic_cast<const edu::sharif::twinner::trace::cv::ConcreteValue64Bits *>
       (concreteValue)) {
     record.type = REGISTER_64_BITS_SYMBOL_TYPE;
     record.concreteValueLsb =
-        static_cast<const edu::sharif::twinner::trace::ConcreteValue64Bits *>
+        static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue64Bits *>
         (concreteValue)->getValue ();
     record.concreteValueMsb = 0;
-  } else if (dynamic_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+  } else if (dynamic_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
       (concreteValue)) {
     record.type = REGISTER_128_BITS_SYMBOL_TYPE;
     record.concreteValueLsb =
-        static_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+        static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
         (concreteValue)->getLsb ();
     record.concreteValueMsb =
-        static_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+        static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
         (concreteValue)->getMsb ();
   } else {
     throw std::runtime_error ("RegisterEmergedSymbol::toSymbolRecord () method: "
@@ -94,7 +94,7 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::strin
     const UINT64 high = (UINT64 (v4) << 32) | v3;
     const UINT64 low = (UINT64 (v2) << 32) | v1;
     return new RegisterEmergedSymbol
-        (reg, edu::sharif::twinner::trace::ConcreteValue128Bits (high, low),
+        (reg, edu::sharif::twinner::trace::cv::ConcreteValue128Bits (high, low),
          generationIndex);
 
   } else {
@@ -104,7 +104,7 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::strin
     }
     const UINT64 value = (UINT64 (v2) << 32) | v1;
     return new RegisterEmergedSymbol
-        (reg, edu::sharif::twinner::trace::ConcreteValue64Bits (value), generationIndex);
+        (reg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value), generationIndex);
   }
 }
 

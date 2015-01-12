@@ -19,6 +19,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
 
 class ConcreteValue128Bits : public ConcreteValueAbstractImp<128> {
 
@@ -109,6 +110,7 @@ private:
   void doubleIt ();
 };
 
+}
 }
 }
 }

@@ -24,7 +24,11 @@ namespace trace {
 
 class Trace;
 class Syscall;
+
+namespace cv {
+
 class ConcreteValue;
+}
 }
 namespace twintool {
 
@@ -34,7 +38,7 @@ class MutableExpressionValueProxy;
 class InstructionSymbolicExecuter {
 
 private:
-  typedef edu::sharif::twinner::trace::ConcreteValue ConcreteValue;
+  typedef edu::sharif::twinner::trace::cv::ConcreteValue ConcreteValue;
 
   typedef void (InstructionSymbolicExecuter::*AnalysisRoutine) (
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);

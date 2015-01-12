@@ -40,7 +40,7 @@ protected:
   std::list < ExpressionToken * > stack;
 
 private:
-  edu::sharif::twinner::trace::ConcreteValue *lastConcreteValue;
+  edu::sharif::twinner::trace::cv::ConcreteValue *lastConcreteValue;
 
   friend class Operator;
 
@@ -53,7 +53,7 @@ private:
    * @param concreteValue The last concrete value of the new expression.
    */
   Expression (const std::list < ExpressionToken * > &stk,
-      edu::sharif::twinner::trace::ConcreteValue *concreteValue);
+      edu::sharif::twinner::trace::cv::ConcreteValue *concreteValue);
 
   /**
    * Instantiates an expression based on the given exp.
@@ -73,7 +73,7 @@ protected:
    * @param lastConcreteValue The last concrete value of the new expression.
    * @param isOverwriting If true, on first read, it writes concrete value to real memory.
    */
-  Expression (edu::sharif::twinner::trace::ConcreteValue *lastConcreteValue,
+  Expression (edu::sharif::twinner::trace::cv::ConcreteValue *lastConcreteValue,
       bool isOverwriting);
 
 public:
@@ -84,14 +84,14 @@ public:
    */
   ~Expression ();
 
-  const edu::sharif::twinner::trace::ConcreteValue &getLastConcreteValue () const;
+  const edu::sharif::twinner::trace::cv::ConcreteValue &getLastConcreteValue () const;
 
   /**
    * Set last concrete value to given object and take ownership of it.
    *
    * @param value The new concrete value which is assumed to be owned by this object.
    */
-  void setLastConcreteValue (edu::sharif::twinner::trace::ConcreteValue *value);
+  void setLastConcreteValue (edu::sharif::twinner::trace::cv::ConcreteValue *value);
 
   void setOverwriting (bool overwriting);
 
@@ -122,7 +122,7 @@ protected:
    * @param op The owned operator which mediates between this and cv objects.
    * @param cv The owned concrete value which should be applied by op.
    */
-  void binaryOperation (Operator *op, edu::sharif::twinner::trace::ConcreteValue *cv);
+  void binaryOperation (Operator *op, edu::sharif::twinner::trace::cv::ConcreteValue *cv);
 
   /**
    * Same as `binaryOperation (Operator *op, ConcreteValue *cv)` method.
@@ -323,10 +323,10 @@ public:
   const std::list < ExpressionToken * > &getStack () const;
 
   void checkConcreteValueReg (REG reg,
-      const edu::sharif::twinner::trace::ConcreteValue &concreteVal) const
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
   /* @throw (WrongStateException) */;
   void checkConcreteValueMemory (ADDRINT memoryEa,
-      const edu::sharif::twinner::trace::ConcreteValue &concreteVal)
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal)
   /* @throw (WrongStateException) */;
 
   bool operator== (const Expression &exp) const;

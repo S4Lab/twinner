@@ -70,7 +70,7 @@ bool Operator::doesSupportSimplification () const {
 }
 
 bool Operator::apply (Expression *exp,
-    edu::sharif::twinner::trace::ConcreteValue *operand) {
+    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   switch (oi) {
   case ADD:
   {
@@ -111,7 +111,7 @@ bool Operator::apply (Expression *exp,
     }
     if (lastConstant) {
       (*exp->lastConcreteValue) -= *operand;
-      edu::sharif::twinner::trace::ConcreteValue *cv = lastConstant->getValue ().clone ();
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConstant->getValue ().clone ();
       (*cv) -= (*operand);
       lastConstant->setValue (*cv);
       delete operand;
@@ -163,7 +163,7 @@ bool Operator::apply (Expression *exp,
     }
     if (lastConstant) {
       (*exp->lastConcreteValue) /= *operand;
-      edu::sharif::twinner::trace::ConcreteValue *cv = lastConstant->getValue ().clone ();
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConstant->getValue ().clone ();
       (*cv) /= (*operand);
       lastConstant->setValue (*cv);
       delete operand;
@@ -275,7 +275,7 @@ bool Operator::apply (Expression *exp,
       (*exp->lastConcreteValue) >>= *operand;
       if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
         Constant *lastConstant = static_cast<Constant *> (exp->stack.back ());
-        edu::sharif::twinner::trace::ConcreteValue *cv = lastConstant->getValue ().clone ();
+        edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConstant->getValue ().clone ();
         (*cv) >>= (*operand);
         lastConstant->setValue (*cv);
         delete operand;
@@ -301,7 +301,7 @@ bool Operator::apply (Expression *exp,
     exp->lastConcreteValue->arithmeticShiftToRight (*operand);
     if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
       Constant *lastConstant = static_cast<Constant *> (exp->stack.back ());
-      edu::sharif::twinner::trace::ConcreteValue *cv = lastConstant->getValue ().clone ();
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConstant->getValue ().clone ();
       cv->arithmeticShiftToRight (*operand);
       lastConstant->setValue (*cv);
       delete operand;
@@ -327,8 +327,8 @@ bool Operator::apply (Expression *exp,
   }
 }
 
-void Operator::apply (edu::sharif::twinner::trace::ConcreteValue &dst,
-    const edu::sharif::twinner::trace::ConcreteValue &src) const {
+void Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   switch (oi) {
   case ADD:
     dst += src;

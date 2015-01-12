@@ -33,7 +33,7 @@ namespace twinner {
 namespace trace {
 
 Expression::Expression (const std::list < ExpressionToken * > &stk,
-    edu::sharif::twinner::trace::ConcreteValue *concreteValue) :
+    edu::sharif::twinner::trace::cv::ConcreteValue *concreteValue) :
     stack (stk), lastConcreteValue (concreteValue), isOverwriting (false) {
 }
 
@@ -55,7 +55,7 @@ Expression::Expression (int size, const Expression &exp) :
   }
 }
 
-Expression::Expression (edu::sharif::twinner::trace::ConcreteValue *concreteValue,
+Expression::Expression (edu::sharif::twinner::trace::cv::ConcreteValue *concreteValue,
     bool _isOverwriting) :
     lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
 }
@@ -68,13 +68,13 @@ Expression::~Expression () {
   delete lastConcreteValue;
 }
 
-const edu::sharif::twinner::trace::ConcreteValue &
+const edu::sharif::twinner::trace::cv::ConcreteValue &
 Expression::getLastConcreteValue () const {
   return *lastConcreteValue;
 }
 
 void Expression::setLastConcreteValue (
-    edu::sharif::twinner::trace::ConcreteValue *value) {
+    edu::sharif::twinner::trace::cv::ConcreteValue *value) {
   delete lastConcreteValue;
   lastConcreteValue = value;
 }
@@ -161,39 +161,39 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
 }
 
 void Expression::binaryOperation (Operator *op,
-    edu::sharif::twinner::trace::ConcreteValue *cv) {
+    edu::sharif::twinner::trace::cv::ConcreteValue *cv) {
   if (op->apply (this, cv)) {
     delete op; // in this case operation is simplified and op is not used.
   }
 }
 
 void Expression::binaryOperation (Operator *op, UINT64 cv) {
-  binaryOperation (op, new edu::sharif::twinner::trace::ConcreteValue64Bits (cv));
+  binaryOperation (op, new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv));
 }
 
 void Expression::truncate (int bits) {
   //TODO: Detect when truncation has no effect (value is already truncated) and ignore it
-  edu::sharif::twinner::trace::ConcreteValue *mask;
+  edu::sharif::twinner::trace::cv::ConcreteValue *mask;
   if (bits > 128) {
     edu::sharif::twinner::util::Logger::error ()
         << "Truncating to " << std::dec << bits << " bits.\n";
     throw std::runtime_error ("Expression::truncate(...): number of bits is too large");
   } else if (bits == 128) {
-    mask = new edu::sharif::twinner::trace::ConcreteValue128Bits
+    mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
         (UINT64 (-1), UINT64 (-1));
   } else if (bits > 64) {
-    mask = new edu::sharif::twinner::trace::ConcreteValue128Bits
+    mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
         ((1ull << (bits - 64)) - 1, UINT64 (-1));
   } else if (bits == 64) {
-    mask = new edu::sharif::twinner::trace::ConcreteValue64Bits (UINT64 (-1));
+    mask = new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (UINT64 (-1));
   } else { // < 64
-    mask = new edu::sharif::twinner::trace::ConcreteValue64Bits ((1ull << bits) - 1);
+    mask = new edu::sharif::twinner::trace::cv::ConcreteValue64Bits ((1ull << bits) - 1);
   }
   bitwiseAnd (mask);
 }
 
 Expression *Expression::twosComplement () const {
-  edu::sharif::twinner::trace::ConcreteValue *cv = lastConcreteValue->clone ();
+  edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConcreteValue->clone ();
   (*cv) = 0;
   Expression *zero = new ExpressionImp (cv);
   zero->minus (this);
@@ -201,7 +201,7 @@ Expression *Expression::twosComplement () const {
 }
 
 void Expression::makeLeastSignificantBitsZero (int bits) {
-  edu::sharif::twinner::trace::ConcreteValue *mask;
+  edu::sharif::twinner::trace::cv::ConcreteValue *mask;
   const int size = lastConcreteValue->getSize ();
   if (bits > size) {
     edu::sharif::twinner::util::Logger::error ()
@@ -209,18 +209,18 @@ void Expression::makeLeastSignificantBitsZero (int bits) {
     throw std::runtime_error ("Expression::makeLeastSignificantBitsZero(...): "
                               "number of bits is too large");
   } else if (bits == 128) {
-    mask = new edu::sharif::twinner::trace::ConcreteValue128Bits (UINT64 (0), UINT64 (0));
+    mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits (UINT64 (0), UINT64 (0));
   } else if (bits > 64) {
-    mask = new edu::sharif::twinner::trace::ConcreteValue128Bits
+    mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
         (~((1ull << (bits - 64)) - 1), UINT64 (0));
   } else if (bits == 64) {
-    mask = new edu::sharif::twinner::trace::ConcreteValue128Bits (UINT64 (1), UINT64 (0));
+    mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits (UINT64 (1), UINT64 (0));
   } else { // < 64
-    mask = new edu::sharif::twinner::trace::ConcreteValue128Bits
+    mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
         (UINT64 (1), ~((1ull << bits) - 1));
   }
   if (size != 128) {
-    edu::sharif::twinner::trace::ConcreteValue *temp = mask->clone (size);
+    edu::sharif::twinner::trace::cv::ConcreteValue *temp = mask->clone (size);
     delete mask;
     mask = temp;
   }
@@ -234,7 +234,7 @@ void Expression::negate () {
   } else {
     stack.push_back (new Operator (Operator::NEGATE));
   }
-  edu::sharif::twinner::trace::ConcreteValue *neg = lastConcreteValue->bitwiseNegated ();
+  edu::sharif::twinner::trace::cv::ConcreteValue *neg = lastConcreteValue->bitwiseNegated ();
   delete lastConcreteValue;
   lastConcreteValue = neg;
 }
@@ -273,7 +273,7 @@ Expression *Expression::loadFromBinaryStream (std::ifstream &in) {
   std::list < ExpressionToken * > stack;
   loadListFromBinaryStream (in, "EXP", stack);
   return new Expression
-      (stack, edu::sharif::twinner::trace::ConcreteValue::loadFromBinaryStream (in));
+      (stack, edu::sharif::twinner::trace::cv::ConcreteValue::loadFromBinaryStream (in));
 }
 
 const std::list < ExpressionToken * > &Expression::getStack () const {
@@ -281,7 +281,7 @@ const std::list < ExpressionToken * > &Expression::getStack () const {
 }
 
 void Expression::checkConcreteValueReg (REG reg,
-    const edu::sharif::twinner::trace::ConcreteValue &concreteVal) const
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
 /* @throw (WrongStateException) */ {
   if (*lastConcreteValue == concreteVal) {
     return;
@@ -292,7 +292,7 @@ void Expression::checkConcreteValueReg (REG reg,
 }
 
 void Expression::checkConcreteValueMemory (ADDRINT memoryEa,
-    const edu::sharif::twinner::trace::ConcreteValue &concreteVal)
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal)
 /* @throw (WrongStateException) */ {
   if (*lastConcreteValue == concreteVal) {
     isOverwriting = false; // overwriting just works at first getting/synchronization

@@ -19,8 +19,10 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
 
 class ConcreteValue;
+}
 }
 namespace twintool {
 
@@ -40,7 +42,7 @@ public:
    * @param val The concrete value which is hold in the served constant expression.
    * @param size The size (bit precision) of the underlying expression in bits.
    */
-  ConstantExpressionValueProxy (const edu::sharif::twinner::trace::ConcreteValue &val,
+  ConstantExpressionValueProxy (const edu::sharif::twinner::trace::cv::ConcreteValue &val,
       int _size);
   ~ConstantExpressionValueProxy ();
 

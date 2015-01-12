@@ -546,7 +546,7 @@ const Logger &operator<< (const Logger &logger, REG reg) {
   return logger << (UINT32) reg;
 }
 
-edu::sharif::twinner::trace::ConcreteValue *readRegisterContent (
+edu::sharif::twinner::trace::cv::ConcreteValue *readRegisterContent (
     const CONTEXT *context, REG reg) {
   const char *msg = "The readRegisterContent(...) method is only supported in TwinTool:"
       " Calling error from Twinner.\n";

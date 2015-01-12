@@ -29,10 +29,10 @@ private:
 
 public:
   Constant (UINT64 val);
-  Constant (const edu::sharif::twinner::trace::ConcreteValue &val);
-  Constant (edu::sharif::twinner::trace::ConcreteValue *val);
+  Constant (const edu::sharif::twinner::trace::cv::ConcreteValue &val);
+  Constant (edu::sharif::twinner::trace::cv::ConcreteValue *val);
 
-  void setValue (const edu::sharif::twinner::trace::ConcreteValue &value);
+  void setValue (const edu::sharif::twinner::trace::cv::ConcreteValue &value);
   virtual Constant *clone () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;

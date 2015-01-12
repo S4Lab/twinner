@@ -28,7 +28,7 @@ ExpressionImp::ExpressionImp (const ExpressionImp &exp) :
 }
 
 ExpressionImp::ExpressionImp (REG reg,
-    const edu::sharif::twinner::trace::ConcreteValue &concreteValue,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex) :
     Expression (concreteValue.clone (), false) {
   //TODO: Check whether concreteValue should be casted to 64-bits precision for symbol
@@ -36,7 +36,7 @@ ExpressionImp::ExpressionImp (REG reg,
 }
 
 ExpressionImp::ExpressionImp (ADDRINT memoryEa,
-    const edu::sharif::twinner::trace::ConcreteValue &concreteValue,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex, bool isOverwriting) :
     Expression (concreteValue.clone (), isOverwriting) {
   if (!isOverwriting) {
@@ -49,18 +49,18 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
   switch (const int cvsize = concreteValue.getSize ()) {
   case 128:
   {
-    const edu::sharif::twinner::trace::ConcreteValue128Bits *cv =
-        static_cast<const edu::sharif::twinner::trace::ConcreteValue128Bits *>
+    const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *cv =
+        static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
         (&concreteValue);
     stack.push_back (new MemoryEmergedSymbol
                      (memoryEa + 8, // little endian
-                      edu::sharif::twinner::trace::ConcreteValue64Bits (cv->getMsb ()),
+                      edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getMsb ()),
                       generationIndex));
     stack.push_back (new Constant (64));
     stack.push_back (new Operator (Operator::SHIFT_LEFT));
     stack.push_back (new MemoryEmergedSymbol
                      (memoryEa,
-                      edu::sharif::twinner::trace::ConcreteValue64Bits (cv->getLsb ()),
+                      edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getLsb ()),
                       generationIndex));
     stack.push_back (new Operator (Operator::BITWISE_OR));
     break;
@@ -76,12 +76,12 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
     if (offset == 0) {
       stack.push_back (new MemoryEmergedSymbol
                        (memoryEa,
-                        edu::sharif::twinner::trace::ConcreteValue64Bits (concreteValue),
+                        edu::sharif::twinner::trace::cv::ConcreteValue64Bits (concreteValue),
                         generationIndex));
     } else {
       stack.push_back (new MemoryEmergedSymbol
                        (memoryEa - offset,
-                        edu::sharif::twinner::trace::ConcreteValue64Bits
+                        edu::sharif::twinner::trace::cv::ConcreteValue64Bits
                         (concreteValue.toUint64 () << (offset * 8)),
                         generationIndex));
       // Using division instead of shift-to-right to match with Expression implementation
@@ -105,20 +105,20 @@ ExpressionImp::ExpressionImp (Symbol *symbol) :
   stack.push_back (symbol);
 }
 
-ExpressionImp::ExpressionImp (const edu::sharif::twinner::trace::ConcreteValue &value) :
+ExpressionImp::ExpressionImp (const edu::sharif::twinner::trace::cv::ConcreteValue &value) :
     Expression (value.clone (), false) {
   stack.push_back (new Constant (value));
 }
 
-ExpressionImp::ExpressionImp (edu::sharif::twinner::trace::ConcreteValue *value) :
+ExpressionImp::ExpressionImp (edu::sharif::twinner::trace::cv::ConcreteValue *value) :
     Expression (value, false) {
   stack.push_back (new Constant (*value));
 }
 
 ExpressionImp::ExpressionImp (UINT64 value) :
-    Expression (new edu::sharif::twinner::trace::ConcreteValue64Bits (value), false) {
+    Expression (new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value), false) {
   stack.push_back
-      (new Constant (new edu::sharif::twinner::trace::ConcreteValue64Bits (value)));
+      (new Constant (new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value)));
 }
 
 ExpressionImp *ExpressionImp::clone () const {

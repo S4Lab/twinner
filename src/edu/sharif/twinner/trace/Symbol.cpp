@@ -19,7 +19,7 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-Symbol::Symbol (const edu::sharif::twinner::trace::ConcreteValue &_concreteValue,
+Symbol::Symbol (const edu::sharif::twinner::trace::cv::ConcreteValue &_concreteValue,
     int _generationIndex) :
     Operand (_concreteValue), generationIndex (_generationIndex) {
 }
@@ -39,7 +39,7 @@ void Symbol::saveToBinaryStream (std::ofstream &out) const {
 
 void Symbol::loadFromBinaryStream (std::ifstream &in) {
   delete concreteValue;
-  concreteValue = edu::sharif::twinner::trace::ConcreteValue::loadFromBinaryStream (in);
+  concreteValue = edu::sharif::twinner::trace::cv::ConcreteValue::loadFromBinaryStream (in);
   in.read ((char *) &generationIndex, sizeof (generationIndex));
 }
 

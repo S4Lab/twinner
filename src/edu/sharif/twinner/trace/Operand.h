@@ -19,8 +19,10 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
 
 class ConcreteValue;
+}
 
 /**
  * @abstract
@@ -28,25 +30,25 @@ class ConcreteValue;
 class Operand : public ExpressionToken {
 
 protected:
-  edu::sharif::twinner::trace::ConcreteValue *concreteValue;
+  edu::sharif::twinner::trace::cv::ConcreteValue *concreteValue;
 
   Operand ();
   /**
    * Instantiates a new operand and clones the given concrete value for it.
    * @param cv The concrete value which its clone will be used as value of this operand.
    */
-  Operand (const edu::sharif::twinner::trace::ConcreteValue &cv);
+  Operand (const edu::sharif::twinner::trace::cv::ConcreteValue &cv);
   /**
    * Instantiates a new operand and takes ownership of the given concrete value for it.
    * @param cv The concrete value which its ownership is taken for instantiated operand.
    */
-  Operand (edu::sharif::twinner::trace::ConcreteValue *cv);
+  Operand (edu::sharif::twinner::trace::cv::ConcreteValue *cv);
   Operand (const Operand &op);
 
 public:
   ~Operand ();
 
-  const edu::sharif::twinner::trace::ConcreteValue &getValue () const;
+  const edu::sharif::twinner::trace::cv::ConcreteValue &getValue () const;
 };
 
 }

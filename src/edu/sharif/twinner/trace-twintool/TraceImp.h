@@ -31,7 +31,8 @@ public:
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const ConcreteValue &regval) const /* @throw (WrongStateException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval) const
+  /* @throw (WrongStateException) */;
 
   /**
    * Searches backwards to find queried values.
@@ -42,7 +43,8 @@ public:
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
-      ADDRINT memoryEa, const ConcreteValue &memval) const
+      ADDRINT memoryEa,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval) const
   /* @throw (WrongStateException) */;
 
   /**
@@ -56,8 +58,8 @@ public:
    * ASSERT: The precision of regval must match with precision of reg
    */
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
-      const ConcreteValue &regval, Expression *newExpression = 0)
-  /* @throw (UnexpectedChangeException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+      Expression *newExpression = 0) /* @throw (UnexpectedChangeException) */;
 
   /**
    * The getter searches segments backwards to find queried value.
@@ -70,8 +72,8 @@ public:
    * ASSERT: The precision of memval must match with precision of memoryEa location
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-      const ConcreteValue &memval, Expression *newExpression = 0)
-  /* @throw (UnexpectedChangeException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+      Expression *newExpression = 0) /* @throw (UnexpectedChangeException) */;
 
   /**
    * The getter searches segments backwards to find queried value.
@@ -85,11 +87,11 @@ private:
   struct TryToGetSymbolicExpressionMethod {
 
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (int size, T address,
-        const ConcreteValue &val) const;
+        const edu::sharif::twinner::trace::cv::ConcreteValue &val) const;
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
         int size, T address) const;
     typedef Expression *(TraceImp::*TraceType) (int size, T address,
-        const ConcreteValue &val) const;
+        const edu::sharif::twinner::trace::cv::ConcreteValue &val) const;
     typedef Expression *(TraceImp::*TraceTypeWithoutConcreteValue) (int size,
         T address) const;
   };
@@ -98,14 +100,15 @@ private:
   struct GetSymbolicExpressionMethod {
 
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (int size, T address,
-        const ConcreteValue &val, Expression *newExpression);
+        const edu::sharif::twinner::trace::cv::ConcreteValue &val,
+        Expression *newExpression);
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
         int size, T address, Expression *newExpression);
   };
 
   template < typename T >
   Expression *tryToGetSymbolicExpressionImplementation (int size, T address,
-      const ConcreteValue &val,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &val,
       typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
   /* @throw (WrongStateException) */;
   template < typename T >
@@ -115,7 +118,7 @@ private:
 
   template < typename T >
   Expression *getSymbolicExpressionImplementation (int size, T address,
-      const ConcreteValue &val,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &val,
       Expression *newExpression,
       typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
       typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod)
@@ -132,8 +135,10 @@ private:
   ExecutionTraceSegment *loadSingleSegmentSymbolsRecordsFromBinaryStream (int index,
       std::ifstream &in);
 
-  Expression *instantiateExpression (REG addr, const ConcreteValue &val, int index);
-  Expression *instantiateExpression (ADDRINT addr, const ConcreteValue &val, int index);
+  Expression *instantiateExpression (REG addr,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &val, int index);
+  Expression *instantiateExpression (ADDRINT addr,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &val, int index);
 };
 
 }
