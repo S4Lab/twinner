@@ -97,6 +97,7 @@ public:
   void convertToInfixExpression (std::list < ExpressionToken * > &st,
       std::stringstream &ss) const;
 
+protected:
   void unaryOperation (Operator op, const Expression *exp);
 
   /**
@@ -130,6 +131,7 @@ public:
    */
   void binaryOperation (Operator *op, UINT64 cv);
 
+public:
   /**
    * Truncates the expression to occupy at most a given count of bits.
    * @param bits Count of bits that this expression should be truncated to be fitted in.
@@ -239,6 +241,19 @@ public:
   template <typename ValueOrExp>
   void divide (ValueOrExp operand) {
     binaryOperation (new Operator (Operator::DIVIDE), operand);
+  }
+
+  /**
+   * Calculates the remainder of division of this expression by the given
+   * symbolic/concrete value.
+   *
+   * @param operand The value (symbolically or concretely) that this expression will be
+   * divided by it and its resulting remainder will be kept by this expression.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
+   */
+  template <typename ValueOrExp>
+  void remainder (ValueOrExp operand) {
+    binaryOperation (new Operator (Operator::REMAINDER), operand);
   }
 
   /**

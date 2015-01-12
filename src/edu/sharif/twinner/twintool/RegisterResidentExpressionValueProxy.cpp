@@ -62,9 +62,7 @@ void RegisterResidentExpressionValueProxy::putExpressionInLeastSignificantBitsOf
   edu::sharif::twinner::trace::Expression *dst =
       trace->getSymbolicExpressionByRegister (rsize, r);
   dst->makeLeastSignificantBitsZero (bits);
-  dst->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::BITWISE_OR), &exp);
+  dst->bitwiseOr (&exp);
 }
 
 void RegisterResidentExpressionValueProxy::valueIsChanged (
@@ -95,9 +93,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
     reg16->truncate (8);
     temp = changedExp.clone (16);
     temp->shiftToLeft (8);
-    reg16->binaryOperation
-        (new edu::sharif::twinner::trace::Operator
-         (edu::sharif::twinner::trace::Operator::BITWISE_OR), temp);
+    reg16->bitwiseOr (temp);
     delete temp;
     constReg16 = reg16;
     break;

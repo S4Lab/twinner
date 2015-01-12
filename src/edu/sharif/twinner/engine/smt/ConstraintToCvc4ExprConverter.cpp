@@ -509,9 +509,7 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
           convertCvc4ExprToExpression (left);
       edu::sharif::twinner::trace::Expression *rightExp =
           convertCvc4ExprToExpression (right);
-      leftExp->binaryOperation
-          (new edu::sharif::twinner::trace::Operator
-           (edu::sharif::twinner::trace::Operator::REMAINDER), rightExp);
+      leftExp->remainder (rightExp);
       delete rightExp;
       return leftExp;
     }

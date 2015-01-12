@@ -1669,9 +1669,7 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
   rightDstExp = leftDstExp->clone ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\tcalculating quotient (right) and remainder (left) of division...";
-  leftDstExp->binaryOperation
-      (new edu::sharif::twinner::trace::Operator
-       (edu::sharif::twinner::trace::Operator::REMAINDER), srcexp);
+  leftDstExp->remainder (srcexp);
   rightDstExp->divide (srcexp);
   delete srcexp;
   leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
@@ -1731,9 +1729,7 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
       << "\tconcrete values are adjusted...";
   if (osval == 8) { // AX == AH:AL
     leftExp->shiftToLeft (8);
-    leftExp->binaryOperation
-        (new edu::sharif::twinner::trace::Operator
-         (edu::sharif::twinner::trace::Operator::BITWISE_OR), rightExp);
+    leftExp->bitwiseOr (rightExp);
     const MutableExpressionValueProxy &ax = RegisterResidentExpressionValueProxy (REG_AX);
     ax.setExpression (trace, leftExp); // this deletes unused expressions by itself
   } else {
