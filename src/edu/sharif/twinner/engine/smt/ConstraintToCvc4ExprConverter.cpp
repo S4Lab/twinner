@@ -14,10 +14,10 @@
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
-#include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
-#include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
-#include "edu/sharif/twinner/trace/Constant.h"
-#include "edu/sharif/twinner/trace/Symbol.h"
+#include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/Constant.h"
+#include "edu/sharif/twinner/trace/exptoken/Symbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 

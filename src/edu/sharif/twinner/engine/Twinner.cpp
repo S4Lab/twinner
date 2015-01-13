@@ -22,7 +22,7 @@
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
-#include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"

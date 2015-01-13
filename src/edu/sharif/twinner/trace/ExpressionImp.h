@@ -20,7 +20,7 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-class Symbol;
+class edu::sharif::twinner::trace::Symbol;
 
 class ExpressionImp : public Expression {
 
@@ -54,7 +54,7 @@ public:
    * The concrete value of the given symbol will be used as the last concrete value of
    * the expression too.
    */
-  ExpressionImp (Symbol *symbol);
+  ExpressionImp (edu::sharif::twinner::trace::Symbol *symbol);
 
   /**
    * Instantiates an expression containing a constant value (non-symbolic).

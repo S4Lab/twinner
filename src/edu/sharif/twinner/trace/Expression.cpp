@@ -12,8 +12,8 @@
 
 #include "Expression.h"
 
-#include "Constant.h"
-#include "Symbol.h"
+#include "edu/sharif/twinner/trace/exptoken/Constant.h"
+#include "edu/sharif/twinner/trace/exptoken/Symbol.h"
 #include "WrongStateException.h"
 #include "ExpressionImp.h"
 
@@ -32,25 +32,26 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-Expression::Expression (const std::list < ExpressionToken * > &stk,
+Expression::Expression (
+    const std::list < edu::sharif::twinner::trace::ExpressionToken * > &stk,
     edu::sharif::twinner::trace::cv::ConcreteValue *concreteValue) :
     stack (stk), lastConcreteValue (concreteValue), isOverwriting (false) {
 }
 
 Expression::Expression (const Expression &exp) :
     lastConcreteValue (exp.lastConcreteValue->clone ()), isOverwriting (false) {
-  for (std::list < ExpressionToken * >::const_iterator it = exp.stack.begin ();
-      it != exp.stack.end (); ++it) {
-    const ExpressionToken *et = *it;
+  for (std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator it =
+      exp.stack.begin (); it != exp.stack.end (); ++it) {
+    const edu::sharif::twinner::trace::ExpressionToken *et = *it;
     stack.push_back (et->clone ());
   }
 }
 
 Expression::Expression (int size, const Expression &exp) :
     lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
-  for (std::list < ExpressionToken * >::const_iterator it = exp.stack.begin ();
-      it != exp.stack.end (); ++it) {
-    const ExpressionToken *et = *it;
+  for (std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator it =
+      exp.stack.begin (); it != exp.stack.end (); ++it) {
+    const edu::sharif::twinner::trace::ExpressionToken *et = *it;
     stack.push_back (et->clone ());
   }
 }
@@ -84,22 +85,25 @@ void Expression::setOverwriting (bool overwriting) {
 }
 
 std::string Expression::toString () const {
-  std::list < ExpressionToken * > st = std::list < ExpressionToken * > (stack);
+  std::list < edu::sharif::twinner::trace::ExpressionToken * > st =
+      std::list < ExpressionToken * > (stack);
   std::stringstream ss;
   convertToInfixExpression (st, ss);
   ss << " /*" << *lastConcreteValue << "*/";
   return ss.str ();
 }
 
-void Expression::convertToInfixExpression (std::list < ExpressionToken * > &st,
+void Expression::convertToInfixExpression (
+    std::list < edu::sharif::twinner::trace::ExpressionToken * > &st,
     std::stringstream &ss) const {
-  const ExpressionToken *token = st.back ();
+  const edu::sharif::twinner::trace::ExpressionToken *token = st.back ();
   st.pop_back ();
-  const Operator *op = dynamic_cast<const Operator *> (token);
+  const edu::sharif::twinner::trace::Operator *op =
+      dynamic_cast<const Operator *> (token);
   if (op) {
     std::stringstream operand;
     switch (op->getType ()) {
-    case Operator::SignExtension:
+    case edu::sharif::twinner::trace::Operator::SignExtension:
       ss << op->toString () << '_';
       convertToInfixExpression (st, ss); // target size
       ss << '_';
@@ -108,17 +112,17 @@ void Expression::convertToInfixExpression (std::list < ExpressionToken * > &st,
       convertToInfixExpression (st, ss); // main operand (to be sign extended)
       ss << ')';
       break;
-    case Operator::Unary:
+    case edu::sharif::twinner::trace::Operator::Unary:
       convertToInfixExpression (st, operand);
       ss << op->toString () << operand.str ();
       break;
-    case Operator::FunctionalBinary:
+    case edu::sharif::twinner::trace::Operator::FunctionalBinary:
       convertToInfixExpression (st, operand); // right operand
       ss << op->toString () /*function name*/ << " (";
       convertToInfixExpression (st, ss); // left operand
       ss << ", " << operand.str () << ')';
       break;
-    case Operator::Binary:
+    case edu::sharif::twinner::trace::Operator::Binary:
       convertToInfixExpression (st, operand); // right operand
       ss << '(';
       convertToInfixExpression (st, ss); // left operand
@@ -135,11 +139,13 @@ void Expression::convertToInfixExpression (std::list < ExpressionToken * > &st,
   }
 }
 
-void Expression::unaryOperation (Operator op, const Expression *exp) {
+void Expression::unaryOperation (edu::sharif::twinner::trace::Operator op,
+    const Expression *exp) {
   throw std::runtime_error ("Expression::unaryOperation: Not yet implemented");
 }
 
-void Expression::binaryOperation (Operator *op, const Expression *exp) {
+void Expression::binaryOperation (edu::sharif::twinner::trace::Operator *op,
+    const Expression *exp) {
   if (op->doesSupportSimplification () && exp->isTrivial ()) {
     // FIXME: Make sure that last concrete value is always valid at this point
     binaryOperation (op, exp->getLastConcreteValue ().clone ());
@@ -160,14 +166,14 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
   op->apply (*lastConcreteValue, *(exp->lastConcreteValue));
 }
 
-void Expression::binaryOperation (Operator *op,
+void Expression::binaryOperation (edu::sharif::twinner::trace::Operator *op,
     edu::sharif::twinner::trace::cv::ConcreteValue *cv) {
   if (op->apply (this, cv)) {
     delete op; // in this case operation is simplified and op is not used.
   }
 }
 
-void Expression::binaryOperation (Operator *op, UINT64 cv) {
+void Expression::binaryOperation (edu::sharif::twinner::trace::Operator *op, UINT64 cv) {
   binaryOperation (op, new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv));
 }
 
@@ -209,12 +215,14 @@ void Expression::makeLeastSignificantBitsZero (int bits) {
     throw std::runtime_error ("Expression::makeLeastSignificantBitsZero(...): "
                               "number of bits is too large");
   } else if (bits == 128) {
-    mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits (UINT64 (0), UINT64 (0));
+    mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
+        (UINT64 (0), UINT64 (0));
   } else if (bits > 64) {
     mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
         (~((1ull << (bits - 64)) - 1), UINT64 (0));
   } else if (bits == 64) {
-    mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits (UINT64 (1), UINT64 (0));
+    mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
+        (UINT64 (1), UINT64 (0));
   } else { // < 64
     mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
         (UINT64 (1), ~((1ull << bits) - 1));
@@ -228,13 +236,14 @@ void Expression::makeLeastSignificantBitsZero (int bits) {
 }
 
 void Expression::negate () {
-  Operator *op = dynamic_cast<Operator *> (stack.back ());
-  if (op && op->getIdentifier () == Operator::NEGATE) {
+  edu::sharif::twinner::trace::Operator *op = dynamic_cast<Operator *> (stack.back ());
+  if (op && op->getIdentifier () == edu::sharif::twinner::trace::Operator::NEGATE) {
     stack.pop_back ();
   } else {
-    stack.push_back (new Operator (Operator::NEGATE));
+    stack.push_back (new edu::sharif::twinner::trace::Operator (Operator::NEGATE));
   }
-  edu::sharif::twinner::trace::cv::ConcreteValue *neg = lastConcreteValue->bitwiseNegated ();
+  edu::sharif::twinner::trace::cv::ConcreteValue *neg =
+      lastConcreteValue->bitwiseNegated ();
   delete lastConcreteValue;
   lastConcreteValue = neg;
 }
@@ -251,9 +260,10 @@ Expression *Expression::signExtended (int size) const {
       return new ExpressionImp (lastConcreteValue->signExtended (size));
     } else {
       Expression *exp = clone (size);
-      exp->stack.push_back (new Constant (mySize));
-      exp->stack.push_back (new Constant (size));
-      exp->stack.push_back (new Operator (Operator::SIGN_EXTEND));
+      exp->stack.push_back (new edu::sharif::twinner::trace::Constant (mySize));
+      exp->stack.push_back (new edu::sharif::twinner::trace::Constant (size));
+      exp->stack.push_back (new edu::sharif::twinner::trace::Operator
+                            (Operator::SIGN_EXTEND));
       exp->setLastConcreteValue (lastConcreteValue->signExtended (size));
       return exp;
     }
@@ -270,13 +280,14 @@ void Expression::saveToBinaryStream (std::ofstream &out) const {
 }
 
 Expression *Expression::loadFromBinaryStream (std::ifstream &in) {
-  std::list < ExpressionToken * > stack;
+  std::list < edu::sharif::twinner::trace::ExpressionToken * > stack;
   loadListFromBinaryStream (in, "EXP", stack);
   return new Expression
       (stack, edu::sharif::twinner::trace::cv::ConcreteValue::loadFromBinaryStream (in));
 }
 
-const std::list < ExpressionToken * > &Expression::getStack () const {
+const std::list < edu::sharif::twinner::trace::ExpressionToken * > &
+Expression::getStack () const {
   return stack;
 }
 
@@ -306,18 +317,20 @@ void Expression::checkConcreteValueMemory (ADDRINT memoryEa,
 }
 
 bool Expression::operator== (const Expression &exp) const {
-  std::list < ExpressionToken * >::const_iterator it1 = stack.begin (),
-      end1 = stack.end (), it2 = exp.stack.begin (), end2 = exp.stack.end ();
+  typedef std::list < edu::sharif::twinner::trace::ExpressionToken * >
+      ::const_iterator cit;
+  cit it1 = stack.begin (), end1 = stack.end (),
+      it2 = exp.stack.begin (), end2 = exp.stack.end ();
   for (; it1 != end1 && it2 != end2 && (**it1) == (**it2); ++it1, ++it2)
     continue;
   return it1 == end1 && it2 == end2;
 }
 
 bool Expression::isTrivial () const {
-  for (std::list < ExpressionToken * >::const_iterator it = stack.begin ();
-      it != stack.end (); ++it) {
-    const ExpressionToken *token = *it;
-    if (dynamic_cast<const Symbol *> (token)) {
+  for (std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator it =
+      stack.begin (); it != stack.end (); ++it) {
+    const edu::sharif::twinner::trace::ExpressionToken *token = *it;
+    if (dynamic_cast<const edu::sharif::twinner::trace::Symbol *> (token)) {
       return false;
     }
   }

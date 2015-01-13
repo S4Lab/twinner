@@ -15,8 +15,8 @@
 #include "ConstraintToCvc4ExprConverter.h"
 #include "UnsatisfiableConstraintsException.h"
 
-#include "edu/sharif/twinner/trace/MemoryEmergedSymbol.h"
-#include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 

@@ -16,7 +16,7 @@
 #include <iostream>
 
 #include "edu/sharif/twinner/trace/Trace.h"
-#include "edu/sharif/twinner/trace/Symbol.h"
+#include "edu/sharif/twinner/trace/exptoken/Symbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"

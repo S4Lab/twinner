@@ -16,7 +16,7 @@
 
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Expression.h"
-#include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 

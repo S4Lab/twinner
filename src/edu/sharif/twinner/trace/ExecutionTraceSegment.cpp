@@ -18,7 +18,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
-#include "edu/sharif/twinner/trace/RegisterEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 
 #include <utility>
@@ -66,7 +66,7 @@ ExecutionTraceSegment::ExecutionTraceSegment (
       it != regMap.end (); ++it) {
     const REG reg = it->first;
     const Expression *exp = it->second;
-    RegisterEmergedSymbol::initializeSubRegisters (reg, this, *exp);
+    edu::sharif::twinner::trace::RegisterEmergedSymbol::initializeSubRegisters (reg, this, *exp);
   }
 }
 
@@ -540,11 +540,11 @@ int ExecutionTraceSegment::calcSizeInBytes (
   for (typename std::map < Addr, Expression * >::const_iterator it = map.begin ();
       it != map.end (); ++it) {
     size += sizeof (typename std::map < Addr, Expression * >::value_type);
-    const std::list < ExpressionToken * > &stack = it->second->getStack ();
-    for (std::list < ExpressionToken * >::const_iterator it2 = stack.begin ();
+    const std::list < edu::sharif::twinner::trace::ExpressionToken * > &stack = it->second->getStack ();
+    for (std::list < edu::sharif::twinner::trace::ExpressionToken * >::const_iterator it2 = stack.begin ();
         it2 != stack.end (); ++it2) {
-      size += sizeof (std::list < ExpressionToken * >::value_type);
-      const ExpressionToken *token = *it2;
+      size += sizeof (std::list < edu::sharif::twinner::trace::ExpressionToken * >::value_type);
+      const edu::sharif::twinner::trace::ExpressionToken *token = *it2;
       size += sizeof (*token);
     }
   }

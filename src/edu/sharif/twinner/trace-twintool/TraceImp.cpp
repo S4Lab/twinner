@@ -19,7 +19,7 @@
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
-#include "edu/sharif/twinner/trace/Symbol.h"
+#include "edu/sharif/twinner/trace/exptoken/Symbol.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 

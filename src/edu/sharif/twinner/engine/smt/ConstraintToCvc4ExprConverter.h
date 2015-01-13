@@ -31,7 +31,7 @@ using namespace CVC4;
 
 #include <list>
 
-#include "edu/sharif/twinner/trace/Operator.h"
+#include "edu/sharif/twinner/trace/exptoken/Operator.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 
 #include "pin.H"

@@ -15,7 +15,7 @@
 
 #include "Savable.h"
 
-#include "Operator.h"
+#include "edu/sharif/twinner/trace/exptoken/Operator.h"
 #include "ExecutionState.h"
 
 #include <list>
@@ -37,12 +37,12 @@ protected:
   /**
    * Uses push_back and pop_back instead of push and pop to implement a stack.
    */
-  std::list < ExpressionToken * > stack;
+  std::list < edu::sharif::twinner::trace::ExpressionToken * > stack;
 
 private:
   edu::sharif::twinner::trace::cv::ConcreteValue *lastConcreteValue;
 
-  friend class Operator;
+  friend class edu::sharif::twinner::trace::Operator;
 
   bool isOverwriting;
 
@@ -52,7 +52,7 @@ private:
    * @param stk Internal stack of symbols of the new expression.
    * @param concreteValue The last concrete value of the new expression.
    */
-  Expression (const std::list < ExpressionToken * > &stk,
+  Expression (const std::list < edu::sharif::twinner::trace::ExpressionToken * > &stk,
       edu::sharif::twinner::trace::cv::ConcreteValue *concreteValue);
 
   /**
@@ -96,11 +96,12 @@ public:
   void setOverwriting (bool overwriting);
 
   std::string toString () const;
-  void convertToInfixExpression (std::list < ExpressionToken * > &st,
+  void convertToInfixExpression (
+      std::list < edu::sharif::twinner::trace::ExpressionToken * > &st,
       std::stringstream &ss) const;
 
 protected:
-  void unaryOperation (Operator op, const Expression *exp);
+  void unaryOperation (edu::sharif::twinner::trace::Operator op, const Expression *exp);
 
   /**
    * The op operator is assumed to be owned by this expression object.
@@ -111,7 +112,7 @@ protected:
    * @param op The owned operator which mediates between this and exp expression objects.
    * @param exp The given constant expression which its clone should be applied by op.
    */
-  void binaryOperation (Operator *op, const Expression *exp);
+  void binaryOperation (edu::sharif::twinner::trace::Operator *op, const Expression *exp);
 
   /**
    * Same as `binaryOperation (Operator *op, const Expression *exp)` but tries to
@@ -122,7 +123,8 @@ protected:
    * @param op The owned operator which mediates between this and cv objects.
    * @param cv The owned concrete value which should be applied by op.
    */
-  void binaryOperation (Operator *op, edu::sharif::twinner::trace::cv::ConcreteValue *cv);
+  void binaryOperation (edu::sharif::twinner::trace::Operator *op,
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv);
 
   /**
    * Same as `binaryOperation (Operator *op, ConcreteValue *cv)` method.
@@ -131,7 +133,7 @@ protected:
    * @param op The owned operator which mediates between this and cv.
    * @param cv The value that should be converted to ConcreteValue to be used.
    */
-  void binaryOperation (Operator *op, UINT64 cv);
+  void binaryOperation (edu::sharif::twinner::trace::Operator *op, UINT64 cv);
 
 public:
   /**
@@ -150,7 +152,9 @@ public:
    */
   template <typename ValueOrExp>
   void shiftToRight (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::SHIFT_RIGHT), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::SHIFT_RIGHT),
+        operand);
   }
 
   /**
@@ -163,7 +167,9 @@ public:
    */
   template <typename ValueOrExp>
   void arithmeticShiftToRight (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::ARITHMETIC_SHIFT_RIGHT), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::ARITHMETIC_SHIFT_RIGHT),
+        operand);
   }
 
   /**
@@ -175,7 +181,9 @@ public:
    */
   template <typename ValueOrExp>
   void shiftToLeft (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::SHIFT_LEFT), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::SHIFT_LEFT),
+        operand);
   }
 
   /**
@@ -187,7 +195,9 @@ public:
    */
   template <typename ValueOrExp>
   void rotateToRight (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::ROTATE_RIGHT), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::ROTATE_RIGHT),
+        operand);
   }
 
   /**
@@ -199,7 +209,9 @@ public:
    */
   template <typename ValueOrExp>
   void minus (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::MINUS), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::MINUS),
+        operand);
   }
 
   /**
@@ -218,7 +230,9 @@ public:
    */
   template <typename ValueOrExp>
   void add (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::ADD), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::ADD),
+        operand);
   }
 
   /**
@@ -230,7 +244,9 @@ public:
    */
   template <typename ValueOrExp>
   void multiply (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::MULTIPLY), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::MULTIPLY),
+        operand);
   }
 
   /**
@@ -242,7 +258,9 @@ public:
    */
   template <typename ValueOrExp>
   void divide (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::DIVIDE), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::DIVIDE),
+        operand);
   }
 
   /**
@@ -255,7 +273,9 @@ public:
    */
   template <typename ValueOrExp>
   void remainder (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::REMAINDER), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::REMAINDER),
+        operand);
   }
 
   /**
@@ -267,7 +287,9 @@ public:
    */
   template <typename ValueOrExp>
   void bitwiseAnd (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::BITWISE_AND), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::BITWISE_AND),
+        operand);
   }
 
   /**
@@ -279,7 +301,9 @@ public:
    */
   template <typename ValueOrExp>
   void bitwiseOr (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::BITWISE_OR), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::BITWISE_OR),
+        operand);
   }
 
   /**
@@ -291,7 +315,9 @@ public:
    */
   template <typename ValueOrExp>
   void bitwiseXor (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::XOR), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::Operator (Operator::XOR),
+        operand);
   }
 
   /**
@@ -320,7 +346,7 @@ public:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static Expression *loadFromBinaryStream (std::ifstream &in);
 
-  const std::list < ExpressionToken * > &getStack () const;
+  const std::list < edu::sharif::twinner::trace::ExpressionToken * > &getStack () const;
 
   void checkConcreteValueReg (REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
