@@ -10,7 +10,7 @@
  * This file is part of Twinner project.
  */
 
-#include "ArithmeticShiftRight.h"
+#include "ArithmeticShiftRightOperator.h"
 
 #include "Constant.h"
 
@@ -24,26 +24,26 @@ namespace twinner {
 namespace trace {
 namespace exptoken {
 
-ArithmeticShiftRight::ArithmeticShiftRight () :
+ArithmeticShiftRightOperator::ArithmeticShiftRightOperator () :
     Operator (Operator::ARITHMETIC_SHIFT_RIGHT) {
 }
 
-ArithmeticShiftRight::ArithmeticShiftRight (const ArithmeticShiftRight &ao) :
+ArithmeticShiftRightOperator::ArithmeticShiftRightOperator (const ArithmeticShiftRightOperator &ao) :
     Operator (ao) {
 }
 
-ArithmeticShiftRight::~ArithmeticShiftRight () {
+ArithmeticShiftRightOperator::~ArithmeticShiftRightOperator () {
 }
 
-ArithmeticShiftRight *ArithmeticShiftRight::clone () const {
-  return new ArithmeticShiftRight (*this);
+ArithmeticShiftRightOperator *ArithmeticShiftRightOperator::clone () const {
+  return new ArithmeticShiftRightOperator (*this);
 }
 
-bool ArithmeticShiftRight::doesSupportSimplification () const {
+bool ArithmeticShiftRightOperator::doesSupportSimplification () const {
   return true;
 }
 
-bool ArithmeticShiftRight::apply (edu::sharif::twinner::trace::Expression *exp,
+bool ArithmeticShiftRightOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   exp->getLastConcreteValue ().arithmeticShiftToRight (*operand);
@@ -63,17 +63,17 @@ bool ArithmeticShiftRight::apply (edu::sharif::twinner::trace::Expression *exp,
   }
 }
 
-void ArithmeticShiftRight::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+void ArithmeticShiftRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst.arithmeticShiftToRight (src);
 }
 
-std::string ArithmeticShiftRight::toString () const {
+std::string ArithmeticShiftRightOperator::toString () const {
   return "arithmeticShiftToRight";
 }
 
-bool ArithmeticShiftRight::operator== (const ExpressionToken &token) const {
-  return dynamic_cast<const ArithmeticShiftRight *> (&token);
+bool ArithmeticShiftRightOperator::operator== (const ExpressionToken &token) const {
+  return dynamic_cast<const ArithmeticShiftRightOperator *> (&token);
 }
 
 }

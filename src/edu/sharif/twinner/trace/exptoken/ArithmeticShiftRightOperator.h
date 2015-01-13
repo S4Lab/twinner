@@ -10,8 +10,8 @@
  * This file is part of Twinner project.
  */
 
-#ifndef ROTATE_RIGHT_OPERATOR_H
-#define ROTATE_RIGHT_OPERATOR_H
+#ifndef ARITHMETIC_SHIFT_RIGHT_OPERATOR_H
+#define ARITHMETIC_SHIFT_RIGHT_OPERATOR_H
 
 #include "Operator.h"
 
@@ -21,14 +21,14 @@ namespace twinner {
 namespace trace {
 namespace exptoken {
 
-class RotateRight : public Operator {
+class ArithmeticShiftRightOperator : public Operator {
 
 public:
-  RotateRight ();
-  RotateRight (const RotateRight &ao);
-  virtual ~RotateRight ();
+  ArithmeticShiftRightOperator ();
+  ArithmeticShiftRightOperator (const ArithmeticShiftRightOperator &ao);
+  virtual ~ArithmeticShiftRightOperator ();
 
-  virtual RotateRight *clone () const;
+  virtual ArithmeticShiftRightOperator *clone () const;
 
   virtual bool doesSupportSimplification () const;
   virtual bool apply (edu::sharif::twinner::trace::Expression *exp,
@@ -46,4 +46,4 @@ public:
 }
 }
 
-#endif	/* RotateRight.h */
+#endif	/* ArithmeticShiftRight.h */

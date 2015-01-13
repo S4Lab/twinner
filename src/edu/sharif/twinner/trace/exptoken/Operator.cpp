@@ -22,12 +22,14 @@
 #include "BitwiseOrOperator.h"
 #include "ShiftLeftOperator.h"
 #include "ShiftRightOperator.h"
-#include "ArithmeticShiftRight.h"
-#include "RotateRight.h"
+#include "ArithmeticShiftRightOperator.h"
+#include "RotateRightOperator.h"
 
 #include "edu/sharif/twinner/trace/Expression.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
+
+#include "edu/sharif/twinner/util/Logger.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -81,33 +83,25 @@ Operator *Operator::loadFromBinaryStream (std::ifstream &in) {
   case SHIFT_RIGHT:
     return new ShiftRightOperator ();
   case ARITHMETIC_SHIFT_RIGHT:
-    return new ArithmeticShiftRight ();
+    return new ArithmeticShiftRightOperator ();
   case ROTATE_RIGHT:
-    return new RotateRight ();
+    return new RotateRightOperator ();
   default:
     return new Operator (oi);
   }
 }
 
 bool Operator::doesSupportSimplification () const {
-  switch (oi) {
-    //  case REMAINDER:
-    //  case ROTATE_LEFT:
-    return true;
-  default:
-    return false;
-  }
+  return false;
 }
 
 bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  switch (oi) {
-    //  case REMAINDER:
-    //  case ROTATE_LEFT:
-  default:
-    throw std::runtime_error ("Operator::apply(Expression *, ConcreteValue *):"
-                              " Non-handled operator identifier");
-  }
+  edu::sharif::twinner::util::Logger::error ()
+      << "Operator::apply(Expression *, ConcreteValue *): "
+      "Unknown OperatorIdentifier: " << std::dec << oi << '\n';
+  throw std::runtime_error ("Operator::apply(Expression *, ConcreteValue *):"
+                            " Non-handled operator identifier");
 }
 
 void Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
@@ -117,6 +111,9 @@ void Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     dst %= src;
     break;
   default:
+    edu::sharif::twinner::util::Logger::error ()
+        << "Operator::apply(ConcreteValue &, const ConcreteValue &):"
+        "Unknown OperatorIdentifier: " << std::dec << oi << '\n';
     throw std::runtime_error ("Operator::apply(ConcreteValue &, const ConcreteValue &):"
                               " Non-handled operator identifier");
   }

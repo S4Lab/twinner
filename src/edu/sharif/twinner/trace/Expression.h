@@ -15,8 +15,19 @@
 
 #include "Savable.h"
 
-#include "edu/sharif/twinner/trace/exptoken/Operator.h"
 #include "ExecutionState.h"
+
+#include "edu/sharif/twinner/trace/exptoken/AddOperator.h"
+#include "edu/sharif/twinner/trace/exptoken/MinusOperator.h"
+#include "edu/sharif/twinner/trace/exptoken/MultiplyOperator.h"
+#include "edu/sharif/twinner/trace/exptoken/DivideOperator.h"
+#include "edu/sharif/twinner/trace/exptoken/XorOperator.h"
+#include "edu/sharif/twinner/trace/exptoken/BitwiseAndOperator.h"
+#include "edu/sharif/twinner/trace/exptoken/BitwiseOrOperator.h"
+#include "edu/sharif/twinner/trace/exptoken/ShiftLeftOperator.h"
+#include "edu/sharif/twinner/trace/exptoken/ShiftRightOperator.h"
+#include "edu/sharif/twinner/trace/exptoken/ArithmeticShiftRightOperator.h"
+#include "edu/sharif/twinner/trace/exptoken/RotateRightOperator.h"
 
 #include <list>
 
@@ -154,7 +165,8 @@ public:
    */
   template <typename ValueOrExp>
   void shiftToRight (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::SHIFT_RIGHT), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::exptoken::ShiftRightOperator (), operand);
   }
 
   /**
@@ -167,7 +179,9 @@ public:
    */
   template <typename ValueOrExp>
   void arithmeticShiftToRight (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::ARITHMETIC_SHIFT_RIGHT), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::exptoken::ArithmeticShiftRightOperator (),
+        operand);
   }
 
   /**
@@ -179,7 +193,8 @@ public:
    */
   template <typename ValueOrExp>
   void shiftToLeft (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::SHIFT_LEFT), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::exptoken::ShiftLeftOperator (), operand);
   }
 
   /**
@@ -191,7 +206,8 @@ public:
    */
   template <typename ValueOrExp>
   void rotateToRight (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::ROTATE_RIGHT), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::exptoken::RotateRightOperator (), operand);
   }
 
   /**
@@ -203,7 +219,8 @@ public:
    */
   template <typename ValueOrExp>
   void minus (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::MINUS), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::exptoken::MinusOperator (), operand);
   }
 
   /**
@@ -222,7 +239,8 @@ public:
    */
   template <typename ValueOrExp>
   void add (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::ADD), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::exptoken::AddOperator (), operand);
   }
 
   /**
@@ -234,7 +252,8 @@ public:
    */
   template <typename ValueOrExp>
   void multiply (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::MULTIPLY), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::exptoken::MultiplyOperator (), operand);
   }
 
   /**
@@ -246,7 +265,8 @@ public:
    */
   template <typename ValueOrExp>
   void divide (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::DIVIDE), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::exptoken::DivideOperator (), operand);
   }
 
   /**
@@ -271,7 +291,8 @@ public:
    */
   template <typename ValueOrExp>
   void bitwiseAnd (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::BITWISE_AND), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::exptoken::BitwiseAndOperator (), operand);
   }
 
   /**
@@ -283,7 +304,8 @@ public:
    */
   template <typename ValueOrExp>
   void bitwiseOr (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::BITWISE_OR), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::exptoken::BitwiseOrOperator (), operand);
   }
 
   /**
@@ -295,7 +317,8 @@ public:
    */
   template <typename ValueOrExp>
   void bitwiseXor (ValueOrExp operand) {
-    binaryOperation (new Operator (Operator::XOR), operand);
+    binaryOperation
+        (new edu::sharif::twinner::trace::exptoken::XorOperator (), operand);
   }
 
   /**

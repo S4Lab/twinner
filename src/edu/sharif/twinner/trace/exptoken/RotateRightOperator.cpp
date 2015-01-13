@@ -10,7 +10,7 @@
  * This file is part of Twinner project.
  */
 
-#include "RotateRight.h"
+#include "RotateRightOperator.h"
 
 #include "Constant.h"
 
@@ -24,26 +24,26 @@ namespace twinner {
 namespace trace {
 namespace exptoken {
 
-RotateRight::RotateRight () :
+RotateRightOperator::RotateRightOperator () :
     Operator (Operator::ROTATE_RIGHT) {
 }
 
-RotateRight::RotateRight (const RotateRight &ao) :
+RotateRightOperator::RotateRightOperator (const RotateRightOperator &ao) :
     Operator (ao) {
 }
 
-RotateRight::~RotateRight () {
+RotateRightOperator::~RotateRightOperator () {
 }
 
-RotateRight *RotateRight::clone () const {
-  return new RotateRight (*this);
+RotateRightOperator *RotateRightOperator::clone () const {
+  return new RotateRightOperator (*this);
 }
 
-bool RotateRight::doesSupportSimplification () const {
+bool RotateRightOperator::doesSupportSimplification () const {
   return true;
 }
 
-bool RotateRight::apply (edu::sharif::twinner::trace::Expression *exp,
+bool RotateRightOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   exp->getLastConcreteValue ().rotateToRight (*operand);
@@ -52,17 +52,17 @@ bool RotateRight::apply (edu::sharif::twinner::trace::Expression *exp,
   return false;
 }
 
-void RotateRight::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+void RotateRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst.rotateToRight (src);
 }
 
-std::string RotateRight::toString () const {
+std::string RotateRightOperator::toString () const {
   return "rotateToRight";
 }
 
-bool RotateRight::operator== (const ExpressionToken &token) const {
-  return dynamic_cast<const RotateRight *> (&token);
+bool RotateRightOperator::operator== (const ExpressionToken &token) const {
+  return dynamic_cast<const RotateRightOperator *> (&token);
 }
 
 }
