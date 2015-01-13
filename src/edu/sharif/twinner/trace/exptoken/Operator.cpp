@@ -13,6 +13,17 @@
 #include "Operator.h"
 
 #include "Constant.h"
+#include "AddOperator.h"
+#include "MinusOperator.h"
+#include "MultiplyOperator.h"
+#include "DivideOperator.h"
+#include "XorOperator.h"
+#include "BitwiseAndOperator.h"
+#include "BitwiseOrOperator.h"
+#include "ShiftLeftOperator.h"
+#include "ShiftRightOperator.h"
+#include "ArithmeticShiftRight.h"
+#include "RotateRight.h"
 
 #include "edu/sharif/twinner/trace/Expression.h"
 
@@ -35,6 +46,9 @@ Operator::Operator (const Operator &op) :
     ExpressionToken (op), oi (op.oi) {
 }
 
+Operator::~Operator () {
+}
+
 Operator *Operator::clone () const {
   return new Operator (*this);
 }
@@ -47,23 +61,37 @@ void Operator::saveToBinaryStream (std::ofstream &out) const {
 Operator *Operator::loadFromBinaryStream (std::ifstream &in) {
   OperatorIdentifier oi;
   in.read ((char *) &oi, sizeof (oi));
-  return new Operator (oi);
+  switch (oi) {
+  case ADD:
+    return new AddOperator ();
+  case MINUS:
+    return new MinusOperator ();
+  case MULTIPLY:
+    return new MultiplyOperator ();
+  case DIVIDE:
+    return new DivideOperator ();
+  case XOR:
+    return new XorOperator ();
+  case BITWISE_AND:
+    return new BitwiseAndOperator ();
+  case BITWISE_OR:
+    return new BitwiseOrOperator ();
+  case SHIFT_LEFT:
+    return new ShiftLeftOperator ();
+  case SHIFT_RIGHT:
+    return new ShiftRightOperator ();
+  case ARITHMETIC_SHIFT_RIGHT:
+    return new ArithmeticShiftRight ();
+  case ROTATE_RIGHT:
+    return new RotateRight ();
+  default:
+    return new Operator (oi);
+  }
 }
 
 bool Operator::doesSupportSimplification () const {
   switch (oi) {
-  case ADD:
-  case MINUS:
-  case MULTIPLY:
-  case DIVIDE:
     //  case REMAINDER:
-  case XOR:
-  case BITWISE_AND:
-  case BITWISE_OR:
-  case SHIFT_LEFT:
-  case SHIFT_RIGHT:
-  case ARITHMETIC_SHIFT_RIGHT:
-  case ROTATE_RIGHT:
     //  case ROTATE_LEFT:
     return true;
   default:
@@ -71,257 +99,10 @@ bool Operator::doesSupportSimplification () const {
   }
 }
 
-bool Operator::apply (Expression *exp,
+bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   switch (oi) {
-  case ADD:
-  {
-    Constant *lastConstant = 0;
-    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
-      lastConstant = static_cast<Constant *> (exp->stack.back ());
-
-    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
-      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
-      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::ADD) {
-        lastConstant = dynamic_cast<Constant *> (*--it);
-      }
-    }
-    if (lastConstant) {
-      (*exp->lastConcreteValue) += *operand;
-      (*operand) += lastConstant->getValue ();
-      lastConstant->setValue (*operand);
-      delete operand;
-      return true;
-    } else {
-      exp->stack.push_back (new Constant (operand));
-      exp->stack.push_back (this);
-      (*exp->lastConcreteValue) += *operand;
-      return false;
-    }
-  }
-  case MINUS:
-  {
-    Constant *lastConstant = 0;
-    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
-      lastConstant = static_cast<Constant *> (exp->stack.back ());
-
-    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
-      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
-      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::ADD) {
-        lastConstant = dynamic_cast<Constant *> (*--it);
-      }
-    }
-    if (lastConstant) {
-      (*exp->lastConcreteValue) -= *operand;
-      edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConstant->getValue ().clone ();
-      (*cv) -= (*operand);
-      lastConstant->setValue (*cv);
-      delete operand;
-      delete cv;
-      return true;
-    } else {
-      exp->stack.push_back (new Constant (operand));
-      exp->stack.push_back (this);
-      (*exp->lastConcreteValue) -= *operand;
-      return false;
-    }
-  }
-  case MULTIPLY:
-  {
-    Constant *lastConstant = 0;
-    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
-      lastConstant = static_cast<Constant *> (exp->stack.back ());
-
-    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
-      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
-      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::MULTIPLY) {
-        lastConstant = dynamic_cast<Constant *> (*--it);
-      }
-    }
-    if (lastConstant) {
-      (*exp->lastConcreteValue) *= *operand;
-      (*operand) *= lastConstant->getValue ();
-      lastConstant->setValue (*operand);
-      delete operand;
-      return true;
-    } else {
-      exp->stack.push_back (new Constant (operand));
-      exp->stack.push_back (this);
-      (*exp->lastConcreteValue) *= *operand;
-      return false;
-    }
-  }
-  case DIVIDE:
-  {
-    Constant *lastConstant = 0;
-    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
-      lastConstant = static_cast<Constant *> (exp->stack.back ());
-
-    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
-      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
-      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::MULTIPLY) {
-        lastConstant = dynamic_cast<Constant *> (*--it);
-      }
-    }
-    if (lastConstant) {
-      (*exp->lastConcreteValue) /= *operand;
-      edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConstant->getValue ().clone ();
-      (*cv) /= (*operand);
-      lastConstant->setValue (*cv);
-      delete operand;
-      delete cv;
-      return true;
-    } else {
-      exp->stack.push_back (new Constant (operand));
-      exp->stack.push_back (this);
-      (*exp->lastConcreteValue) /= *operand;
-      return false;
-    }
-  }
     //  case REMAINDER:
-  case XOR:
-  {
-    Constant *lastConstantMask = 0;
-    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
-      lastConstantMask = static_cast<Constant *> (exp->stack.back ());
-
-    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
-      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
-      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::XOR) {
-        lastConstantMask = dynamic_cast<Constant *> (*--it);
-      }
-    }
-    if (lastConstantMask) {
-      (*exp->lastConcreteValue) ^= *operand;
-      (*operand) ^= lastConstantMask->getValue ();
-      lastConstantMask->setValue (*operand);
-      delete operand;
-      return true;
-    } else {
-      exp->stack.push_back (new Constant (operand));
-      exp->stack.push_back (this);
-      (*exp->lastConcreteValue) ^= *operand;
-      return false;
-    }
-  }
-  case BITWISE_AND:
-  {
-    Constant *lastConstantMask = 0;
-    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
-      lastConstantMask = static_cast<Constant *> (exp->stack.back ());
-
-    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
-      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
-      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::BITWISE_AND) {
-        lastConstantMask = dynamic_cast<Constant *> (*--it);
-      }
-    }
-    if (lastConstantMask) {
-      (*exp->lastConcreteValue) &= *operand;
-      (*operand) &= lastConstantMask->getValue ();
-      lastConstantMask->setValue (*operand);
-      delete operand;
-      return true;
-    } else {
-      exp->stack.push_back (new Constant (operand));
-      exp->stack.push_back (this);
-      (*exp->lastConcreteValue) &= *operand;
-      return false;
-    }
-  }
-  case BITWISE_OR:
-  {
-    Constant *lastConstantMask = 0;
-    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
-      lastConstantMask = static_cast<Constant *> (exp->stack.back ());
-
-    } else if (exp->stack.size () > 2 && dynamic_cast<Operator *> (exp->stack.back ())) {
-      std::list < ExpressionToken * >::iterator it = exp->stack.end ();
-      if (static_cast<Operator *> (*--it)->getIdentifier () == Operator::BITWISE_OR) {
-        lastConstantMask = dynamic_cast<Constant *> (*--it);
-      }
-    }
-    if (lastConstantMask) {
-      (*exp->lastConcreteValue) |= *operand;
-      (*operand) |= lastConstantMask->getValue ();
-      lastConstantMask->setValue (*operand);
-      delete operand;
-      return true;
-    } else {
-      exp->stack.push_back (new Constant (operand));
-      exp->stack.push_back (this);
-      (*exp->lastConcreteValue) |= *operand;
-      return false;
-    }
-  }
-  case SHIFT_LEFT:
-  {
-    if ((*operand) >= 64) {
-      exp->stack.push_back (new Constant (operand));
-      exp->stack.push_back (this);
-      (*exp->lastConcreteValue) <<= *operand;
-      return false;
-    } else {
-      // shift-to-left by n bits is equivalent to multiplication by 2^n
-      UINT64 val = (1ull << operand->toUint64 ());
-      delete operand;
-      if (val > 1) {
-        exp->multiply (val);
-      }
-      return true;
-    }
-  }
-  case SHIFT_RIGHT:
-  {
-    if ((*operand) >= 64) {
-      (*exp->lastConcreteValue) >>= *operand;
-      if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
-        Constant *lastConstant = static_cast<Constant *> (exp->stack.back ());
-        edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConstant->getValue ().clone ();
-        (*cv) >>= (*operand);
-        lastConstant->setValue (*cv);
-        delete operand;
-        delete cv;
-        return true; // means that this operator is not used and can be deleted.
-      } else {
-        exp->stack.push_back (new Constant (operand));
-        exp->stack.push_back (this);
-        return false; // means that this operator is owned by exp since now
-      }
-    } else {
-      // shift-to-right by n bits is equivalent to division by 2^n
-      const UINT64 val = (1ull << operand->toUint64 ());
-      delete operand;
-      if (val > 1) {
-        exp->divide (val);
-      }
-      return true; // means that this operator is not used and can be deleted.
-    }
-  }
-  case ARITHMETIC_SHIFT_RIGHT:
-  {
-    exp->lastConcreteValue->arithmeticShiftToRight (*operand);
-    if (!exp->stack.empty () && dynamic_cast<Constant *> (exp->stack.back ())) {
-      Constant *lastConstant = static_cast<Constant *> (exp->stack.back ());
-      edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConstant->getValue ().clone ();
-      cv->arithmeticShiftToRight (*operand);
-      lastConstant->setValue (*cv);
-      delete operand;
-      delete cv;
-      return true;
-    } else {
-      exp->stack.push_back (new Constant (operand));
-      exp->stack.push_back (this);
-      return false;
-    }
-  }
-  case ROTATE_RIGHT:
-  {
-    exp->stack.push_back (new Constant (operand));
-    exp->stack.push_back (this);
-    exp->lastConcreteValue->rotateToRight (*operand);
-    return false;
-  }
     //  case ROTATE_LEFT:
   default:
     throw std::runtime_error ("Operator::apply(Expression *, ConcreteValue *):"
@@ -332,44 +113,9 @@ bool Operator::apply (Expression *exp,
 void Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   switch (oi) {
-  case ADD:
-    dst += src;
-    break;
-  case MINUS:
-    dst -= src;
-    break;
-  case MULTIPLY:
-    dst *= src;
-    break;
-  case DIVIDE:
-    dst /= src;
-    break;
   case REMAINDER:
     dst %= src;
     break;
-  case XOR:
-    dst ^= src;
-    break;
-  case BITWISE_AND:
-    dst &= src;
-    break;
-  case BITWISE_OR:
-    dst |= src;
-    break;
-  case SHIFT_LEFT:
-    dst <<= src;
-    break;
-  case SHIFT_RIGHT:
-    dst >>= src;
-    break;
-  case ARITHMETIC_SHIFT_RIGHT:
-    dst.arithmeticShiftToRight (src);
-    break;
-  case ROTATE_RIGHT:
-    dst.rotateToRight (src);
-    break;
-  case ROTATE_LEFT:
-    // TODO: Implement
   default:
     throw std::runtime_error ("Operator::apply(ConcreteValue &, const ConcreteValue &):"
                               " Non-handled operator identifier");
@@ -378,32 +124,10 @@ void Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
 
 std::string Operator::toString () const {
   switch (oi) {
-  case ADD:
-    return "+";
-  case MINUS:
-    return "-";
-  case MULTIPLY:
-    return "*";
-  case DIVIDE:
-    return "/";
   case REMAINDER:
     return "%";
   case NEGATE:
     return "-";
-  case XOR:
-    return "^";
-  case BITWISE_AND:
-    return "&";
-  case BITWISE_OR:
-    return "|";
-  case SHIFT_LEFT:
-    return "logicalShiftToLeft";
-  case SHIFT_RIGHT:
-    return ">>";
-  case ARITHMETIC_SHIFT_RIGHT:
-    return "arithmeticShiftToRight";
-  case ROTATE_RIGHT:
-    return "rotateToRight";
   case ROTATE_LEFT:
     return "rotateToLeft";
   case SIGN_EXTEND:

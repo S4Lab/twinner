@@ -28,24 +28,25 @@ namespace util {
 class Logger;
 }
 namespace trace {
+namespace cv {
 
 class ConcreteValue;
+}
 
 class Expression : public Savable {
 
-protected:
+public:
   /**
    * Uses push_back and pop_back instead of push and pop to implement a stack.
    */
   typedef std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * > Stack;
-  Stack stack;
-
   typedef edu::sharif::twinner::trace::exptoken::Operator Operator;
+
+protected:
+  Stack stack;
 
 private:
   edu::sharif::twinner::trace::cv::ConcreteValue *lastConcreteValue;
-
-  friend Operator;
 
   bool isOverwriting;
 
@@ -87,6 +88,7 @@ public:
    */
   ~Expression ();
 
+  edu::sharif::twinner::trace::cv::ConcreteValue &getLastConcreteValue ();
   const edu::sharif::twinner::trace::cv::ConcreteValue &getLastConcreteValue () const;
 
   /**
@@ -322,6 +324,7 @@ public:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static Expression *loadFromBinaryStream (std::ifstream &in);
 
+  Stack &getStack ();
   const Stack &getStack () const;
 
   void checkConcreteValueReg (REG reg,

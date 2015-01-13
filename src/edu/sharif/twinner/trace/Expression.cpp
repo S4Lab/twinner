@@ -68,6 +68,10 @@ Expression::~Expression () {
   delete lastConcreteValue;
 }
 
+edu::sharif::twinner::trace::cv::ConcreteValue &Expression::getLastConcreteValue () {
+  return *lastConcreteValue;
+}
+
 const edu::sharif::twinner::trace::cv::ConcreteValue &
 Expression::getLastConcreteValue () const {
   return *lastConcreteValue;
@@ -276,6 +280,10 @@ Expression *Expression::loadFromBinaryStream (std::ifstream &in) {
   loadListFromBinaryStream (in, "EXP", stack);
   return new Expression
       (stack, edu::sharif::twinner::trace::cv::ConcreteValue::loadFromBinaryStream (in));
+}
+
+Expression::Stack &Expression::getStack () {
+  return stack;
 }
 
 const Expression::Stack &Expression::getStack () const {

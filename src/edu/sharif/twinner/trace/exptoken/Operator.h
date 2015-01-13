@@ -60,13 +60,14 @@ public:
     FunctionalBinary
   };
 
-private:
+protected:
   OperatorIdentifier oi;
 
   Operator (const Operator &op);
 
 public:
   Operator (OperatorIdentifier);
+  virtual ~Operator ();
 
   virtual Operator *clone () const;
 
@@ -80,7 +81,7 @@ public:
    * @return true iff the `apply (Expression *, ConcreteValue *)` method has a chance
    * to simplify the expression.
    */
-  bool doesSupportSimplification () const;
+  virtual bool doesSupportSimplification () const;
 
   /**
    * Applies this operator on given expression and concrete value objects.
@@ -94,8 +95,9 @@ public:
    * @param cv The owned concrete value that is used as operand of this operation.
    * @return true iff the operator is not used and operation is applied directly.
    */
-  bool apply (Expression *exp, edu::sharif::twinner::trace::cv::ConcreteValue *cv);
-  void apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+  virtual bool apply (edu::sharif::twinner::trace::Expression *exp,
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv);
+  virtual void apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
       const edu::sharif::twinner::trace::cv::ConcreteValue &src) const;
 
   virtual std::string toString () const;
