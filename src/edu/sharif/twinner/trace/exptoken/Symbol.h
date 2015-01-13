@@ -21,6 +21,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
 
 enum SymbolType {
 
@@ -70,6 +71,7 @@ public:
   virtual std::pair < int, SymbolRecord > toSymbolRecord () const = 0;
 };
 
+}
 }
 }
 }

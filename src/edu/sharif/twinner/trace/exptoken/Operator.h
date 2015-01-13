@@ -25,6 +25,8 @@ class ConcreteValue;
 }
 class Expression;
 
+namespace exptoken {
+
 class Operator : public ExpressionToken {
 
 public:
@@ -104,6 +106,7 @@ public:
   virtual bool operator== (const ExpressionToken &token) const;
 };
 
+}
 }
 }
 }

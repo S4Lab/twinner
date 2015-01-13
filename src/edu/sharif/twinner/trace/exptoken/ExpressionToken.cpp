@@ -22,6 +22,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
 
 ExpressionToken::ExpressionToken () {
 }
@@ -51,6 +52,7 @@ ExpressionToken *ExpressionToken::loadFromBinaryStream (std::ifstream &in) {
   }
 }
 
+}
 }
 }
 }

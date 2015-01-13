@@ -27,7 +27,11 @@ namespace trace {
 
 class Trace;
 class Constraint;
+
+namespace exptoken {
+
 class Symbol;
+}
 }
 namespace engine {
 namespace search {
@@ -67,7 +71,7 @@ private:
   void addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace);
 
   bool calculateSymbolsValuesForCoveringNextPath (
-      std::set < const edu::sharif::twinner::trace::Symbol * > &symbols);
+      std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols);
 
   std::map < ADDRINT, UINT64 > obtainInitializedMemoryValues (Executer &ex) const;
   void codeTracesIntoTwinCode (const std::map < ADDRINT, UINT64 > &initialValues);

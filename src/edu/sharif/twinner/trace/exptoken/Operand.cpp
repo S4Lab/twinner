@@ -18,6 +18,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
 
 Operand::Operand () :
     ExpressionToken (), concreteValue (0) {
@@ -43,6 +44,7 @@ const edu::sharif::twinner::trace::cv::ConcreteValue &Operand::getValue () const
   return *concreteValue;
 }
 
+}
 }
 }
 }

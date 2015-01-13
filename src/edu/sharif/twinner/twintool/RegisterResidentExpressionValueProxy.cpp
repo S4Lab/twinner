@@ -69,7 +69,7 @@ void RegisterResidentExpressionValueProxy::putExpressionInLeastSignificantBitsOf
 void RegisterResidentExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression &changedExp) const {
-  typedef edu::sharif::twinner::trace::RegisterEmergedSymbol Reg;
+  typedef edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol Reg;
   edu::sharif::twinner::util::Logger::loquacious () << "(register value is changed to "
       << &changedExp << ")\n";
   const int regIndex = Reg::getRegisterIndex (REG_FullRegName (reg));

@@ -19,6 +19,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
 
 class MemoryEmergedSymbol : public Symbol {
 
@@ -48,6 +49,7 @@ public:
   ADDRINT getAddress () const;
 };
 
+}
 }
 }
 }

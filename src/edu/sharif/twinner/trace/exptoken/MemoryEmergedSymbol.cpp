@@ -23,6 +23,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
 
 MemoryEmergedSymbol::MemoryEmergedSymbol (const MemoryEmergedSymbol &s) :
     Symbol (s), address (s.address) {
@@ -117,6 +118,7 @@ ADDRINT MemoryEmergedSymbol::getAddress () const {
   return address;
 }
 
+}
 }
 }
 }

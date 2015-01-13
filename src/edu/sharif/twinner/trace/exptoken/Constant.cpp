@@ -22,6 +22,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
 
 Constant::Constant (const Constant &c) :
     Operand (c) {
@@ -68,6 +69,7 @@ bool Constant::operator== (const ExpressionToken &token) const {
       && (*static_cast<const Constant *> (&token)->concreteValue) == (*concreteValue);
 }
 
+}
 }
 }
 }

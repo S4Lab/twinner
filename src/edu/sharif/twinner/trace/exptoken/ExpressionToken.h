@@ -13,17 +13,18 @@
 #ifndef EXPRESSIONTOKEN_H_
 #define EXPRESSIONTOKEN_H_
 
-#include "Savable.h"
+#include "edu/sharif/twinner/trace/Savable.h"
 
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
 
 /**
  * @interface
  */
-class ExpressionToken : public Savable {
+class ExpressionToken : public edu::sharif::twinner::trace::Savable {
 
 protected:
 
@@ -43,6 +44,7 @@ public:
   virtual bool operator== (const ExpressionToken &token) const = 0;
 };
 
+}
 }
 }
 }

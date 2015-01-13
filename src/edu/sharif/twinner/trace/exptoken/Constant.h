@@ -21,6 +21,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
 
 class Constant : public Operand {
 
@@ -43,6 +44,7 @@ public:
   virtual bool operator== (const ExpressionToken &token) const;
 };
 
+}
 }
 }
 }

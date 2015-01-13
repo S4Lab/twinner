@@ -14,6 +14,7 @@
 
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
+
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 
@@ -116,7 +117,7 @@ const Logger &Logger::operator<< (
 }
 
 const Logger &Logger::operator<< (
-    const edu::sharif::twinner::trace::ExpressionToken *token) const {
+    const edu::sharif::twinner::trace::exptoken::ExpressionToken *token) const {
   return (*this) << "Token(" << token->toString () << ')';
 }
 

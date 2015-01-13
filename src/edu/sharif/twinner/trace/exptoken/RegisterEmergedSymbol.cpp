@@ -12,8 +12,8 @@
 
 #include "RegisterEmergedSymbol.h"
 
-#include "ExecutionTraceSegment.h"
-#include "Expression.h"
+#include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
+#include "edu/sharif/twinner/trace/Expression.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
@@ -24,6 +24,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (const RegisterEmergedSymbol &s) :
     Symbol (s), address (s.address) {
@@ -384,6 +385,7 @@ void RegisterEmergedSymbol::initializeSubRegisters (REG reg,
       (8, getOverlappingRegisterByIndex (regIndex, 4), &expression)->truncate (8);
 }
 
+}
 }
 }
 }

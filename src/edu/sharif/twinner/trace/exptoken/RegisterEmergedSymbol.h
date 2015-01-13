@@ -23,6 +23,8 @@ namespace trace {
 class ExecutionTraceSegment;
 class Expression;
 
+namespace exptoken {
+
 class RegisterEmergedSymbol : public Symbol {
 
 private:
@@ -111,6 +113,7 @@ public:
       ExecutionTraceSegment *segment, const Expression &expression);
 };
 
+}
 }
 }
 }

@@ -27,7 +27,7 @@ namespace engine {
 namespace smt {
 
 void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
-    std::set < const edu::sharif::twinner::trace::Symbol * > &satSolution);
+    std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &satSolution);
 
 Cvc4SmtSolver::Cvc4SmtSolver () :
     SmtSolver () {
@@ -38,7 +38,7 @@ Cvc4SmtSolver::~Cvc4SmtSolver () {
 
 void Cvc4SmtSolver::solveConstraints (
     const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-    std::set < const edu::sharif::twinner::trace::Symbol * > &satSolution) const
+    std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &satSolution) const
 /* @throw (UnsatisfiableConstraintsException) */ {
   edu::sharif::twinner::util::Logger::loquacious ()
       << "Cvc4SmtSolver::solveConstraints (...)\n";
@@ -111,7 +111,7 @@ Cvc4SmtSolver::simplifyConstraints (
 }
 
 void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
-    std::set < const edu::sharif::twinner::trace::Symbol * > &satSolution) {
+    std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &satSolution) {
   edu::sharif::twinner::util::Logger log =
       edu::sharif::twinner::util::Logger::loquacious ();
   log << "Constraints are satisfiable. Filling satSolution with memory symbols...";
@@ -133,11 +133,11 @@ void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
     log << "\tsetting " << it->first << " -> " << valstr << "...";
     if (it->first.at (0) == 'm') { // memory symbol
       satSolution.insert
-          (edu::sharif::twinner::trace::MemoryEmergedSymbol::fromNameAndValue
+          (edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol::fromNameAndValue
            (it->first, v4, v3, v2, v1));
     } else { // register symbol
       satSolution.insert
-          (edu::sharif::twinner::trace::RegisterEmergedSymbol::fromNameAndValue
+          (edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol::fromNameAndValue
            (it->first, v4, v3, v2, v1));
     }
   }

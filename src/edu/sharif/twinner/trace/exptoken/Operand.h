@@ -23,6 +23,7 @@ namespace cv {
 
 class ConcreteValue;
 }
+namespace exptoken {
 
 /**
  * @abstract
@@ -51,6 +52,7 @@ public:
   const edu::sharif::twinner::trace::cv::ConcreteValue &getValue () const;
 };
 
+}
 }
 }
 }

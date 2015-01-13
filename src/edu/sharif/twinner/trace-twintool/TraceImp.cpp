@@ -19,7 +19,9 @@
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
+
 #include "edu/sharif/twinner/trace/exptoken/Symbol.h"
+
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 
@@ -216,7 +218,8 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
 }
 
 void TraceImp::loadInitializedSymbolsFromBinaryStream (std::ifstream &in) {
-  std::map < int, std::list < SymbolRecord > >::size_type s;
+  std::map < int, std::list < edu::sharif::twinner::trace::exptoken::SymbolRecord > >
+      ::size_type s;
   in.read ((char *) &s, sizeof (s));
   int index = 0;
   if (s == 0) {
@@ -239,30 +242,30 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
     int index, std::ifstream &in) {
   std::map < ADDRINT, Expression * > memMap;
   std::map < REG, Expression * > regMap;
-  std::list < SymbolRecord >::size_type s;
+  std::list < edu::sharif::twinner::trace::exptoken::SymbolRecord >::size_type s;
   in.read ((char *) &s, sizeof (s));
 
   repeat (s) {
-    SymbolRecord record;
+    edu::sharif::twinner::trace::exptoken::SymbolRecord record;
     in.read ((char *) &record.address, sizeof (record.address));
     in.read ((char *) &record.type, sizeof (record.type));
     in.read ((char *) &record.concreteValueLsb, sizeof (record.concreteValueLsb));
     in.read ((char *) &record.concreteValueMsb, sizeof (record.concreteValueMsb));
     Expression *exp;
-    switch (SymbolType (record.type)) {
-    case REGISTER_64_BITS_SYMBOL_TYPE:
-    case REGISTER_128_BITS_SYMBOL_TYPE:
+    switch (edu::sharif::twinner::trace::exptoken::SymbolType (record.type)) {
+    case edu::sharif::twinner::trace::exptoken::REGISTER_64_BITS_SYMBOL_TYPE:
+    case edu::sharif::twinner::trace::exptoken::REGISTER_128_BITS_SYMBOL_TYPE:
     {
-      if (record.type == REGISTER_64_BITS_SYMBOL_TYPE) {
-        exp = instantiateExpression
-            (REG (record.address), edu::sharif::twinner::trace::cv::ConcreteValue64Bits
-             (record.concreteValueLsb), index);
+      if (record.type ==
+          edu::sharif::twinner::trace::exptoken::REGISTER_64_BITS_SYMBOL_TYPE) {
+        exp = instantiateExpression (REG (record.address),
+                                     edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+                                     (record.concreteValueLsb), index);
       } else {
-        exp = instantiateExpression
-            (REG (record.address),
-             edu::sharif::twinner::trace::cv::ConcreteValue128Bits
-             (record.concreteValueMsb, record.concreteValueLsb),
-             index);
+        exp = instantiateExpression (REG (record.address),
+                                     edu::sharif::twinner::trace::cv::ConcreteValue128Bits
+                                     (record.concreteValueMsb, record.concreteValueLsb),
+                                     index);
       }
       std::pair < std::map < REG, Expression * >::iterator, bool > res =
           regMap.insert (make_pair (REG (record.address), exp));
@@ -272,27 +275,25 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
       }
       break;
     }
-    case MEMORY_64_BITS_SYMBOL_TYPE:
-    case MEMORY_128_BITS_SYMBOL_TYPE:
+    case edu::sharif::twinner::trace::exptoken::MEMORY_64_BITS_SYMBOL_TYPE:
+    case edu::sharif::twinner::trace::exptoken::MEMORY_128_BITS_SYMBOL_TYPE:
     {
-      if (record.type == MEMORY_64_BITS_SYMBOL_TYPE) {
-        exp = new ExpressionImp
-            (ADDRINT (record.address),
-             edu::sharif::twinner::trace::cv::ConcreteValue64Bits
-             (record.concreteValueLsb),
-             index, true);
+      if (record.type ==
+          edu::sharif::twinner::trace::exptoken::MEMORY_64_BITS_SYMBOL_TYPE) {
+        exp = new ExpressionImp (ADDRINT (record.address),
+                                 edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+                                 (record.concreteValueLsb),
+                                 index, true);
         edu::sharif::twinner::util::Logger::loquacious () << "loading symbol: 0x"
-            << std::hex << ADDRINT (record.address) << " -> "
-            << exp << '\n';
+            << std::hex << ADDRINT (record.address) << " -> " << exp << '\n';
       } else {
         edu::sharif::twinner::util::Logger::warning () << "A 128-bits memory symbol "
             "is found in the symbols file, while only 64-bits memory symbols are "
             "supposed to be transferred between Twinner and TwinTool.\n";
-        exp = new ExpressionImp
-            (ADDRINT (record.address),
-             edu::sharif::twinner::trace::cv::ConcreteValue128Bits
-             (record.concreteValueMsb, record.concreteValueLsb),
-             index, true);
+        exp = new ExpressionImp (ADDRINT (record.address),
+                                 edu::sharif::twinner::trace::cv::ConcreteValue128Bits
+                                 (record.concreteValueMsb, record.concreteValueLsb),
+                                 index, true);
       }
       std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
           memMap.insert (make_pair (ADDRINT (record.address), exp));

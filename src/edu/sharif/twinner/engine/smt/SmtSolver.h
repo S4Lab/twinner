@@ -22,7 +22,11 @@ namespace twinner {
 namespace trace {
 
 class Constraint;
+
+namespace exptoken {
+
 class Symbol;
+}
 }
 namespace engine {
 namespace smt {
@@ -55,7 +59,7 @@ public:
    */
   virtual void solveConstraints (
       const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-      std::set < const edu::sharif::twinner::trace::Symbol * > &symbols) const
+      std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols) const
   /* @throw (UnsatisfiableConstraintsException) */ = 0;
 
   /**

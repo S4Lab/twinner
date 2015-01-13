@@ -26,9 +26,12 @@ namespace twinner {
 namespace trace {
 
 class Expression;
-class ExpressionToken;
 class Constraint;
 
+namespace exptoken {
+
+class ExpressionToken;
+}
 namespace cv {
 
 class ConcreteValue;
@@ -75,7 +78,7 @@ public:
   const Logger &operator<< (const edu::sharif::twinner::trace::Expression *exp) const;
   const Logger &operator<< (const edu::sharif::twinner::trace::Constraint *c) const;
   const Logger &operator<< (
-      const edu::sharif::twinner::trace::ExpressionToken *token) const;
+      const edu::sharif::twinner::trace::exptoken::ExpressionToken *token) const;
   const Logger &operator<< (
       const edu::sharif::twinner::trace::cv::ConcreteValue &value) const;
 

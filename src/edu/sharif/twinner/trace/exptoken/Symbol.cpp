@@ -18,6 +18,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
 
 Symbol::Symbol (const edu::sharif::twinner::trace::cv::ConcreteValue &_concreteValue,
     int _generationIndex) :
@@ -47,6 +48,7 @@ int Symbol::getGenerationIndex () const {
   return generationIndex;
 }
 
+}
 }
 }
 }

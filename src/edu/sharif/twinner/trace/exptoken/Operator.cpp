@@ -12,8 +12,9 @@
 
 #include "Operator.h"
 
-#include "Expression.h"
 #include "Constant.h"
+
+#include "edu/sharif/twinner/trace/Expression.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
@@ -24,6 +25,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
 
 Operator::Operator (OperatorIdentifier _oi) :
     ExpressionToken (), oi (_oi) {
@@ -432,6 +434,7 @@ bool Operator::operator== (const ExpressionToken &token) const {
       && static_cast<const Operator *> (&token)->oi == oi;
 }
 
+}
 }
 }
 }

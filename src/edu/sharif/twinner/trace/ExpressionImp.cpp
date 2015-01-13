@@ -32,7 +32,7 @@ ExpressionImp::ExpressionImp (REG reg,
     int generationIndex) :
     Expression (concreteValue.clone (), false) {
   //TODO: Check whether concreteValue should be casted to 64-bits precision for symbol
-  stack.push_back (new edu::sharif::twinner::trace::RegisterEmergedSymbol
+  stack.push_back (new edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol
                    (reg, concreteValue, generationIndex));
 }
 
@@ -43,7 +43,7 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
   if (!isOverwriting) {
     if (memoryEa < 0x7f0000000000ull) { // FIXME: Generalize this code
       // this temporary code assumes that everything out of stack (including heap) is constant
-      stack.push_back (new edu::sharif::twinner::trace::Constant (concreteValue));
+      stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (concreteValue));
       return;
     }
   }
@@ -54,22 +54,23 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
         static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
         (&concreteValue);
     stack.push_back
-        (new MemoryEmergedSymbol
+        (new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
          (memoryEa + 8, // little endian
           edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getMsb ()),
           generationIndex));
-    stack.push_back (new edu::sharif::twinner::trace::Constant (64));
-    stack.push_back (new edu::sharif::twinner::trace::Operator (Operator::SHIFT_LEFT));
+    stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (64));
     stack.push_back
-        (new MemoryEmergedSymbol
+        (new Operator (Operator::SHIFT_LEFT));
+    stack.push_back
+        (new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
          (memoryEa,
           edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getLsb ()),
           generationIndex));
-    stack.push_back (new edu::sharif::twinner::trace::Operator (Operator::BITWISE_OR));
+    stack.push_back (new Operator (Operator::BITWISE_OR));
     break;
   }
   case 64:
-    stack.push_back (new edu::sharif::twinner::trace::MemoryEmergedSymbol
+    stack.push_back (new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
                      (memoryEa, concreteValue, generationIndex));
     break;
   case 32:
@@ -79,23 +80,26 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
     const int offset = memoryEa % 8;
     if (offset == 0) {
       stack.push_back
-          (new MemoryEmergedSymbol
+          (new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
            (memoryEa,
             edu::sharif::twinner::trace::cv::ConcreteValue64Bits (concreteValue),
             generationIndex));
     } else {
-      stack.push_back (new MemoryEmergedSymbol
+      stack.push_back (new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
                        (memoryEa - offset,
                         edu::sharif::twinner::trace::cv::ConcreteValue64Bits
                         (concreteValue.toUint64 () << (offset * 8)),
                         generationIndex));
       // Using division instead of shift-to-right to match with Expression implementation
-      stack.push_back (new edu::sharif::twinner::trace::Constant (1ull << (offset * 8)));
-      stack.push_back (new edu::sharif::twinner::trace::Operator (Operator::DIVIDE));
+      stack.push_back
+          (new edu::sharif::twinner::trace::exptoken::Constant (1ull << (offset * 8)));
+      stack.push_back
+          (new Operator (Operator::DIVIDE));
     }
     if (offset < 8 - (cvsize / 8)) {
-      stack.push_back (new edu::sharif::twinner::trace::Constant ((1ull << cvsize) - 1));
-      stack.push_back (new edu::sharif::twinner::trace::Operator (Operator::BITWISE_AND));
+      stack.push_back
+          (new edu::sharif::twinner::trace::exptoken::Constant ((1ull << cvsize) - 1));
+      stack.push_back (new Operator (Operator::BITWISE_AND));
     }
     break;
   }
@@ -105,7 +109,7 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
   }
 }
 
-ExpressionImp::ExpressionImp (edu::sharif::twinner::trace::Symbol *symbol) :
+ExpressionImp::ExpressionImp (edu::sharif::twinner::trace::exptoken::Symbol *symbol) :
     Expression (symbol->getValue ().clone (), false) {
   stack.push_back (symbol);
 }
@@ -113,17 +117,17 @@ ExpressionImp::ExpressionImp (edu::sharif::twinner::trace::Symbol *symbol) :
 ExpressionImp::ExpressionImp (
     const edu::sharif::twinner::trace::cv::ConcreteValue &value) :
     Expression (value.clone (), false) {
-  stack.push_back (new edu::sharif::twinner::trace::Constant (value));
+  stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (value));
 }
 
 ExpressionImp::ExpressionImp (edu::sharif::twinner::trace::cv::ConcreteValue *value) :
     Expression (value, false) {
-  stack.push_back (new edu::sharif::twinner::trace::Constant (*value));
+  stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (*value));
 }
 
 ExpressionImp::ExpressionImp (UINT64 value) :
     Expression (new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value), false) {
-  stack.push_back (new edu::sharif::twinner::trace::Constant
+  stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant
                    (new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value)));
 }
 

@@ -26,8 +26,12 @@ namespace twinner {
 namespace trace {
 
 class Trace;
+
+namespace exptoken {
+
 class Symbol;
 struct SymbolRecord;
+}
 }
 namespace engine {
 
@@ -42,17 +46,20 @@ public:
   };
 
   /**
-   * Indicating name of the temp file, being used to communicate with TwinTool about the initial symbols values.
+   * Indicating name of the temp file, being used to communicate with TwinTool
+   * about the initial symbols values.
    */
   static const char *SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE;
 
   /**
-   * Indicating name of the temp file, being used to communicate with TwinTool about the last execution trace.
+   * Indicating name of the temp file, being used to communicate with TwinTool
+   * about the last execution trace.
    */
   static const char *EXECUTION_TRACE_COMMUNICATION_TEMP_FILE;
 
   /**
-   * Indicating name of the temp file, being used to communicate content of shared memory of disassembled instructions.
+   * Indicating name of the temp file, being used to communicate content of
+   * shared memory of disassembled instructions.
    */
   static const char *DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE;
 
@@ -65,8 +72,8 @@ public:
       std::string inputArguments, bool main);
 
   void setCandidateAddresses (const std::set < ADDRINT > &addresses) const;
-  void setSymbolsValues (
-      const std::set < const edu::sharif::twinner::trace::Symbol * > &symbols) const;
+  void setSymbolsValues (const std::set <
+      const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols) const;
 
   edu::sharif::twinner::trace::Trace *executeSingleTraceInNormalMode () const;
 
@@ -74,7 +81,7 @@ public:
   map < ADDRINT, UINT64 > executeSingleTraceInInitialStateDetectionMode () const;
 
 private:
-  typedef edu::sharif::twinner::trace::SymbolRecord Record;
+  typedef edu::sharif::twinner::trace::exptoken::SymbolRecord Record;
 
   bool saveSymbolRecordsToFile (ExecutionMode mode,
       std::map < int, std::list < Record > > records) const;
