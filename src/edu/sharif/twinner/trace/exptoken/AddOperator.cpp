@@ -46,22 +46,30 @@ bool AddOperator::doesSupportSimplification () const {
 bool AddOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   Constant *lastConstant = 0;
+  const Operator *op = 0;
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
     lastConstant = static_cast<Constant *> (stack.back ());
 
   } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
     std::list < ExpressionToken * >::iterator it = stack.end ();
-    const Operator *op = static_cast<Operator *> (*--it);
-    if (op->getIdentifier () == Operator::ADD) {
+    op = static_cast<Operator *> (*--it);
+    if (op->getIdentifier () == Operator::ADD
+        || op->getIdentifier () == Operator::MINUS) {
       lastConstant = dynamic_cast<Constant *> (*--it);
     }
   }
   exp->getLastConcreteValue () += *operand;
   if (lastConstant) {
-    (*operand) += lastConstant->getValue ();
-    lastConstant->setValue (*operand);
+    edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConstant->getValue ().clone ();
+    if (op && op->getIdentifier () == Operator::MINUS) {
+      (*cv) -= (*operand);
+    } else {
+      (*cv) += (*operand);
+    }
     delete operand;
+    lastConstant->setValue (*cv);
+    delete cv;
     return true;
   } else {
     stack.push_back (new Constant (operand));
