@@ -64,15 +64,16 @@ protected:
   OperatorIdentifier oi;
 
   Operator (const Operator &op);
+  Operator (OperatorIdentifier);
 
 public:
-  Operator (OperatorIdentifier);
   virtual ~Operator ();
 
   virtual Operator *clone () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static Operator *loadFromBinaryStream (std::ifstream &in);
+  static Operator *instantiateOperator (OperatorIdentifier oi);
 
   /**
    * Indicates whether this operator supports expression simplification and direct

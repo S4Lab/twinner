@@ -236,8 +236,9 @@ void Expression::negate () {
   Operator *op = dynamic_cast<Operator *> (stack.back ());
   if (op && op->getIdentifier () == Operator::NEGATE) {
     stack.pop_back ();
+    delete op;
   } else {
-    stack.push_back (new Operator (Operator::NEGATE));
+    stack.push_back (Operator::instantiateOperator (Operator::NEGATE));
   }
   edu::sharif::twinner::trace::cv::ConcreteValue *neg =
       lastConcreteValue->bitwiseNegated ();
@@ -259,7 +260,7 @@ Expression *Expression::signExtended (int size) const {
       Expression *exp = clone (size);
       exp->stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (mySize));
       exp->stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (size));
-      exp->stack.push_back (new Operator (Operator::SIGN_EXTEND));
+      exp->stack.push_back (Operator::instantiateOperator (Operator::SIGN_EXTEND));
       exp->setLastConcreteValue (lastConcreteValue->signExtended (size));
       return exp;
     }

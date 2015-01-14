@@ -59,14 +59,13 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
           edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getMsb ()),
           generationIndex));
     stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (64));
-    stack.push_back
-        (new Operator (Operator::SHIFT_LEFT));
+    stack.push_back (Operator::instantiateOperator (Operator::SHIFT_LEFT));
     stack.push_back
         (new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
          (memoryEa,
           edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getLsb ()),
           generationIndex));
-    stack.push_back (new Operator (Operator::BITWISE_OR));
+    stack.push_back (Operator::instantiateOperator (Operator::BITWISE_OR));
     break;
   }
   case 64:
@@ -93,13 +92,12 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
       // Using division instead of shift-to-right to match with Expression implementation
       stack.push_back
           (new edu::sharif::twinner::trace::exptoken::Constant (1ull << (offset * 8)));
-      stack.push_back
-          (new Operator (Operator::DIVIDE));
+      stack.push_back (Operator::instantiateOperator (Operator::DIVIDE));
     }
     if (offset < 8 - (cvsize / 8)) {
       stack.push_back
           (new edu::sharif::twinner::trace::exptoken::Constant ((1ull << cvsize) - 1));
-      stack.push_back (new Operator (Operator::BITWISE_AND));
+      stack.push_back (Operator::instantiateOperator (Operator::BITWISE_AND));
     }
     break;
   }

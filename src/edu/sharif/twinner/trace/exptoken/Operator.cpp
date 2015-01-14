@@ -63,6 +63,10 @@ void Operator::saveToBinaryStream (std::ofstream &out) const {
 Operator *Operator::loadFromBinaryStream (std::ifstream &in) {
   OperatorIdentifier oi;
   in.read ((char *) &oi, sizeof (oi));
+  return instantiateOperator (oi);
+}
+
+Operator *Operator::instantiateOperator (OperatorIdentifier oi) {
   switch (oi) {
   case ADD:
     return new AddOperator ();
