@@ -55,6 +55,8 @@ bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     const Operator *op = static_cast<Operator *> (*--it);
     if (op->getIdentifier () == Operator::BITWISE_AND) {
       lastConstantMask = dynamic_cast<Constant *> (*--it);
+    } else if (deepSimplify (exp, operand)) {
+      return apply (exp, operand);
     }
   }
   exp->getLastConcreteValue () &= *operand;
@@ -73,6 +75,64 @@ bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::Expression *exp,
 void BitwiseAndOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst &= src;
+}
+
+bool BitwiseAndOperator::deepSimplify (edu::sharif::twinner::trace::Expression *exp,
+    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
+  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
+  if (stack.size () > 4) {
+    std::list < ExpressionToken * >::iterator it = stack.end ();
+    Operator *addOrMinusOp = dynamic_cast<Operator *> (*--it);
+    if (addOrMinusOp && (addOrMinusOp->getIdentifier () == Operator::ADD
+        || addOrMinusOp->getIdentifier () == Operator::MINUS)) {
+      Constant *second = dynamic_cast<Constant *> (*--it);
+      if (second) {
+        Operator *andOp = dynamic_cast<Operator *> (*--it);
+        if (andOp && andOp->getIdentifier () == Operator::BITWISE_AND) {
+          Constant *first = dynamic_cast<Constant *> (*--it);
+          if (first && isTruncatingMask (first->getValue ().clone ())) {
+            // exp == (...) & first [+-] second  and  first is similar to 0x00001111
+            stack.pop_back (); // removes addOrMinusOp
+            stack.pop_back (); // removes second
+            stack.pop_back (); // removes andOp
+            stack.pop_back (); // removes first
+            if (addOrMinusOp->getIdentifier () == Operator::ADD) {
+              exp->getLastConcreteValue () -= second->getValue ();
+              exp->add (second->getValue ().clone ());
+            } else {
+              exp->getLastConcreteValue () += second->getValue ();
+              exp->minus (second->getValue ().clone ());
+            }
+            delete addOrMinusOp;
+            delete second;
+            delete andOp;
+            (*operand) &= first->getValue ();
+            delete first;
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
+bool BitwiseAndOperator::isTruncatingMask (
+    edu::sharif::twinner::trace::cv::ConcreteValue *cv) const {
+  const unsigned int s = cv->getSize ();
+  for (UINT64 i = 0; i < s; ++i) {
+    if ((cv->toUint64 () & 0x1) == 0) {
+      if (cv->isZero ()) {
+        break;
+      } else {
+        delete cv;
+        return false;
+      }
+    }
+    (*cv) >>= 1;
+  }
+  delete cv;
+  return true;
 }
 
 std::string BitwiseAndOperator::toString () const {
