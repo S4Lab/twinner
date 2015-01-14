@@ -146,21 +146,32 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
   if (op->doesSupportSimplification () && exp->isTrivial ()) {
     // FIXME: Make sure that last concrete value is always valid at this point
     binaryOperation (op, exp->getLastConcreteValue ().clone ());
-    return;
+  } else if ((op->getIdentifier () == Operator::DIVIDE
+      || op->getIdentifier () == Operator::MINUS
+      || op->getIdentifier () == Operator::XOR)
+      && (*this) == (*exp)) {
+    while (!stack.empty ()) {
+      delete stack.back ();
+      stack.pop_back ();
+    }
+    const int v = ((op->getIdentifier () == Operator::DIVIDE) ? 1 : 0);
+    stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (v));
+    *lastConcreteValue = v;
+  } else {
+    /**
+     * It's possible that this object and given constant expression object be the same.
+     * In that case changing this object while searching the given expression can
+     * change the constant expression unexpectedly. To avoid such situations, it's important
+     * to take required non constant clone of the given constant expression atomically
+     * before applying any change to this object.
+     */
+    Expression *copy = exp->clone ();
+    stack.insert (stack.end (), copy->stack.begin (), copy->stack.end ());
+    copy->stack.clear ();
+    delete copy;
+    stack.push_back (op);
+    op->apply (*lastConcreteValue, *(exp->lastConcreteValue));
   }
-  /**
-   * It's possible that this object and given constant expression object be the same.
-   * In that case changing this object while searching the given expression can
-   * change the constant expression unexpectedly. To avoid such situations, it's important
-   * to take required non constant clone of the given constant expression atomically
-   * before applying any change to this object.
-   */
-  Expression *copy = exp->clone ();
-  stack.insert (stack.end (), copy->stack.begin (), copy->stack.end ());
-  copy->stack.clear ();
-  delete copy;
-  stack.push_back (op);
-  op->apply (*lastConcreteValue, *(exp->lastConcreteValue));
 }
 
 void Expression::binaryOperation (Operator *op,
