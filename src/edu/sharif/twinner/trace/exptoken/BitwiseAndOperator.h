@@ -40,7 +40,15 @@ public:
   virtual bool operator== (const ExpressionToken &token) const;
 
 private:
-  bool deepSimplify (edu::sharif::twinner::trace::Expression *exp,
+
+  enum SimplificationStatus {
+
+    CAN_NOT_SIMPLIFY,
+    RESTART_SIMPLIFICATION,
+    COMPLETED // operator is not used and can be deleted
+  };
+
+  SimplificationStatus deepSimplify (edu::sharif::twinner::trace::Expression *exp,
       edu::sharif::twinner::trace::cv::ConcreteValue *operand);
   bool isTruncatingMask (edu::sharif::twinner::trace::cv::ConcreteValue *cv) const;
 };

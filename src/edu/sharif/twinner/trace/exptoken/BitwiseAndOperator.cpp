@@ -55,8 +55,15 @@ bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     const Operator *op = static_cast<Operator *> (*--it);
     if (op->getIdentifier () == Operator::BITWISE_AND) {
       lastConstantMask = dynamic_cast<Constant *> (*--it);
-    } else if (deepSimplify (exp, operand)) {
-      return apply (exp, operand);
+    } else {
+      switch (deepSimplify (exp, operand)) {
+      case CAN_NOT_SIMPLIFY:
+        break;
+      case RESTART_SIMPLIFICATION:
+        return apply (exp, operand);
+      case COMPLETED:
+        return true;
+      }
     }
   }
   exp->getLastConcreteValue () &= *operand;
@@ -77,44 +84,80 @@ void BitwiseAndOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &
   dst &= src;
 }
 
-bool BitwiseAndOperator::deepSimplify (edu::sharif::twinner::trace::Expression *exp,
+BitwiseAndOperator::SimplificationStatus BitwiseAndOperator::deepSimplify (
+    edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   if (stack.size () > 4) {
     std::list < ExpressionToken * >::iterator it = stack.end ();
-    Operator *addOrMinusOp = dynamic_cast<Operator *> (*--it);
-    if (addOrMinusOp && (addOrMinusOp->getIdentifier () == Operator::ADD
-        || addOrMinusOp->getIdentifier () == Operator::MINUS)) {
+    Operator *addOrMinusOrBitwiseOrOp = dynamic_cast<Operator *> (*--it);
+    if (addOrMinusOrBitwiseOrOp
+        && (addOrMinusOrBitwiseOrOp->getIdentifier () == Operator::ADD
+        || addOrMinusOrBitwiseOrOp->getIdentifier () == Operator::MINUS
+        || addOrMinusOrBitwiseOrOp->getIdentifier () == Operator::BITWISE_OR)) {
       Constant *second = dynamic_cast<Constant *> (*--it);
       if (second) {
         Operator *andOp = dynamic_cast<Operator *> (*--it);
         if (andOp && andOp->getIdentifier () == Operator::BITWISE_AND) {
           Constant *first = dynamic_cast<Constant *> (*--it);
-          if (first && isTruncatingMask (first->getValue ().clone ())) {
-            // exp == (...) & first [+-] second  and  first is similar to 0x00001111
-            stack.pop_back (); // removes addOrMinusOp
-            stack.pop_back (); // removes second
-            stack.pop_back (); // removes andOp
-            stack.pop_back (); // removes first
-            if (addOrMinusOp->getIdentifier () == Operator::ADD) {
-              exp->getLastConcreteValue () -= second->getValue ();
-              exp->add (second->getValue ().clone ());
-            } else {
-              exp->getLastConcreteValue () += second->getValue ();
-              exp->minus (second->getValue ().clone ());
+          if (first) {
+            // exp == (...) & first [+-|] second
+            if (addOrMinusOrBitwiseOrOp->getIdentifier () == Operator::BITWISE_OR) {
+              edu::sharif::twinner::trace::cv::ConcreteValue *secondCv =
+                  second->getValue ().clone ();
+              (*secondCv) &= (*operand);
+              if ((*secondCv) != (*operand)) {
+                edu::sharif::twinner::trace::cv::ConcreteValue *firstCv =
+                    first->getValue ().clone ();
+                (*firstCv) |= (*secondCv);
+                (*operand) &= (*firstCv);
+                delete firstCv;
+                stack.pop_back (); // removes addOrMinusOrBitwiseOrOp
+                stack.pop_back (); // removes second
+                stack.pop_back (); // removes andOp
+                stack.pop_back (); // removes first
+                exp->bitwiseOr (secondCv);
+                delete addOrMinusOrBitwiseOrOp;
+                delete second;
+                delete andOp;
+                delete first;
+                return RESTART_SIMPLIFICATION;
+              } else {
+                delete secondCv;
+                while (!stack.empty ()) {
+                  delete stack.back ();
+                  stack.pop_back ();
+                }
+                stack.push_back (new Constant (operand));
+                exp->getLastConcreteValue () = (*operand);
+                return COMPLETED;
+              }
+            } else if (isTruncatingMask (first->getValue ().clone ())) {
+              // first is similar to 0x00001111
+              stack.pop_back (); // removes addOrMinusOrBitwiseOrOp
+              stack.pop_back (); // removes second
+              stack.pop_back (); // removes andOp
+              stack.pop_back (); // removes first
+              if (addOrMinusOrBitwiseOrOp->getIdentifier () == Operator::ADD) {
+                exp->getLastConcreteValue () -= second->getValue ();
+                exp->add (second->getValue ().clone ());
+              } else {
+                exp->getLastConcreteValue () += second->getValue ();
+                exp->minus (second->getValue ().clone ());
+              }
+              delete addOrMinusOrBitwiseOrOp;
+              delete second;
+              delete andOp;
+              (*operand) &= first->getValue ();
+              delete first;
+              return RESTART_SIMPLIFICATION;
             }
-            delete addOrMinusOp;
-            delete second;
-            delete andOp;
-            (*operand) &= first->getValue ();
-            delete first;
-            return true;
           }
         }
       }
     }
   }
-  return false;
+  return CAN_NOT_SIMPLIFY;
 }
 
 bool BitwiseAndOperator::isTruncatingMask (
