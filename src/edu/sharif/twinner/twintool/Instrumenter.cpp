@@ -203,6 +203,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_SCASB, STRING_OPERATION_REG_MEM));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_MOVSQ, STRING_OPERATION_MEM_MEM));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_LODSD, DST_REG_SRC_MEM_AUX_RSI));
 }
 
@@ -793,21 +795,23 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                               IARG_UINT32, REG_RDI, IARG_REG_VALUE, REG_RDI,
                               IARG_UINT32, insAssembly,
                               IARG_END);
-    const BOOL repe = INS_RepPrefix (ins);
-    const BOOL repne = INS_RepnePrefix (ins);
-    if (repe || repne) {
-      REG repreg = INS_RepCountRegister (ins);
-      if (repreg == REG_INVALID ()) {
-        throw std::runtime_error ("INS_Rep(ne)Prefix conflicts INS_RepCountRegister");
-      }
-      INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineRepPrefix,
-                      IARG_PTR, ise, IARG_UINT32, op,
-                      IARG_UINT32, repreg, IARG_REG_VALUE, repreg,
-                      IARG_EXECUTING,
-                      IARG_UINT32, repe,
-                      IARG_UINT32, insAssembly,
-                      IARG_END);
-    }
+    instrumentRepPrefix (op, ins, insAssembly);
+    break;
+  }
+  case STRING_OPERATION_MEM_MEM:
+  {
+    const REG dstreg = REG_RDI;
+    const REG srcreg = REG_RSI;
+    INS_InsertPredicatedCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineStrOpMemMem,
+                              IARG_PTR, ise, IARG_UINT32, op,
+                              IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                              IARG_MEMORYOP_EA, 0,
+                              IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                              IARG_MEMORYOP_EA, 1,
+                              IARG_MEMORYREAD_SIZE,
+                              IARG_UINT32, insAssembly,
+                              IARG_END);
+    instrumentRepPrefix (op, ins, insAssembly);
     break;
   }
   case LEAVE_INS_MODELS:
@@ -825,6 +829,24 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   default:
     throw std::runtime_error ("Unknown instruction model");
+  }
+}
+
+void Instrumenter::instrumentRepPrefix (OPCODE op, INS ins, UINT32 insAssembly) const {
+  const BOOL repe = INS_RepPrefix (ins);
+  const BOOL repne = INS_RepnePrefix (ins);
+  if (repe || repne) {
+    REG repreg = INS_RepCountRegister (ins);
+    if (repreg == REG_INVALID ()) {
+      throw std::runtime_error ("INS_Rep(ne)Prefix conflicts INS_RepCountRegister");
+    }
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineRepPrefix,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, repreg, IARG_REG_VALUE, repreg,
+                    IARG_EXECUTING,
+                    IARG_UINT32, repe,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
   }
 }
 

@@ -54,6 +54,11 @@ private:
   typedef void (InstructionSymbolicExecuter::*DoubleSourcesAnalysisRoutine) (
       const MutableExpressionValueProxy &dst,
       const ExpressionValueProxy &leftSrc, const ExpressionValueProxy &rightSrc);
+  typedef void (InstructionSymbolicExecuter::*OneToThreeOperandsAnalysisRoutine) (
+      const MutableExpressionValueProxy &dstOne,
+      const MutableExpressionValueProxy &dstTwo,
+      const MutableExpressionValueProxy &dstThree,
+      const ExpressionValueProxy &srcOne);
   typedef void (InstructionSymbolicExecuter::*ConditionalBranchAnalysisRoutine) (
       bool branchTaken);
   typedef void (InstructionSymbolicExecuter::*Hook) (const CONTEXT *context,
@@ -186,6 +191,11 @@ public:
       REG dstRightReg, const ConcreteValue &dstRightRegVal,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
       UINT32 insAssembly);
+  void analysisRoutineTwoRegTwoMem (OneToThreeOperandsAnalysisRoutine routine,
+      REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
+      REG dstRightReg, const ConcreteValue &dstRightRegVal,
+      ADDRINT dstMemoryEa, ADDRINT srcMemoryEa, UINT32 memReadBytes,
+      UINT32 insAssembly);
   void analysisRoutineAfterOperandLessInstruction (OperandLessAnalysisRoutine routine,
       const CONTEXT *context,
       UINT32 insAssembly);
@@ -259,6 +269,15 @@ private:
    */
   void movsxAnalysisRoutine (const MutableExpressionValueProxy &dst,
       const ExpressionValueProxy &src);
+
+  /**
+   * MOV String to String reads from [rsi]/srcMem and moves to [rdi]/dstMem and
+   * increments/decrements rdi/rsi registers
+   */
+  void movsAnalysisRoutine (const MutableExpressionValueProxy &rdi,
+      const MutableExpressionValueProxy &rsi,
+      const MutableExpressionValueProxy &dstMem,
+      const ExpressionValueProxy &srcMem);
 
   /**
    * PUSH has 3 models
@@ -575,6 +594,8 @@ public:
       OPCODE op) const;
   DoubleSourcesAnalysisRoutine convertOpcodeToDoubleSourcesAnalysisRoutine (
       OPCODE op) const;
+  OneToThreeOperandsAnalysisRoutine convertOpcodeToOneToThreeOperandsAnalysisRoutine (
+      OPCODE op) const;
   ConditionalBranchAnalysisRoutine convertOpcodeToConditionalBranchAnalysisRoutine (
       OPCODE op) const;
   SuddenlyChangedRegAnalysisRoutine convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
@@ -714,6 +735,13 @@ VOID analysisRoutineStrOpRegMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
     UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 insAssembly);
+VOID analysisRoutineStrOpMemMem (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    ADDRINT srcMemoryEa,
+    UINT32 memReadBytes,
     UINT32 insAssembly);
 VOID analysisRoutineRepPrefix (VOID *iseptr, UINT32 opcode,
     UINT32 repReg, ADDRINT repRegVal,

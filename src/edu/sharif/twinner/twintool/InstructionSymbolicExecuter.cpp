@@ -608,6 +608,33 @@ void InstructionSymbolicExecuter::analysisRoutineTwoRegOneMem (
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineTwoRegTwoMem (
+    OneToThreeOperandsAnalysisRoutine routine,
+    REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
+    REG dstRightReg, const ConcreteValue &dstRightRegVal,
+    ADDRINT dstMemoryEa, ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineTwoRegTwoMem(INS: "
+      << insAssemblyStr << "): left dst reg: " << REG_StringShort (dstLeftReg)
+      << ", right dst reg: " << REG_StringShort (dstRightReg)
+      << ", dst mem addr: 0x" << dstMemoryEa << ", src mem addr: 0x" << srcMemoryEa
+      << ", mem read bytes: 0x" << memReadBytes << '\n';
+  (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
+      RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
+      MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+      MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::analysisRoutineAfterOperandLessInstruction (
     OperandLessAnalysisRoutine routine,
     const CONTEXT *context,
@@ -849,6 +876,31 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   dst.setExpression (trace, signExtendedExp);
   delete signExtendedExp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
+void InstructionSymbolicExecuter::movsAnalysisRoutine (
+    const MutableExpressionValueProxy &rdi, const MutableExpressionValueProxy &rsi,
+    const MutableExpressionValueProxy &dstMem, const ExpressionValueProxy &srcMem) {
+  edu::sharif::twinner::util::Logger::loquacious () << "movsAnalysisRoutine(...)\n";
+  movAnalysisRoutine (dstMem, srcMem);
+  edu::sharif::twinner::trace::Expression *rdiexp = rdi.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *rsiexp = rsi.getExpression (trace);
+  if (eflags.getDirectionFlag ()) { // DF == 1
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tdecrementing index register...";
+    rdiexp->minus (rdi.getSize () / 8);
+    rsiexp->minus (rsi.getSize () / 8);
+  } else { // DF == 0
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tincrementing index register...";
+    rdiexp->add (rdi.getSize () / 8);
+    rsiexp->add (rsi.getSize () / 8);
+  }
+  rdi.setExpression (trace, rdiexp);
+  rsi.setExpression (trace, rsiexp);
+  delete rdiexp;
+  delete rsiexp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -1225,16 +1277,13 @@ void InstructionSymbolicExecuter::repAnalysisRoutine (
     throw std::runtime_error ("REP count and executing state do not match");
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  std::list <edu::sharif::twinner::trace::Constraint *> ccList;
   if (executing) {
-    edu::sharif::twinner::util::Logger::loquacious () << "\tchecking eflags...";
-    ccList = eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
-    // if zero == repEqual then predicated instruction will be executed once again
     edu::sharif::twinner::util::Logger::loquacious () << "\tdecrementing count reg...";
     dstexp->minus (1);
     dst.setExpression (trace, dstexp);
   }
   delete dstexp;
+  std::list <edu::sharif::twinner::trace::Constraint *> ccList;
   ccList.push_front (cc);
   trace->addPathConstraints (ccList);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
@@ -1793,6 +1842,11 @@ void InstructionSymbolicExecuter::scasAnalysisRoutine (
   }
   srcReg.setExpression (trace, exp);
   delete exp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tchecking eflags...";
+  bool zero;
+  std::list <edu::sharif::twinner::trace::Constraint *> ccList =
+      eflags.instantiateConstraintForZeroCase (zero, disassembledInstruction);
+  trace->addPathConstraints (ccList);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -2038,6 +2092,21 @@ InstructionSymbolicExecuter::convertOpcodeToDoubleSourcesAnalysisRoutine (
         "Double Sources: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
     throw std::runtime_error
         ("Unknown opcode (for double sources) given to analysis routine");
+  }
+}
+
+InstructionSymbolicExecuter::OneToThreeOperandsAnalysisRoutine
+InstructionSymbolicExecuter::convertOpcodeToOneToThreeOperandsAnalysisRoutine (
+    OPCODE op) const {
+  switch (op) {
+  case XED_ICLASS_MOVSQ:
+    return &InstructionSymbolicExecuter::movsAnalysisRoutine;
+  default:
+    edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
+        "1-to-3 operands: Unknown opcode: "
+        << OPCODE_StringShort (op) << '\n';
+    throw std::runtime_error
+        ("Unknown opcode (for 1-to-3 operands) given to analysis routine");
   }
 }
 
@@ -2516,6 +2585,24 @@ VOID analysisRoutineStrOpRegMem (VOID *iseptr, UINT32 opcode,
        (REG) srcReg,
        edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
        srcMemoryEa, memReadBytes,
+       insAssembly);
+}
+
+VOID analysisRoutineStrOpMemMem (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    ADDRINT srcMemoryEa,
+    UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineTwoRegTwoMem
+      (ise->convertOpcodeToOneToThreeOperandsAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg,
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
+       (REG) srcReg,
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
+       dstMemoryEa, srcMemoryEa, memReadBytes,
        insAssembly);
 }
 
