@@ -1272,7 +1272,7 @@ void InstructionSymbolicExecuter::repAnalysisRoutine (
   bool zero;
   edu::sharif::twinner::trace::Constraint *cc =
       edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
-      (zero, dstexp, 0, disassembledInstruction);
+      (zero, dstexp, disassembledInstruction);
   if (zero == executing) {
     throw std::runtime_error ("REP count and executing state do not match");
   }
