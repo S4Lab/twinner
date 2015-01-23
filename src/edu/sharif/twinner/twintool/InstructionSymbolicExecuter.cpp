@@ -912,16 +912,17 @@ void InstructionSymbolicExecuter::movsAnalysisRoutine (
   movAnalysisRoutine (dstMem, srcMem);
   edu::sharif::twinner::trace::Expression *rdiexp = rdi.getExpression (trace);
   edu::sharif::twinner::trace::Expression *rsiexp = rsi.getExpression (trace);
+  const int size = dstMem.getSize () / 8;
   if (eflags.getDirectionFlag ()) { // DF == 1
     edu::sharif::twinner::util::Logger::loquacious ()
         << "\tdecrementing index register...";
-    rdiexp->minus (rdi.getSize () / 8);
-    rsiexp->minus (rsi.getSize () / 8);
+    rdiexp->minus (size);
+    rsiexp->minus (size);
   } else { // DF == 0
     edu::sharif::twinner::util::Logger::loquacious ()
         << "\tincrementing index register...";
-    rdiexp->add (rdi.getSize () / 8);
-    rsiexp->add (rsi.getSize () / 8);
+    rdiexp->add (size);
+    rsiexp->add (size);
   }
   rdi.setExpression (trace, rdiexp);
   rsi.setExpression (trace, rsiexp);
@@ -1882,14 +1883,15 @@ void InstructionSymbolicExecuter::stosAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "stosAnalysisRoutine(...)\n";
   movAnalysisRoutine (dstMem, srcReg);
   edu::sharif::twinner::trace::Expression *rdiexp = rdireg.getExpression (trace);
+  const int size = dstMem.getSize () / 8;
   if (eflags.getDirectionFlag ()) { // DF == 1
     edu::sharif::twinner::util::Logger::loquacious ()
         << "\tdecrementing index register...";
-    rdiexp->minus (rdireg.getSize () / 8);
+    rdiexp->minus (size);
   } else { // DF == 0
     edu::sharif::twinner::util::Logger::loquacious ()
         << "\tincrementing index register...";
-    rdiexp->add (rdireg.getSize () / 8);
+    rdiexp->add (size);
   }
   rdireg.setExpression (trace, rdiexp);
   delete rdiexp;
@@ -2117,6 +2119,9 @@ InstructionSymbolicExecuter::convertOpcodeToDoubleDestinationsAnalysisRoutine (
     return &InstructionSymbolicExecuter::mulAnalysisRoutine;
   case XED_ICLASS_SCASB:
     return &InstructionSymbolicExecuter::scasAnalysisRoutine;
+  case XED_ICLASS_STOSB:
+  case XED_ICLASS_STOSW:
+  case XED_ICLASS_STOSD:
   case XED_ICLASS_STOSQ:
     return &InstructionSymbolicExecuter::stosAnalysisRoutine;
   case XED_ICLASS_LEAVE:

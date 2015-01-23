@@ -203,6 +203,12 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_SCASB, STRING_OPERATION_REG_MEM));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_STOSB, STRING_OPERATION_MEM_REG));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_STOSW, STRING_OPERATION_MEM_REG));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_STOSD, STRING_OPERATION_MEM_REG));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_STOSQ, STRING_OPERATION_MEM_REG));
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOVSQ, STRING_OPERATION_MEM_MEM));
