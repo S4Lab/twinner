@@ -203,6 +203,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_SCASB, STRING_OPERATION_REG_MEM));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_STOSQ, STRING_OPERATION_MEM_REG));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_MOVSQ, STRING_OPERATION_MEM_MEM));
   managedInstructions.insert
       (make_pair (XED_ICLASS_LODSD, DST_REG_SRC_MEM_AUX_RSI));
@@ -296,8 +298,13 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
     case XED_CATEGORY_UNCOND_BR:
       return DST_RSP_SRC_CALL;
     case XED_CATEGORY_STRINGOP:
-      return INS_OperandIsReg (ins, 0) ?
-          STRING_OPERATION_REG_MEM : STRING_OPERATION_MEM_MEM;
+      if (INS_OperandIsReg (ins, 0)) {
+        return STRING_OPERATION_REG_MEM;
+      } else if (INS_OperandIsReg (ins, 2)) {
+        return STRING_OPERATION_MEM_REG;
+      } else {
+        return STRING_OPERATION_MEM_MEM;
+      }
     default:
       return getInstructionModelForNormalInstruction (ins);
     }
@@ -793,6 +800,20 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                               IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                               IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
                               IARG_UINT32, REG_RDI, IARG_REG_VALUE, REG_RDI,
+                              IARG_UINT32, insAssembly,
+                              IARG_END);
+    instrumentRepPrefix (op, ins, insAssembly);
+    break;
+  }
+  case STRING_OPERATION_MEM_REG:
+  {
+    const REG srcreg = INS_OperandReg (ins, 2);
+    INS_InsertPredicatedCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineStrOpMemReg,
+                              IARG_PTR, ise, IARG_UINT32, op,
+                              IARG_MEMORYOP_EA, 0,
+                              IARG_UINT32, REG_RDI, IARG_REG_VALUE, REG_RDI,
+                              IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                              IARG_MEMORYREAD_SIZE,
                               IARG_UINT32, insAssembly,
                               IARG_END);
     instrumentRepPrefix (op, ins, insAssembly);

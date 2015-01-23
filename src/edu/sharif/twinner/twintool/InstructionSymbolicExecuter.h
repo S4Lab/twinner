@@ -191,6 +191,11 @@ public:
       REG dstRightReg, const ConcreteValue &dstRightRegVal,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
       UINT32 insAssembly);
+  void analysisRoutineOneMemTwoReg (DoubleDestinationsAnalysisRoutine routine,
+      ADDRINT dstMemoryEa,
+      REG dstReg, const ConcreteValue &dstRegVal,
+      REG srcReg, const ConcreteValue &srcRegVal,
+      UINT32 memReadBytes, UINT32 insAssembly);
   void analysisRoutineTwoRegTwoMem (OneToThreeOperandsAnalysisRoutine routine,
       REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
       REG dstRightReg, const ConcreteValue &dstRightRegVal,
@@ -543,6 +548,13 @@ private:
       const ExpressionValueProxy &srcMem);
 
   /**
+   * Store String stores the srcReg into dstMem==[rdi] location and moves rdi accordingly.
+   */
+  void stosAnalysisRoutine (const MutableExpressionValueProxy &dstMem,
+      const MutableExpressionValueProxy &rdireg,
+      const ExpressionValueProxy &srcReg);
+
+  /**
    * LEAVE instruction:
    *   spReg <- fpReg
    *   fpReg <- pop-from-stack
@@ -735,6 +747,12 @@ VOID analysisRoutineStrOpRegMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
     UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 insAssembly);
+VOID analysisRoutineStrOpMemReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 memReadBytes,
     UINT32 insAssembly);
 VOID analysisRoutineStrOpMemMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,

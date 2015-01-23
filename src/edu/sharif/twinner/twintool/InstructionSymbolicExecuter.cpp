@@ -608,6 +608,32 @@ void InstructionSymbolicExecuter::analysisRoutineTwoRegOneMem (
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineOneMemTwoReg (
+    DoubleDestinationsAnalysisRoutine routine,
+    ADDRINT dstMemoryEa,
+    REG dstReg, const ConcreteValue &dstRegVal,
+    REG srcReg, const ConcreteValue &srcRegVal,
+    UINT32 memReadBytes, UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineOneMemTwoReg(INS: "
+      << insAssemblyStr << "): dst mem: 0x" << dstMemoryEa
+      << ", dst reg: " << REG_StringShort (dstReg)
+      << ", src reg: " << REG_StringShort (srcReg)
+      << ", mem read bytes: 0x" << memReadBytes << '\n';
+  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+      RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::analysisRoutineTwoRegTwoMem (
     OneToThreeOperandsAnalysisRoutine routine,
     REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
@@ -1850,6 +1876,26 @@ void InstructionSymbolicExecuter::scasAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::stosAnalysisRoutine (
+    const MutableExpressionValueProxy &dstMem, const MutableExpressionValueProxy &rdireg,
+    const ExpressionValueProxy &srcReg) {
+  edu::sharif::twinner::util::Logger::loquacious () << "stosAnalysisRoutine(...)\n";
+  movAnalysisRoutine (dstMem, srcReg);
+  edu::sharif::twinner::trace::Expression *rdiexp = rdireg.getExpression (trace);
+  if (eflags.getDirectionFlag ()) { // DF == 1
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tdecrementing index register...";
+    rdiexp->minus (rdireg.getSize () / 8);
+  } else { // DF == 0
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tincrementing index register...";
+    rdiexp->add (rdireg.getSize () / 8);
+  }
+  rdireg.setExpression (trace, rdiexp);
+  delete rdiexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::leaveAnalysisRoutine (
     const MutableExpressionValueProxy &fpReg,
     const MutableExpressionValueProxy &spReg,
@@ -2071,6 +2117,8 @@ InstructionSymbolicExecuter::convertOpcodeToDoubleDestinationsAnalysisRoutine (
     return &InstructionSymbolicExecuter::mulAnalysisRoutine;
   case XED_ICLASS_SCASB:
     return &InstructionSymbolicExecuter::scasAnalysisRoutine;
+  case XED_ICLASS_STOSQ:
+    return &InstructionSymbolicExecuter::stosAnalysisRoutine;
   case XED_ICLASS_LEAVE:
     return &InstructionSymbolicExecuter::leaveAnalysisRoutine;
   default:
@@ -2586,6 +2634,23 @@ VOID analysisRoutineStrOpRegMem (VOID *iseptr, UINT32 opcode,
        edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
        srcMemoryEa, memReadBytes,
        insAssembly);
+}
+
+VOID analysisRoutineStrOpMemReg (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineOneMemTwoReg
+      (ise->convertOpcodeToDoubleDestinationsAnalysisRoutine ((OPCODE) opcode),
+       dstMemoryEa,
+       (REG) dstReg,
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
+       (REG) srcReg,
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
+       memReadBytes, insAssembly);
 }
 
 VOID analysisRoutineStrOpMemMem (VOID *iseptr, UINT32 opcode,
