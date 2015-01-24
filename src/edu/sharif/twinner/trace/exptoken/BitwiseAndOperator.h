@@ -51,6 +51,7 @@ private:
   SimplificationStatus deepSimplify (edu::sharif::twinner::trace::Expression *exp,
       edu::sharif::twinner::trace::cv::ConcreteValue *operand);
   bool isTruncatingMask (edu::sharif::twinner::trace::cv::ConcreteValue *cv) const;
+  int numberOfBits (edu::sharif::twinner::trace::cv::ConcreteValue *cv) const;
 };
 
 }

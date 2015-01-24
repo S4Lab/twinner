@@ -90,19 +90,20 @@ BitwiseAndOperator::SimplificationStatus BitwiseAndOperator::deepSimplify (
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   if (stack.size () > 4) {
     std::list < ExpressionToken * >::iterator it = stack.end ();
-    Operator *addOrMinusOrBitwiseOrOp = dynamic_cast<Operator *> (*--it);
-    if (addOrMinusOrBitwiseOrOp
-        && (addOrMinusOrBitwiseOrOp->getIdentifier () == Operator::ADD
-        || addOrMinusOrBitwiseOrOp->getIdentifier () == Operator::MINUS
-        || addOrMinusOrBitwiseOrOp->getIdentifier () == Operator::BITWISE_OR)) {
+    Operator *addOrMinusOrBitwiseOrOrMulOp = dynamic_cast<Operator *> (*--it);
+    if (addOrMinusOrBitwiseOrOrMulOp
+        && (addOrMinusOrBitwiseOrOrMulOp->getIdentifier () == Operator::ADD
+        || addOrMinusOrBitwiseOrOrMulOp->getIdentifier () == Operator::MINUS
+        || addOrMinusOrBitwiseOrOrMulOp->getIdentifier () == Operator::BITWISE_OR
+        || addOrMinusOrBitwiseOrOrMulOp->getIdentifier () == Operator::MULTIPLY)) {
       Constant *second = dynamic_cast<Constant *> (*--it);
       if (second) {
         Operator *andOp = dynamic_cast<Operator *> (*--it);
         if (andOp && andOp->getIdentifier () == Operator::BITWISE_AND) {
           Constant *first = dynamic_cast<Constant *> (*--it);
           if (first) {
-            // exp == (...) & first [+-|] second
-            if (addOrMinusOrBitwiseOrOp->getIdentifier () == Operator::BITWISE_OR) {
+            // exp == (...) & first [+-|*] second
+            if (addOrMinusOrBitwiseOrOrMulOp->getIdentifier () == Operator::BITWISE_OR) {
               edu::sharif::twinner::trace::cv::ConcreteValue *secondCv =
                   second->getValue ().clone ();
               (*secondCv) &= (*operand);
@@ -117,7 +118,7 @@ BitwiseAndOperator::SimplificationStatus BitwiseAndOperator::deepSimplify (
                 stack.pop_back (); // removes andOp
                 stack.pop_back (); // removes first
                 exp->bitwiseOr (secondCv);
-                delete addOrMinusOrBitwiseOrOp;
+                delete addOrMinusOrBitwiseOrOrMulOp;
                 delete second;
                 delete andOp;
                 delete first;
@@ -132,20 +133,30 @@ BitwiseAndOperator::SimplificationStatus BitwiseAndOperator::deepSimplify (
                 exp->getLastConcreteValue () = (*operand);
                 return COMPLETED;
               }
+            } else if (addOrMinusOrBitwiseOrOrMulOp->getIdentifier ()
+                == Operator::MULTIPLY && isTruncatingMask (operand->clone ())) {
+              // exp == (...) & first * second
+              const int maxNumberOfBitsOfResult =
+                  numberOfBits (first->getValue ().clone ()) +
+                  numberOfBits (second->getValue ().clone ());
+              if (maxNumberOfBitsOfResult <= numberOfBits (operand->clone ())) {
+                delete operand;
+                return COMPLETED;
+              }
             } else if (isTruncatingMask (first->getValue ().clone ())) {
               // first is similar to 0x00001111
               stack.pop_back (); // removes addOrMinusOrBitwiseOrOp
               stack.pop_back (); // removes second
               stack.pop_back (); // removes andOp
               stack.pop_back (); // removes first
-              if (addOrMinusOrBitwiseOrOp->getIdentifier () == Operator::ADD) {
+              if (addOrMinusOrBitwiseOrOrMulOp->getIdentifier () == Operator::ADD) {
                 exp->getLastConcreteValue () -= second->getValue ();
                 exp->add (second->getValue ().clone ());
               } else {
                 exp->getLastConcreteValue () += second->getValue ();
                 exp->minus (second->getValue ().clone ());
               }
-              delete addOrMinusOrBitwiseOrOp;
+              delete addOrMinusOrBitwiseOrOrMulOp;
               delete second;
               delete andOp;
               (*operand) &= first->getValue ();
@@ -176,6 +187,17 @@ bool BitwiseAndOperator::isTruncatingMask (
   }
   delete cv;
   return true;
+}
+
+int BitwiseAndOperator::numberOfBits (
+    edu::sharif::twinner::trace::cv::ConcreteValue *cv) const {
+  int bits = 0;
+  while (!cv->isZero ()) {
+    (*cv) >>= 1;
+    bits++;
+  }
+  delete cv;
+  return bits;
 }
 
 std::string BitwiseAndOperator::toString () const {
