@@ -83,6 +83,7 @@ protected:
 
 public:
   Expression (const Expression &exp);
+  Expression &operator= (const Expression &exp);
 
   /**
    * Deletes all hold expression tokens and destructs the expression instance.

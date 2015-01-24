@@ -46,6 +46,23 @@ Expression::Expression (const Expression &exp) :
   }
 }
 
+Expression &Expression::operator= (const Expression &exp) {
+  (*lastConcreteValue) = (*exp.lastConcreteValue);
+  isOverwriting = false;
+  Stack clonedStack;
+  for (typename Stack::const_iterator it = exp.stack.begin ();
+      it != exp.stack.end (); ++it) {
+    const edu::sharif::twinner::trace::exptoken::ExpressionToken *et = *it;
+    clonedStack.push_back (et->clone ());
+  }
+  while (!stack.empty ()) {
+    delete stack.back ();
+    stack.pop_back ();
+  }
+  stack = clonedStack;
+  return *this;
+}
+
 Expression::Expression (int size, const Expression &exp) :
     lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
   for (typename Stack::const_iterator it = exp.stack.begin ();
@@ -157,6 +174,10 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
     const int v = ((op->getIdentifier () == Operator::DIVIDE) ? 1 : 0);
     stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (v));
     *lastConcreteValue = v;
+  } else if (op->getIdentifier () == Operator::BITWISE_OR && isTrivial ()) {
+    edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConcreteValue->clone ();
+    (*this) = (*exp);
+    binaryOperation (op, cv);
   } else {
     /**
      * It's possible that this object and given constant expression object be the same.

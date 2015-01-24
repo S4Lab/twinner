@@ -45,6 +45,10 @@ bool BitwiseOrOperator::doesSupportSimplification () const {
 
 bool BitwiseOrOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
+  if (operand->isZero ()) {
+    delete operand;
+    return true;
+  }
   Constant *lastConstantMask = 0;
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
