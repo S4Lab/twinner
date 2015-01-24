@@ -45,21 +45,15 @@ bool ShiftLeftOperator::doesSupportSimplification () const {
 
 bool ShiftLeftOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  if ((*operand) >= 64) {
-    edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-    exp->getLastConcreteValue () <<= *operand;
-    stack.push_back (new Constant (operand));
-    stack.push_back (this);
-    return false;
-  } else {
-    // shift-to-left by n bits is equivalent to multiplication by 2^n
-    UINT64 val = (1ull << operand->toUint64 ());
+  if (operand->isZero ()) {
     delete operand;
-    if (val > 1) {
-      exp->multiply (val);
-    }
     return true;
   }
+  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
+  exp->getLastConcreteValue () <<= *operand;
+  stack.push_back (new Constant (operand));
+  stack.push_back (this);
+  return false;
 }
 
 void ShiftLeftOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
