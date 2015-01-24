@@ -38,6 +38,18 @@ public:
 
   virtual std::string toString () const;
   virtual bool operator== (const ExpressionToken &token) const;
+
+private:
+
+  enum SimplificationStatus {
+
+    CAN_NOT_SIMPLIFY,
+    RESTART_SIMPLIFICATION,
+    COMPLETED // operator is not used and can be deleted
+  };
+
+  SimplificationStatus deepSimplify (edu::sharif::twinner::trace::Expression *exp,
+      edu::sharif::twinner::trace::cv::ConcreteValue *operand);
 };
 
 }

@@ -55,6 +55,15 @@ bool MultiplyOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     const Operator *op = static_cast<Operator *> (*--it);
     if (op->getIdentifier () == Operator::MULTIPLY) {
       lastConstant = dynamic_cast<Constant *> (*--it);
+    } else {
+      switch (deepSimplify (exp, operand)) {
+      case CAN_NOT_SIMPLIFY:
+        break;
+      case RESTART_SIMPLIFICATION:
+        return apply (exp, operand);
+      case COMPLETED:
+        return true;
+      }
     }
   }
   exp->getLastConcreteValue () *= *operand;
@@ -68,6 +77,35 @@ bool MultiplyOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     stack.push_back (this);
     return false;
   }
+}
+
+MultiplyOperator::SimplificationStatus MultiplyOperator::deepSimplify (
+    edu::sharif::twinner::trace::Expression *exp,
+    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
+  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
+  std::list < ExpressionToken * >::iterator it = stack.end ();
+  Operator *divideOrBitwiseAndOp = static_cast<Operator *> (*--it);
+  if (divideOrBitwiseAndOp->getIdentifier () == Operator::DIVIDE) {
+    Constant *second = dynamic_cast<Constant *> (*--it);
+    if (second) {
+      exp->getLastConcreteValue () *= *operand;
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv = second->getValue ().clone ();
+      if ((*cv) == (*operand)) {
+        stack.pop_back (); // removes divideOrBitwiseAndOp
+        stack.pop_back (); // removes second
+        delete divideOrBitwiseAndOp;
+        delete second;
+      } else {
+        (*cv) /= (*operand);
+        second->setValue (*cv);
+      }
+      delete operand;
+      delete cv;
+      return COMPLETED;
+    }
+  } else if (divideOrBitwiseAndOp->getIdentifier () == Operator::BITWISE_AND) {
+  }
+  return CAN_NOT_SIMPLIFY;
 }
 
 void MultiplyOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
