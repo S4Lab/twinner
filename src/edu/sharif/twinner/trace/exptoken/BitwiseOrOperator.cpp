@@ -43,35 +43,9 @@ bool BitwiseOrOperator::doesSupportSimplification () const {
   return true;
 }
 
-bool BitwiseOrOperator::apply (edu::sharif::twinner::trace::Expression *exp,
-    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  if (operand->isZero ()) {
-    delete operand;
-    return true;
-  }
-  Constant *lastConstantMask = 0;
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstantMask = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    const Operator *op = static_cast<Operator *> (*--it);
-    if (op->getIdentifier () == Operator::BITWISE_OR) {
-      lastConstantMask = dynamic_cast<Constant *> (*--it);
-    }
-  }
-  exp->getLastConcreteValue () |= *operand;
-  if (lastConstantMask) {
-    (*operand) |= lastConstantMask->getValue ();
-    lastConstantMask->setValue (*operand);
-    delete operand;
-    return true;
-  } else {
-    stack.push_back (new Constant (operand));
-    stack.push_back (this);
-    return false;
-  }
+void BitwiseOrOperator::initializeSimplificationRules () {
+  simplificationRules.push_back
+      (SimplificationRule (Operator::BITWISE_OR, Operator::BITWISE_OR));
 }
 
 void BitwiseOrOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,

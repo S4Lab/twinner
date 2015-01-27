@@ -15,6 +15,8 @@
 
 #include "ExpressionToken.h"
 
+#include <vector>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -61,10 +63,31 @@ public:
   };
 
 protected:
+
+  /**
+   * Indicates a simplification rule as a mapping between lastOperator
+   * and simplificationOperator. An expression which is similar to
+   * Y <lastOperator> Z <thisOperator> operand
+   * will be simplified as
+   * Y <lastOperator> (Z <simplificationOperator> operand)
+   */
+  struct SimplificationRule {
+
+    const Operator *lastOperator;
+    const Operator *simplificationOperator;
+
+    SimplificationRule (OperatorIdentifier last, OperatorIdentifier simplified) :
+        lastOperator (Operator::instantiateOperator (last)),
+        simplificationOperator (Operator::instantiateOperator (simplified)) {
+    }
+  };
+
+  std::vector<SimplificationRule> simplificationRules;
+
   OperatorIdentifier oi;
 
-  Operator (const Operator &op);
   Operator (OperatorIdentifier);
+  Operator (const Operator &op);
 
 public:
   virtual ~Operator ();
@@ -107,6 +130,20 @@ public:
   OperatorIdentifier getIdentifier () const;
 
   virtual bool operator== (const ExpressionToken &token) const;
+
+protected:
+
+  virtual void initializeSimplificationRules ();
+
+  enum SimplificationStatus {
+
+    CAN_NOT_SIMPLIFY,
+    RESTART_SIMPLIFICATION,
+    COMPLETED // operator is not used and can be deleted
+  };
+
+  virtual SimplificationStatus deepSimplify (edu::sharif::twinner::trace::Expression *exp,
+      edu::sharif::twinner::trace::cv::ConcreteValue *operand);
 };
 
 }

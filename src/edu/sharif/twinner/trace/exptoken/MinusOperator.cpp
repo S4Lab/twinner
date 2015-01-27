@@ -43,40 +43,9 @@ bool MinusOperator::doesSupportSimplification () const {
   return true;
 }
 
-bool MinusOperator::apply (edu::sharif::twinner::trace::Expression *exp,
-    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  Constant *lastConstant = 0;
-  const Operator *op = 0;
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstant = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    op = static_cast<Operator *> (*--it);
-    if (op->getIdentifier () == Operator::ADD
-        || op->getIdentifier () == Operator::MINUS) {
-      lastConstant = dynamic_cast<Constant *> (*--it);
-    }
-  }
-  exp->getLastConcreteValue () -= *operand;
-  if (lastConstant) {
-    edu::sharif::twinner::trace::cv::ConcreteValue *cv =
-        lastConstant->getValue ().clone ();
-    if (op && op->getIdentifier () == Operator::MINUS) {
-      (*cv) += (*operand);
-    } else {
-      (*cv) -= (*operand);
-    }
-    delete operand;
-    lastConstant->setValue (*cv);
-    delete cv;
-    return true;
-  } else {
-    stack.push_back (new Constant (operand));
-    stack.push_back (this);
-    return false;
-  }
+void MinusOperator::initializeSimplificationRules () {
+  simplificationRules.push_back (SimplificationRule (Operator::ADD, Operator::MINUS));
+  simplificationRules.push_back (SimplificationRule (Operator::MINUS, Operator::ADD));
 }
 
 void MinusOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,

@@ -43,31 +43,8 @@ bool XorOperator::doesSupportSimplification () const {
   return true;
 }
 
-bool XorOperator::apply (edu::sharif::twinner::trace::Expression *exp,
-    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  Constant *lastConstantMask = 0;
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstantMask = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    const Operator *op = static_cast<Operator *> (*--it);
-    if (op->getIdentifier () == Operator::XOR) {
-      lastConstantMask = dynamic_cast<Constant *> (*--it);
-    }
-  }
-  exp->getLastConcreteValue () ^= *operand;
-  if (lastConstantMask) {
-    (*operand) ^= lastConstantMask->getValue ();
-    lastConstantMask->setValue (*operand);
-    delete operand;
-    return true;
-  } else {
-    stack.push_back (new Constant (operand));
-    stack.push_back (this);
-    return false;
-  }
+void XorOperator::initializeSimplificationRules () {
+  simplificationRules.push_back (SimplificationRule (Operator::XOR, Operator::XOR));
 }
 
 void XorOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,

@@ -49,11 +49,7 @@ bool ShiftLeftOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     delete operand;
     return true;
   }
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  exp->getLastConcreteValue () <<= *operand;
-  stack.push_back (new Constant (operand));
-  stack.push_back (this);
-  return false;
+  return Operator::apply (exp, operand);
 }
 
 void ShiftLeftOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,

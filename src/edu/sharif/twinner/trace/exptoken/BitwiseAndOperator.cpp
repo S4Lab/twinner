@@ -43,40 +43,9 @@ bool BitwiseAndOperator::doesSupportSimplification () const {
   return true;
 }
 
-bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::Expression *exp,
-    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  Constant *lastConstantMask = 0;
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstantMask = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    const Operator *op = static_cast<Operator *> (*--it);
-    if (op->getIdentifier () == Operator::BITWISE_AND) {
-      lastConstantMask = dynamic_cast<Constant *> (*--it);
-    } else {
-      switch (deepSimplify (exp, operand)) {
-      case CAN_NOT_SIMPLIFY:
-        break;
-      case RESTART_SIMPLIFICATION:
-        return apply (exp, operand);
-      case COMPLETED:
-        return true;
-      }
-    }
-  }
-  exp->getLastConcreteValue () &= *operand;
-  if (lastConstantMask) {
-    (*operand) &= lastConstantMask->getValue ();
-    lastConstantMask->setValue (*operand);
-    delete operand;
-    return true;
-  } else {
-    stack.push_back (new Constant (operand));
-    stack.push_back (this);
-    return false;
-  }
+void BitwiseAndOperator::initializeSimplificationRules () {
+  simplificationRules.push_back
+      (SimplificationRule (Operator::BITWISE_AND, Operator::BITWISE_AND));
 }
 
 void BitwiseAndOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
@@ -84,7 +53,7 @@ void BitwiseAndOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &
   dst &= src;
 }
 
-BitwiseAndOperator::SimplificationStatus BitwiseAndOperator::deepSimplify (
+Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
     edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();

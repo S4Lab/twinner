@@ -43,26 +43,6 @@ bool ArithmeticShiftRightOperator::doesSupportSimplification () const {
   return true;
 }
 
-bool ArithmeticShiftRightOperator::apply (edu::sharif::twinner::trace::Expression *exp,
-    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  exp->getLastConcreteValue ().arithmeticShiftToRight (*operand);
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    Constant *lastConstant = static_cast<Constant *> (stack.back ());
-    edu::sharif::twinner::trace::cv::ConcreteValue *cv =
-        lastConstant->getValue ().clone ();
-    cv->arithmeticShiftToRight (*operand);
-    lastConstant->setValue (*cv);
-    delete operand;
-    delete cv;
-    return true;
-  } else {
-    stack.push_back (new Constant (operand));
-    stack.push_back (this);
-    return false;
-  }
-}
-
 void ArithmeticShiftRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst.arithmeticShiftToRight (src);

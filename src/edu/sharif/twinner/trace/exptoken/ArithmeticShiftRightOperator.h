@@ -31,8 +31,6 @@ public:
   virtual ArithmeticShiftRightOperator *clone () const;
 
   virtual bool doesSupportSimplification () const;
-  virtual bool apply (edu::sharif::twinner::trace::Expression *exp,
-      edu::sharif::twinner::trace::cv::ConcreteValue *cv);
   virtual void apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
       const edu::sharif::twinner::trace::cv::ConcreteValue &src) const;
 

@@ -49,48 +49,41 @@ bool ShiftRightOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     delete operand;
     return true;
   }
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  exp->getLastConcreteValue () >>= *operand;
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    Constant *lastConstant = static_cast<Constant *> (stack.back ());
-    edu::sharif::twinner::trace::cv::ConcreteValue *cv =
-        lastConstant->getValue ().clone ();
-    (*cv) >>= (*operand);
-    lastConstant->setValue (*cv);
-    delete operand;
-    delete cv;
-    return true; // means that this operator is not used and can be deleted.
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    const Operator *op = static_cast<Operator *> (*--it);
-    if (op->getIdentifier () == Operator::BITWISE_AND) {
-      Constant *mask = dynamic_cast<Constant *> (*--it);
-      if (mask) {
-        edu::sharif::twinner::trace::cv::ConcreteValue *cv = mask->getValue ().clone ();
-        (*cv) >>= (*operand);
-        if (cv->isZero ()) {
-          while (!stack.empty ()) {
-            delete stack.back ();
-            stack.pop_back ();
-          }
-          const UINT64 v = 0;
-          stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (v));
-          delete operand;
-          delete cv;
-          return true;
-        }
-        delete cv;
-      }
-    }
-  }
-  stack.push_back (new Constant (operand));
-  stack.push_back (this);
-  return false; // means that this operator is owned by exp since now
+  return Operator::apply (exp, operand);
 }
 
 void ShiftRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst >>= src;
+}
+
+Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
+    edu::sharif::twinner::trace::Expression *exp,
+    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
+  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
+  std::list < ExpressionToken * >::iterator it = stack.end ();
+  const Operator *op = static_cast<Operator *> (*--it);
+  if (op->getIdentifier () == Operator::BITWISE_AND) {
+    Constant *mask = dynamic_cast<Constant *> (*--it);
+    if (mask) {
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv = mask->getValue ().clone ();
+      (*cv) >>= (*operand);
+      if (cv->isZero ()) {
+        while (!stack.empty ()) {
+          delete stack.back ();
+          stack.pop_back ();
+        }
+        const UINT64 v = 0;
+        stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (v));
+        exp->getLastConcreteValue () = v;
+        delete operand;
+        delete cv;
+        return COMPLETED;
+      }
+      delete cv;
+    }
+  }
+  return CAN_NOT_SIMPLIFY;
 }
 
 std::string ShiftRightOperator::toString () const {

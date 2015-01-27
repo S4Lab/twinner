@@ -43,15 +43,6 @@ bool RotateRightOperator::doesSupportSimplification () const {
   return true;
 }
 
-bool RotateRightOperator::apply (edu::sharif::twinner::trace::Expression *exp,
-    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  exp->getLastConcreteValue ().rotateToRight (*operand);
-  stack.push_back (new Constant (operand));
-  stack.push_back (this);
-  return false;
-}
-
 void RotateRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst.rotateToRight (src);

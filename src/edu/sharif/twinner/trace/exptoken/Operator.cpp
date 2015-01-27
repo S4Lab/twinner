@@ -42,13 +42,21 @@ namespace exptoken {
 
 Operator::Operator (OperatorIdentifier _oi) :
     ExpressionToken (), oi (_oi) {
+  initializeSimplificationRules ();
 }
 
 Operator::Operator (const Operator &op) :
     ExpressionToken (op), oi (op.oi) {
+  initializeSimplificationRules ();
 }
 
 Operator::~Operator () {
+  while (!simplificationRules.empty ()) {
+    struct SimplificationRule sr = simplificationRules.back ();
+    delete sr.lastOperator;
+    delete sr.simplificationOperator;
+    simplificationRules.pop_back ();
+  }
 }
 
 Operator *Operator::clone () const {
@@ -101,11 +109,61 @@ bool Operator::doesSupportSimplification () const {
 
 bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  edu::sharif::twinner::util::Logger::error ()
-      << "Operator::apply(Expression *, ConcreteValue *): "
-      "Unknown OperatorIdentifier: " << std::dec << oi << '\n';
-  throw std::runtime_error ("Operator::apply(Expression *, ConcreteValue *):"
-                            " Non-handled operator identifier");
+  Constant *lastConstant = 0;
+  const Operator *op = 0;
+  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
+  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
+    lastConstant = static_cast<Constant *> (stack.back ());
+    op = this;
+
+  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
+    std::list < ExpressionToken * >::iterator it = stack.end ();
+    op = static_cast<Operator *> (*--it);
+    bool mayNeedDeepSimplification = true;
+    for (std::vector<SimplificationRule>::iterator rule = simplificationRules.begin ();
+        rule != simplificationRules.end (); ++rule) {
+      if ((*op) == (*rule->lastOperator)) {
+        mayNeedDeepSimplification = false;
+        lastConstant = dynamic_cast<Constant *> (*--it);
+        op = rule->simplificationOperator;
+        break;
+      }
+    }
+    if (mayNeedDeepSimplification) {
+      switch (deepSimplify (exp, operand)) {
+      case CAN_NOT_SIMPLIFY:
+        break;
+      case RESTART_SIMPLIFICATION:
+        return apply (exp, operand);
+      case COMPLETED:
+        return true;
+      }
+    }
+  }
+  apply (exp->getLastConcreteValue (), *operand);
+  if (lastConstant) {
+    edu::sharif::twinner::trace::cv::ConcreteValue *cv =
+        lastConstant->getValue ().clone ();
+    op->apply (*cv, *operand);
+    delete operand;
+    lastConstant->setValue (*cv);
+    delete cv;
+    return true;
+  } else {
+    stack.push_back (new Constant (operand));
+    stack.push_back (this);
+    return false;
+  }
+}
+
+void Operator::initializeSimplificationRules () {
+  // initialize the simplificationRules vector of rules
+}
+
+Operator::SimplificationStatus Operator::deepSimplify (
+    edu::sharif::twinner::trace::Expression *exp,
+    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
+  return CAN_NOT_SIMPLIFY;
 }
 
 void Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,

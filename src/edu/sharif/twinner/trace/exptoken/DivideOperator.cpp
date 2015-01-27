@@ -43,34 +43,9 @@ bool DivideOperator::doesSupportSimplification () const {
   return true;
 }
 
-bool DivideOperator::apply (edu::sharif::twinner::trace::Expression *exp,
-    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  Constant *lastConstant = 0;
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstant = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    const Operator *op = static_cast<Operator *> (*--it);
-    if (op->getIdentifier () == Operator::MULTIPLY) {
-      lastConstant = dynamic_cast<Constant *> (*--it);
-    }
-  }
-  exp->getLastConcreteValue () /= *operand;
-  if (lastConstant) {
-    edu::sharif::twinner::trace::cv::ConcreteValue *cv =
-        lastConstant->getValue ().clone ();
-    (*cv) /= (*operand);
-    lastConstant->setValue (*cv);
-    delete operand;
-    delete cv;
-    return true;
-  } else {
-    stack.push_back (new Constant (operand));
-    stack.push_back (this);
-    return false;
-  }
+void DivideOperator::initializeSimplificationRules () {
+  simplificationRules.push_back
+      (SimplificationRule (Operator::MULTIPLY, Operator::DIVIDE));
 }
 
 void DivideOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,

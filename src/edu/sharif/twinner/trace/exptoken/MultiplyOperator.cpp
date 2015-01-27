@@ -43,43 +43,12 @@ bool MultiplyOperator::doesSupportSimplification () const {
   return true;
 }
 
-bool MultiplyOperator::apply (edu::sharif::twinner::trace::Expression *exp,
-    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  Constant *lastConstant = 0;
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
-    lastConstant = static_cast<Constant *> (stack.back ());
-
-  } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
-    std::list < ExpressionToken * >::iterator it = stack.end ();
-    const Operator *op = static_cast<Operator *> (*--it);
-    if (op->getIdentifier () == Operator::MULTIPLY) {
-      lastConstant = dynamic_cast<Constant *> (*--it);
-    } else {
-      switch (deepSimplify (exp, operand)) {
-      case CAN_NOT_SIMPLIFY:
-        break;
-      case RESTART_SIMPLIFICATION:
-        return apply (exp, operand);
-      case COMPLETED:
-        return true;
-      }
-    }
-  }
-  exp->getLastConcreteValue () *= *operand;
-  if (lastConstant) {
-    (*operand) *= lastConstant->getValue ();
-    lastConstant->setValue (*operand);
-    delete operand;
-    return true;
-  } else {
-    stack.push_back (new Constant (operand));
-    stack.push_back (this);
-    return false;
-  }
+void MultiplyOperator::initializeSimplificationRules () {
+  simplificationRules.push_back
+      (SimplificationRule (Operator::MULTIPLY, Operator::MULTIPLY));
 }
 
-MultiplyOperator::SimplificationStatus MultiplyOperator::deepSimplify (
+Operator::SimplificationStatus MultiplyOperator::deepSimplify (
     edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
