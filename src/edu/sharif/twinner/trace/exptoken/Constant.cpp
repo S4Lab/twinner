@@ -44,6 +44,11 @@ void Constant::setValue (const edu::sharif::twinner::trace::cv::ConcreteValue &v
   (*concreteValue) = value;
 }
 
+void Constant::setValue (edu::sharif::twinner::trace::cv::ConcreteValue *value) {
+  delete concreteValue;
+  concreteValue = value;
+}
+
 Constant *Constant::clone () const {
   return new Constant (*this);
 }

@@ -33,6 +33,7 @@
 
 #include <fstream>
 #include <stdexcept>
+#include <algorithm>
 
 namespace edu {
 namespace sharif {
@@ -142,12 +143,14 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
   }
   apply (exp->getLastConcreteValue (), *operand);
   if (lastConstant) {
+    const int size = std::max (std::max (exp->getLastConcreteValue ().getSize (),
+                                         lastConstant->getValue ().getSize ()),
+                               operand->getSize ());
     edu::sharif::twinner::trace::cv::ConcreteValue *cv =
-        lastConstant->getValue ().clone ();
+        lastConstant->getValue ().clone (size);
     op->apply (*cv, *operand);
     delete operand;
-    lastConstant->setValue (*cv);
-    delete cv;
+    lastConstant->setValue (cv);
     return true;
   } else {
     stack.push_back (new Constant (operand));

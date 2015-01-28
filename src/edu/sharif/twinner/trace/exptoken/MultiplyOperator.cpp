@@ -58,18 +58,21 @@ Operator::SimplificationStatus MultiplyOperator::deepSimplify (
     Constant *second = dynamic_cast<Constant *> (*--it);
     if (second) {
       exp->getLastConcreteValue () *= *operand;
-      edu::sharif::twinner::trace::cv::ConcreteValue *cv = second->getValue ().clone ();
-      if ((*cv) == (*operand)) {
+      if (second->getValue () == (*operand)) {
         stack.pop_back (); // removes divideOrBitwiseAndOp
         stack.pop_back (); // removes second
         delete divideOrBitwiseAndOp;
         delete second;
       } else {
+        const int size = std::max (std::max (exp->getLastConcreteValue ().getSize (),
+                                             second->getValue ().getSize ()),
+                                   operand->getSize ());
+        edu::sharif::twinner::trace::cv::ConcreteValue *cv =
+            second->getValue ().clone (size);
         (*cv) /= (*operand);
-        second->setValue (*cv);
+        second->setValue (cv);
       }
       delete operand;
-      delete cv;
       return COMPLETED;
     }
   } else if (divideOrBitwiseAndOp->getIdentifier () == Operator::BITWISE_AND) {

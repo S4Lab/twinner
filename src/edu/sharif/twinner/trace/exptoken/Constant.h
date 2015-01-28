@@ -34,6 +34,7 @@ public:
   Constant (edu::sharif::twinner::trace::cv::ConcreteValue *val);
 
   void setValue (const edu::sharif::twinner::trace::cv::ConcreteValue &value);
+  void setValue (edu::sharif::twinner::trace::cv::ConcreteValue *value);
   virtual Constant *clone () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;

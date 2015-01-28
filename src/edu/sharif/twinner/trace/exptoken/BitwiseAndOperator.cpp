@@ -73,12 +73,13 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
           if (first) {
             // exp == (...) & first [+-|*] second
             if (addOrMinusOrBitwiseOrOrMulOp->getIdentifier () == Operator::BITWISE_OR) {
+              const int size = operand->getSize ();
               edu::sharif::twinner::trace::cv::ConcreteValue *secondCv =
-                  second->getValue ().clone ();
+                  second->getValue ().clone (size);
               (*secondCv) &= (*operand);
               if ((*secondCv) != (*operand)) {
                 edu::sharif::twinner::trace::cv::ConcreteValue *firstCv =
-                    first->getValue ().clone ();
+                    first->getValue ().clone (size);
                 (*firstCv) |= (*secondCv);
                 (*operand) &= (*firstCv);
                 delete firstCv;
