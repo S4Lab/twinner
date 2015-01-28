@@ -18,7 +18,7 @@ while [ 1 ]; do
 			# Get the memory info
 			m=`awk '{OFS="\t";print $1,$2,$3,$6}' /proc/$pidno/statm`
 			## Get the memory percentage
-			perc=`top -bd .10 -p $pidno -n 1  | grep $pidno | gawk '{print \$10}'`
+			perc=`top -bd .10 -p $pidno -n 1  | grep $pidno | gawk '{print \$8}'`
 			## print the results
 			echo -e "[$pidno] $m\t$perc";
 			val=`echo $m | cut -d\  -f4`
