@@ -43,12 +43,10 @@ namespace exptoken {
 
 Operator::Operator (OperatorIdentifier _oi) :
     ExpressionToken (), oi (_oi) {
-  initializeSimplificationRules ();
 }
 
 Operator::Operator (const Operator &op) :
     ExpressionToken (op), oi (op.oi) {
-  initializeSimplificationRules ();
 }
 
 Operator::~Operator () {
@@ -157,10 +155,6 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     stack.push_back (this);
     return false;
   }
-}
-
-void Operator::initializeSimplificationRules () {
-  // initialize the simplificationRules vector of rules
 }
 
 Operator::SimplificationStatus Operator::deepSimplify (

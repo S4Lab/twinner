@@ -26,10 +26,12 @@ namespace exptoken {
 
 XorOperator::XorOperator () :
     Operator (Operator::XOR) {
+  initializeSimplificationRules ();
 }
 
 XorOperator::XorOperator (const XorOperator &ao) :
     Operator (ao) {
+  initializeSimplificationRules ();
 }
 
 XorOperator::~XorOperator () {

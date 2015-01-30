@@ -37,8 +37,8 @@ public:
   virtual std::string toString () const;
   virtual bool operator== (const ExpressionToken &token) const;
 
-protected:
-  virtual void initializeSimplificationRules ();
+private:
+  void initializeSimplificationRules ();
 };
 
 }

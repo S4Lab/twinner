@@ -38,11 +38,12 @@ public:
   virtual bool operator== (const ExpressionToken &token) const;
 
 protected:
-  virtual void initializeSimplificationRules ();
   virtual SimplificationStatus deepSimplify (edu::sharif::twinner::trace::Expression *exp,
       edu::sharif::twinner::trace::cv::ConcreteValue *operand);
 
 private:
+  void initializeSimplificationRules ();
+
   bool isTruncatingMask (edu::sharif::twinner::trace::cv::ConcreteValue *cv) const;
   int numberOfBits (edu::sharif::twinner::trace::cv::ConcreteValue *cv) const;
 };

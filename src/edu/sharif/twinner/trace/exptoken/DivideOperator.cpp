@@ -26,10 +26,12 @@ namespace exptoken {
 
 DivideOperator::DivideOperator () :
     Operator (Operator::DIVIDE) {
+  initializeSimplificationRules ();
 }
 
 DivideOperator::DivideOperator (const DivideOperator &ao) :
     Operator (ao) {
+  initializeSimplificationRules ();
 }
 
 DivideOperator::~DivideOperator () {

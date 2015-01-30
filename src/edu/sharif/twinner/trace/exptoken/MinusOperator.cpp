@@ -26,10 +26,12 @@ namespace exptoken {
 
 MinusOperator::MinusOperator () :
     Operator (Operator::MINUS) {
+  initializeSimplificationRules ();
 }
 
 MinusOperator::MinusOperator (const MinusOperator &ao) :
     Operator (ao) {
+  initializeSimplificationRules ();
 }
 
 MinusOperator::~MinusOperator () {

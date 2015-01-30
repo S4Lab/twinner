@@ -133,8 +133,6 @@ public:
 
 protected:
 
-  virtual void initializeSimplificationRules ();
-
   enum SimplificationStatus {
 
     CAN_NOT_SIMPLIFY,

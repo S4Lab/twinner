@@ -26,10 +26,12 @@ namespace exptoken {
 
 MultiplyOperator::MultiplyOperator () :
     Operator (Operator::MULTIPLY) {
+  initializeSimplificationRules ();
 }
 
 MultiplyOperator::MultiplyOperator (const MultiplyOperator &ao) :
     Operator (ao) {
+  initializeSimplificationRules ();
 }
 
 MultiplyOperator::~MultiplyOperator () {

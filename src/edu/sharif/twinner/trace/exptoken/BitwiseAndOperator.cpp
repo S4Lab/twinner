@@ -26,10 +26,12 @@ namespace exptoken {
 
 BitwiseAndOperator::BitwiseAndOperator () :
     Operator (Operator::BITWISE_AND) {
+  initializeSimplificationRules ();
 }
 
 BitwiseAndOperator::BitwiseAndOperator (const BitwiseAndOperator &ao) :
     Operator (ao) {
+  initializeSimplificationRules ();
 }
 
 BitwiseAndOperator::~BitwiseAndOperator () {

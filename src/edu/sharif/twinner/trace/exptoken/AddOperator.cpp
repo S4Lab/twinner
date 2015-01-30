@@ -26,10 +26,12 @@ namespace exptoken {
 
 AddOperator::AddOperator () :
     Operator (Operator::ADD) {
+  initializeSimplificationRules ();
 }
 
 AddOperator::AddOperator (const AddOperator &ao) :
     Operator (ao) {
+  initializeSimplificationRules ();
 }
 
 AddOperator::~AddOperator () {
