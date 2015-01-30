@@ -142,15 +142,36 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *cv =
         lastConstant->getValue ().clone (size);
     bool overflow;
+    bool alternatingAddAndMinus = false;
     if (sop) {
       overflow = sop->apply (*cv, *operand);
+      alternatingAddAndMinus = (lop->getIdentifier () == Operator::ADD
+          && sop->getIdentifier () == Operator::MINUS)
+          || (lop->getIdentifier () == Operator::MINUS
+          && sop->getIdentifier () == Operator::ADD);
       delete sop;
     } else {
       overflow = lop->apply (*cv, *operand);
     }
     if (overflow) {
-      delete cv;
-    } else {
+      if (alternatingAddAndMinus) {
+        edu::sharif::twinner::trace::cv::ConcreteValue *negativeOfCv =
+            cv->twosComplement ();
+        delete cv;
+        cv = negativeOfCv;
+        stack.pop_back ();
+        if (lop->getIdentifier () == Operator::ADD) {
+          stack.push_back (Operator::instantiateOperator (Operator::MINUS));
+        } else {
+          stack.push_back (Operator::instantiateOperator (Operator::ADD));
+        }
+        delete lop;
+      } else {
+        delete cv;
+        cv = 0;
+      }
+    }
+    if (cv) {
       delete operand;
       lastConstant->setValue (cv);
       return true;
