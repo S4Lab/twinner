@@ -73,12 +73,11 @@ protected:
    */
   struct SimplificationRule {
 
-    const Operator *lastOperator;
-    const Operator *simplificationOperator;
+    OperatorIdentifier lastOperator;
+    OperatorIdentifier simplificationOperator;
 
     SimplificationRule (OperatorIdentifier last, OperatorIdentifier simplified) :
-        lastOperator (Operator::instantiateOperator (last)),
-        simplificationOperator (Operator::instantiateOperator (simplified)) {
+        lastOperator (last), simplificationOperator (simplified) {
     }
   };
 

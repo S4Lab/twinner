@@ -50,12 +50,6 @@ Operator::Operator (const Operator &op) :
 }
 
 Operator::~Operator () {
-  while (!simplificationRules.empty ()) {
-    struct SimplificationRule sr = simplificationRules.back ();
-    delete sr.lastOperator;
-    delete sr.simplificationOperator;
-    simplificationRules.pop_back ();
-  }
 }
 
 Operator *Operator::clone () const {
@@ -109,22 +103,23 @@ bool Operator::doesSupportSimplification () const {
 bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   Constant *lastConstant = 0;
-  const Operator *op = 0;
+  const Operator *lop = 0;
+  const Operator *sop = 0;
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
     lastConstant = static_cast<Constant *> (stack.back ());
-    op = this;
+    lop = this;
 
   } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
     std::list < ExpressionToken * >::iterator it = stack.end ();
-    op = static_cast<Operator *> (*--it);
+    lop = static_cast<Operator *> (*--it);
     bool mayNeedDeepSimplification = true;
     for (std::vector<SimplificationRule>::iterator rule = simplificationRules.begin ();
         rule != simplificationRules.end (); ++rule) {
-      if ((*op) == (*rule->lastOperator)) {
+      if (lop->getIdentifier () == rule->lastOperator) {
         mayNeedDeepSimplification = false;
         lastConstant = dynamic_cast<Constant *> (*--it);
-        op = rule->simplificationOperator;
+        sop = Operator::instantiateOperator (rule->simplificationOperator);
         break;
       }
     }
@@ -146,7 +141,12 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
                                operand->getSize ());
     edu::sharif::twinner::trace::cv::ConcreteValue *cv =
         lastConstant->getValue ().clone (size);
-    op->apply (*cv, *operand);
+    if (sop) {
+      sop->apply (*cv, *operand);
+      delete sop;
+    } else {
+      lop->apply (*cv, *operand);
+    }
     delete operand;
     lastConstant->setValue (cv);
     return true;
