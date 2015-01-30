@@ -141,20 +141,24 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
                                operand->getSize ());
     edu::sharif::twinner::trace::cv::ConcreteValue *cv =
         lastConstant->getValue ().clone (size);
+    bool overflow;
     if (sop) {
-      sop->apply (*cv, *operand);
+      overflow = sop->apply (*cv, *operand);
       delete sop;
     } else {
-      lop->apply (*cv, *operand);
+      overflow = lop->apply (*cv, *operand);
     }
-    delete operand;
-    lastConstant->setValue (cv);
-    return true;
-  } else {
-    stack.push_back (new Constant (operand));
-    stack.push_back (this);
-    return false;
+    if (overflow) {
+      delete cv;
+    } else {
+      delete operand;
+      lastConstant->setValue (cv);
+      return true;
+    }
   }
+  stack.push_back (new Constant (operand));
+  stack.push_back (this);
+  return false;
 }
 
 Operator::SimplificationStatus Operator::deepSimplify (
