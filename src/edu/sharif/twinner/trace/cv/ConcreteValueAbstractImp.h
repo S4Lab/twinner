@@ -25,6 +25,20 @@ namespace twinner {
 namespace trace {
 namespace cv {
 
+struct ResultCarry {
+
+  UINT64 result;
+  UINT64 carry;
+
+  ResultCarry (UINT64 v) :
+      result (v & 0xFFFFFFFF), carry (v >> 32) {
+  }
+
+  operator bool () const {
+    return result != 0 || carry != 0;
+  }
+};
+
 template<unsigned int bits, /* bits must be a multiple of 8 */
 typename ValueType = UINT64 /* bits-length type */>
 class ConcreteValueAbstractImp : public ConcreteValue {
@@ -179,8 +193,12 @@ public:
   }
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator*= (const ConcreteValue &cv) {
+    // bits <= 32
     const UINT64 cvValue = cv.toUint64 ();
-    value *= cvValue;
+    UINT64 result = value;
+    result *= cvValue;
+    value = result;
+    cf = (value != result);
     return *this;
   }
 
@@ -190,12 +208,14 @@ public:
       throw std::runtime_error ("division by zero");
     }
     value /= cvValue;
+    cf = false;
     return *this;
   }
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator%= (const ConcreteValue &cv) {
     const UINT64 cvValue = cv.toUint64 ();
     value %= cvValue;
+    cf = false;
     return *this;
   }
 
@@ -250,6 +270,30 @@ template<> inline
 ConcreteValue *ConcreteValueAbstractImp<64, UINT64>::signExtended (int length) const {
   throw std::runtime_error
       ("64-bits sign-extension is not supported by ConcreteValueAbstractImp");
+}
+
+template<> inline
+ConcreteValueAbstractImp<64, UINT64> &ConcreteValueAbstractImp<64, UINT64>::operator*= (
+    const ConcreteValue &cv) {
+  const UINT64 cvValue = cv.toUint64 ();
+  const UINT64 b2 = cvValue & 0xFFFFFFFF;
+  const UINT64 b1 = cvValue >> 32;
+  const UINT64 a2 = value & 0xFFFFFFFF;
+  const UINT64 a1 = value >> 32;
+  //   b1 b2
+  // * a1 a2
+  const ResultCarry d2 (a2 * b2);
+
+  const ResultCarry c21 (a2 * b1);
+  const ResultCarry c12 (a1 * b2);
+  const ResultCarry d1 (c21.result + c12.result + d2.carry);
+
+  const ResultCarry c11 (a1 * b1);
+  const ResultCarry d0 (c11.result + d1.carry);
+  // d0 is overflowed and ignored
+  value = (d1.result << 32) | d2.result;
+  cf = d0;
+  return *this;
 }
 
 template<>

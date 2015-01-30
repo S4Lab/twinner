@@ -94,16 +94,6 @@ private:
   bool wouldSummationHaveCarry (UINT64 a, UINT64 b) const;
   bool getNthBit (UINT64 value, int n) const;
 
-  struct ResultCarry {
-
-    UINT64 result;
-    UINT64 carry;
-
-    ResultCarry (UINT64 v) :
-        result (v & 0xFFFFFFFF), carry (v >> 32) {
-    }
-  };
-
   void divide (ConcreteValue128Bits dividend, ConcreteValue128Bits divisor,
       ConcreteValue128Bits &quotient, ConcreteValue128Bits &remainder) const;
 

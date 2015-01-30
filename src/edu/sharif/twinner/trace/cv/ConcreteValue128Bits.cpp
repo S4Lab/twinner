@@ -301,9 +301,22 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator*= (const ConcreteValue &mul
   const ResultCarry c32 (a3 * b2);
   const ResultCarry c41 (a4 * b1);
   const ResultCarry d1 (c41.result + c32.result + c23.result + c14.result + d2.carry);
+
+  const ResultCarry c13 (a1 * b3);
+  const ResultCarry c22 (a2 * b2);
+  const ResultCarry c31 (a3 * b1);
+  const ResultCarry d0 (c31.result + c22.result + c13.result + d1.carry);
+
+  const ResultCarry c12 (a1 * b2);
+  const ResultCarry c21 (a2 * b1);
+  const ResultCarry dm1 (c21.result + c12.result + d0.carry);
+
+  const ResultCarry c11 (a1 * b1);
+  const ResultCarry dm2 (c11.result + dm1.carry);
   //d0 and other terms are overflowed and ignored
   lsb = (d3.result << 32) | d4.result;
   msb = (d1.result << 32) | d2.result;
+  cf = (d0 || dm1 || dm2);
   return *this;
 }
 
@@ -357,12 +370,14 @@ void ConcreteValue128Bits::doubleIt () {
 ConcreteValue128Bits &ConcreteValue128Bits::operator/= (const ConcreteValue &divisor) {
   ConcreteValue128Bits remainder;
   divide (*this, divisor, *this, remainder);
+  cf = false;
   return *this;
 }
 
 ConcreteValue128Bits &ConcreteValue128Bits::operator%= (const ConcreteValue &divisor) {
   ConcreteValue128Bits quotient;
   divide (*this, divisor, quotient, *this);
+  cf = false;
   return *this;
 }
 
@@ -381,7 +396,7 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator>>= (const ConcreteValue &bi
     cf = (msb >> 63) & 0x1;
     msb = lsb = 0;
   } else {
-    int n = (ConcreteValue64Bits (bits)).getValue ();
+    int n = bits.toUint64 ();
     if (n > 63) {
       n -= 64;
       cf = getNthBit (msb, n);
@@ -411,7 +426,7 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator<<= (const ConcreteValue &bi
     cf = lsb & 0x1;
     msb = lsb = 0;
   } else {
-    int n = (ConcreteValue64Bits (bits)).getValue ();
+    int n = bits.toUint64 ();
     if (n > 63) {
       n -= 64;
       cf = (lsb >> (64 - n)) & 0x1;
