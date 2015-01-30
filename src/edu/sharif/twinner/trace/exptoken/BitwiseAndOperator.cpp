@@ -116,7 +116,8 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
                 delete operand;
                 return COMPLETED;
               }
-            } else if (isTruncatingMask (first->getValue ().clone ())) {
+            } else if (isTruncatingMask (first->getValue ().clone ())
+                && isEquallyOrMoreLimitedThan (*operand, first->getValue ())) {
               // first is similar to 0x00001111
               stack.pop_back (); // removes addOrMinusOrBitwiseOrOp
               stack.pop_back (); // removes second
@@ -132,7 +133,6 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
               delete addOrMinusOrBitwiseOrOrMulOp;
               delete second;
               delete andOp;
-              (*operand) &= first->getValue ();
               delete first;
               return RESTART_SIMPLIFICATION;
             }
@@ -171,6 +171,16 @@ int BitwiseAndOperator::numberOfBits (
   }
   delete cv;
   return bits;
+}
+
+bool BitwiseAndOperator::isEquallyOrMoreLimitedThan (
+    const edu::sharif::twinner::trace::cv::ConcreteValue &first,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &second) const {
+  edu::sharif::twinner::trace::cv::ConcreteValue *moreLimited = first.clone ();
+  (*moreLimited) &= second;
+  const bool firstIsEquallyOrMoreLimited = ((*moreLimited) == first);
+  delete moreLimited;
+  return firstIsEquallyOrMoreLimited;
 }
 
 std::string BitwiseAndOperator::toString () const {

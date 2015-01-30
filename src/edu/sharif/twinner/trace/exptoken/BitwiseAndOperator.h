@@ -46,6 +46,9 @@ private:
 
   bool isTruncatingMask (edu::sharif::twinner::trace::cv::ConcreteValue *cv) const;
   int numberOfBits (edu::sharif::twinner::trace::cv::ConcreteValue *cv) const;
+  bool isEquallyOrMoreLimitedThan (
+      const edu::sharif::twinner::trace::cv::ConcreteValue &first,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &second) const;
 };
 
 }
