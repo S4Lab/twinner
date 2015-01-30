@@ -50,9 +50,10 @@ void DivideOperator::initializeSimplificationRules () {
       (SimplificationRule (Operator::MULTIPLY, Operator::DIVIDE));
 }
 
-void DivideOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+bool DivideOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst /= src;
+  return dst.getCarryBit ();
 }
 
 std::string DivideOperator::toString () const {

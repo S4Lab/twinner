@@ -120,7 +120,16 @@ public:
    */
   virtual bool apply (edu::sharif::twinner::trace::Expression *exp,
       edu::sharif::twinner::trace::cv::ConcreteValue *cv);
-  virtual void apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+
+  /**
+   * Applies this operator on given concrete values. The dst will be updated to indicate
+   * value of `dst <this> src`.
+   *
+   * @param dst The destination concrete value which will be updated according to this op.
+   * @param src The source concrete value which is used as second operand.
+   * @return true if and only if there is an unsigned overflow in the operation.
+   */
+  virtual bool apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
       const edu::sharif::twinner::trace::cv::ConcreteValue &src) const;
 
   virtual std::string toString () const;

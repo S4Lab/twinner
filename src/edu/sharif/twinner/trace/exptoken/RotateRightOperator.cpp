@@ -43,9 +43,10 @@ bool RotateRightOperator::doesSupportSimplification () const {
   return true;
 }
 
-void RotateRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+bool RotateRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst.rotateToRight (src);
+  return dst.getCarryBit ();
 }
 
 std::string RotateRightOperator::toString () const {

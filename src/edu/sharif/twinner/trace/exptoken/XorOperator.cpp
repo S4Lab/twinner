@@ -49,9 +49,10 @@ void XorOperator::initializeSimplificationRules () {
   simplificationRules.push_back (SimplificationRule (Operator::XOR, Operator::XOR));
 }
 
-void XorOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+bool XorOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst ^= src;
+  return dst.getCarryBit ();
 }
 
 std::string XorOperator::toString () const {

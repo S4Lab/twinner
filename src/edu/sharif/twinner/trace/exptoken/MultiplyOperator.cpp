@@ -82,9 +82,10 @@ Operator::SimplificationStatus MultiplyOperator::deepSimplify (
   return CAN_NOT_SIMPLIFY;
 }
 
-void MultiplyOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+bool MultiplyOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst *= src;
+  return dst.getCarryBit ();
 }
 
 std::string MultiplyOperator::toString () const {

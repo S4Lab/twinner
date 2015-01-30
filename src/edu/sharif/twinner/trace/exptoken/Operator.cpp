@@ -163,7 +163,7 @@ Operator::SimplificationStatus Operator::deepSimplify (
   return CAN_NOT_SIMPLIFY;
 }
 
-void Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+bool Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   switch (oi) {
   case REMAINDER:
@@ -176,6 +176,7 @@ void Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     throw std::runtime_error ("Operator::apply(ConcreteValue &, const ConcreteValue &):"
                               " Non-handled operator identifier");
   }
+  return dst.getCarryBit ();
 }
 
 std::string Operator::toString () const {

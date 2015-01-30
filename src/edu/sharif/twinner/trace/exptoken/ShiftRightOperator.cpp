@@ -52,9 +52,10 @@ bool ShiftRightOperator::apply (edu::sharif::twinner::trace::Expression *exp,
   return Operator::apply (exp, operand);
 }
 
-void ShiftRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+bool ShiftRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst >>= src;
+  return dst.getCarryBit ();
 }
 
 Operator::SimplificationStatus ShiftRightOperator::deepSimplify (

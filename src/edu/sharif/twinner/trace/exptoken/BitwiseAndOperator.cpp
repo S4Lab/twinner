@@ -50,9 +50,10 @@ void BitwiseAndOperator::initializeSimplificationRules () {
       (SimplificationRule (Operator::BITWISE_AND, Operator::BITWISE_AND));
 }
 
-void BitwiseAndOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst &= src;
+  return dst.getCarryBit ();
 }
 
 Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (

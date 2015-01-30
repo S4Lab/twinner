@@ -52,9 +52,10 @@ bool ShiftLeftOperator::apply (edu::sharif::twinner::trace::Expression *exp,
   return Operator::apply (exp, operand);
 }
 
-void ShiftLeftOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+bool ShiftLeftOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst <<= src;
+  return dst.getCarryBit ();
 }
 
 std::string ShiftLeftOperator::toString () const {

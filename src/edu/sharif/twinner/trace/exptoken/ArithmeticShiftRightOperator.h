@@ -31,7 +31,7 @@ public:
   virtual ArithmeticShiftRightOperator *clone () const;
 
   virtual bool doesSupportSimplification () const;
-  virtual void apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+  virtual bool apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
       const edu::sharif::twinner::trace::cv::ConcreteValue &src) const;
 
   virtual std::string toString () const;

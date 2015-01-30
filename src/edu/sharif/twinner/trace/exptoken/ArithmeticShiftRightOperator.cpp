@@ -43,9 +43,10 @@ bool ArithmeticShiftRightOperator::doesSupportSimplification () const {
   return true;
 }
 
-void ArithmeticShiftRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+bool ArithmeticShiftRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst.arithmeticShiftToRight (src);
+  return dst.getCarryBit ();
 }
 
 std::string ArithmeticShiftRightOperator::toString () const {

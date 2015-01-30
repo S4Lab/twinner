@@ -50,9 +50,10 @@ void BitwiseOrOperator::initializeSimplificationRules () {
       (SimplificationRule (Operator::BITWISE_OR, Operator::BITWISE_OR));
 }
 
-void BitwiseOrOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+bool BitwiseOrOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst |= src;
+  return dst.getCarryBit ();
 }
 
 std::string BitwiseOrOperator::toString () const {

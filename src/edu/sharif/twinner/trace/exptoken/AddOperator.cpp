@@ -50,9 +50,10 @@ void AddOperator::initializeSimplificationRules () {
   simplificationRules.push_back (SimplificationRule (Operator::MINUS, Operator::MINUS));
 }
 
-void AddOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+bool AddOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst += src;
+  return dst.getCarryBit ();
 }
 
 std::string AddOperator::toString () const {
