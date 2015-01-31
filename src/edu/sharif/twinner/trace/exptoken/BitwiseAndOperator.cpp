@@ -14,7 +14,7 @@
 
 #include "Constant.h"
 
-#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/ExpressionImp.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
@@ -48,6 +48,16 @@ bool BitwiseAndOperator::doesSupportSimplification () const {
 void BitwiseAndOperator::initializeSimplificationRules () {
   simplificationRules.push_back
       (SimplificationRule (Operator::BITWISE_AND, Operator::BITWISE_AND));
+}
+
+bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::Expression *exp,
+    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
+  if (operand->isZero ()) {
+    delete operand;
+    (*exp) = edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
+    return true;
+  }
+  return Operator::apply (exp, operand);
 }
 
 bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,

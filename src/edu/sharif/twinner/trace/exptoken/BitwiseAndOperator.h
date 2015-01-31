@@ -31,6 +31,8 @@ public:
   virtual BitwiseAndOperator *clone () const;
 
   virtual bool doesSupportSimplification () const;
+  virtual bool apply (edu::sharif::twinner::trace::Expression *exp,
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv);
   virtual bool apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
       const edu::sharif::twinner::trace::cv::ConcreteValue &src) const;
 
