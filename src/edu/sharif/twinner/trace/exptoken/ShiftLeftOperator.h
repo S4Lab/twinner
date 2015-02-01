@@ -45,6 +45,21 @@ private:
 protected:
   virtual SimplificationStatus deepSimplify (edu::sharif::twinner::trace::Expression *exp,
       edu::sharif::twinner::trace::cv::ConcreteValue *operand);
+
+private:
+  bool skipBitwiseOrAndBitwiseAndOperators (int numberOfItems,
+      std::list < ExpressionToken * >::iterator &it) const;
+
+  struct AppliedMask {
+
+    edu::sharif::twinner::trace::cv::ConcreteValue *mask;
+    bool opIsBitwiseOr;
+  };
+
+  bool aggregateMasks (std::list < AppliedMask > &appliedMasks,
+      std::list < ExpressionToken * >::iterator it,
+      std::list < ExpressionToken * >::iterator end,
+      edu::sharif::twinner::trace::cv::ConcreteValue &shiftAmount) const;
 };
 
 }

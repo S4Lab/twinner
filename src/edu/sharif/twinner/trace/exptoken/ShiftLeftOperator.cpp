@@ -72,50 +72,92 @@ Operator::SimplificationStatus ShiftLeftOperator::deepSimplify (
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   std::list < ExpressionToken * >::iterator it = stack.end ();
-  const Operator *bitwiseOrOrBitwiseAndOp = static_cast<Operator *> (*--it);
-  if (bitwiseOrOrBitwiseAndOp->getIdentifier () == Operator::BITWISE_OR
-      || bitwiseOrOrBitwiseAndOp->getIdentifier () == Operator::BITWISE_AND) {
-    Constant *mask = dynamic_cast<Constant *> (*--it);
-    if (mask) {
-      Operator *shiftOp = dynamic_cast<Operator *> (*--it);
-      if (shiftOp && shiftOp->getIdentifier () == Operator::SHIFT_LEFT) {
-        Constant *first = dynamic_cast<Constant *> (*--it);
-        if (first) {
-          // ((Z << first) [|&] mask) << operand
-          edu::sharif::twinner::trace::cv::ConcreteValue *cv =
-              mask->getValue ().clone (128);
-          (*cv) <<= (*operand);
-          (*cv) >>= (*operand);
-          const bool shiftingMaskDoesNotCausePrecisionLoss = ((*cv) == mask->getValue ());
-          if (shiftingMaskDoesNotCausePrecisionLoss) {
-            (*cv) <<= (*operand);
-            edu::sharif::twinner::trace::cv::ConcreteValue *cv64 = cv->clone (64);
-            if ((*cv) == (*cv64)) {
-              delete cv;
-              cv = cv64;
-            } else {
-              delete cv64;
-            }
-            stack.pop_back (); // removes bitwiseOrOrBitwiseAndOp
-            stack.pop_back (); // removes mask
-            exp->shiftToLeft (operand); // concrete value is invariant after this op.
-            const bool opIsBitwiseOr =
-                (bitwiseOrOrBitwiseAndOp->getIdentifier () == Operator::BITWISE_OR);
-            delete bitwiseOrOrBitwiseAndOp;
-            delete mask;
-            if (opIsBitwiseOr) {
-              exp->bitwiseOr (cv);
-            } else {
-              exp->bitwiseAnd (cv);
-            }
-            return COMPLETED;
+  if (skipBitwiseOrAndBitwiseAndOperators (stack.size (), it)) {
+    const Operator *shiftOp = static_cast<Operator *> (*it);
+    if (shiftOp->getIdentifier () == Operator::SHIFT_LEFT) {
+      std::list < ExpressionToken * >::iterator masks = it;
+      Constant *first = dynamic_cast<Constant *> (*--it);
+      if (first) {
+        // ((Z << first) [|&] mask1 ... [|&] maskn) << operand
+        std::list < AppliedMask > appliedMasks;
+        if (aggregateMasks (appliedMasks, masks, stack.end (), *operand)) {
+          std::list < ExpressionToken * >::iterator rit = stack.end ();
+          while (--rit != masks) {
+            delete *rit;
           }
-          delete cv;
+          stack.erase (++masks, stack.end ());
+          exp->shiftToLeft (operand); // concrete value is invariant at the end
+          for (std::list < AppliedMask >::const_iterator am = appliedMasks.begin ();
+              am != appliedMasks.end (); ++am) {
+            if (am->opIsBitwiseOr) {
+              exp->bitwiseOr (am->mask);
+            } else {
+              exp->bitwiseAnd (am->mask);
+            }
+          }
+          return COMPLETED;
         }
       }
     }
   }
   return CAN_NOT_SIMPLIFY;
+}
+
+bool ShiftLeftOperator::skipBitwiseOrAndBitwiseAndOperators (int numberOfItems,
+    std::list < ExpressionToken * >::iterator &it) const {
+  numberOfItems -= 2;
+  for (int i = 0; i < numberOfItems; i += 2) {
+    const Operator *bitwiseOrOrBitwiseAndOp = dynamic_cast<Operator *> (*--it);
+    if (!bitwiseOrOrBitwiseAndOp) {
+      return false;
+    }
+    if (bitwiseOrOrBitwiseAndOp->getIdentifier () != Operator::BITWISE_OR
+        && bitwiseOrOrBitwiseAndOp->getIdentifier () != Operator::BITWISE_AND) {
+      return true;
+    }
+    if (!dynamic_cast<Constant *> (*--it)) {
+      return false;
+    }
+  }
+  return false;
+}
+
+bool ShiftLeftOperator::aggregateMasks (std::list < AppliedMask > &appliedMasks,
+    std::list < ExpressionToken * >::iterator it,
+    std::list < ExpressionToken * >::iterator end,
+    edu::sharif::twinner::trace::cv::ConcreteValue &shiftAmount) const {
+  ++it;
+  do {
+    const Constant *mask = static_cast<Constant *> (*it++);
+    const Operator *bitwiseOrOrBitwiseAndOp = static_cast<Operator *> (*it++);
+    edu::sharif::twinner::trace::cv::ConcreteValue *cv = mask->getValue ().clone (128);
+    (*cv) <<= shiftAmount;
+    (*cv) >>= shiftAmount;
+    const bool shiftingMaskDoesNotCausePrecisionLoss = ((*cv) == mask->getValue ());
+    if (shiftingMaskDoesNotCausePrecisionLoss) {
+      (*cv) <<= shiftAmount;
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv64 = cv->clone (64);
+      if ((*cv) == (*cv64)) {
+        delete cv;
+        cv = cv64;
+      } else {
+        delete cv64;
+      }
+      AppliedMask am;
+      am.mask = cv;
+      am.opIsBitwiseOr =
+          (bitwiseOrOrBitwiseAndOp->getIdentifier () == Operator::BITWISE_OR);
+      appliedMasks.push_back (am);
+    } else {
+      delete cv;
+      while (!appliedMasks.empty ()) {
+        delete appliedMasks.back ().mask;
+        appliedMasks.pop_back ();
+      }
+      return false;
+    }
+  } while (it != end);
+  return true;
 }
 
 std::string ShiftLeftOperator::toString () const {
