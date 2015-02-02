@@ -96,6 +96,22 @@ Operator *Operator::instantiateOperator (OperatorIdentifier oi) {
   }
 }
 
+Operator *Operator::instantiateNegatedOperator () const {
+  switch (oi) {
+  case ADD:
+    return new MinusOperator ();
+  case MINUS:
+    return new AddOperator ();
+  case SHIFT_LEFT:
+    return new ShiftRightOperator ();
+  case SHIFT_RIGHT:
+    return new ShiftLeftOperator ();
+  default:
+    throw std::runtime_error ("Operator::instantiateNegatedOperator (): "
+                              "This operator is not negatable");
+  }
+}
+
 bool Operator::doesSupportSimplification () const {
   return false;
 }
@@ -146,29 +162,29 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *cv =
         lastConstant->getValue ().clone (size);
     bool overflow;
-    bool alternatingAddAndMinus = false;
+    bool alternatingNegatableOperators = false; // e.g. Z + x - y or Z >> x << y
     if (sop) {
       overflow = sop->apply (*cv, *operand);
-      alternatingAddAndMinus = (lop->getIdentifier () == Operator::ADD
+      alternatingNegatableOperators = (lop->getIdentifier () == Operator::ADD
           && sop->getIdentifier () == Operator::MINUS)
           || (lop->getIdentifier () == Operator::MINUS
-          && sop->getIdentifier () == Operator::ADD);
+          && sop->getIdentifier () == Operator::ADD)
+          || (lop->getIdentifier () == Operator::SHIFT_LEFT
+          && sop->getIdentifier () == Operator::SHIFT_RIGHT)
+          || (lop->getIdentifier () == Operator::SHIFT_RIGHT
+          && sop->getIdentifier () == Operator::SHIFT_LEFT);
       delete sop;
     } else {
       overflow = lop->apply (*cv, *operand);
     }
     if (overflow) {
-      if (alternatingAddAndMinus) {
+      if (alternatingNegatableOperators) {
         edu::sharif::twinner::trace::cv::ConcreteValue *negativeOfCv =
             cv->twosComplement ();
         delete cv;
         cv = negativeOfCv;
         stack.pop_back ();
-        if (lop->getIdentifier () == Operator::ADD) {
-          stack.push_back (Operator::instantiateOperator (Operator::MINUS));
-        } else {
-          stack.push_back (Operator::instantiateOperator (Operator::ADD));
-        }
+        stack.push_back (lop->instantiateNegatedOperator ());
         delete lop;
       } else {
         delete cv;

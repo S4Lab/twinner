@@ -65,6 +65,8 @@ bool ShiftLeftOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &d
 void ShiftLeftOperator::initializeSimplificationRules () {
   simplificationRules.push_back
       (SimplificationRule (Operator::SHIFT_LEFT, Operator::ADD));
+  simplificationRules.push_back
+      (SimplificationRule (Operator::SHIFT_RIGHT, Operator::MINUS));
 }
 
 Operator::SimplificationStatus ShiftLeftOperator::deepSimplify (

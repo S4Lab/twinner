@@ -26,10 +26,12 @@ namespace exptoken {
 
 ShiftRightOperator::ShiftRightOperator () :
     Operator (Operator::SHIFT_RIGHT) {
+  initializeSimplificationRules ();
 }
 
 ShiftRightOperator::ShiftRightOperator (const ShiftRightOperator &ao) :
     Operator (ao) {
+  initializeSimplificationRules ();
 }
 
 ShiftRightOperator::~ShiftRightOperator () {
@@ -56,6 +58,13 @@ bool ShiftRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst >>= src;
   return dst.getCarryBit ();
+}
+
+void ShiftRightOperator::initializeSimplificationRules () {
+  simplificationRules.push_back
+      (SimplificationRule (Operator::SHIFT_RIGHT, Operator::ADD));
+  simplificationRules.push_back
+      (SimplificationRule (Operator::SHIFT_LEFT, Operator::MINUS));
 }
 
 Operator::SimplificationStatus ShiftRightOperator::deepSimplify (

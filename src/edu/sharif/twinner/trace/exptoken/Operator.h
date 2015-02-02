@@ -97,6 +97,8 @@ public:
   static Operator *loadFromBinaryStream (std::ifstream &in);
   static Operator *instantiateOperator (OperatorIdentifier oi);
 
+  Operator *instantiateNegatedOperator () const;
+
   /**
    * Indicates whether this operator supports expression simplification and direct
    * application for constant operands.
