@@ -172,14 +172,7 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     bool alternatingNegatableOperators = false; // e.g. Z + x - y or Z >> x << y
     if (sop) {
       overflow = sop->apply (*cv, *operand);
-      alternatingNegatableOperators = (lop->getIdentifier () == Operator::ADD
-          && sop->getIdentifier () == Operator::MINUS)
-          || (lop->getIdentifier () == Operator::MINUS
-          && sop->getIdentifier () == Operator::ADD)
-          || (lop->getIdentifier () == Operator::SHIFT_LEFT
-          && sop->getIdentifier () == Operator::SHIFT_RIGHT)
-          || (lop->getIdentifier () == Operator::SHIFT_RIGHT
-          && sop->getIdentifier () == Operator::SHIFT_LEFT);
+      alternatingNegatableOperators = (sop->getIdentifier () == Operator::MINUS);
       delete sop;
     } else {
       overflow = lop->apply (*cv, *operand);
