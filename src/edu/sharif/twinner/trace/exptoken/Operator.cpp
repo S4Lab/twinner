@@ -122,7 +122,9 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
   const Operator *lop = 0;
   const Operator *sop = 0;
   // i.e. simplifying last concrete value of exp to zero, zeroes whole of exp
-  bool isZeroNatural = false;
+  bool isZeroNatural = false; // e.g. Z * 0 == 0
+  // i.e. using zero as the last operand on this exp has no effect
+  bool isZeroNeutral = false; //  e.g. Z + 0 == Z
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
     lastConstant = static_cast<Constant *> (stack.back ());
@@ -133,6 +135,11 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     lop = static_cast<Operator *> (*--it);
     isZeroNatural = (lop->getIdentifier () == Operator::BITWISE_AND
         || lop->getIdentifier () == Operator::MULTIPLY);
+    isZeroNeutral = (lop->getIdentifier () == Operator::BITWISE_OR
+        || lop->getIdentifier () == Operator::SHIFT_LEFT
+        || lop->getIdentifier () == Operator::SHIFT_RIGHT
+        || lop->getIdentifier () == Operator::ADD
+        || lop->getIdentifier () == Operator::MINUS);
     bool mayNeedDeepSimplification = true;
     for (std::vector<SimplificationRule>::iterator rule = simplificationRules.begin ();
         rule != simplificationRules.end (); ++rule) {
@@ -196,6 +203,11 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
       lastConstant->setValue (cv);
       if (isZeroNatural && lastConstant->getValue ().isZero ()) {
         (*exp) = edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
+      } else if (isZeroNeutral && lastConstant->getValue ().isZero ()) {
+        delete stack.back ();
+        stack.pop_back (); // removes operator
+        delete stack.back ();
+        stack.pop_back (); // removes operand
       }
       return true;
     }
