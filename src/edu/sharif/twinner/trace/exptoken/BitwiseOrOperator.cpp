@@ -45,6 +45,15 @@ bool BitwiseOrOperator::doesSupportSimplification () const {
   return true;
 }
 
+bool BitwiseOrOperator::apply (edu::sharif::twinner::trace::Expression *exp,
+    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
+  if (operand->isZero ()) {
+    delete operand;
+    return true;
+  }
+  return Operator::apply (exp, operand);
+}
+
 void BitwiseOrOperator::initializeSimplificationRules () {
   simplificationRules.push_back
       (SimplificationRule (Operator::BITWISE_OR, Operator::BITWISE_OR));
