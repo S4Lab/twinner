@@ -128,8 +128,10 @@ bool ShiftLeftOperator::aggregateMasks (std::list < AppliedMask > &appliedMasks,
     edu::sharif::twinner::trace::cv::ConcreteValue &shiftAmount) const {
   ++it;
   do {
-    const Constant *mask = static_cast<Constant *> (*it++);
-    const Operator *bitwiseOrOrBitwiseAndOp = static_cast<Operator *> (*it++);
+    const Constant *mask = static_cast<Constant *> (*it);
+    ++it;
+    const Operator *bitwiseOrOrBitwiseAndOp = static_cast<Operator *> (*it);
+    ++it;
     edu::sharif::twinner::trace::cv::ConcreteValue *cv = mask->getValue ().clone (128);
     (*cv) <<= shiftAmount;
     (*cv) >>= shiftAmount;

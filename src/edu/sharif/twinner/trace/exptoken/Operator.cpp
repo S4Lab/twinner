@@ -25,7 +25,7 @@
 #include "ArithmeticShiftRightOperator.h"
 #include "RotateRightOperator.h"
 
-#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/ExpressionImp.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
@@ -105,6 +105,8 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
   Constant *lastConstant = 0;
   const Operator *lop = 0;
   const Operator *sop = 0;
+  // i.e. simplifying last concrete value of exp to zero, zeroes whole of exp
+  bool isZeroNatural = false;
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
     lastConstant = static_cast<Constant *> (stack.back ());
@@ -113,6 +115,8 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
   } else if (stack.size () > 2 && dynamic_cast<Operator *> (stack.back ())) {
     std::list < ExpressionToken * >::iterator it = stack.end ();
     lop = static_cast<Operator *> (*--it);
+    isZeroNatural = (lop->getIdentifier () == Operator::BITWISE_AND
+        || lop->getIdentifier () == Operator::MULTIPLY);
     bool mayNeedDeepSimplification = true;
     for (std::vector<SimplificationRule>::iterator rule = simplificationRules.begin ();
         rule != simplificationRules.end (); ++rule) {
@@ -174,6 +178,9 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     if (cv) {
       delete operand;
       lastConstant->setValue (cv);
+      if (isZeroNatural && lastConstant->getValue ().isZero ()) {
+        (*exp) = edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
+      }
       return true;
     }
   }
