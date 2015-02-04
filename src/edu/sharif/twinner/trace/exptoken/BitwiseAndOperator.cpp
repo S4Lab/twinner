@@ -70,7 +70,7 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
     edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  if (stack.size () > 4) {
+  if (stack.size () > 2) {
     std::list < ExpressionToken * >::iterator it = stack.end ();
     Operator *secondOp = dynamic_cast<Operator *> (*--it);
     if (secondOp
@@ -82,6 +82,19 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
         || secondOp->getIdentifier () == Operator::SHIFT_RIGHT)) {
       Constant *second = dynamic_cast<Constant *> (*--it);
       if (second) {
+        if (secondOp->getIdentifier () == Operator::BITWISE_OR) {
+          edu::sharif::twinner::trace::cv::ConcreteValue *secondCv =
+              second->getValue ().clone (operand->getSize ());
+          (*secondCv) &= (*operand);
+          if ((*secondCv) == (*operand)) {
+            delete secondCv;
+            (*exp) = edu::sharif::twinner::trace::ExpressionImp (operand);
+            return COMPLETED;
+          }
+        }
+        if (stack.size () <= 4) {
+          return CAN_NOT_SIMPLIFY;
+        }
         Operator *firstOp = dynamic_cast<Operator *> (*--it);
         if (firstOp->getIdentifier () == Operator::BITWISE_AND) {
           Constant *first = dynamic_cast<Constant *> (*--it);
@@ -92,32 +105,21 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
               edu::sharif::twinner::trace::cv::ConcreteValue *secondCv =
                   second->getValue ().clone (size);
               (*secondCv) &= (*operand);
-              if ((*secondCv) != (*operand)) {
-                edu::sharif::twinner::trace::cv::ConcreteValue *firstCv =
-                    first->getValue ().clone (size);
-                (*firstCv) |= (*secondCv);
-                (*operand) &= (*firstCv);
-                delete firstCv;
-                stack.pop_back (); // removes addOrMinusOrBitwiseOrOp
-                stack.pop_back (); // removes second
-                stack.pop_back (); // removes andOp
-                stack.pop_back (); // removes first
-                exp->bitwiseOr (secondCv);
-                delete secondOp;
-                delete second;
-                delete firstOp;
-                delete first;
-                return RESTART_SIMPLIFICATION;
-              } else {
-                delete secondCv;
-                while (!stack.empty ()) {
-                  delete stack.back ();
-                  stack.pop_back ();
-                }
-                stack.push_back (new Constant (operand));
-                exp->getLastConcreteValue () = (*operand);
-                return COMPLETED;
-              }
+              edu::sharif::twinner::trace::cv::ConcreteValue *firstCv =
+                  first->getValue ().clone (size);
+              (*firstCv) |= (*secondCv);
+              (*operand) &= (*firstCv);
+              delete firstCv;
+              stack.pop_back (); // removes addOrMinusOrBitwiseOrOp
+              stack.pop_back (); // removes second
+              stack.pop_back (); // removes andOp
+              stack.pop_back (); // removes first
+              exp->bitwiseOr (secondCv);
+              delete secondOp;
+              delete second;
+              delete firstOp;
+              delete first;
+              return RESTART_SIMPLIFICATION;
             } else if (secondOp->getIdentifier () == Operator::MULTIPLY) {
               // exp == (...) & first * second
               if (isTruncatingMask (operand->clone ())) {
