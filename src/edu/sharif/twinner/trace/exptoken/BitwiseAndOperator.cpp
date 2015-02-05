@@ -137,14 +137,25 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
               edu::sharif::twinner::trace::cv::ConcreteValue *firstCv =
                   first->getValue ().clone (operand->getSize ());
               secondOp->apply (*firstCv, second->getValue ());
-              (*firstCv) &= (*operand);
-              const bool simplifiesToZero = firstCv->isZero ();
+              (*operand) &= (*firstCv);
               delete firstCv;
-              if (simplifiesToZero) {
-                delete operand;
-                (*exp) = edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
-                return COMPLETED;
+              stack.pop_back (); // removes secondOp
+              stack.pop_back (); // removes second
+              stack.pop_back (); // removes firstOp
+              stack.pop_back (); // removes first
+              edu::sharif::twinner::trace::cv::ConcreteValue *cv =
+                  exp->getLastConcreteValue ().clone ();
+              if (secondOp->getIdentifier () == Operator::SHIFT_LEFT) {
+                exp->shiftToLeft (second->getValue ().clone ());
+              } else {
+                exp->shiftToRight (second->getValue ().clone ());
               }
+              exp->setLastConcreteValue (cv);
+              delete secondOp;
+              delete second;
+              delete firstOp;
+              delete first;
+              return RESTART_SIMPLIFICATION;
             } else if (isTruncatingMask (first->getValue ().clone ())
                 && isEquallyOrMoreLimitedThan (*operand, first->getValue ())) {
               // first is similar to 0x00001111
