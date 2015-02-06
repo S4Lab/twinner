@@ -1976,9 +1976,11 @@ void InstructionSymbolicExecuter::incAnalysisRoutine (
   dstexp->add (1);
   opr.setExpression (trace, dstexp);
   delete dstexp;
-  delete dstexpOrig;
-  eflags.setFlags (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
-                   ("IncrementOperationGroup"));
+  const edu::sharif::twinner::trace::Expression *one =
+      new edu::sharif::twinner::trace::ExpressionImp (UINT64 (1));
+  eflags.setFlags
+      (new edu::sharif::twinner::twintool::operationgroup::AdditionOperationGroup
+       (dstexpOrig, one));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
