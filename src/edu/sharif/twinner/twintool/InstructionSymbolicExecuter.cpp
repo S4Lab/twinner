@@ -1994,9 +1994,11 @@ void InstructionSymbolicExecuter::decAnalysisRoutine (
   dstexp->minus (1);
   opr.setExpression (trace, dstexp);
   delete dstexp;
-  delete dstexpOrig;
-  eflags.setFlags (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
-                   ("DecrementOperationGroup"));
+  const edu::sharif::twinner::trace::Expression *one =
+      new edu::sharif::twinner::trace::ExpressionImp (UINT64 (1));
+  eflags.setFlags
+      (new edu::sharif::twinner::twintool::operationgroup::SubtractOperationGroup
+       (dstexpOrig, one));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
