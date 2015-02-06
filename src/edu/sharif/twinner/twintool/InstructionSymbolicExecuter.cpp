@@ -22,6 +22,7 @@
 #include "edu/sharif/twinner/twintool/operationgroup/AdditionOperationGroup.h"
 #include "edu/sharif/twinner/twintool/operationgroup/AddWithCarryOperationGroup.h"
 #include "edu/sharif/twinner/twintool/operationgroup/BitwiseAndOperationGroup.h"
+#include "edu/sharif/twinner/twintool/operationgroup/ShiftArithmeticRightOperationGroup.h"
 
 #include "edu/sharif/twinner/trace-twintool/TraceImp.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
@@ -1409,10 +1410,8 @@ void InstructionSymbolicExecuter::sarAnalysisRoutine (
   }
   dst.setExpression (trace, dstexp);
   delete dstexp;
-  delete dstexpOrig;
-  delete srcexp;
-  eflags.setFlags (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
-                   ("ShiftArithmeticRightOperationGroup"));
+  eflags.setFlags (new edu::sharif::twinner::twintool::operationgroup
+                   ::ShiftArithmeticRightOperationGroup (dstexpOrig, srcexp));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
