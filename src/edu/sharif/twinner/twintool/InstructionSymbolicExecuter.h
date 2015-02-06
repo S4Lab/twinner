@@ -576,6 +576,11 @@ private:
   void rdtscAnalysisRoutine (const CONTEXT *context);
 
   /**
+   * Clears the direction flags (DF)
+   */
+  void cldAnalysisRoutine (const CONTEXT *context);
+
+  /**
    * INC increments the opr reg/mem operand.
    */
   void incAnalysisRoutine (const MutableExpressionValueProxy &opr);

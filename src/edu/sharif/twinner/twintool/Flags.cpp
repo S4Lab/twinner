@@ -68,6 +68,10 @@ void Flags::setOverflowFlag (bool set) {
   of = set ? SET_FSTATE : CLEAR_FSTATE;
 }
 
+void Flags::setDirectionFlag (bool set) {
+  df = set ? SET_FSTATE : CLEAR_FSTATE;
+}
+
 void Flags::setCarryFlag (bool set) {
   cf = set ? SET_FSTATE : CLEAR_FSTATE;
 }

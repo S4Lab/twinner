@@ -1923,6 +1923,7 @@ void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) 
    * the edx:eax registers. These registers should be loaded as immediate values
    * in symbolic expressions.
    */
+  // FIXME: This code doesn't preserve time-stamp and is vulnerable to time bombs
   ConcreteValue *edxVal =
       edu::sharif::twinner::util::readRegisterContent (context, REG_EDX);
   ConcreteValue *eaxVal =
@@ -1940,6 +1941,16 @@ void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) 
   eax.setExpression (trace, eaxNewExp);
   delete edxNewExp; // expressions are cloned by above setter methods
   delete eaxNewExp;
+}
+
+void InstructionSymbolicExecuter::cldAnalysisRoutine (const CONTEXT *context) {
+  edu::sharif::twinner::util::Logger::loquacious () << "cldAnalysisRoutine(...)\n";
+  /**
+   * Now, we are right after the CLD instruction. This is a decision to match with other
+   * operand-less instructions. Anyway, our implementation for CLD works independent of
+   * being executed before or after the CLD instruction itself.
+   */
+  eflags.setCarryFlag (false);
 }
 
 void InstructionSymbolicExecuter::incAnalysisRoutine (
@@ -2240,6 +2251,8 @@ InstructionSymbolicExecuter::convertOpcodeToOperandLessAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_RDTSC:
     return &InstructionSymbolicExecuter::rdtscAnalysisRoutine;
+  case XED_ICLASS_CLD:
+    return &InstructionSymbolicExecuter::cldAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Operand Less: Unknown opcode: " << OPCODE_StringShort (op) << '\n';

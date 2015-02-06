@@ -92,6 +92,15 @@ public:
   void setOverflowFlag (bool set);
 
   /**
+   * Sets or clears the DF independent of other flags.
+   * The DF, in string operations, indicate whether string pointer (RDI/RSI) should be
+   * decremented (DF == 1) or incremented (DF == 0).
+   *
+   * @param set Indicates whether DF should be set or cleared
+   */
+  void setDirectionFlag (bool set);
+
+  /**
    * Sets or clears the CF independent of other flags.
    *
    * @param set Indicates whether CF should be set or cleared
