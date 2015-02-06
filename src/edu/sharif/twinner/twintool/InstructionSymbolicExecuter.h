@@ -388,6 +388,11 @@ private:
   void jnbAnalysisRoutine (bool branchTaken);
 
   /**
+   * JB jumps if CF=1 (jump below)
+   */
+  void jbAnalysisRoutine (bool branchTaken);
+
+  /**
    * JS jumps if SF=1 which means that corresponding expression was < 0
    */
   void jsAnalysisRoutine (bool branchTaken);
