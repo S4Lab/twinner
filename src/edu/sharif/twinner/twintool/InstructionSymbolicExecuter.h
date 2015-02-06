@@ -586,9 +586,14 @@ private:
   void decAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
   /**
-   * SETNZ sets opr to 1 iff ZF=0 (and set it to 0 otherwise).
+   * SETNZ sets opr to 1 iff ZF=0 (and sets it to 0 otherwise).
    */
   void setnzAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
+  /**
+   * SETZ sets opr to 1 iff ZF=1 (and sets it to 0 otherwise).
+   */
+  void setzAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
   /**
    * NOT one's complements the opr.
