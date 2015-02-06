@@ -88,10 +88,17 @@ void Instrumenter::initialize () {
                   MOV_ZX_AND_SX_INS_MODELS));
   managedInstructions.insert // xmm <- r/m  OR  r/m <- xmm
       (make_pair (XED_ICLASS_MOVD, DST_LARGE_REG_SRC_EITHER_REG_OR_MEM_OR_VICE_VERSA));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_CMOVBE, DST_REG_SRC_EITHER_REG_OR_MEM));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_CMOVNBE, DST_REG_SRC_EITHER_REG_OR_MEM));
+  const OPCODE cmovcc[] = {
+                           XED_ICLASS_CMOVB, XED_ICLASS_CMOVBE, XED_ICLASS_CMOVL,
+                           XED_ICLASS_CMOVLE, XED_ICLASS_CMOVNB, XED_ICLASS_CMOVNBE,
+                           XED_ICLASS_CMOVNL, XED_ICLASS_CMOVNLE, XED_ICLASS_CMOVNO,
+                           XED_ICLASS_CMOVNP, XED_ICLASS_CMOVNS, XED_ICLASS_CMOVNZ,
+                           XED_ICLASS_CMOVO, XED_ICLASS_CMOVP, XED_ICLASS_CMOVS,
+                           XED_ICLASS_CMOVZ
+  };
+  for (unsigned int i = 0; i < sizeof (cmovcc) / sizeof (OPCODE); ++i) {
+    managedInstructions.insert (make_pair (cmovcc[i], CMOV_INS_MODELS));
+  }
   managedInstructions.insert
       (make_pair (XED_ICLASS_CMPXCHG, DST_EITHER_REG_OR_MEM_SRC_REG_AUX_REG));
   managedInstructions.insert
@@ -307,6 +314,8 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
     switch (INS_Category (ins)) {
     case XED_CATEGORY_COND_BR:
       return JMP_CC_INS_MODELS;
+    case XED_CATEGORY_CMOV:
+      return CMOV_INS_MODELS;
     case XED_CATEGORY_CALL:
     case XED_CATEGORY_RET:
     case XED_CATEGORY_UNCOND_BR:
@@ -745,6 +754,35 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_END);
     break;
   }
+  case CMOV_INS_MODELS:
+  {
+    // instruction type: DST_REG_SRC_EITHER_REG_OR_MEM
+    edu::sharif::twinner::util::Logger::debug () << "Instrumenting conditional move "
+        "as a conditional jump followed by a normal move\n";
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineConditionalBranch,
+                    IARG_PTR, ise, IARG_UINT32, convertConditionalMoveToJumpOpcode (op),
+                    IARG_EXECUTING,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    REG dstreg = INS_OperandReg (ins, 0);
+    if (INS_OperandIsReg (ins, 1)) {
+      REG srcreg = INS_OperandReg (ins, 1);
+      INS_InsertPredicatedCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcReg,
+                                IARG_PTR, ise, IARG_UINT32, XED_ICLASS_MOV,
+                                IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                                IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                                IARG_UINT32, insAssembly,
+                                IARG_END);
+    } else {
+      INS_InsertPredicatedCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMem,
+                                IARG_PTR, ise, IARG_UINT32, XED_ICLASS_MOV,
+                                IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                                IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                                IARG_UINT32, insAssembly,
+                                IARG_END);
+    }
+    break;
+  }
   case DST_REG_SRC_ADG:
   {
     REG dstreg = INS_OperandReg (ins, 0);
@@ -1007,6 +1045,16 @@ void Instrumenter::printInstructionsStatisticsInfo () const {
   edu::sharif::twinner::util::Logger::info ()
       << "count of ignored instructions: " << countOfIgnoredInstructions << " ("
       << (countOfIgnoredInstructions * 100.0 / totalCountOfInstructions) << " %)\n";
+}
+
+OPCODE Instrumenter::convertConditionalMoveToJumpOpcode (OPCODE cmovcc) const {
+  if (cmovcc < XED_ICLASS_CMOVNB) {
+    return cmovcc + XED_ICLASS_JB - XED_ICLASS_CMOVB;
+  } else if (cmovcc < XED_ICLASS_CMOVS) {
+    return cmovcc + XED_ICLASS_JNB - XED_ICLASS_CMOVNB;
+  } else {
+    return cmovcc + XED_ICLASS_JS - XED_ICLASS_CMOVS;
+  }
 }
 
 VOID instrumentSingleInstruction (INS ins, VOID * v) {

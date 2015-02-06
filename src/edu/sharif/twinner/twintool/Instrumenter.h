@@ -85,6 +85,7 @@ private:
     DST_LARGE_REG_SRC_MEM_AUX_IMD = 0x0000000100000000,
 
     DST_REG_SRC_MEM_AUX_RSI = 0x0000000200000000,
+    CMOV_INS_MODELS = 0x0000000400000000,
 
     DST_EITHER_REG_OR_MEM_SRC_MUTABLE_REG = DST_REG_SRC_MUTABLE_REG
     | DST_MEM_SRC_MUTABLE_REG,
@@ -174,6 +175,8 @@ private:
 
   std::map < OPCODE, int > countOfInstructionsPerOpcode;
   int totalCountOfInstructions;
+
+  OPCODE convertConditionalMoveToJumpOpcode (OPCODE cmovcc) const;
 };
 
 VOID instrumentSingleInstruction (INS ins, VOID *v);
