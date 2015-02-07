@@ -493,6 +493,40 @@ void ExecutionTraceSegment::loadMapFromBinaryStream (std::ifstream &in,
   }
 }
 
+inline void removeItemFromMap (std::map < ADDRINT, Expression * > &map, ADDRINT addr) {
+  std::map < ADDRINT, Expression * >::iterator item = map.find (addr);
+  delete item->second;
+  map.erase (item);
+};
+
+void ExecutionTraceSegment::abandonTrivialMemoryExpressions () {
+  std::set<ADDRINT> trivialAddresses;
+  for (std::map < ADDRINT, Expression * >::const_iterator it =
+      memoryAddressTo128BitsExpression.begin ();
+      it != memoryAddressTo128BitsExpression.end (); ++it) {
+    if (it->second->isTrivial ()) {
+      trivialAddresses.insert (it->first);
+    }
+  }
+  for (std::set<ADDRINT>::const_iterator it = trivialAddresses.begin ();
+      it != trivialAddresses.end (); ++it) {
+    const ADDRINT addr128 = *it;
+    removeItemFromMap (memoryAddressTo128BitsExpression, addr128);
+    for (int i = 0; i < 16; i += 8) {
+      removeItemFromMap (memoryAddressTo64BitsExpression, addr128 + i);
+    }
+    for (int i = 0; i < 16; i += 4) {
+      removeItemFromMap (memoryAddressTo32BitsExpression, addr128 + i);
+    }
+    for (int i = 0; i < 16; i += 2) {
+      removeItemFromMap (memoryAddressTo16BitsExpression, addr128 + i);
+    }
+    for (int i = 0; i < 16; i += 1) {
+      removeItemFromMap (memoryAddressTo8BitsExpression, addr128 + i);
+    }
+  }
+}
+
 void ExecutionTraceSegment::printRegistersValues (
     const edu::sharif::twinner::util::Logger &logger) const {
   logger << registerToExpression;

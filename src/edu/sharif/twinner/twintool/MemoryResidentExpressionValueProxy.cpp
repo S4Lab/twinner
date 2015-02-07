@@ -28,6 +28,13 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
+/*
+ * FIXME: After `Abandoning trivial/concrete memory expressions` commit, concrete
+ * memory initializations are omitted from the generated twincode.
+ * This should be resolved by keeping track of trivial memory values too, but with
+ * less overhead (e.g. not keeping it in all 128/64/32/16/8 bits maps).
+ */
+
 MemoryResidentExpressionValueProxy::MemoryResidentExpressionValueProxy (
     ADDRINT _memoryEa, int _memReadBytes) :
     memoryEa (_memoryEa), memReadBytes (_memReadBytes) {
@@ -152,7 +159,7 @@ bool MemoryResidentExpressionValueProxy::isMemoryEaAligned () const {
 void MemoryResidentExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression &changedExp) const {
-  edu::sharif::twinner::util::Logger::debug () << "(memory value is changed to "
+  edu::sharif::twinner::util::Logger::loquacious () << "(memory value is changed to "
       << &changedExp << ")\n";
   expCache.clear ();
   const int size = getSize ();
@@ -187,6 +194,7 @@ void MemoryResidentExpressionValueProxy::valueIsChanged (
     }
   }
   // trace->printMemoryUsageStats (edu::sharif::twinner::util::Logger::debug ());
+  trace->abandonTrivialMemoryExpressions ();
 }
 
 void MemoryResidentExpressionValueProxy::propagateChangeDownwards (int size,

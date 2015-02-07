@@ -175,6 +175,8 @@ protected:
   }
 
 public:
+  void abandonTrivialMemoryExpressions ();
+
   virtual void printRegistersValues (
       const edu::sharif::twinner::util::Logger &logger) const;
   virtual void printMemoryAddressesValues (

@@ -177,7 +177,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
   } catch (const WrongStateException &e) {
     const edu::sharif::twinner::trace::cv::ConcreteValue &currentValue =
         e.getCurrentStateValue ();
-    edu::sharif::twinner::util::Logger::debug () << "Unexpected value ("
+    edu::sharif::twinner::util::Logger::loquacious () << "Unexpected value ("
         << std::hex << currentValue
         << ") was found (instead of " << val << "). "
         "Probably, a new symbol is required to describe it.\n";
