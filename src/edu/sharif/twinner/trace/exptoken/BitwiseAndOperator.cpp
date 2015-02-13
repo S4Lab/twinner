@@ -120,17 +120,6 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
               delete firstOp;
               delete first;
               return RESTART_SIMPLIFICATION;
-            } else if (secondOp->getIdentifier () == Operator::MULTIPLY) {
-              // exp == (...) & first * second
-              if (isTruncatingMask (operand->clone ())) {
-                const int maxNumberOfBitsOfResult =
-                    numberOfBits (first->getValue ().clone ()) +
-                    numberOfBits (second->getValue ().clone ());
-                if (maxNumberOfBitsOfResult <= numberOfBits (operand->clone ())) {
-                  delete operand;
-                  return COMPLETED;
-                }
-              }
             } else if (secondOp->getIdentifier () == Operator::SHIFT_LEFT
                 || secondOp->getIdentifier () == Operator::SHIFT_RIGHT) {
               // exp == (...) & first [<<>>] second
@@ -159,22 +148,36 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
             } else if (isTruncatingMask (first->getValue ().clone ())
                 && isEquallyOrMoreLimitedThan (*operand, first->getValue ())) {
               // first is similar to 0x00001111
-              stack.pop_back (); // removes addOrMinusOrBitwiseOrOp
+              stack.pop_back (); // removes secondOp
               stack.pop_back (); // removes second
-              stack.pop_back (); // removes andOp
+              stack.pop_back (); // removes firstOp
               stack.pop_back (); // removes first
+              edu::sharif::twinner::trace::cv::ConcreteValue *cv =
+                  exp->getLastConcreteValue ().clone ();
               if (secondOp->getIdentifier () == Operator::ADD) {
-                exp->getLastConcreteValue () -= second->getValue ();
                 exp->add (second->getValue ().clone ());
-              } else {
-                exp->getLastConcreteValue () += second->getValue ();
+              } else if (secondOp->getIdentifier () == Operator::MINUS) {
                 exp->minus (second->getValue ().clone ());
+              } else {
+                exp->multiply (second->getValue ().clone ());
               }
+              exp->setLastConcreteValue (cv);
               delete secondOp;
               delete second;
               delete firstOp;
               delete first;
               return RESTART_SIMPLIFICATION;
+            } else if (secondOp->getIdentifier () == Operator::MULTIPLY) {
+              // exp == (...) & first * second
+              if (isTruncatingMask (operand->clone ())) {
+                const int maxNumberOfBitsOfResult =
+                    numberOfBits (first->getValue ().clone ()) +
+                    numberOfBits (second->getValue ().clone ());
+                if (maxNumberOfBitsOfResult <= numberOfBits (operand->clone ())) {
+                  delete operand;
+                  return COMPLETED;
+                }
+              }
             }
           }
         } else if (firstOp->getIdentifier () == Operator::ADD
