@@ -178,6 +178,9 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
     edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConcreteValue->clone ();
     (*this) = (*exp);
     binaryOperation (op, cv);
+  } else if (op->getIdentifier () == Operator::ADD && (*this) == (*exp)) {
+    delete op;
+    multiply (2);
   } else {
     /**
      * It's possible that this object and given constant expression object be the same.
