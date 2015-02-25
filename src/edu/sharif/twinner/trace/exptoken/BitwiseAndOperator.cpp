@@ -91,6 +91,7 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
             (*exp) = edu::sharif::twinner::trace::ExpressionImp (operand);
             return COMPLETED;
           }
+          delete secondCv;
         }
         if (stack.size () <= 4) {
           return CAN_NOT_SIMPLIFY;
