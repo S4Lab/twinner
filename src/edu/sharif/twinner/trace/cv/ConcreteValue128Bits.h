@@ -51,6 +51,7 @@ public:
 
   virtual bool isNegative () const;
   virtual bool isZero () const;
+  virtual bool isCompletePowerOfTwo (int *n) const;
 
   virtual ConcreteValue128Bits *twosComplement () const;
   virtual ConcreteValue128Bits *bitwiseNegated () const;

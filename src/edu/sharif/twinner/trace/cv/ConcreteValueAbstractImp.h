@@ -105,6 +105,25 @@ public:
     return (toUint64 () == 0);
   }
 
+  virtual bool isCompletePowerOfTwo (int *n) const {
+    ValueType v = value;
+    int b = 0;
+    while (v > 0) {
+      v >>= 1;
+      b++;
+    }
+    if (b == 0) {
+      return false;
+    } else if (b == 1 || value == (1ull << (b - 1))) {
+      if (n) {
+        *n = b - 1;
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   virtual ValueType getValue () const {
     return value;
   }

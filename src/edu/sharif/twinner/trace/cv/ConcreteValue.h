@@ -70,6 +70,16 @@ public:
   virtual bool isZero () const = 0;
 
   /**
+   * Returns true if and only if the underlying concrete value is a complete power of two.
+   * If the concrete value is of `2^n` form, and if the n argument is not null, the n
+   * argument will be set to log2 of concrete value.
+   *
+   * @param n set to log2 of concrete value iff it is not null and method returns true
+   * @return true iff concrete value is of `2^n` form.
+   */
+  virtual bool isCompletePowerOfTwo (int *n) const = 0;
+
+  /**
    * Instantiates a new concrete value object holding two's complement of this concrete
    * value. Caller should delete the returned object.
    * @return The two's complement of this concrete value.

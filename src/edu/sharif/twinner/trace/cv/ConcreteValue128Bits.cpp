@@ -132,6 +132,31 @@ bool ConcreteValue128Bits::isZero () const {
   return (msb == 0) && (lsb == 0);
 }
 
+bool ConcreteValue128Bits::isCompletePowerOfTwo (int *n) const {
+  if ((msb == 0) == (lsb == 0)) {
+    return false;
+  }
+  const UINT64 org = lsb ? lsb : msb;
+  UINT64 v = org;
+  int bits = 0;
+  while (v > 0) {
+    v >>= 1;
+    bits++;
+  }
+  if (bits == 1 || org == (1ull << (bits - 1))) {
+    if (n) {
+      if (lsb) {
+        *n = bits - 1;
+      } else {
+        *n = bits - 1 + 64;
+      }
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
 ConcreteValue128Bits *ConcreteValue128Bits::twosComplement () const {
   ConcreteValue128Bits *tmp = bitwiseNegated ();
   ConcreteValue &tt = *tmp;
