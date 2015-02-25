@@ -86,6 +86,44 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
       exp->bitwiseAnd (cv);
       return COMPLETED;
     }
+  } else if (op->getIdentifier () == Operator::MULTIPLY
+      || op->getIdentifier () == Operator::DIVIDE) {
+    const Constant *val = dynamic_cast<Constant *> (*--it);
+    if (val) {
+      int n;
+      if (val->getValue ().isCompletePowerOfTwo (&n)) {
+        if (op->getIdentifier () == Operator::DIVIDE) {
+          edu::sharif::twinner::trace::cv::ConcreteValue *cv = operand->clone ();
+          (*cv) += n;
+          if (cv->getCarryBit ()) {
+            delete cv;
+          } else {
+            exp->getLastConcreteValue () *= val->getValue ();
+            stack.pop_back (); // removes op
+            stack.pop_back (); // removes val
+            delete op;
+            delete val;
+            exp->shiftToRight (cv);
+            return COMPLETED;
+          }
+        } else {
+          edu::sharif::twinner::trace::cv::ConcreteValue *cv = operand->clone ();
+          (*cv) -= n;
+          exp->getLastConcreteValue () /= val->getValue ();
+          stack.pop_back (); // removes op
+          stack.pop_back (); // removes val
+          delete op;
+          delete val;
+          if (cv->getCarryBit ()) {
+            exp->shiftToLeft (-cv->toUint64 ());
+            delete cv;
+          } else {
+            exp->shiftToRight (cv);
+          }
+          return COMPLETED;
+        }
+      }
+    }
   }
   return CAN_NOT_SIMPLIFY;
 }
