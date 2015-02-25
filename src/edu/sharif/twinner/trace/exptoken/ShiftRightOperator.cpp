@@ -78,19 +78,13 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
     if (mask) {
       edu::sharif::twinner::trace::cv::ConcreteValue *cv = mask->getValue ().clone ();
       (*cv) >>= (*operand);
-      if (cv->isZero ()) {
-        while (!stack.empty ()) {
-          delete stack.back ();
-          stack.pop_back ();
-        }
-        const UINT64 v = 0;
-        stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (v));
-        exp->getLastConcreteValue () = v;
-        delete operand;
-        delete cv;
-        return COMPLETED;
-      }
-      delete cv;
+      stack.pop_back (); // removes op
+      stack.pop_back (); // removes mask
+      delete op;
+      delete mask;
+      exp->shiftToRight (operand);
+      exp->bitwiseAnd (cv);
+      return COMPLETED;
     }
   }
   return CAN_NOT_SIMPLIFY;
