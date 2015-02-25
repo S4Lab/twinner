@@ -75,30 +75,26 @@ Operator::SimplificationStatus ShiftLeftOperator::deepSimplify (
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   std::list < ExpressionToken * >::iterator it = stack.end ();
   if (skipBitwiseOrAndBitwiseAndOperators (stack.size (), it)) {
-    const Operator *shiftOp = static_cast<Operator *> (*it);
-    if (shiftOp->getIdentifier () == Operator::SHIFT_LEFT) {
-      std::list < ExpressionToken * >::iterator masks = it;
-      Constant *first = dynamic_cast<Constant *> (*--it);
-      if (first) {
-        // ((Z << first) [|&] mask1 ... [|&] maskn) << operand
-        std::list < AppliedMask > appliedMasks;
-        if (aggregateMasks (appliedMasks, masks, stack.end (), *operand)) {
-          std::list < ExpressionToken * >::iterator rit = stack.end ();
-          while (--rit != masks) {
-            delete *rit;
-          }
-          stack.erase (++masks, stack.end ());
-          exp->shiftToLeft (operand); // concrete value is invariant at the end
-          for (std::list < AppliedMask >::const_iterator am = appliedMasks.begin ();
-              am != appliedMasks.end (); ++am) {
-            if (am->opIsBitwiseOr) {
-              exp->bitwiseOr (am->mask);
-            } else {
-              exp->bitwiseAnd (am->mask);
-            }
-          }
-          return COMPLETED;
+    std::list < ExpressionToken * >::iterator masks = it;
+    if (++it != stack.end ()) {
+      // (Z [|&] mask1 ... [|&] maskn) << operand
+      std::list < AppliedMask > appliedMasks;
+      if (aggregateMasks (appliedMasks, masks, stack.end (), *operand)) {
+        std::list < ExpressionToken * >::iterator rit = stack.end ();
+        while (--rit != masks) {
+          delete *rit;
         }
+        stack.erase (++masks, stack.end ());
+        exp->shiftToLeft (operand); // concrete value is invariant at the end
+        for (std::list < AppliedMask >::const_iterator am = appliedMasks.begin ();
+            am != appliedMasks.end (); ++am) {
+          if (am->opIsBitwiseOr) {
+            exp->bitwiseOr (am->mask);
+          } else {
+            exp->bitwiseAnd (am->mask);
+          }
+        }
+        return COMPLETED;
       }
     }
   }
