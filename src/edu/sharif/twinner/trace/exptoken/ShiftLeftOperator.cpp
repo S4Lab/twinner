@@ -96,6 +96,47 @@ Operator::SimplificationStatus ShiftLeftOperator::deepSimplify (
         }
         return COMPLETED;
       }
+    } else {
+      const Operator *multiplyOrDivideOp = static_cast<Operator *> (*--it);
+      if (multiplyOrDivideOp->getIdentifier () == Operator::MULTIPLY
+          || multiplyOrDivideOp->getIdentifier () == Operator::DIVIDE) {
+        const Constant *val = dynamic_cast<Constant *> (*--it);
+        if (val) {
+          int n;
+          if (val->getValue ().isCompletePowerOfTwo (&n)) {
+            if (multiplyOrDivideOp->getIdentifier () == Operator::MULTIPLY) {
+              edu::sharif::twinner::trace::cv::ConcreteValue *cv = operand->clone ();
+              (*cv) += n;
+              if (cv->getCarryBit ()) {
+                delete cv;
+              } else {
+                exp->getLastConcreteValue () /= val->getValue ();
+                stack.pop_back (); // removes multiplyOrDivideOp
+                stack.pop_back (); // removes val
+                delete multiplyOrDivideOp;
+                delete val;
+                exp->shiftToLeft (cv);
+                return COMPLETED;
+              }
+            } else {
+              edu::sharif::twinner::trace::cv::ConcreteValue *cv = operand->clone ();
+              (*cv) -= n;
+              exp->getLastConcreteValue () *= val->getValue ();
+              stack.pop_back (); // removes multiplyOrDivideOp
+              stack.pop_back (); // removes val
+              delete multiplyOrDivideOp;
+              delete val;
+              if (cv->getCarryBit ()) {
+                exp->shiftToRight (-cv->toUint64 ());
+                delete cv;
+              } else {
+                exp->shiftToLeft (cv);
+              }
+              return COMPLETED;
+            }
+          }
+        }
+      }
     }
   }
   return CAN_NOT_SIMPLIFY;
