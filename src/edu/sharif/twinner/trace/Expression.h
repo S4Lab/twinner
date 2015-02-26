@@ -106,7 +106,7 @@ public:
   void convertToInfixExpression (Stack &st, std::stringstream &ss) const;
 
 protected:
-  void unaryOperation (Operator op, const Expression *exp);
+  void unaryOperation (Operator *op, const Expression *exp);
 
   /**
    * The op operator is assumed to be owned by this expression object.

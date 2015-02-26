@@ -45,6 +45,10 @@ bool XorOperator::doesSupportSimplification () const {
   return true;
 }
 
+bool XorOperator::isCommutable () const {
+  return true;
+}
+
 void XorOperator::initializeSimplificationRules () {
   simplificationRules.push_back (SimplificationRule (Operator::XOR, Operator::XOR));
 }

@@ -45,6 +45,10 @@ bool BitwiseOrOperator::doesSupportSimplification () const {
   return true;
 }
 
+bool BitwiseOrOperator::isCommutable () const {
+  return true;
+}
+
 bool BitwiseOrOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   if (operand->isZero ()) {

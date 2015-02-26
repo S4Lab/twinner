@@ -45,6 +45,10 @@ bool MultiplyOperator::doesSupportSimplification () const {
   return true;
 }
 
+bool MultiplyOperator::isCommutable () const {
+  return false;
+}
+
 void MultiplyOperator::initializeSimplificationRules () {
   simplificationRules.push_back
       (SimplificationRule (Operator::MULTIPLY, Operator::MULTIPLY));

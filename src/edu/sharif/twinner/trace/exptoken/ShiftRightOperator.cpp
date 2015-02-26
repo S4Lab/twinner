@@ -45,6 +45,10 @@ bool ShiftRightOperator::doesSupportSimplification () const {
   return true;
 }
 
+bool ShiftRightOperator::isCommutable () const {
+  return false;
+}
+
 bool ShiftRightOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   if (operand->isZero ()) {

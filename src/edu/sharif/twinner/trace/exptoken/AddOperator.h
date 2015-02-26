@@ -31,6 +31,7 @@ public:
   virtual AddOperator *clone () const;
 
   virtual bool doesSupportSimplification () const;
+  virtual bool isCommutable () const;
   virtual bool apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
       const edu::sharif::twinner::trace::cv::ConcreteValue &src) const;
 

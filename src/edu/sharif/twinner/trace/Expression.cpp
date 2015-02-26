@@ -155,7 +155,7 @@ void Expression::convertToInfixExpression (Stack &st, std::stringstream &ss) con
   }
 }
 
-void Expression::unaryOperation (Operator op, const Expression *exp) {
+void Expression::unaryOperation (Operator *op, const Expression *exp) {
   throw std::runtime_error ("Expression::unaryOperation: Not yet implemented");
 }
 

@@ -116,6 +116,10 @@ bool Operator::doesSupportSimplification () const {
   return false;
 }
 
+bool Operator::isCommutable () const {
+  return false;
+}
+
 bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
   Constant *lastConstant = 0;
@@ -225,7 +229,7 @@ bool Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Operator::apply(ConcreteValue &, const ConcreteValue &):"
-        "Unknown OperatorIdentifier: " << std::dec << oi << '\n';
+        " Unknown OperatorIdentifier: " << std::dec << oi << '\n';
     throw std::runtime_error ("Operator::apply(ConcreteValue &, const ConcreteValue &):"
                               " Non-handled operator identifier");
   }

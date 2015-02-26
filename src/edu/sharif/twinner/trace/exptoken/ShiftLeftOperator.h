@@ -31,6 +31,7 @@ public:
   virtual ShiftLeftOperator *clone () const;
 
   virtual bool doesSupportSimplification () const;
+  virtual bool isCommutable () const;
   virtual bool apply (edu::sharif::twinner::trace::Expression *exp,
       edu::sharif::twinner::trace::cv::ConcreteValue *cv);
   virtual bool apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,

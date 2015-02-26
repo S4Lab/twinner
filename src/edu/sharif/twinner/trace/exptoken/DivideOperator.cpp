@@ -45,6 +45,10 @@ bool DivideOperator::doesSupportSimplification () const {
   return true;
 }
 
+bool DivideOperator::isCommutable () const {
+  return false;
+}
+
 void DivideOperator::initializeSimplificationRules () {
   simplificationRules.push_back
       (SimplificationRule (Operator::MULTIPLY, Operator::DIVIDE));

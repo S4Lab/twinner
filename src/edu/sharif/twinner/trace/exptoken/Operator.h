@@ -109,6 +109,14 @@ public:
   virtual bool doesSupportSimplification () const;
 
   /**
+   * Returns true if and only if this operator is commutable. That is, `a <op> b` is
+   * equal to `b <op> a` expression.
+   *
+   * @return true iff this operator is commutable.
+   */
+  virtual bool isCommutable () const;
+
+  /**
    * Applies this operator on given expression and concrete value objects.
    * This modifies internal state of exp to make it equal with `exp <this> cv`.
    * Also, if it's possible to simplify the operation and avoid applying it symbolically,

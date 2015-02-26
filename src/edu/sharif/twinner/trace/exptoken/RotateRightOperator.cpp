@@ -43,6 +43,10 @@ bool RotateRightOperator::doesSupportSimplification () const {
   return true;
 }
 
+bool RotateRightOperator::isCommutable () const {
+  return false;
+}
+
 bool RotateRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst.rotateToRight (src);

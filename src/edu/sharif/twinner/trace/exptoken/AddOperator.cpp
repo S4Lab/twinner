@@ -45,6 +45,10 @@ bool AddOperator::doesSupportSimplification () const {
   return true;
 }
 
+bool AddOperator::isCommutable () const {
+  return true;
+}
+
 void AddOperator::initializeSimplificationRules () {
   simplificationRules.push_back (SimplificationRule (Operator::ADD, Operator::ADD));
   simplificationRules.push_back (SimplificationRule (Operator::MINUS, Operator::MINUS));

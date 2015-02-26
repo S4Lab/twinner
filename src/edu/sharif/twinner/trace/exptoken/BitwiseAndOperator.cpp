@@ -45,6 +45,10 @@ bool BitwiseAndOperator::doesSupportSimplification () const {
   return true;
 }
 
+bool BitwiseAndOperator::isCommutable () const {
+  return true;
+}
+
 void BitwiseAndOperator::initializeSimplificationRules () {
   simplificationRules.push_back
       (SimplificationRule (Operator::BITWISE_AND, Operator::BITWISE_AND));

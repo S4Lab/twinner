@@ -43,6 +43,10 @@ bool ArithmeticShiftRightOperator::doesSupportSimplification () const {
   return true;
 }
 
+bool ArithmeticShiftRightOperator::isCommutable () const {
+  return false;
+}
+
 bool ArithmeticShiftRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst.arithmeticShiftToRight (src);
