@@ -174,7 +174,7 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
     const int v = ((op->getIdentifier () == Operator::DIVIDE) ? 1 : 0);
     stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (v));
     *lastConcreteValue = v;
-  } else if (op->getIdentifier () == Operator::BITWISE_OR && isTrivial ()) {
+  } else if (op->doesSupportSimplification () && op->isCommutable () && isTrivial ()) {
     edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConcreteValue->clone ();
     (*this) = (*exp);
     binaryOperation (op, cv);
