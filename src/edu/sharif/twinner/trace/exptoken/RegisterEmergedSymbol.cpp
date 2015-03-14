@@ -70,6 +70,10 @@ std::pair < int, SymbolRecord > RegisterEmergedSymbol::toSymbolRecord () const {
   return make_pair (generationIndex, record);
 }
 
+REG RegisterEmergedSymbol::getAddress () const {
+  return address;
+}
+
 void RegisterEmergedSymbol::saveToBinaryStream (std::ofstream &out) const {
   out.write ("R", 1);
   out.write ((const char *) &address, sizeof (address));

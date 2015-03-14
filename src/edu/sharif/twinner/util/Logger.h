@@ -123,6 +123,10 @@ public:
     return actualWrite (f);
   }
 
+  inline const Logger &operator<< (struct std::_Setprecision f) const {
+    return actualWrite (f);
+  }
+
   template <typename T>
   const Logger &actualWrite (const T &t) const {
     if (enabled) {

@@ -41,6 +41,7 @@ public:
 
   virtual RegisterEmergedSymbol *clone () const;
   virtual std::pair < int, SymbolRecord > toSymbolRecord () const;
+  REG getAddress () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static RegisterEmergedSymbol *loadFromBinaryStream (std::ifstream &in);

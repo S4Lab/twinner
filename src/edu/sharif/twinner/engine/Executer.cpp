@@ -20,8 +20,11 @@
 #include <sys/wait.h>
 #include <sys/resource.h>
 
+#include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Trace.h"
-#include "edu/sharif/twinner/trace/exptoken/Symbol.h"
+#include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
+#include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
@@ -151,6 +154,57 @@ void save_record (std::ofstream &out,
   out.write ((const char *) &record.concreteValueMsb, sizeof (record.concreteValueMsb));
 }
 
+void aggregate_symbols (const edu::sharif::twinner::trace::Expression *exp,
+    std::map < ADDRINT, const edu::sharif::twinner::trace::exptoken::Symbol * > &msyms,
+    std::map < REG, const edu::sharif::twinner::trace::exptoken::Symbol * > &rsyms) {
+  if (!exp) {
+    return;
+  }
+  const std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * > &stack =
+      exp->getStack ();
+  for (std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >
+      ::const_iterator it = stack.begin (); it != stack.end (); ++it) {
+    const edu::sharif::twinner::trace::exptoken::ExpressionToken *token = *it;
+    if (dynamic_cast<const edu::sharif::twinner::trace::exptoken
+        ::MemoryEmergedSymbol *> (token)) {
+      const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *symbol =
+          static_cast<const edu::sharif::twinner::trace::exptoken
+          ::MemoryEmergedSymbol *> (token);
+      msyms.insert (make_pair (symbol->getAddress (), symbol));
+    } else if (dynamic_cast<const edu::sharif::twinner::trace::exptoken
+        ::RegisterEmergedSymbol *> (token)) {
+      const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *symbol =
+          static_cast<const edu::sharif::twinner::trace::exptoken
+          ::RegisterEmergedSymbol *> (token);
+      rsyms.insert (make_pair (symbol->getAddress (), symbol));
+    }
+  }
+}
+
+template <typename Address>
+void aggregate_symbols (
+    const std::map < Address, edu::sharif::twinner::trace::Expression * > &expressions,
+    std::map < ADDRINT, const edu::sharif::twinner::trace::exptoken::Symbol * > &msyms,
+    std::map < REG, const edu::sharif::twinner::trace::exptoken::Symbol * > &rsyms) {
+  for (typename std::map < Address, edu::sharif::twinner::trace::Expression * >
+      ::const_iterator it = expressions.begin (); it != expressions.end (); ++it) {
+    const edu::sharif::twinner::trace::Expression *exp = it->second;
+    aggregate_symbols (exp, msyms, rsyms);
+  }
+}
+
+void aggregate_symbols (
+    const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
+    std::map < ADDRINT, const edu::sharif::twinner::trace::exptoken::Symbol * > &msyms,
+    std::map < REG, const edu::sharif::twinner::trace::exptoken::Symbol * > &rsyms) {
+  for (std::list < const edu::sharif::twinner::trace::Constraint * >
+      ::const_iterator it = constraints.begin (); it != constraints.end (); ++it) {
+    const edu::sharif::twinner::trace::Constraint *constraint = *it;
+    aggregate_symbols (constraint->getMainExpression (), msyms, rsyms);
+    aggregate_symbols (constraint->getAuxExpression (), msyms, rsyms);
+  }
+}
+
 /**
  * Uses OS interface to run  twintool in an independent process. The execution
  * trace will be communicated with twintool through file interface.
@@ -173,14 +227,27 @@ Executer::executeSingleTraceInNormalMode () const {
                strlen (OVERHEAD_MEASUREMENT_OPTION));
     Measurement ourMeasure, baselineMeasure;
     edu::sharif::twinner::trace::Trace *trace = executeSystemCommand (cmd, ourMeasure);
-    /*
-     * As SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE is not changed by above command,
-     * executing it again will drive the program through the same path.
-     * However, new symbols which were introduced by above command are not persisted yet
-     * and so if those symbols are not deterministic (e.g. system time), the following
-     * execution can follow a different path of execution.
-     * FIXME: persists symbols of the above execution before the following execution
-     */
+    const std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * > &segments =
+        trace->getTraceSegments ();
+    std::map < ADDRINT, const edu::sharif::twinner::trace::exptoken::Symbol * > msyms;
+    std::map < REG, const edu::sharif::twinner::trace::exptoken::Symbol * > rsyms;
+    for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
+        ::const_iterator it = segments.begin (); it != segments.end (); ++it) {
+      const edu::sharif::twinner::trace::ExecutionTraceSegment *segment = *it;
+      aggregate_symbols (segment->getMemoryAddressTo64BitsExpression (), msyms, rsyms);
+      aggregate_symbols (segment->getRegisterToExpression (), msyms, rsyms);
+      aggregate_symbols (segment->getPathConstraints (), msyms, rsyms);
+    }
+    std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > symbols;
+    for (std::map < ADDRINT, const edu::sharif::twinner::trace::exptoken::Symbol * >
+        ::const_iterator it = msyms.begin (); it != msyms.end (); ++it) {
+      symbols.insert (it->second);
+    }
+    for (std::map < REG, const edu::sharif::twinner::trace::exptoken::Symbol * >
+        ::const_iterator it = rsyms.begin (); it != rsyms.end (); ++it) {
+      symbols.insert (it->second);
+    }
+    setSymbolsValues (symbols);
     executeSystemCommand (command, baselineMeasure);
     double cpuOverhead = ourMeasure.cputime;
     cpuOverhead = ((cpuOverhead / baselineMeasure.cputime) - 1) * 100;
