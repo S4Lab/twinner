@@ -41,16 +41,18 @@ enum ArgumentsParsingStatus {
 
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &input, string &args, string &twintool, string &pin, string &twin,
-    bool &justAnalyzeMainRoutine);
-int run (string input, string args, string twintool, string pin, string twin, bool main);
+    bool &justAnalyzeMainRoutine, bool &measureOverheads);
+int run (string input, string args, string twintool, string pin, string twin,
+    bool main, bool measureOverheads);
 int checkTraceFile (string traceFilePath, string memoryFilePath);
 
 int main (int argc, char *argv[]) {
   string input, args, twintool, pin, twin;
   bool justAnalyzeMainRoutine = false;
+  bool measureOverheads = false;
   switch (parseArguments (argc, argv,
                           input, args, twintool, pin, twin,
-                          justAnalyzeMainRoutine)) {
+                          justAnalyzeMainRoutine, measureOverheads)) {
   case CONTINUE_NORMALLY:
     // checking mandatory arguments...
 
@@ -64,7 +66,8 @@ int main (int argc, char *argv[]) {
       printError (argv[0], "permission denied: can not write to output twin binary!");
     } else {
       // all files are OK...
-      return run (input, args, twintool, pin, twin, justAnalyzeMainRoutine);
+      return run (input, args, twintool, pin, twin,
+                  justAnalyzeMainRoutine, measureOverheads);
     }
     return -2;
 
@@ -86,7 +89,8 @@ int main (int argc, char *argv[]) {
   }
 }
 
-int run (string input, string args, string twintool, string pin, string twin, bool main) {
+int run (string input, string args, string twintool, string pin, string twin,
+    bool main, bool measureOverheads) {
   edu::sharif::twinner::util::Logger::info ()
       << "[verboseness level: "
       << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n"
@@ -103,6 +107,7 @@ int run (string input, string args, string twintool, string pin, string twin, bo
   tw.setTwinBinaryPath (twin);
   tw.setInputBinaryArguments (args);
   tw.setJustAnalyzeMainRoutine (main);
+  tw.setMeasureOverheads (measureOverheads);
 
   tw.generateTwinBinary ();
 
@@ -128,7 +133,7 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
 
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &input, string &args, string &twintool, string &pin, string &twin,
-    bool &justAnalyzeMainRoutine) {
+    bool &justAnalyzeMainRoutine, bool &measureOverheads) {
   char *progName = argv[0];
 
   const ArgParser::Option options[] = {
@@ -142,6 +147,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true, false},
     { 'o', "output", ArgParser::YES, "path/name of the generated twin binary", true, false},
     { 'm', "main", ArgParser::NO, "restrict analysis to after the main() function", false, false},
+    { 'M', "measure", ArgParser::NO, "run each trace twice and report on overheads of twintool", false, false},
     { 'c', "check", ArgParser::YES, "check validity of a trace file and its memory file"
      " (must be the last argument)", false, true},
     { 0, 0, ArgParser::NO, 0, false, false}
@@ -202,6 +208,9 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       break;
     case 'm':
       justAnalyzeMainRoutine = true;
+      break;
+    case 'M':
+      measureOverheads = true;
       break;
     default:
       printError (progName, "Can not parse arguments!");

@@ -50,6 +50,7 @@ private:
   std::string twin;
   std::string arguments;
   bool main; // just analyze after the main() function
+  bool overheads; // run twintool twice for each trace and measure CPU/Memory overheads
 
   std::list < const edu::sharif::twinner::trace::Trace * > traces;
   edu::sharif::twinner::engine::search::ConstraintTree *ctree;
@@ -64,6 +65,7 @@ public:
   void setTwinBinaryPath (std::string twin);
   void setInputBinaryArguments (std::string arguments);
   void setJustAnalyzeMainRoutine (bool main);
+  void setMeasureOverheads (bool measureOverheads);
 
   void generateTwinBinary ();
 

@@ -149,6 +149,10 @@ void Twinner::setJustAnalyzeMainRoutine (bool main) {
   this->main = main;
 }
 
+void Twinner::setMeasureOverheads (bool measureOverheads) {
+  this->overheads = measureOverheads;
+}
+
 /**
  * Generates twin code and twin binary.
  * Steps:
@@ -172,7 +176,7 @@ void Twinner::setJustAnalyzeMainRoutine (bool main) {
  * and initialize remaining addresses in the Twin code.
  */
 void Twinner::generateTwinBinary () {
-  Executer ex (pin, twintool, input, arguments, main);
+  Executer ex (pin, twintool, input, arguments, main, overheads);
   set < const edu::sharif::twinner::trace::exptoken::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;

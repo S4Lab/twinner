@@ -63,13 +63,21 @@ public:
    */
   static const char *DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE;
 
+  /**
+   * Presence of this option in arguments of twintool, asks it to execute the program
+   * through the requested path, but to perform a minimal instruction counting
+   * instrumentation (instead of normal instrumentation).
+   */
+  static const char *OVERHEAD_MEASURMENT_OPTION;
+
 private:
   const std::string baseCommand;
   std::string inputArguments;
+  const bool overheads;
 
 public:
   Executer (std::string pinLauncher, std::string twintool, std::string inputBinary,
-      std::string inputArguments, bool main);
+      std::string inputArguments, bool main, bool overheads);
 
   void setCandidateAddresses (const std::set < ADDRINT > &addresses) const;
   void setSymbolsValues (const std::set <

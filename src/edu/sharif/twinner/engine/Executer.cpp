@@ -43,17 +43,19 @@ const char *Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE = "/tmp/twinner/sym
 const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/trace.dat";
 const char *Executer::DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE =
     "/tmp/twinner/memory.dat";
+const char *Executer::OVERHEAD_MEASURMENT_OPTION = " -measure";
 
 Executer::Executer (std::string pinLauncher, std::string twintool,
-    std::string inputBinary, std::string _inputArguments, bool main) :
+    std::string inputBinary, std::string _inputArguments, bool main, bool _overheads) :
     baseCommand (pinLauncher
     + " -t " + twintool
     + " -symbols " + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
     + " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
     + " -memory " + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
     + " -verbose " + edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString ()
+    + (_overheads ? OVERHEAD_MEASURMENT_OPTION : "")
     + (main ? " -main -- " : " -- ") + inputBinary),
-    inputArguments (_inputArguments) {
+    inputArguments (_inputArguments), overheads (_overheads) {
 }
 
 void Executer::setCandidateAddresses (const std::set < ADDRINT > &addresses) const {
@@ -157,7 +159,11 @@ Executer::executeSingleTraceInNormalMode () const {
    *  to timeout execution and exit after a while. In this way, this code does not
    *  need to be changed at all.
    */
-  const std::string command = baseCommand + " " + inputArguments;
+  std::string command = baseCommand + " " + inputArguments;
+  if (overheads) {
+    command.erase (command.find (OVERHEAD_MEASURMENT_OPTION),
+                   strlen (OVERHEAD_MEASURMENT_OPTION));
+  }
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
   int ret = system (command.c_str ());
