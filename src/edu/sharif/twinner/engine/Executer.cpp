@@ -14,6 +14,11 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/resource.h>
 
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/exptoken/Symbol.h"
@@ -43,7 +48,9 @@ const char *Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE = "/tmp/twinner/sym
 const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/trace.dat";
 const char *Executer::DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE =
     "/tmp/twinner/memory.dat";
-const char *Executer::OVERHEAD_MEASURMENT_OPTION = " -measure";
+const char *Executer::OVERHEAD_MEASUREMENT_OPTION = " -measure";
+const char *Executer::OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE =
+    "/tmp/twinner/measurements.dat";
 
 Executer::Executer (std::string pinLauncher, std::string twintool,
     std::string inputBinary, std::string _inputArguments, bool main, bool _overheads) :
@@ -53,7 +60,7 @@ Executer::Executer (std::string pinLauncher, std::string twintool,
     + " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
     + " -memory " + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
     + " -verbose " + edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString ()
-    + (_overheads ? OVERHEAD_MEASURMENT_OPTION : "")
+    + (_overheads ? OVERHEAD_MEASUREMENT_OPTION : "")
     + (main ? " -main -- " : " -- ") + inputBinary),
     inputArguments (_inputArguments), overheads (_overheads) {
 }
@@ -159,11 +166,36 @@ Executer::executeSingleTraceInNormalMode () const {
    *  to timeout execution and exit after a while. In this way, this code does not
    *  need to be changed at all.
    */
-  std::string command = baseCommand + " " + inputArguments;
+  const std::string command = baseCommand + " " + inputArguments;
   if (overheads) {
-    command.erase (command.find (OVERHEAD_MEASURMENT_OPTION),
-                   strlen (OVERHEAD_MEASURMENT_OPTION));
+    std::string cmd = command;
+    cmd.erase (cmd.find (OVERHEAD_MEASUREMENT_OPTION),
+               strlen (OVERHEAD_MEASUREMENT_OPTION));
+    Measurement ourMeasure, baselineMeasure;
+    edu::sharif::twinner::trace::Trace *trace = executeSystemCommand (cmd, ourMeasure);
+    /*
+     * As SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE is not changed by above command,
+     * executing it again will drive the program through the same path.
+     * However, new symbols which were introduced by above command are not persisted yet
+     * and so if those symbols are not deterministic (e.g. system time), the following
+     * execution can follow a different path of execution.
+     * FIXME: persists symbols of the above execution before the following execution
+     */
+    executeSystemCommand (command, baselineMeasure);
+    double cpuOverhead = ourMeasure.cputime;
+    cpuOverhead = ((cpuOverhead / baselineMeasure.cputime) - 1) * 100;
+    double memoryOverhead = ourMeasure.mss;
+    memoryOverhead = ((memoryOverhead / baselineMeasure.mss) - 1) * 100;
+    edu::sharif::twinner::util::Logger::info () << std::dec << std::setprecision (2)
+        << "CPU overhead (%): " << cpuOverhead
+        << " | Memory overhead (%): " << memoryOverhead << '\n';
+    return trace;
   }
+  return executeSystemCommand (command);
+}
+
+edu::sharif::twinner::trace::Trace *
+Executer::executeSystemCommand (std::string command) const {
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
   int ret = system (command.c_str ());
@@ -172,6 +204,79 @@ Executer::executeSingleTraceInNormalMode () const {
   return edu::sharif::twinner::trace::Trace::loadFromFile
       (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
        DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
+}
+
+edu::sharif::twinner::trace::Trace *
+Executer::executeSystemCommand (std::string command, Measurement &measurement) const {
+  edu::sharif::twinner::util::Logger::debug ()
+      << "Calling system (\"" << command << "\");\n";
+  edu::sharif::twinner::trace::Trace *trace = executeAndMeasure (command, measurement);
+  edu::sharif::twinner::util::Logger::debug ()
+      << "The system(...) call returns code: " << measurement.ret << '\n';
+  return trace;
+}
+
+edu::sharif::twinner::trace::Trace *
+Executer::executeAndMeasure (std::string command, Measurement &m) const {
+  pid_t childPid = fork ();
+  if (childPid < 0) {
+    edu::sharif::twinner::util::Logger::error () << "Cannot fork!\n";
+    abort ();
+  } else if (childPid == 0) { // executed in the child process
+    int ret = system (command.c_str ());
+    Measurement measurement = measureCurrentState (ret);
+    std::ofstream out;
+    const char *path = OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE;
+    out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
+    if (!out.is_open ()) {
+      edu::sharif::twinner::util::Logger::error () << "Can not write measurement info:"
+          " Error in open function: " << path << '\n';
+    } else {
+      out.write ((const char *) &measurement, sizeof (measurement));
+      out.close ();
+    }
+    exit (ret);
+
+  } else { // executed in the parent process
+    int status;
+    if (childPid != waitpid (childPid, &status, 0)) {
+      edu::sharif::twinner::util::Logger::warning () << "Error while waiting for child\n";
+    }
+    std::ifstream in;
+    const char *path = OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE;
+    in.open (path, ios_base::in | ios_base::binary);
+    if (!in.is_open ()) {
+      edu::sharif::twinner::util::Logger::error () << "Can not read measurement info:"
+          " Error in open function: " << path << '\n';
+    } else {
+      in.read ((char *) &m, sizeof (m));
+      in.close ();
+      if (m.ret != status) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "Measurement info are inconsistent\n";
+      }
+    }
+  }
+  return edu::sharif::twinner::trace::Trace::loadFromFile
+      (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
+       DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
+}
+
+UINT64 operator+ (struct timeval a, struct timeval b) {
+  return (a.tv_sec + b.tv_sec) * 1000 * 1000 + (a.tv_usec + b.tv_usec);
+}
+
+Executer::Measurement Executer::measureCurrentState (int ret) const {
+  Measurement measurement;
+  measurement.ret = ret;
+  struct rusage usage;
+  if (getrusage (RUSAGE_CHILDREN, &usage) != 0) {
+    edu::sharif::twinner::util::Logger::error () << "Error in getrusage()\n";
+  } else {
+    measurement.cputime = usage.ru_utime + usage.ru_stime;
+    measurement.mss = usage.ru_maxrss;
+  }
+  return measurement;
 }
 
 void Executer::changeArguments () {

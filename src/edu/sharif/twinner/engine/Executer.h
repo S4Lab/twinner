@@ -68,12 +68,25 @@ public:
    * through the requested path, but to perform a minimal instruction counting
    * instrumentation (instead of normal instrumentation).
    */
-  static const char *OVERHEAD_MEASURMENT_OPTION;
+  static const char *OVERHEAD_MEASUREMENT_OPTION;
+
+  /**
+   * Indicating name of the temp file, being used to communicate the overhead measurements
+   * from the forked children process (which runs Twintool) to its parent (i.e. Twinner).
+   */
+  static const char *OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE;
 
 private:
   const std::string baseCommand;
   std::string inputArguments;
   const bool overheads;
+
+  struct Measurement {
+
+    int ret;
+    UINT64 cputime;
+    UINT64 mss; // maximum segment size (in kilobytes)
+  };
 
 public:
   Executer (std::string pinLauncher, std::string twintool, std::string inputBinary,
@@ -90,6 +103,13 @@ public:
 
 private:
   typedef edu::sharif::twinner::trace::exptoken::SymbolRecord Record;
+
+  edu::sharif::twinner::trace::Trace *executeSystemCommand (std::string command) const;
+  edu::sharif::twinner::trace::Trace *executeSystemCommand (std::string command,
+      Measurement &measurement) const;
+  edu::sharif::twinner::trace::Trace *executeAndMeasure (std::string command,
+      Measurement &measurement) const;
+  Measurement measureCurrentState (int ret) const;
 
   bool saveSymbolRecordsToFile (ExecutionMode mode,
       std::map < int, std::list < Record > > records) const;
