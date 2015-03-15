@@ -138,6 +138,22 @@ void Trace::syscallReturned (CONTEXT *context) const {
   }
 }
 
+void Trace::initializeOverwritingMemoryCells () const {
+  //TODO: This can be merged with above method (see Expression::checkConcreteValueMemory)
+  const ExecutionTraceSegment *segment = *currentSegmentIterator;
+  const std::map < ADDRINT, Expression * > &map =
+      segment->getMemoryAddressTo64BitsExpression ();
+  for (std::map < ADDRINT, Expression * >::const_iterator it = map.begin ();
+      it != map.end (); ++it) {
+    const ADDRINT memoryEa = it->first;
+    Expression *exp = it->second;
+    if (exp->isOverwritingExpression ()) {
+      exp->setOverwriting (false);
+      exp->getLastConcreteValue ().writeToMemoryAddress (memoryEa);
+    }
+  }
+}
+
 bool Trace::saveToFile (const char *path, const char *memoryPath) const {
   std::ofstream out;
   out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);

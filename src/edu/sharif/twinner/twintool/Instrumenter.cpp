@@ -37,11 +37,11 @@ namespace twintool {
 inline void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > &map,
     const ADDRINT &address);
 
-Instrumenter::Instrumenter (std::ifstream &symbolsFileInputStream,
+Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     const string &_traceFilePath, const std::string &_disassemblyFilePath,
-    bool _disabled) :
+    bool _disabled, bool measureMode) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-    ise (new InstructionSymbolicExecuter (symbolsFileInputStream, _disabled)),
+    ise (new InstructionSymbolicExecuter (symbolsFileInStream, _disabled, measureMode)),
     isWithinInitialStateDetectionMode (false),
     disabled (_disabled),
     totalCountOfInstructions (0) {

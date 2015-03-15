@@ -101,6 +101,7 @@ public:
   void setLastConcreteValue (edu::sharif::twinner::trace::cv::ConcreteValue *value);
 
   void setOverwriting (bool overwriting);
+  bool isOverwritingExpression () const;
 
   std::string toString () const;
   void convertToInfixExpression (Stack &st, std::stringstream &ss) const;

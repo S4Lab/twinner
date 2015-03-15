@@ -138,7 +138,7 @@ private:
 public:
   Instrumenter (std::ifstream &symbolsFileInputStream,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
-      bool disabled);
+      bool disabled, bool measureMode);
   Instrumenter (const std::set < ADDRINT > &candidateAddresses,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
       bool disabled);

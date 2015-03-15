@@ -104,6 +104,10 @@ void Expression::setOverwriting (bool overwriting) {
   isOverwriting = overwriting;
 }
 
+bool Expression::isOverwritingExpression () const {
+  return isOverwriting;
+}
+
 std::string Expression::toString () const {
   Stack st = Stack (stack);
   std::stringstream ss;

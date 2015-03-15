@@ -44,16 +44,18 @@ namespace twinner {
 namespace twintool {
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
-    std::ifstream &symbolsFileInputStream, bool _disabled) :
+    std::ifstream &symbolsFileInputStream, bool _disabled, bool _measureMode) :
     trace (new edu::sharif::twinner::trace::TraceImp (symbolsFileInputStream)),
     trackedReg (REG_INVALID_), operandSize (-1), hook (0),
-    disabled (_disabled) {
+    disabled (_disabled),
+    measureMode (_measureMode), numberOfExecutedInstructions (0) {
 }
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (bool _disabled) :
     trace (new edu::sharif::twinner::trace::TraceImp ()),
     trackedReg (REG_INVALID_), operandSize (-1), hook (0),
-    disabled (_disabled) {
+    disabled (_disabled),
+    measureMode (false), numberOfExecutedInstructions (0) {
 }
 
 edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () const {
@@ -75,6 +77,9 @@ void InstructionSymbolicExecuter::syscallInvoked (const CONTEXT *context,
     return;
   }
   trace->syscallInvoked (s);
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+  }
 }
 
 void InstructionSymbolicExecuter::syscallReturned (CONTEXT *context) const {
@@ -82,6 +87,9 @@ void InstructionSymbolicExecuter::syscallReturned (CONTEXT *context) const {
     return;
   }
   trace->syscallReturned (context);
+  if (measureMode) {
+    trace->initializeOverwritingMemoryCells ();
+  }
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
@@ -92,6 +100,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -114,6 +126,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMutableReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -137,6 +153,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -162,6 +182,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxImd (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -185,6 +209,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine r
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -210,6 +238,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMemAuxReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -235,6 +267,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMemAuxImd (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -258,6 +294,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -280,6 +320,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -303,6 +347,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMutableReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -327,6 +375,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcRegAuxReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -351,6 +403,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -391,6 +447,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImdAuxReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -430,6 +490,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine r
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -455,6 +519,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMemAuxReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -478,6 +546,10 @@ void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -496,6 +568,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -518,6 +594,10 @@ void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -542,6 +622,10 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -567,6 +651,10 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcMem (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -593,6 +681,10 @@ void InstructionSymbolicExecuter::analysisRoutineTwoRegOneMem (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -619,6 +711,10 @@ void InstructionSymbolicExecuter::analysisRoutineOneMemTwoReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -645,6 +741,10 @@ void InstructionSymbolicExecuter::analysisRoutineTwoRegTwoMem (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -670,6 +770,10 @@ void InstructionSymbolicExecuter::analysisRoutineAfterOperandLessInstruction (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -689,6 +793,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImplicit (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -708,6 +816,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImplicit (
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -737,6 +849,10 @@ void InstructionSymbolicExecuter::analysisRoutineRepEqualOrRepNotEqualPrefix (RE
     return;
   }
   disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =

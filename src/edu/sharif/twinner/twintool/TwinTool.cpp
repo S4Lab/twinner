@@ -50,8 +50,11 @@ KNOB < string > verbose (KNOB_MODE_WRITEONCE, "pintool", "verbose", "warning",
 KNOB < BOOL > main (KNOB_MODE_WRITEONCE, "pintool", "main", "",
     "if presents, only main() routine and what is called by it will be analyzed");
 
+KNOB < BOOL > measure (KNOB_MODE_WRITEONCE, "pintool", "measure", "",
+    "if presents, trivial instruction counting instrumentation will be used instead of normal behavior");
+
 TwinTool::TwinTool () :
-im (0) {
+    im (0) {
 }
 
 TwinTool::~TwinTool () {
@@ -145,6 +148,11 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     edu::sharif::twinner::util::Logger::info ()
         << "Only main() routine will be analyzed.\n";
   }
+  bool measureMode = measure.Value ();
+  if (measureMode) {
+    edu::sharif::twinner::util::Logger::info () << "Measure mode: "
+        "instruction counting instrumentation will be used instead of normal behavior.\n";
+  }
   if (hasSymbolsInputFile) {
     std::ifstream in;
     openFileForReading (in, symbolsFilePath);
@@ -152,9 +160,13 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     switch (mode) {
     case NORMAL_MODE:
       im = new Instrumenter (in, traceFilePath, disassemblyFilePath,
-                             justAnalyzeMainRoutine);
+                             justAnalyzeMainRoutine, measureMode);
       break;
     case INITIAL_STATE_DETECTION_MODE:
+      if (measureMode) {
+        throw std::runtime_error ("measure and initial-state-detection modes "
+                                  "cannot be enabled simultaneously");
+      }
       im = new Instrumenter (readSetOfAddressesFromBinaryStream (in),
                              traceFilePath, disassemblyFilePath, justAnalyzeMainRoutine);
       break;

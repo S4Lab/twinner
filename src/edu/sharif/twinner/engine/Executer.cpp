@@ -372,7 +372,11 @@ void Executer::changeArguments () {
 
 map < ADDRINT, UINT64 >
 Executer::executeSingleTraceInInitialStateDetectionMode () const {
-  const std::string command = baseCommand + " " + inputArguments;
+  std::string command = baseCommand + " " + inputArguments;
+  if (overheads) {
+    command.erase (command.find (OVERHEAD_MEASUREMENT_OPTION),
+                   strlen (OVERHEAD_MEASUREMENT_OPTION));
+  }
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
   int ret = system (command.c_str ());

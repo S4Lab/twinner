@@ -79,9 +79,13 @@ private:
   UINT32 disassembledInstruction;
 
   bool disabled;
+  const bool measureMode;
+
+  UINT64 numberOfExecutedInstructions; // used in measure mode
 
 public:
-  InstructionSymbolicExecuter (std::ifstream &symbolsFileInputStream, bool disabled);
+  InstructionSymbolicExecuter (std::ifstream &symbolsFileInputStream, bool disabled,
+      bool _measureMode);
   InstructionSymbolicExecuter (bool disabled);
 
   edu::sharif::twinner::trace::Trace *getTrace () const;
