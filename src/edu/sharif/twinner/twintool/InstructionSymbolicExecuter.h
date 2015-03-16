@@ -600,6 +600,11 @@ private:
   void decAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
   /**
+   * NEG two's complements the opr (which is reg or mem).
+   */
+  void negAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
+  /**
    * SETNZ sets opr to 1 iff ZF=0 (and sets it to 0 otherwise).
    */
   void setnzAnalysisRoutine (const MutableExpressionValueProxy &opr);

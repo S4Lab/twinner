@@ -2118,6 +2118,23 @@ void InstructionSymbolicExecuter::decAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::negAnalysisRoutine (
+    const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::util::Logger::loquacious () << "negAnalysisRoutine(...)\n"
+      << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexpOrig = opr.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\ttwo's complementing...";
+  edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->twosComplement ();
+  opr.setExpression (trace, dstexp);
+  delete dstexp;
+  delete dstexpOrig;
+  //TODO: set CF == (dstexpOrig is not zero) and other flags based on dstexp result
+  eflags.setFlags
+      (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
+       ("NegationOperationGroup"));
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::setnzAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::util::Logger::loquacious () << "setnzAnalysisRoutine(...)\n"
@@ -2404,6 +2421,8 @@ InstructionSymbolicExecuter::convertOpcodeToSingleOperandAnalysisRoutine (
     return &InstructionSymbolicExecuter::incAnalysisRoutine;
   case XED_ICLASS_DEC:
     return &InstructionSymbolicExecuter::decAnalysisRoutine;
+  case XED_ICLASS_NEG:
+    return &InstructionSymbolicExecuter::negAnalysisRoutine;
   case XED_ICLASS_SETNZ:
     return &InstructionSymbolicExecuter::setnzAnalysisRoutine;
   case XED_ICLASS_SETZ:
