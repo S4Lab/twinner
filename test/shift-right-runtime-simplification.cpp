@@ -17,9 +17,18 @@ using namespace edu::sharif::twinner::trace::cv;
 using namespace edu::sharif::twinner::util;
 
 
+void test1 ();
+void test2 ();
+
 int main () {
   Logger::setVerbosenessLevel ("loquacious");
-//(((((((((((logicalShiftToLeft ((m7fffffffe108_1 / 0x100000000), 0x20) | ((m7fffffffe108_1 + 0x400000) & 0xffffffff)) - 0xffffffffffffffdd) & 0xffffffffffffffff) - 0xfffffffffffffffc) >> 0x40) & 0x1) + 0x1b7d85fbe) * 0x4) & 0xffffffff) * 0x2) >> 0x20)
+  test1 ();
+  test2 ();
+  return 0;
+}
+
+void test1 () {
+  Logger::info () << "test 1: simplifying (((((((((((logicalShiftToLeft ((m7fffffffe108_1 / 0x100000000), 0x20) | ((m7fffffffe108_1 + 0x400000) & 0xffffffff)) - 0xffffffffffffffdd) & 0xffffffffffffffff) - 0xfffffffffffffffc) >> 0x40) & 0x1) + 0x1b7d85fbe) * 0x4) & 0xffffffff) * 0x2) >> 0x20)\n";
   const Expression *m7fffffffe108_1 = new ExpressionImp (0x7fffffffe108, ConcreteValue64Bits (0x00400450), 1, false);
   Expression *exp = m7fffffffe108_1->clone ();
   exp->divide (0x100000000);
@@ -40,8 +49,16 @@ int main () {
   exp->multiply (0x2);
   exp->shiftToRight (0x20);
   Logger::info () << "exp: " << exp << '\n';
+}
 
-
-  return 0;
+void test2 () {
+  Logger::info () << "test 2: simplifying (((m7fffffffe040_0 | 0xf4240) & 0xffffffff) | 0x100000000) >> 0x20\n";
+  const Expression *m7fffffffe040_0 = new ExpressionImp (0x7fffffffe108, ConcreteValue64Bits (0x00400450), 1, false);
+  Expression *exp = m7fffffffe040_0->clone ();
+  exp->bitwiseOr (0xf4240);
+  exp->bitwiseAnd (0xffffffff);
+  exp->bitwiseOr (0x100000000);
+  exp->shiftToRight (0x20);
+  Logger::info () << "exp: " << exp << '\n';
 }
 
