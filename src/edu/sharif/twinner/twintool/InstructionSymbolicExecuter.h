@@ -337,6 +337,13 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * SBB is subtract with borrow
+   * dst = dst - (src + CF) where CF is the carry of the previous operation
+   */
+  void sbbAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * CMP is same as SUB else of not modifying dst operand's value
    */
   void cmpAnalysisRoutine (const MutableExpressionValueProxy &dst,

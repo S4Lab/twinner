@@ -1159,6 +1159,30 @@ void InstructionSymbolicExecuter::subAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::sbbAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "sbbAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting carry exp...";
+  const edu::sharif::twinner::trace::Expression *carryexp = eflags.getCarryFlag ();
+  edu::sharif::twinner::trace::Expression *exp = dstexp->clone ();
+  edu::sharif::twinner::util::Logger::loquacious () << "\tbinary operation...";
+  exp->minus (srcexp);
+  exp->minus (carryexp);
+  dst.setExpression (trace, exp);
+  delete exp;
+  delete dstexp;
+  delete srcexp;
+  delete carryexp;
+  eflags.setFlags
+      (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
+       ("SubtractWithBorrowOperationGroup"));
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::cmpAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "cmpAnalysisRoutine(...)\n"
@@ -2214,6 +2238,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::adcAnalysisRoutine;
   case XED_ICLASS_SUB:
     return &InstructionSymbolicExecuter::subAnalysisRoutine;
+  case XED_ICLASS_SBB:
+    return &InstructionSymbolicExecuter::sbbAnalysisRoutine;
   case XED_ICLASS_CMP:
     return &InstructionSymbolicExecuter::cmpAnalysisRoutine;
   case XED_ICLASS_LEA:
