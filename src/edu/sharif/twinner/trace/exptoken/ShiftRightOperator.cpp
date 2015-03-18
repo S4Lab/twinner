@@ -90,29 +90,36 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
       exp->bitwiseAnd (cv);
       return COMPLETED;
     }
-  } else if (op->getIdentifier () == Operator::ADD) {
+  } else if (op->getIdentifier () == Operator::ADD
+      || op->getIdentifier () == Operator::BITWISE_OR) {
     Constant *second = dynamic_cast<Constant *> (*--it);
     if (second) {
       const Operator *andOp = dynamic_cast<Operator *> (*--it);
       if (andOp && andOp->getIdentifier () == Operator::BITWISE_AND) {
         Constant *mask = dynamic_cast<Constant *> (*--it);
         if (mask) {
-          // exp: (Z & mask) + second
+          // exp: (Z & mask) [+|] second
           edu::sharif::twinner::trace::cv::ConcreteValue *m = mask->getValue ().clone ();
           (*m) &= second->getValue ();
           const bool bitsAreDisjoint = m->isZero ();
           delete m;
-          if (bitsAreDisjoint) {
+          if (bitsAreDisjoint || op->getIdentifier () == Operator::BITWISE_OR) {
             edu::sharif::twinner::trace::cv::ConcreteValue *cv =
                 second->getValue ().clone ();
             (*cv) >>= (*operand);
-            stack.pop_back (); // removes op; the add operator
+            stack.pop_back (); // removes op
             stack.pop_back (); // removes second
-            exp->getLastConcreteValue () -= second->getValue ();
+            if (op->getIdentifier () == Operator::ADD) {
+              exp->getLastConcreteValue () -= second->getValue ();
+            }
             delete op;
             delete second;
             exp->shiftToRight (operand);
-            exp->add (cv);
+            if (op->getIdentifier () == Operator::ADD) {
+              exp->add (cv);
+            } else {
+              exp->bitwiseOr (cv);
+            }
             return COMPLETED;
           }
         }
