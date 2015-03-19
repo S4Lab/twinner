@@ -493,10 +493,12 @@ void ExecutionTraceSegment::loadMapFromBinaryStream (std::ifstream &in,
   }
 }
 
-inline void removeItemFromMap (std::map < ADDRINT, Expression * > &map, ADDRINT addr) {
+void removeItemFromMap (std::map < ADDRINT, Expression * > &map, ADDRINT addr) {
   std::map < ADDRINT, Expression * >::iterator item = map.find (addr);
-  delete item->second;
-  map.erase (item);
+  if (item != map.end ()) {
+    delete item->second;
+    map.erase (item);
+  }
 };
 
 void ExecutionTraceSegment::abandonTrivialMemoryExpressions () {
