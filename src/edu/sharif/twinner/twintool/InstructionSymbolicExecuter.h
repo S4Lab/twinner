@@ -414,6 +414,11 @@ private:
   void jsAnalysisRoutine (bool branchTaken);
 
   /**
+   * JNS jumps if SF=0 which means that corresponding expression was >= 0
+   */
+  void jnsAnalysisRoutine (bool branchTaken);
+
+  /**
    * CALL instruction is executed and RSP is changed. This method will synchronize its
    * symbolic value with its concrete value.
    */

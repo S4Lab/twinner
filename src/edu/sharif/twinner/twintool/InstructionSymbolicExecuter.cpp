@@ -1366,6 +1366,20 @@ void InstructionSymbolicExecuter::jsAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::jnsAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::util::Logger::loquacious () << "jnsAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  bool sign;
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
+      eflags.instantiateConstraintForSignCase (sign, disassembledInstruction);
+  if (sign == branchTaken) {
+    throw std::runtime_error ("JNS branching and last known EFLAGS state do not match");
+  }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraints (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
     const ConcreteValue &rspRegVal) {
   edu::sharif::twinner::util::Logger::loquacious () << "callAnalysisRoutine(...)\n"
@@ -2433,6 +2447,8 @@ InstructionSymbolicExecuter::convertOpcodeToConditionalBranchAnalysisRoutine (
     return &InstructionSymbolicExecuter::jbAnalysisRoutine;
   case XED_ICLASS_JS:
     return &InstructionSymbolicExecuter::jsAnalysisRoutine;
+  case XED_ICLASS_JNS:
+    return &InstructionSymbolicExecuter::jnsAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Conditional Branch: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
