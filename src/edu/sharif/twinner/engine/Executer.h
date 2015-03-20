@@ -86,7 +86,7 @@ private:
     int ret;
     UINT64 cputime;
     UINT64 mss; // maximum segment size (in kilobytes)
-  };
+  } __attribute__ ((packed));
 
 public:
   Executer (std::string pinLauncher, std::string twintool, std::string inputBinary,

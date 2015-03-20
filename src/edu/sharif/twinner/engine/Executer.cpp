@@ -290,7 +290,7 @@ Executer::executeAndMeasure (std::string command, Measurement &m) const {
     edu::sharif::twinner::util::Logger::error () << "Cannot fork!\n";
     abort ();
   } else if (childPid == 0) { // executed in the child process
-    int ret = system (command.c_str ());
+    const int ret = system (command.c_str ());
     Measurement measurement = measureCurrentState (ret);
     std::ofstream out;
     const char *path = OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE;
@@ -318,9 +318,11 @@ Executer::executeAndMeasure (std::string command, Measurement &m) const {
     } else {
       in.read ((char *) &m, sizeof (m));
       in.close ();
-      if (m.ret != status) {
+      const int cmdret = WIFEXITED (status) ? WEXITSTATUS (status) : -1 /*signaled*/;
+      if (m.ret != cmdret) {
         edu::sharif::twinner::util::Logger::error ()
-            << "Measurement info are inconsistent\n";
+            << "Measurement info are inconsistent (cmd ret: " << std::dec << cmdret
+            << ", measurement ret: " << m.ret << ")\n";
       }
     }
   }
