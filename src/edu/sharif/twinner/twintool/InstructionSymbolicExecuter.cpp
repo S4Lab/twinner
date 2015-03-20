@@ -1266,6 +1266,20 @@ void InstructionSymbolicExecuter::jnleAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::jlAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::util::Logger::loquacious () << "jlAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  bool less;
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
+      eflags.instantiateConstraintForLessCase (less, disassembledInstruction);
+  if (less != branchTaken) {
+    throw std::runtime_error ("JL branching and last known EFLAGS state do not match");
+  }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraints (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::jnlAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "jnlAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -2405,6 +2419,8 @@ InstructionSymbolicExecuter::convertOpcodeToConditionalBranchAnalysisRoutine (
     return &InstructionSymbolicExecuter::jleAnalysisRoutine;
   case XED_ICLASS_JNLE:
     return &InstructionSymbolicExecuter::jnleAnalysisRoutine;
+  case XED_ICLASS_JL:
+    return &InstructionSymbolicExecuter::jlAnalysisRoutine;
   case XED_ICLASS_JNL:
     return &InstructionSymbolicExecuter::jnlAnalysisRoutine;
   case XED_ICLASS_JBE:

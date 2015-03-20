@@ -379,6 +379,11 @@ private:
   void jnleAnalysisRoutine (bool branchTaken);
 
   /**
+   * JL jumps if SF!=OF which means that corresponding expression was < 0
+   */
+  void jlAnalysisRoutine (bool branchTaken);
+
+  /**
    * JNL jumps if SF=OF which means that corresponding expression was > 0
    */
   void jnlAnalysisRoutine (bool branchTaken);
