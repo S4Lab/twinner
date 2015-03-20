@@ -261,11 +261,15 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
         exp = instantiateExpression (REG (record.address),
                                      edu::sharif::twinner::trace::cv::ConcreteValue64Bits
                                      (record.concreteValueLsb), index);
+        edu::sharif::twinner::util::Logger::loquacious () << "loading symbol: "
+            << REG (record.address) << " -> " << exp << '\n';
       } else {
         exp = instantiateExpression (REG (record.address),
                                      edu::sharif::twinner::trace::cv::ConcreteValue128Bits
                                      (record.concreteValueMsb, record.concreteValueLsb),
                                      index);
+        edu::sharif::twinner::util::Logger::loquacious () << "loading symbol: "
+            << REG (record.address) << " -> " << exp << '\n';
       }
       std::pair < std::map < REG, Expression * >::iterator, bool > res =
           regMap.insert (make_pair (REG (record.address), exp));

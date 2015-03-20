@@ -132,9 +132,11 @@ void Trace::syscallReturned (CONTEXT *context) const {
   for (std::map < REG, Expression * >::const_iterator it = map.begin ();
       it != map.end (); ++it) {
     const REG reg = it->first;
-    const Expression *exp = it->second;
-    // The expression is an overwriting symbol for sure
-    exp->getLastConcreteValue ().writeToRegister (context, reg);
+    Expression *exp = it->second;
+    if (exp->isOverwritingExpression ()) {
+      exp->getLastConcreteValue ().writeToRegister (context, reg);
+      exp->setOverwriting (false);
+    }
   }
 }
 
@@ -163,8 +165,8 @@ bool Trace::saveToFile (const char *path, const char *memoryPath) const {
     return false;
   }
   if (currentSegmentIterator != segments.begin ()) {
-    edu::sharif::twinner::util::Logger::warning () << "Some unvisited segments are found"
-        " at front of the segments list\n";
+    edu::sharif::twinner::util::Logger::warning ()
+        << "Some unvisited segments are found at front of the segments list\n";
   }
   saveToBinaryStream (out);
   out.close ();

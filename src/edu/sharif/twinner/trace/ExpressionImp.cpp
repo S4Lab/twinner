@@ -30,7 +30,7 @@ ExpressionImp::ExpressionImp (const ExpressionImp &exp) :
 ExpressionImp::ExpressionImp (REG reg,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex) :
-    Expression (concreteValue.clone (), false) {
+    Expression (concreteValue.clone (), true) {
   if (concreteValue.getSize () < 64) {
     /*
      * The reg and concreteValue must always have the same precision but when the reg is

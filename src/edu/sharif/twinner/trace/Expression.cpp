@@ -336,8 +336,7 @@ void Expression::checkConcreteValueReg (REG reg,
   if (*lastConcreteValue == concreteVal) {
     return;
   }
-  // for reg case, isOverwriting is false for sure
-  // overwriting is done after syscall instructions instead
+  // for reg case, isOverwriting is set to false after the syscall instruction
   throw WrongStateException (concreteVal, *lastConcreteValue);
 }
 
