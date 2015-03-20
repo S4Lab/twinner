@@ -31,9 +31,22 @@ ExpressionImp::ExpressionImp (REG reg,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex) :
     Expression (concreteValue.clone (), false) {
-  //TODO: Check whether concreteValue should be casted to 64-bits precision for symbol
-  stack.push_back (new edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol
-                   (reg, concreteValue, generationIndex));
+  if (concreteValue.getSize () < 64) {
+    /*
+     * The reg and concreteValue must always have the same precision but when the reg is
+     * promoted to its enclosing register by caller.
+     * Also this constructor should be called with 128 or 64 bits regs and so smaller
+     * concrete values is a sign of reg promotion by the caller.
+     * And as no reg promotion is implemented for 128 bits registers, the reg have to
+     * be a 64 bits register.
+     */
+    const edu::sharif::twinner::trace::cv::ConcreteValue64Bits cv (concreteValue);
+    stack.push_back (new edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol
+                     (reg, cv, generationIndex));
+  } else {
+    stack.push_back (new edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol
+                     (reg, concreteValue, generationIndex));
+  }
 }
 
 ExpressionImp::ExpressionImp (ADDRINT memoryEa,
