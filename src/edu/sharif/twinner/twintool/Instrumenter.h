@@ -157,6 +157,8 @@ public:
 
 private:
   void initialize ();
+  template<int size>
+  void initialize (InstructionModel model, const OPCODE opcodes[]);
 
   void saveMemoryContentsToFile (const char *path) const;
 

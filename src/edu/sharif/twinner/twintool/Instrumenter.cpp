@@ -70,35 +70,30 @@ Instrumenter::Instrumenter (const string &_traceFilePath,
   initialize ();
 }
 
+#define INITIALIZE(MODEL, OPCODES...) \
+  initialize<sizeof ((const OPCODE[]) {OPCODES}) / sizeof (OPCODE)> \
+    (MODEL, (const OPCODE[]) {OPCODES})
+
 void Instrumenter::initialize () {
   edu::sharif::twinner::util::Logger::info ()
       << "Instrumenter class created [verboseness level: "
       << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n";
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_MOV, COMMON_INS_MODELS));
+  INITIALIZE (COMMON_INS_MODELS,
+              XED_ICLASS_MOV, XED_ICLASS_ADD, XED_ICLASS_ADC,
+              XED_ICLASS_SUB, XED_ICLASS_SBB, XED_ICLASS_CMP,
+              XED_ICLASS_AND, XED_ICLASS_OR, XED_ICLASS_XOR);
   // Zero extension <=> no changes ; the value which is in 8bits is in 16bits too.
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_MOVZX, // 2 models (r <- zero-extend(r/m))
-                  MOV_ZX_AND_SX_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_MOVSX, // 2 models (r <- sign-extend(r/m))
-                  MOV_ZX_AND_SX_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_MOVSXD, // 2 models (r <- sign-extend(r/m))
-                  MOV_ZX_AND_SX_INS_MODELS));
+  INITIALIZE (MOV_ZX_AND_SX_INS_MODELS,
+              XED_ICLASS_MOVZX, XED_ICLASS_MOVSX, XED_ICLASS_MOVSXD);
   managedInstructions.insert // xmm <- r/m  OR  r/m <- xmm
       (make_pair (XED_ICLASS_MOVD, DST_LARGE_REG_SRC_EITHER_REG_OR_MEM_OR_VICE_VERSA));
-  const OPCODE cmovcc[] = {
-                           XED_ICLASS_CMOVB, XED_ICLASS_CMOVBE, XED_ICLASS_CMOVL,
-                           XED_ICLASS_CMOVLE, XED_ICLASS_CMOVNB, XED_ICLASS_CMOVNBE,
-                           XED_ICLASS_CMOVNL, XED_ICLASS_CMOVNLE, XED_ICLASS_CMOVNO,
-                           XED_ICLASS_CMOVNP, XED_ICLASS_CMOVNS, XED_ICLASS_CMOVNZ,
-                           XED_ICLASS_CMOVO, XED_ICLASS_CMOVP, XED_ICLASS_CMOVS,
-                           XED_ICLASS_CMOVZ
-  };
-  for (unsigned int i = 0; i < sizeof (cmovcc) / sizeof (OPCODE); ++i) {
-    managedInstructions.insert (make_pair (cmovcc[i], CMOV_INS_MODELS));
-  }
+  INITIALIZE (CMOV_INS_MODELS,
+              XED_ICLASS_CMOVB, XED_ICLASS_CMOVBE, XED_ICLASS_CMOVL,
+              XED_ICLASS_CMOVLE, XED_ICLASS_CMOVNB, XED_ICLASS_CMOVNBE,
+              XED_ICLASS_CMOVNL, XED_ICLASS_CMOVNLE, XED_ICLASS_CMOVNO,
+              XED_ICLASS_CMOVNP, XED_ICLASS_CMOVNS, XED_ICLASS_CMOVNZ,
+              XED_ICLASS_CMOVO, XED_ICLASS_CMOVP, XED_ICLASS_CMOVS,
+              XED_ICLASS_CMOVZ);
   managedInstructions.insert
       (make_pair (XED_ICLASS_CMPXCHG, DST_EITHER_REG_OR_MEM_SRC_REG_AUX_REG));
   managedInstructions.insert
@@ -113,124 +108,67 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_JMP, JMP_INS_MODELS));
   managedInstructions.insert // ignoring syscall as it is handled by callback routines
       (make_pair (XED_ICLASS_SYSCALL, NOP_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_ADD, COMMON_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_ADC, COMMON_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_SUB, COMMON_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_SBB, COMMON_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_CMP, COMMON_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_JNZ, JMP_CC_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_JZ, JMP_CC_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_JLE, JMP_CC_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_JNLE, JMP_CC_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_JNL, JMP_CC_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_JBE, JMP_CC_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_JNBE, JMP_CC_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_JNB, JMP_CC_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_JB, JMP_CC_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_JS, JMP_CC_INS_MODELS));
+  INITIALIZE (JMP_CC_INS_MODELS,
+              XED_ICLASS_JB, XED_ICLASS_JBE, XED_ICLASS_JL, XED_ICLASS_JLE,
+              XED_ICLASS_JNB, XED_ICLASS_JNBE, XED_ICLASS_JNL, XED_ICLASS_JNLE,
+              XED_ICLASS_JNO, XED_ICLASS_JNP, XED_ICLASS_JNS, XED_ICLASS_JNZ,
+              XED_ICLASS_JO, XED_ICLASS_JP, XED_ICLASS_JS, XED_ICLASS_JZ);
   managedInstructions.insert
       (make_pair (XED_ICLASS_LEA, LEA_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_CALL_NEAR, CALL_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_RET_NEAR, RET_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_CALL_FAR, CALL_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_RET_FAR, RET_INS_MODELS));
+  INITIALIZE (CALL_INS_MODELS, XED_ICLASS_CALL_NEAR, XED_ICLASS_CALL_FAR);
+  INITIALIZE (RET_INS_MODELS, XED_ICLASS_RET_NEAR, XED_ICLASS_RET_FAR);
   managedInstructions.insert
       (make_pair (XED_ICLASS_LEAVE, LEAVE_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_SHL, SHIFT_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_SHR, SHIFT_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_SAR, SHIFT_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_ROR, SHIFT_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_AND, COMMON_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_OR, COMMON_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_XOR, COMMON_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_DIV, DST_REG_REG_SRC_REG));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_MUL, DST_REG_REG_SRC_REG));
+  INITIALIZE (SHIFT_INS_MODELS,
+              XED_ICLASS_SHL, XED_ICLASS_SHR, XED_ICLASS_SAR, XED_ICLASS_ROR);
+  INITIALIZE (DST_REG_REG_SRC_REG, XED_ICLASS_DIV, XED_ICLASS_MUL);
   managedInstructions.insert
       (make_pair (XED_ICLASS_CDQE, DST_REG_SRC_REG));
   managedInstructions.insert
       (make_pair (XED_ICLASS_TEST, TEST_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_RDTSC, OPERAND_LESS)); // read time-stamp counter
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_CLD, OPERAND_LESS)); // clear direction flag (DF)
+  INITIALIZE (OPERAND_LESS,
+              XED_ICLASS_RDTSC, // read time-stamp counter
+              XED_ICLASS_CLD); // clear direction flag (DF)
   managedInstructions.insert
       (make_pair (XED_ICLASS_PMOVMSKB, DST_REG_SRC_LARGE_REG)); // packed move mask-byte
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_PCMPEQB, PCMPEQX_INS_MODELS)); // packed compare byte
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_PXOR, PCMPEQX_INS_MODELS));
-  managedInstructions.insert // packed min of unsigned bytes
-      (make_pair (XED_ICLASS_PMINUB, DST_REG_SRC_EITHER_REG_OR_MEM_ANY_SIZE));
-  managedInstructions.insert // unpack low data
-      (make_pair (XED_ICLASS_PUNPCKLBW, DST_LARGE_REG_SRC_EITHER_LARGE_REG_OR_MEM));
-  managedInstructions.insert // unpack low data
-      (make_pair (XED_ICLASS_PUNPCKLWD, DST_LARGE_REG_SRC_EITHER_LARGE_REG_OR_MEM));
+  INITIALIZE (PCMPEQX_INS_MODELS,
+              XED_ICLASS_PCMPEQB, // packed compare byte
+              XED_ICLASS_PXOR);
+  INITIALIZE (DST_REG_SRC_EITHER_REG_OR_MEM_ANY_SIZE,
+              XED_ICLASS_PMINUB, // packed min of unsigned bytes
+              XED_ICLASS_POR);
+  INITIALIZE (DST_LARGE_REG_SRC_EITHER_LARGE_REG_OR_MEM,
+              XED_ICLASS_PUNPCKLBW, // unpack low data
+              XED_ICLASS_PUNPCKLWD);
   managedInstructions.insert
       (make_pair (XED_ICLASS_PSHUFD, DST_LARGE_REG_SRC_EITHER_LARGE_REG_OR_MEM_AUX_IMD));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_POR, DST_REG_SRC_EITHER_REG_OR_MEM_ANY_SIZE));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_MOVAPS, MOV_INS_WITH_LARGE_REG_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_MOVDQU, MOV_INS_WITH_LARGE_REG_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_MOVDQA, MOV_INS_WITH_LARGE_REG_INS_MODELS));
+  INITIALIZE (MOV_INS_WITH_LARGE_REG_INS_MODELS,
+              XED_ICLASS_MOVAPS, XED_ICLASS_MOVDQU, XED_ICLASS_MOVDQA);
   managedInstructions.insert
       (make_pair (XED_ICLASS_BSF, DST_REG_SRC_EITHER_REG_OR_MEM));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_INC, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_DEC, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_NEG, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_SETNZ, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_SETZ, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_NOT, DST_EITHER_REG_OR_MEM_SRC_IMPLICIT));
+  INITIALIZE (DST_EITHER_REG_OR_MEM_SRC_IMPLICIT,
+              XED_ICLASS_INC, XED_ICLASS_DEC, XED_ICLASS_NEG,
+              XED_ICLASS_SETB, XED_ICLASS_SETBE, XED_ICLASS_SETL, XED_ICLASS_SETLE,
+              XED_ICLASS_SETNB, XED_ICLASS_SETNBE, XED_ICLASS_SETNL, XED_ICLASS_SETNLE,
+              XED_ICLASS_SETNO, XED_ICLASS_SETNP, XED_ICLASS_SETNS, XED_ICLASS_SETNZ,
+              XED_ICLASS_SETO, XED_ICLASS_SETP, XED_ICLASS_SETS, XED_ICLASS_SETZ,
+              XED_ICLASS_NOT);
+  INITIALIZE (STRING_OPERATION_MEM_REG,
+              XED_ICLASS_STOSB, XED_ICLASS_STOSW,
+              XED_ICLASS_STOSD, XED_ICLASS_STOSQ);
   managedInstructions.insert
       (make_pair (XED_ICLASS_SCASB, STRING_OPERATION_REG_MEM));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_STOSB, STRING_OPERATION_MEM_REG));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_STOSW, STRING_OPERATION_MEM_REG));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_STOSD, STRING_OPERATION_MEM_REG));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_STOSQ, STRING_OPERATION_MEM_REG));
   managedInstructions.insert
       (make_pair (XED_ICLASS_MOVSQ, STRING_OPERATION_MEM_MEM));
   managedInstructions.insert
       (make_pair (XED_ICLASS_LODSD, DST_REG_SRC_MEM_AUX_RSI));
+}
+
+template<int size>
+void Instrumenter::initialize (InstructionModel model, const OPCODE opcodes[]) {
+  for (unsigned int i = 0; i < size; ++i) {
+    managedInstructions.insert (make_pair (opcodes[i], model));
+  }
 }
 
 Instrumenter::~Instrumenter () {
