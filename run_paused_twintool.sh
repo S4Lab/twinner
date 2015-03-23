@@ -1,0 +1,1 @@
+sudo su sandbox -c "../../../pin.sh -pause_tool 60 -t ./obj-intel64/TwinTool.so -symbols /tmp/twinner/symbols.dat -trace /tmp/twinner/trace.dat -verbose $1 -- ./obj-intel64/overhead-measurement-test.out"
