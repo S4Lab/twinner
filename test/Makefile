@@ -6,10 +6,11 @@ TARGETS := simple-condition-test \
 	assembly-mov-sizes \
 	registers-state-manipulation \
 	multi-path-with-printf-leafs-test \
-	upx-test upx-test.upx-packed
+	upx-test upx-test.upx-packed \
+	overhead-measurement-test
 TWIN_TARGETS := simple-condition-test \
 	multi-path-with-printf-leafs-test \
-	upx-test
+	#upx-test
 
 all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
 
@@ -26,7 +27,7 @@ upx-test.out: upx-test.c
 	gcc -g -static -o upx-test.out upx-test.c
 
 upx-test.upx-packed.out: upx-test.out
-	upx --strip-relocs=0 -o upx-test.upx-packed.out upx-test.out
+	rm upx-test.upx-packed.out && upx --strip-relocs=0 -o upx-test.upx-packed.out upx-test.out
 
 expression-operations-concrete-value-test.out: expression-operations-concrete-value-test.cpp
 	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o expression-operations-concrete-value-test.o expression-operations-concrete-value-test.cpp
