@@ -304,7 +304,7 @@ UINT64 readMemoryContent (ADDRINT memoryEa, size_t size) {
   UINT64 currentConcreteValue;
   PIN_SafeCopy (&currentConcreteValue, (const VOID *) (memoryEa), size);
   if (size < 8) {
-    currentConcreteValue &= (1 << (size * 8)) - 1;
+    currentConcreteValue &= (1ull << (size * 8)) - 1;
   }
   return currentConcreteValue;
 }
