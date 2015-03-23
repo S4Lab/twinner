@@ -19,11 +19,13 @@ using namespace edu::sharif::twinner::util;
 
 void test1 ();
 void test2 ();
+void test3 ();
 
 int main () {
   Logger::setVerbosenessLevel ("loquacious");
   test1 ();
   test2 ();
+  test3 ();
   return 0;
 }
 
@@ -59,6 +61,18 @@ void test2 () {
   exp->bitwiseAnd (0xffffffff);
   exp->bitwiseOr (0x100000000);
   exp->shiftToRight (0x20);
+  Logger::info () << "exp: " << exp << '\n';
+}
+
+void test3 () {
+  Logger::info () << "test 3: simplifying (((m7ffff7df6340_1 / 0x10000) & 0xffff) >> 8) & 0xff\n";
+  const Expression *m7ffff7df6340_1 = new ExpressionImp (0x7ffff7df6340, ConcreteValue64Bits (0x736c0000), 1, false);
+  Expression *exp = m7ffff7df6340_1->clone ();
+  exp->divide (0x10000);
+  exp->bitwiseAnd (0xffff);
+  Logger::info () << "before last shift: " << exp << '\n';
+  exp->shiftToRight (0x8);
+  exp->truncate (8);
   Logger::info () << "exp: " << exp << '\n';
 }
 
