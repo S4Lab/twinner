@@ -75,11 +75,12 @@ MemoryResidentExpressionValueProxy::alignedMemoryRead (int size,
     edu::sharif::twinner::trace::Trace *trace) const {
   edu::sharif::twinner::trace::cv::ConcreteValue *cv;
   if (size == 128) {
-    const UINT64 cvlsb = edu::sharif::twinner::util::readMemoryContent (memoryEa);
-    const UINT64 cvmsb = edu::sharif::twinner::util::readMemoryContent (memoryEa + 8);
+    const UINT64 cvlsb = edu::sharif::twinner::util::readMemoryContent (memoryEa, 8);
+    const UINT64 cvmsb = edu::sharif::twinner::util::readMemoryContent (memoryEa + 8, 8);
     cv = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits (cvmsb, cvlsb);
   } else {
-    const UINT64 cvval = edu::sharif::twinner::util::readMemoryContent (memoryEa);
+    const UINT64 cvval =
+        edu::sharif::twinner::util::readMemoryContent (memoryEa, size / 8);
     cv = edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cvval).clone (size);
   }
   edu::sharif::twinner::trace::Expression *exp =
@@ -291,7 +292,7 @@ MemoryResidentExpressionValueProxy::getNeighborExpression (int size,
     readFromCache = true;
     return it->second.first;
   }
-  const UINT64 cv = edu::sharif::twinner::util::readMemoryContent (address);
+  const UINT64 cv = edu::sharif::twinner::util::readMemoryContent (address, size / 8);
   edu::sharif::twinner::trace::cv::ConcreteValue *cvObj =
       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv).clone (size);
   const edu::sharif::twinner::trace::Expression *neighbor =

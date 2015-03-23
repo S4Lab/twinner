@@ -558,7 +558,7 @@ edu::sharif::twinner::trace::cv::ConcreteValue *readRegisterContent (
   throw std::runtime_error (msg);
 }
 
-UINT64 readMemoryContent (ADDRINT memoryEa) {
+UINT64 readMemoryContent (ADDRINT memoryEa, size_t size) {
   const char *msg = "The readMemoryContent(...) method is only supported in TwinTool:"
       " Calling error from Twinner.\n";
   edu::sharif::twinner::util::Logger::error () << msg;

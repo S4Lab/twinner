@@ -948,7 +948,7 @@ void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > &map,
     const ADDRINT &address) {
   //TODO: Communicate mem-read size and read 64bits or 128bits values accordingly
   map.insert (make_pair (address,
-                         edu::sharif::twinner::util::readMemoryContent (address)));
+                         edu::sharif::twinner::util::readMemoryContent (address, 8)));
 }
 
 void Instrumenter::aboutToExit (INT32 code) {

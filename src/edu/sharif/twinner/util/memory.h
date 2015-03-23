@@ -26,7 +26,7 @@ namespace util {
 edu::sharif::twinner::trace::cv::ConcreteValue *readRegisterContent (
     const CONTEXT *context, REG reg);
 
-UINT64 readMemoryContent (ADDRINT memoryEa);
+UINT64 readMemoryContent (ADDRINT memoryEa, size_t size);
 VOID writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size);
 VOID writeRegisterContent (CONTEXT *context, REG reg, const UINT8 *value);
 
