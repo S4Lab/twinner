@@ -29,7 +29,7 @@ private:
   char * const memory;
   uint32_t afterLastAllocatedByteIndex; // [0, this-index) is allocated
 
-  MemoryManager (uint32_t capacity = 50 * 1024 /* 50 MiB */);
+  MemoryManager (uint32_t capacity = 50 * 1024 * 1024 /* 50 MiB */);
   MemoryManager (uint32_t capacity, char *memory);
 
 public:
