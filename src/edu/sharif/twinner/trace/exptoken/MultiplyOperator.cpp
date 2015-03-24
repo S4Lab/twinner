@@ -63,7 +63,6 @@ Operator::SimplificationStatus MultiplyOperator::deepSimplify (
   if (divideOrBitwiseAndOp->getIdentifier () == Operator::DIVIDE) {
     Constant *second = dynamic_cast<Constant *> (*--it);
     if (second) {
-      exp->getLastConcreteValue () *= *operand;
       if (second->getValue () == (*operand)) {
         stack.pop_back (); // removes divideOrBitwiseAndOp
         stack.pop_back (); // removes second

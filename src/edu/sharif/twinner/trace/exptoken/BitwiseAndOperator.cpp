@@ -137,14 +137,11 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
               stack.pop_back (); // removes second
               stack.pop_back (); // removes firstOp
               stack.pop_back (); // removes first
-              edu::sharif::twinner::trace::cv::ConcreteValue *cv =
-                  exp->getLastConcreteValue ().clone ();
               if (secondOp->getIdentifier () == Operator::SHIFT_LEFT) {
                 exp->shiftToLeft (second->getValue ().clone ());
               } else {
                 exp->shiftToRight (second->getValue ().clone ());
               }
-              exp->setLastConcreteValue (cv);
               delete secondOp;
               delete second;
               delete firstOp;
@@ -157,8 +154,6 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
               stack.pop_back (); // removes second
               stack.pop_back (); // removes firstOp
               stack.pop_back (); // removes first
-              edu::sharif::twinner::trace::cv::ConcreteValue *cv =
-                  exp->getLastConcreteValue ().clone ();
               if (secondOp->getIdentifier () == Operator::ADD) {
                 exp->add (second->getValue ().clone ());
               } else if (secondOp->getIdentifier () == Operator::MINUS) {
@@ -166,7 +161,6 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
               } else {
                 exp->multiply (second->getValue ().clone ());
               }
-              exp->setLastConcreteValue (cv);
               delete secondOp;
               delete second;
               delete firstOp;

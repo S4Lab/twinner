@@ -42,6 +42,8 @@ public:
 
 private:
   void initializeSimplificationRules ();
+  bool areBitsDisjoint (const edu::sharif::twinner::trace::cv::ConcreteValue &first,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &second) const;
 
 protected:
   virtual SimplificationStatus deepSimplify (edu::sharif::twinner::trace::Expression *exp,

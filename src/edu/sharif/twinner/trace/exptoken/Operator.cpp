@@ -129,6 +129,9 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
   bool isZeroNatural = false; // e.g. Z * 0 == 0
   // i.e. using zero as the last operand on this exp has no effect
   bool isZeroNeutral = false; //  e.g. Z + 0 == Z
+  edu::sharif::twinner::trace::cv::ConcreteValue *finalCv =
+      exp->getLastConcreteValue ().clone ();
+  apply (*finalCv, *operand);
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
     lastConstant = static_cast<Constant *> (stack.back ());
@@ -159,13 +162,18 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
       case CAN_NOT_SIMPLIFY:
         break;
       case RESTART_SIMPLIFICATION:
-        return apply (exp, operand);
+      {
+        bool ret = apply (exp, operand);
+        exp->setLastConcreteValue (finalCv);
+        return ret;
+      }
       case COMPLETED:
+        exp->setLastConcreteValue (finalCv);
         return true;
       }
     }
   }
-  apply (exp->getLastConcreteValue (), *operand);
+  exp->setLastConcreteValue (finalCv);
   if (lastConstant) {
     const int size = std::max (std::max (exp->getLastConcreteValue ().getSize (),
                                          lastConstant->getValue ().getSize ()),

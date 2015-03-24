@@ -71,6 +71,16 @@ void ShiftRightOperator::initializeSimplificationRules () {
       (SimplificationRule (Operator::SHIFT_LEFT, Operator::MINUS));
 }
 
+bool ShiftRightOperator::areBitsDisjoint (
+    const edu::sharif::twinner::trace::cv::ConcreteValue &first,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &second) const {
+  edu::sharif::twinner::trace::cv::ConcreteValue *m = first.clone ();
+  (*m) &= second;
+  const bool bitsAreDisjoint = m->isZero ();
+  delete m;
+  return bitsAreDisjoint;
+}
+
 Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
     edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
@@ -99,19 +109,13 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
         Constant *mask = dynamic_cast<Constant *> (*--it);
         if (mask) {
           // exp: (Z & mask) [+|] second
-          edu::sharif::twinner::trace::cv::ConcreteValue *m = mask->getValue ().clone ();
-          (*m) &= second->getValue ();
-          const bool bitsAreDisjoint = m->isZero ();
-          delete m;
-          if (bitsAreDisjoint || op->getIdentifier () == Operator::BITWISE_OR) {
+          if (op->getIdentifier () == Operator::BITWISE_OR
+              || areBitsDisjoint (mask->getValue (), second->getValue ())) {
             edu::sharif::twinner::trace::cv::ConcreteValue *cv =
                 second->getValue ().clone ();
             (*cv) >>= (*operand);
             stack.pop_back (); // removes op
             stack.pop_back (); // removes second
-            if (op->getIdentifier () == Operator::ADD) {
-              exp->getLastConcreteValue () -= second->getValue ();
-            }
             delete op;
             delete second;
             exp->shiftToRight (operand);
@@ -137,21 +141,16 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
           if (cv->getCarryBit ()) {
             delete cv;
           } else {
-            edu::sharif::twinner::trace::cv::ConcreteValue *resCv =
-                exp->getLastConcreteValue ().clone ();
-            (*resCv) >>= (*operand);
             stack.pop_back (); // removes op
             stack.pop_back (); // removes val
             delete op;
             delete val;
             exp->shiftToRight (cv);
-            exp->setLastConcreteValue (resCv);
             return COMPLETED;
           }
         } else {
           edu::sharif::twinner::trace::cv::ConcreteValue *cv = operand->clone ();
           (*cv) -= n;
-          exp->getLastConcreteValue () /= val->getValue ();
           stack.pop_back (); // removes op
           stack.pop_back (); // removes val
           delete op;

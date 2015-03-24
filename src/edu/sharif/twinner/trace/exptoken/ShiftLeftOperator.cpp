@@ -114,7 +114,6 @@ Operator::SimplificationStatus ShiftLeftOperator::deepSimplify (
               if (cv->getCarryBit ()) {
                 delete cv;
               } else {
-                exp->getLastConcreteValue () /= val->getValue ();
                 stack.pop_back (); // removes multiplyOrDivideOp
                 stack.pop_back (); // removes val
                 delete multiplyOrDivideOp;
@@ -125,7 +124,6 @@ Operator::SimplificationStatus ShiftLeftOperator::deepSimplify (
             } else {
               edu::sharif::twinner::trace::cv::ConcreteValue *cv = operand->clone ();
               (*cv) -= n;
-              exp->getLastConcreteValue () *= val->getValue ();
               stack.pop_back (); // removes multiplyOrDivideOp
               stack.pop_back (); // removes val
               delete multiplyOrDivideOp;
