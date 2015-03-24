@@ -199,6 +199,18 @@ public:
   }
 
   /**
+   * Rotates the expression to left as much as the given symbolic/concrete count of bits.
+   *
+   * @param operand Count of bits (symbolically or concretely) that this expression should
+   * be rotated upon towards left.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
+   */
+  template <typename ValueOrExp>
+  void rotateToLeft (ValueOrExp operand) {
+    binaryOperation (Operator::instantiateOperator (Operator::ROTATE_LEFT), operand);
+  }
+
+  /**
    * Decrement this expression as much as the given symbolic/concrete value.
    *
    * @param operand The value (symbolically or concretely) which its value will be

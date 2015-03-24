@@ -1602,6 +1602,26 @@ void InstructionSymbolicExecuter::rorAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::rolAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "rolAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *msb = dstexp->clone ();
+  msb->shiftToRight (dstexp->getLastConcreteValue ().getSize () - 1);
+  msb->truncate (1);
+  // TODO: set msb as the carry flag (CF) value
+  delete msb;
+  edu::sharif::twinner::util::Logger::loquacious () << "\trotating-left operation...";
+  dstexp->rotateToLeft (srcexp);
+  delete srcexp;
+  dst.setExpression (trace, dstexp);
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::andAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "andAnalysisRoutine(...)\n"
@@ -2302,6 +2322,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::sarAnalysisRoutine;
   case XED_ICLASS_ROR:
     return &InstructionSymbolicExecuter::rorAnalysisRoutine;
+  case XED_ICLASS_ROL:
+    return &InstructionSymbolicExecuter::rolAnalysisRoutine;
   case XED_ICLASS_AND:
     return &InstructionSymbolicExecuter::andAnalysisRoutine;
   case XED_ICLASS_OR:

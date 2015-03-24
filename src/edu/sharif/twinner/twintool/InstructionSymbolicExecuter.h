@@ -468,6 +468,13 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * ROL rotates left the dst as much as indicated by src.
+   * Also the MSB of src (which will be moved to the new LSB) will be set in CF.
+   */
+  void rolAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * AND bitwise ands dst with src as its mask.
    */
   void andAnalysisRoutine (const MutableExpressionValueProxy &dst,
