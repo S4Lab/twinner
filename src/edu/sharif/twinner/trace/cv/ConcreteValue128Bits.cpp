@@ -506,6 +506,22 @@ ConcreteValue128Bits &ConcreteValue128Bits::rotateToRight (const ConcreteValue &
   return *this;
 }
 
+ConcreteValue128Bits &ConcreteValue128Bits::rotateToLeft (const ConcreteValue &bits) {
+  //TODO: handle CF
+  int n = bits.toUint64 ();
+  if (n > 63) {
+    UINT64 tmp = lsb;
+    lsb = msb;
+    msb = tmp;
+    n -= 64;
+  }
+  if (n > 0) {
+    lsb = (lsb << n) | (msb >> (64 - n));
+    msb = (msb << n) | (lsb >> (64 - n));
+  }
+  return *this;
+}
+
 }
 }
 }

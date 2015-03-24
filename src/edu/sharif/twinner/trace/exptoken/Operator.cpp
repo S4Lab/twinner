@@ -24,6 +24,7 @@
 #include "ShiftRightOperator.h"
 #include "ArithmeticShiftRightOperator.h"
 #include "RotateRightOperator.h"
+#include "RotateLeftOperator.h"
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 
@@ -91,6 +92,8 @@ Operator *Operator::instantiateOperator (OperatorIdentifier oi) {
     return new ArithmeticShiftRightOperator ();
   case ROTATE_RIGHT:
     return new RotateRightOperator ();
+  case ROTATE_LEFT:
+    return new RotateLeftOperator ();
   default:
     return new Operator (oi);
   }
@@ -250,8 +253,6 @@ std::string Operator::toString () const {
     return "%";
   case NEGATE:
     return "-";
-  case ROTATE_LEFT:
-    return "rotateToLeft";
   case SIGN_EXTEND:
     return "signExtend";
   default:

@@ -279,8 +279,16 @@ public:
   }
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &rotateToRight (const ConcreteValue &cv) {
+    //TODO: handle CF
     const UINT64 cvValue = cv.toUint64 ();
     value = (value << (bits - cvValue)) | (value >> cvValue);
+    return *this;
+  }
+
+  virtual ConcreteValueAbstractImp<bits, ValueType> &rotateToLeft (const ConcreteValue &cv) {
+    //TODO: handle CF
+    const UINT64 cvValue = cv.toUint64 ();
+    value = (value << cvValue) | (value >> (bits - cvValue));
     return *this;
   }
 };

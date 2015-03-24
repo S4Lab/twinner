@@ -160,6 +160,10 @@ ConcreteValue &ConcreteValue::rotateToRight (UINT64 bits) {
   return this->rotateToRight (ConcreteValue64Bits (bits));
 }
 
+ConcreteValue &ConcreteValue::rotateToLeft (UINT64 bits) {
+  return this->rotateToLeft (ConcreteValue64Bits (bits));
+}
+
 }
 }
 }
