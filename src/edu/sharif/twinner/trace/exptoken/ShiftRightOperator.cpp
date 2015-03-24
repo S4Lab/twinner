@@ -137,12 +137,15 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
           if (cv->getCarryBit ()) {
             delete cv;
           } else {
-            exp->getLastConcreteValue () *= val->getValue ();
+            edu::sharif::twinner::trace::cv::ConcreteValue *resCv =
+                exp->getLastConcreteValue ().clone ();
+            (*resCv) >>= (*operand);
             stack.pop_back (); // removes op
             stack.pop_back (); // removes val
             delete op;
             delete val;
             exp->shiftToRight (cv);
+            exp->setLastConcreteValue (resCv);
             return COMPLETED;
           }
         } else {
