@@ -651,6 +651,11 @@ private:
   void setleAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
   /**
+   * SETBE sets opr to 1 iff ZF=1 or CF=1 (and sets it to 0 otherwise).
+   */
+  void setbeAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
+  /**
    * NOT one's complements the opr.
    * opr <- NOT(opr)
    */

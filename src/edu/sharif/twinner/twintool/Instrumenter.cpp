@@ -264,6 +264,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_SETNZ:
   case XED_ICLASS_SETZ:
   case XED_ICLASS_SETLE:
+  case XED_ICLASS_SETBE:
   case XED_ICLASS_NOT:
     return INS_OperandIsReg (ins, 0) ? DST_REG_SRC_IMPLICIT : DST_MEM_SRC_IMPLICIT;
   case XED_ICLASS_LEAVE:
