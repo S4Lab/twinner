@@ -572,6 +572,13 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * IMUL is signed multiply and has three models.
+   * This method implements the two operands model.
+   */
+  void imulAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * SCAS instruction compares AL/AX/EAX/RAX (the dstReg) and a given srcMem value
    * which is pointed to by the DI/EDI/RDI (the srcReg) and sets the EFLAGS based on
    * the comparison result.

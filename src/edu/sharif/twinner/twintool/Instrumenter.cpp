@@ -123,6 +123,21 @@ void Instrumenter::initialize () {
               XED_ICLASS_SHL, XED_ICLASS_SHR, XED_ICLASS_SAR,
               XED_ICLASS_ROR, XED_ICLASS_ROL);
   INITIALIZE (DST_REG_REG_SRC_REG, XED_ICLASS_DIV, XED_ICLASS_MUL);
+  /*
+   * IMUL is for signed multiplication and has three models:
+   * 1. one operand, like IMUL r1/m1, where it does DX:AX <- AX*r1/m1 and a like.
+   * In this form, destination size is twice each source operand and so the signed
+   * result is different from the unsigned multiplication result.
+   * For correct calculation, values can be sign-extended to double size and then
+   * perform the unsigned multiplication. As unsigned and signed multiplications have
+   * the same result iff the result if truncated to the same bit size.
+   * 2. two operands, like IMUL r1, r2/m2, where it does r1 <- r1*r2/m2 and so works like
+   * unsigned multiplication.
+   * 3. three operands, like IMUL r1, r2/m2, imd1, where it does r1 <- r2/m2*imd1 and so
+   * it works like unsigned multiplication.
+   */
+  managedInstructions.insert // this is for two operands mode of IMUL
+      (make_pair (XED_ICLASS_IMUL, DST_REG_SRC_EITHER_REG_OR_MEM));
   managedInstructions.insert
       (make_pair (XED_ICLASS_CDQE, DST_REG_SRC_REG));
   managedInstructions.insert

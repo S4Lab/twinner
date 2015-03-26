@@ -2052,6 +2052,25 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::imulAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "imulAnalysisRoutine(...): "
+      "two-operands-mode\n"
+      "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
+  const int size = dst.getSize ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tmultiplying (dst = dst * src; size=0x" << std::hex << size << ")...";
+  dstexp->multiply (srcexp);
+  delete srcexp;
+  dstexp->truncate (size);
+  dst.setExpression (trace, dstexp);
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::scasAnalysisRoutine (
     const MutableExpressionValueProxy &dstReg,
     const MutableExpressionValueProxy &srcReg,
@@ -2294,6 +2313,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_MOVDQU:
   case XED_ICLASS_MOVDQA:
     return &InstructionSymbolicExecuter::movAnalysisRoutine;
+  case XED_ICLASS_IMUL:
+    return &InstructionSymbolicExecuter::imulAnalysisRoutine;
   case XED_ICLASS_CDQE:
   case XED_ICLASS_MOVSX:
   case XED_ICLASS_MOVSXD:
