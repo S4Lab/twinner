@@ -502,7 +502,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine r
       << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
+  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, (int) memReadBytes),
       MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
@@ -531,7 +531,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMemAuxReg (
       << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << ", aux reg: " << REG_StringShort (auxReg) << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa),
+  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, (int) memReadBytes),
       MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes),
       RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
