@@ -140,8 +140,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_IMUL, DST_REG_SRC_EITHER_REG_OR_MEM));
   managedInstructions.insert
       (make_pair (XED_ICLASS_CDQE, DST_REG_SRC_REG));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_TEST, TEST_INS_MODELS));
+  INITIALIZE (TEST_INS_MODELS,
+              XED_ICLASS_TEST, XED_ICLASS_BT);
   INITIALIZE (OPERAND_LESS,
               XED_ICLASS_RDTSC, // read time-stamp counter
               XED_ICLASS_CLD); // clear direction flag (DF)

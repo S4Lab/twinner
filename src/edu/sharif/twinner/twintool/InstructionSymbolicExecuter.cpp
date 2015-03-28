@@ -1698,6 +1698,23 @@ void InstructionSymbolicExecuter::testAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::btAnalysisRoutine (
+    const MutableExpressionValueProxy &bitstring, const ExpressionValueProxy &offset) {
+  edu::sharif::twinner::util::Logger::loquacious () << "btAnalysisRoutine(...)\n"
+      << "\tgetting offset exp...";
+  edu::sharif::twinner::trace::Expression *offsetexp = offset.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting bitstring exp...";
+  edu::sharif::twinner::trace::Expression *bitstringexp = bitstring.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tfinding requested bit...";
+  offsetexp->bitwiseAnd (bitstring.getSize () - 1);
+  bitstringexp->shiftToRight (offsetexp);
+  bitstringexp->bitwiseAnd (0x1);
+  delete offsetexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting EFLAGS...";
+  eflags.setCarryFlag (bitstringexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "pmovmskbAnalysisRoutine(...)\n"
@@ -2377,6 +2394,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::xorAnalysisRoutine;
   case XED_ICLASS_TEST:
     return &InstructionSymbolicExecuter::testAnalysisRoutine;
+  case XED_ICLASS_BT:
+    return &InstructionSymbolicExecuter::btAnalysisRoutine;
   case XED_ICLASS_PMOVMSKB:
     return &InstructionSymbolicExecuter::pmovmskbAnalysisRoutine;
   case XED_ICLASS_PCMPEQB:

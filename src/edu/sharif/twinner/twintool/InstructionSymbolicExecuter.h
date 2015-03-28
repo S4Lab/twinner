@@ -500,6 +500,13 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * BT is bit test instruction. It finds the bitoffset-th bit from the bitstring and
+   * set it as the CF.
+   */
+  void btAnalysisRoutine (const MutableExpressionValueProxy &bitstring,
+      const ExpressionValueProxy &bitoffset);
+
+  /**
    * PMOVMSKB is a packed-move instruction which moves mask-byte of src reg to dat reg.
    * Mask-byte: read MSB of each byte of a reg and put those bits together. A 128-bits reg
    * has 16 bytes and its mask-byte has 16-bits or 2 bytes. Remaining bits in left-side of
