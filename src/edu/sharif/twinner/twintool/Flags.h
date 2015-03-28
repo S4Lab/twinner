@@ -40,6 +40,7 @@ public:
     DEFAULT_FSTATE,
     SET_FSTATE,
     CLEAR_FSTATE,
+    MANUAL_FSTATE,
   };
 
 private:
@@ -51,6 +52,7 @@ private:
   FlagState zf; // zero flag
   FlagState pf; // parity flag
   FlagState cf; // carry flag
+  const edu::sharif::twinner::trace::Expression *cfexp;
 
 public:
   Flags ();
@@ -106,6 +108,13 @@ public:
    * @param set Indicates whether CF should be set or cleared
    */
   void setCarryFlag (bool set);
+
+  /**
+   * Sets the CF to one-bit exp expression. Other flags remain untouched.
+   *
+   * @param exp The one-bit expressions which indicates new state of CF.
+   */
+  void setCarryFlag (const edu::sharif::twinner::trace::Expression *exp);
 
   /**
    * Instantiates a new constraint object denoting ZF's (zero flag) state. The last

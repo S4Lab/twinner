@@ -28,11 +28,13 @@ namespace twintool {
 Flags::Flags () :
     op (0),
     of (DEFAULT_FSTATE), df (CLEAR_FSTATE), sf (DEFAULT_FSTATE), zf (DEFAULT_FSTATE),
-    pf (DEFAULT_FSTATE), cf (DEFAULT_FSTATE) {
+    pf (DEFAULT_FSTATE), cf (DEFAULT_FSTATE),
+    cfexp (0) {
 }
 
 Flags::~Flags () {
   delete op;
+  delete cfexp;
 }
 
 bool Flags::getDirectionFlag () const {
@@ -50,6 +52,8 @@ edu::sharif::twinner::trace::Expression *Flags::getCarryFlag () const {
     return new edu::sharif::twinner::trace::ExpressionImp (1);
   case DEFAULT_FSTATE:
     return op->getCarryExpression ();
+  case MANUAL_FSTATE:
+    return cfexp->clone ();
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown state for CF (0x" << std::hex << int (cf) << ")\n";
@@ -62,6 +66,10 @@ void Flags::setFlags (
   delete op;
   op = operation;
   of = sf = zf = pf = cf = DEFAULT_FSTATE;
+  if (cfexp) {
+    delete cfexp;
+    cfexp = 0;
+  }
 }
 
 void Flags::setOverflowFlag (bool set) {
@@ -74,6 +82,18 @@ void Flags::setDirectionFlag (bool set) {
 
 void Flags::setCarryFlag (bool set) {
   cf = set ? SET_FSTATE : CLEAR_FSTATE;
+  if (cfexp) {
+    delete cfexp;
+    cfexp = 0;
+  }
+}
+
+void Flags::setCarryFlag (const edu::sharif::twinner::trace::Expression *exp) {
+  cf = MANUAL_FSTATE;
+  if (cfexp) {
+    delete cfexp;
+  }
+  cfexp = exp;
 }
 
 std::list <edu::sharif::twinner::trace::Constraint *>
@@ -198,6 +218,15 @@ Flags::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
     case DEFAULT_FSTATE:
       list = op->instantiateConstraintForBelowOrEqualCase (belowOrEqual, instruction);
       break;
+    case MANUAL_FSTATE:
+      list = instantiateConstraintForZeroCase (belowOrEqual, instruction);
+      if (!belowOrEqual) {
+        bool cfiszero;
+        list.push_back (edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+                        (cfiszero, cfexp, instruction));
+        belowOrEqual = !cfiszero;
+      }
+      break;
     default:
       edu::sharif::twinner::util::Logger::error ()
           << "Unknown state for CF (0x" << std::hex << int (cf) << ")\n";
@@ -225,6 +254,12 @@ Flags::instantiateConstraintForBelowCase (bool &below, uint32_t instruction) con
     break;
   case DEFAULT_FSTATE:
     list = op->instantiateConstraintForBelowCase (below, instruction);
+    break;
+  case MANUAL_FSTATE:
+    bool cfiszero;
+    list.push_back (edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+                    (cfiszero, cfexp, instruction));
+    below = !cfiszero;
     break;
   default:
     edu::sharif::twinner::util::Logger::error ()
