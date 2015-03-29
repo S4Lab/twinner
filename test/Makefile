@@ -7,7 +7,8 @@ TARGETS := simple-condition-test \
 	registers-state-manipulation \
 	multi-path-with-printf-leafs-test \
 	upx-test upx-test.upx-packed \
-	overhead-measurement-test
+	overhead-measurement-test \
+	expression-addition-runtime-simplification
 TWIN_TARGETS := simple-condition-test \
 	multi-path-with-printf-leafs-test \
 	#upx-test
@@ -28,6 +29,10 @@ upx-test.out: upx-test.c
 
 upx-test.upx-packed.out: upx-test.out
 	rm upx-test.upx-packed.out && upx --strip-relocs=0 -o upx-test.upx-packed.out upx-test.out
+
+expression-addition-runtime-simplification.out: expression-addition-runtime-simplification.cpp
+	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o expression-addition-runtime-simplification.o expression-addition-runtime-simplification.cpp
+	g++ -o expression-addition-runtime-simplification.out expression-addition-runtime-simplification.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/cv/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/exptoken/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/search/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o ../deploy/obj-intel64/edu/sharif/twinner/exception/AbstractException.o -lcvc4 -lgmp
 
 expression-operations-concrete-value-test.out: expression-operations-concrete-value-test.cpp
 	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o expression-operations-concrete-value-test.o expression-operations-concrete-value-test.cpp
