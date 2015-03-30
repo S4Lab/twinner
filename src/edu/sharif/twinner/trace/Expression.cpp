@@ -218,13 +218,84 @@ bool Expression::checkForCancelingOperation (Operator *op, const Expression *exp
 
 bool Expression::checkForNonTrivialAddition (Operator *op, const Expression *exp) {
   if (op->getIdentifier () == Operator::ADD) {
-    if ((*this) == (*exp)) {
+    std::pair<Stack::const_iterator, Stack::const_iterator> its = compareTo (*exp);
+    Stack::const_iterator me = its.first, that = its.second;
+    if (me == stack.end () && that == exp->stack.end ()) {
       delete op;
       multiply (2);
       return true;
     }
+    UINT64 c = checkForNonTrivialAddition (me, that, stack.end (), exp->stack.end ());
+    if (c == 0) {
+      c = checkForNonTrivialAddition (that, me, exp->stack.end (), stack.end ());
+      if (c == 0) {
+        return false;
+      }
+      (*this) = (*exp);
+    }
+    delete op;
+    multiply (c);
+    return true;
   }
   return false;
+}
+
+UINT64 Expression::checkForNonTrivialAddition (
+    Stack::const_iterator me, Stack::const_iterator that,
+    Stack::const_iterator myEnd, Stack::const_iterator thatEnd) {
+  typedef edu::sharif::twinner::trace::exptoken::Constant Constant;
+  typedef edu::sharif::twinner::trace::cv::ConcreteValue ConcreteValue;
+  // Checking for `me == Y` and `that == Y c <<` case
+  if (me == myEnd) {
+    Constant *c = dynamic_cast<Constant *> (*that++);
+    if (c && that != thatEnd) {
+      Operator *shiftLeft = dynamic_cast<Operator *> (*that++);
+      if (shiftLeft && shiftLeft->getIdentifier () == Operator::SHIFT_LEFT) {
+        if (that == thatEnd) {
+          const ConcreteValue &cv = c->getValue ();
+          if (cv.getSize () <= 64) {
+            UINT64 val = cv.toUint64 ();
+            if (val < 64) {
+              return 1ull + (1ull << val);
+            }
+          }
+        }
+      }
+    }
+  } else if (that != thatEnd) {
+    // Checking for `me == Z m &` and `that == Z c << k &` case where `k == m c <<`
+    Constant *m = dynamic_cast<Constant *> (*me++);
+    Constant *c = dynamic_cast<Constant *> (*that++);
+    if (m && c && me != myEnd && that != thatEnd) {
+      Operator *bitwiseAnd = dynamic_cast<Operator *> (*me++);
+      Operator *shiftLeft = dynamic_cast<Operator *> (*that++);
+      if (bitwiseAnd && bitwiseAnd->getIdentifier () == Operator::BITWISE_AND
+          && shiftLeft && shiftLeft->getIdentifier () == Operator::SHIFT_LEFT
+          && me == myEnd && that != thatEnd) {
+        Constant *k = dynamic_cast<Constant *> (*that++);
+        if (k && that != thatEnd) {
+          bitwiseAnd = dynamic_cast<Operator *> (*that++);
+          if (bitwiseAnd && bitwiseAnd->getIdentifier () == Operator::BITWISE_AND
+              && that == thatEnd) {
+            ConcreteValue *mVal = m->getValue ().clone ();
+            (*mVal) <<= c->getValue ();
+            const bool kIsValid = (*mVal) == k->getValue ();
+            delete mVal;
+            if (kIsValid) {
+              const ConcreteValue &cv = c->getValue ();
+              if (cv.getSize () <= 64) {
+                UINT64 val = cv.toUint64 ();
+                if (val < 64) {
+                  return 1ull + (1ull << val);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return 0;
 }
 
 void Expression::binaryOperation (Operator *op,
@@ -377,6 +448,15 @@ void Expression::checkConcreteValueMemory (ADDRINT memoryEa,
   }
   isOverwriting = false;
   lastConcreteValue->writeToMemoryAddress (memoryEa);
+}
+
+std::pair<Expression::Stack::const_iterator, Expression::Stack::const_iterator>
+Expression::compareTo (const Expression &exp) const {
+  Stack::const_iterator it1 = stack.begin (), end1 = stack.end (),
+      it2 = exp.stack.begin (), end2 = exp.stack.end ();
+  for (; it1 != end1 && it2 != end2 && (**it1) == (**it2); ++it1, ++it2)
+    continue;
+  return make_pair (it1, it2);
 }
 
 bool Expression::operator== (const Expression &exp) const {
