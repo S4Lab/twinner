@@ -140,6 +140,11 @@ protected:
    */
   void binaryOperation (Operator *op, UINT64 cv);
 
+private:
+  bool checkForTrivialExpression (Operator *op, const Expression *exp);
+  bool checkForCancelingOperation (Operator *op, const Expression *exp);
+  bool checkForNonTrivialAddition (Operator *op, const Expression *exp);
+
 public:
   /**
    * Truncates the expression to occupy at most a given count of bits.

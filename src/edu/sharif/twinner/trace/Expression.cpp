@@ -164,28 +164,9 @@ void Expression::unaryOperation (Operator *op, const Expression *exp) {
 }
 
 void Expression::binaryOperation (Operator *op, const Expression *exp) {
-  if (op->doesSupportSimplification () && exp->isTrivial ()) {
-    // FIXME: Make sure that last concrete value is always valid at this point
-    binaryOperation (op, exp->getLastConcreteValue ().clone ());
-  } else if ((op->getIdentifier () == Operator::DIVIDE
-      || op->getIdentifier () == Operator::MINUS
-      || op->getIdentifier () == Operator::XOR)
-      && (*this) == (*exp)) {
-    while (!stack.empty ()) {
-      delete stack.back ();
-      stack.pop_back ();
-    }
-    const int v = ((op->getIdentifier () == Operator::DIVIDE) ? 1 : 0);
-    stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (v));
-    *lastConcreteValue = v;
-  } else if (op->doesSupportSimplification () && op->isCommutable () && isTrivial ()) {
-    edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConcreteValue->clone ();
-    (*this) = (*exp);
-    binaryOperation (op, cv);
-  } else if (op->getIdentifier () == Operator::ADD && (*this) == (*exp)) {
-    delete op;
-    multiply (2);
-  } else {
+  if (!(checkForTrivialExpression (op, exp)
+      || checkForCancelingOperation (op, exp)
+      || checkForNonTrivialAddition (op, exp))) {
     /**
      * It's possible that this object and given constant expression object be the same.
      * In that case changing this object while searching the given expression can
@@ -200,6 +181,50 @@ void Expression::binaryOperation (Operator *op, const Expression *exp) {
     stack.push_back (op);
     op->apply (*lastConcreteValue, *(exp->lastConcreteValue));
   }
+}
+
+bool Expression::checkForTrivialExpression (Operator *op, const Expression *exp) {
+  if (op->doesSupportSimplification ()) {
+    if (exp->isTrivial ()) {
+      // FIXME: Make sure that last concrete value is always valid at this point
+      binaryOperation (op, exp->getLastConcreteValue ().clone ());
+      return true;
+    } else if (op->isCommutable () && isTrivial ()) {
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConcreteValue->clone ();
+      (*this) = (*exp);
+      binaryOperation (op, cv);
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Expression::checkForCancelingOperation (Operator *op, const Expression *exp) {
+  if ((op->getIdentifier () == Operator::DIVIDE
+      || op->getIdentifier () == Operator::MINUS
+      || op->getIdentifier () == Operator::XOR)
+      && (*this) == (*exp)) {
+    while (!stack.empty ()) {
+      delete stack.back ();
+      stack.pop_back ();
+    }
+    const int v = ((op->getIdentifier () == Operator::DIVIDE) ? 1 : 0);
+    stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (v));
+    *lastConcreteValue = v;
+    return true;
+  }
+  return false;
+}
+
+bool Expression::checkForNonTrivialAddition (Operator *op, const Expression *exp) {
+  if (op->getIdentifier () == Operator::ADD) {
+    if ((*this) == (*exp)) {
+      delete op;
+      multiply (2);
+      return true;
+    }
+  }
+  return false;
 }
 
 void Expression::binaryOperation (Operator *op,
