@@ -1028,9 +1028,26 @@ void InstructionSymbolicExecuter::movsAnalysisRoutine (
     const MutableExpressionValueProxy &dstMem, const ExpressionValueProxy &srcMem) {
   edu::sharif::twinner::util::Logger::loquacious () << "movsAnalysisRoutine(...)\n";
   movAnalysisRoutine (dstMem, srcMem);
+  const int size = dstMem.getSize () / 8;
+  adjustRsiRdiRegisters (size, rdi, rsi);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
+void InstructionSymbolicExecuter::cmpsAnalysisRoutine (
+    const MutableExpressionValueProxy &rdi, const MutableExpressionValueProxy &rsi,
+    const MutableExpressionValueProxy &dstMem, const ExpressionValueProxy &srcMem) {
+  edu::sharif::twinner::util::Logger::loquacious () << "cmpsAnalysisRoutine(...)\n";
+  cmpAnalysisRoutine (dstMem, srcMem);
+  const int size = dstMem.getSize () / 8;
+  adjustRsiRdiRegisters (size, rdi, rsi);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
+void InstructionSymbolicExecuter::adjustRsiRdiRegisters (int size,
+    const MutableExpressionValueProxy &rdi, const MutableExpressionValueProxy &rsi) {
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsi/rdi values...";
   edu::sharif::twinner::trace::Expression *rdiexp = rdi.getExpression (trace);
   edu::sharif::twinner::trace::Expression *rsiexp = rsi.getExpression (trace);
-  const int size = dstMem.getSize () / 8;
   if (eflags.getDirectionFlag ()) { // DF == 1
     edu::sharif::twinner::util::Logger::loquacious ()
         << "\tdecrementing index register...";
@@ -1046,7 +1063,6 @@ void InstructionSymbolicExecuter::movsAnalysisRoutine (
   rsi.setExpression (trace, rsiexp);
   delete rdiexp;
   delete rsiexp;
-  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
 void InstructionSymbolicExecuter::pushAnalysisRoutine (
@@ -2538,6 +2554,11 @@ InstructionSymbolicExecuter::convertOpcodeToOneToThreeOperandsAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_MOVSQ:
     return &InstructionSymbolicExecuter::movsAnalysisRoutine;
+  case XED_ICLASS_CMPSB:
+  case XED_ICLASS_CMPSW:
+  case XED_ICLASS_CMPSD:
+  case XED_ICLASS_CMPSQ:
+    return &InstructionSymbolicExecuter::cmpsAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "1-to-3 operands: Unknown opcode: "

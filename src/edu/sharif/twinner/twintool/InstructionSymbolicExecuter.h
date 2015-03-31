@@ -289,6 +289,16 @@ private:
       const ExpressionValueProxy &srcMem);
 
   /**
+   * CMPSB / CMPSW / CMPSD / CMPSQ compare string with 1/2/4/8 bytes sizes.
+   * Operands are read from [rsi]/srcMem and [rdi]/dstMem and
+   * increments/decrements rdi/rsi registers.
+   */
+  void cmpsAnalysisRoutine (const MutableExpressionValueProxy &rdi,
+      const MutableExpressionValueProxy &rsi,
+      const MutableExpressionValueProxy &dstMem,
+      const ExpressionValueProxy &srcMem);
+
+  /**
    * PUSH has 3 models
    * m <- r/m/i
    */
@@ -672,6 +682,9 @@ private:
    * opr <- NOT(opr)
    */
   void notAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
+  void adjustRsiRdiRegisters (int size,
+      const MutableExpressionValueProxy &rdi, const MutableExpressionValueProxy &rsi);
 
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
