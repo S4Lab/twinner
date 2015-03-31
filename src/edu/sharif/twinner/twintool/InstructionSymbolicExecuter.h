@@ -628,6 +628,11 @@ private:
   void cldAnalysisRoutine (const CONTEXT *context);
 
   /**
+   * CPUID == CPU Identification
+   */
+  void cpuidAnalysisRoutine (const CONTEXT *context);
+
+  /**
    * INC increments the opr reg/mem operand.
    */
   void incAnalysisRoutine (const MutableExpressionValueProxy &opr);

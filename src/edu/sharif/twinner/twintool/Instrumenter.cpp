@@ -144,7 +144,8 @@ void Instrumenter::initialize () {
               XED_ICLASS_TEST, XED_ICLASS_BT);
   INITIALIZE (OPERAND_LESS,
               XED_ICLASS_RDTSC, // read time-stamp counter
-              XED_ICLASS_CLD); // clear direction flag (DF)
+              XED_ICLASS_CLD, // clear direction flag (DF)
+              XED_ICLASS_CPUID);
   managedInstructions.insert
       (make_pair (XED_ICLASS_PMOVMSKB, DST_REG_SRC_LARGE_REG)); // packed move mask-byte
   INITIALIZE (PCMPEQX_INS_MODELS,
@@ -254,6 +255,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
     return NOP_INS_MODELS;
   case XED_ICLASS_RDTSC:
   case XED_ICLASS_CLD:
+  case XED_ICLASS_CPUID:
     return OPERAND_LESS;
   case XED_ICLASS_DIV:
   case XED_ICLASS_MUL:

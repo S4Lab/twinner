@@ -2190,6 +2190,48 @@ void InstructionSymbolicExecuter::cldAnalysisRoutine (const CONTEXT *context) {
   eflags.setCarryFlag (false);
 }
 
+void InstructionSymbolicExecuter::cpuidAnalysisRoutine (const CONTEXT *context) {
+  edu::sharif::twinner::util::Logger::loquacious () << "cpuidAnalysisRoutine(...)\n";
+  /*
+   * CPUID instruction will read EAX and ECX and based on their values, sets 4 registers
+   * deterministically. Now, we are after the CPUID and can set those registers.
+   */
+  // FIXME: Two constraints must be created to state previous values of EAX and ECX
+  ConcreteValue *eaxVal =
+      edu::sharif::twinner::util::readRegisterContent (context, REG_EAX);
+  ConcreteValue *ebxVal =
+      edu::sharif::twinner::util::readRegisterContent (context, REG_EBX);
+  ConcreteValue *ecxVal =
+      edu::sharif::twinner::util::readRegisterContent (context, REG_ECX);
+  ConcreteValue *edxVal =
+      edu::sharif::twinner::util::readRegisterContent (context, REG_EDX);
+  edu::sharif::twinner::trace::Expression *eaxNewExp =
+      new edu::sharif::twinner::trace::ExpressionImp (eaxVal);
+  edu::sharif::twinner::trace::Expression *ebxNewExp =
+      new edu::sharif::twinner::trace::ExpressionImp (ebxVal);
+  edu::sharif::twinner::trace::Expression *ecxNewExp =
+      new edu::sharif::twinner::trace::ExpressionImp (ecxVal);
+  edu::sharif::twinner::trace::Expression *edxNewExp =
+      new edu::sharif::twinner::trace::ExpressionImp (edxVal);
+
+  const MutableExpressionValueProxy &eax =
+      RegisterResidentExpressionValueProxy (REG_EAX, *eaxVal);
+  const MutableExpressionValueProxy &ebx =
+      RegisterResidentExpressionValueProxy (REG_EBX, *ebxVal);
+  const MutableExpressionValueProxy &ecx =
+      RegisterResidentExpressionValueProxy (REG_ECX, *ecxVal);
+  const MutableExpressionValueProxy &edx =
+      RegisterResidentExpressionValueProxy (REG_EDX, *edxVal);
+  eax.setExpression (trace, eaxNewExp);
+  ebx.setExpression (trace, ebxNewExp);
+  ecx.setExpression (trace, ecxNewExp);
+  edx.setExpression (trace, edxNewExp);
+  delete eaxNewExp;
+  delete ebxNewExp;
+  delete ecxNewExp;
+  delete edxNewExp;
+}
+
 void InstructionSymbolicExecuter::incAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::util::Logger::loquacious () << "incAnalysisRoutine(...)\n"
@@ -2569,6 +2611,8 @@ InstructionSymbolicExecuter::convertOpcodeToOperandLessAnalysisRoutine (
     return &InstructionSymbolicExecuter::rdtscAnalysisRoutine;
   case XED_ICLASS_CLD:
     return &InstructionSymbolicExecuter::cldAnalysisRoutine;
+  case XED_ICLASS_CPUID:
+    return &InstructionSymbolicExecuter::cpuidAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Operand Less: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
