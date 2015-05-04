@@ -15,53 +15,29 @@
 
 class UINT128 {
 
-public:
-  typedef __m128i builtin128;
-  typedef __m64 builtin64;
-
 private:
-  builtin128 value;
+  UINT64 high, low;
 
 public:
 
-  UINT128 (const builtin128 &v) : value (v) {
+  constexpr UINT128 (UINT64 _high, UINT64 _low)
+      : high (_high), low (_low) {
   }
 
-  UINT128 (const UINT32 a, const UINT32 b, const UINT32 c, const UINT32 d) {
-    value = _mm_set_epi32 (a, b, c, d);
+  constexpr UINT128 (const UINT32 a, const UINT32 b, const UINT32 c, const UINT32 d)
+      : high ((UINT64 (a) << 32) | b), low ((UINT64 (c) << 32) | d) {
   }
 
-  UINT128 (const UINT64 *v) {
-
-    union {
-
-      UINT32 v32[4];
-      UINT64 v64[2];
-    } u;
-    u.v64[0] = v[0];
-    u.v64[1] = v[1];
-    value = _mm_set_epi32 (u.v32[3], u.v32[2], u.v32[1], u.v32[0]);
+  constexpr UINT128 (const UINT64 *v)
+      : low (v[0]), high (v[1]) {
   }
 
   bool operator== (const UINT128 &v) const {
-    union {
-
-      UINT64 v64[2];
-      builtin128 v128;
-    } u1, u2;
-    _mm_store_si128 (&u1.v128, value);
-    _mm_store_si128 (&u2.v128, v.value);
-    return u1.v64[0] == u2.v64[0] && u1.v64[1] == u2.v64[1];
+    return high == v.high && low == v.low;
   }
 
   bool operator== (const UINT64 &v) const {
-    union {
-
-      UINT64 v64[2];
-      builtin128 v128;
-    } u;
-    _mm_store_si128 (&u.v128, value);
-    return u.v64[0] == v && u.v64[1] == 0;
+    return high == 0 && low == v;
   }
 
   bool operator!= (const UINT128 &v) const {
@@ -73,158 +49,158 @@ public:
   }
 
   bool operator< (const UINT128 &v) const {
-    union {
-
-      UINT64 v64[2];
-      builtin128 v128;
-    } u1, u2;
-    _mm_store_si128 (&u1.v128, value);
-    _mm_store_si128 (&u2.v128, v.value);
-    return u1.v64[1] < u2.v64[1] || (u1.v64[1] == u2.v64[1] && u1.v64[0] < u2.v64[0]);
+    return high < v.high || (high == v.high && low < v.low);
   }
 
   bool operator< (const UINT64 &v) const {
-    union {
-
-      UINT64 v64[2];
-      builtin128 v128;
-    } u;
-    _mm_store_si128 (&u.v128, value);
-    return u.v64[1] == 0 && u.v64[0] < v;
+    return high == 0 && low < v;
   }
 
-  bool operator> (const UINT128 &v) const {
-    return v < (*this);
-  }
-
-  bool operator> (const UINT64 &v) const {
-    union {
-
-      UINT64 v64[2];
-      builtin128 v128;
-    } u;
-    _mm_store_si128 (&u.v128, value);
-    return u.v64[1] > 0 || u.v64[0] > v;
-  }
-  
   bool operator<= (const UINT128 &v) const {
-    union {
-
-      UINT64 v64[2];
-      builtin128 v128;
-    } u1, u2;
-    _mm_store_si128 (&u1.v128, value);
-    _mm_store_si128 (&u2.v128, v.value);
-    return u1.v64[1] < u2.v64[1] || (u1.v64[1] == u2.v64[1] && u1.v64[0] <= u2.v64[0]);
+    return high < v.high || (high == v.high && low <= v.low);
   }
 
   bool operator<= (const UINT64 &v) const {
-    union {
+    return high == 0 && low <= v;
+  }
 
-      UINT64 v64[2];
-      builtin128 v128;
-    } u;
-    _mm_store_si128 (&u.v128, value);
-    return u.v64[1] == 0 && u.v64[0] <= v;
+  bool operator> (const UINT128 &v) const {
+    return !((*this) <= v);
+  }
+
+  bool operator> (const UINT64 &v) const {
+    return !((*this) <= v);
   }
 
   bool operator>= (const UINT128 &v) const {
-    return v <= (*this);
+    return !((*this) < v);
   }
 
   bool operator>= (const UINT64 &v) const {
-    union {
-
-      UINT64 v64[2];
-      builtin128 v128;
-    } u;
-    _mm_store_si128 (&u.v128, value);
-    return u.v64[1] > 0 || u.v64[0] >= v;
-  }
-  
-  UINT128 &operator= (const builtin128 &v) {
-    value = v;
-    return *this;
-  }
-
-  operator builtin128 () const {
-    return value;
+    return !((*this) < v);
   }
 
   UINT64 toUint64 () const {
-    union {
-
-      UINT64 v64[2];
-      builtin128 v128;
-    } u;
-    _mm_store_si128 (&u.v128, value);
-    return u.v64[0];
+    return low;
   }
 
   UINT128 operator^ (const UINT128 &v) const {
-    return _mm_xor_si128 (value, v.value);
+    return UINT128 (high ^ v.high, low ^ v.low);
   }
 
   UINT128 operator& (const UINT128 &v) const {
-    return _mm_and_si128 (value, v.value);
+    return UINT128 (high & v.high, low & v.low);
   }
 
   UINT64 operator& (const UINT64 &v) const {
-
-    union {
-
-      UINT64 v64[2];
-      builtin128 v128;
-    } u;
-    _mm_store_si128 (&u.v128, value);
-    return u.v64[0] & v;
+    return low & v;
   }
 
   UINT128 operator| (const UINT128 &v) const {
-    return _mm_or_si128 (value, v.value);
+    return UINT128 (high | v.high, low | v.low);
   }
 
   UINT128 operator| (const UINT64 &v) const {
-    return (value | v);
+    return UINT128 (high, low | v);
   }
 
   UINT128 operator>> (int bits) const {
-    if (bits % 8 != 0) {
-      throw std::runtime_error ("128-bits shifting is only available in byte multiples");
+    if (bits < 64) {
+      return UINT128 (high >> bits, (high << (64 - bits)) | (low >> bits));
+    } else {
+      return UINT128 (0, high >> (bits - 64));
     }
-    return _mm_srli_si128 (value, bits / 8);
   }
 
-  UINT128 operator/ (UINT64 divisor) const {
-    return value / divisor;
+  UINT128 operator<< (int bits) const {
+    if (bits < 64) {
+      return UINT128 ((high << bits) | (low >> (64 - bits)), low << bits);
+    } else {
+      return UINT128 (low << (bits - 64), 0);
+    }
+  }
+
+  UINT64 operator/ (UINT64 divisor) const {
+    UINT64 quotient;
+    asm (
+          "DIV %[divisor]"
+          : "=a" (quotient)
+          : "d" (high), "a" (low), [divisor] "r" (divisor)
+          );
+    return quotient;
   }
 
   UINT128 operator% (const UINT128 &divisor) const {
-    return value % divisor.value;
+    if (divisor.high == 0) {
+      return UINT128 (0, (*this) % (divisor.low));
+    }
+    UINT128 remainder = *this;
+    while (remainder >= divisor) {
+      remainder = remainder - divisor;
+    }
+    return remainder;
   }
 
-  UINT128 operator% (UINT64 divisor) const {
-    return value % divisor;
+  UINT64 operator% (UINT64 divisor) const {
+    UINT64 remainder;
+    asm (
+          "DIV %[divisor]"
+          : "=d" (remainder)
+          : "d" (high), "a" (low), [divisor] "r" (divisor)
+          );
+    return remainder;
   }
 
   UINT128 operator+ (UINT64 addee) const {
-    return value + addee;
+    UINT64 msp, lsp;
+    asm (
+          "ADD %[a], %%rbx\n\t"
+          "ADC $0, %%rcx"
+          : "=c" (msp), "=b" (lsp)
+          : "c" (high), "b" (low), [a] "r" (addee)
+          );
+    return UINT128 (msp, lsp);
   }
 
   UINT128 operator+ (UINT128 addee) const {
-    return value + addee.value;
+    UINT64 msp, lsp;
+    asm (
+          "ADD %[l], %%rbx\n\t"
+          "ADC %[h], %%rcx"
+          : "=c" (msp), "=b" (lsp)
+          : "c" (high), "b" (low), [h] "r" (addee.high), [l] "r" (addee.low)
+          );
+    return UINT128 (msp, lsp);
   }
 
   UINT128 operator- (UINT64 minusee) const {
-    return value - minusee;
+    UINT64 msp, lsp;
+    asm (
+          "SUB %[a], %%rbx\n\t"
+          "SBB $0, %%rcx"
+          : "=c" (msp), "=b" (lsp)
+          : "c" (high), "b" (low), [a] "r" (minusee)
+          );
+    return UINT128 (msp, lsp);
   }
 
   UINT128 operator- (UINT128 minusee) const {
-    return value - minusee.value;
+    UINT64 msp, lsp;
+    asm (
+          "SUB %[l], %%rbx\n\t"
+          "SBB %[h], %%rcx"
+          : "=c" (msp), "=b" (lsp)
+          : "c" (high), "b" (low), [h] "r" (minusee.high), [l] "r" (minusee.low)
+          );
+    return UINT128 (msp, lsp);
   }
 
   UINT128 operator- () const {
-    return -value;
+    return UINT128 (0, 0) - (*this);
+  }
+
+  friend inline UINT128 arithmeticShiftToRight (const UINT128 &v, int bits) {
+    return UINT128 (INT64 (v.high) >> bits, (v.high << (64 - bits)) | (v.low >> bits));
   }
 };
 
@@ -253,50 +229,23 @@ static inline bool operator>= (const UINT64 &a, const UINT128 &b) {
 }
 
 static inline UINT128 operator+ (UINT64 a, UINT128 b) {
-  return a + UINT128::builtin128 (b);
+  return b + a;
 }
 
 static inline UINT128 operator- (UINT64 a, UINT128 b) {
-  return a - UINT128::builtin128 (b);
+  return UINT128 (0, a) - b;
 }
 
-static inline UINT128 logicalShiftToLeft (const UINT128 &v, const int bits) {
-  const UINT128::builtin128 b = v;
-
-  union {
-
-    UINT64 v64[2];
-    UINT128::builtin128 v128;
-  } u;
-  _mm_store_si128 (&u.v128, b);
-  u.v64[1] = (u.v64[1] << bits) | (u.v64[0] >> (64 - bits));
-  u.v64[0] = u.v64[0] << bits;
-  return u.v128;
+static inline UINT128 logicalShiftToLeft (const UINT128 v, const int bits) {
+  return v << bits;
 }
 
-static inline UINT128 logicalShiftToLeft (const UINT64 &v, const int bits) {
-  const UINT64 u[] = {v << bits /*lsb*/, v >> (64 - bits)/*msb*/};
-  return UINT128 (u);
-}
-
-static inline UINT128 arithmeticShiftToRight (const UINT128 &v, int bits) {
-  const UINT128::builtin128 b = v;
-
-  union {
-
-    UINT64 v64[2];
-    UINT128::builtin128 v128;
-  } u;
-  _mm_store_si128 (&u.v128, b);
-  u.v64[0] = (u.v64[1] << (64 - bits)) | (u.v64[0] >> bits);
-  const signed long long int s = u.v64[1];
-  u.v64[1] = (s >> bits);
-  return u.v128;
+static inline UINT128 logicalShiftToLeft (const UINT64 v, const int bits) {
+  return UINT128 (v >> (64 - bits), v << bits);
 }
 
 static inline UINT64 arithmeticShiftToRight (const UINT64 &v, int bits) {
-  const signed long long int s = v;
-  return (s >> bits);
+  return (INT64 (v) >> bits);
 }
 
 #endif	/* tc-uint128.h */

@@ -15,49 +15,37 @@
 
 static inline UINT128 signExtend_0x80_0x8 (const UINT64 v) {
   const UINT8 source = UINT8 (v);
-  UINT64 signedValue[2];
-  signedValue[0] = UINT64 (INT8 (source));
   if (INT8 (source) < 0) {
-    signedValue[1] = UINT64 (-1);
+    return UINT128 (UINT64 (-1), UINT64 (INT8 (source)));
   } else {
-    signedValue[1] = UINT64 (0);
+    return UINT128 (UINT64 (0), UINT64 (INT8 (source)));
   }
-  return UINT128 (signedValue);
 }
 
 static inline UINT128 signExtend_0x80_0x10 (const UINT64 v) {
   const UINT16 source = UINT16 (v);
-  UINT64 signedValue[2];
-  signedValue[0] = UINT64 (INT16 (source));
   if (INT16 (source) < 0) {
-    signedValue[1] = UINT64 (-1);
+    return UINT128 (UINT64 (-1), UINT64 (INT16 (source)));
   } else {
-    signedValue[1] = UINT64 (0);
+    return UINT128 (UINT64 (0), UINT64 (INT16 (source)));
   }
-  return UINT128 (signedValue);
 }
 
 static inline UINT128 signExtend_0x80_0x20 (const UINT64 v) {
   const UINT32 source = UINT32 (v);
-  UINT64 signedValue[2];
-  signedValue[0] = UINT64 (INT32 (source));
   if (INT32 (source) < 0) {
-    signedValue[1] = UINT64 (-1);
+    return UINT128 (UINT64 (-1), UINT64 (INT32 (source)));
   } else {
-    signedValue[1] = UINT64 (0);
+    return UINT128 (UINT64 (0), UINT64 (INT32 (source)));
   }
-  return UINT128 (signedValue);
 }
 
 static inline UINT128 signExtend_0x80_0x40 (const UINT64 v) {
-  UINT64 signedValue[2];
-  signedValue[0] = v;
   if (INT64 (v) < 0) {
-    signedValue[1] = UINT64 (-1);
+    return UINT128 (UINT64 (-1), v);
   } else {
-    signedValue[1] = UINT64 (0);
+    return UINT128 (UINT64 (0), v);
   }
-  return UINT128 (signedValue);
 }
 
 static inline UINT64 signExtend_0x40_0x8 (const UINT64 v) {
