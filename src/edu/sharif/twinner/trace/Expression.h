@@ -35,7 +35,6 @@ class ConcreteValue;
 }
 
 class Expression : public Savable {
-
 public:
   /**
    * Uses push_back and pop_back instead of push and pop to implement a stack.
@@ -232,9 +231,11 @@ public:
   /**
    * Instantiates an expression indicating the two's complement of this expression.
    * Caller should delete the returned expression.
+   *
+   * @param precision The maximum size (in bits) of resulting expression or -1 (for no change).
    * @return The two's complement of this expression.
    */
-  Expression *twosComplement () const;
+  Expression *twosComplement (int precision = -1) const;
 
   /**
    * Increment this expression as much as the given symbolic/concrete value.

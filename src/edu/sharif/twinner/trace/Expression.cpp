@@ -34,11 +34,11 @@ namespace trace {
 
 Expression::Expression (const Stack &stk,
     edu::sharif::twinner::trace::cv::ConcreteValue *concreteValue) :
-    stack (stk), lastConcreteValue (concreteValue), isOverwriting (false) {
+stack (stk), lastConcreteValue (concreteValue), isOverwriting (false) {
 }
 
 Expression::Expression (const Expression &exp) :
-    lastConcreteValue (exp.lastConcreteValue->clone ()), isOverwriting (false) {
+lastConcreteValue (exp.lastConcreteValue->clone ()), isOverwriting (false) {
   for (typename Stack::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const edu::sharif::twinner::trace::exptoken::ExpressionToken *et = *it;
@@ -64,7 +64,7 @@ Expression &Expression::operator= (const Expression &exp) {
 }
 
 Expression::Expression (int size, const Expression &exp) :
-    lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
+lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
   for (typename Stack::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const edu::sharif::twinner::trace::exptoken::ExpressionToken *et = *it;
@@ -74,7 +74,7 @@ Expression::Expression (int size, const Expression &exp) :
 
 Expression::Expression (edu::sharif::twinner::trace::cv::ConcreteValue *concreteValue,
     bool _isOverwriting) :
-    lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
+lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
 }
 
 Expression::~Expression () {
@@ -165,8 +165,8 @@ void Expression::unaryOperation (Operator *op, const Expression *exp) {
 
 void Expression::binaryOperation (Operator *op, const Expression *exp) {
   if (!(checkForTrivialExpression (op, exp)
-      || checkForCancelingOperation (op, exp)
-      || checkForNonTrivialAddition (op, exp))) {
+        || checkForCancelingOperation (op, exp)
+        || checkForNonTrivialAddition (op, exp))) {
     /**
      * It's possible that this object and given constant expression object be the same.
      * In that case changing this object while searching the given expression can
@@ -201,8 +201,8 @@ bool Expression::checkForTrivialExpression (Operator *op, const Expression *exp)
 
 bool Expression::checkForCancelingOperation (Operator *op, const Expression *exp) {
   if ((op->getIdentifier () == Operator::DIVIDE
-      || op->getIdentifier () == Operator::MINUS
-      || op->getIdentifier () == Operator::XOR)
+       || op->getIdentifier () == Operator::MINUS
+       || op->getIdentifier () == Operator::XOR)
       && (*this) == (*exp)) {
     while (!stack.empty ()) {
       delete stack.back ();
@@ -330,8 +330,9 @@ void Expression::truncate (int bits) {
   bitwiseAnd (mask);
 }
 
-Expression *Expression::twosComplement () const {
-  edu::sharif::twinner::trace::cv::ConcreteValue *cv = lastConcreteValue->clone ();
+Expression *Expression::twosComplement (int precision) const {
+  edu::sharif::twinner::trace::cv::ConcreteValue *cv =
+      lastConcreteValue->clone (precision);
   (*cv) = 0;
   Expression *zero = new ExpressionImp (cv);
   zero->minus (this);

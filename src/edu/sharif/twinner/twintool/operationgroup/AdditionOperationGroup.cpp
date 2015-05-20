@@ -28,7 +28,7 @@ namespace operationgroup {
 
 AdditionOperationGroup::AdditionOperationGroup (ConstExpressionPtr mainExp,
     ConstExpressionPtr auxExp) :
-    NaryOperationGroup (mainExp, auxExp) {
+NaryOperationGroup (mainExp, auxExp) {
 }
 
 OperationGroup::ExpressionPtr AdditionOperationGroup::getCarryExpression () const {
@@ -48,8 +48,10 @@ OperationGroup::ExpressionPtr AdditionOperationGroup::getCarryExpression () cons
 std::list <OperationGroup::ConstraintPtr>
 AdditionOperationGroup::instantiateConstraintForZeroCase (bool &zero,
     uint32_t instruction) const {
+  const int precision = exp[0]->getLastConcreteValue ().getSize ();
   std::list <OperationGroup::ConstraintPtr> list;
-  OperationGroup::ExpressionPtr negativeOfRightExp = exp[1]->twosComplement ();
+  OperationGroup::ExpressionPtr negativeOfRightExp =
+      exp[1]->twosComplement (precision);
   list.push_back (OperationGroup::Constraint::instantiateEqualConstraint
                   (zero, exp[0], negativeOfRightExp, instruction));
   delete negativeOfRightExp;
@@ -59,8 +61,10 @@ AdditionOperationGroup::instantiateConstraintForZeroCase (bool &zero,
 std::list <OperationGroup::ConstraintPtr>
 AdditionOperationGroup::instantiateConstraintForLessCase (bool &less,
     uint32_t instruction) const {
+  const int precision = exp[0]->getLastConcreteValue ().getSize ();
   std::list <OperationGroup::ConstraintPtr> list;
-  OperationGroup::ExpressionPtr negativeOfRightExp = exp[1]->twosComplement ();
+  OperationGroup::ExpressionPtr negativeOfRightExp =
+      exp[1]->twosComplement (precision);
   list.push_back (OperationGroup::Constraint::instantiateLessConstraint
                   (less, exp[0], negativeOfRightExp, instruction));
   delete negativeOfRightExp;
@@ -70,8 +74,10 @@ AdditionOperationGroup::instantiateConstraintForLessCase (bool &less,
 std::list <OperationGroup::ConstraintPtr>
 AdditionOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
     uint32_t instruction) const {
+  const int precision = exp[0]->getLastConcreteValue ().getSize ();
   std::list <OperationGroup::ConstraintPtr> list;
-  OperationGroup::ExpressionPtr negativeOfRightExp = exp[1]->twosComplement ();
+  OperationGroup::ExpressionPtr negativeOfRightExp =
+      exp[1]->twosComplement (precision);
   list.push_back (OperationGroup::Constraint::instantiateLessOrEqualConstraint
                   (lessOrEqual, exp[0], negativeOfRightExp, instruction));
   delete negativeOfRightExp;
@@ -96,8 +102,10 @@ AdditionOperationGroup::instantiateConstraintForBelowCase (bool &below,
 std::list <OperationGroup::ConstraintPtr>
 AdditionOperationGroup::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
     uint32_t instruction) const {
+  const int precision = exp[0]->getLastConcreteValue ().getSize ();
   std::list <OperationGroup::ConstraintPtr> list;
-  OperationGroup::ExpressionPtr negativeOfRightExp = exp[1]->twosComplement ();
+  OperationGroup::ExpressionPtr negativeOfRightExp =
+      exp[1]->twosComplement (precision);
   list.push_back (OperationGroup::Constraint::instantiateBelowConstraint
                   (belowOrEqual, exp[0], negativeOfRightExp, instruction));
   delete negativeOfRightExp;
