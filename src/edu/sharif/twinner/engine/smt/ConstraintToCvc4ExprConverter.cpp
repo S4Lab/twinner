@@ -37,8 +37,8 @@ namespace smt {
 ConstraintToCvc4ExprConverter::ConstraintToCvc4ExprConverter (ExprManager &_em,
     bool _limitSymbols,
     const std::list < const edu::sharif::twinner::trace::Constraint * > &_constraints) :
-    em (_em), constraints (_constraints), initialized (false),
-    limitSymbols (_limitSymbols) {
+em (_em), constraints (_constraints), initialized (false),
+limitSymbols (_limitSymbols) {
   type = em.mkBitVectorType (128);
 
   zero = em.mkConst (BitVector (128, UINT64 (0)));
@@ -463,22 +463,25 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
     }
     case kind::BITVECTOR_PLUS:
     {
-      if (exp.getNumChildren () != 2) {
+      if (exp.getNumChildren () < 2) {
         edu::sharif::twinner::util::Logger::error ()
             << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
-            << "): CVC4 BITVECTOR_PLUS needs exactly two children\n";
-        throw std::runtime_error ("CVC4 Expr must have exactly two children");
+            << "): CVC4 BITVECTOR_PLUS needs at least two children\n";
+        throw std::runtime_error ("CVC4 Expr must have at least two children");
       }
-      Expr::const_iterator it = exp.begin ();
-      Expr left = *it++;
-      Expr right = *it;
-      edu::sharif::twinner::trace::Expression *leftExp =
-          convertCvc4ExprToExpression (left);
-      edu::sharif::twinner::trace::Expression *rightExp =
-          convertCvc4ExprToExpression (right);
-      leftExp->add (rightExp);
-      delete rightExp;
-      return leftExp;
+      edu::sharif::twinner::trace::Expression *sum = 0;
+      for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
+        Expr exp = *it;
+        edu::sharif::twinner::trace::Expression *addee =
+            convertCvc4ExprToExpression (exp);
+        if (sum == 0) {
+          sum = addee;
+        } else {
+          sum->add (addee);
+          delete addee;
+        }
+      }
+      return sum;
     }
     case kind::BITVECTOR_NEG:
     {
