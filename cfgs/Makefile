@@ -10,11 +10,13 @@ TARGETS := multi-path-with-printf-leafs-test \
 all: $(TARGETS:=.cfg.png)
 
 %.cfg.png: %.cfg.dot
-	dot -o $@ -Tpng $<
+	nice dot -o $@ -Tpng $<
 
 %.cfg.dot: %.ll
 	opt -dot-cfg $< >/dev/null
-	mv cfg.main.dot  $@
+	# use other opt passes to optimise the graph
+	sed -i 's/,label=".*"\]/,label="{l1|{<s0>T|<s1>F}}"\]/' cfg.main.dot
+	mv cfg.main.dot $@
 
 %.ll: %.c
 	$(CLANG) $(CLANG_FLAGS) $(INCLUDEPATH) $<
