@@ -14,8 +14,8 @@
 #define TC_UINT128_H
 
 struct UINT128 {
-  UINT64 low;
-  UINT64 high;
+  const UINT64 low;
+  const UINT64 high;
 
   constexpr UINT128 (const UINT64 _high, const UINT64 _low)
   : high (_high), low (_low) {
@@ -205,12 +205,11 @@ UINT64 operator% (const UINT64 u, const UINT128 divisor) {
 UINT128 operator% (const UINT128 u, const UINT128 divisor) {
   if (divisor.high == 0) {
     return UINT128 (0, u % (divisor.low));
+  } else if (u < divisor) {
+    return u;
+  } else {
+    return (u - divisor) % divisor;
   }
-  UINT128 remainder = u;
-  while (remainder >= divisor) {
-    remainder = remainder - divisor;
-  }
-  return remainder;
 }
 
 UINT128 arithmeticShiftToRight (const UINT128 v, const int bits) {

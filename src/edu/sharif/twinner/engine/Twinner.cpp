@@ -22,6 +22,7 @@
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 #include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
@@ -40,21 +41,19 @@ namespace twinner {
 namespace engine {
 
 struct TwinCodeGenerationAux {
-
   unsigned int depth;
   std::stringstream &out;
   unsigned int index;
 };
 
 class IndentedStringStream : public std::stringstream {
-
- private:
+private:
   const std::string indentation;
 
- public:
+public:
 
   IndentedStringStream (const std::string &_indentation) :
-      indentation (_indentation) {
+  indentation (_indentation) {
   }
 
   IndentedStringStream &indented () {
@@ -64,7 +63,8 @@ class IndentedStringStream : public std::stringstream {
 };
 
 void code_trace_into_twin_code (std::stringstream &out,
-    const edu::sharif::twinner::trace::Trace * const &trace);
+    const edu::sharif::twinner::trace::Trace * const &trace,
+    int traceIndex, std::stringstream &conout);
 std::map < int, std::set < ADDRINT > > gather_symbols_addresses_of_trace (
     const edu::sharif::twinner::trace::Trace *trace);
 void extract_memory_addresses_of_trace_segment (
@@ -86,7 +86,21 @@ void check_symbol_type_and_add_it_to_set (
 
 void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
     TwinCodeGenerationAux &aux,
-    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
+    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment,
+    int traceIndex, std::stringstream &conout);
+void extract_types_and_names (
+    std::set< std::pair< std::string, std::string > > &typesAndNames,
+    const edu::sharif::twinner::trace::Constraint *simplifiedConstraint);
+void extract_types_and_names (
+    std::set< std::pair< std::string, std::string > > &typesAndNames,
+    const edu::sharif::twinner::trace::Expression *exp);
+void extract_type_and_name_and_add_them_to_set (
+    std::set< std::pair< std::string, std::string > > &typesAndNames,
+    edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token);
+void code_condition_function_and_if (IndentedStringStream &iss,
+    std::string constraintString, int traceIndex, int segmentIndex,
+    std::set< std::pair< std::string, std::string > > typesAndNames,
+    std::stringstream &conout);
 
 void delete_symbol (const edu::sharif::twinner::trace::exptoken::Symbol * const &symbol);
 
@@ -115,7 +129,7 @@ void code_memory_changes (IndentedStringStream &out,
     const ADDRINT &memoryEa, edu::sharif::twinner::trace::Expression * const &exp);
 
 Twinner::Twinner () :
-    ctree (new edu::sharif::twinner::engine::search::ConstraintTree ()) {
+ctree (new edu::sharif::twinner::engine::search::ConstraintTree ()) {
   edu::sharif::twinner::engine::smt::SmtSolver::init
       (new edu::sharif::twinner::engine::smt::Cvc4SmtSolver ());
 }
@@ -270,10 +284,12 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
 
 void Twinner::codeTracesIntoTwinCode (
     const std::map < ADDRINT, UINT64 > &initialValues) {
+  std::stringstream code;
   std::stringstream out;
-  out << '\n';
-  out << "#include \"twincode.h\"\n";
-  out << '\n';
+  std::stringstream conout;
+  code << '\n';
+  code << "#include \"twincode.h\"\n";
+  code << '\n';
   out << "int main () {\n";
   out << "\tstruct RegistersSet regs;\n";
   out << "\tSAVE_REGISTERS (regs);\n";
@@ -284,12 +300,13 @@ void Twinner::codeTracesIntoTwinCode (
   for (std::list < const edu::sharif::twinner::trace::Trace * >::iterator it =
       traces.begin (); it != traces.end (); ++it) {
     out << "\t// coding trace #" << i << '\n';
-    code_trace_into_twin_code (out, *it);
+    code_trace_into_twin_code (out, *it, i, conout);
     out << "\t// end of trace #" << i << '\n';
     ++i;
   }
   out << "}\n";
-  edu::sharif::twinner::util::Logger::info () << out.str ();
+  code << conout.str () << out.str ();
+  edu::sharif::twinner::util::Logger::info () << code.str ();
 
   std::ofstream fileout;
   fileout.open (twin.c_str (), ios_base::out | ios_base::trunc);
@@ -299,7 +316,7 @@ void Twinner::codeTracesIntoTwinCode (
         << twin << '\n';
     throw std::runtime_error ("Error in saving twincode in file");
   }
-  fileout << out.str ();
+  fileout << code.str ();
 
   fileout.close ();
 }
@@ -307,8 +324,8 @@ void Twinner::codeTracesIntoTwinCode (
 void code_registers_symbols_initiation_into_twin_code (std::stringstream &out,
     int index) {
   const char *registersNames[] = {// count == 16
-                                  "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "rsp", "rbp",
-                                  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
+    "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "rsp", "rbp",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
   };
   out << std::dec << "const UINT64 " << registersNames[0] << "_" << index <<
       " = regs." << registersNames[0];
@@ -345,11 +362,12 @@ void code_initial_value_into_twin_code (std::stringstream &out,
 }
 
 void code_trace_into_twin_code (std::stringstream &out,
-    const edu::sharif::twinner::trace::Trace * const &trace) {
+    const edu::sharif::twinner::trace::Trace * const &trace,
+    int traceIndex, std::stringstream &conout) {
   TwinCodeGenerationAux aux = {
-                               1, // depth
-                               out,
-                               0 // index
+    1, // depth
+    out,
+    0 // index
   };
   out << "\t{\n";
   std::map < int, std::set < ADDRINT > > addresses =
@@ -358,7 +376,8 @@ void code_trace_into_twin_code (std::stringstream &out,
       ::const_reverse_iterator it = trace->getTraceSegments ().rbegin ();
       it != trace->getTraceSegments ().rend (); ++it) {
     edu::sharif::twinner::trace::ExecutionTraceSegment * const segment = *it;
-    code_segment_into_twin_code (addresses[aux.index], aux, segment);
+    code_segment_into_twin_code (addresses[aux.index], aux, segment,
+                                 traceIndex, conout);
   }
   for (unsigned int j = aux.depth - 1; j > 0; --j) {
 
@@ -424,13 +443,15 @@ void check_symbol_type_and_add_it_to_set (std::map < int, std::set < ADDRINT > >
 
 void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
     TwinCodeGenerationAux &aux,
-    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
+    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment,
+    int traceIndex, std::stringstream &conout) {
   edu::sharif::twinner::util::foreach
       (addresses, &code_symbol_initiation_into_twin_code, aux);
   std::list < const edu::sharif::twinner::trace::Constraint * > simplifiedConstraints =
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
       ->simplifyConstraints (segment->getPathConstraints ());
   std::stringstream out;
+  std::set< std::pair< std::string, std::string > > typesAndNames;
   bool first = true;
   for (std::list < const edu::sharif::twinner::trace::Constraint * >
       ::const_reverse_iterator it = simplifiedConstraints.rbegin ();
@@ -446,25 +467,92 @@ void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
       out << " && (";
     }
     out << simplifiedConstraint->toString () << ')';
+    extract_types_and_names (typesAndNames, simplifiedConstraint);
     delete simplifiedConstraint;
-  }
-  if (!first) {
-
-    repeat (aux.depth) {
-      aux.out << '\t';
-    }
-    aux.out << "if (" << out.str () << ") {\n";
-    aux.depth++;
   }
   std::stringstream indentation;
 
   repeat (aux.depth) {
     indentation << '\t';
   }
+  if (!first) {
+    IndentedStringStream iss (indentation.str ());
+    code_condition_function_and_if (iss, out.str (), traceIndex, aux.index,
+                                    typesAndNames, conout);
+    aux.out << iss.str ();
+    aux.depth++;
+    indentation << '\t';
+  }
   IndentedStringStream iss (indentation.str ());
   code_memory_symbolic_changes_of_one_segment (iss, segment);
   code_registers_symbolic_changes_of_one_segment (iss, segment, aux.index);
   aux.out << iss.str ();
+}
+
+void extract_types_and_names (
+    std::set< std::pair< std::string, std::string > > &typesAndNames,
+    const edu::sharif::twinner::trace::Constraint *simplifiedConstraint) {
+  extract_types_and_names
+      (typesAndNames, simplifiedConstraint->getMainExpression ());
+  if (simplifiedConstraint->getAuxExpression ()) {
+    extract_types_and_names
+        (typesAndNames, simplifiedConstraint->getAuxExpression ());
+  }
+}
+
+void extract_types_and_names (
+    std::set< std::pair< std::string, std::string > > &typesAndNames,
+    const edu::sharif::twinner::trace::Expression *exp) {
+  edu::sharif::twinner::util::foreach
+      (exp->getStack (), &extract_type_and_name_and_add_them_to_set,
+       typesAndNames);
+}
+
+void extract_type_and_name_and_add_them_to_set (
+    std::set< std::pair< std::string, std::string > > &typesAndNames,
+    edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token) {
+  const edu::sharif::twinner::trace::exptoken::Symbol *symbol =
+      dynamic_cast<edu::sharif::twinner::trace::exptoken::Symbol *> (token);
+  if (symbol) {
+    const char *type;
+    if (symbol->getValue ().getSize () == 128) {
+      type = "UINT128";
+    } else {
+      type = "UINT64";
+    }
+    typesAndNames.insert (make_pair (std::string (type), symbol->toString ()));
+  }
+}
+
+void code_condition_function_and_if (IndentedStringStream &iss,
+    std::string constraintString, int traceIndex, int segmentIndex,
+    std::set< std::pair< std::string, std::string > > typesAndNames,
+    std::stringstream &conout) {
+  std::stringstream conditionName;
+  conditionName << "trace_" << traceIndex << "_condition_" << segmentIndex;
+
+  typedef std::pair< std::string, std::string > TypeAndName;
+  typedef std::set< TypeAndName > TypesAndNamesSet;
+  std::stringstream typedArguments, arguments;
+  bool first = true;
+  for (typename TypesAndNamesSet::const_iterator it = typesAndNames.begin ();
+      it != typesAndNames.end (); ++it) {
+    if (first) {
+      first = false;
+    } else {
+      typedArguments << ", ";
+      arguments << ", ";
+    }
+    typedArguments << it->first << ' ' << it->second;
+    arguments << it->second;
+  }
+
+  conout << "bool " << conditionName.str () << " ("
+      << typedArguments.str () << ") {\n";
+  conout << "\treturn " << constraintString << ";\n";
+  conout << "}\n\n";
+  iss.indented () << "if (" << conditionName.str () << " ("
+      << arguments.str () << ")) {\n";
 }
 
 void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &out,
@@ -478,7 +566,7 @@ void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &out,
 void code_memory_changes (IndentedStringStream &out,
     const ADDRINT &memoryEa, edu::sharif::twinner::trace::Expression * const &exp) {
   out.indented () << "*((UINT64 *) 0x" << std::hex << memoryEa << ") = "
-      << exp->toString () << ";\n";
+      "UINT64 (" << exp->toString () << ");\n";
 }
 
 void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
@@ -486,7 +574,6 @@ void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
     unsigned int &index) {
 
   struct RegInfo {
-
     const char *name;
     REG id;
   } const regs[] = {// count == 16
@@ -515,7 +602,7 @@ void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
         regToExp.find (regs[i].id);
     out.indented () << "regs." << regs[i].name << " = ";
     if (it != regToExp.end ()) {
-      out << it->second->toString () << ";\n";
+      out << "UINT64 (" << it->second->toString () << ");\n";
     } else {
       out << regs[i].name << "_" << index << ";\n";
     }
