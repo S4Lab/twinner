@@ -5,7 +5,8 @@ CLANG_FLAGS := -S -std=c++11 -emit-llvm
 INCLUDEPATH := -I ../src/res/
 
 TARGETS := multi-path-with-printf-leafs-test \
-	multi-path-with-printf-leafs-test.twin
+	multi-path-with-printf-leafs-test.twin \
+	mpwpl-manual-virt-obf
 
 all: $(TARGETS:=.cfg.png)
 
