@@ -8,12 +8,16 @@ TARGETS := simple-condition-test \
 	multi-path-with-printf-leafs-test \
 	upx-test upx-test.upx-packed \
 	overhead-measurement-test \
-	expression-addition-runtime-simplification
+	expression-addition-runtime-simplification \
+	mpwpl-manual-virt-obf
 TWIN_TARGETS := simple-condition-test \
 	multi-path-with-printf-leafs-test \
 	#upx-test
 
 all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
+
+mpwpl-manual-virt-obf.out: mpwpl-manual-virt-obf.c
+	g++ --std=c++11 mpwpl-manual-virt-obf.c -o mpwpl-manual-virt-obf.out
 
 %.twin.out: %.twin.c
 	g++ -std=c++11 -g $(INCLUDEPATH) $< -o $@
