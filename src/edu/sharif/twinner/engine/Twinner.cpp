@@ -380,6 +380,9 @@ void code_trace_into_twin_code (std::stringstream &out,
                                  traceIndex, conout);
   }
   for (unsigned int j = aux.depth - 1; j > 0; --j) {
+    if (j == 1) {
+      out << "\t\treturn 0;\n"; // Marking end of trace
+    }
 
     repeat (j) {
       out << '\t';
