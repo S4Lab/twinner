@@ -2364,6 +2364,27 @@ void InstructionSymbolicExecuter::setleAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::setlAnalysisRoutine (
+    const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::util::Logger::loquacious () << "setlAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  bool less;
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
+      eflags.instantiateConstraintForLessCase (less, disassembledInstruction);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraints (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp;
+  if (less) {
+    dstexp = new edu::sharif::twinner::trace::ExpressionImp (UINT64 (1));
+  } else { // shouldSetToZero
+    dstexp = new edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
+  }
+  opr.setExpression (trace, dstexp);
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::setbeAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::util::Logger::loquacious () << "setbeAnalysisRoutine(...)\n"
@@ -2679,6 +2700,8 @@ InstructionSymbolicExecuter::convertOpcodeToSingleOperandAnalysisRoutine (
     return &InstructionSymbolicExecuter::setzAnalysisRoutine;
   case XED_ICLASS_SETLE:
     return &InstructionSymbolicExecuter::setleAnalysisRoutine;
+  case XED_ICLASS_SETL:
+    return &InstructionSymbolicExecuter::setlAnalysisRoutine;
   case XED_ICLASS_SETBE:
     return &InstructionSymbolicExecuter::setbeAnalysisRoutine;
   case XED_ICLASS_SETNBE:
