@@ -516,6 +516,28 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       delete rightExp;
       return leftExp;
     }
+    case kind::BITVECTOR_OR:
+    {
+      if (exp.getNumChildren () < 2) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression ("
+            << exp << "): CVC4 BITVECTOR_OR needs at least two children\n";
+        throw std::runtime_error ("CVC4 Expr must have at least two children");
+      }
+      edu::sharif::twinner::trace::Expression *orRes = 0;
+      for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
+        Expr exp = *it;
+        edu::sharif::twinner::trace::Expression *oree =
+            convertCvc4ExprToExpression (exp);
+        if (orRes == 0) {
+          orRes = oree;
+        } else {
+          orRes->bitwiseOr (oree);
+          delete oree;
+        }
+      }
+      return orRes;
+    }
       // TODO: Implement following operator types: MINUS, MULTIPLY, DIVIDE, XOR, BITWISE_AND, BITWISE_OR, SHIFT_RIGHT, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
     default:
       edu::sharif::twinner::util::Logger::error ()
