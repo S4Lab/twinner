@@ -46,17 +46,17 @@ namespace twintool {
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     std::ifstream &symbolsFileInputStream, bool _disabled, bool _measureMode) :
-    trace (new edu::sharif::twinner::trace::TraceImp (symbolsFileInputStream)),
-    trackedReg (REG_INVALID_), operandSize (-1), hook (0),
-    disabled (_disabled),
-    measureMode (_measureMode), numberOfExecutedInstructions (0) {
+trace (new edu::sharif::twinner::trace::TraceImp (symbolsFileInputStream)),
+trackedReg (REG_INVALID_), operandSize (-1), hook (0),
+disabled (_disabled),
+measureMode (_measureMode), numberOfExecutedInstructions (0) {
 }
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (bool _disabled) :
-    trace (new edu::sharif::twinner::trace::TraceImp ()),
-    trackedReg (REG_INVALID_), operandSize (-1), hook (0),
-    disabled (_disabled),
-    measureMode (false), numberOfExecutedInstructions (0) {
+trace (new edu::sharif::twinner::trace::TraceImp ()),
+trackedReg (REG_INVALID_), operandSize (-1), hook (0),
+disabled (_disabled),
+measureMode (false), numberOfExecutedInstructions (0) {
 }
 
 edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () const {
@@ -113,7 +113,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -139,7 +139,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMutableReg (
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -167,8 +167,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxReg (
       << ", src reg: " << REG_StringShort (srcReg)
       << ", aux reg: " << REG_StringShort (auxReg) << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
-      RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
+                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
+                    RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -196,8 +196,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxImd (
       << ", src reg: " << REG_StringShort (srcReg)
       << ", aux imd: 0x" << auxImmediateValue << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
-      ConstantExpressionValueProxy (auxImmediateValue, 8));
+                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
+                    ConstantExpressionValueProxy (auxImmediateValue, 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -223,7 +223,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine r
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
+                    MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -252,8 +252,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMemAuxReg (
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << ", aux reg: " << REG_StringShort (auxReg) << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes),
-      RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
+                    MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes),
+                    RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -281,8 +281,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMemAuxImd (
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << ", aux imd: 0x" << auxImmediateValue << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes),
-      ConstantExpressionValueProxy (auxImmediateValue, 8));
+                    MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes),
+                    ConstantExpressionValueProxy (auxImmediateValue, 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -307,7 +307,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src imd: 0x" << srcImmediateValue << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      ConstantExpressionValueProxy (srcImmediateValue, REG_Size (dstReg) * 8));
+                    ConstantExpressionValueProxy (srcImmediateValue, REG_Size (dstReg) * 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -333,7 +333,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
       << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -360,7 +360,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMutableReg (
       << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -389,8 +389,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcRegAuxReg (
       << ", src reg: " << REG_StringShort (srcReg)
       << ", aux reg: " << REG_StringShort (auxReg) << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-      RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
-      RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
+                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
+                    RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -432,7 +432,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
   logger << std::hex << ": dst mem addr: 0x" << dstMemoryEa
       << ", src imd: 0x" << srcImmediateValue << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-      ConstantExpressionValueProxy (srcImmediateValue, memReadBytes * 8));
+                    ConstantExpressionValueProxy (srcImmediateValue, memReadBytes * 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -477,8 +477,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImdAuxReg (
       << ", src imd: 0x" << srcImmediateValue
       << ", aux reg: " << REG_StringShort (auxReg) << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-      ConstantExpressionValueProxy (srcImmediateValue, memReadBytes * 8),
-      RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
+                    ConstantExpressionValueProxy (srcImmediateValue, memReadBytes * 8),
+                    RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -504,7 +504,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine r
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, (int) memReadBytes),
-      MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
+                    MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -533,8 +533,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMemAuxReg (
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << ", aux reg: " << REG_StringShort (auxReg) << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, (int) memReadBytes),
-      MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes),
-      RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
+                    MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes),
+                    RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -582,7 +582,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
       << REG_StringShort (dstReg) << ", dst reg value: 0x"
       << dstRegVal << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      ConstantExpressionValueProxy (dstRegVal, REG_Size (dstReg) * 8));
+                    ConstantExpressionValueProxy (dstRegVal, REG_Size (dstReg) * 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -636,8 +636,8 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
       << ", right dst reg: " << REG_StringShort (dstRightReg)
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
-      RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
-      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+                    RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
+                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -666,8 +666,8 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcMem (
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
-      RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
-      MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
+                    RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
+                    MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -696,8 +696,8 @@ void InstructionSymbolicExecuter::analysisRoutineTwoRegOneMem (
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
-      RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
-      MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
+                    RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
+                    MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -726,8 +726,8 @@ void InstructionSymbolicExecuter::analysisRoutineOneMemTwoReg (
       << ", src reg: " << REG_StringShort (srcReg)
       << ", mem read bytes: 0x" << memReadBytes << '\n';
   (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-      RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-      RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+                    RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -756,9 +756,9 @@ void InstructionSymbolicExecuter::analysisRoutineTwoRegTwoMem (
       << ", dst mem addr: 0x" << dstMemoryEa << ", src mem addr: 0x" << srcMemoryEa
       << ", mem read bytes: 0x" << memReadBytes << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
-      RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
-      MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-      MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
+                    RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
+                    MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+                    MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -878,7 +878,7 @@ void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
 
   } else if (operandSize > 0) {
     (this->*hook) (context,
-        edu::sharif::twinner::trace::cv::ConcreteValue64Bits (operandSize));
+                   edu::sharif::twinner::trace::cv::ConcreteValue64Bits (operandSize));
     operandSize = -1;
   }
   hook = 0;
@@ -952,7 +952,6 @@ void InstructionSymbolicExecuter::pshufdAnalysisRoutine (
   const edu::sharif::twinner::trace::Expression *orderexp = order.getExpression (trace);
 
   struct OrderByte {
-
     unsigned int b0 : 2;
     unsigned int b1 : 2;
     unsigned int b2 : 2;
@@ -2387,6 +2386,28 @@ void InstructionSymbolicExecuter::setbeAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::setnbeAnalysisRoutine (
+    const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::util::Logger::loquacious () << "setnbeAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  bool belowOrEqual;
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
+      eflags.instantiateConstraintForBelowOrEqualCase
+      (belowOrEqual, disassembledInstruction);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraints (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp;
+  if (!belowOrEqual) {
+    dstexp = new edu::sharif::twinner::trace::ExpressionImp (UINT64 (1));
+  } else { // shouldSetToZero
+    dstexp = new edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
+  }
+  opr.setExpression (trace, dstexp);
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::notAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::util::Logger::loquacious () << "notAnalysisRoutine(...)\n"
@@ -2660,6 +2681,8 @@ InstructionSymbolicExecuter::convertOpcodeToSingleOperandAnalysisRoutine (
     return &InstructionSymbolicExecuter::setleAnalysisRoutine;
   case XED_ICLASS_SETBE:
     return &InstructionSymbolicExecuter::setbeAnalysisRoutine;
+  case XED_ICLASS_SETNBE:
+    return &InstructionSymbolicExecuter::setnbeAnalysisRoutine;
   case XED_ICLASS_NOT:
     return &InstructionSymbolicExecuter::notAnalysisRoutine;
   default:

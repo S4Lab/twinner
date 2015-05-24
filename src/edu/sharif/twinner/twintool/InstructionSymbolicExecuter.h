@@ -36,7 +36,6 @@ class ExpressionValueProxy;
 class MutableExpressionValueProxy;
 
 class InstructionSymbolicExecuter {
-
 private:
   typedef edu::sharif::twinner::trace::cv::ConcreteValue ConcreteValue;
 
@@ -676,6 +675,11 @@ private:
    * SETBE sets opr to 1 iff ZF=1 or CF=1 (and sets it to 0 otherwise).
    */
   void setbeAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
+  /**
+   * SETNBE sets opr to 1 iff ZF=0 and CF=0 (and sets it to 0 otherwise).
+   */
+  void setnbeAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
   /**
    * NOT one's complements the opr.

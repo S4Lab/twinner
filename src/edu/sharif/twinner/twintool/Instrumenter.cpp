@@ -40,33 +40,33 @@ inline void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > 
 Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     const string &_traceFilePath, const std::string &_disassemblyFilePath,
     bool _disabled, bool measureMode) :
-    traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-    ise (new InstructionSymbolicExecuter (symbolsFileInStream, _disabled, measureMode)),
-    isWithinInitialStateDetectionMode (false),
-    disabled (_disabled),
-    totalCountOfInstructions (0) {
+traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
+ise (new InstructionSymbolicExecuter (symbolsFileInStream, _disabled, measureMode)),
+isWithinInitialStateDetectionMode (false),
+disabled (_disabled),
+totalCountOfInstructions (0) {
   initialize ();
 }
 
 Instrumenter::Instrumenter (const std::set < ADDRINT > &_candidateAddresses,
     const std::string &_traceFilePath, const std::string &_disassemblyFilePath,
     bool _disabled) :
-    traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-    ise (new InstructionSymbolicExecuter (_disabled)),
-    candidateAddresses (_candidateAddresses),
-    isWithinInitialStateDetectionMode (true),
-    disabled (_disabled),
-    totalCountOfInstructions (0) {
+traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
+ise (new InstructionSymbolicExecuter (_disabled)),
+candidateAddresses (_candidateAddresses),
+isWithinInitialStateDetectionMode (true),
+disabled (_disabled),
+totalCountOfInstructions (0) {
   initialize ();
 }
 
 Instrumenter::Instrumenter (const string &_traceFilePath,
     const std::string &_disassemblyFilePath, bool _disabled) :
-    traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-    ise (new InstructionSymbolicExecuter (_disabled)),
-    isWithinInitialStateDetectionMode (false),
-    disabled (_disabled),
-    totalCountOfInstructions (0) {
+traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
+ise (new InstructionSymbolicExecuter (_disabled)),
+isWithinInitialStateDetectionMode (false),
+disabled (_disabled),
+totalCountOfInstructions (0) {
   initialize ();
 }
 
@@ -237,6 +237,9 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
         return;
 
       } else {
+        edu::sharif::twinner::util::Logger::error ()
+            << "UnExpected instruction model (expectedModels = "
+            << int (expectedModels) << ", model = " << int (model) << ")\n";
         throw std::runtime_error ("UnExpected instruction model");
       }
     }
@@ -268,6 +271,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_SETZ:
   case XED_ICLASS_SETLE:
   case XED_ICLASS_SETBE:
+  case XED_ICLASS_SETNBE:
   case XED_ICLASS_NOT:
     return INS_OperandIsReg (ins, 0) ? DST_REG_SRC_IMPLICIT : DST_MEM_SRC_IMPLICIT;
   case XED_ICLASS_LEAVE:
