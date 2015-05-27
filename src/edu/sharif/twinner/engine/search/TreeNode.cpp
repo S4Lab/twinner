@@ -14,6 +14,8 @@
 
 #include "edu/sharif/twinner/trace/Constraint.h"
 
+#include "edu/sharif/twinner/engine/smt/SmtSolver.h"
+
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
@@ -28,8 +30,8 @@ static int lastDebugId = 0;
 
 TreeNode::TreeNode (TreeNode *p, const edu::sharif::twinner::trace::Constraint *c,
     const edu::sharif::twinner::util::MemoryManager *m) :
-    debugId (++lastDebugId),
-    parent (p), constraint (c), memoryManager (m) {
+debugId (++lastDebugId),
+parent (p), constraint (c), memoryManager (m) {
   if (p) {
     p->children.push_back (this);
   }
@@ -50,6 +52,18 @@ TreeNode *TreeNode::addConstraint (
     const edu::sharif::twinner::trace::Constraint *c,
     const edu::sharif::twinner::util::MemoryManager *m) {
   if (c->isTrivial ()) {
+    return this;
+  }
+  std::list < const edu::sharif::twinner::trace::Constraint * > sc =
+      edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+      ->simplifyConstraint (c);
+  const bool isTrivial = sc.empty ()
+      || (sc.size () == 1 && sc.front ()->isTrivial ());
+  while (!sc.empty ()) {
+    delete sc.back ();
+    sc.pop_back ();
+  }
+  if (isTrivial) {
     return this;
   }
   if (children.empty () || (*children.back ()->constraint) != (*c)) {
