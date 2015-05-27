@@ -17,11 +17,15 @@
 #include <list>
 #include <stdexcept>
 #include <string.h>
+#include <stdlib.h>
 
 #include "Instrumenter.h"
 
+#include "edu/sharif/twinner/exception/AbstractException.h"
+
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
+
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 
@@ -54,7 +58,7 @@ KNOB < BOOL > measure (KNOB_MODE_WRITEONCE, "pintool", "measure", "",
     "if presents, trivial instruction counting instrumentation will be used instead of normal behavior");
 
 TwinTool::TwinTool () :
-    im (0) {
+im (0) {
 }
 
 TwinTool::~TwinTool () {
@@ -63,7 +67,26 @@ TwinTool::~TwinTool () {
   }
 }
 
+void my_terminate_handler () {
+  edu::sharif::twinner::util::Logger::error () << "terminate is called\n";
+  try {
+    throw;
+  } catch (const edu::sharif::twinner::exception::AbstractException &e) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "AbstractException::what (): " << e.what () << '\n';
+    e.printStackBacktrace ();
+  } catch (const std::exception &e) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "std::exception::what (): " << e.what () << '\n';
+  } catch (...) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "unknown exception is thrown!\n";
+  }
+  abort ();
+}
+
 INT32 TwinTool::run (int argc, char *argv[]) {
+  set_terminate (my_terminate_handler);
   /*
    * Initialize PIN library. Print help message if -h(elp) is specified
    * in the command line or the command line is invalid.
