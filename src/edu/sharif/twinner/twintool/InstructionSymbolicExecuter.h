@@ -32,6 +32,7 @@ class ConcreteValue;
 }
 namespace twintool {
 
+class Instrumenter;
 class ExpressionValueProxy;
 class MutableExpressionValueProxy;
 
@@ -68,6 +69,7 @@ private:
   typedef void (InstructionSymbolicExecuter::*SingleOperandAnalysisRoutine) (
       const MutableExpressionValueProxy &opr);
 
+  Instrumenter *im;
   edu::sharif::twinner::trace::Trace *trace;
   Flags eflags;
 
@@ -83,9 +85,9 @@ private:
   UINT64 numberOfExecutedInstructions; // used in measure mode
 
 public:
-  InstructionSymbolicExecuter (std::ifstream &symbolsFileInputStream, bool disabled,
-      bool _measureMode);
-  InstructionSymbolicExecuter (bool disabled);
+  InstructionSymbolicExecuter (Instrumenter *im,
+      std::ifstream &symbolsFileInputStream, bool disabled, bool _measureMode);
+  InstructionSymbolicExecuter (Instrumenter *im, bool disabled);
 
   edu::sharif::twinner::trace::Trace *getTrace () const;
 

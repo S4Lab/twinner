@@ -41,7 +41,8 @@ Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     const string &_traceFilePath, const std::string &_disassemblyFilePath,
     bool _disabled, bool measureMode) :
 traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-ise (new InstructionSymbolicExecuter (symbolsFileInStream, _disabled, measureMode)),
+ise (new InstructionSymbolicExecuter (this, symbolsFileInStream,
+_disabled, measureMode)),
 isWithinInitialStateDetectionMode (false),
 disabled (_disabled),
 totalCountOfInstructions (0) {
@@ -52,7 +53,7 @@ Instrumenter::Instrumenter (const std::set < ADDRINT > &_candidateAddresses,
     const std::string &_traceFilePath, const std::string &_disassemblyFilePath,
     bool _disabled) :
 traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-ise (new InstructionSymbolicExecuter (_disabled)),
+ise (new InstructionSymbolicExecuter (this, _disabled)),
 candidateAddresses (_candidateAddresses),
 isWithinInitialStateDetectionMode (true),
 disabled (_disabled),
@@ -63,7 +64,7 @@ totalCountOfInstructions (0) {
 Instrumenter::Instrumenter (const string &_traceFilePath,
     const std::string &_disassemblyFilePath, bool _disabled) :
 traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-ise (new InstructionSymbolicExecuter (_disabled)),
+ise (new InstructionSymbolicExecuter (this, _disabled)),
 isWithinInitialStateDetectionMode (false),
 disabled (_disabled),
 totalCountOfInstructions (0) {

@@ -13,6 +13,7 @@
 #include "InstructionSymbolicExecuter.h"
 
 
+#include "Instrumenter.h"
 #include "RegisterResidentExpressionValueProxy.h"
 #include "MemoryResidentExpressionValueProxy.h"
 #include "ConstantExpressionValueProxy.h"
@@ -45,14 +46,18 @@ namespace twinner {
 namespace twintool {
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
+    Instrumenter *_im,
     std::ifstream &symbolsFileInputStream, bool _disabled, bool _measureMode) :
+im (_im),
 trace (new edu::sharif::twinner::trace::TraceImp (symbolsFileInputStream)),
 trackedReg (REG_INVALID_), operandSize (-1), hook (0),
 disabled (_disabled),
 measureMode (_measureMode), numberOfExecutedInstructions (0) {
 }
 
-InstructionSymbolicExecuter::InstructionSymbolicExecuter (bool _disabled) :
+InstructionSymbolicExecuter::InstructionSymbolicExecuter (Instrumenter *_im,
+    bool _disabled) :
+im (_im),
 trace (new edu::sharif::twinner::trace::TraceImp ()),
 trackedReg (REG_INVALID_), operandSize (-1), hook (0),
 disabled (_disabled),
@@ -872,16 +877,19 @@ void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
     ConcreteValue *value =
         edu::sharif::twinner::util::readRegisterContent (context, trackedReg);
-    (this->*hook) (context, *value);
-    delete value;
+    Hook hfunc = hook;
     trackedReg = REG_INVALID_;
+    hook = 0;
+    (this->*hfunc) (context, *value);
+    delete value;
 
   } else if (operandSize > 0) {
-    (this->*hook) (context,
-                   edu::sharif::twinner::trace::cv::ConcreteValue64Bits (operandSize));
+    edu::sharif::twinner::trace::cv::ConcreteValue64Bits os (operandSize);
+    Hook hfunc = hook;
     operandSize = -1;
+    hook = 0;
+    (this->*hfunc) (context, os);
   }
-  hook = 0;
 }
 
 void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (
@@ -1474,15 +1482,38 @@ void InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
     const ConcreteValue &oldVal = rsp->getLastConcreteValue ();
     if (oldVal != rspRegVal) { // This jump had side-effect on RSP
-      edu::sharif::twinner::util::Logger::debug () << "\tadjusting rsp...";
+      edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsp...";
       if (oldVal < rspRegVal) {
         ConcreteValue *cv = rspRegVal.clone ();
         (*cv) -= oldVal;
-        rsp->add (cv); // some items have been popped out of stack and RSP is incremented
+        if ((*cv) == 8) {
+          edu::sharif::twinner::util::Logger::loquacious ()
+              << "JMP instruction popped 8 bytes... simulating syscall\n";
+          SYSCALL_STANDARD std;
+#ifdef TARGET_LINUX
+#ifdef TARGET_IA32E
+          std = SYSCALL_STANDARD_IA32E_LINUX;
+#else
+          std = SYSCALL_STANDARD_IA32_LINUX;
+#endif
+#else
+#error "Only Linux is supported currently."
+#endif
+          CONTEXT ctxt;
+          PIN_SaveContext (context, &ctxt);
+          im->syscallEntryPoint (PIN_ThreadId (), &ctxt, std);
+          im->syscallExitPoint (PIN_ThreadId (), &ctxt, std);
+        } else {
+          edu::sharif::twinner::util::Logger::warning ()
+              << "JMP instruction popped items out of stack, but not 8 bytes\n";
+        }
+        rsp->add (cv);
       } else { // oldVal > rspRegVal
+        edu::sharif::twinner::util::Logger::warning ()
+            << "JMP instruction pushed items into stack (decrementing RSP)\n";
         ConcreteValue *cv = oldVal.clone ();
         (*cv) -= rspRegVal;
-        rsp->minus (cv); // some items have been pushed into stack and RSP is decremented
+        rsp->minus (cv);
       }
       // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
     }
