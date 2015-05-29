@@ -4,7 +4,7 @@
  * Copyright © 2013-2015  Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -44,11 +44,9 @@ class Logger;
 extern const Logger &operator<< (const Logger &logger, REG reg);
 
 class Logger {
-
 private:
 
   enum VerbosenessLevel {
-
     QUIET, ERROR, WARNING, INFO, DEBUG, LOQUACIOUS
   };
 
@@ -103,6 +101,10 @@ public:
   }
 
   inline const Logger &operator<< (const long unsigned int t) const {
+    return actualWrite (t);
+  }
+
+  inline const Logger &operator<< (const long int t) const {
     return actualWrite (t);
   }
 

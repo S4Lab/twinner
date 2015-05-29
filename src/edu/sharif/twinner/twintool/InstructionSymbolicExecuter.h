@@ -221,6 +221,9 @@ public:
   void analysisRoutineRepEqualOrRepNotEqualPrefix (REG repReg,
       const ConcreteValue &repRegVal, BOOL executing, BOOL repEqual,
       UINT32 insAssembly);
+  void analysisRoutineMemoryRegisterCorrespondence (REG baseReg,
+      const ConcreteValue &baseRegVal, ADDRDELTA displacement,
+      ADDRINT memoryEa, UINT32 insAssembly);
 
 private:
 
@@ -702,6 +705,12 @@ private:
   void adjustRsiRdiRegisters (int size,
       const MutableExpressionValueProxy &rdi, const MutableExpressionValueProxy &rsi);
 
+  /**
+   * memoryEa must be equal to baseReg + displacement
+   */
+  void memoryRegisterCorrespondenceAnalysisRoutine (
+      const ExpressionValueProxy &baseReg, ADDRDELTA displacement, ADDRINT memoryEa);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
   MutableSourceAnalysisRoutine convertOpcodeToMutableSourceAnalysisRoutine (
@@ -870,6 +879,11 @@ VOID analysisRoutineStrOpMemMem (VOID *iseptr, UINT32 opcode,
 VOID analysisRoutineRepPrefix (VOID *iseptr, UINT32 opcode,
     UINT32 repReg, ADDRINT repRegVal,
     UINT32 executing, UINT32 repEqual,
+    UINT32 insAssembly);
+VOID analysisRoutineMemoryRegisterCorrespondence (VOID *iseptr,
+    UINT32 baseReg, ADDRINT baseRegVal,
+    ADDRINT displacement,
+    ADDRINT memoryEa,
     UINT32 insAssembly);
 
 }

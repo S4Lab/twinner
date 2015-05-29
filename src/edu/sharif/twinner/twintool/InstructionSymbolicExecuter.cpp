@@ -873,6 +873,31 @@ void InstructionSymbolicExecuter::analysisRoutineRepEqualOrRepNotEqualPrefix (RE
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineMemoryRegisterCorrespondence (
+    REG baseReg, const ConcreteValue &baseRegVal, ADDRDELTA displacement,
+    ADDRINT memoryEa, UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineMemoryRegisterCorrespondence(INS: "
+      << insAssemblyStr << "): base reg: " << REG_StringShort (baseReg)
+      << ", displacement: " << std::dec << displacement
+      << ", mem addr: 0x" << std::hex << memoryEa << '\n';
+  memoryRegisterCorrespondenceAnalysisRoutine
+      (RegisterResidentExpressionValueProxy (baseReg, baseRegVal),
+       displacement, memoryEa);
+  logger << "Done\n";
+}
+
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
     ConcreteValue *value =
@@ -2495,6 +2520,30 @@ void InstructionSymbolicExecuter::notAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::memoryRegisterCorrespondenceAnalysisRoutine (
+    const ExpressionValueProxy &baseReg, ADDRDELTA displacement,
+    ADDRINT memoryEa) {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "memoryRegisterCorrespondenceAnalysisRoutine(...)\n"
+      << "\tgetting base reg exp...";
+  edu::sharif::twinner::trace::Expression *baseexp =
+      baseReg.getExpression (trace);
+  if (displacement > 0) {
+    baseexp->add (displacement);
+  } else {
+    baseexp->minus (-displacement);
+  }
+  baseexp->minus (memoryEa);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  std::list <edu::sharif::twinner::trace::Constraint *> cc;
+  cc.push_back (new edu::sharif::twinner::trace::Constraint
+                (baseexp, edu::sharif::twinner::trace::Constraint::ZERO,
+                 disassembledInstruction, false));
+  delete baseexp;
+  trace->addPathConstraints (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -3210,6 +3259,19 @@ VOID analysisRoutineRepPrefix (VOID *iseptr, UINT32 opcode,
        edu::sharif::twinner::trace::cv::ConcreteValue64Bits (repRegVal),
        executing, repEqual,
        insAssembly);
+}
+
+VOID analysisRoutineMemoryRegisterCorrespondence (VOID *iseptr,
+    UINT32 baseReg, ADDRINT baseRegVal,
+    ADDRINT displacement,
+    ADDRINT memoryEa,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineMemoryRegisterCorrespondence
+      ((REG) baseReg,
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (baseRegVal),
+       ADDRDELTA (displacement),
+       memoryEa, insAssembly);
 }
 
 }

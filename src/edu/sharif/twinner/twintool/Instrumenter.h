@@ -27,11 +27,9 @@ namespace twintool {
 class InstructionSymbolicExecuter;
 
 class Instrumenter {
-
 private:
 
   enum InstructionModel {
-
     NOP_INS_MODELS = 0x0000000000000000,
 
     DST_REG_SRC_REG = 0x0000000000000001,
@@ -170,6 +168,8 @@ private:
   InstructionModel getInstructionModelForNormalInstruction (INS ins) const;
   inline void checkForInitialState (INS ins) const;
   void instrumentSingleInstruction (InstructionModel model, OPCODE op, INS ins,
+      UINT32 insAssembly) const;
+  void instrumentMemoryRegisterCorrespondence (INS ins,
       UINT32 insAssembly) const;
   void instrumentRepPrefix (OPCODE op, INS ins, UINT32 insAssembly) const;
 

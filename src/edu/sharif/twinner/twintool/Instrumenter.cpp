@@ -434,6 +434,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                   IARG_PTR, ise,
                   IARG_CONST_CONTEXT,
                   IARG_END);
+  instrumentMemoryRegisterCorrespondence (ins, insAssembly);
   switch (model) {
   case DST_REG_SRC_REG:
   {
@@ -876,6 +877,35 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
 }
 
+void Instrumenter::instrumentMemoryRegisterCorrespondence (INS ins,
+    UINT32 insAssembly) const {
+  const UINT32 countOfOperands = INS_OperandCount (ins);
+  for (UINT32 i = 0; i < countOfOperands; ++i) {
+    if (INS_OperandIsMemory (ins, i)) {
+      REG baseReg = INS_OperandMemoryBaseReg (ins, i);
+      if (baseReg != REG_INVALID ()) {
+        ADDRDELTA displacement = INS_OperandMemoryDisplacement (ins, i);
+        REG indexReg = INS_OperandMemoryIndexReg (ins, i);
+        if (indexReg != REG_INVALID ()) {
+          throw std::runtime_error ("indexed register "
+                                    "memory operand is not supported");
+        }
+        // EA = displacement + baseReg
+        INS_InsertCall (ins, IPOINT_BEFORE,
+                        (AFUNPTR) analysisRoutineMemoryRegisterCorrespondence,
+                        IARG_PTR, ise,
+                        IARG_UINT32, baseReg, IARG_REG_VALUE, baseReg,
+                        IARG_ADDRINT, ADDRINT (displacement),
+                        IARG_MEMORYOP_EA, 0,
+                        IARG_UINT32, insAssembly,
+                        IARG_END);
+      }
+      // TODO: Handle instructions with two memory operands
+      break;
+    }
+  }
+}
+
 void Instrumenter::instrumentRepPrefix (OPCODE op, INS ins, UINT32 insAssembly) const {
   const BOOL repe = INS_RepPrefix (ins);
   const BOOL repne = INS_RepnePrefix (ins);
@@ -906,7 +936,7 @@ void Instrumenter::printDebugInformation (INS ins, const char *insAssembly) cons
       << (isMemoryRead ? "\t--> Reading from memory\n" : "")
       << (isMemoryWrite ? "\t--> Writing to memory\n" : "")
       << (!isOriginal ? "\t--> NON-ORIGINAL instruction!\n" : "");
-  for (UINT32 i = 0; i < INS_OperandCount (ins); ++i) {
+  for (UINT32 i = 0; i < countOfOperands; ++i) {
     bool isReg = INS_OperandIsReg (ins, i);
     bool isImmed = INS_OperandIsImmediate (ins, i);
     bool isMem = INS_OperandIsMemory (ins, i);
