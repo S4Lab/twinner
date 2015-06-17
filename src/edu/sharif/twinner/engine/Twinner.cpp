@@ -275,8 +275,7 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->solveConstraints
           (clist, symbols);
       return true;
-    } catch
-      (const edu::sharif::twinner::engine::smt::UnsatisfiableConstraintsException &e) {
+    } catch (const edu::sharif::twinner::engine::smt::UnsatisfiableConstraintsException &e) {
     }
   }
   return false;

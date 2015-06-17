@@ -895,7 +895,6 @@ void InstructionSymbolicExecuter::analysisRoutineMemoryRegisterCorrespondence (
   memoryRegisterCorrespondenceAnalysisRoutine
       (RegisterResidentExpressionValueProxy (baseReg, baseRegVal),
        displacement, memoryEa);
-  logger << "Done\n";
 }
 
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
@@ -2528,12 +2527,14 @@ void InstructionSymbolicExecuter::memoryRegisterCorrespondenceAnalysisRoutine (
       << "\tgetting base reg exp...";
   edu::sharif::twinner::trace::Expression *baseexp =
       baseReg.getExpression (trace);
+  const int size = max (baseexp->getLastConcreteValue ().getSize (), 64);
   if (displacement > 0) {
     baseexp->add (displacement);
   } else {
     baseexp->minus (-displacement);
   }
   baseexp->minus (memoryEa);
+  baseexp->truncate (size);
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
   std::list <edu::sharif::twinner::trace::Constraint *> cc;
   cc.push_back (new edu::sharif::twinner::trace::Constraint

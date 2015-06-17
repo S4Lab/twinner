@@ -4,7 +4,7 @@
  * Copyright © 2013-2015  Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -25,6 +25,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <string.h>
+#include <list>
 
 namespace edu {
 namespace sharif {
@@ -415,10 +416,18 @@ Expression *ExecutionTraceSegment::setSymbolicExpressionImplementation (int size
 }
 
 void ExecutionTraceSegment::addPathConstraints (
-    const std::list <edu::sharif::twinner::trace::Constraint *> &c) {
+    const std::list <edu::sharif::twinner::trace::Constraint *> &constraints,
+    const edu::sharif::twinner::trace::Constraint *lastConstraint) {
   for (std::list <edu::sharif::twinner::trace::Constraint *>::const_iterator it =
-      c.begin (); it != c.end (); ++it) {
-    pathConstraints.push_back (*it);
+      constraints.begin (); it != constraints.end (); ++it) {
+    const edu::sharif::twinner::trace::Constraint *c = *it;
+    if (c->isTrivial () || (lastConstraint && (*lastConstraint) == (*c))) {
+      delete c;
+    } else {
+      edu::sharif::twinner::util::Logger::warning () << "adding " << c << '\n';
+      pathConstraints.push_back (c);
+      lastConstraint = c;
+    }
   }
 }
 

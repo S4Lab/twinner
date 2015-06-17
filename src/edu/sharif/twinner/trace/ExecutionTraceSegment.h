@@ -25,7 +25,6 @@ namespace twinner {
 namespace trace {
 
 class ExecutionTraceSegment : public ExecutionState {
-
 private:
   std::map < REG, Expression * > registerToExpression;
   /// The ADDRINT must be aligned
@@ -76,7 +75,8 @@ public:
       const Expression *exp);
 
   virtual void addPathConstraints (
-      const std::list <edu::sharif::twinner::trace::Constraint *> &c);
+      const std::list <edu::sharif::twinner::trace::Constraint *> &c,
+      const edu::sharif::twinner::trace::Constraint *lastConstraint);
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static ExecutionTraceSegment *loadFromBinaryStream (std::ifstream &in);

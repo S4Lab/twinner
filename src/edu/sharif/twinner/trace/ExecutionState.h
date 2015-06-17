@@ -4,7 +4,7 @@
  * Copyright © 2013-2015  Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -40,7 +40,6 @@ class ConcreteValue;
  * are kept and can be reported.
  */
 class ExecutionState : public Savable {
-
 protected:
 
   ExecutionState () {
@@ -241,9 +240,11 @@ public:
    * current execution state in the running program.
    *
    * @param c The constraints which are being added.
+   * @param lastConstraint The last constraint which is already added.
    */
   virtual void addPathConstraints (
-      const std::list <edu::sharif::twinner::trace::Constraint *> &c) = 0;
+      const std::list <edu::sharif::twinner::trace::Constraint *> &c,
+      const edu::sharif::twinner::trace::Constraint *lastConstraint) = 0;
 
   /**
    * Prints values of all registers (both symbolic and concrete values). Only registers

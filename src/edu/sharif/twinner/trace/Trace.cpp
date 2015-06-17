@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <set>
 #include <fstream>
+#include <list>
 
 #include "Expression.h"
 #include "Constraint.h"
@@ -38,7 +39,7 @@ inline void write_map_entry (std::ofstream &out,
 
 Trace::Trace (const std::list < ExecutionTraceSegment * > &list,
     edu::sharif::twinner::util::MemoryManager *_memoryManager) :
-    segments (list), memoryManager (_memoryManager) {
+segments (list), memoryManager (_memoryManager) {
   currentSegmentIterator = segments.end ();
   if (currentSegmentIterator != segments.begin ()) {
     currentSegmentIterator--;
@@ -47,7 +48,7 @@ Trace::Trace (const std::list < ExecutionTraceSegment * > &list,
 }
 
 Trace::Trace () :
-    memoryManager (edu::sharif::twinner::util::MemoryManager::allocateInstance ()) {
+memoryManager (edu::sharif::twinner::util::MemoryManager::allocateInstance ()) {
   segments.push_front (new ExecutionTraceSegment ());
   currentSegmentIterator = segments.begin ();
   currentSegmentIndex = 0;
@@ -113,8 +114,21 @@ Expression *Trace::setSymbolicExpressionByMemoryAddress (int size, ADDRINT memor
 }
 
 void Trace::addPathConstraints (
-    const std::list <edu::sharif::twinner::trace::Constraint *> &c) {
-  getCurrentTraceSegment ()->addPathConstraints (c);
+    const std::list <edu::sharif::twinner::trace::Constraint *> &c,
+    const edu::sharif::twinner::trace::Constraint *lastConstraint) {
+  if (lastConstraint) {
+    throw std::runtime_error ("Trace::addPathConstraints (): "
+                              "lastConstraint argument must be null");
+  }
+  for (std::list < ExecutionTraceSegment * >::iterator it =
+      currentSegmentIterator; it != segments.end (); ++it) {
+    ExecutionTraceSegment *segment = *it;
+    if (!segment->getPathConstraints ().empty ()) {
+      lastConstraint = segment->getPathConstraints ().back ();
+      break;
+    }
+  }
+  getCurrentTraceSegment ()->addPathConstraints (c, lastConstraint);
 }
 
 void Trace::syscallInvoked (Syscall s) {

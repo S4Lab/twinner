@@ -31,7 +31,6 @@ class Syscall;
 class ExecutionTraceSegment;
 
 class Trace : public ExecutionState {
-
 protected:
   /**
    * Most recent segment is kept at front of list.
@@ -147,7 +146,8 @@ public:
    * The constraint will be added to the most recent trace segment.
    */
   virtual void addPathConstraints (
-      const std::list <edu::sharif::twinner::trace::Constraint *> &c);
+      const std::list <edu::sharif::twinner::trace::Constraint *> &c,
+      const edu::sharif::twinner::trace::Constraint *lastConstraint = 0);
 
   void syscallInvoked (Syscall s);
   void syscallReturned (CONTEXT *context) const;
