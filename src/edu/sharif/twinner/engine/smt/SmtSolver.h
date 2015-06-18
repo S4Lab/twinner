@@ -37,7 +37,6 @@ namespace smt {
  * It also implemnets singleton functionality to hide implementation more transparent.
  */
 class SmtSolver {
-
 private:
   static SmtSolver *me;
 
@@ -84,6 +83,33 @@ public:
   virtual std::list < const edu::sharif::twinner::trace::Constraint * >
   simplifyConstraints (std::list < const edu::sharif::twinner::trace::Constraint * >
       constraints) const = 0;
+
+  /**
+   * Clears the internal state of the SMT solver.
+   * This cancels all asserted constraints.
+   */
+  virtual void clearState () = 0;
+
+  /**
+   * Asserts the given constraint in this SMT solver context.
+   * All asserted constraints from the last call to clearState () method
+   * are accumulated.
+   *
+   * @param constraint The constraint to be asserted in this SMT solver context.
+   */
+  virtual void assertConstraint (const edu::sharif::twinner::trace::Constraint *
+      constraint) = 0;
+
+  /**
+   * Checks validity of the given constraint based on asserted constraints in
+   * the current context. The constraint is valid if it can be proven to be
+   * always true based on the asserted constraints.
+   *
+   * @param constraint The constraints which its validity is queried.
+   * @return true iff the given constraint is always valid in current context.
+   */
+  virtual bool checkValidity (const edu::sharif::twinner::trace::Constraint *
+      constraint) = 0;
 
   static void init (SmtSolver *instance);
   static SmtSolver *getInstance ();

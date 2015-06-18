@@ -29,11 +29,52 @@ namespace smt {
 void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
     std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &satSolution);
 
+class Cvc4SmtSolverState {
+private:
+  ExprManager *em;
+  SmtEngine *smt;
+  std::map<std::string, Expr> symbols;
+
+public:
+
+  Cvc4SmtSolverState () {
+    em = new ExprManager ();
+    smt = new SmtEngine (em);
+    /*
+     * QF_ means disable quantifiers
+     * BV means enable bit-vectors
+     */
+    smt->setLogic ("QF_BV");
+    smt->setOption ("produce-models", true);
+  }
+
+  ~Cvc4SmtSolverState () {
+    delete smt;
+    delete em;
+  }
+
+  void assertConstraints (
+      std::list < const edu::sharif::twinner::trace::Constraint * > constraints) {
+    ConstraintToCvc4ExprConverter converter (*em, false, constraints);
+    Expr cvc4Constraint = converter.convert (symbols);
+    smt->assertFormula (cvc4Constraint);
+  }
+
+  bool checkValidity (
+      std::list < const edu::sharif::twinner::trace::Constraint * > constraints) {
+    ConstraintToCvc4ExprConverter converter (*em, false, constraints);
+    Expr cvc4Constraint = converter.convert (symbols);
+    Result res = smt->query (cvc4Constraint);
+    return res.isValid ();
+  }
+};
+
 Cvc4SmtSolver::Cvc4SmtSolver () :
-    SmtSolver () {
+SmtSolver (), state (new Cvc4SmtSolverState ()) {
 }
 
 Cvc4SmtSolver::~Cvc4SmtSolver () {
+  delete state;
 }
 
 void Cvc4SmtSolver::solveConstraints (
@@ -110,6 +151,25 @@ Cvc4SmtSolver::simplifyConstraints (
   return converter.convertBack (simple);
 }
 
+void Cvc4SmtSolver::clearState () {
+  delete state;
+  state = new Cvc4SmtSolverState ();
+}
+
+void Cvc4SmtSolver::assertConstraint (
+    const edu::sharif::twinner::trace::Constraint *constraint) {
+  std::list < const edu::sharif::twinner::trace::Constraint * > constraints;
+  constraints.push_back (constraint);
+  state->assertConstraints (constraints);
+}
+
+bool Cvc4SmtSolver::checkValidity (
+    const edu::sharif::twinner::trace::Constraint *constraint) {
+  std::list < const edu::sharif::twinner::trace::Constraint * > constraints;
+  constraints.push_back (constraint);
+  return state->checkValidity (constraints);
+}
+
 void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
     std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &satSolution) {
   edu::sharif::twinner::util::Logger log =
@@ -148,13 +208,13 @@ void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
 }
 namespace util {
 
-const edu::sharif::twinner::util::Logger &operator<< (
-    const edu::sharif::twinner::util::Logger &log, const Expr &exp) {
+const edu::sharif::twinner::util::Logger &
+operator<< (const edu::sharif::twinner::util::Logger &log, const Expr &exp) {
   return log.actualWrite (exp);
 }
 
-const edu::sharif::twinner::util::Logger &operator<< (
-    const edu::sharif::twinner::util::Logger &log, const Result &res) {
+const edu::sharif::twinner::util::Logger &
+operator<< (const edu::sharif::twinner::util::Logger &log, const Result &res) {
   return log.actualWrite (res);
 }
 

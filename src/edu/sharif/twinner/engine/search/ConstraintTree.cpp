@@ -18,6 +18,8 @@
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 
+#include "edu/sharif/twinner/engine/smt/SmtSolver.h"
+
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 
@@ -36,6 +38,7 @@ ConstraintTree::~ConstraintTree () {
 }
 
 void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *trace) {
+  edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->clearState ();
   TreeNode *node = root;
   const std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * > &segments =
       trace->getTraceSegments ();

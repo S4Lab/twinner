@@ -51,21 +51,15 @@ void delete_tree_node (TreeNode * const &node) {
 TreeNode *TreeNode::addConstraint (
     const edu::sharif::twinner::trace::Constraint *c,
     const edu::sharif::twinner::util::MemoryManager *m) {
-  std::list < const edu::sharif::twinner::trace::Constraint * > sc =
-      edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
-      ->simplifyConstraint (c);
-  const bool isTrivial = sc.empty ()
-      || (sc.size () == 1 && sc.front ()->isTrivial ());
-  while (!sc.empty ()) {
-    delete sc.back ();
-    sc.pop_back ();
-  }
-  if (isTrivial || (constraint && (*constraint) == (*c))) {
+  if (edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+      ->checkValidity (c)) {
     return this;
   }
   if (children.empty () || (*children.back ()->constraint) != (*c)) {
     new TreeNode (this, c, m);
   }
+  edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+      ->assertConstraint (c);
   return children.back ();
 }
 

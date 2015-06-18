@@ -21,7 +21,11 @@ namespace twinner {
 namespace engine {
 namespace smt {
 
+class Cvc4SmtSolverState;
+
 class Cvc4SmtSolver : public SmtSolver {
+private:
+  Cvc4SmtSolverState *state;
 
 public:
   Cvc4SmtSolver ();
@@ -37,6 +41,12 @@ public:
   virtual std::list < const edu::sharif::twinner::trace::Constraint * >
   simplifyConstraints (
       std::list < const edu::sharif::twinner::trace::Constraint * > constraints) const;
+
+  virtual void clearState ();
+  virtual void assertConstraint (const edu::sharif::twinner::trace::Constraint *
+      constraint);
+  virtual bool checkValidity (const edu::sharif::twinner::trace::Constraint *
+      constraint);
 };
 
 }
