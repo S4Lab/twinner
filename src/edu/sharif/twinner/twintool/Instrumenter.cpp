@@ -883,7 +883,9 @@ void Instrumenter::instrumentMemoryRegisterCorrespondence (INS ins,
   for (UINT32 i = 0; i < countOfOperands; ++i) {
     if (INS_OperandIsMemory (ins, i)) {
       REG baseReg = INS_OperandMemoryBaseReg (ins, i);
-      if (baseReg != REG_INVALID ()) {
+      if (baseReg != REG_INVALID ()
+          && (baseReg == REG_RBP || baseReg == REG_RAX)) {
+        // TODO: generalize above register check
         ADDRDELTA displacement = INS_OperandMemoryDisplacement (ins, i);
         REG indexReg = INS_OperandMemoryIndexReg (ins, i);
         if (indexReg != REG_INVALID ()) {
