@@ -12,6 +12,7 @@
 
 #include "Cvc4SmtSolver.h"
 
+#include "Cvc4SmtSolverState.h"
 #include "ConstraintToCvc4ExprConverter.h"
 #include "UnsatisfiableConstraintsException.h"
 
@@ -28,46 +29,6 @@ namespace smt {
 
 void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
     std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &satSolution);
-
-class Cvc4SmtSolverState {
-private:
-  ExprManager *em;
-  SmtEngine *smt;
-  std::map<std::string, Expr> symbols;
-
-public:
-
-  Cvc4SmtSolverState () {
-    em = new ExprManager ();
-    smt = new SmtEngine (em);
-    /*
-     * QF_ means disable quantifiers
-     * BV means enable bit-vectors
-     */
-    smt->setLogic ("QF_BV");
-    smt->setOption ("produce-models", true);
-  }
-
-  ~Cvc4SmtSolverState () {
-    delete smt;
-    delete em;
-  }
-
-  void assertConstraints (
-      std::list < const edu::sharif::twinner::trace::Constraint * > constraints) {
-    ConstraintToCvc4ExprConverter converter (*em, false, constraints);
-    Expr cvc4Constraint = converter.convert (symbols);
-    smt->assertFormula (cvc4Constraint);
-  }
-
-  bool checkValidity (
-      std::list < const edu::sharif::twinner::trace::Constraint * > constraints) {
-    ConstraintToCvc4ExprConverter converter (*em, false, constraints);
-    Expr cvc4Constraint = converter.convert (symbols);
-    Result res = smt->query (cvc4Constraint);
-    return res.isValid ();
-  }
-};
 
 Cvc4SmtSolver::Cvc4SmtSolver () :
 SmtSolver (), state (new Cvc4SmtSolverState ()) {

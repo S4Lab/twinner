@@ -13,21 +13,9 @@
 #ifndef CONSTRAINT_TO_CVC4_EXPR_CONVERTER_H
 #define CONSTRAINT_TO_CVC4_EXPR_CONVERTER_H
 
-// MUST NOT BE INCLUDED FROM ANYWHERE ELSE OF Cvc4SmtSolver.cpp and ConstraintToCvc4ExprConverter.cpp files.
+// MUST NOT BE INCLUDED FROM ANYWHERE ELSE OF CVC4 specific .cpp files.
 
-#if 1 // inclusion of CVC4 header
-/*
- * Of course, Twinner is not supposed to fix warnings of CVC4. Also it does not like
- * to disable -Werror. So we need to disable warnings in CVC4 temporarily. CVC4 is
- * using deprecated code which defining following macro, will prevent its related warning
- * to be raised while compiling following included header file.
- */
-#define _BACKWARD_BACKWARD_WARNING_H 1
-#include "inc/cvc4/cvc4.h"
-#undef _BACKWARD_BACKWARD_WARNING_H
-#endif // end of inclusion of CVC4 header
-
-using namespace CVC4;
+#include "Cvc4Header.h"
 
 #include <list>
 
@@ -58,7 +46,6 @@ namespace engine {
 namespace smt {
 
 class ConstraintToCvc4ExprConverter {
-
 private:
   ExprManager &em;
   const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints;
