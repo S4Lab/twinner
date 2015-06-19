@@ -20,9 +20,9 @@ namespace twinner {
 namespace engine {
 namespace smt {
 
-Cvc4SmtSolverState::Cvc4SmtSolverState () {
-  em = new ExprManager ();
-  smt = new SmtEngine (em);
+Cvc4SmtSolverState::Cvc4SmtSolverState () :
+em (new ExprManager ()), smt (new SmtEngine (em)),
+symbols (new std::map<std::string, Expr> ()) {
   /*
    * QF_ means disable quantifiers
    * BV means enable bit-vectors
@@ -32,6 +32,7 @@ Cvc4SmtSolverState::Cvc4SmtSolverState () {
 }
 
 Cvc4SmtSolverState::~Cvc4SmtSolverState () {
+  delete symbols;
   delete smt;
   delete em;
 }
@@ -39,14 +40,14 @@ Cvc4SmtSolverState::~Cvc4SmtSolverState () {
 void Cvc4SmtSolverState::assertConstraints (
     std::list < const edu::sharif::twinner::trace::Constraint * > constraints) {
   ConstraintToCvc4ExprConverter converter (*em, false, constraints);
-  Expr cvc4Constraint = converter.convert (symbols);
+  Expr cvc4Constraint = converter.convert (*symbols);
   smt->assertFormula (cvc4Constraint);
 }
 
 bool Cvc4SmtSolverState::checkValidity (
     std::list < const edu::sharif::twinner::trace::Constraint * > constraints) {
   ConstraintToCvc4ExprConverter converter (*em, false, constraints);
-  Expr cvc4Constraint = converter.convert (symbols);
+  Expr cvc4Constraint = converter.convert (*symbols);
   Result res = smt->query (cvc4Constraint);
   return res.isValid ();
 }

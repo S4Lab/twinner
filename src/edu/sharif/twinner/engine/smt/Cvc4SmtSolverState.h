@@ -31,7 +31,7 @@ class Cvc4SmtSolverState {
 private:
   ExprManager *em;
   SmtEngine *smt;
-  std::map<std::string, Expr> symbols;
+  std::map<std::string, Expr> *symbols;
 
 public:
   Cvc4SmtSolverState ();
