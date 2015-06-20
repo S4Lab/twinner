@@ -24,13 +24,13 @@ namespace twinner {
 namespace trace {
 
 ExpressionImp::ExpressionImp (const ExpressionImp &exp) :
-    Expression (exp) {
+Expression (exp) {
 }
 
 ExpressionImp::ExpressionImp (REG reg,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex) :
-    Expression (concreteValue.clone (), true) {
+Expression (concreteValue.clone (), true) {
   if (concreteValue.getSize () < 64) {
     /*
      * The reg and concreteValue must always have the same precision but when the reg is
@@ -52,7 +52,7 @@ ExpressionImp::ExpressionImp (REG reg,
 ExpressionImp::ExpressionImp (ADDRINT memoryEa,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex, bool isOverwriting) :
-    Expression (concreteValue.clone (), isOverwriting) {
+Expression (concreteValue.clone (), isOverwriting) {
   if (!isOverwriting) {
     if (memoryEa < 0x7f0000000000ull) { // FIXME: Generalize this code
       // this temporary code assumes that everything out of stack (including heap) is constant
@@ -102,10 +102,9 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
                         edu::sharif::twinner::trace::cv::ConcreteValue64Bits
                         (concreteValue.toUint64 () << (offset * 8)),
                         generationIndex));
-      // Using division instead of shift-to-right to match with Expression implementation
       stack.push_back
-          (new edu::sharif::twinner::trace::exptoken::Constant (1ull << (offset * 8)));
-      stack.push_back (Operator::instantiateOperator (Operator::DIVIDE));
+          (new edu::sharif::twinner::trace::exptoken::Constant (offset * 8));
+      stack.push_back (Operator::instantiateOperator (Operator::SHIFT_RIGHT));
     }
     if (offset < 8 - (cvsize / 8)) {
       stack.push_back
@@ -121,23 +120,23 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
 }
 
 ExpressionImp::ExpressionImp (edu::sharif::twinner::trace::exptoken::Symbol *symbol) :
-    Expression (symbol->getValue ().clone (), false) {
+Expression (symbol->getValue ().clone (), false) {
   stack.push_back (symbol);
 }
 
 ExpressionImp::ExpressionImp (
     const edu::sharif::twinner::trace::cv::ConcreteValue &value) :
-    Expression (value.clone (), false) {
+Expression (value.clone (), false) {
   stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (value));
 }
 
 ExpressionImp::ExpressionImp (edu::sharif::twinner::trace::cv::ConcreteValue *value) :
-    Expression (value, false) {
+Expression (value, false) {
   stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (*value));
 }
 
 ExpressionImp::ExpressionImp (UINT64 value) :
-    Expression (new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value), false) {
+Expression (new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value), false) {
   stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant
                    (new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value)));
 }
