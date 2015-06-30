@@ -55,12 +55,20 @@ TreeNode *TreeNode::addConstraint (
       ->checkValidity (c)) {
     return this;
   }
-  if (children.empty () || (*children.back ()->constraint) != (*c)) {
-    new TreeNode (this, c, m);
-  }
   edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
       ->assertConstraint (c);
-  return children.back ();
+  for (TreeNode *n = this; true; n = n->children.back ()) {
+    if (n->children.empty ()) {
+      new TreeNode (n, c, m);
+    } else if ((*n->children.back ()->constraint) != (*c)) {
+      if (edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+          ->checkValidity (n->children.back ()->constraint)) {
+        continue;
+      }
+      new TreeNode (n, c, m);
+    }
+    return n->children.back ();
+  }
 }
 
 TreeNode *TreeNode::getRightMostDeepestGrandChild (
