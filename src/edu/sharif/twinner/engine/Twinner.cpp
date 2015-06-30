@@ -466,7 +466,7 @@ void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
       out << '(';
       first = false;
     } else {
-      out << " && (";
+      out << "\n\t\t&& (";
     }
     out << simplifiedConstraint->toString () << ')';
     extract_types_and_names (typesAndNames, simplifiedConstraint);
