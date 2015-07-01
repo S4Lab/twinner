@@ -1507,36 +1507,43 @@ void InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
     const ConcreteValue &oldVal = rsp->getLastConcreteValue ();
     if (oldVal != rspRegVal) { // This jump had side-effect on RSP
       edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsp...";
+      SYSCALL_STANDARD std;
+#ifdef TARGET_LINUX
+#ifdef TARGET_IA32E
+      std = SYSCALL_STANDARD_IA32E_LINUX;
+#else
+      std = SYSCALL_STANDARD_IA32_LINUX;
+#endif
+#else
+#error "Only Linux is supported currently."
+#endif
+      CONTEXT ctxt;
+      PIN_SaveContext (context, &ctxt);
+      im->syscallEntryPoint (PIN_ThreadId (), &ctxt, std);
+      im->syscallExitPoint (PIN_ThreadId (), &ctxt, std);
       if (oldVal < rspRegVal) {
         ConcreteValue *cv = rspRegVal.clone ();
         (*cv) -= oldVal;
         if ((*cv) == 8) {
           edu::sharif::twinner::util::Logger::loquacious ()
               << "JMP instruction popped 8 bytes... simulating syscall\n";
-          SYSCALL_STANDARD std;
-#ifdef TARGET_LINUX
-#ifdef TARGET_IA32E
-          std = SYSCALL_STANDARD_IA32E_LINUX;
-#else
-          std = SYSCALL_STANDARD_IA32_LINUX;
-#endif
-#else
-#error "Only Linux is supported currently."
-#endif
-          CONTEXT ctxt;
-          PIN_SaveContext (context, &ctxt);
-          im->syscallEntryPoint (PIN_ThreadId (), &ctxt, std);
-          im->syscallExitPoint (PIN_ThreadId (), &ctxt, std);
         } else {
           edu::sharif::twinner::util::Logger::warning ()
-              << "JMP instruction popped items out of stack, but not 8 bytes\n";
+              << "JMP instruction popped items out of stack"
+              ", amount = " << *cv << '\n';
         }
         rsp->add (cv);
       } else { // oldVal > rspRegVal
-        edu::sharif::twinner::util::Logger::warning ()
-            << "JMP instruction pushed items into stack (decrementing RSP)\n";
         ConcreteValue *cv = oldVal.clone ();
         (*cv) -= rspRegVal;
+        if ((*cv) == 8) {
+          edu::sharif::twinner::util::Logger::loquacious ()
+              << "JMP instruction pushed 8 bytes... simulating syscall\n";
+        } else {
+          edu::sharif::twinner::util::Logger::warning ()
+              << "JMP instruction pushed items into stack"
+              ", amount = " << *cv << '\n';
+        }
         rsp->minus (cv);
       }
       // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
