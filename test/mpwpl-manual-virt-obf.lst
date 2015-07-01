@@ -1,0 +1,1372 @@
+GAS LISTING /tmp/ccIRtJEC.s 			page 1
+
+
+   1              		.file	"mpwpl-manual-virt-obf.c"
+   2              		.text
+   3              	.Ltext0:
+   4              		.globl	str0
+   5              		.section	.rodata
+   6              		.align 8
+   7              	.LC0:
+   8 0000 55736167 		.string	"Usage: program <command codes>\n"
+   8      653A2070 
+   8      726F6772 
+   8      616D203C 
+   8      636F6D6D 
+   9              		.data
+  10              		.align 8
+  13              	str0:
+  14 0000 00000000 		.quad	.LC0
+  14      00000000 
+  15              		.globl	str1
+  16              		.section	.rodata
+  17              		.align 8
+  18              	.LC1:
+  19 0020 61203E20 		.string	"a > 5, b > 5, c > 5 -- case 1\n"
+  19      352C2062 
+  19      203E2035 
+  19      2C206320 
+  19      3E203520 
+  20              		.data
+  21              		.align 8
+  24              	str1:
+  25 0008 00000000 		.quad	.LC1
+  25      00000000 
+  26              		.globl	str2
+  27              		.section	.rodata
+  28 003f 00       		.align 8
+  29              	.LC2:
+  30 0040 61203E20 		.string	"a > 5, b > 5, c <= 5 -- case 2\n"
+  30      352C2062 
+  30      203E2035 
+  30      2C206320 
+  30      3C3D2035 
+  31              		.data
+  32              		.align 8
+  35              	str2:
+  36 0010 00000000 		.quad	.LC2
+  36      00000000 
+  37              		.globl	str3
+  38              		.section	.rodata
+  39              		.align 8
+  40              	.LC3:
+  41 0060 61203E20 		.string	"a > 5, b <= 5, c > 5 -- case 3\n"
+  41      352C2062 
+  41      203C3D20 
+  41      352C2063 
+  41      203E2035 
+  42              		.data
+  43              		.align 8
+  46              	str3:
+GAS LISTING /tmp/ccIRtJEC.s 			page 2
+
+
+  47 0018 00000000 		.quad	.LC3
+  47      00000000 
+  48              		.globl	str4
+  49              		.section	.rodata
+  50              		.align 8
+  51              	.LC4:
+  52 0080 61203E20 		.string	"a > 5, b <= 5, c <= 5 -- case 4\n"
+  52      352C2062 
+  52      203C3D20 
+  52      352C2063 
+  52      203C3D20 
+  53              		.data
+  54              		.align 8
+  57              	str4:
+  58 0020 00000000 		.quad	.LC4
+  58      00000000 
+  59              		.globl	str5
+  60              		.section	.rodata
+  61 00a1 00000000 		.align 8
+  61      000000
+  62              	.LC5:
+  63 00a8 61203C3D 		.string	"a <= 5, b > 5, c > 5 -- case 5\n"
+  63      20352C20 
+  63      62203E20 
+  63      352C2063 
+  63      203E2035 
+  64              		.data
+  65              		.align 8
+  68              	str5:
+  69 0028 00000000 		.quad	.LC5
+  69      00000000 
+  70              		.globl	str6
+  71              		.section	.rodata
+  72              		.align 8
+  73              	.LC6:
+  74 00c8 61203C3D 		.string	"a <= 5, b > 5, c <= 5 -- case 6\n"
+  74      20352C20 
+  74      62203E20 
+  74      352C2063 
+  74      203C3D20 
+  75              		.data
+  76              		.align 8
+  79              	str6:
+  80 0030 00000000 		.quad	.LC6
+  80      00000000 
+  81              		.globl	str7
+  82              		.section	.rodata
+  83 00e9 00000000 		.align 8
+  83      000000
+  84              	.LC7:
+  85 00f0 61203C3D 		.string	"a <= 5, b <= 5, c > 5 -- case 7\n"
+  85      20352C20 
+  85      62203C3D 
+  85      20352C20 
+  85      63203E20 
+  86              		.data
+  87              		.align 8
+GAS LISTING /tmp/ccIRtJEC.s 			page 3
+
+
+  90              	str7:
+  91 0038 00000000 		.quad	.LC7
+  91      00000000 
+  92              		.globl	str8
+  93              		.section	.rodata
+  94 0111 00000000 		.align 8
+  94      000000
+  95              	.LC8:
+  96 0118 61203C3D 		.string	"a <= 5, b <= 5, c <= 5 -- case 8\n"
+  96      20352C20 
+  96      62203C3D 
+  96      20352C20 
+  96      63203C3D 
+  97              		.data
+  98              		.align 8
+ 101              	str8:
+ 102 0040 00000000 		.quad	.LC8
+ 102      00000000 
+ 103              		.globl	str9
+ 104              		.section	.rodata
+ 105 013a 00000000 		.align 8
+ 105      0000
+ 106              	.LC9:
+ 107 0140 6D756C74 		.string	"multi-path program with printf-leafs\n"
+ 107      692D7061 
+ 107      74682070 
+ 107      726F6772 
+ 107      616D2077 
+ 108              		.data
+ 109              		.align 8
+ 112              	str9:
+ 113 0048 00000000 		.quad	.LC9
+ 113      00000000 
+ 114              		.section	.rodata
+ 115 0166 0000     		.align 8
+ 116              	.LC10:
+ 117 0168 0101FFFF 		.string	"\001\001\377\377\377\377\377\377\377\377\002\002"
+ 117      FFFFFFFF 
+ 117      FFFF0202 
+ 117      00
+ 118 0175 00       		.string	""
+ 119 0176 00       		.string	""
+ 120 0177 010200   		.string	"\001\002"
+ 121 017a 00       		.string	""
+ 122 017b 00       		.string	""
+ 123 017c 00       		.string	""
+ 124 017d 021500   		.string	"\002\025"
+ 125 0180 00       		.string	""
+ 126 0181 00       		.string	""
+ 127 0182 02FFFFFF 		.string	"\002\377\377\377\377\377\377\377\377"
+ 127      FFFFFFFF 
+ 127      FF00
+ 128 018c 02FFFFFF 		.string	"\002\377\377\377\377"
+ 128      FF00
+ 129 0192 0200     		.string	"\002"
+ 130 0194 00       		.string	""
+ 131 0195 00       		.string	""
+GAS LISTING /tmp/ccIRtJEC.s 			page 4
+
+
+ 132 0196 00       		.string	""
+ 133 0197 0103FFFF 		.string	"\001\003\377\377\377\377\377\377\377\377\0025"
+ 133      FFFFFFFF 
+ 133      FFFF0235 
+ 133      00
+ 134 01a4 00       		.string	""
+ 135 01a5 00       		.string	""
+ 136 01a6 030200   		.string	"\003\002"
+ 137 01a9 00       		.string	""
+ 138 01aa 00       		.string	""
+ 139 01ab 00       		.string	""
+ 140 01ac 028A00   		.string	"\002\212"
+ 141 01af 00       		.string	""
+ 142 01b0 00       		.string	""
+ 143 01b1 0103FFFF 		.string	"\001\003\377\377\377\377\377\377\377\377\0025"
+ 143      FFFFFFFF 
+ 143      FFFF0235 
+ 143      00
+ 144 01be 00       		.string	""
+ 145 01bf 00       		.string	""
+ 146 01c0 030200   		.string	"\003\002"
+ 147 01c3 00       		.string	""
+ 148 01c4 00       		.string	""
+ 149 01c5 00       		.string	""
+ 150 01c6 023800   		.string	"\0028"
+ 151 01c9 00       		.string	""
+ 152 01ca 00       		.string	""
+ 153 01cb 0103FFFF 		.string	"\001\003\377\377\377\377\377\377\377\377\0025"
+ 153      FFFFFFFF 
+ 153      FFFF0235 
+ 153      00
+ 154 01d8 00       		.string	""
+ 155 01d9 00       		.string	""
+ 156 01da 030200   		.string	"\003\002"
+ 157 01dd 00       		.string	""
+ 158 01de 00       		.string	""
+ 159 01df 00       		.string	""
+ 160 01e0 020F00   		.string	"\002\017"
+ 161 01e3 00       		.string	""
+ 162 01e4 00       		.string	""
+ 163 01e5 02FFFFFF 		.string	"\002\377\377\377\377\377\377\377\377\003\002\t"
+ 163      FFFFFFFF 
+ 163      FF030209 
+ 163      00
+ 164 01f2 00       		.string	""
+ 165 01f3 00       		.string	""
+ 166 01f4 02FFFFFF 		.string	"\002\377\377\377\377\377\377\377\377\003\0022"
+ 166      FFFFFFFF 
+ 166      FF030232 
+ 166      00
+ 167 0201 00       		.string	""
+ 168 0202 00       		.string	""
+ 169 0203 0103FFFF 		.string	"\001\003\377\377\377\377\377\377\377\377\0025"
+ 169      FFFFFFFF 
+ 169      FFFF0235 
+ 169      00
+ 170 0210 00       		.string	""
+GAS LISTING /tmp/ccIRtJEC.s 			page 5
+
+
+ 171 0211 00       		.string	""
+ 172 0212 030200   		.string	"\003\002"
+ 173 0215 00       		.string	""
+ 174 0216 00       		.string	""
+ 175 0217 00       		.string	""
+ 176 0218 020F00   		.string	"\002\017"
+ 177 021b 00       		.string	""
+ 178 021c 00       		.string	""
+ 179 021d 02FFFFFF 		.string	"\002\377\377\377\377\377\377\377\377\003\002\t"
+ 179      FFFFFFFF 
+ 179      FF030209 
+ 179      00
+ 180 022a 00       		.string	""
+ 181 022b 00       		.string	""
+ 182 022c 02FFFFFF 		.string	"\002\377\377\377\377\377\377\377\377\003\002\204"
+ 182      FFFFFFFF 
+ 182      FF030284 
+ 182      00
+ 183 0239 00       		.string	""
+ 184 023a 00       		.string	""
+ 185 023b 0103FFFF 		.string	"\001\003\377\377\377\377\377\377\377\377\0025"
+ 185      FFFFFFFF 
+ 185      FFFF0235 
+ 185      00
+ 186 0248 00       		.string	""
+ 187 0249 00       		.string	""
+ 188 024a 030200   		.string	"\003\002"
+ 189 024d 00       		.string	""
+ 190 024e 00       		.string	""
+ 191 024f 00       		.string	""
+ 192 0250 023800   		.string	"\0028"
+ 193 0253 00       		.string	""
+ 194 0254 00       		.string	""
+ 195 0255 0103FFFF 		.string	"\001\003\377\377\377\377\377\377\377\377\0025"
+ 195      FFFFFFFF 
+ 195      FFFF0235 
+ 195      00
+ 196 0262 00       		.string	""
+ 197 0263 00       		.string	""
+ 198 0264 030200   		.string	"\003\002"
+ 199 0267 00       		.string	""
+ 200 0268 00       		.string	""
+ 201 0269 00       		.string	""
+ 202 026a 020F00   		.string	"\002\017"
+ 203 026d 00       		.string	""
+ 204 026e 00       		.string	""
+ 205 026f 02FFFFFF 		.string	"\002\377\377\377\377\377\377\377\377\003\002\t"
+ 205      FFFFFFFF 
+ 205      FF030209 
+ 205      00
+ 206 027c 00       		.string	""
+ 207 027d 00       		.string	""
+ 208 027e 02FFFFFF 		.string	"\002\377\377\377\377\377\377\377\377\003\0022"
+ 208      FFFFFFFF 
+ 208      FF030232 
+ 208      00
+ 209 028b 00       		.string	""
+GAS LISTING /tmp/ccIRtJEC.s 			page 6
+
+
+ 210 028c 00       		.string	""
+ 211 028d 0103FFFF 		.string	"\001\003\377\377\377\377\377\377\377\377\0025"
+ 211      FFFFFFFF 
+ 211      FFFF0235 
+ 211      00
+ 212 029a 00       		.string	""
+ 213 029b 00       		.string	""
+ 214 029c 030200   		.string	"\003\002"
+ 215 029f 00       		.string	""
+ 216 02a0 00       		.string	""
+ 217 02a1 00       		.string	""
+ 218 02a2 020F00   		.string	"\002\017"
+ 219 02a5 00       		.string	""
+ 220 02a6 00       		.string	""
+ 221 02a7 02FFFFFF 		.string	"\002\377\377\377\377\377\377\377\377\003\002\t"
+ 221      FFFFFFFF 
+ 221      FF030209 
+ 221      00
+ 222 02b4 00       		.string	""
+ 223 02b5 00       		.string	""
+ 224 02b6 02FFFFFF 		.string	"\002\377\377\377\377\377\377\377\377\002\377\377\377\377\377\377\377\377"
+ 224      FFFFFFFF 
+ 224      FF02FFFF 
+ 224      FFFFFFFF 
+ 224      FFFF00
+ 225 02c9 0200     		.string	"\002"
+ 226 02cb 00       		.string	""
+ 227 02cc 00       		.string	""
+ 228 02cd 00       		.string	""
+ 229 02ce 00       		.string	""
+ 230              		.text
+ 231              		.globl	_Z12init_programPiPPc
+ 233              	_Z12init_programPiPPc:
+ 234              	.LFB0:
+ 235              		.file 1 "mpwpl-manual-virt-obf.c"
+   1:mpwpl-manual-virt-obf.c **** #include <stdio.h>
+   2:mpwpl-manual-virt-obf.c **** #include <string.h>
+   3:mpwpl-manual-virt-obf.c **** #include <inttypes.h>
+   4:mpwpl-manual-virt-obf.c **** 
+   5:mpwpl-manual-virt-obf.c **** typedef int32_t int32;
+   6:mpwpl-manual-virt-obf.c **** 
+   7:mpwpl-manual-virt-obf.c **** int end_of_execution (const char *&ptr);
+   8:mpwpl-manual-virt-obf.c **** void printf_command (const char *&ptr);
+   9:mpwpl-manual-virt-obf.c **** void jump_command (const char *&ptr);
+  10:mpwpl-manual-virt-obf.c **** void if_then_else_command (const char *&ptr);
+  11:mpwpl-manual-virt-obf.c **** bool do_comparison (const char *&ptr, int arg0, int arg1);
+  12:mpwpl-manual-virt-obf.c **** int get_argument (const char *&ptr);
+  13:mpwpl-manual-virt-obf.c **** 
+  14:mpwpl-manual-virt-obf.c **** const int pointer_size = 8;
+  15:mpwpl-manual-virt-obf.c **** const int constant_size = 4;
+  16:mpwpl-manual-virt-obf.c **** 
+  17:mpwpl-manual-virt-obf.c **** const char *str0 = "Usage: program <command codes>\n";
+  18:mpwpl-manual-virt-obf.c **** const char *str1 = "a > 5, b > 5, c > 5 -- case 1\n";
+  19:mpwpl-manual-virt-obf.c **** const char *str2 = "a > 5, b > 5, c <= 5 -- case 2\n";
+  20:mpwpl-manual-virt-obf.c **** const char *str3 = "a > 5, b <= 5, c > 5 -- case 3\n";
+  21:mpwpl-manual-virt-obf.c **** const char *str4 = "a > 5, b <= 5, c <= 5 -- case 4\n";
+  22:mpwpl-manual-virt-obf.c **** const char *str5 = "a <= 5, b > 5, c > 5 -- case 5\n";
+GAS LISTING /tmp/ccIRtJEC.s 			page 7
+
+
+  23:mpwpl-manual-virt-obf.c **** const char *str6 = "a <= 5, b > 5, c <= 5 -- case 6\n";
+  24:mpwpl-manual-virt-obf.c **** const char *str7 = "a <= 5, b <= 5, c > 5 -- case 7\n";
+  25:mpwpl-manual-virt-obf.c **** const char *str8 = "a <= 5, b <= 5, c <= 5 -- case 8\n";
+  26:mpwpl-manual-virt-obf.c **** const char *str9 = "multi-path program with printf-leafs\n";
+  27:mpwpl-manual-virt-obf.c **** 
+  28:mpwpl-manual-virt-obf.c **** #define program_text "\x01\x01\xff\xff\xff\xff\xff\xff\xff\xff\x02\x02\x00\x00\x00\x01\x02\x00\x00\
+  29:mpwpl-manual-virt-obf.c **** 
+  30:mpwpl-manual-virt-obf.c **** /*
+  31:mpwpl-manual-virt-obf.c **** const char program_text[] = {
+  32:mpwpl-manual-virt-obf.c ****   0x01,
+  33:mpwpl-manual-virt-obf.c ****   0x01, '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  34:mpwpl-manual-virt-obf.c ****   0x02, 2, 0, 0, 0,
+  35:mpwpl-manual-virt-obf.c ****   0x01,
+  36:mpwpl-manual-virt-obf.c ****   0x02, 0, 0, 0, 0,
+  37:mpwpl-manual-virt-obf.c ****   0x02, 15 + 6, 0, 0, 0,
+  38:mpwpl-manual-virt-obf.c ****   0x02, // printf
+  39:mpwpl-manual-virt-obf.c ****   '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  40:mpwpl-manual-virt-obf.c ****   0x00, // return -1;
+  41:mpwpl-manual-virt-obf.c ****   0x02, -1, -1, -1, -1,
+  42:mpwpl-manual-virt-obf.c ****   0x00, // return 0; <- dead-code
+  43:mpwpl-manual-virt-obf.c ****   0x02, 0, 0, 0, 0,
+  44:mpwpl-manual-virt-obf.c ****   0x01, // if (a>5)
+  45:mpwpl-manual-virt-obf.c ****   0x03, '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  46:mpwpl-manual-virt-obf.c ****   0x02, '0' + 5, 0, 0, 0,
+  47:mpwpl-manual-virt-obf.c ****   0x03,
+  48:mpwpl-manual-virt-obf.c ****   0x02, 0, 0, 0, 0,
+  49:mpwpl-manual-virt-obf.c ****   0x02, char (138), 0, 0, 0, // else of if(a>5)
+  50:mpwpl-manual-virt-obf.c ****   0x01,
+  51:mpwpl-manual-virt-obf.c ****   0x03, '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  52:mpwpl-manual-virt-obf.c ****   0x02, '0' + 5, 0, 0, 0,
+  53:mpwpl-manual-virt-obf.c ****   0x03,
+  54:mpwpl-manual-virt-obf.c ****   0x02, 0, 0, 0, 0,
+  55:mpwpl-manual-virt-obf.c ****   0x02, 56, 0, 0, 0, // else of if(b>5)
+  56:mpwpl-manual-virt-obf.c ****   0x01,
+  57:mpwpl-manual-virt-obf.c ****   0x03, '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  58:mpwpl-manual-virt-obf.c ****   0x02, '0' + 5, 0, 0, 0,
+  59:mpwpl-manual-virt-obf.c ****   0x03,
+  60:mpwpl-manual-virt-obf.c ****   0x02, 0, 0, 0, 0,
+  61:mpwpl-manual-virt-obf.c ****   0x02, 15, 0, 0, 0, // else of if(c>5)
+  62:mpwpl-manual-virt-obf.c ****   0x02, // printf
+  63:mpwpl-manual-virt-obf.c ****   '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  64:mpwpl-manual-virt-obf.c ****   0x03, // jump to end of if(c>5)
+  65:mpwpl-manual-virt-obf.c ****   0x02, 9, 0, 0, 0,
+  66:mpwpl-manual-virt-obf.c ****   0x02, // printf
+  67:mpwpl-manual-virt-obf.c ****   '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  68:mpwpl-manual-virt-obf.c ****   0x03, // jump to end of if(b>5)
+  69:mpwpl-manual-virt-obf.c ****   0x02, 50, 0, 0, 0,
+  70:mpwpl-manual-virt-obf.c ****   // else of if(b>5)
+  71:mpwpl-manual-virt-obf.c ****   0x01,
+  72:mpwpl-manual-virt-obf.c ****   0x03, '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  73:mpwpl-manual-virt-obf.c ****   0x02, '0' + 5, 0, 0, 0,
+  74:mpwpl-manual-virt-obf.c ****   0x03,
+  75:mpwpl-manual-virt-obf.c ****   0x02, 0, 0, 0, 0,
+  76:mpwpl-manual-virt-obf.c ****   0x02, 15, 0, 0, 0, // else of if(b<=5) ... if(c>5)
+  77:mpwpl-manual-virt-obf.c ****   0x02, // printf
+  78:mpwpl-manual-virt-obf.c ****   '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  79:mpwpl-manual-virt-obf.c ****   0x03, // jump to end of if(c>5)
+GAS LISTING /tmp/ccIRtJEC.s 			page 8
+
+
+  80:mpwpl-manual-virt-obf.c ****   0x02, 9, 0, 0, 0,
+  81:mpwpl-manual-virt-obf.c ****   0x02, // printf
+  82:mpwpl-manual-virt-obf.c ****   '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  83:mpwpl-manual-virt-obf.c ****   0x03, // jump to end of if(a>5)
+  84:mpwpl-manual-virt-obf.c ****   0x02, char (132), 0, 0, 0,
+  85:mpwpl-manual-virt-obf.c ****   // else of if(a>5)
+  86:mpwpl-manual-virt-obf.c **** 
+  87:mpwpl-manual-virt-obf.c ****   0x01,
+  88:mpwpl-manual-virt-obf.c ****   0x03, '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  89:mpwpl-manual-virt-obf.c ****   0x02, '0' + 5, 0, 0, 0,
+  90:mpwpl-manual-virt-obf.c ****   0x03,
+  91:mpwpl-manual-virt-obf.c ****   0x02, 0, 0, 0, 0,
+  92:mpwpl-manual-virt-obf.c ****   0x02, 56, 0, 0, 0, // else of if(b>5)
+  93:mpwpl-manual-virt-obf.c ****   0x01,
+  94:mpwpl-manual-virt-obf.c ****   0x03, '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+  95:mpwpl-manual-virt-obf.c ****   0x02, '0' + 5, 0, 0, 0,
+  96:mpwpl-manual-virt-obf.c ****   0x03,
+  97:mpwpl-manual-virt-obf.c ****   0x02, 0, 0, 0, 0,
+  98:mpwpl-manual-virt-obf.c ****   0x02, 15, 0, 0, 0, // else of if(c>5)
+  99:mpwpl-manual-virt-obf.c ****   0x02, // printf case 5
+ 100:mpwpl-manual-virt-obf.c ****   '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+ 101:mpwpl-manual-virt-obf.c ****   0x03, // jump to end of if(c>5)
+ 102:mpwpl-manual-virt-obf.c ****   0x02, 9, 0, 0, 0,
+ 103:mpwpl-manual-virt-obf.c ****   0x02, // printf case 6
+ 104:mpwpl-manual-virt-obf.c ****   '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+ 105:mpwpl-manual-virt-obf.c ****   0x03, // jump to end of if(b>5)
+ 106:mpwpl-manual-virt-obf.c ****   0x02, 50, 0, 0, 0,
+ 107:mpwpl-manual-virt-obf.c ****   // else of if(b>5)
+ 108:mpwpl-manual-virt-obf.c ****   0x01,
+ 109:mpwpl-manual-virt-obf.c ****   0x03, '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+ 110:mpwpl-manual-virt-obf.c ****   0x02, '0' + 5, 0, 0, 0,
+ 111:mpwpl-manual-virt-obf.c ****   0x03,
+ 112:mpwpl-manual-virt-obf.c ****   0x02, 0, 0, 0, 0,
+ 113:mpwpl-manual-virt-obf.c ****   0x02, 15, 0, 0, 0, // else of if(b<=5) ... if(c>5)
+ 114:mpwpl-manual-virt-obf.c ****   0x02, // printf case 7
+ 115:mpwpl-manual-virt-obf.c ****   '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+ 116:mpwpl-manual-virt-obf.c ****   0x03, // jump to end of if(c>5)
+ 117:mpwpl-manual-virt-obf.c ****   0x02, 9, 0, 0, 0,
+ 118:mpwpl-manual-virt-obf.c ****   0x02, // printf
+ 119:mpwpl-manual-virt-obf.c ****   '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+ 120:mpwpl-manual-virt-obf.c ****   // end of if(a>5)
+ 121:mpwpl-manual-virt-obf.c ****   0x02, // final printf
+ 122:mpwpl-manual-virt-obf.c ****   '\xFF', '\xFF','\xFF','\xFF', '\xFF', '\xFF','\xFF','\xFF',
+ 123:mpwpl-manual-virt-obf.c ****   0x00, // return 0;
+ 124:mpwpl-manual-virt-obf.c ****   0x02, 0, 0, 0, 0,
+ 125:mpwpl-manual-virt-obf.c **** };
+ 126:mpwpl-manual-virt-obf.c **** */
+ 127:mpwpl-manual-virt-obf.c **** 
+ 128:mpwpl-manual-virt-obf.c **** const char *init_program (int *argcptr, char *argv[]) {
+ 236              		.loc 1 128 0
+ 237              		.cfi_startproc
+ 238 0000 55       		pushq	%rbp
+ 239              		.cfi_def_cfa_offset 16
+ 240              		.cfi_offset 6, -16
+ 241 0001 4889E5   		movq	%rsp, %rbp
+ 242              		.cfi_def_cfa_register 6
+ 243 0004 4883EC20 		subq	$32, %rsp
+GAS LISTING /tmp/ccIRtJEC.s 			page 9
+
+
+ 244 0008 48897DE8 		movq	%rdi, -24(%rbp)
+ 245 000c 488975E0 		movq	%rsi, -32(%rbp)
+ 246              	.LBB2:
+ 129:mpwpl-manual-virt-obf.c ****   static_assert (sizeof (program_text) > 300, "wrong program text");
+ 130:mpwpl-manual-virt-obf.c ****   char *program = new char[sizeof (program_text)];
+ 247              		.loc 1 130 0
+ 248 0010 BF670100 		movl	$359, %edi
+ 248      00
+ 249 0015 E8000000 		call	_Znam
+ 249      00
+ 250 001a 488945F8 		movq	%rax, -8(%rbp)
+ 131:mpwpl-manual-virt-obf.c ****   memcpy (program, program_text, sizeof (program_text));
+ 251              		.loc 1 131 0
+ 252 001e 488B45F8 		movq	-8(%rbp), %rax
+ 253 0022 BA670100 		movl	$359, %edx
+ 253      00
+ 254 0027 BE000000 		movl	$.LC10, %esi
+ 254      00
+ 255 002c 4889C7   		movq	%rax, %rdi
+ 256 002f E8000000 		call	memcpy
+ 256      00
+ 132:mpwpl-manual-virt-obf.c ****   static_assert (sizeof (int *) <= pointer_size, "wrong pointer size");
+ 133:mpwpl-manual-virt-obf.c ****   *((int **) (&program[2])) = argcptr;
+ 257              		.loc 1 133 0
+ 258 0034 488B45F8 		movq	-8(%rbp), %rax
+ 259 0038 488D5002 		leaq	2(%rax), %rdx
+ 260 003c 488B45E8 		movq	-24(%rbp), %rax
+ 261 0040 488902   		movq	%rax, (%rdx)
+ 134:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[27])) = str0;
+ 262              		.loc 1 134 0
+ 263 0043 488B45F8 		movq	-8(%rbp), %rax
+ 264 0047 488D501B 		leaq	27(%rax), %rdx
+ 265 004b 488B0500 		movq	str0(%rip), %rax
+ 265      000000
+ 266 0052 488902   		movq	%rax, (%rdx)
+ 135:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[49])) = &argv[1][0];
+ 267              		.loc 1 135 0
+ 268 0055 488B45F8 		movq	-8(%rbp), %rax
+ 269 0059 488D5031 		leaq	49(%rax), %rdx
+ 270 005d 488B45E0 		movq	-32(%rbp), %rax
+ 271 0061 488B4008 		movq	8(%rax), %rax
+ 272 0065 488902   		movq	%rax, (%rdx)
+ 136:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[75])) = &argv[1][1];
+ 273              		.loc 1 136 0
+ 274 0068 488B45F8 		movq	-8(%rbp), %rax
+ 275 006c 4883C04B 		addq	$75, %rax
+ 276 0070 488B55E0 		movq	-32(%rbp), %rdx
+ 277 0074 4883C208 		addq	$8, %rdx
+ 278 0078 488B12   		movq	(%rdx), %rdx
+ 279 007b 4883C201 		addq	$1, %rdx
+ 280 007f 488910   		movq	%rdx, (%rax)
+ 137:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[101])) = &argv[1][2];
+ 281              		.loc 1 137 0
+ 282 0082 488B45F8 		movq	-8(%rbp), %rax
+ 283 0086 4883C065 		addq	$101, %rax
+ 284 008a 488B55E0 		movq	-32(%rbp), %rdx
+ 285 008e 4883C208 		addq	$8, %rdx
+GAS LISTING /tmp/ccIRtJEC.s 			page 10
+
+
+ 286 0092 488B12   		movq	(%rdx), %rdx
+ 287 0095 4883C202 		addq	$2, %rdx
+ 288 0099 488910   		movq	%rdx, (%rax)
+ 138:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[126])) = str1;
+ 289              		.loc 1 138 0
+ 290 009c 488B45F8 		movq	-8(%rbp), %rax
+ 291 00a0 488D507E 		leaq	126(%rax), %rdx
+ 292 00a4 488B0500 		movq	str1(%rip), %rax
+ 292      000000
+ 293 00ab 488902   		movq	%rax, (%rdx)
+ 139:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[141])) = str2;
+ 294              		.loc 1 139 0
+ 295 00ae 488B45F8 		movq	-8(%rbp), %rax
+ 296 00b2 488D908D 		leaq	141(%rax), %rdx
+ 296      000000
+ 297 00b9 488B0500 		movq	str2(%rip), %rax
+ 297      000000
+ 298 00c0 488902   		movq	%rax, (%rdx)
+ 140:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[157])) = &argv[1][2];
+ 299              		.loc 1 140 0
+ 300 00c3 488B45F8 		movq	-8(%rbp), %rax
+ 301 00c7 48059D00 		addq	$157, %rax
+ 301      0000
+ 302 00cd 488B55E0 		movq	-32(%rbp), %rdx
+ 303 00d1 4883C208 		addq	$8, %rdx
+ 304 00d5 488B12   		movq	(%rdx), %rdx
+ 305 00d8 4883C202 		addq	$2, %rdx
+ 306 00dc 488910   		movq	%rdx, (%rax)
+ 141:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[182])) = str3;
+ 307              		.loc 1 141 0
+ 308 00df 488B45F8 		movq	-8(%rbp), %rax
+ 309 00e3 488D90B6 		leaq	182(%rax), %rdx
+ 309      000000
+ 310 00ea 488B0500 		movq	str3(%rip), %rax
+ 310      000000
+ 311 00f1 488902   		movq	%rax, (%rdx)
+ 142:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[197])) = str4;
+ 312              		.loc 1 142 0
+ 313 00f4 488B45F8 		movq	-8(%rbp), %rax
+ 314 00f8 488D90C5 		leaq	197(%rax), %rdx
+ 314      000000
+ 315 00ff 488B0500 		movq	str4(%rip), %rax
+ 315      000000
+ 316 0106 488902   		movq	%rax, (%rdx)
+ 143:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[213])) = &argv[1][1];
+ 317              		.loc 1 143 0
+ 318 0109 488B45F8 		movq	-8(%rbp), %rax
+ 319 010d 4805D500 		addq	$213, %rax
+ 319      0000
+ 320 0113 488B55E0 		movq	-32(%rbp), %rdx
+ 321 0117 4883C208 		addq	$8, %rdx
+ 322 011b 488B12   		movq	(%rdx), %rdx
+ 323 011e 4883C201 		addq	$1, %rdx
+ 324 0122 488910   		movq	%rdx, (%rax)
+ 144:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[239])) = &argv[1][2];
+ 325              		.loc 1 144 0
+ 326 0125 488B45F8 		movq	-8(%rbp), %rax
+GAS LISTING /tmp/ccIRtJEC.s 			page 11
+
+
+ 327 0129 4805EF00 		addq	$239, %rax
+ 327      0000
+ 328 012f 488B55E0 		movq	-32(%rbp), %rdx
+ 329 0133 4883C208 		addq	$8, %rdx
+ 330 0137 488B12   		movq	(%rdx), %rdx
+ 331 013a 4883C202 		addq	$2, %rdx
+ 332 013e 488910   		movq	%rdx, (%rax)
+ 145:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[264])) = str5;
+ 333              		.loc 1 145 0
+ 334 0141 488B45F8 		movq	-8(%rbp), %rax
+ 335 0145 488D9008 		leaq	264(%rax), %rdx
+ 335      010000
+ 336 014c 488B0500 		movq	str5(%rip), %rax
+ 336      000000
+ 337 0153 488902   		movq	%rax, (%rdx)
+ 146:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[279])) = str6;
+ 338              		.loc 1 146 0
+ 339 0156 488B45F8 		movq	-8(%rbp), %rax
+ 340 015a 488D9017 		leaq	279(%rax), %rdx
+ 340      010000
+ 341 0161 488B0500 		movq	str6(%rip), %rax
+ 341      000000
+ 342 0168 488902   		movq	%rax, (%rdx)
+ 147:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[295])) = &argv[1][2];
+ 343              		.loc 1 147 0
+ 344 016b 488B45F8 		movq	-8(%rbp), %rax
+ 345 016f 48052701 		addq	$295, %rax
+ 345      0000
+ 346 0175 488B55E0 		movq	-32(%rbp), %rdx
+ 347 0179 4883C208 		addq	$8, %rdx
+ 348 017d 488B12   		movq	(%rdx), %rdx
+ 349 0180 4883C202 		addq	$2, %rdx
+ 350 0184 488910   		movq	%rdx, (%rax)
+ 148:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[320])) = str7;
+ 351              		.loc 1 148 0
+ 352 0187 488B45F8 		movq	-8(%rbp), %rax
+ 353 018b 488D9040 		leaq	320(%rax), %rdx
+ 353      010000
+ 354 0192 488B0500 		movq	str7(%rip), %rax
+ 354      000000
+ 355 0199 488902   		movq	%rax, (%rdx)
+ 149:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[335])) = str8;
+ 356              		.loc 1 149 0
+ 357 019c 488B45F8 		movq	-8(%rbp), %rax
+ 358 01a0 488D904F 		leaq	335(%rax), %rdx
+ 358      010000
+ 359 01a7 488B0500 		movq	str8(%rip), %rax
+ 359      000000
+ 360 01ae 488902   		movq	%rax, (%rdx)
+ 150:mpwpl-manual-virt-obf.c ****   *((const char **) (&program[344])) = str9;
+ 361              		.loc 1 150 0
+ 362 01b1 488B45F8 		movq	-8(%rbp), %rax
+ 363 01b5 488D9058 		leaq	344(%rax), %rdx
+ 363      010000
+ 364 01bc 488B0500 		movq	str9(%rip), %rax
+ 364      000000
+ 365 01c3 488902   		movq	%rax, (%rdx)
+GAS LISTING /tmp/ccIRtJEC.s 			page 12
+
+
+ 151:mpwpl-manual-virt-obf.c ****   return program;
+ 366              		.loc 1 151 0
+ 367 01c6 488B45F8 		movq	-8(%rbp), %rax
+ 368              	.LBE2:
+ 152:mpwpl-manual-virt-obf.c **** }
+ 369              		.loc 1 152 0
+ 370 01ca C9       		leave
+ 371              		.cfi_def_cfa 7, 8
+ 372 01cb C3       		ret
+ 373              		.cfi_endproc
+ 374              	.LFE0:
+ 376              		.globl	main
+ 378              	main:
+ 379              	.LFB1:
+ 153:mpwpl-manual-virt-obf.c **** 
+ 154:mpwpl-manual-virt-obf.c **** int main (int argc, char *argv[]) {
+ 380              		.loc 1 154 0
+ 381              		.cfi_startproc
+ 382 01cc 55       		pushq	%rbp
+ 383              		.cfi_def_cfa_offset 16
+ 384              		.cfi_offset 6, -16
+ 385 01cd 4889E5   		movq	%rsp, %rbp
+ 386              		.cfi_def_cfa_register 6
+ 387 01d0 4883EC20 		subq	$32, %rsp
+ 388 01d4 897DEC   		movl	%edi, -20(%rbp)
+ 389 01d7 488975E0 		movq	%rsi, -32(%rbp)
+ 390              	.LBB3:
+ 155:mpwpl-manual-virt-obf.c ****   const char *ptr = init_program (&argc, argv);
+ 391              		.loc 1 155 0
+ 392 01db 488B55E0 		movq	-32(%rbp), %rdx
+ 393 01df 488D45EC 		leaq	-20(%rbp), %rax
+ 394 01e3 4889D6   		movq	%rdx, %rsi
+ 395 01e6 4889C7   		movq	%rax, %rdi
+ 396 01e9 E8000000 		call	_Z12init_programPiPPc
+ 396      00
+ 397 01ee 488945F8 		movq	%rax, -8(%rbp)
+ 398              	.L11:
+ 156:mpwpl-manual-virt-obf.c ****   for (;;) {
+ 157:mpwpl-manual-virt-obf.c ****     switch (*ptr) {
+ 399              		.loc 1 157 0
+ 400 01f2 488B45F8 		movq	-8(%rbp), %rax
+ 401 01f6 0FB600   		movzbl	(%rax), %eax
+ 402 01f9 0FBEC0   		movsbl	%al, %eax
+ 403 01fc 83F801   		cmpl	$1, %eax
+ 404 01ff 7425     		je	.L5
+ 405 0201 83F801   		cmpl	$1, %eax
+ 406 0204 7F06     		jg	.L6
+ 407 0206 85C0     		testl	%eax, %eax
+ 408 0208 740E     		je	.L7
+ 409 020a EB43     		jmp	.L4
+ 410              	.L6:
+ 411 020c 83F802   		cmpl	$2, %eax
+ 412 020f 7423     		je	.L8
+ 413 0211 83F803   		cmpl	$3, %eax
+ 414 0214 742C     		je	.L9
+ 415 0216 EB37     		jmp	.L4
+ 416              	.L7:
+GAS LISTING /tmp/ccIRtJEC.s 			page 13
+
+
+ 158:mpwpl-manual-virt-obf.c ****       case 0x00:
+ 159:mpwpl-manual-virt-obf.c ****         return end_of_execution (ptr);
+ 417              		.loc 1 159 0
+ 418 0218 488D45F8 		leaq	-8(%rbp), %rax
+ 419 021c 4889C7   		movq	%rax, %rdi
+ 420 021f E8000000 		call	_Z16end_of_executionRPKc
+ 420      00
+ 421 0224 EB2B     		jmp	.L12
+ 422              	.L5:
+ 160:mpwpl-manual-virt-obf.c ****       case 0x01:
+ 161:mpwpl-manual-virt-obf.c ****         if_then_else_command (ptr);
+ 423              		.loc 1 161 0
+ 424 0226 488D45F8 		leaq	-8(%rbp), %rax
+ 425 022a 4889C7   		movq	%rax, %rdi
+ 426 022d E8000000 		call	_Z20if_then_else_commandRPKc
+ 426      00
+ 162:mpwpl-manual-virt-obf.c ****         break;
+ 427              		.loc 1 162 0
+ 428 0232 EB1B     		jmp	.L4
+ 429              	.L8:
+ 163:mpwpl-manual-virt-obf.c ****       case 0x02:
+ 164:mpwpl-manual-virt-obf.c ****         printf_command (ptr);
+ 430              		.loc 1 164 0
+ 431 0234 488D45F8 		leaq	-8(%rbp), %rax
+ 432 0238 4889C7   		movq	%rax, %rdi
+ 433 023b E8000000 		call	_Z14printf_commandRPKc
+ 433      00
+ 165:mpwpl-manual-virt-obf.c ****         break;
+ 434              		.loc 1 165 0
+ 435 0240 EB0D     		jmp	.L4
+ 436              	.L9:
+ 166:mpwpl-manual-virt-obf.c ****       case 0x03:
+ 167:mpwpl-manual-virt-obf.c ****         jump_command (ptr);
+ 437              		.loc 1 167 0
+ 438 0242 488D45F8 		leaq	-8(%rbp), %rax
+ 439 0246 4889C7   		movq	%rax, %rdi
+ 440 0249 E8000000 		call	_Z12jump_commandRPKc
+ 440      00
+ 168:mpwpl-manual-virt-obf.c ****         break;
+ 441              		.loc 1 168 0
+ 442 024e 90       		nop
+ 443              	.L4:
+ 169:mpwpl-manual-virt-obf.c ****     }
+ 170:mpwpl-manual-virt-obf.c ****   }
+ 171:mpwpl-manual-virt-obf.c ****   delete[] ptr;
+ 172:mpwpl-manual-virt-obf.c ****   return 0;
+ 444              		.loc 1 172 0
+ 445 024f EBA1     		jmp	.L11
+ 446              	.L12:
+ 447              	.LBE3:
+ 173:mpwpl-manual-virt-obf.c **** }
+ 448              		.loc 1 173 0 discriminator 1
+ 449 0251 C9       		leave
+ 450              		.cfi_def_cfa 7, 8
+ 451 0252 C3       		ret
+ 452              		.cfi_endproc
+ 453              	.LFE1:
+GAS LISTING /tmp/ccIRtJEC.s 			page 14
+
+
+ 455              		.globl	_Z16end_of_executionRPKc
+ 457              	_Z16end_of_executionRPKc:
+ 458              	.LFB2:
+ 174:mpwpl-manual-virt-obf.c **** 
+ 175:mpwpl-manual-virt-obf.c **** int end_of_execution (const char *&ptr) {
+ 459              		.loc 1 175 0
+ 460              		.cfi_startproc
+ 461 0253 55       		pushq	%rbp
+ 462              		.cfi_def_cfa_offset 16
+ 463              		.cfi_offset 6, -16
+ 464 0254 4889E5   		movq	%rsp, %rbp
+ 465              		.cfi_def_cfa_register 6
+ 466 0257 4883EC20 		subq	$32, %rsp
+ 467 025b 48897DE8 		movq	%rdi, -24(%rbp)
+ 468              	.LBB4:
+ 176:mpwpl-manual-virt-obf.c ****   ++ptr;
+ 469              		.loc 1 176 0
+ 470 025f 488B45E8 		movq	-24(%rbp), %rax
+ 471 0263 488B00   		movq	(%rax), %rax
+ 472 0266 488D5001 		leaq	1(%rax), %rdx
+ 473 026a 488B45E8 		movq	-24(%rbp), %rax
+ 474 026e 488910   		movq	%rdx, (%rax)
+ 177:mpwpl-manual-virt-obf.c ****   const int arg0 = get_argument (ptr);
+ 475              		.loc 1 177 0
+ 476 0271 488B45E8 		movq	-24(%rbp), %rax
+ 477 0275 4889C7   		movq	%rax, %rdi
+ 478 0278 E8000000 		call	_Z12get_argumentRPKc
+ 478      00
+ 479 027d 8945FC   		movl	%eax, -4(%rbp)
+ 178:mpwpl-manual-virt-obf.c ****   return arg0;
+ 480              		.loc 1 178 0
+ 481 0280 8B45FC   		movl	-4(%rbp), %eax
+ 482              	.LBE4:
+ 179:mpwpl-manual-virt-obf.c **** }
+ 483              		.loc 1 179 0
+ 484 0283 C9       		leave
+ 485              		.cfi_def_cfa 7, 8
+ 486 0284 C3       		ret
+ 487              		.cfi_endproc
+ 488              	.LFE2:
+ 490              		.globl	_Z14printf_commandRPKc
+ 492              	_Z14printf_commandRPKc:
+ 493              	.LFB3:
+ 180:mpwpl-manual-virt-obf.c **** 
+ 181:mpwpl-manual-virt-obf.c **** void printf_command (const char *&ptr) {
+ 494              		.loc 1 181 0
+ 495              		.cfi_startproc
+ 496 0285 55       		pushq	%rbp
+ 497              		.cfi_def_cfa_offset 16
+ 498              		.cfi_offset 6, -16
+ 499 0286 4889E5   		movq	%rsp, %rbp
+ 500              		.cfi_def_cfa_register 6
+ 501 0289 4883EC20 		subq	$32, %rsp
+ 502 028d 48897DE8 		movq	%rdi, -24(%rbp)
+ 503              	.LBB5:
+ 182:mpwpl-manual-virt-obf.c ****   ++ptr;
+ 504              		.loc 1 182 0
+GAS LISTING /tmp/ccIRtJEC.s 			page 15
+
+
+ 505 0291 488B45E8 		movq	-24(%rbp), %rax
+ 506 0295 488B00   		movq	(%rax), %rax
+ 507 0298 488D5001 		leaq	1(%rax), %rdx
+ 508 029c 488B45E8 		movq	-24(%rbp), %rax
+ 509 02a0 488910   		movq	%rdx, (%rax)
+ 183:mpwpl-manual-virt-obf.c ****   const char **format = (const char **) ptr;
+ 510              		.loc 1 183 0
+ 511 02a3 488B45E8 		movq	-24(%rbp), %rax
+ 512 02a7 488B00   		movq	(%rax), %rax
+ 513 02aa 488945F8 		movq	%rax, -8(%rbp)
+ 184:mpwpl-manual-virt-obf.c ****   ptr += pointer_size;
+ 514              		.loc 1 184 0
+ 515 02ae 488B45E8 		movq	-24(%rbp), %rax
+ 516 02b2 488B10   		movq	(%rax), %rdx
+ 517 02b5 B8080000 		movl	$8, %eax
+ 517      00
+ 518 02ba 4898     		cltq
+ 519 02bc 4801C2   		addq	%rax, %rdx
+ 520 02bf 488B45E8 		movq	-24(%rbp), %rax
+ 521 02c3 488910   		movq	%rdx, (%rax)
+ 185:mpwpl-manual-virt-obf.c ****   printf (*format);
+ 522              		.loc 1 185 0
+ 523 02c6 488B45F8 		movq	-8(%rbp), %rax
+ 524 02ca 488B00   		movq	(%rax), %rax
+ 525 02cd 4889C7   		movq	%rax, %rdi
+ 526 02d0 B8000000 		movl	$0, %eax
+ 526      00
+ 527 02d5 E8000000 		call	printf
+ 527      00
+ 528              	.LBE5:
+ 186:mpwpl-manual-virt-obf.c **** }
+ 529              		.loc 1 186 0
+ 530 02da C9       		leave
+ 531              		.cfi_def_cfa 7, 8
+ 532 02db C3       		ret
+ 533              		.cfi_endproc
+ 534              	.LFE3:
+ 536              		.globl	_Z12jump_commandRPKc
+ 538              	_Z12jump_commandRPKc:
+ 539              	.LFB4:
+ 187:mpwpl-manual-virt-obf.c **** 
+ 188:mpwpl-manual-virt-obf.c **** void jump_command (const char *&ptr) {
+ 540              		.loc 1 188 0
+ 541              		.cfi_startproc
+ 542 02dc 55       		pushq	%rbp
+ 543              		.cfi_def_cfa_offset 16
+ 544              		.cfi_offset 6, -16
+ 545 02dd 4889E5   		movq	%rsp, %rbp
+ 546              		.cfi_def_cfa_register 6
+ 547 02e0 4883EC20 		subq	$32, %rsp
+ 548 02e4 48897DE8 		movq	%rdi, -24(%rbp)
+ 549              	.LBB6:
+ 189:mpwpl-manual-virt-obf.c ****   ++ptr;
+ 550              		.loc 1 189 0
+ 551 02e8 488B45E8 		movq	-24(%rbp), %rax
+ 552 02ec 488B00   		movq	(%rax), %rax
+ 553 02ef 488D5001 		leaq	1(%rax), %rdx
+GAS LISTING /tmp/ccIRtJEC.s 			page 16
+
+
+ 554 02f3 488B45E8 		movq	-24(%rbp), %rax
+ 555 02f7 488910   		movq	%rdx, (%rax)
+ 190:mpwpl-manual-virt-obf.c ****   const int offset = get_argument (ptr);
+ 556              		.loc 1 190 0
+ 557 02fa 488B45E8 		movq	-24(%rbp), %rax
+ 558 02fe 4889C7   		movq	%rax, %rdi
+ 559 0301 E8000000 		call	_Z12get_argumentRPKc
+ 559      00
+ 560 0306 8945FC   		movl	%eax, -4(%rbp)
+ 191:mpwpl-manual-virt-obf.c ****   ptr += offset;
+ 561              		.loc 1 191 0
+ 562 0309 488B45E8 		movq	-24(%rbp), %rax
+ 563 030d 488B10   		movq	(%rax), %rdx
+ 564 0310 8B45FC   		movl	-4(%rbp), %eax
+ 565 0313 4898     		cltq
+ 566 0315 4801C2   		addq	%rax, %rdx
+ 567 0318 488B45E8 		movq	-24(%rbp), %rax
+ 568 031c 488910   		movq	%rdx, (%rax)
+ 569              	.LBE6:
+ 192:mpwpl-manual-virt-obf.c **** }
+ 570              		.loc 1 192 0
+ 571 031f C9       		leave
+ 572              		.cfi_def_cfa 7, 8
+ 573 0320 C3       		ret
+ 574              		.cfi_endproc
+ 575              	.LFE4:
+ 577              		.globl	_Z20if_then_else_commandRPKc
+ 579              	_Z20if_then_else_commandRPKc:
+ 580              	.LFB5:
+ 193:mpwpl-manual-virt-obf.c **** 
+ 194:mpwpl-manual-virt-obf.c **** void if_then_else_command (const char *&ptr) {
+ 581              		.loc 1 194 0
+ 582              		.cfi_startproc
+ 583 0321 55       		pushq	%rbp
+ 584              		.cfi_def_cfa_offset 16
+ 585              		.cfi_offset 6, -16
+ 586 0322 4889E5   		movq	%rsp, %rbp
+ 587              		.cfi_def_cfa_register 6
+ 588 0325 4883EC30 		subq	$48, %rsp
+ 589 0329 48897DD8 		movq	%rdi, -40(%rbp)
+ 590              	.LBB7:
+ 195:mpwpl-manual-virt-obf.c ****   ++ptr;
+ 591              		.loc 1 195 0
+ 592 032d 488B45D8 		movq	-40(%rbp), %rax
+ 593 0331 488B00   		movq	(%rax), %rax
+ 594 0334 488D5001 		leaq	1(%rax), %rdx
+ 595 0338 488B45D8 		movq	-40(%rbp), %rax
+ 596 033c 488910   		movq	%rdx, (%rax)
+ 196:mpwpl-manual-virt-obf.c ****   const int arg0 = get_argument (ptr);
+ 597              		.loc 1 196 0
+ 598 033f 488B45D8 		movq	-40(%rbp), %rax
+ 599 0343 4889C7   		movq	%rax, %rdi
+ 600 0346 E8000000 		call	_Z12get_argumentRPKc
+ 600      00
+ 601 034b 8945FC   		movl	%eax, -4(%rbp)
+ 197:mpwpl-manual-virt-obf.c ****   const int arg1 = get_argument (ptr);
+ 602              		.loc 1 197 0
+GAS LISTING /tmp/ccIRtJEC.s 			page 17
+
+
+ 603 034e 488B45D8 		movq	-40(%rbp), %rax
+ 604 0352 4889C7   		movq	%rax, %rdi
+ 605 0355 E8000000 		call	_Z12get_argumentRPKc
+ 605      00
+ 606 035a 8945F8   		movl	%eax, -8(%rbp)
+ 198:mpwpl-manual-virt-obf.c ****   const bool res = do_comparison (ptr, arg0, arg1);
+ 607              		.loc 1 198 0
+ 608 035d 8B55F8   		movl	-8(%rbp), %edx
+ 609 0360 8B4DFC   		movl	-4(%rbp), %ecx
+ 610 0363 488B45D8 		movq	-40(%rbp), %rax
+ 611 0367 89CE     		movl	%ecx, %esi
+ 612 0369 4889C7   		movq	%rax, %rdi
+ 613 036c E8000000 		call	_Z13do_comparisonRPKcii
+ 613      00
+ 614 0371 8845F7   		movb	%al, -9(%rbp)
+ 199:mpwpl-manual-virt-obf.c ****   const int thenpart = get_argument (ptr);
+ 615              		.loc 1 199 0
+ 616 0374 488B45D8 		movq	-40(%rbp), %rax
+ 617 0378 4889C7   		movq	%rax, %rdi
+ 618 037b E8000000 		call	_Z12get_argumentRPKc
+ 618      00
+ 619 0380 8945F0   		movl	%eax, -16(%rbp)
+ 200:mpwpl-manual-virt-obf.c ****   const int elsepart = get_argument (ptr);
+ 620              		.loc 1 200 0
+ 621 0383 488B45D8 		movq	-40(%rbp), %rax
+ 622 0387 4889C7   		movq	%rax, %rdi
+ 623 038a E8000000 		call	_Z12get_argumentRPKc
+ 623      00
+ 624 038f 8945EC   		movl	%eax, -20(%rbp)
+ 201:mpwpl-manual-virt-obf.c ****   if (res) {
+ 625              		.loc 1 201 0
+ 626 0392 807DF700 		cmpb	$0, -9(%rbp)
+ 627 0396 7418     		je	.L18
+ 202:mpwpl-manual-virt-obf.c ****     ptr += thenpart;
+ 628              		.loc 1 202 0
+ 629 0398 488B45D8 		movq	-40(%rbp), %rax
+ 630 039c 488B10   		movq	(%rax), %rdx
+ 631 039f 8B45F0   		movl	-16(%rbp), %eax
+ 632 03a2 4898     		cltq
+ 633 03a4 4801C2   		addq	%rax, %rdx
+ 634 03a7 488B45D8 		movq	-40(%rbp), %rax
+ 635 03ab 488910   		movq	%rdx, (%rax)
+ 636 03ae EB16     		jmp	.L17
+ 637              	.L18:
+ 203:mpwpl-manual-virt-obf.c ****   } else {
+ 204:mpwpl-manual-virt-obf.c ****     ptr += elsepart;
+ 638              		.loc 1 204 0
+ 639 03b0 488B45D8 		movq	-40(%rbp), %rax
+ 640 03b4 488B10   		movq	(%rax), %rdx
+ 641 03b7 8B45EC   		movl	-20(%rbp), %eax
+ 642 03ba 4898     		cltq
+ 643 03bc 4801C2   		addq	%rax, %rdx
+ 644 03bf 488B45D8 		movq	-40(%rbp), %rax
+ 645 03c3 488910   		movq	%rdx, (%rax)
+ 646              	.L17:
+ 647              	.LBE7:
+ 205:mpwpl-manual-virt-obf.c ****   }
+GAS LISTING /tmp/ccIRtJEC.s 			page 18
+
+
+ 206:mpwpl-manual-virt-obf.c **** }
+ 648              		.loc 1 206 0
+ 649 03c6 C9       		leave
+ 650              		.cfi_def_cfa 7, 8
+ 651 03c7 C3       		ret
+ 652              		.cfi_endproc
+ 653              	.LFE5:
+ 655              		.section	.rodata
+ 656              	.LC11:
+ 657 02cf 77726F6E 		.string	"wrong operator"
+ 657      67206F70 
+ 657      65726174 
+ 657      6F7200
+ 658              		.text
+ 659              		.globl	_Z13do_comparisonRPKcii
+ 661              	_Z13do_comparisonRPKcii:
+ 662              	.LFB6:
+ 207:mpwpl-manual-virt-obf.c **** 
+ 208:mpwpl-manual-virt-obf.c **** bool do_comparison (const char *&ptr, int arg0, int arg1) {
+ 663              		.loc 1 208 0
+ 664              		.cfi_startproc
+ 665 03c8 55       		pushq	%rbp
+ 666              		.cfi_def_cfa_offset 16
+ 667              		.cfi_offset 6, -16
+ 668 03c9 4889E5   		movq	%rsp, %rbp
+ 669              		.cfi_def_cfa_register 6
+ 670 03cc 4883EC20 		subq	$32, %rsp
+ 671 03d0 48897DE8 		movq	%rdi, -24(%rbp)
+ 672 03d4 8975E4   		movl	%esi, -28(%rbp)
+ 673 03d7 8955E0   		movl	%edx, -32(%rbp)
+ 674              	.LBB8:
+ 209:mpwpl-manual-virt-obf.c ****   const char type = *ptr;
+ 675              		.loc 1 209 0
+ 676 03da 488B45E8 		movq	-24(%rbp), %rax
+ 677 03de 488B00   		movq	(%rax), %rax
+ 678 03e1 0FB600   		movzbl	(%rax), %eax
+ 679 03e4 8845FF   		movb	%al, -1(%rbp)
+ 210:mpwpl-manual-virt-obf.c ****   ++ptr;
+ 680              		.loc 1 210 0
+ 681 03e7 488B45E8 		movq	-24(%rbp), %rax
+ 682 03eb 488B00   		movq	(%rax), %rax
+ 683 03ee 488D5001 		leaq	1(%rax), %rdx
+ 684 03f2 488B45E8 		movq	-24(%rbp), %rax
+ 685 03f6 488910   		movq	%rdx, (%rax)
+ 211:mpwpl-manual-virt-obf.c ****   if (type == 0x1) {
+ 686              		.loc 1 211 0
+ 687 03f9 807DFF01 		cmpb	$1, -1(%rbp)
+ 688 03fd 750B     		jne	.L21
+ 212:mpwpl-manual-virt-obf.c ****     return arg0 < arg1;
+ 689              		.loc 1 212 0
+ 690 03ff 8B45E4   		movl	-28(%rbp), %eax
+ 691 0402 3B45E0   		cmpl	-32(%rbp), %eax
+ 692 0405 0F9CC0   		setl	%al
+ 693 0408 EB78     		jmp	.L22
+ 694              	.L21:
+ 213:mpwpl-manual-virt-obf.c ****   } else if (type == 0x02) {
+ 695              		.loc 1 213 0
+GAS LISTING /tmp/ccIRtJEC.s 			page 19
+
+
+ 696 040a 807DFF02 		cmpb	$2, -1(%rbp)
+ 697 040e 750B     		jne	.L23
+ 214:mpwpl-manual-virt-obf.c ****     return arg0 <= arg1;
+ 698              		.loc 1 214 0
+ 699 0410 8B45E4   		movl	-28(%rbp), %eax
+ 700 0413 3B45E0   		cmpl	-32(%rbp), %eax
+ 701 0416 0F9EC0   		setle	%al
+ 702 0419 EB67     		jmp	.L22
+ 703              	.L23:
+ 215:mpwpl-manual-virt-obf.c ****   } else if (type == 0x03) {
+ 704              		.loc 1 215 0
+ 705 041b 807DFF03 		cmpb	$3, -1(%rbp)
+ 706 041f 750B     		jne	.L24
+ 216:mpwpl-manual-virt-obf.c ****     return arg0 > arg1;
+ 707              		.loc 1 216 0
+ 708 0421 8B45E4   		movl	-28(%rbp), %eax
+ 709 0424 3B45E0   		cmpl	-32(%rbp), %eax
+ 710 0427 0F9FC0   		setg	%al
+ 711 042a EB56     		jmp	.L22
+ 712              	.L24:
+ 217:mpwpl-manual-virt-obf.c ****   } else if (type == 0x04) {
+ 713              		.loc 1 217 0
+ 714 042c 807DFF04 		cmpb	$4, -1(%rbp)
+ 715 0430 750B     		jne	.L25
+ 218:mpwpl-manual-virt-obf.c ****     return arg0 >= arg1;
+ 716              		.loc 1 218 0
+ 717 0432 8B45E4   		movl	-28(%rbp), %eax
+ 718 0435 3B45E0   		cmpl	-32(%rbp), %eax
+ 719 0438 0F9DC0   		setge	%al
+ 720 043b EB45     		jmp	.L22
+ 721              	.L25:
+ 219:mpwpl-manual-virt-obf.c ****   } else if (type == 0x05) {
+ 722              		.loc 1 219 0
+ 723 043d 807DFF05 		cmpb	$5, -1(%rbp)
+ 724 0441 750B     		jne	.L26
+ 220:mpwpl-manual-virt-obf.c ****     return arg0 == arg1;
+ 725              		.loc 1 220 0
+ 726 0443 8B45E4   		movl	-28(%rbp), %eax
+ 727 0446 3B45E0   		cmpl	-32(%rbp), %eax
+ 728 0449 0F94C0   		sete	%al
+ 729 044c EB34     		jmp	.L22
+ 730              	.L26:
+ 221:mpwpl-manual-virt-obf.c ****   } else if (type == 0x06) {
+ 731              		.loc 1 221 0
+ 732 044e 807DFF06 		cmpb	$6, -1(%rbp)
+ 733 0452 750B     		jne	.L27
+ 222:mpwpl-manual-virt-obf.c ****     return arg0 != arg1;
+ 734              		.loc 1 222 0
+ 735 0454 8B45E4   		movl	-28(%rbp), %eax
+ 736 0457 3B45E0   		cmpl	-32(%rbp), %eax
+ 737 045a 0F95C0   		setne	%al
+ 738 045d EB23     		jmp	.L22
+ 739              	.L27:
+ 223:mpwpl-manual-virt-obf.c ****   } else {
+ 224:mpwpl-manual-virt-obf.c ****     throw "wrong operator";
+ 740              		.loc 1 224 0
+ 741 045f BF080000 		movl	$8, %edi
+GAS LISTING /tmp/ccIRtJEC.s 			page 20
+
+
+ 741      00
+ 742 0464 E8000000 		call	__cxa_allocate_exception
+ 742      00
+ 743 0469 48C70000 		movq	$.LC11, (%rax)
+ 743      000000
+ 744 0470 BA000000 		movl	$0, %edx
+ 744      00
+ 745 0475 BE000000 		movl	$_ZTIPKc, %esi
+ 745      00
+ 746 047a 4889C7   		movq	%rax, %rdi
+ 747 047d E8000000 		call	__cxa_throw
+ 747      00
+ 748              	.L22:
+ 749              	.LBE8:
+ 225:mpwpl-manual-virt-obf.c ****   }
+ 226:mpwpl-manual-virt-obf.c **** }
+ 750              		.loc 1 226 0
+ 751 0482 C9       		leave
+ 752              		.cfi_def_cfa 7, 8
+ 753 0483 C3       		ret
+ 754              		.cfi_endproc
+ 755              	.LFE6:
+ 757              		.section	.rodata
+ 758              	.LC12:
+ 759 02de 77726F6E 		.string	"wrong type"
+ 759      67207479 
+ 759      706500
+ 760              		.text
+ 761              		.globl	_Z12get_argumentRPKc
+ 763              	_Z12get_argumentRPKc:
+ 764              	.LFB7:
+ 227:mpwpl-manual-virt-obf.c **** 
+ 228:mpwpl-manual-virt-obf.c **** int get_argument (const char *&ptr) {
+ 765              		.loc 1 228 0
+ 766              		.cfi_startproc
+ 767 0484 55       		pushq	%rbp
+ 768              		.cfi_def_cfa_offset 16
+ 769              		.cfi_offset 6, -16
+ 770 0485 4889E5   		movq	%rsp, %rbp
+ 771              		.cfi_def_cfa_register 6
+ 772 0488 4883EC30 		subq	$48, %rsp
+ 773 048c 48897DD8 		movq	%rdi, -40(%rbp)
+ 774              	.LBB9:
+ 229:mpwpl-manual-virt-obf.c ****   const char type = *ptr;
+ 775              		.loc 1 229 0
+ 776 0490 488B45D8 		movq	-40(%rbp), %rax
+ 777 0494 488B00   		movq	(%rax), %rax
+ 778 0497 0FB600   		movzbl	(%rax), %eax
+ 779 049a 8845FF   		movb	%al, -1(%rbp)
+ 230:mpwpl-manual-virt-obf.c ****   ++ptr;
+ 780              		.loc 1 230 0
+ 781 049d 488B45D8 		movq	-40(%rbp), %rax
+ 782 04a1 488B00   		movq	(%rax), %rax
+ 783 04a4 488D5001 		leaq	1(%rax), %rdx
+ 784 04a8 488B45D8 		movq	-40(%rbp), %rax
+ 785 04ac 488910   		movq	%rdx, (%rax)
+ 786              	.LBB10:
+GAS LISTING /tmp/ccIRtJEC.s 			page 21
+
+
+ 231:mpwpl-manual-virt-obf.c ****   if (type == 0x01) { // pointer argument
+ 787              		.loc 1 231 0
+ 788 04af 807DFF01 		cmpb	$1, -1(%rbp)
+ 789 04b3 7531     		jne	.L29
+ 790              	.LBB11:
+ 232:mpwpl-manual-virt-obf.c ****     const int **arg0 = (const int **) ptr;
+ 791              		.loc 1 232 0
+ 792 04b5 488B45D8 		movq	-40(%rbp), %rax
+ 793 04b9 488B00   		movq	(%rax), %rax
+ 794 04bc 488945F0 		movq	%rax, -16(%rbp)
+ 233:mpwpl-manual-virt-obf.c ****     ptr += pointer_size;
+ 795              		.loc 1 233 0
+ 796 04c0 488B45D8 		movq	-40(%rbp), %rax
+ 797 04c4 488B10   		movq	(%rax), %rdx
+ 798 04c7 B8080000 		movl	$8, %eax
+ 798      00
+ 799 04cc 4898     		cltq
+ 800 04ce 4801C2   		addq	%rax, %rdx
+ 801 04d1 488B45D8 		movq	-40(%rbp), %rax
+ 802 04d5 488910   		movq	%rdx, (%rax)
+ 234:mpwpl-manual-virt-obf.c ****     return **arg0;
+ 803              		.loc 1 234 0
+ 804 04d8 488B45F0 		movq	-16(%rbp), %rax
+ 805 04dc 488B00   		movq	(%rax), %rax
+ 806 04df 8B00     		movl	(%rax), %eax
+ 807 04e1 E98C0000 		jmp	.L30
+ 807      00
+ 808              	.L29:
+ 809              	.LBE11:
+ 810              	.LBB12:
+ 811              	.LBB13:
+ 235:mpwpl-manual-virt-obf.c ****   } else if (type == 0x02) { // constant argument
+ 812              		.loc 1 235 0
+ 813 04e6 807DFF02 		cmpb	$2, -1(%rbp)
+ 814 04ea 752B     		jne	.L31
+ 815              	.LBB14:
+ 236:mpwpl-manual-virt-obf.c ****     const int32 *arg0 = (const int32 *) ptr;
+ 816              		.loc 1 236 0
+ 817 04ec 488B45D8 		movq	-40(%rbp), %rax
+ 818 04f0 488B00   		movq	(%rax), %rax
+ 819 04f3 488945E8 		movq	%rax, -24(%rbp)
+ 237:mpwpl-manual-virt-obf.c ****     ptr += constant_size;
+ 820              		.loc 1 237 0
+ 821 04f7 488B45D8 		movq	-40(%rbp), %rax
+ 822 04fb 488B10   		movq	(%rax), %rdx
+ 823 04fe B8040000 		movl	$4, %eax
+ 823      00
+ 824 0503 4898     		cltq
+ 825 0505 4801C2   		addq	%rax, %rdx
+ 826 0508 488B45D8 		movq	-40(%rbp), %rax
+ 827 050c 488910   		movq	%rdx, (%rax)
+ 238:mpwpl-manual-virt-obf.c ****     return *arg0;
+ 828              		.loc 1 238 0
+ 829 050f 488B45E8 		movq	-24(%rbp), %rax
+ 830 0513 8B00     		movl	(%rax), %eax
+ 831 0515 EB5B     		jmp	.L30
+ 832              	.L31:
+GAS LISTING /tmp/ccIRtJEC.s 			page 22
+
+
+ 833              	.LBE14:
+ 834              	.LBB15:
+ 835              	.LBB16:
+ 239:mpwpl-manual-virt-obf.c ****   } else if (type == 0x03) { // pointer to char argument
+ 836              		.loc 1 239 0
+ 837 0517 807DFF03 		cmpb	$3, -1(%rbp)
+ 838 051b 7532     		jne	.L32
+ 839              	.LBB17:
+ 240:mpwpl-manual-virt-obf.c ****     const char **arg0 = (const char **) ptr;
+ 840              		.loc 1 240 0
+ 841 051d 488B45D8 		movq	-40(%rbp), %rax
+ 842 0521 488B00   		movq	(%rax), %rax
+ 843 0524 488945E0 		movq	%rax, -32(%rbp)
+ 241:mpwpl-manual-virt-obf.c ****     ptr += pointer_size;
+ 844              		.loc 1 241 0
+ 845 0528 488B45D8 		movq	-40(%rbp), %rax
+ 846 052c 488B10   		movq	(%rax), %rdx
+ 847 052f B8080000 		movl	$8, %eax
+ 847      00
+ 848 0534 4898     		cltq
+ 849 0536 4801C2   		addq	%rax, %rdx
+ 850 0539 488B45D8 		movq	-40(%rbp), %rax
+ 851 053d 488910   		movq	%rdx, (%rax)
+ 242:mpwpl-manual-virt-obf.c ****     return **arg0;
+ 852              		.loc 1 242 0
+ 853 0540 488B45E0 		movq	-32(%rbp), %rax
+ 854 0544 488B00   		movq	(%rax), %rax
+ 855 0547 0FB600   		movzbl	(%rax), %eax
+ 856 054a 0FBEC0   		movsbl	%al, %eax
+ 857 054d EB23     		jmp	.L30
+ 858              	.L32:
+ 859              	.LBE17:
+ 243:mpwpl-manual-virt-obf.c ****   } else {
+ 244:mpwpl-manual-virt-obf.c ****     throw "wrong type";
+ 860              		.loc 1 244 0
+ 861 054f BF080000 		movl	$8, %edi
+ 861      00
+ 862 0554 E8000000 		call	__cxa_allocate_exception
+ 862      00
+ 863 0559 48C70000 		movq	$.LC12, (%rax)
+ 863      000000
+ 864 0560 BA000000 		movl	$0, %edx
+ 864      00
+ 865 0565 BE000000 		movl	$_ZTIPKc, %esi
+ 865      00
+ 866 056a 4889C7   		movq	%rax, %rdi
+ 867 056d E8000000 		call	__cxa_throw
+ 867      00
+ 868              	.L30:
+ 869              	.LBE16:
+ 870              	.LBE15:
+ 871              	.LBE13:
+ 872              	.LBE12:
+ 873              	.LBE10:
+ 874              	.LBE9:
+ 245:mpwpl-manual-virt-obf.c ****   }
+ 246:mpwpl-manual-virt-obf.c **** }
+GAS LISTING /tmp/ccIRtJEC.s 			page 23
+
+
+ 875              		.loc 1 246 0
+ 876 0572 C9       		leave
+ 877              		.cfi_def_cfa 7, 8
+ 878 0573 C3       		ret
+ 879              		.cfi_endproc
+ 880              	.LFE7:
+ 882              		.section	.rodata
+ 883 02e9 000000   		.align 4
+ 886              	_ZL12pointer_size:
+ 887 02ec 08000000 		.long	8
+ 888              		.align 4
+ 891              	_ZL13constant_size:
+ 892 02f0 04000000 		.long	4
+ 893              		.text
+ 894              	.Letext0:
+ 895              		.file 2 "/usr/include/stdint.h"
+GAS LISTING /tmp/ccIRtJEC.s 			page 24
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 mpwpl-manual-virt-obf.c
+     /tmp/ccIRtJEC.s:13     .data:0000000000000000 str0
+     /tmp/ccIRtJEC.s:24     .data:0000000000000008 str1
+     /tmp/ccIRtJEC.s:35     .data:0000000000000010 str2
+     /tmp/ccIRtJEC.s:46     .data:0000000000000018 str3
+     /tmp/ccIRtJEC.s:57     .data:0000000000000020 str4
+     /tmp/ccIRtJEC.s:68     .data:0000000000000028 str5
+     /tmp/ccIRtJEC.s:79     .data:0000000000000030 str6
+     /tmp/ccIRtJEC.s:90     .data:0000000000000038 str7
+     /tmp/ccIRtJEC.s:101    .data:0000000000000040 str8
+     /tmp/ccIRtJEC.s:112    .data:0000000000000048 str9
+     /tmp/ccIRtJEC.s:233    .text:0000000000000000 _Z12init_programPiPPc
+     /tmp/ccIRtJEC.s:378    .text:00000000000001cc main
+     /tmp/ccIRtJEC.s:457    .text:0000000000000253 _Z16end_of_executionRPKc
+     /tmp/ccIRtJEC.s:579    .text:0000000000000321 _Z20if_then_else_commandRPKc
+     /tmp/ccIRtJEC.s:492    .text:0000000000000285 _Z14printf_commandRPKc
+     /tmp/ccIRtJEC.s:538    .text:00000000000002dc _Z12jump_commandRPKc
+     /tmp/ccIRtJEC.s:763    .text:0000000000000484 _Z12get_argumentRPKc
+     /tmp/ccIRtJEC.s:661    .text:00000000000003c8 _Z13do_comparisonRPKcii
+     /tmp/ccIRtJEC.s:886    .rodata:00000000000002ec _ZL12pointer_size
+     /tmp/ccIRtJEC.s:891    .rodata:00000000000002f0 _ZL13constant_size
+
+UNDEFINED SYMBOLS
+_Znam
+memcpy
+printf
+__cxa_allocate_exception
+_ZTIPKc
+__cxa_throw

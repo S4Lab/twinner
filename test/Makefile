@@ -17,6 +17,7 @@ TWIN_TARGETS := simple-condition-test \
 all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
 
 mpwpl-manual-virt-obf.out: mpwpl-manual-virt-obf.c
+	g++ -c -g -Wa,-a,-ad --std=c++11 mpwpl-manual-virt-obf.c > mpwpl-manual-virt-obf.lst
 	g++ --std=c++11 mpwpl-manual-virt-obf.c -o mpwpl-manual-virt-obf.out
 
 %.twin.out: %.twin.c

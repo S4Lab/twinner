@@ -2,7 +2,7 @@
 
 int main (int argc, char *argv[]) {
 	if (argc < 2) {
-		printf ("Usage: %s <command codes>\n", argv[0]);
+		printf ("Usage: program <command codes>\n");
 		return -1;
 	}
 	int a = argv[1][0] - '0';
@@ -33,7 +33,7 @@ int main (int argc, char *argv[]) {
 			printf ("a <= 5, b <= 5, c <= 5 -- case 8\n");
 		}
 	}
-	printf ("exiting multi-path test program with printf-leafs\n");
+	printf ("multi-path program with printf-leafs\n");
 	return 0;
 }
 

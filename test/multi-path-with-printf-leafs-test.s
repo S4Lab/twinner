@@ -2,8 +2,9 @@
 	.text
 .Ltext0:
 	.section	.rodata
+	.align 8
 .LC0:
-	.string	"Usage: %s <command codes>\n"
+	.string	"Usage: program <command codes>"
 .LC1:
 	.string	"a > 5, b > 5, c > 5 -- case 1"
 	.align 8
@@ -29,7 +30,7 @@
 	.string	"a <= 5, b <= 5, c <= 5 -- case 8"
 	.align 8
 .LC9:
-	.string	"exiting multi-path test program with printf-leafs"
+	.string	"multi-path program with printf-leafs"
 	.text
 	.globl	main
 	.type	main, @function
@@ -50,12 +51,8 @@ main:
 	cmpl	$1, -20(%rbp)
 	jg	.L2
 	.loc 1 5 0
-	movq	-32(%rbp), %rax
-	movq	(%rax), %rax
-	movq	%rax, %rsi
 	movl	$.LC0, %edi
-	movl	$0, %eax
-	call	printf
+	call	puts
 	.loc 1 6 0
 	movl	$-1, %eax
 	jmp	.L3
@@ -403,8 +400,6 @@ main:
 	.string	"unsigned int"
 .LASF13:
 	.string	"/home/behnam/thesis/tools/Twinner/test"
-.LASF11:
-	.string	"GNU C 4.8.2 20140206 (prerelease) -mtune=generic -march=x86-64 -g"
 .LASF0:
 	.string	"long unsigned int"
 .LASF8:
@@ -421,11 +416,13 @@ main:
 	.string	"argc"
 .LASF4:
 	.string	"signed char"
+.LASF11:
+	.string	"GNU C 4.9.2 20150304 (prerelease) -mtune=generic -march=x86-64 -g"
 .LASF5:
 	.string	"short int"
 .LASF7:
 	.string	"sizetype"
 .LASF10:
 	.string	"argv"
-	.ident	"GCC: (GNU) 4.8.2 20140206 (prerelease)"
+	.ident	"GCC: (GNU) 4.9.2 20150304 (prerelease)"
 	.section	.note.GNU-stack,"",@progbits
