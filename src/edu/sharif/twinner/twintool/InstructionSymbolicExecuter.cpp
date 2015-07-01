@@ -1479,13 +1479,32 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
   edu::sharif::twinner::trace::Expression *rsp =
       trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
-    edu::sharif::twinner::util::Logger::loquacious ()
-        << "\tadjusting rsp...";
     const ConcreteValue &oldVal = rsp->getLastConcreteValue ();
     if (oldVal < rspRegVal) {
       // some items have been popped out from the stack by RET and so RSP is incremented
       ConcreteValue *cv = rspRegVal.clone ();
       (*cv) -= oldVal;
+      edu::sharif::twinner::util::Logger::loquacious ()
+          << "\tadjusting rsp, amount = " << *cv;
+      const bool normalRetInstruction = ((*cv) == 8) || ((*cv) == 16);
+      if (!normalRetInstruction) {
+        edu::sharif::twinner::util::Logger::loquacious ()
+            << "\tsimulating a syscall...";
+        SYSCALL_STANDARD std;
+#ifdef TARGET_LINUX
+#ifdef TARGET_IA32E
+        std = SYSCALL_STANDARD_IA32E_LINUX;
+#else
+        std = SYSCALL_STANDARD_IA32_LINUX;
+#endif
+#else
+#error "Only Linux is supported currently."
+#endif
+        CONTEXT ctxt;
+        PIN_SaveContext (context, &ctxt);
+        im->syscallEntryPoint (PIN_ThreadId (), &ctxt, std);
+        im->syscallExitPoint (PIN_ThreadId (), &ctxt, std);
+      }
       rsp->add (cv);
       // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
 
