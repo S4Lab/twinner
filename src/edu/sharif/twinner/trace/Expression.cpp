@@ -355,10 +355,10 @@ void Expression::makeLeastSignificantBitsZero (int bits) {
         (~((1ull << (bits - 64)) - 1), UINT64 (0));
   } else if (bits == 64) {
     mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
-        (UINT64 (1), UINT64 (0));
+        (UINT64 (-1), UINT64 (0));
   } else { // < 64
     mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
-        (UINT64 (1), ~((1ull << bits) - 1));
+        (UINT64 (-1), ~((1ull << bits) - 1));
   }
   if (size != 128) {
     edu::sharif::twinner::trace::cv::ConcreteValue *temp = mask->clone (size);
