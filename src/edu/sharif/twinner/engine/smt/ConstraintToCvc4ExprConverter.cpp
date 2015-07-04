@@ -471,9 +471,9 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       }
       edu::sharif::twinner::trace::Expression *sum = 0;
       for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
-        Expr exp = *it;
+        Expr child = *it;
         edu::sharif::twinner::trace::Expression *addee =
-            convertCvc4ExprToExpression (exp);
+            convertCvc4ExprToExpression (child);
         if (sum == 0) {
           sum = addee;
         } else {
@@ -526,9 +526,9 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       }
       edu::sharif::twinner::trace::Expression *orRes = 0;
       for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
-        Expr exp = *it;
+        Expr child = *it;
         edu::sharif::twinner::trace::Expression *oree =
-            convertCvc4ExprToExpression (exp);
+            convertCvc4ExprToExpression (child);
         if (orRes == 0) {
           orRes = oree;
         } else {
