@@ -40,6 +40,7 @@ ConstraintTree::~ConstraintTree () {
 void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *trace) {
   edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->clearState ();
   TreeNode *node = root;
+  int depth = 0;
   const std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * > &segments =
       trace->getTraceSegments ();
   for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
@@ -49,7 +50,12 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
     for (std::list < const edu::sharif::twinner::trace::Constraint * >
         ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
       const edu::sharif::twinner::trace::Constraint *constraint = *it2;
-      node = node->addConstraint (constraint, trace->getMemoryManager ());
+      TreeNode *next = node->addConstraint
+          (constraint, trace->getMemoryManager (), (depth <= 10));
+      if (next != node) {
+        node = next;
+        depth++;
+      }
     }
   }
   iterator = root;

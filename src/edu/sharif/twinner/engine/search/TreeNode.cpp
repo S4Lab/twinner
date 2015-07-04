@@ -50,8 +50,10 @@ void delete_tree_node (TreeNode * const &node) {
 
 TreeNode *TreeNode::addConstraint (
     const edu::sharif::twinner::trace::Constraint *c,
-    const edu::sharif::twinner::util::MemoryManager *m) {
-  if (edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+    const edu::sharif::twinner::util::MemoryManager *m,
+    bool performValidityCheck) {
+  if (performValidityCheck &&
+      edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
       ->checkValidity (c)) {
     return this;
   }

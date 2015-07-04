@@ -31,7 +31,6 @@ namespace engine {
 namespace search {
 
 class TreeNode {
-
 private:
   const int debugId; // FIXME: Remove this field when debug is not required
 
@@ -52,11 +51,13 @@ public:
    * child of this node, the responsible node will be returned.
    * @param constraint The constraint which should be added.
    * @param memoryManager The memory manager which contains causing instruction.
+   * @param performValidityCheck Ignore constraint if it is tautological.
    *
    * @return The node (possibly newly instantiated) which is responsible for constraint.
    */
   TreeNode *addConstraint (const edu::sharif::twinner::trace::Constraint *constraint,
-      const edu::sharif::twinner::util::MemoryManager *memoryManager);
+      const edu::sharif::twinner::util::MemoryManager *memoryManager,
+      bool performValidityCheck);
 
   /**
    * Moves downward, traversing right-most children until a leaf is visited. During this
