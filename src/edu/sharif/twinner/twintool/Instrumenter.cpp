@@ -199,8 +199,6 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
     RTN rtn = INS_Rtn (ins);
     if (RTN_Valid (rtn) && RTN_Name (rtn) == "main") {
       enable ();
-    } else {
-      return;
     }
   }
   std::string insAssemblyStr = INS_Disassemble (ins);
