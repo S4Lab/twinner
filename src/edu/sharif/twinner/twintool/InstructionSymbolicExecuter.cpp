@@ -897,6 +897,34 @@ void InstructionSymbolicExecuter::analysisRoutineMemoryRegisterCorrespondence (
        displacement, memoryEa);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineMemoryIndexedRegisterCorrespondence (
+    REG baseReg, const ConcreteValue &baseRegVal, ADDRDELTA displacement,
+    REG indexReg, const ConcreteValue &indexRegVal, UINT32 scale,
+    ADDRINT memoryEa, UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineMemoryIndexedRegisterCorrespondence(INS: "
+      << insAssemblyStr << "): base reg: " << REG_StringShort (baseReg)
+      << ", displacement: " << std::dec << displacement
+      << ", index reg: " << REG_StringShort (indexReg)
+      << ", scale: " << std::dec << scale
+      << ", mem addr: 0x" << std::hex << memoryEa << '\n';
+  memoryIndexedRegisterCorrespondenceAnalysisRoutine
+      (RegisterResidentExpressionValueProxy (baseReg, baseRegVal), displacement,
+       RegisterResidentExpressionValueProxy (indexReg, indexRegVal), scale,
+       memoryEa);
+}
+
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
     ConcreteValue *value =
@@ -2571,6 +2599,41 @@ void InstructionSymbolicExecuter::memoryRegisterCorrespondenceAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::memoryIndexedRegisterCorrespondenceAnalysisRoutine (
+    const ExpressionValueProxy &baseReg, ADDRDELTA displacement,
+    const ExpressionValueProxy &indexReg, UINT32 scale,
+    ADDRINT memoryEa) {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "memoryIndexedRegisterCorrespondenceAnalysisRoutine(...)\n"
+      << "\tgetting base reg exp...";
+  edu::sharif::twinner::trace::Expression *baseexp =
+      baseReg.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tgetting index reg exp...";
+  edu::sharif::twinner::trace::Expression *indexexp =
+      indexReg.getExpression (trace);
+  const int size = max (max (baseexp->getLastConcreteValue ().getSize (), 64),
+                        indexexp->getLastConcreteValue ().getSize ());
+  if (displacement > 0) {
+    baseexp->add (displacement);
+  } else {
+    baseexp->minus (-displacement);
+  }
+  indexexp->multiply (scale);
+  baseexp->add (indexexp);
+  delete indexexp;
+  baseexp->minus (memoryEa);
+  baseexp->truncate (size);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  std::list <edu::sharif::twinner::trace::Constraint *> cc;
+  cc.push_back (new edu::sharif::twinner::trace::Constraint
+                (baseexp, edu::sharif::twinner::trace::Constraint::ZERO,
+                 disassembledInstruction, false));
+  delete baseexp;
+  trace->addPathConstraints (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 InstructionSymbolicExecuter::AnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   switch (op) {
@@ -3298,6 +3361,24 @@ VOID analysisRoutineMemoryRegisterCorrespondence (VOID *iseptr,
       ((REG) baseReg,
        edu::sharif::twinner::trace::cv::ConcreteValue64Bits (baseRegVal),
        ADDRDELTA (displacement),
+       memoryEa, insAssembly);
+}
+
+VOID analysisRoutineMemoryIndexedRegisterCorrespondence (VOID *iseptr,
+    UINT32 baseReg, ADDRINT baseRegVal,
+    ADDRINT displacement,
+    UINT32 indexReg, ADDRINT indexRegVal,
+    ADDRINT scale,
+    ADDRINT memoryEa,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineMemoryIndexedRegisterCorrespondence
+      ((REG) baseReg,
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (baseRegVal),
+       ADDRDELTA (displacement),
+       (REG) indexReg,
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (indexRegVal),
+       UINT32 (scale),
        memoryEa, insAssembly);
 }
 

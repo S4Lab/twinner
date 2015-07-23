@@ -887,18 +887,29 @@ void Instrumenter::instrumentMemoryRegisterCorrespondence (INS ins,
         ADDRDELTA displacement = INS_OperandMemoryDisplacement (ins, i);
         REG indexReg = INS_OperandMemoryIndexReg (ins, i);
         if (indexReg != REG_INVALID ()) {
-          throw std::runtime_error ("indexed register "
-                                    "memory operand is not supported");
+          UINT32 scale = INS_OperandMemoryScale (ins, i);
+          // EA = displacement + baseReg + indexReg*scale
+          INS_InsertCall (ins, IPOINT_BEFORE,
+                          (AFUNPTR) analysisRoutineMemoryIndexedRegisterCorrespondence,
+                          IARG_PTR, ise,
+                          IARG_UINT32, baseReg, IARG_REG_VALUE, baseReg,
+                          IARG_ADDRINT, ADDRINT (displacement),
+                          IARG_UINT32, indexReg, IARG_REG_VALUE, indexReg,
+                          IARG_ADDRINT, ADDRINT (scale),
+                          IARG_MEMORYOP_EA, 0,
+                          IARG_UINT32, insAssembly,
+                          IARG_END);
+        } else {
+          // EA = displacement + baseReg
+          INS_InsertCall (ins, IPOINT_BEFORE,
+                          (AFUNPTR) analysisRoutineMemoryRegisterCorrespondence,
+                          IARG_PTR, ise,
+                          IARG_UINT32, baseReg, IARG_REG_VALUE, baseReg,
+                          IARG_ADDRINT, ADDRINT (displacement),
+                          IARG_MEMORYOP_EA, 0,
+                          IARG_UINT32, insAssembly,
+                          IARG_END);
         }
-        // EA = displacement + baseReg
-        INS_InsertCall (ins, IPOINT_BEFORE,
-                        (AFUNPTR) analysisRoutineMemoryRegisterCorrespondence,
-                        IARG_PTR, ise,
-                        IARG_UINT32, baseReg, IARG_REG_VALUE, baseReg,
-                        IARG_ADDRINT, ADDRINT (displacement),
-                        IARG_MEMORYOP_EA, 0,
-                        IARG_UINT32, insAssembly,
-                        IARG_END);
       }
       // TODO: Handle instructions with two memory operands
       break;

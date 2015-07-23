@@ -224,6 +224,10 @@ public:
   void analysisRoutineMemoryRegisterCorrespondence (REG baseReg,
       const ConcreteValue &baseRegVal, ADDRDELTA displacement,
       ADDRINT memoryEa, UINT32 insAssembly);
+  void analysisRoutineMemoryIndexedRegisterCorrespondence (REG baseReg,
+      const ConcreteValue &baseRegVal, ADDRDELTA displacement,
+      REG indexReg, const ConcreteValue &indexRegVal, UINT32 scale,
+      ADDRINT memoryEa, UINT32 insAssembly);
 
 private:
 
@@ -711,6 +715,14 @@ private:
   void memoryRegisterCorrespondenceAnalysisRoutine (
       const ExpressionValueProxy &baseReg, ADDRDELTA displacement, ADDRINT memoryEa);
 
+  /**
+   * memoryEa must be equal to baseReg + displacement + indexReg*scale
+   */
+  void memoryIndexedRegisterCorrespondenceAnalysisRoutine (
+      const ExpressionValueProxy &baseReg, ADDRDELTA displacement,
+      const ExpressionValueProxy &indexReg, UINT32 scale,
+      ADDRINT memoryEa);
+
 public:
   AnalysisRoutine convertOpcodeToAnalysisRoutine (OPCODE op) const;
   MutableSourceAnalysisRoutine convertOpcodeToMutableSourceAnalysisRoutine (
@@ -883,6 +895,13 @@ VOID analysisRoutineRepPrefix (VOID *iseptr, UINT32 opcode,
 VOID analysisRoutineMemoryRegisterCorrespondence (VOID *iseptr,
     UINT32 baseReg, ADDRINT baseRegVal,
     ADDRINT displacement,
+    ADDRINT memoryEa,
+    UINT32 insAssembly);
+VOID analysisRoutineMemoryIndexedRegisterCorrespondence (VOID *iseptr,
+    UINT32 baseReg, ADDRINT baseRegVal,
+    ADDRINT displacement,
+    UINT32 indexReg, ADDRINT indexRegVal,
+    ADDRINT scale,
     ADDRINT memoryEa,
     UINT32 insAssembly);
 
