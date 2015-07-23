@@ -933,6 +933,7 @@ void Instrumenter::printDebugInformation (INS ins, const char *insAssembly) cons
   bool isOriginal = INS_IsOriginal (ins);
   UINT32 countOfOperands = INS_OperandCount (ins);
   debug << "Instrumenting assembly instruction: " << insAssembly
+      << "\n\t--> address: 0x" << std::hex << INS_Address (ins)
       << "\n\t--> Count of operands: " << countOfOperands
       << "\n\t--> Count of memory operands: " << INS_MemoryOperandCount (ins) << '\n'
       << (isMemoryRead ? "\t--> Reading from memory\n" : "")
