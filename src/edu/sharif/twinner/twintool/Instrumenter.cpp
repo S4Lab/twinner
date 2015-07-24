@@ -123,7 +123,8 @@ void Instrumenter::initialize () {
   INITIALIZE (SHIFT_INS_MODELS,
               XED_ICLASS_SHL, XED_ICLASS_SHR, XED_ICLASS_SAR,
               XED_ICLASS_ROR, XED_ICLASS_ROL);
-  INITIALIZE (DST_REG_REG_SRC_REG, XED_ICLASS_DIV, XED_ICLASS_MUL);
+  INITIALIZE (DST_REG_REG_SRC_EITHER_REG_OR_MEM,
+              XED_ICLASS_DIV, XED_ICLASS_MUL);
   /*
    * IMUL is for signed multiplication and has three models:
    * 1. one operand, like IMUL r1/m1, where it does DX:AX <- AX*r1/m1 and a like.
@@ -262,7 +263,8 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
     return OPERAND_LESS;
   case XED_ICLASS_DIV:
   case XED_ICLASS_MUL:
-    return DST_REG_REG_SRC_REG;
+    return INS_OperandIsReg (ins, 0) ? DST_REG_REG_SRC_REG
+        : DST_REG_REG_SRC_MEM;
   case XED_ICLASS_INC:
   case XED_ICLASS_DEC:
   case XED_ICLASS_NEG:
@@ -782,6 +784,19 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_UINT32, dstLeftReg, IARG_REG_VALUE, dstLeftReg,
                     IARG_UINT32, dstRightReg, IARG_REG_VALUE, dstRightReg,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_REG_REG_SRC_MEM:
+  {
+    REG dstRightReg = INS_OperandReg (ins, 1);
+    REG dstLeftReg = INS_OperandReg (ins, 2);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineTwoDstRegOneSrcMem,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstLeftReg, IARG_REG_VALUE, dstLeftReg,
+                    IARG_UINT32, dstRightReg, IARG_REG_VALUE, dstRightReg,
+                    IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
