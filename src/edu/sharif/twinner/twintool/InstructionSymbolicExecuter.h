@@ -598,6 +598,14 @@ private:
 
   /**
    * IMUL is signed multiply and has three models.
+   * This method implements the one operand model.
+   */
+  void imulAnalysisRoutine (const MutableExpressionValueProxy &leftDst,
+      const MutableExpressionValueProxy &rightDst,
+      const ExpressionValueProxy &src);
+
+  /**
+   * IMUL is signed multiply and has three models.
    * This method implements the two operands model.
    */
   void imulAnalysisRoutine (const MutableExpressionValueProxy &dst,

@@ -132,14 +132,14 @@ void Instrumenter::initialize () {
    * result is different from the unsigned multiplication result.
    * For correct calculation, values can be sign-extended to double size and then
    * perform the unsigned multiplication. As unsigned and signed multiplications have
-   * the same result iff the result if truncated to the same bit size.
+   * the same result iff the result be truncated to the same bit size.
    * 2. two operands, like IMUL r1, r2/m2, where it does r1 <- r1*r2/m2 and so works like
    * unsigned multiplication.
    * 3. three operands, like IMUL r1, r2/m2, imd1, where it does r1 <- r2/m2*imd1 and so
    * it works like unsigned multiplication.
    */
-  managedInstructions.insert // this is for two operands mode of IMUL
-      (make_pair (XED_ICLASS_IMUL, DST_REG_SRC_EITHER_REG_OR_MEM));
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_IMUL, IMUL_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_CDQE, DST_REG_SRC_REG));
   INITIALIZE (TEST_INS_MODELS,
@@ -265,6 +265,17 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_MUL:
     return INS_OperandIsReg (ins, 0) ? DST_REG_REG_SRC_REG
         : DST_REG_REG_SRC_MEM;
+  case XED_ICLASS_IMUL:
+    switch (INS_OperandCount (ins)) {
+    case 3:
+      return INS_OperandIsReg (ins, 1) ? DST_REG_SRC_REG : DST_REG_SRC_MEM;
+    case 4:
+      if (INS_OperandIsImmediate (ins, 2)) {
+        throw std::runtime_error ("Unsupported IMUL model (3-operands)");
+      }
+      return INS_OperandIsReg (ins, 0) ? DST_REG_REG_SRC_REG : DST_REG_REG_SRC_MEM;
+    }
+    throw std::runtime_error ("Unknown IMUL model");
   case XED_ICLASS_INC:
   case XED_ICLASS_DEC:
   case XED_ICLASS_NEG:

@@ -124,6 +124,8 @@ private:
     | DST_LARGE_REG_SRC_MEM | DST_MEM_SRC_LARGE_REG | DST_REG_SRC_LARGE_REG,
     DST_LARGE_REG_SRC_EITHER_LARGE_REG_OR_MEM_AUX_IMD =
     DST_LARGE_REG_SRC_LARGE_REG_AUX_IMD | DST_LARGE_REG_SRC_MEM_AUX_IMD,
+    IMUL_INS_MODELS = DST_REG_REG_SRC_EITHER_REG_OR_MEM /* one operand mode */
+    | DST_REG_SRC_EITHER_REG_OR_MEM /* two operands mode */,
   };
 
   std::map < OPCODE, InstructionModel > managedInstructions;

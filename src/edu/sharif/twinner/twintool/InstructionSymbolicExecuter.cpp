@@ -2194,6 +2194,51 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::imulAnalysisRoutine (
+    const MutableExpressionValueProxy &leftDst,
+    const MutableExpressionValueProxy &rightDst,
+    const ExpressionValueProxy &src) {
+  operandSize = leftDst.getSize ();
+  const int doubleSize = operandSize * 2;
+  /*
+   * Operation: (leftDst-rightDst) = rightDst <signed-multiply> src
+   * Signed and unsigned multiplications are equivalent iff result is truncated
+   * to size of operands. So we should first sign-extend operands to double-size
+   * and then do unsigned multiplication.
+   */
+  edu::sharif::twinner::util::Logger::loquacious () << "imulAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::trace::Expression *signExtendedExp =
+      srcexp->signExtended (doubleSize);
+  delete srcexp;
+  srcexp = signExtendedExp;
+  edu::sharif::twinner::trace::Expression *leftDstExp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting right dst exp...";
+  edu::sharif::twinner::trace::Expression *rightDstExp = rightDst.getExpression (trace);
+  signExtendedExp = rightDstExp->signExtended (doubleSize);
+  delete rightDstExp;
+  rightDstExp = signExtendedExp;
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tsigned multiplying (left-right = right * src; size=0x"
+      << std::hex << operandSize << ")...";
+  rightDstExp->multiply (srcexp);
+  delete srcexp;
+  leftDstExp = rightDstExp->clone ();
+  leftDstExp->shiftToRight (operandSize);
+  rightDstExp->truncate (operandSize);
+  leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
+  delete leftDstExp;
+  rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
+  delete rightDstExp;
+  // At this point, symbolic multiplication result is calculated correctly.
+  // but concrete values are not! So we need to register a hook to synchronize concrete
+  // values too (we can also calculate them in assembly, but it's not required).
+
+  hook = &InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
+void InstructionSymbolicExecuter::imulAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::util::Logger::loquacious () << "imulAnalysisRoutine(...): "
       "two-operands-mode\n"
@@ -2751,6 +2796,8 @@ InstructionSymbolicExecuter::convertOpcodeToDoubleDestinationsAnalysisRoutine (
     return &InstructionSymbolicExecuter::divAnalysisRoutine;
   case XED_ICLASS_MUL:
     return &InstructionSymbolicExecuter::mulAnalysisRoutine;
+  case XED_ICLASS_IMUL:
+    return &InstructionSymbolicExecuter::imulAnalysisRoutine;
   case XED_ICLASS_SCASB:
     return &InstructionSymbolicExecuter::scasAnalysisRoutine;
   case XED_ICLASS_STOSB:
