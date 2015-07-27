@@ -560,7 +560,27 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       }
       return andRes;
     }
-      // TODO: Implement following operator types: MINUS, MULTIPLY, DIVIDE, XOR, SHIFT_RIGHT, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
+    case kind::BITVECTOR_LSHR:
+    {
+      if (exp.getNumChildren () != 2) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression ("
+            << exp << "): CVC4 BITVECTOR_LSHR needs exactly two children\n";
+        throw std::runtime_error ("CVC4 Expr must have exactly two children");
+      }
+      Expr::const_iterator it = exp.begin ();
+      Expr shifteeExpr = *it;
+      ++it;
+      Expr bitsExpr = *it;
+      edu::sharif::twinner::trace::Expression *shiftee =
+          convertCvc4ExprToExpression (shifteeExpr);
+      edu::sharif::twinner::trace::Expression *bits =
+          convertCvc4ExprToExpression (bitsExpr);
+      shiftee->shiftToRight (bits);
+      delete bits;
+      return shiftee;
+    }
+      // TODO: Implement following operator types: MINUS, MULTIPLY, DIVIDE, XOR, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
     default:
       edu::sharif::twinner::util::Logger::error ()
           << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
