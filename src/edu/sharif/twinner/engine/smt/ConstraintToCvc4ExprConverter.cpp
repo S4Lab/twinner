@@ -404,6 +404,7 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
         high -= low; // now we should extract [high,0]
       }
       bitLength = high + 1;
+      operand->truncate (bitLength);
       return operand;
     }
     case kind::BITVECTOR_SIGN_EXTEND:
