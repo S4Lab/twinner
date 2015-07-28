@@ -396,6 +396,12 @@ void bitvectorXorConverter (
   exp->bitwiseXor (operand);
 }
 
+void bitvectorMultConverter (
+    edu::sharif::twinner::trace::Expression *exp,
+    const edu::sharif::twinner::trace::Expression *operand) {
+  exp->multiply (operand);
+}
+
 class BitvectorConcatConverter {
 private:
   int totalLength;
@@ -601,7 +607,9 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
     }
     case kind::BITVECTOR_XOR:
       return convertByFoldingList (exp, bitvectorXorConverter, "BITVECTOR_XOR");
-      // TODO: Implement following operator types: MINUS, MULTIPLY, DIVIDE, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
+    case kind::BITVECTOR_MULT:
+      return convertByFoldingList (exp, bitvectorMultConverter, "BITVECTOR_MULT");
+      // TODO: Implement following operator types: MINUS, DIVIDE, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
     default:
       edu::sharif::twinner::util::Logger::error ()
           << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
