@@ -91,6 +91,13 @@ public:
 private:
   void addConstraint (Expr constraint);
 
+  template <typename Combiner>
+  edu::sharif::twinner::trace::Expression *convertByFoldingList (Expr &exp,
+      Combiner &combiner, const char *name);
+  template <typename Combiner, typename BitLengthTracker>
+  edu::sharif::twinner::trace::Expression *convertByFoldingList (Expr &exp,
+      Combiner &combiner, BitLengthTracker &tracker, const char *name);
+
   Expr convertConstraintToCvc4Expr (std::map<std::string, Expr> &symbols,
       const edu::sharif::twinner::trace::Constraint *constraint);
   edu::sharif::twinner::trace::Constraint *convertCvc4ExprToConstraint (Expr &exp);

@@ -361,6 +361,115 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
   }
 }
 
+namespace {
+
+struct NoOpTracker {
+
+  void operator<< (UINT64 bitLength) const {
+  }
+
+  void operator>> (UINT64 bitLength) const {
+  }
+};
+
+void bitvectorPlusConverter (
+    edu::sharif::twinner::trace::Expression *exp,
+    const edu::sharif::twinner::trace::Expression *operand) {
+  exp->add (operand);
+}
+
+void bitvectorOrConverter (
+    edu::sharif::twinner::trace::Expression *exp,
+    const edu::sharif::twinner::trace::Expression *operand) {
+  exp->bitwiseOr (operand);
+}
+
+void bitvectorAndConverter (
+    edu::sharif::twinner::trace::Expression *exp,
+    const edu::sharif::twinner::trace::Expression *operand) {
+  exp->bitwiseAnd (operand);
+}
+
+void bitvectorXorConverter (
+    edu::sharif::twinner::trace::Expression *exp,
+    const edu::sharif::twinner::trace::Expression *operand) {
+  exp->bitwiseXor (operand);
+}
+
+class BitvectorConcatConverter {
+private:
+  int totalLength;
+  UINT64 bitLength;
+
+public:
+
+  BitvectorConcatConverter () : totalLength (0) {
+  }
+
+  void operator<< (UINT64 _bitLength) {
+    bitLength = _bitLength;
+    totalLength += _bitLength;
+  }
+
+  void operator() (edu::sharif::twinner::trace::Expression *&exp,
+                   edu::sharif::twinner::trace::Expression *&operand) const {
+    if (!exp->isTrivial () || !exp->getLastConcreteValue ().isZero ()) {
+      edu::sharif::twinner::trace::Expression *length =
+          new edu::sharif::twinner::trace::ExpressionImp (bitLength);
+      exp->shiftToLeft (length);
+      delete length;
+      if (!operand->isTrivial () || !operand->getLastConcreteValue ().isZero ()) {
+        exp->bitwiseOr (operand);
+      }
+    } else {
+      std::swap (exp, operand);
+    }
+  }
+
+  void operator>> (UINT64 &_bitLength) const {
+    _bitLength = totalLength;
+  }
+};
+
+}
+
+template <typename Combiner>
+edu::sharif::twinner::trace::Expression *
+ConstraintToCvc4ExprConverter::convertByFoldingList (Expr &exp,
+    Combiner &combiner, const char *name) {
+  NoOpTracker tracker;
+  return convertByFoldingList (exp, combiner, tracker, name);
+}
+
+template <typename Combiner, typename BitLengthTracker>
+edu::sharif::twinner::trace::Expression *
+ConstraintToCvc4ExprConverter::convertByFoldingList (Expr &exp,
+    Combiner &combiner, BitLengthTracker &tracker, const char *name) {
+  const int numberOfChildren = exp.getNumChildren ();
+  if (numberOfChildren < 2) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
+        << "): CVC4 " << name << " needs at least two children\n";
+    throw std::runtime_error ("CVC4 Expr must have at least two children");
+  }
+  edu::sharif::twinner::trace::Expression *result = 0;
+  for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
+    Expr child = *it;
+    edu::sharif::twinner::trace::Expression *operand =
+        convertCvc4ExprToExpression (child);
+    if (result == 0) {
+      tracker << bitLength;
+      result = operand;
+    } else {
+      tracker << bitLength;
+      combiner (result, operand);
+      delete operand;
+    }
+  }
+  tracker >> bitLength;
+  return result;
+}
+
 edu::sharif::twinner::trace::Expression *
 ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
   if (exp.isConst ()) {
@@ -428,62 +537,11 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
     }
     case kind::BITVECTOR_CONCAT:
     {
-      const int numberOfChildren = exp.getNumChildren ();
-      if (numberOfChildren < 2) {
-        edu::sharif::twinner::util::Logger::error ()
-            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
-            << "): CVC4 BITVECTOR_CONCAT needs at least two children\n";
-        throw std::runtime_error ("CVC4 Expr must have at least two children");
-      }
-      Expr::const_iterator it = exp.begin ();
-      Expr left = *it++;
-      edu::sharif::twinner::trace::Expression *leftExp =
-          convertCvc4ExprToExpression (left);
-      int totalLength = bitLength;
-      do {
-        Expr right = *it++;
-        edu::sharif::twinner::trace::Expression *rightExp =
-            convertCvc4ExprToExpression (right);
-        if (!leftExp->isTrivial () || !leftExp->getLastConcreteValue ().isZero ()) {
-          edu::sharif::twinner::trace::Expression *length =
-              new edu::sharif::twinner::trace::ExpressionImp (bitLength);
-          leftExp->shiftToLeft (length);
-          delete length;
-          if (!rightExp->isTrivial () || !rightExp->getLastConcreteValue ().isZero ()) {
-            leftExp->bitwiseOr (rightExp);
-          }
-          delete rightExp;
-        } else {
-          delete leftExp;
-          leftExp = rightExp;
-        }
-        totalLength += bitLength;
-      } while (it != exp.end ());
-      bitLength = totalLength;
-      return leftExp;
+      BitvectorConcatConverter converter;
+      return convertByFoldingList (exp, converter, converter, "BITVECTOR_CONCAT");
     }
     case kind::BITVECTOR_PLUS:
-    {
-      if (exp.getNumChildren () < 2) {
-        edu::sharif::twinner::util::Logger::error ()
-            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
-            << "): CVC4 BITVECTOR_PLUS needs at least two children\n";
-        throw std::runtime_error ("CVC4 Expr must have at least two children");
-      }
-      edu::sharif::twinner::trace::Expression *sum = 0;
-      for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
-        Expr child = *it;
-        edu::sharif::twinner::trace::Expression *addee =
-            convertCvc4ExprToExpression (child);
-        if (sum == 0) {
-          sum = addee;
-        } else {
-          sum->add (addee);
-          delete addee;
-        }
-      }
-      return sum;
-    }
+      return convertByFoldingList (exp, bitvectorPlusConverter, "BITVECTOR_PLUS");
     case kind::BITVECTOR_NEG:
     {
       if (exp.getNumChildren () != 1) {
@@ -518,49 +576,9 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       return leftExp;
     }
     case kind::BITVECTOR_OR:
-    {
-      if (exp.getNumChildren () < 2) {
-        edu::sharif::twinner::util::Logger::error ()
-            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression ("
-            << exp << "): CVC4 BITVECTOR_OR needs at least two children\n";
-        throw std::runtime_error ("CVC4 Expr must have at least two children");
-      }
-      edu::sharif::twinner::trace::Expression *orRes = 0;
-      for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
-        Expr child = *it;
-        edu::sharif::twinner::trace::Expression *oree =
-            convertCvc4ExprToExpression (child);
-        if (orRes == 0) {
-          orRes = oree;
-        } else {
-          orRes->bitwiseOr (oree);
-          delete oree;
-        }
-      }
-      return orRes;
-    }
+      return convertByFoldingList (exp, bitvectorOrConverter, "BITVECTOR_OR");
     case kind::BITVECTOR_AND:
-    {
-      if (exp.getNumChildren () < 2) {
-        edu::sharif::twinner::util::Logger::error ()
-            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression ("
-            << exp << "): CVC4 BITVECTOR_AND needs at least two children\n";
-        throw std::runtime_error ("CVC4 Expr must have at least two children");
-      }
-      edu::sharif::twinner::trace::Expression *andRes = 0;
-      for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
-        Expr child = *it;
-        edu::sharif::twinner::trace::Expression *andee =
-            convertCvc4ExprToExpression (child);
-        if (andRes == 0) {
-          andRes = andee;
-        } else {
-          andRes->bitwiseAnd (andee);
-          delete andee;
-        }
-      }
-      return andRes;
-    }
+      return convertByFoldingList (exp, bitvectorAndConverter, "BITVECTOR_AND");
     case kind::BITVECTOR_LSHR:
     {
       if (exp.getNumChildren () != 2) {
@@ -582,27 +600,7 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       return shiftee;
     }
     case kind::BITVECTOR_XOR:
-    {
-      if (exp.getNumChildren () < 2) {
-        edu::sharif::twinner::util::Logger::error ()
-            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression ("
-            << exp << "): CVC4 BITVECTOR_XOR needs at least two children\n";
-        throw std::runtime_error ("CVC4 Expr must have at least two children");
-      }
-      edu::sharif::twinner::trace::Expression *xorRes = 0;
-      for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
-        Expr child = *it;
-        edu::sharif::twinner::trace::Expression *xoree =
-            convertCvc4ExprToExpression (child);
-        if (xorRes == 0) {
-          xorRes = xoree;
-        } else {
-          xorRes->bitwiseXor (xoree);
-          delete xoree;
-        }
-      }
-      return xorRes;
-    }
+      return convertByFoldingList (exp, bitvectorXorConverter, "BITVECTOR_XOR");
       // TODO: Implement following operator types: MINUS, MULTIPLY, DIVIDE, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
     default:
       edu::sharif::twinner::util::Logger::error ()
