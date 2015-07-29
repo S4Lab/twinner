@@ -18,8 +18,11 @@
 
 #include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/iterationtools.h"
 
 namespace edu {
 namespace sharif {
@@ -78,6 +81,28 @@ void Cvc4SmtSolver::solveConstraints (
   throw UnsatisfiableConstraintsException ();
 }
 
+void aggregate_expression_symbol_values (
+    std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals,
+    edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token) {
+  if (const edu::sharif::twinner::trace::exptoken::Symbol * symbol =
+      dynamic_cast<edu::sharif::twinner::trace::exptoken::Symbol *> (token)) {
+    vals.insert (make_pair (symbol->toString (), &(symbol->getValue ())));
+  }
+}
+
+void aggregate_symbol_values (
+    std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals,
+    const edu::sharif::twinner::trace::Constraint * const &constraint) {
+  edu::sharif::twinner::util::foreach
+      (constraint->getMainExpression ()->getStack (),
+       aggregate_expression_symbol_values, vals);
+  if (constraint->getAuxExpression ()) {
+    edu::sharif::twinner::util::foreach
+        (constraint->getAuxExpression ()->getStack (),
+         aggregate_expression_symbol_values, vals);
+  }
+}
+
 std::list < const edu::sharif::twinner::trace::Constraint * >
 Cvc4SmtSolver::simplifyConstraint (
     const edu::sharif::twinner::trace::Constraint *constraint) const {
@@ -109,7 +134,10 @@ Cvc4SmtSolver::simplifyConstraints (
   std::map<std::string, Expr> symbols;
   Expr cvc4Constraint = converter.convert (symbols);
   Expr simple = smt.simplify (cvc4Constraint);
-  return converter.convertBack (simple);
+  std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> vals;
+  edu::sharif::twinner::util::foreach
+      (constraints, aggregate_symbol_values, vals);
+  return converter.convertBack (simple, vals);
 }
 
 void Cvc4SmtSolver::clearState () {

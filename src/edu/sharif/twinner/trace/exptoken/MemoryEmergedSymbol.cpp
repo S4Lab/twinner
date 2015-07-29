@@ -4,7 +4,7 @@
  * Copyright © 2013-2015  Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -26,17 +26,17 @@ namespace trace {
 namespace exptoken {
 
 MemoryEmergedSymbol::MemoryEmergedSymbol (const MemoryEmergedSymbol &s) :
-    Symbol (s), address (s.address) {
+Symbol (s), address (s.address) {
 }
 
 MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT addr) :
-    Symbol (), address (addr) {
+Symbol (), address (addr) {
 }
 
 MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT _address,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex) :
-    Symbol (concreteValue, generationIndex), address (_address) {
+Symbol (concreteValue, generationIndex), address (_address) {
 }
 
 MemoryEmergedSymbol *MemoryEmergedSymbol::clone () const {
@@ -91,14 +91,18 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::fromNameAndValue (const std::string &n
                               "Illegal value: Currently, all memory symbols are 64 bits.");
   }
   const UINT64 value = (UINT64 (v2) << 32) | v1;
+  return MemoryEmergedSymbol::fromNameAndValue
+      (name, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value));
+}
+
+MemoryEmergedSymbol *MemoryEmergedSymbol::fromNameAndValue (const std::string &name,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &value) {
   std::stringstream ss (name);
   char dummy;
   ADDRINT address;
   int generationIndex;
   ss >> dummy >> std::hex >> address >> dummy >> generationIndex;
-  return new MemoryEmergedSymbol
-      (address, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value),
-       generationIndex);
+  return new MemoryEmergedSymbol (address, value, generationIndex);
 }
 
 std::string MemoryEmergedSymbol::toString () const {

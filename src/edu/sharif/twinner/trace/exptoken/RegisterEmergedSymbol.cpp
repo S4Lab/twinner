@@ -4,7 +4,7 @@
  * Copyright © 2013-2015  Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -27,17 +27,17 @@ namespace trace {
 namespace exptoken {
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (const RegisterEmergedSymbol &s) :
-    Symbol (s), address (s.address) {
+Symbol (s), address (s.address) {
 }
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (REG addr) :
-    Symbol (), address (addr) {
+Symbol (), address (addr) {
 }
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (REG _address,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex) :
-    Symbol (concreteValue, generationIndex), address (_address) {
+Symbol (concreteValue, generationIndex), address (_address) {
 }
 
 RegisterEmergedSymbol *RegisterEmergedSymbol::clone () const {
@@ -111,6 +111,16 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::strin
     return new RegisterEmergedSymbol
         (reg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value), generationIndex);
   }
+}
+
+RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::string &name,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &value) {
+  const int separator = name.find ('_');
+  const REG reg = getRegisterFromName (name.substr (0, separator));
+  std::stringstream ss (name.substr (separator + 1));
+  int generationIndex;
+  ss >> std::hex >> generationIndex;
+  return new RegisterEmergedSymbol (reg, value, generationIndex);
 }
 
 std::string RegisterEmergedSymbol::toString () const {

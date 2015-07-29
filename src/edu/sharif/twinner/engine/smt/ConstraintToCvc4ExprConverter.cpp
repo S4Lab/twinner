@@ -57,13 +57,14 @@ Expr ConstraintToCvc4ExprConverter::convert (std::map<std::string, Expr> &symbol
 }
 
 std::list < const edu::sharif::twinner::trace::Constraint * >
-ConstraintToCvc4ExprConverter::convertBack (Expr exp) {
+ConstraintToCvc4ExprConverter::convertBack (Expr exp,
+    const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals) {
   std::list < const edu::sharif::twinner::trace::Constraint * > lst;
   if (exp.getKind () == kind::AND) {
     for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
       Expr child = *it;
       std::list < const edu::sharif::twinner::trace::Constraint * > constraints =
-          convertBack (child);
+          convertBack (child, vals);
       lst.insert (lst.end (), constraints.begin (), constraints.end ());
     }
   } else if (exp.getKind () == kind::CONST_BOOLEAN) {
@@ -77,7 +78,7 @@ ConstraintToCvc4ExprConverter::convertBack (Expr exp) {
     delete zero;
     lst.push_back (res);
   } else {
-    lst.push_back (convertCvc4ExprToConstraint (exp));
+    lst.push_back (convertCvc4ExprToConstraint (exp, vals));
   }
   return lst;
 }
@@ -142,11 +143,12 @@ Expr ConstraintToCvc4ExprConverter::convertConstraintToCvc4Expr (
 }
 
 edu::sharif::twinner::trace::Constraint *
-ConstraintToCvc4ExprConverter::convertCvc4ExprToConstraint (Expr &exp) {
+ConstraintToCvc4ExprConverter::convertCvc4ExprToConstraint (Expr &exp,
+    const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals) {
   if (exp.getNumChildren () == 1 && exp.getKind () == kind::NOT) {
     Expr con = *exp.begin ();
     edu::sharif::twinner::trace::Constraint *constraint =
-        convertCvc4ExprToConstraint (con);
+        convertCvc4ExprToConstraint (con, vals);
     edu::sharif::twinner::trace::Constraint *notConstraint =
         constraint->instantiateNegatedConstraint ();
     delete constraint;
@@ -163,21 +165,22 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToConstraint (Expr &exp) {
   Expr auxExp = *it;
   if (auxExp == zero) {
     return convertCvc4ExprToConstraint
-        (exprVsZeroKindToComparisonType (exp.getKind ()), mainExp);
+        (exprVsZeroKindToComparisonType (exp.getKind ()), mainExp, vals);
   } else if (mainExp == zero) {
     return convertCvc4ExprToConstraint
-        (exprVsZeroKindToReversedComparisonType (exp.getKind ()), auxExp);
+        (exprVsZeroKindToReversedComparisonType (exp.getKind ()), auxExp, vals);
   } else {
     return convertCvc4ExprToConstraint
-        (exprVsExprKindToComparisonType (exp.getKind ()), mainExp, auxExp);
+        (exprVsExprKindToComparisonType (exp.getKind ()), mainExp, auxExp, vals);
   }
 }
 
 edu::sharif::twinner::trace::Constraint *
 ConstraintToCvc4ExprConverter::convertCvc4ExprToConstraint (
     edu::sharif::twinner::trace::Constraint::ComparisonType type,
-    Expr &mainExp) {
-  edu::sharif::twinner::trace::Expression *exp = convertCvc4ExprToExpression (mainExp);
+    Expr &mainExp,
+    const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals) {
+  edu::sharif::twinner::trace::Expression *exp = convertCvc4ExprToExpression (mainExp, vals);
   edu::sharif::twinner::trace::Constraint *constraint =
       new edu::sharif::twinner::trace::Constraint (exp, type, 0, false);
   delete exp;
@@ -187,9 +190,10 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToConstraint (
 edu::sharif::twinner::trace::Constraint *
 ConstraintToCvc4ExprConverter::convertCvc4ExprToConstraint (
     edu::sharif::twinner::trace::Constraint::ComparisonType type,
-    Expr &mainExp, Expr &auxExp) {
-  edu::sharif::twinner::trace::Expression *exp1 = convertCvc4ExprToExpression (mainExp);
-  edu::sharif::twinner::trace::Expression *exp2 = convertCvc4ExprToExpression (auxExp);
+    Expr &mainExp, Expr &auxExp,
+    const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals) {
+  edu::sharif::twinner::trace::Expression *exp1 = convertCvc4ExprToExpression (mainExp, vals);
+  edu::sharif::twinner::trace::Expression *exp2 = convertCvc4ExprToExpression (auxExp, vals);
   edu::sharif::twinner::trace::Constraint *constraint =
       new edu::sharif::twinner::trace::Constraint (exp1, exp2, type, 0, false);
   delete exp1;
@@ -442,14 +446,16 @@ public:
 template <typename Combiner>
 edu::sharif::twinner::trace::Expression *
 ConstraintToCvc4ExprConverter::convertByFoldingList (Expr &exp,
+    const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals,
     Combiner &combiner, const char *name) {
   NoOpTracker tracker;
-  return convertByFoldingList (exp, combiner, tracker, name);
+  return convertByFoldingList (exp, vals, combiner, tracker, name);
 }
 
 template <typename Combiner, typename BitLengthTracker>
 edu::sharif::twinner::trace::Expression *
 ConstraintToCvc4ExprConverter::convertByFoldingList (Expr &exp,
+    const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals,
     Combiner &combiner, BitLengthTracker &tracker, const char *name) {
   const int numberOfChildren = exp.getNumChildren ();
   if (numberOfChildren < 2) {
@@ -462,7 +468,7 @@ ConstraintToCvc4ExprConverter::convertByFoldingList (Expr &exp,
   for (Expr::const_iterator it = exp.begin (); it != exp.end (); ++it) {
     Expr child = *it;
     edu::sharif::twinner::trace::Expression *operand =
-        convertCvc4ExprToExpression (child);
+        convertCvc4ExprToExpression (child, vals);
     if (result == 0) {
       tracker << bitLength;
       result = operand;
@@ -477,7 +483,8 @@ ConstraintToCvc4ExprConverter::convertByFoldingList (Expr &exp,
 }
 
 edu::sharif::twinner::trace::Expression *
-ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
+ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp,
+    const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals) {
   if (exp.isConst ()) {
     bitLength = BitVectorType (exp.getType (false)).getSize ();
     // as size of Constant is <= 128-bits, following code does not lose precision
@@ -493,14 +500,21 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
   } else if (exp.isVariable ()) {
     bitLength = 128;
     std::string variableName = exp.toString ();
+    typedef std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> ValuesMap;
+    typename ValuesMap::const_iterator it = vals.find (variableName);
+    if (it == vals.end ()) {
+      throw std::runtime_error ("convertCvc4ExprToExpression:"
+                                " vals does not contain variable name");
+    }
+    const edu::sharif::twinner::trace::cv::ConcreteValue &val = *(it->second);
     if (variableName.at (0) == 'm') { // memory symbol
       return new edu::sharif::twinner::trace::ExpressionImp
           (edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol::fromNameAndValue
-           (variableName, 0, 0, 0, 0)); // TODO: Handle value
+           (variableName, val));
     } else { // register symbol
       return new edu::sharif::twinner::trace::ExpressionImp
           (edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol::fromNameAndValue
-           (variableName, 0, 0, 0, 0));
+           (variableName, val));
     }
   } else switch (exp.getKind ()) {
     case kind::BITVECTOR_EXTRACT:
@@ -510,7 +524,7 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       int high = extractionInterval.getConst <BitVectorExtract> ().high;
       Expr child = *exp.begin ();
       edu::sharif::twinner::trace::Expression *operand =
-          convertCvc4ExprToExpression (child);
+          convertCvc4ExprToExpression (child, vals);
       if (low > 0) {
         edu::sharif::twinner::trace::Expression *lowBits =
             new edu::sharif::twinner::trace::ExpressionImp (low);
@@ -528,7 +542,7 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       const int extensionAmount = numberOfExtensionBits.getConst <BitVectorSignExtend> ();
       Expr child = *exp.begin ();
       edu::sharif::twinner::trace::Expression *operand =
-          convertCvc4ExprToExpression (child);
+          convertCvc4ExprToExpression (child, vals);
       const int sourceBits = bitLength;
       const int targetBits = sourceBits + extensionAmount;
       edu::sharif::twinner::trace::Expression *source = operand->clone (sourceBits);
@@ -544,10 +558,12 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
     case kind::BITVECTOR_CONCAT:
     {
       BitvectorConcatConverter converter;
-      return convertByFoldingList (exp, converter, converter, "BITVECTOR_CONCAT");
+      return convertByFoldingList
+          (exp, vals, converter, converter, "BITVECTOR_CONCAT");
     }
     case kind::BITVECTOR_PLUS:
-      return convertByFoldingList (exp, bitvectorPlusConverter, "BITVECTOR_PLUS");
+      return convertByFoldingList
+          (exp, vals, bitvectorPlusConverter, "BITVECTOR_PLUS");
     case kind::BITVECTOR_NEG:
     {
       if (exp.getNumChildren () != 1) {
@@ -558,7 +574,7 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       }
       Expr child = *exp.begin ();
       edu::sharif::twinner::trace::Expression *resExp =
-          convertCvc4ExprToExpression (child);
+          convertCvc4ExprToExpression (child, vals);
       resExp->negate ();
       return resExp;
     }
@@ -574,17 +590,19 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       Expr left = *it++;
       Expr right = *it;
       edu::sharif::twinner::trace::Expression *leftExp =
-          convertCvc4ExprToExpression (left);
+          convertCvc4ExprToExpression (left, vals);
       edu::sharif::twinner::trace::Expression *rightExp =
-          convertCvc4ExprToExpression (right);
+          convertCvc4ExprToExpression (right, vals);
       leftExp->remainder (rightExp);
       delete rightExp;
       return leftExp;
     }
     case kind::BITVECTOR_OR:
-      return convertByFoldingList (exp, bitvectorOrConverter, "BITVECTOR_OR");
+      return convertByFoldingList
+          (exp, vals, bitvectorOrConverter, "BITVECTOR_OR");
     case kind::BITVECTOR_AND:
-      return convertByFoldingList (exp, bitvectorAndConverter, "BITVECTOR_AND");
+      return convertByFoldingList
+          (exp, vals, bitvectorAndConverter, "BITVECTOR_AND");
     case kind::BITVECTOR_LSHR:
     {
       if (exp.getNumChildren () != 2) {
@@ -598,17 +616,19 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp) {
       ++it;
       Expr bitsExpr = *it;
       edu::sharif::twinner::trace::Expression *shiftee =
-          convertCvc4ExprToExpression (shifteeExpr);
+          convertCvc4ExprToExpression (shifteeExpr, vals);
       edu::sharif::twinner::trace::Expression *bits =
-          convertCvc4ExprToExpression (bitsExpr);
+          convertCvc4ExprToExpression (bitsExpr, vals);
       shiftee->shiftToRight (bits);
       delete bits;
       return shiftee;
     }
     case kind::BITVECTOR_XOR:
-      return convertByFoldingList (exp, bitvectorXorConverter, "BITVECTOR_XOR");
+      return convertByFoldingList
+          (exp, vals, bitvectorXorConverter, "BITVECTOR_XOR");
     case kind::BITVECTOR_MULT:
-      return convertByFoldingList (exp, bitvectorMultConverter, "BITVECTOR_MULT");
+      return convertByFoldingList
+          (exp, vals, bitvectorMultConverter, "BITVECTOR_MULT");
       // TODO: Implement following operator types: MINUS, DIVIDE, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
     default:
       edu::sharif::twinner::util::Logger::error ()

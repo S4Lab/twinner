@@ -4,7 +4,7 @@
  * Copyright © 2013-2015  Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -22,7 +22,6 @@ namespace trace {
 namespace exptoken {
 
 class MemoryEmergedSymbol : public Symbol {
-
 private:
   ADDRINT address;
 
@@ -42,6 +41,8 @@ public:
   static MemoryEmergedSymbol *loadFromBinaryStream (std::ifstream &in);
   static MemoryEmergedSymbol *fromNameAndValue (const std::string &name,
       UINT32 v4, UINT32 v3, UINT32 v2, UINT32 v1);
+  static MemoryEmergedSymbol *fromNameAndValue (const std::string &name,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &value);
 
   virtual std::string toString () const;
   virtual bool operator== (const ExpressionToken &token) const;

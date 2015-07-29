@@ -84,29 +84,36 @@ public:
    * Converts back CVC4 Expr to Twinner's format constraint.
    *
    * @param exp The CVC4 Expr expression to converted back to Twinner's format.
+   * @param vals Concrete values of the variables which are used in the exp.
    * @return The Twinner's format constraint of the given expression.
    */
-  std::list < const edu::sharif::twinner::trace::Constraint * > convertBack (Expr exp);
+  std::list < const edu::sharif::twinner::trace::Constraint * > convertBack (Expr exp,
+      const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals);
 
 private:
   void addConstraint (Expr constraint);
 
   template <typename Combiner>
   edu::sharif::twinner::trace::Expression *convertByFoldingList (Expr &exp,
+      const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals,
       Combiner &combiner, const char *name);
   template <typename Combiner, typename BitLengthTracker>
   edu::sharif::twinner::trace::Expression *convertByFoldingList (Expr &exp,
+      const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals,
       Combiner &combiner, BitLengthTracker &tracker, const char *name);
 
   Expr convertConstraintToCvc4Expr (std::map<std::string, Expr> &symbols,
       const edu::sharif::twinner::trace::Constraint *constraint);
-  edu::sharif::twinner::trace::Constraint *convertCvc4ExprToConstraint (Expr &exp);
+  edu::sharif::twinner::trace::Constraint *convertCvc4ExprToConstraint (Expr &exp,
+      const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals);
   edu::sharif::twinner::trace::Constraint *convertCvc4ExprToConstraint (
       edu::sharif::twinner::trace::Constraint::ComparisonType type,
-      Expr &mainExp);
+      Expr &mainExp,
+      const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals);
   edu::sharif::twinner::trace::Constraint *convertCvc4ExprToConstraint (
       edu::sharif::twinner::trace::Constraint::ComparisonType type,
-      Expr &mainExp, Expr &auxExp);
+      Expr &mainExp, Expr &auxExp,
+      const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals);
 
   edu::sharif::twinner::trace::Constraint::ComparisonType
   exprVsZeroKindToComparisonType (Kind kind) const;
@@ -119,7 +126,8 @@ private:
       const edu::sharif::twinner::trace::Expression *exp);
   Expr convertExpressionToCvc4Expr (std::map<std::string, Expr> &symbols,
       std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >::const_iterator &top);
-  edu::sharif::twinner::trace::Expression *convertCvc4ExprToExpression (Expr &exp);
+  edu::sharif::twinner::trace::Expression *convertCvc4ExprToExpression (Expr &exp,
+      const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals);
 
   UINT64 extractConstantUint64 (
       std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >::const_iterator &top);
