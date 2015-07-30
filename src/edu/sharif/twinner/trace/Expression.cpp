@@ -368,13 +368,13 @@ void Expression::makeLeastSignificantBitsZero (int bits) {
   bitwiseAnd (mask);
 }
 
-void Expression::negate () {
+void Expression::bitwiseNegate () {
   Operator *op = dynamic_cast<Operator *> (stack.back ());
-  if (op && op->getIdentifier () == Operator::NEGATE) {
+  if (op && op->getIdentifier () == Operator::BITWISE_NEGATE) {
     stack.pop_back ();
     delete op;
   } else {
-    stack.push_back (Operator::instantiateOperator (Operator::NEGATE));
+    stack.push_back (Operator::instantiateOperator (Operator::BITWISE_NEGATE));
   }
   edu::sharif::twinner::trace::cv::ConcreteValue *neg =
       lastConcreteValue->bitwiseNegated ();

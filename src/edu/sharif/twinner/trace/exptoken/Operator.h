@@ -36,7 +36,7 @@ public:
   enum OperatorIdentifier {
 
     SIGN_EXTEND,
-    NEGATE,
+    BITWISE_NEGATE,
 
     MAX_UNARY_OPERATOR_IDENTIFIER,
 

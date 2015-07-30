@@ -333,7 +333,7 @@ public:
    * stack, it will be removed and redundant negation operators won't be pushed onto
    * the stack.
    */
-  void negate ();
+  void bitwiseNegate ();
 
   /**
    * Similar to the clone() method, but it needs to clone to a larger "size" and also

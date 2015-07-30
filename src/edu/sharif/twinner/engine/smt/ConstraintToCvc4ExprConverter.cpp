@@ -573,9 +573,25 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp,
         throw std::runtime_error ("CVC4 Expr must have exactly one children");
       }
       Expr child = *exp.begin ();
+      edu::sharif::twinner::trace::Expression *childExp =
+          convertCvc4ExprToExpression (child, vals);
+      edu::sharif::twinner::trace::Expression *resExp =
+          childExp->twosComplement ();
+      delete childExp;
+      return resExp;
+    }
+    case kind::BITVECTOR_NOT:
+    {
+      if (exp.getNumChildren () != 1) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
+            << "): CVC4 BITVECTOR_NOT needs exactly one child\n";
+        throw std::runtime_error ("CVC4 Expr must have exactly one children");
+      }
+      Expr child = *exp.begin ();
       edu::sharif::twinner::trace::Expression *resExp =
           convertCvc4ExprToExpression (child, vals);
-      resExp->negate ();
+      resExp->bitwiseNegate ();
       return resExp;
     }
     case kind::BITVECTOR_UREM_TOTAL:
@@ -684,8 +700,8 @@ Kind ConstraintToCvc4ExprConverter::convertOperatorIdentifierToCvc4Kind (
     return kind::BITVECTOR_UDIV;
   case edu::sharif::twinner::trace::exptoken::Operator::REMAINDER:
     return kind::BITVECTOR_UREM_TOTAL;
-  case edu::sharif::twinner::trace::exptoken::Operator::NEGATE:
-    return kind::BITVECTOR_NEG;
+  case edu::sharif::twinner::trace::exptoken::Operator::BITWISE_NEGATE:
+    return kind::BITVECTOR_NOT;
   case edu::sharif::twinner::trace::exptoken::Operator::XOR:
     return kind::BITVECTOR_XOR;
   case edu::sharif::twinner::trace::exptoken::Operator::BITWISE_AND:

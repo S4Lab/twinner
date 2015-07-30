@@ -4,7 +4,7 @@
  * Copyright © 2013-2015  Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -144,12 +144,12 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
     std::list < ExpressionToken * >::iterator it = stack.end ();
     lop = static_cast<Operator *> (*--it);
     isZeroNatural = (lop->getIdentifier () == Operator::BITWISE_AND
-        || lop->getIdentifier () == Operator::MULTIPLY);
+                     || lop->getIdentifier () == Operator::MULTIPLY);
     isZeroNeutral = (lop->getIdentifier () == Operator::BITWISE_OR
-        || lop->getIdentifier () == Operator::SHIFT_LEFT
-        || lop->getIdentifier () == Operator::SHIFT_RIGHT
-        || lop->getIdentifier () == Operator::ADD
-        || lop->getIdentifier () == Operator::MINUS);
+                     || lop->getIdentifier () == Operator::SHIFT_LEFT
+                     || lop->getIdentifier () == Operator::SHIFT_RIGHT
+                     || lop->getIdentifier () == Operator::ADD
+                     || lop->getIdentifier () == Operator::MINUS);
     bool mayNeedDeepSimplification = true;
     for (std::vector<SimplificationRule>::iterator rule = simplificationRules.begin ();
         rule != simplificationRules.end (); ++rule) {
@@ -251,8 +251,8 @@ std::string Operator::toString () const {
   switch (oi) {
   case REMAINDER:
     return "%";
-  case NEGATE:
-    return "-";
+  case BITWISE_NEGATE:
+    return "~";
   case SIGN_EXTEND:
     return "signExtend";
   default:

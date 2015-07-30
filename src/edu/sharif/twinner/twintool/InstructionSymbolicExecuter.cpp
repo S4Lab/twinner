@@ -2611,7 +2611,7 @@ void InstructionSymbolicExecuter::notAnalysisRoutine (
       << "\tgetting dst exp...";
   edu::sharif::twinner::trace::Expression *dstexp = opr.getExpression (trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tnegating...";
-  dstexp->negate ();
+  dstexp->bitwiseNegate ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   opr.setExpression (trace, dstexp);
   delete dstexp;
