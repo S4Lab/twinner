@@ -1516,22 +1516,9 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
           << "\tadjusting rsp, amount = " << *cv;
       const bool normalRetInstruction = ((*cv) == 8) || ((*cv) == 16);
       if (!normalRetInstruction) {
-        edu::sharif::twinner::util::Logger::loquacious ()
-            << "\tsimulating a syscall...";
-        SYSCALL_STANDARD std;
-#ifdef TARGET_LINUX
-#ifdef TARGET_IA32E
-        std = SYSCALL_STANDARD_IA32E_LINUX;
-#else
-        std = SYSCALL_STANDARD_IA32_LINUX;
-#endif
-#else
-#error "Only Linux is supported currently."
-#endif
-        CONTEXT ctxt;
-        PIN_SaveContext (context, &ctxt);
-        im->syscallEntryPoint (PIN_ThreadId (), &ctxt, std);
-        im->syscallExitPoint (PIN_ThreadId (), &ctxt, std);
+        edu::sharif::twinner::util::Logger::error ()
+            << "\tret instruction must pop either 8 or 16 bytes\n";
+        throw std::runtime_error ("ret must pop either 8 or 16 bytes");
       }
       rsp->add (cv);
       // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
@@ -1553,47 +1540,22 @@ void InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
     const ConcreteValue &oldVal = rsp->getLastConcreteValue ();
     if (oldVal != rspRegVal) { // This jump had side-effect on RSP
-      edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsp...";
-      SYSCALL_STANDARD std;
-#ifdef TARGET_LINUX
-#ifdef TARGET_IA32E
-      std = SYSCALL_STANDARD_IA32E_LINUX;
-#else
-      std = SYSCALL_STANDARD_IA32_LINUX;
-#endif
-#else
-#error "Only Linux is supported currently."
-#endif
-      CONTEXT ctxt;
-      PIN_SaveContext (context, &ctxt);
-      im->syscallEntryPoint (PIN_ThreadId (), &ctxt, std);
-      im->syscallExitPoint (PIN_ThreadId (), &ctxt, std);
       if (oldVal < rspRegVal) {
         ConcreteValue *cv = rspRegVal.clone ();
         (*cv) -= oldVal;
-        if ((*cv) == 8) {
-          edu::sharif::twinner::util::Logger::loquacious ()
-              << "JMP instruction popped 8 bytes... simulating syscall\n";
-        } else {
-          edu::sharif::twinner::util::Logger::warning ()
-              << "JMP instruction popped items out of stack"
-              ", amount = " << *cv << '\n';
-        }
-        rsp->add (cv);
+        edu::sharif::twinner::util::Logger::warning ()
+            << "JMP instruction popped items out of stack"
+            ", amount = " << *cv << '\n';
       } else { // oldVal > rspRegVal
         ConcreteValue *cv = oldVal.clone ();
         (*cv) -= rspRegVal;
-        if ((*cv) == 8) {
-          edu::sharif::twinner::util::Logger::loquacious ()
-              << "JMP instruction pushed 8 bytes... simulating syscall\n";
-        } else {
-          edu::sharif::twinner::util::Logger::warning ()
-              << "JMP instruction pushed items into stack"
-              ", amount = " << *cv << '\n';
-        }
-        rsp->minus (cv);
+        edu::sharif::twinner::util::Logger::warning ()
+            << "JMP instruction pushed items into stack"
+            ", amount = " << *cv << '\n';
       }
-      // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
+      edu::sharif::twinner::util::Logger::error ()
+          << "\tjmp instruction must not have any side effect\n";
+      throw std::runtime_error ("jmp changed the RSP");
     }
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
