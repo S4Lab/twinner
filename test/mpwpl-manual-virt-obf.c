@@ -125,9 +125,10 @@ const char program_text[] = {
 };
 */
 
+char program[sizeof (program_text)];
+
 const char *init_program (int *argcptr, char *argv[]) {
   static_assert (sizeof (program_text) > 300, "wrong program text");
-  char *program = new char[sizeof (program_text)];
   memcpy (program, program_text, sizeof (program_text));
   static_assert (sizeof (int *) <= pointer_size, "wrong pointer size");
   *((int **) (&program[2])) = argcptr;
