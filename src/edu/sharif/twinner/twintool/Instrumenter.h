@@ -132,6 +132,7 @@ private:
 
   std::string traceFilePath; // save final execution trace into this file
   std::string disassemblyFilePath; // save disassembled instructions into this file
+  std::string marFilePath; // save final main() args report into this file
 
   InstructionSymbolicExecuter *ise;
 
@@ -151,6 +152,8 @@ public:
       bool disabled);
   ~Instrumenter ();
 
+  void setMainArgsReportingFilePath (const std::string &marFilePath);
+
   void instrumentSingleInstruction (INS ins);
 
   void syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std);
@@ -159,6 +162,8 @@ public:
   void aboutToExit (INT32 code);
   void disable ();
   void enable ();
+
+  void reportMainArgs (int argc, char **argv);
 
 private:
   void initialize ();
@@ -191,6 +196,7 @@ private:
 VOID instrumentSingleInstruction (INS ins, VOID *v);
 VOID imageIsLoaded (IMG img, VOID *v);
 VOID startAnalysis (VOID *v);
+VOID reportMainArgs (VOID *v, ADDRINT *arg0, ADDRINT *arg1);
 VOID syscallIsAboutToBeCalled (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std,
     VOID *v);
 VOID syscallIsReturned (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std,

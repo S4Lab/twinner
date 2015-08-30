@@ -14,6 +14,7 @@
 
 #include <stdexcept>
 #include <stdlib.h>
+#include <fstream>
 
 #include "xed-iclass-enum.h"
 
@@ -193,6 +194,10 @@ void Instrumenter::initialize (InstructionModel model, const OPCODE opcodes[]) {
 
 Instrumenter::~Instrumenter () {
   delete ise;
+}
+
+void Instrumenter::setMainArgsReportingFilePath (const std::string &_marFilePath) {
+  marFilePath = _marFilePath;
 }
 
 void Instrumenter::instrumentSingleInstruction (INS ins) {
@@ -1069,6 +1074,25 @@ void Instrumenter::enable () {
   ise->enable ();
 }
 
+void Instrumenter::reportMainArgs (int argc, char **argv) {
+  static bool calledOnce = false;
+  if (disabled || calledOnce) {
+    return;
+  }
+  calledOnce = true;
+  std::ofstream out;
+  out.open (marFilePath.c_str (), ios_base::out | ios_base::trunc | ios_base::binary);
+  if (!out.is_open ()) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Can not report main() args: Error in open function: "
+        << marFilePath << '\n';
+    throw std::runtime_error ("Error in reporting main() args during opening file");
+  }
+  out.write (reinterpret_cast<char *> (&argc), sizeof (argc));
+  out.write (reinterpret_cast<char *> (&argv), sizeof (argv));
+  out.close ();
+}
+
 void Instrumenter::printInstructionsStatisticsInfo () const {
   int countOfIgnoredInstructions = totalCountOfInstructions;
   for (std::map < OPCODE, int >::const_iterator it =
@@ -1104,31 +1128,30 @@ VOID instrumentSingleInstruction (INS ins, VOID * v) {
 VOID imageIsLoaded (IMG img, VOID *v) {
   edu::sharif::twinner::util::Logger log = edu::sharif::twinner::util::Logger::debug ();
   log << "Instrumenting image...";
-  for (SEC section = IMG_SecHead (img); SEC_Valid (section);
-      section = SEC_Next (section)) {
-    for (RTN routine = SEC_RtnHead (section); RTN_Valid (routine);
-        routine = RTN_Next (routine)) {
-      std::string name = RTN_Name (routine);
-      if (name == "main") {
-        log << " routine: " << name;
-        RTN_Open (routine);
-        /*
-         * All instructions before main() routine are owned by RTLD. So we should start
-         * instrumenting instructions after when main() routine is called. Also
-         * instructions after returning from main() are owned by RTLD and so, instrumenter
-         * and analysis routines should be disabled when main() returns.
-         */
-        RTN_InsertCall (routine, IPOINT_BEFORE, (AFUNPTR) startAnalysis,
-                        IARG_PTR, v,
-                        IARG_END);
-        RTN_InsertCall (routine, IPOINT_AFTER, (AFUNPTR) terminateAnalysis,
-                        IARG_PTR, v,
-                        IARG_END);
-        RTN_Close (routine);
-        log << '\n';
-        return;
-      }
-    }
+  RTN mainRoutine = RTN_FindByName (img, "main");
+  if (RTN_Valid (mainRoutine)) {
+    log << " routine: main";
+    RTN_Open (mainRoutine);
+    /*
+     * All instructions before main() routine are owned by RTLD.
+     * So we should start instrumenting instructions thereafter.
+     * Also instructions after returning from main() are owned by RTLD and
+     * so instrumenter and analysis routines should be disabled afterwards.
+     */
+    RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) startAnalysis,
+                    IARG_PTR, v,
+                    IARG_END);
+    RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
+                    IARG_PTR, v,
+                    IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0,
+                    IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1,
+                    IARG_END);
+    RTN_InsertCall (mainRoutine, IPOINT_AFTER, (AFUNPTR) terminateAnalysis,
+                    IARG_PTR, v,
+                    IARG_END);
+    RTN_Close (mainRoutine);
+    log << '\n';
+    return;
   }
   log << '\n';
 }
@@ -1138,6 +1161,13 @@ VOID startAnalysis (VOID *v) {
       << "********** startAnalysis(...) **********\n";
   Instrumenter *im = (Instrumenter *) v;
   im->enable ();
+}
+
+VOID reportMainArgs (VOID *v, ADDRINT *arg0, ADDRINT *arg1) {
+  Instrumenter *im = (Instrumenter *) v;
+  int argc = *reinterpret_cast<int *> (arg0);
+  char **argv = *reinterpret_cast<char ***> (arg1);
+  im->reportMainArgs (argc, argv);
 }
 
 VOID syscallIsAboutToBeCalled (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std,

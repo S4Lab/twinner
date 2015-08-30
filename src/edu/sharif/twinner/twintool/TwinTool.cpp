@@ -54,6 +54,11 @@ KNOB < string > verbose (KNOB_MODE_WRITEONCE, "pintool", "verbose", "warning",
 KNOB < BOOL > main (KNOB_MODE_WRITEONCE, "pintool", "main", "",
     "if presents, only main() routine and what is called by it will be analyzed");
 
+KNOB < string > mainArgsReportingOutputFilePath (KNOB_MODE_WRITEONCE,
+    "pintool", "mar", "/tmp/twinner/main-args-reporting.dat",
+    "specify file path for saving main() arguments information"
+    " (just in -main mode");
+
 KNOB < BOOL > measure (KNOB_MODE_WRITEONCE, "pintool", "measure", "",
     "if presents, trivial instruction counting instrumentation will be used instead of normal behavior");
 
@@ -119,6 +124,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
   string symbolsFilePath = symbolsInputFilePath.Value ();
   string traceFilePath = traceOutputFilePath.Value ();
   string disassemblyFilePath = disassemblyOutputFilePath.Value ();
+  string mainArgsReportingFilePath = mainArgsReportingOutputFilePath.Value ();
   if (!symbolsFilePath.empty ()) { // optional
     if (access (symbolsFilePath.c_str (), F_OK) == 0) { // optional
       if (access (symbolsFilePath.c_str (), R_OK) != 0) {
@@ -170,6 +176,18 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
   if (justAnalyzeMainRoutine) {
     edu::sharif::twinner::util::Logger::info ()
         << "Only main() routine will be analyzed.\n";
+    if (mainArgsReportingFilePath.empty ()) {
+      printError ("In the --main mode,"
+                  " main() arguments information must be saved somewhere."
+                  " Use --mar to specify the path!");
+      return false;
+    }
+    if (access (mainArgsReportingFilePath.c_str (), F_OK) == 0
+        && access (mainArgsReportingFilePath.c_str (), W_OK) != 0) {
+      printError ("permission denied: can not write to mar file: "
+                  + mainArgsReportingFilePath);
+      return false;
+    }
   }
   bool measureMode = measure.Value ();
   if (measureMode) {
@@ -200,6 +218,9 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     in.close ();
   } else {
     im = new Instrumenter (traceFilePath, disassemblyFilePath, justAnalyzeMainRoutine);
+  }
+  if (justAnalyzeMainRoutine) {
+    im->setMainArgsReportingFilePath (mainArgsReportingFilePath);
   }
   return true;
 }
