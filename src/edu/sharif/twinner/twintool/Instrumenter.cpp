@@ -20,6 +20,8 @@
 
 #include "InstructionSymbolicExecuter.h"
 
+#include "edu/sharif/twinner/engine/MarInfo.h"
+
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Syscall.h"
 
@@ -41,34 +43,34 @@ inline void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > 
 Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     const string &_traceFilePath, const std::string &_disassemblyFilePath,
     bool _disabled, bool measureMode) :
-traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-ise (new InstructionSymbolicExecuter (this, symbolsFileInStream,
-_disabled, measureMode)),
-isWithinInitialStateDetectionMode (false),
-disabled (_disabled),
-totalCountOfInstructions (0) {
+    traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
+    ise (new InstructionSymbolicExecuter (this, symbolsFileInStream,
+    _disabled, measureMode)),
+    isWithinInitialStateDetectionMode (false),
+    disabled (_disabled),
+    totalCountOfInstructions (0) {
   initialize ();
 }
 
 Instrumenter::Instrumenter (const std::set < ADDRINT > &_candidateAddresses,
     const std::string &_traceFilePath, const std::string &_disassemblyFilePath,
     bool _disabled) :
-traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-ise (new InstructionSymbolicExecuter (this, _disabled)),
-candidateAddresses (_candidateAddresses),
-isWithinInitialStateDetectionMode (true),
-disabled (_disabled),
-totalCountOfInstructions (0) {
+    traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
+    ise (new InstructionSymbolicExecuter (this, _disabled)),
+    candidateAddresses (_candidateAddresses),
+    isWithinInitialStateDetectionMode (true),
+    disabled (_disabled),
+    totalCountOfInstructions (0) {
   initialize ();
 }
 
 Instrumenter::Instrumenter (const string &_traceFilePath,
     const std::string &_disassemblyFilePath, bool _disabled) :
-traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
-ise (new InstructionSymbolicExecuter (this, _disabled)),
-isWithinInitialStateDetectionMode (false),
-disabled (_disabled),
-totalCountOfInstructions (0) {
+    traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
+    ise (new InstructionSymbolicExecuter (this, _disabled)),
+    isWithinInitialStateDetectionMode (false),
+    disabled (_disabled),
+    totalCountOfInstructions (0) {
   initialize ();
 }
 
@@ -1080,17 +1082,8 @@ void Instrumenter::reportMainArgs (int argc, char **argv) {
     return;
   }
   calledOnce = true;
-  std::ofstream out;
-  out.open (marFilePath.c_str (), ios_base::out | ios_base::trunc | ios_base::binary);
-  if (!out.is_open ()) {
-    edu::sharif::twinner::util::Logger::error ()
-        << "Can not report main() args: Error in open function: "
-        << marFilePath << '\n';
-    throw std::runtime_error ("Error in reporting main() args during opening file");
-  }
-  out.write (reinterpret_cast<char *> (&argc), sizeof (argc));
-  out.write (reinterpret_cast<char *> (&argv), sizeof (argv));
-  out.close ();
+  edu::sharif::twinner::engine::MarInfo (argc, argv)
+      .saveToFile (marFilePath.c_str ());
 }
 
 void Instrumenter::printInstructionsStatisticsInfo () const {

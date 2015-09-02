@@ -40,9 +40,9 @@ class ConstraintTree;
 }
 
 class Executer;
+class MarInfo;
 
 class Twinner {
-
 private:
   std::string input;
   std::string twintool;
@@ -70,7 +70,8 @@ public:
   void generateTwinBinary ();
 
 private:
-  void addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace);
+  void addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace,
+      MarInfo *marInfo);
 
   bool calculateSymbolsValuesForCoveringNextPath (
       std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols);

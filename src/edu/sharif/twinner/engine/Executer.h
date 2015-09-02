@@ -35,12 +35,12 @@ struct SymbolRecord;
 }
 namespace engine {
 
-class Executer {
+class MarInfo;
 
+class Executer {
 public:
 
   enum ExecutionMode {
-
     NORMAL_MODE = 0x1,
     INITIAL_STATE_DETECTION_MODE = 0x4,
   };
@@ -76,13 +76,18 @@ public:
    */
   static const char *OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE;
 
+  /**
+   * Indicating name of the temp file, being used to communicate information
+   * about the main() args when code is instrumented in main()-only mode.
+   */
+  static const char *MAIN_ARGS_COMMUNICATION_TEMP_FILE;
+
 private:
   const std::string baseCommand;
   std::string inputArguments;
   const bool overheads;
 
   struct Measurement {
-
     int ret;
     UINT64 cputime;
     UINT64 mss; // maximum segment size (in kilobytes)
@@ -100,6 +105,14 @@ public:
 
   void changeArguments ();
   map < ADDRINT, UINT64 > executeSingleTraceInInitialStateDetectionMode () const;
+
+  /**
+   * Reads main() args info and wraps read info in a new MarInfo instance.
+   * Caller owns the returned object.
+   *
+   * @return an instance of MarInfo containing main() args info of last run.
+   */
+  MarInfo *readMarInfo () const;
 
 private:
   typedef edu::sharif::twinner::trace::exptoken::SymbolRecord Record;

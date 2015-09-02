@@ -20,6 +20,8 @@
 #include <sys/wait.h>
 #include <sys/resource.h>
 
+#include "MarInfo.h"
+
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
@@ -54,6 +56,8 @@ const char *Executer::DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE =
 const char *Executer::OVERHEAD_MEASUREMENT_OPTION = " -measure";
 const char *Executer::OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE =
     "/tmp/twinner/measurements.dat";
+const char *Executer::MAIN_ARGS_COMMUNICATION_TEMP_FILE =
+    "/tmp/twinner/main-args-reporting.dat";
 
 Executer::Executer (std::string pinLauncher, std::string twintool,
     std::string inputBinary, std::string _inputArguments, bool main, bool _overheads) :
@@ -64,7 +68,8 @@ Executer::Executer (std::string pinLauncher, std::string twintool,
     + " -memory " + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
     + " -verbose " + edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString ()
     + (_overheads ? OVERHEAD_MEASUREMENT_OPTION : "")
-    + (main ? " -main -- " : " -- ") + inputBinary),
+    + (main ? std::string (" -main -mar ") + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
+    + " -- " + inputBinary),
     inputArguments (_inputArguments), overheads (_overheads) {
 }
 
@@ -259,6 +264,10 @@ Executer::executeSingleTraceInNormalMode () const {
     return trace;
   }
   return executeSystemCommand (command);
+}
+
+MarInfo *Executer::readMarInfo () const {
+  return MarInfo::readMarInfoFromFile (MAIN_ARGS_COMMUNICATION_TEMP_FILE);
 }
 
 edu::sharif::twinner::trace::Trace *

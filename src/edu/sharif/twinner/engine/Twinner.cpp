@@ -202,7 +202,7 @@ void Twinner::generateTwinBinary () {
 
     edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
     symbols.clear ();
-    addExecutionTrace (trace);
+    addExecutionTrace (trace, ex.readMarInfo ());
     // symbols will be filled with newly instantiated objects and should be deleted...
     somePathsAreNotCovered = calculateSymbolsValuesForCoveringNextPath (symbols);
   }
@@ -256,7 +256,8 @@ void delete_symbol (const edu::sharif::twinner::trace::exptoken::Symbol * const 
   delete symbol;
 }
 
-void Twinner::addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace) {
+void Twinner::addExecutionTrace (
+    const edu::sharif::twinner::trace::Trace *trace, MarInfo *marInfo) {
   edu::sharif::twinner::util::Logger log = edu::sharif::twinner::util::Logger::debug ();
   log << "Adding execution trace:\n";
   trace->printCompleteState (log);
