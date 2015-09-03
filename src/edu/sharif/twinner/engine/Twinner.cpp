@@ -18,6 +18,7 @@
 #include <stdlib.h>
 
 #include "Executer.h"
+#include "MarInfo.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Expression.h"
@@ -53,7 +54,7 @@ private:
 public:
 
   IndentedStringStream (const std::string &_indentation) :
-  indentation (_indentation) {
+      indentation (_indentation) {
   }
 
   IndentedStringStream &indented () {
@@ -258,6 +259,9 @@ void delete_symbol (const edu::sharif::twinner::trace::exptoken::Symbol * const 
 
 void Twinner::addExecutionTrace (
     const edu::sharif::twinner::trace::Trace *trace, MarInfo *marInfo) {
+  if (!marInfo->isConsistent ()) {
+    throw std::runtime_error ("MAR info in inconsistent");
+  }
   edu::sharif::twinner::util::Logger log = edu::sharif::twinner::util::Logger::debug ();
   log << "Adding execution trace:\n";
   trace->printCompleteState (log);

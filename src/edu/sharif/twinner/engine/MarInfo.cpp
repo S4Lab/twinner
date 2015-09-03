@@ -22,8 +22,17 @@ namespace sharif {
 namespace twinner {
 namespace engine {
 
+void *MarInfo::initialArgv = 0;
+
 MarInfo::MarInfo (int _argc, char **_argv) :
     argc (_argc), argv (_argv) {
+  if (MarInfo::initialArgv == 0) {
+    MarInfo::initialArgv = _argv;
+  }
+}
+
+bool MarInfo::isConsistent () const {
+  return MarInfo::initialArgv == argv;
 }
 
 void MarInfo::saveToFile (const char *path) const {

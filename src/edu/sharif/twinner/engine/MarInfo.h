@@ -23,8 +23,12 @@ private:
   int argc;
   char **argv;
 
+  static void *initialArgv;
+
 public:
   MarInfo (int argc, char **argv);
+
+  bool isConsistent () const;
 
   void saveToFile (const char *path) const;
   static MarInfo *readMarInfoFromFile (const char *path);
