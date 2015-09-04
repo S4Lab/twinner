@@ -43,10 +43,8 @@ public:
       std::list < const edu::sharif::twinner::trace::Constraint * > constraints) const;
 
   virtual void clearState ();
-  virtual void assertConstraint (const edu::sharif::twinner::trace::Constraint *
-      constraint);
-  virtual bool checkValidity (const edu::sharif::twinner::trace::Constraint *
-      constraint);
+  virtual void assertConstraint (const edu::sharif::twinner::trace::Constraint *constraint);
+  virtual bool checkValidity (const edu::sharif::twinner::trace::Constraint *constraint);
 };
 
 }

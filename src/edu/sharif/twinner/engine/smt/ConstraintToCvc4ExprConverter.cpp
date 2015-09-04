@@ -37,8 +37,8 @@ namespace smt {
 ConstraintToCvc4ExprConverter::ConstraintToCvc4ExprConverter (ExprManager &_em,
     bool _limitSymbols,
     const std::list < const edu::sharif::twinner::trace::Constraint * > &_constraints) :
-em (_em), constraints (_constraints), initialized (false),
-limitSymbols (_limitSymbols) {
+    em (_em), constraints (_constraints), initialized (false),
+    limitSymbols (_limitSymbols) {
   type = em.mkBitVectorType (128);
 
   zero = em.mkConst (BitVector (128, UINT64 (0)));

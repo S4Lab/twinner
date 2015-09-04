@@ -30,7 +30,7 @@ namespace engine {
 namespace search {
 
 ConstraintTree::ConstraintTree () :
-root (new TreeNode ()), iterator (root) {
+    root (new TreeNode ()), iterator (root) {
 }
 
 ConstraintTree::~ConstraintTree () {
@@ -45,9 +45,9 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
       trace->getTraceSegments ();
   for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
       ::const_reverse_iterator it = segments.rbegin (); it != segments.rend (); ++it) {
-    const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints =
+    const std::list < edu::sharif::twinner::trace::Constraint * > &constraints =
         (*it)->getPathConstraints ();
-    for (std::list < const edu::sharif::twinner::trace::Constraint * >
+    for (std::list < edu::sharif::twinner::trace::Constraint * >
         ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
       const edu::sharif::twinner::trace::Constraint *constraint = *it2;
       TreeNode *next = node->addConstraint

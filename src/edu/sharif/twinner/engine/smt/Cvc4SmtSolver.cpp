@@ -34,7 +34,7 @@ void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
     std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &satSolution);
 
 Cvc4SmtSolver::Cvc4SmtSolver () :
-SmtSolver (), state (new Cvc4SmtSolverState ()) {
+    SmtSolver (), state (new Cvc4SmtSolverState ()) {
 }
 
 Cvc4SmtSolver::~Cvc4SmtSolver () {

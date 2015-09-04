@@ -39,7 +39,7 @@ inline void write_map_entry (std::ofstream &out,
 
 Trace::Trace (const std::list < ExecutionTraceSegment * > &list,
     edu::sharif::twinner::util::MemoryManager *_memoryManager) :
-segments (list), memoryManager (_memoryManager) {
+    segments (list), memoryManager (_memoryManager) {
   currentSegmentIterator = segments.end ();
   if (currentSegmentIterator != segments.begin ()) {
     currentSegmentIterator--;
@@ -48,7 +48,7 @@ segments (list), memoryManager (_memoryManager) {
 }
 
 Trace::Trace () :
-memoryManager (edu::sharif::twinner::util::MemoryManager::allocateInstance ()) {
+    memoryManager (edu::sharif::twinner::util::MemoryManager::allocateInstance ()) {
   segments.push_front (new ExecutionTraceSegment ());
   currentSegmentIterator = segments.begin ();
   currentSegmentIndex = 0;
@@ -288,6 +288,10 @@ std::map < ADDRINT, UINT64 > Trace::loadAddressToValueMapFromBinaryStream (
 }
 
 const std::list < ExecutionTraceSegment * > &Trace::getTraceSegments () const {
+  return segments;
+}
+
+std::list < ExecutionTraceSegment * > &Trace::getTraceSegments () {
   return segments;
 }
 

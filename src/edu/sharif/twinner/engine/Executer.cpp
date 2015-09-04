@@ -199,10 +199,10 @@ void aggregate_symbols (
 }
 
 void aggregate_symbols (
-    const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
+    const std::list < edu::sharif::twinner::trace::Constraint * > &constraints,
     std::map < ADDRINT, const edu::sharif::twinner::trace::exptoken::Symbol * > &msyms,
     std::map < REG, const edu::sharif::twinner::trace::exptoken::Symbol * > &rsyms) {
-  for (std::list < const edu::sharif::twinner::trace::Constraint * >
+  for (std::list < edu::sharif::twinner::trace::Constraint * >
       ::const_iterator it = constraints.begin (); it != constraints.end (); ++it) {
     const edu::sharif::twinner::trace::Constraint *constraint = *it;
     aggregate_symbols (constraint->getMainExpression (), msyms, rsyms);

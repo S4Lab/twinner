@@ -159,6 +159,7 @@ public:
   static map < ADDRINT, UINT64 > loadAddressToValueMapFromFile (const char *path);
 
   const std::list < ExecutionTraceSegment * > &getTraceSegments () const;
+  std::list < ExecutionTraceSegment * > &getTraceSegments ();
 
 private:
   void saveToBinaryStream (std::ofstream &out) const;

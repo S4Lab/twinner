@@ -33,13 +33,13 @@ private:
   std::map < ADDRINT, Expression * > memoryAddressTo32BitsExpression;
   std::map < ADDRINT, Expression * > memoryAddressTo16BitsExpression;
   std::map < ADDRINT, Expression * > memoryAddressTo8BitsExpression;
-  std::list < const Constraint * > pathConstraints;
+  std::list < Constraint * > pathConstraints;
   /// Each execution trace segment is terminated with some syscall.
   Syscall syscall;
 
   ExecutionTraceSegment (const std::map < REG, Expression * > &regi,
       const std::map < ADDRINT, Expression * > &memo,
-      const std::list < const Constraint * > &cnrt);
+      const std::list < Constraint * > &cnrt);
 
 public:
   ExecutionTraceSegment ();
@@ -123,7 +123,8 @@ public:
 
   const std::map < REG, Expression * > &getRegisterToExpression () const;
   const std::map < ADDRINT, Expression * > &getMemoryAddressTo64BitsExpression () const;
-  const std::list < const Constraint * > &getPathConstraints () const;
+  const std::list < Constraint * > &getPathConstraints () const;
+  std::list < Constraint * > &getPathConstraints ();
 
   int printMemoryUsageStats (const edu::sharif::twinner::util::Logger &logger) const;
 

@@ -34,7 +34,7 @@ namespace trace {
 
 ExecutionTraceSegment::ExecutionTraceSegment (const std::map < REG, Expression * > &regi,
     const std::map < ADDRINT, Expression * > &memo,
-    const std::list < const Constraint * > &cnrt) :
+    const std::list < Constraint * > &cnrt) :
     registerToExpression (regi), memoryAddressTo64BitsExpression (memo), pathConstraints (cnrt) {
   /*
    * This constructor is called by Twinner to reacquire registers/memory/constraints
@@ -80,8 +80,8 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
   registerToExpression.clear ();
   std::map < ADDRINT, Expression * > *memToExp[]
       = {&memoryAddressTo128BitsExpression, &memoryAddressTo64BitsExpression,
-         &memoryAddressTo32BitsExpression, &memoryAddressTo16BitsExpression,
-         &memoryAddressTo8BitsExpression, 0};
+    &memoryAddressTo32BitsExpression, &memoryAddressTo16BitsExpression,
+    &memoryAddressTo8BitsExpression, 0};
   for (int i = 0; memToExp[i]; ++i) {
     for (std::map < ADDRINT, Expression * >::iterator it = memToExp[i]->begin ();
         it != memToExp[i]->end (); ++it) {
@@ -420,7 +420,7 @@ void ExecutionTraceSegment::addPathConstraints (
     const edu::sharif::twinner::trace::Constraint *lastConstraint) {
   for (std::list <edu::sharif::twinner::trace::Constraint *>::const_iterator it =
       constraints.begin (); it != constraints.end (); ++it) {
-    const edu::sharif::twinner::trace::Constraint *c = *it;
+    edu::sharif::twinner::trace::Constraint *c = *it;
     if (c->isTrivial () || (lastConstraint && (*lastConstraint) == (*c))) {
       delete c;
     } else {
@@ -470,7 +470,7 @@ ExecutionTraceSegment *ExecutionTraceSegment::loadFromBinaryStream (std::ifstrea
   // The memo only contains 64-bits memory symbols (+ 128/64-bits reg symbols of course)
   // Also the precision of ADDRINT is 64-bits (both memory cells and formulas are 64-bits)
   std::map < ADDRINT, Expression * > memo;
-  std::list < const Constraint * > cnrt;
+  std::list < Constraint * > cnrt;
   loadMapFromBinaryStream (in, "REG", regi);
   loadMapFromBinaryStream (in, "MEM", memo);
   loadListFromBinaryStream (in, "CON", cnrt);
@@ -573,8 +573,12 @@ ExecutionTraceSegment::getMemoryAddressTo64BitsExpression () const {
   return memoryAddressTo64BitsExpression;
 }
 
-const std::list < const Constraint * > &
+const std::list < Constraint * > &
 ExecutionTraceSegment::getPathConstraints () const {
+  return pathConstraints;
+}
+
+std::list < Constraint * > &ExecutionTraceSegment::getPathConstraints () {
   return pathConstraints;
 }
 

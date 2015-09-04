@@ -73,7 +73,7 @@ void extract_memory_addresses_of_trace_segment (
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
 void extract_memory_addresses_of_constraint (
     std::map < int, std::set < ADDRINT > > &addr,
-    const edu::sharif::twinner::trace::Constraint * const &constraint);
+    edu::sharif::twinner::trace::Constraint * const &constraint);
 template < typename Key >
 void extract_memory_addresses_of_expression (
     std::map < int, std::set < ADDRINT > > &addr,
@@ -130,7 +130,7 @@ void code_memory_changes (IndentedStringStream &out,
     const ADDRINT &memoryEa, edu::sharif::twinner::trace::Expression * const &exp);
 
 Twinner::Twinner () :
-ctree (new edu::sharif::twinner::engine::search::ConstraintTree ()) {
+    ctree (new edu::sharif::twinner::engine::search::ConstraintTree ()) {
   edu::sharif::twinner::engine::smt::SmtSolver::init
       (new edu::sharif::twinner::engine::smt::Cvc4SmtSolver ());
 }
@@ -420,7 +420,7 @@ void extract_memory_addresses_of_trace_segment (
 }
 
 void extract_memory_addresses_of_constraint (std::map < int, std::set < ADDRINT > > &addr,
-    const edu::sharif::twinner::trace::Constraint * const &constraint) {
+    edu::sharif::twinner::trace::Constraint * const &constraint) {
   extract_memory_addresses_of_expression (addr, constraint->getMainExpression ());
   if (constraint->getAuxExpression ()) {
     extract_memory_addresses_of_expression (addr, constraint->getAuxExpression ());
@@ -454,9 +454,13 @@ void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
     int traceIndex, std::stringstream &conout) {
   edu::sharif::twinner::util::foreach
       (addresses, &code_symbol_initiation_into_twin_code, aux);
+  const std::list < edu::sharif::twinner::trace::Constraint * > &pathConstraints =
+      segment->getPathConstraints ();
   std::list < const edu::sharif::twinner::trace::Constraint * > simplifiedConstraints =
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
-      ->simplifyConstraints (segment->getPathConstraints ());
+      ->simplifyConstraints
+      (std::list < const edu::sharif::twinner::trace::Constraint * >
+       (pathConstraints.begin (), pathConstraints.end ()));
   std::stringstream out;
   std::set< std::pair< std::string, std::string > > typesAndNames;
   bool first = true;

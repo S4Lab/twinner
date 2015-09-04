@@ -21,8 +21,8 @@ namespace engine {
 namespace smt {
 
 Cvc4SmtSolverState::Cvc4SmtSolverState () :
-em (new ExprManager ()), smt (new SmtEngine (em)),
-symbols (new std::map<std::string, Expr> ()) {
+    em (new ExprManager ()), smt (new SmtEngine (em)),
+    symbols (new std::map<std::string, Expr> ()) {
   /*
    * QF_ means disable quantifiers
    * BV means enable bit-vectors
