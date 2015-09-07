@@ -4,7 +4,7 @@
  * Copyright © 2013-2015  Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -72,6 +72,10 @@ std::string Constant::toString () const {
 bool Constant::operator== (const ExpressionToken &token) const {
   return dynamic_cast<const Constant *> (&token)
       && (*static_cast<const Constant *> (&token)->concreteValue) == (*concreteValue);
+}
+
+bool Constant::isConstant () const {
+  return true;
 }
 
 }

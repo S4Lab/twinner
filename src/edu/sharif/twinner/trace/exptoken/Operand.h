@@ -4,7 +4,7 @@
  * Copyright © 2013-2015  Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -29,7 +29,6 @@ namespace exptoken {
  * @abstract
  */
 class Operand : public ExpressionToken {
-
 protected:
   edu::sharif::twinner::trace::cv::ConcreteValue *concreteValue;
 
@@ -50,6 +49,8 @@ public:
   ~Operand ();
 
   const edu::sharif::twinner::trace::cv::ConcreteValue &getValue () const;
+
+  virtual bool isConstant () const = 0;
 };
 
 }

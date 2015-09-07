@@ -25,11 +25,9 @@ namespace trace {
 class Expression;
 
 class Constraint : public Savable {
-
 public:
 
   enum ComparisonType {
-
     // zero
     NON_POSITIVE, NON_NEGATIVE, NON_ZERO,
     POSITIVE, NEGATIVE, ZERO,
@@ -110,7 +108,9 @@ public:
   std::string toString () const;
 
   const Expression *getMainExpression () const;
+  Expression *getMainExpression ();
   const Expression *getAuxExpression () const;
+  Expression *getAuxExpression ();
   ComparisonType getComparisonType () const;
   uint32_t getCausingInstructionIdentifier () const;
 

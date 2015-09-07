@@ -34,11 +34,11 @@ namespace trace {
 
 Expression::Expression (const Stack &stk,
     edu::sharif::twinner::trace::cv::ConcreteValue *concreteValue) :
-stack (stk), lastConcreteValue (concreteValue), isOverwriting (false) {
+    stack (stk), lastConcreteValue (concreteValue), isOverwriting (false) {
 }
 
 Expression::Expression (const Expression &exp) :
-lastConcreteValue (exp.lastConcreteValue->clone ()), isOverwriting (false) {
+    lastConcreteValue (exp.lastConcreteValue->clone ()), isOverwriting (false) {
   for (typename Stack::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const edu::sharif::twinner::trace::exptoken::ExpressionToken *et = *it;
@@ -64,7 +64,7 @@ Expression &Expression::operator= (const Expression &exp) {
 }
 
 Expression::Expression (int size, const Expression &exp) :
-lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
+    lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
   for (typename Stack::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const edu::sharif::twinner::trace::exptoken::ExpressionToken *et = *it;
@@ -74,7 +74,7 @@ lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
 
 Expression::Expression (edu::sharif::twinner::trace::cv::ConcreteValue *concreteValue,
     bool _isOverwriting) :
-lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
+    lastConcreteValue (concreteValue), isOverwriting (_isOverwriting) {
 }
 
 Expression::~Expression () {
@@ -471,8 +471,12 @@ bool Expression::operator== (const Expression &exp) const {
 bool Expression::isTrivial () const {
   for (Stack::const_iterator it = stack.begin (); it != stack.end (); ++it) {
     const edu::sharif::twinner::trace::exptoken::ExpressionToken *token = *it;
-    if (dynamic_cast<const edu::sharif::twinner::trace::exptoken::Symbol *> (token)) {
-      return false;
+    if (dynamic_cast<const edu::sharif::twinner::trace::exptoken::Operand *> (token)) {
+      const edu::sharif::twinner::trace::exptoken::Operand *operand =
+          static_cast<const edu::sharif::twinner::trace::exptoken::Operand *> (token);
+      if (!operand->isConstant ()) {
+        return false;
+      }
     }
   }
   return true;

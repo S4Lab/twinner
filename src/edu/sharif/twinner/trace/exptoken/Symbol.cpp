@@ -4,7 +4,7 @@
  * Copyright © 2013-2015  Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -46,6 +46,10 @@ void Symbol::loadFromBinaryStream (std::ifstream &in) {
 
 int Symbol::getGenerationIndex () const {
   return generationIndex;
+}
+
+bool Symbol::isConstant () const {
+  return false;
 }
 
 }

@@ -70,7 +70,7 @@ public:
   void generateTwinBinary ();
 
 private:
-  void addExecutionTrace (const edu::sharif::twinner::trace::Trace *trace,
+  void addExecutionTrace (edu::sharif::twinner::trace::Trace *trace,
       MarInfo *marInfo);
 
   bool calculateSymbolsValuesForCoveringNextPath (

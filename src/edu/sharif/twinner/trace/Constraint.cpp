@@ -132,7 +132,15 @@ const Expression *Constraint::getMainExpression () const {
   return mainExp;
 }
 
+Expression *Constraint::getMainExpression () {
+  return mainExp;
+}
+
 const Expression *Constraint::getAuxExpression () const {
+  return auxExp;
+}
+
+Expression *Constraint::getAuxExpression () {
   return auxExp;
 }
 
@@ -186,7 +194,7 @@ Constraint *Constraint::instantiateNegatedConstraint () const {
 bool Constraint::operator== (const Constraint &constraint) const {
   return (*mainExp) == (*constraint.mainExp) && type == constraint.type
       && ((auxExp == 0 && constraint.auxExp == 0)
-      || (auxExp != 0 && constraint.auxExp != 0 && (*auxExp) == (*constraint.auxExp)));
+          || (auxExp != 0 && constraint.auxExp != 0 && (*auxExp) == (*constraint.auxExp)));
 }
 
 bool Constraint::isTrivial () const {

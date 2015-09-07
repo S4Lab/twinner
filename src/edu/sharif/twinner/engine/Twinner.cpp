@@ -257,11 +257,12 @@ void delete_symbol (const edu::sharif::twinner::trace::exptoken::Symbol * const 
   delete symbol;
 }
 
-void Twinner::addExecutionTrace (
-    const edu::sharif::twinner::trace::Trace *trace, MarInfo *marInfo) {
+void Twinner::addExecutionTrace (edu::sharif::twinner::trace::Trace *trace,
+    MarInfo *marInfo) {
   if (!marInfo->isConsistent ()) {
     throw std::runtime_error ("MAR info in inconsistent");
   }
+  marInfo->simplifyTrace (trace);
   edu::sharif::twinner::util::Logger log = edu::sharif::twinner::util::Logger::debug ();
   log << "Adding execution trace:\n";
   trace->printCompleteState (log);

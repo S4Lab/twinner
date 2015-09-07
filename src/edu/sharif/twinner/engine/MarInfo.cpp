@@ -15,6 +15,15 @@
 #include <fstream>
 #include <stdexcept>
 
+#include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
+
+#include "edu/sharif/twinner/trace/exptoken/NamedSymbol.h"
+
+#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
+
 #include "edu/sharif/twinner/util/Logger.h"
 
 namespace edu {
@@ -33,6 +42,46 @@ MarInfo::MarInfo (int _argc, char **_argv) :
 
 bool MarInfo::isConsistent () const {
   return MarInfo::initialArgv == argv;
+}
+
+void MarInfo::simplifyTrace (edu::sharif::twinner::trace::Trace *trace) const {
+  std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * > &segments =
+      trace->getTraceSegments ();
+  for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
+      ::const_reverse_iterator it = segments.rbegin (); it != segments.rend (); ++it) {
+    std::list < edu::sharif::twinner::trace::Constraint * > &constraints =
+        (*it)->getPathConstraints ();
+    for (std::list < edu::sharif::twinner::trace::Constraint * >
+        ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
+      edu::sharif::twinner::trace::Constraint *constraint = *it2;
+      simplifyExpression (constraint->getMainExpression ());
+      simplifyExpression (constraint->getAuxExpression ());
+    }
+  }
+}
+
+void MarInfo::simplifyExpression (edu::sharif::twinner::trace::Expression *exp) const {
+  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
+  for (edu::sharif::twinner::trace::Expression::Stack::iterator it =
+      stack.begin (); it != stack.end (); ++it) {
+    edu::sharif::twinner::trace::exptoken::ExpressionToken *&token = *it;
+#ifdef TARGET_IA32E
+    // argv == rsi_0
+    if (dynamic_cast<edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *> (token)) {
+      edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
+          static_cast<edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *> (token);
+      if (reg->getAddress () == REG_RSI && reg->getGenerationIndex () == 0) {
+        token = new edu::sharif::twinner::trace::exptoken::NamedSymbol
+            ("argv", true,
+             edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+             (UINT64 (MarInfo::initialArgv)), 0);
+        delete reg;
+      }
+    }
+#else
+#error "Unsupported architecture"
+#endif
+  }
 }
 
 void MarInfo::saveToFile (const char *path) const {

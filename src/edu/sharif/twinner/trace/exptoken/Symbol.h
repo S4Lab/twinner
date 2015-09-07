@@ -24,7 +24,6 @@ namespace trace {
 namespace exptoken {
 
 enum SymbolType {
-
   REGISTER_64_BITS_SYMBOL_TYPE = 16,
   REGISTER_128_BITS_SYMBOL_TYPE = 32,
   MEMORY_64_BITS_SYMBOL_TYPE = 64,
@@ -32,7 +31,6 @@ enum SymbolType {
 };
 
 struct SymbolRecord {
-
   UINT64 address;
   UINT32 type; // SymbolType
   UINT64 concreteValueLsb;
@@ -43,7 +41,6 @@ struct SymbolRecord {
  * @abstract
  */
 class Symbol : public Operand {
-
 protected:
   /**
    * Different values can be stored at the same memory address (as they can be changed
@@ -69,6 +66,8 @@ public:
   int getGenerationIndex () const;
 
   virtual std::pair < int, SymbolRecord > toSymbolRecord () const = 0;
+
+  virtual bool isConstant () const;
 };
 
 }

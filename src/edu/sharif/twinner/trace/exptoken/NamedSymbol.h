@@ -10,12 +10,10 @@
  * This file is part of Twinner project.
  */
 
-#ifndef CONSTANT_H_
-#define CONSTANT_H_
+#ifndef NAMED_SYMBOL_H_
+#define NAMED_SYMBOL_H_
 
-#include "Operand.h"
-
-#include "pin.H"
+#include "Symbol.h"
 
 namespace edu {
 namespace sharif {
@@ -23,24 +21,26 @@ namespace twinner {
 namespace trace {
 namespace exptoken {
 
-class Constant : public Operand {
+class NamedSymbol : public Symbol {
 private:
-  Constant (const Constant &c);
+  std::string name;
+  bool constant;
+
+  NamedSymbol (const NamedSymbol &symbol);
+  NamedSymbol (std::string name, bool constant);
 
 public:
-  Constant (UINT64 val);
-  Constant (const edu::sharif::twinner::trace::cv::ConcreteValue &val);
-  Constant (edu::sharif::twinner::trace::cv::ConcreteValue *val);
+  NamedSymbol (std::string name, bool constant,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
+      int generationIndex);
 
-  void setValue (const edu::sharif::twinner::trace::cv::ConcreteValue &value);
-  void setValue (edu::sharif::twinner::trace::cv::ConcreteValue *value);
-  virtual Constant *clone () const;
+  virtual NamedSymbol *clone () const;
+  virtual std::pair < int, SymbolRecord > toSymbolRecord () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
-  static Constant *loadFromBinaryStream (std::ifstream &in);
+  static NamedSymbol *loadFromBinaryStream (std::ifstream &in);
 
   virtual std::string toString () const;
-
   virtual bool operator== (const ExpressionToken &token) const;
 
   virtual bool isConstant () const;
@@ -52,4 +52,4 @@ public:
 }
 }
 
-#endif /* CONSTANT_H_ */
+#endif /* NamedSymbol.h */

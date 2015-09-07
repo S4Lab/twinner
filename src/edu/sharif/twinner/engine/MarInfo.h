@@ -16,6 +16,11 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace trace {
+
+class Trace;
+class Expression;
+}
 namespace engine {
 
 class MarInfo {
@@ -29,9 +34,13 @@ public:
   MarInfo (int argc, char **argv);
 
   bool isConsistent () const;
+  void simplifyTrace (edu::sharif::twinner::trace::Trace *trace) const;
 
   void saveToFile (const char *path) const;
   static MarInfo *readMarInfoFromFile (const char *path);
+
+private:
+  void simplifyExpression (edu::sharif::twinner::trace::Expression *exp) const;
 };
 
 }
