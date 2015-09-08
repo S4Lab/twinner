@@ -26,6 +26,7 @@ namespace twinner {
 namespace trace {
 
 class Trace;
+class MarInfo;
 
 namespace exptoken {
 
@@ -34,8 +35,6 @@ struct SymbolRecord;
 }
 }
 namespace engine {
-
-class MarInfo;
 
 class Executer {
 public:
@@ -112,7 +111,7 @@ public:
    *
    * @return an instance of MarInfo containing main() args info of last run.
    */
-  MarInfo *readMarInfo () const;
+  edu::sharif::twinner::trace::MarInfo *readMarInfo () const;
 
 private:
   typedef edu::sharif::twinner::trace::exptoken::SymbolRecord Record;

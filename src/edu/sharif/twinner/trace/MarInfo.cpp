@@ -15,11 +15,11 @@
 #include <fstream>
 #include <stdexcept>
 
-#include "edu/sharif/twinner/trace/Trace.h"
-#include "edu/sharif/twinner/trace/Expression.h"
-#include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
-#include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
+#include "Trace.h"
+#include "Expression.h"
+#include "ExecutionTraceSegment.h"
 
+#include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/exptoken/NamedSymbol.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
@@ -29,12 +29,12 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace engine {
+namespace trace {
 
 void *MarInfo::initialArgv = 0;
 
 MarInfo::MarInfo (int _argc, char **_argv) :
-    argc (_argc), argv (_argv) {
+    Savable (), argc (_argc), argv (_argv) {
   if (MarInfo::initialArgv == 0) {
     MarInfo::initialArgv = _argv;
   }
@@ -44,26 +44,23 @@ bool MarInfo::isConsistent () const {
   return MarInfo::initialArgv == argv;
 }
 
-void MarInfo::simplifyTrace (edu::sharif::twinner::trace::Trace *trace) const {
-  std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * > &segments =
-      trace->getTraceSegments ();
-  for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
-      ::const_reverse_iterator it = segments.rbegin (); it != segments.rend (); ++it) {
-    std::list < edu::sharif::twinner::trace::Constraint * > &constraints =
-        (*it)->getPathConstraints ();
-    for (std::list < edu::sharif::twinner::trace::Constraint * >
-        ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
-      edu::sharif::twinner::trace::Constraint *constraint = *it2;
+void MarInfo::simplifyTrace (Trace *trace) const {
+  std::list < ExecutionTraceSegment * > &segments = trace->getTraceSegments ();
+  for (std::list < ExecutionTraceSegment * >::const_reverse_iterator it =
+      segments.rbegin (); it != segments.rend (); ++it) {
+    std::list < Constraint * > &constraints = (*it)->getPathConstraints ();
+    for (std::list < Constraint * >::const_iterator it2 = constraints.begin ();
+        it2 != constraints.end (); ++it2) {
+      Constraint *constraint = *it2;
       simplifyExpression (constraint->getMainExpression ());
       simplifyExpression (constraint->getAuxExpression ());
     }
   }
 }
 
-void MarInfo::simplifyExpression (edu::sharif::twinner::trace::Expression *exp) const {
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
-  for (edu::sharif::twinner::trace::Expression::Stack::iterator it =
-      stack.begin (); it != stack.end (); ++it) {
+void MarInfo::simplifyExpression (Expression *exp) const {
+  Expression::Stack &stack = exp->getStack ();
+  for (Expression::Stack::iterator it = stack.begin (); it != stack.end (); ++it) {
     edu::sharif::twinner::trace::exptoken::ExpressionToken *&token = *it;
 #ifdef TARGET_IA32E
     // argv == rsi_0
@@ -93,9 +90,13 @@ void MarInfo::saveToFile (const char *path) const {
         << path << '\n';
     throw std::runtime_error ("Error in reporting main() args during opening file");
   }
+  saveToBinaryStream (out);
+  out.close ();
+}
+
+void MarInfo::saveToBinaryStream (std::ofstream &out) const {
   out.write (reinterpret_cast<const char *> (&argc), sizeof (argc));
   out.write (reinterpret_cast<const char *> (&argv), sizeof (argv));
-  out.close ();
 }
 
 MarInfo *MarInfo::readMarInfoFromFile (const char *path) {

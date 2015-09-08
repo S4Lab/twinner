@@ -13,6 +13,8 @@
 #ifndef MAR_INFO_H
 #define MAR_INFO_H
 
+#include "Savable.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -20,10 +22,8 @@ namespace trace {
 
 class Trace;
 class Expression;
-}
-namespace engine {
 
-class MarInfo {
+class MarInfo : public Savable {
 private:
   int argc;
   char **argv;
@@ -34,13 +34,14 @@ public:
   MarInfo (int argc, char **argv);
 
   bool isConsistent () const;
-  void simplifyTrace (edu::sharif::twinner::trace::Trace *trace) const;
+  void simplifyTrace (Trace *trace) const;
 
   void saveToFile (const char *path) const;
+  virtual void saveToBinaryStream (std::ofstream &out) const;
   static MarInfo *readMarInfoFromFile (const char *path);
 
 private:
-  void simplifyExpression (edu::sharif::twinner::trace::Expression *exp) const;
+  void simplifyExpression (Expression *exp) const;
 };
 
 }

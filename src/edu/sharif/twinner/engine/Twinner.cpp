@@ -18,8 +18,8 @@
 #include <stdlib.h>
 
 #include "Executer.h"
-#include "MarInfo.h"
 
+#include "edu/sharif/twinner/trace/MarInfo.h"
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
@@ -258,7 +258,7 @@ void delete_symbol (const edu::sharif::twinner::trace::exptoken::Symbol * const 
 }
 
 void Twinner::addExecutionTrace (edu::sharif::twinner::trace::Trace *trace,
-    MarInfo *marInfo) {
+    edu::sharif::twinner::trace::MarInfo *marInfo) {
   if (!marInfo->isConsistent ()) {
     throw std::runtime_error ("MAR info in inconsistent");
   }

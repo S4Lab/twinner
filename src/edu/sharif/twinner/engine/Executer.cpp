@@ -20,8 +20,7 @@
 #include <sys/wait.h>
 #include <sys/resource.h>
 
-#include "MarInfo.h"
-
+#include "edu/sharif/twinner/trace/MarInfo.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
@@ -266,8 +265,9 @@ Executer::executeSingleTraceInNormalMode () const {
   return executeSystemCommand (command);
 }
 
-MarInfo *Executer::readMarInfo () const {
-  return MarInfo::readMarInfoFromFile (MAIN_ARGS_COMMUNICATION_TEMP_FILE);
+edu::sharif::twinner::trace::MarInfo *Executer::readMarInfo () const {
+  return edu::sharif::twinner::trace::MarInfo::readMarInfoFromFile
+      (MAIN_ARGS_COMMUNICATION_TEMP_FILE);
 }
 
 edu::sharif::twinner::trace::Trace *

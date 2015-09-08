@@ -20,7 +20,7 @@
 
 #include "InstructionSymbolicExecuter.h"
 
-#include "edu/sharif/twinner/engine/MarInfo.h"
+#include "edu/sharif/twinner/trace/MarInfo.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Syscall.h"
@@ -1082,7 +1082,7 @@ void Instrumenter::reportMainArgs (int argc, char **argv) {
     return;
   }
   calledOnce = true;
-  edu::sharif::twinner::engine::MarInfo (argc, argv)
+  edu::sharif::twinner::trace::MarInfo (argc, argv)
       .saveToFile (marFilePath.c_str ());
 }
 

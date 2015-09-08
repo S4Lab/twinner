@@ -27,6 +27,7 @@ namespace trace {
 
 class Trace;
 class Constraint;
+class MarInfo;
 
 namespace exptoken {
 
@@ -40,7 +41,6 @@ class ConstraintTree;
 }
 
 class Executer;
-class MarInfo;
 
 class Twinner {
 private:
@@ -71,7 +71,7 @@ public:
 
 private:
   void addExecutionTrace (edu::sharif::twinner::trace::Trace *trace,
-      MarInfo *marInfo);
+      edu::sharif::twinner::trace::MarInfo *marInfo);
 
   bool calculateSymbolsValuesForCoveringNextPath (
       std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols);
