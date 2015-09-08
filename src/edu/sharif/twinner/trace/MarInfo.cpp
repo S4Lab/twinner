@@ -59,6 +59,9 @@ void MarInfo::simplifyTrace (Trace *trace) const {
 }
 
 void MarInfo::simplifyExpression (Expression *exp) const {
+  if (exp == 0) {
+    return;
+  }
   Expression::Stack &stack = exp->getStack ();
   for (Expression::Stack::iterator it = stack.begin (); it != stack.end (); ++it) {
     edu::sharif::twinner::trace::exptoken::ExpressionToken *&token = *it;
