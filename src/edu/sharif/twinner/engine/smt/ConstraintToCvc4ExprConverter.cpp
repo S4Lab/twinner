@@ -325,43 +325,42 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
       throw std::runtime_error ("Unknown operator type");
     }
 
-  } else if (dynamic_cast<const edu::sharif::twinner::trace::exptoken::Symbol *> (token)) {
-    const edu::sharif::twinner::trace::exptoken::Symbol *symbolToken =
-        static_cast<const edu::sharif::twinner::trace::exptoken::Symbol *> (token);
-    const std::string name = symbolToken->toString ();
-    std::map<std::string, Expr>::const_iterator it = symbols.find (name);
-    if (it != symbols.end ()) {
-      return it->second;
-    } else {
-      Expr sym = em.mkVar (name, type);
-      if (symbolToken->getValue ().getSize () == 64 && limitSymbols) {
-        addConstraint (em.mkExpr (kind::BITVECTOR_ULT, sym, max64));
-      }
-      symbols.insert (std::make_pair (name, sym));
-      return sym;
-    }
-
-  } else if (dynamic_cast<const edu::sharif::twinner::trace::exptoken::Constant *> (token)) {
-    const edu::sharif::twinner::trace::exptoken::Constant *constantToken =
-        static_cast<const edu::sharif::twinner::trace::exptoken::Constant *> (token);
-    const edu::sharif::twinner::trace::cv::ConcreteValue &value =
-        constantToken->getValue ();
-    std::string valstr = value.toHexString ();
-    std::map<std::string, Expr>::const_iterator it = constants.find (valstr);
-    if (it != constants.end ()) {
-      return it->second;
-    } else {
-      edu::sharif::twinner::util::Logger logger =
-          edu::sharif::twinner::util::Logger::loquacious ();
-      logger << "Creating CVC4 Integer from hex string: " << valstr;
-      Expr cc = em.mkConst (BitVector (128, Integer (valstr, 16)));
-      logger << " ... done.\n";
-      constants.insert (std::make_pair (valstr, cc));
-      return cc;
-    }
-
   } else {
-    throw std::runtime_error ("Missing expression token");
+    const edu::sharif::twinner::trace::exptoken::Operand *operandToken =
+        static_cast<const edu::sharif::twinner::trace::exptoken::Operand *> (token);
+    if (!operandToken->isConstant ()) {
+      const edu::sharif::twinner::trace::exptoken::Symbol *symbolToken =
+          static_cast<const edu::sharif::twinner::trace::exptoken::Symbol *> (token);
+      const std::string name = symbolToken->toString ();
+      std::map<std::string, Expr>::const_iterator it = symbols.find (name);
+      if (it != symbols.end ()) {
+        return it->second;
+      } else {
+        Expr sym = em.mkVar (name, type);
+        if (symbolToken->getValue ().getSize () == 64 && limitSymbols) {
+          addConstraint (em.mkExpr (kind::BITVECTOR_ULT, sym, max64));
+        }
+        symbols.insert (std::make_pair (name, sym));
+        return sym;
+      }
+
+    } else {
+      const edu::sharif::twinner::trace::cv::ConcreteValue &value =
+          operandToken->getValue ();
+      std::string valstr = value.toHexString ();
+      std::map<std::string, Expr>::const_iterator it = constants.find (valstr);
+      if (it != constants.end ()) {
+        return it->second;
+      } else {
+        edu::sharif::twinner::util::Logger logger =
+            edu::sharif::twinner::util::Logger::loquacious ();
+        logger << "Creating CVC4 Integer from hex string: " << valstr;
+        Expr cc = em.mkConst (BitVector (128, Integer (valstr, 16)));
+        logger << " ... done.\n";
+        constants.insert (std::make_pair (valstr, cc));
+        return cc;
+      }
+    }
   }
 }
 
