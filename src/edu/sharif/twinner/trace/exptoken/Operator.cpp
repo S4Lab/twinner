@@ -17,6 +17,7 @@
 #include "MinusOperator.h"
 #include "MultiplyOperator.h"
 #include "DivideOperator.h"
+#include "RemainderOperator.h"
 #include "XorOperator.h"
 #include "BitwiseAndOperator.h"
 #include "BitwiseOrOperator.h"
@@ -77,7 +78,13 @@ Operator *Operator::instantiateOperator (OperatorIdentifier oi) {
   case MULTIPLY:
     return new MultiplyOperator ();
   case DIVIDE:
-    return new DivideOperator ();
+    return new DivideOperator (false);
+  case SIGNED_DIVIDE:
+    return new DivideOperator (true);
+  case REMAINDER:
+    return new RemainderOperator (false);
+  case SIGNED_REMAINDER:
+    return new RemainderOperator (true);
   case XOR:
     return new XorOperator ();
   case BITWISE_AND:
@@ -233,24 +240,17 @@ Operator::SimplificationStatus Operator::deepSimplify (
 
 bool Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
-  switch (oi) {
-  case REMAINDER:
-    dst %= src;
-    break;
-  default:
-    edu::sharif::twinner::util::Logger::error ()
-        << "Operator::apply(ConcreteValue &, const ConcreteValue &):"
-        " Unknown OperatorIdentifier: " << std::dec << oi << '\n';
-    throw std::runtime_error ("Operator::apply(ConcreteValue &, const ConcreteValue &):"
-                              " Non-handled operator identifier");
-  }
-  return dst.getCarryBit ();
+  edu::sharif::twinner::util::Logger::error ()
+      << "Operator::apply(ConcreteValue &, const ConcreteValue &):"
+      " Unknown OperatorIdentifier: " << std::dec << oi << '\n';
+  throw std::runtime_error
+      ("Operator::apply(ConcreteValue &, const ConcreteValue &):"
+       " Non-handled operator identifier");
+  //return dst.getCarryBit ();
 }
 
 std::string Operator::toString () const {
   switch (oi) {
-  case REMAINDER:
-    return "%";
   case BITWISE_NEGATE:
     return "~";
   case SIGN_EXTEND:

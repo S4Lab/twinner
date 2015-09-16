@@ -24,13 +24,14 @@ namespace twinner {
 namespace trace {
 namespace exptoken {
 
-DivideOperator::DivideOperator () :
-    Operator (Operator::DIVIDE) {
+DivideOperator::DivideOperator (bool _signedArithmetic) :
+    Operator (_signedArithmetic ? Operator::SIGNED_DIVIDE : Operator::DIVIDE),
+    signedArithmetic (_signedArithmetic) {
   initializeSimplificationRules ();
 }
 
 DivideOperator::DivideOperator (const DivideOperator &ao) :
-    Operator (ao) {
+    Operator (ao), signedArithmetic (ao.signedArithmetic) {
   initializeSimplificationRules ();
 }
 
@@ -42,7 +43,7 @@ DivideOperator *DivideOperator::clone () const {
 }
 
 bool DivideOperator::doesSupportSimplification () const {
-  return true;
+  return !signedArithmetic;
 }
 
 bool DivideOperator::isCommutable () const {
@@ -50,22 +51,34 @@ bool DivideOperator::isCommutable () const {
 }
 
 void DivideOperator::initializeSimplificationRules () {
-  simplificationRules.push_back
-      (SimplificationRule (Operator::MULTIPLY, Operator::DIVIDE));
+  if (!signedArithmetic) {
+    simplificationRules.push_back
+        (SimplificationRule (Operator::MULTIPLY, Operator::DIVIDE));
+  }
 }
 
 bool DivideOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
-  dst /= src;
+  if (signedArithmetic) {
+    dst.signedDivide (src);
+  } else {
+    dst /= src;
+  }
   return dst.getCarryBit ();
 }
 
 std::string DivideOperator::toString () const {
-  return "/";
+  if (signedArithmetic) {
+    return "signedDivide";
+  } else {
+    return "/";
+  }
 }
 
 bool DivideOperator::operator== (const ExpressionToken &token) const {
-  return dynamic_cast<const DivideOperator *> (&token);
+  return dynamic_cast<const DivideOperator *> (&token)
+      && signedArithmetic ==
+      static_cast<const DivideOperator *> (&token)->signedArithmetic;
 }
 
 }

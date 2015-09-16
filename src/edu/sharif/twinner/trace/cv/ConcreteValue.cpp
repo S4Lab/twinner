@@ -55,7 +55,7 @@ ConcreteValue *ConcreteValue::loadFromBinaryStream (std::ifstream &in) {
 }
 
 std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
-    const ConcreteValue &cv) {
+                                      const ConcreteValue &cv) {
   if (dynamic_cast<const ConcreteValue8Bits *> (&cv)) {
     return stream << static_cast<const ConcreteValue8Bits &> (cv);
 
@@ -136,8 +136,16 @@ ConcreteValue &ConcreteValue::operator/= (UINT64 divisor) {
   return (*this) /= ConcreteValue64Bits (divisor);
 }
 
+ConcreteValue &ConcreteValue::signedDivide (UINT64 divisor) {
+  return this->signedDivide (ConcreteValue64Bits (divisor));
+}
+
 ConcreteValue &ConcreteValue::operator%= (UINT64 divisor) {
   return (*this) %= ConcreteValue64Bits (divisor);
+}
+
+ConcreteValue &ConcreteValue::signedRemainder (UINT64 divisor) {
+  return this->signedRemainder (ConcreteValue64Bits (divisor));
 }
 
 ConcreteValue &ConcreteValue::operator^= (UINT64 pattern) {

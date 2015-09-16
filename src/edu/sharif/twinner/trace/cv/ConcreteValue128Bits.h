@@ -22,7 +22,6 @@ namespace trace {
 namespace cv {
 
 class ConcreteValue128Bits : public ConcreteValueAbstractImp<128> {
-
 private:
   UINT64 msb, lsb; // most/least significant byte
   bool cf;
@@ -82,6 +81,9 @@ public:
   virtual ConcreteValue128Bits &operator%= (const ConcreteValue &divisor);
   virtual ConcreteValue128Bits &operator^= (const ConcreteValue &pattern);
 
+  virtual ConcreteValue128Bits &signedDivide (const ConcreteValue &divisor);
+  virtual ConcreteValue128Bits &signedRemainder (const ConcreteValue &divisor);
+
   virtual ConcreteValue128Bits &operator>>= (const ConcreteValue &bits);
   virtual ConcreteValue128Bits &operator<<= (const ConcreteValue &bits);
 
@@ -97,9 +99,13 @@ private:
   bool getNthBit (UINT64 value, int n) const;
 
   void divide (ConcreteValue128Bits dividend, ConcreteValue128Bits divisor,
-      ConcreteValue128Bits &quotient, ConcreteValue128Bits &remainder) const;
+      ConcreteValue128Bits &quotient, ConcreteValue128Bits &remainder,
+      bool signedArithmetic = false) const;
 
   void doubleIt ();
+
+  void twosComplement (ConcreteValue128Bits &num) const;
+  bool absolute (ConcreteValue128Bits &num) const;
 };
 
 }

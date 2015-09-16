@@ -94,11 +94,10 @@ void ConcreteValue128Bits::writeToRegister (CONTEXT *context, REG reg) const {
 }
 
 std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
-    const ConcreteValue128Bits &me) {
+                                      const ConcreteValue128Bits &me) {
   std::stringstream ss;
 
   union {
-
     UINT32 v32[4];
     UINT64 v64[2];
   } value;
@@ -345,9 +344,29 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator*= (const ConcreteValue &mul
   return *this;
 }
 
+void ConcreteValue128Bits::twosComplement (ConcreteValue128Bits &num) const {
+  ConcreteValue128Bits *tmp = num.twosComplement ();
+  num = static_cast<ConcreteValue &> (*tmp);
+  delete tmp;
+}
+
+bool ConcreteValue128Bits::absolute (ConcreteValue128Bits &num) const {
+  const bool sign = num.isNegative ();
+  if (sign) {
+    twosComplement (num);
+  }
+  return sign;
+}
+
 void ConcreteValue128Bits::divide (
-    ConcreteValue128Bits dividend, const ConcreteValue128Bits divisor,
-    ConcreteValue128Bits &quotient, ConcreteValue128Bits &remainder) const {
+    ConcreteValue128Bits dividend, ConcreteValue128Bits divisor,
+    ConcreteValue128Bits &quotient, ConcreteValue128Bits &remainder,
+    bool signedArithmetic) const {
+  bool dividendSign, divisorSign;
+  if (signedArithmetic) {
+    dividendSign = absolute (dividend);
+    divisorSign = absolute (divisor);
+  }
   if (divisor.isZero ()) {
     throw std::runtime_error ("ConcreteValue128Bits::divide(...) method: "
                               "Division by zero!");
@@ -378,6 +397,14 @@ void ConcreteValue128Bits::divide (
       break;
     }
   }
+  if (signedArithmetic) {
+    if (dividendSign != divisorSign) {
+      twosComplement (quotient);
+    }
+    if (dividendSign) {
+      twosComplement (remainder);
+    }
+  }
 }
 
 void ConcreteValue128Bits::doubleIt () {
@@ -399,9 +426,23 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator/= (const ConcreteValue &div
   return *this;
 }
 
+ConcreteValue128Bits &ConcreteValue128Bits::signedDivide (const ConcreteValue &divisor) {
+  ConcreteValue128Bits remainder;
+  divide (*this, divisor, *this, remainder, true);
+  cf = false;
+  return *this;
+}
+
 ConcreteValue128Bits &ConcreteValue128Bits::operator%= (const ConcreteValue &divisor) {
   ConcreteValue128Bits quotient;
   divide (*this, divisor, quotient, *this);
+  cf = false;
+  return *this;
+}
+
+ConcreteValue128Bits &ConcreteValue128Bits::signedRemainder (const ConcreteValue &divisor) {
+  ConcreteValue128Bits quotient;
+  divide (*this, divisor, quotient, *this, true);
   cf = false;
   return *this;
 }

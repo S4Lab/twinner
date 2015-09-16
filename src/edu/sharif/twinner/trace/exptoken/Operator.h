@@ -30,11 +30,9 @@ class Expression;
 namespace exptoken {
 
 class Operator : public ExpressionToken {
-
 public:
 
   enum OperatorIdentifier {
-
     SIGN_EXTEND,
     BITWISE_NEGATE,
 
@@ -49,13 +47,13 @@ public:
 
     MAX_BINARY_OPERATOR_IDENTIFIER,
 
+    SIGNED_DIVIDE, SIGNED_REMAINDER,
     SHIFT_LEFT,
     ARITHMETIC_SHIFT_RIGHT,
     ROTATE_RIGHT, ROTATE_LEFT,
   };
 
   enum OperatorType {
-
     SignExtension,
     Unary,
     Binary,
@@ -72,12 +70,11 @@ protected:
    * Y <lastOperator> (Z <simplificationOperator> operand)
    */
   struct SimplificationRule {
-
     OperatorIdentifier lastOperator;
     OperatorIdentifier simplificationOperator;
 
     SimplificationRule (OperatorIdentifier last, OperatorIdentifier simplified) :
-        lastOperator (last), simplificationOperator (simplified) {
+    lastOperator (last), simplificationOperator (simplified) {
     }
   };
 
@@ -152,7 +149,6 @@ public:
 protected:
 
   enum SimplificationStatus {
-
     CAN_NOT_SIMPLIFY,
     RESTART_SIMPLIFICATION,
     COMPLETED // operator is not used and can be deleted

@@ -26,12 +26,11 @@ namespace trace {
 namespace cv {
 
 struct ResultCarry {
-
   UINT64 result;
   UINT64 carry;
 
   ResultCarry (UINT64 v) :
-      result (v & 0xFFFFFFFF), carry (v >> 32) {
+  result (v & 0xFFFFFFFF), carry (v >> 32) {
   }
 
   operator bool () const {
@@ -42,7 +41,6 @@ struct ResultCarry {
 template<unsigned int bits, /* bits must be a multiple of 8 */
 typename ValueType = UINT64 /* bits-length type */>
 class ConcreteValueAbstractImp : public ConcreteValue {
-
 protected:
   ValueType value;
   bool cf;
@@ -231,9 +229,35 @@ public:
     return *this;
   }
 
+  virtual ConcreteValueAbstractImp<bits, ValueType> &signedDivide (
+      const ConcreteValue &divisor) {
+    const INT64 cvValue = INT64 (ValueType (divisor.toUint64 ()));
+    if (cvValue == 0) {
+      throw std::runtime_error ("division by zero");
+    }
+    INT64 res = INT64 (value);
+    res /= cvValue;
+    value = res;
+    cf = false;
+    return *this;
+  }
+
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator%= (const ConcreteValue &cv) {
     const UINT64 cvValue = cv.toUint64 ();
     value %= cvValue;
+    cf = false;
+    return *this;
+  }
+
+  virtual ConcreteValueAbstractImp<bits, ValueType> &signedRemainder (
+      const ConcreteValue &divisor) {
+    const INT64 cvValue = INT64 (ValueType (divisor.toUint64 ()));
+    if (cvValue == 0) {
+      throw std::runtime_error ("remainder by zero");
+    }
+    INT64 res = INT64 (value);
+    res %= cvValue;
+    value = res;
     cf = false;
     return *this;
   }
@@ -325,7 +349,6 @@ ConcreteValueAbstractImp<64, UINT64> &ConcreteValueAbstractImp<64, UINT64>::oper
 
 template<>
 class ConcreteValueAbstractImp<128, UINT64> : public ConcreteValue {
-
 public:
 
   ConcreteValueAbstractImp () : ConcreteValue () {

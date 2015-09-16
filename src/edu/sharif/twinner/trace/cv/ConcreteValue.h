@@ -29,7 +29,6 @@ namespace cv {
  * length (e.g. 64 bits implementation using UINT64) values.
  */
 class ConcreteValue : public edu::sharif::twinner::trace::Savable {
-
 protected:
   ConcreteValue ();
 
@@ -195,6 +194,9 @@ public:
   virtual ConcreteValue &operator%= (const ConcreteValue &divisor) = 0;
   virtual ConcreteValue &operator^= (const ConcreteValue &pattern) = 0;
 
+  virtual ConcreteValue &signedDivide (const ConcreteValue &divisor) = 0;
+  virtual ConcreteValue &signedRemainder (const ConcreteValue &divisor) = 0;
+
   virtual ConcreteValue &operator>>= (const ConcreteValue &bits) = 0;
   virtual ConcreteValue &operator<<= (const ConcreteValue &bits) = 0;
 
@@ -208,7 +210,9 @@ public:
   ConcreteValue &operator|= (UINT64 mask);
   ConcreteValue &operator*= (UINT64 mul);
   ConcreteValue &operator/= (UINT64 divisor);
+  ConcreteValue &signedDivide (UINT64 divisor);
   ConcreteValue &operator%= (UINT64 divisor);
+  ConcreteValue &signedRemainder (UINT64 divisor);
   ConcreteValue &operator^= (UINT64 pattern);
   ConcreteValue &operator>>= (UINT64 bits);
   ConcreteValue &operator<<= (UINT64 bits);

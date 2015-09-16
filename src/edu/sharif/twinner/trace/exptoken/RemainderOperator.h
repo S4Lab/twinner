@@ -10,8 +10,8 @@
  * This file is part of Twinner project.
  */
 
-#ifndef DIVIDE_OPERATOR_H
-#define DIVIDE_OPERATOR_H
+#ifndef REMAINDER_OPERATOR_H
+#define REMAINDER_OPERATOR_H
 
 #include "Operator.h"
 
@@ -21,16 +21,16 @@ namespace twinner {
 namespace trace {
 namespace exptoken {
 
-class DivideOperator : public Operator {
+class RemainderOperator : public Operator {
 private:
   bool signedArithmetic;
 
 public:
-  DivideOperator (bool signedArithmetic);
-  DivideOperator (const DivideOperator &ao);
-  virtual ~DivideOperator ();
+  RemainderOperator (bool signedArithmetic);
+  RemainderOperator (const RemainderOperator &ao);
+  virtual ~RemainderOperator ();
 
-  virtual DivideOperator *clone () const;
+  virtual RemainderOperator *clone () const;
 
   virtual bool doesSupportSimplification () const;
   virtual bool isCommutable () const;
@@ -50,4 +50,4 @@ private:
 }
 }
 
-#endif	/* DivideOperator.h */
+#endif	/* RemainderOperator.h */
