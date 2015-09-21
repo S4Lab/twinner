@@ -274,6 +274,18 @@ public:
   }
 
   /**
+   * Signed divides this expression by the given symbolic/concrete value.
+   *
+   * @param operand The value (symbolically or concretely) that this expression will be
+   * signed divided by it.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
+   */
+  template <typename ValueOrExp>
+  void signedDivide (ValueOrExp operand) {
+    binaryOperation (Operator::instantiateOperator (Operator::SIGNED_DIVIDE), operand);
+  }
+
+  /**
    * Calculates the remainder of division of this expression by the given
    * symbolic/concrete value.
    *
@@ -284,6 +296,19 @@ public:
   template <typename ValueOrExp>
   void remainder (ValueOrExp operand) {
     binaryOperation (Operator::instantiateOperator (Operator::REMAINDER), operand);
+  }
+
+  /**
+   * Calculates the remainder of signed division of this expression by the given
+   * symbolic/concrete value.
+   *
+   * @param operand The value (symbolically or concretely) that this expression will be
+   * signed divided by it and its resulting remainder will be kept by this expression.
+   * @type ValueOrExp type can be UINT64, ConcreteValue *, or const Expression *
+   */
+  template <typename ValueOrExp>
+  void signedRemainder (ValueOrExp operand) {
+    binaryOperation (Operator::instantiateOperator (Operator::SIGNED_REMAINDER), operand);
   }
 
   /**

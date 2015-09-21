@@ -144,6 +144,8 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_IMUL, IMUL_INS_MODELS));
   managedInstructions.insert
+      (make_pair (XED_ICLASS_IDIV, IDIV_INS_MODELS));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_CDQE, DST_REG_SRC_REG));
   INITIALIZE (TEST_INS_MODELS,
               XED_ICLASS_TEST, XED_ICLASS_BT);
@@ -269,6 +271,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_CPUID:
     return OPERAND_LESS;
   case XED_ICLASS_DIV:
+  case XED_ICLASS_IDIV:
   case XED_ICLASS_MUL:
     return INS_OperandIsReg (ins, 0) ? DST_REG_REG_SRC_REG
         : DST_REG_REG_SRC_MEM;

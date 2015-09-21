@@ -586,6 +586,19 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * IDIV signed divide the left-right regs by src reg/mem and puts the
+   * quotient in right and remainder in left dst.
+   * This method only calculates symbolic values of operands (concrete values
+   * will be wrong) and also ignores propagating new values to overlapping
+   * registers. Instead, it registers a hook to adjust concrete values and
+   * propagates to overlapping registers at the beginning of
+   * next executed instruction.
+   */
+  void idivAnalysisRoutine (const MutableExpressionValueProxy &leftDst,
+      const MutableExpressionValueProxy &rightDst,
+      const ExpressionValueProxy &src);
+
+  /**
    * MUL unsigned multiply right reg by src and puts result in left-right regs.
    * This method only calculates symbolic values of operands (concrete values
    * will be wrong) and also ignores propagating new values to overlapping registers.

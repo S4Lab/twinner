@@ -48,20 +48,20 @@ namespace twintool {
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     Instrumenter *_im,
     std::ifstream &symbolsFileInputStream, bool _disabled, bool _measureMode) :
-im (_im),
-trace (new edu::sharif::twinner::trace::TraceImp (symbolsFileInputStream)),
-trackedReg (REG_INVALID_), operandSize (-1), hook (0),
-disabled (_disabled),
-measureMode (_measureMode), numberOfExecutedInstructions (0) {
+    im (_im),
+    trace (new edu::sharif::twinner::trace::TraceImp (symbolsFileInputStream)),
+    trackedReg (REG_INVALID_), operandSize (-1), hook (0),
+    disabled (_disabled),
+    measureMode (_measureMode), numberOfExecutedInstructions (0) {
 }
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (Instrumenter *_im,
     bool _disabled) :
-im (_im),
-trace (new edu::sharif::twinner::trace::TraceImp ()),
-trackedReg (REG_INVALID_), operandSize (-1), hook (0),
-disabled (_disabled),
-measureMode (false), numberOfExecutedInstructions (0) {
+    im (_im),
+    trace (new edu::sharif::twinner::trace::TraceImp ()),
+    trackedReg (REG_INVALID_), operandSize (-1), hook (0),
+    disabled (_disabled),
+    measureMode (false), numberOfExecutedInstructions (0) {
 }
 
 edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () const {
@@ -2064,6 +2064,42 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::idivAnalysisRoutine (
+    const MutableExpressionValueProxy &leftDst,
+    const MutableExpressionValueProxy &rightDst,
+    const ExpressionValueProxy &src) {
+  edu::sharif::twinner::util::Logger::loquacious () << "idivAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting left dst exp...";
+  edu::sharif::twinner::trace::Expression *leftDstExp = leftDst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting right dst exp...";
+  edu::sharif::twinner::trace::Expression *rightDstExp = rightDst.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tpreparing left-right in both dst regs...";
+  operandSize = leftDst.getSize ();
+  leftDstExp->shiftToLeft (operandSize);
+  leftDstExp->bitwiseOr (rightDstExp);
+  delete rightDstExp;
+  rightDstExp = leftDstExp->clone ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tcalculating quotient (right)"
+      " and remainder (left) of signed division...";
+  leftDstExp->signedRemainder (srcexp);
+  rightDstExp->signedDivide (srcexp);
+  delete srcexp;
+  leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
+  delete leftDstExp;
+  rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
+  delete rightDstExp;
+  // At this point, symbolic quotient and remainder are calculated correctly.
+  // but concrete values are not! So we need to register a hook to synchronize concrete
+  // values too (we can also calculate them in assembly, but it's not required).
+
+  hook = &InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
     const CONTEXT *context, const ConcreteValue &operandSize) {
   edu::sharif::twinner::util::Logger::loquacious ()
@@ -2756,6 +2792,8 @@ InstructionSymbolicExecuter::convertOpcodeToDoubleDestinationsAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_DIV:
     return &InstructionSymbolicExecuter::divAnalysisRoutine;
+  case XED_ICLASS_IDIV:
+    return &InstructionSymbolicExecuter::idivAnalysisRoutine;
   case XED_ICLASS_MUL:
     return &InstructionSymbolicExecuter::mulAnalysisRoutine;
   case XED_ICLASS_IMUL:
