@@ -251,26 +251,23 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
     in.read ((char *) &record.type, sizeof (record.type));
     in.read ((char *) &record.concreteValueLsb, sizeof (record.concreteValueLsb));
     in.read ((char *) &record.concreteValueMsb, sizeof (record.concreteValueMsb));
-    Expression *exp;
+    Expression *exp = 0;
     switch (edu::sharif::twinner::trace::exptoken::SymbolType (record.type)) {
     case edu::sharif::twinner::trace::exptoken::REGISTER_64_BITS_SYMBOL_TYPE:
+      exp = instantiateExpression
+          (REG (record.address),
+           edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+           (record.concreteValueLsb), index);
     case edu::sharif::twinner::trace::exptoken::REGISTER_128_BITS_SYMBOL_TYPE:
     {
-      if (record.type ==
-          edu::sharif::twinner::trace::exptoken::REGISTER_64_BITS_SYMBOL_TYPE) {
-        exp = instantiateExpression (REG (record.address),
-                                     edu::sharif::twinner::trace::cv::ConcreteValue64Bits
-                                     (record.concreteValueLsb), index);
-        edu::sharif::twinner::util::Logger::loquacious () << "loading symbol: "
-            << REG (record.address) << " -> " << exp << '\n';
-      } else {
+      if (exp == 0) {
         exp = instantiateExpression (REG (record.address),
                                      edu::sharif::twinner::trace::cv::ConcreteValue128Bits
                                      (record.concreteValueMsb, record.concreteValueLsb),
                                      index);
-        edu::sharif::twinner::util::Logger::loquacious () << "loading symbol: "
-            << REG (record.address) << " -> " << exp << '\n';
       }
+      edu::sharif::twinner::util::Logger::loquacious () << "loading symbol: "
+          << REG (record.address) << " -> " << exp << '\n';
       std::pair < std::map < REG, Expression * >::iterator, bool > res =
           regMap.insert (make_pair (REG (record.address), exp));
       if (!res.second) {
@@ -280,17 +277,14 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
       break;
     }
     case edu::sharif::twinner::trace::exptoken::MEMORY_64_BITS_SYMBOL_TYPE:
+      exp = new ExpressionImp
+          (ADDRINT (record.address),
+           edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+           (record.concreteValueLsb),
+           index, true);
     case edu::sharif::twinner::trace::exptoken::MEMORY_128_BITS_SYMBOL_TYPE:
     {
-      if (record.type ==
-          edu::sharif::twinner::trace::exptoken::MEMORY_64_BITS_SYMBOL_TYPE) {
-        exp = new ExpressionImp (ADDRINT (record.address),
-                                 edu::sharif::twinner::trace::cv::ConcreteValue64Bits
-                                 (record.concreteValueLsb),
-                                 index, true);
-        edu::sharif::twinner::util::Logger::loquacious () << "loading symbol: 0x"
-            << std::hex << ADDRINT (record.address) << " -> " << exp << '\n';
-      } else {
+      if (exp == 0) {
         edu::sharif::twinner::util::Logger::warning () << "A 128-bits memory symbol "
             "is found in the symbols file, while only 64-bits memory symbols are "
             "supposed to be transferred between Twinner and TwinTool.\n";
@@ -299,6 +293,8 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
                                  (record.concreteValueMsb, record.concreteValueLsb),
                                  index, true);
       }
+      edu::sharif::twinner::util::Logger::loquacious () << "loading symbol: 0x"
+          << std::hex << ADDRINT (record.address) << " -> " << exp << '\n';
       std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
           memMap.insert (make_pair (ADDRINT (record.address), exp));
       if (!res.second) {

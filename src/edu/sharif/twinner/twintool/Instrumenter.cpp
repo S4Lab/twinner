@@ -438,7 +438,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
 
 inline void Instrumenter::checkForInitialState (INS ins) const {
   static bool firstTime = true;
-  if (firstTime) {
+  if (firstTime && !disabled) {
     firstTime = false;
     // initializing registers, right before execution of first instrumented instruction
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineInitializeRegisters,
