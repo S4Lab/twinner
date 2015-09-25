@@ -248,12 +248,12 @@ UINT128 operator- (const UINT64 a, const UINT128 b) {
   return UINT128 (0, a) - b;
 }
 
-UINT128 logicalShiftToLeft (const UINT128 v, const int bits) {
-  return v << bits;
+UINT128 logicalShiftToRight (const UINT128 v, const int bits) {
+  return v >> bits;
 }
 
-UINT128 logicalShiftToLeft (const UINT64 v, const int bits) {
-  return UINT128 (v >> (64 - bits), v << bits);
+UINT64 logicalShiftToRight (const UINT64 v, const int bits) {
+  return v >> bits;
 }
 
 UINT64 arithmeticShiftToRight (const UINT64 v, const int bits) {

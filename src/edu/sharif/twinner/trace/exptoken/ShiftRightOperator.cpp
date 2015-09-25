@@ -170,7 +170,7 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
 }
 
 std::string ShiftRightOperator::toString () const {
-  return ">>";
+  return "logicalShiftToRight";
 }
 
 bool ShiftRightOperator::operator== (const ExpressionToken &token) const {

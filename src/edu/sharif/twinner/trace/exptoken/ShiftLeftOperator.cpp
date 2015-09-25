@@ -204,7 +204,7 @@ bool ShiftLeftOperator::aggregateMasks (std::list < AppliedMask > &appliedMasks,
 }
 
 std::string ShiftLeftOperator::toString () const {
-  return "logicalShiftToLeft";
+  return "<<";
 }
 
 bool ShiftLeftOperator::operator== (const ExpressionToken &token) const {
