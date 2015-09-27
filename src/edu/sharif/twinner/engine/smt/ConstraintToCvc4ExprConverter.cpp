@@ -331,7 +331,7 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
     if (!operandToken->isConstant ()) {
       const edu::sharif::twinner::trace::exptoken::Symbol *symbolToken =
           static_cast<const edu::sharif::twinner::trace::exptoken::Symbol *> (token);
-      const std::string name = symbolToken->toString ();
+      const std::string name = symbolToken->technicalName ();
       std::map<std::string, Expr>::const_iterator it = symbols.find (name);
       if (it != symbols.end ()) {
         return it->second;

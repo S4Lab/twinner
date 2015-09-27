@@ -84,6 +84,12 @@ std::string NamedSymbol::toString () const {
   return name;
 }
 
+std::string NamedSymbol::technicalName () const {
+  std::stringstream ss;
+  ss << 'm' << std::hex << concreteValue->toUint64 () << '_' << generationIndex;
+  return ss.str ();
+}
+
 bool NamedSymbol::operator== (const ExpressionToken &token) const {
   return dynamic_cast<const NamedSymbol *> (&token)
       && static_cast<const NamedSymbol *> (&token)->generationIndex ==

@@ -55,6 +55,10 @@ ExpressionToken *ExpressionToken::loadFromBinaryStream (std::ifstream &in) {
   }
 }
 
+std::string ExpressionToken::technicalName () const {
+  return toString ();
+}
+
 }
 }
 }

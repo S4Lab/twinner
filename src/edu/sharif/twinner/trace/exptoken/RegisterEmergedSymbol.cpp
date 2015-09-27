@@ -27,17 +27,17 @@ namespace trace {
 namespace exptoken {
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (const RegisterEmergedSymbol &s) :
-Symbol (s), address (s.address) {
+    Symbol (s), address (s.address) {
 }
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (REG addr) :
-Symbol (), address (addr) {
+    Symbol (), address (addr) {
 }
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (REG _address,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex) :
-Symbol (concreteValue, generationIndex), address (_address) {
+    Symbol (concreteValue, generationIndex), address (_address) {
 }
 
 RegisterEmergedSymbol *RegisterEmergedSymbol::clone () const {
@@ -276,7 +276,7 @@ REG RegisterEmergedSymbol::getRegisterFromName (const std::string &name) {
   } else if (name == "xmm15") {
     return REG_XMM15;
   } else {
-    const std::string msg = "Unknown Register Name";
+    const std::string msg = "Unknown Register Name: ";
     throw std::runtime_error (msg + name);
   }
 }

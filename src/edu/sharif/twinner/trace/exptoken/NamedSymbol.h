@@ -41,6 +41,7 @@ public:
   static NamedSymbol *loadFromBinaryStream (std::ifstream &in);
 
   virtual std::string toString () const;
+  virtual std::string technicalName () const;
   virtual bool operator== (const ExpressionToken &token) const;
 
   virtual bool isConstant () const;
