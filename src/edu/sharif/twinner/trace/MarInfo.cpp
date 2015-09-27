@@ -20,6 +20,7 @@
 #include "ExecutionTraceSegment.h"
 
 #include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/exptoken/NamedSymbol.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
@@ -87,6 +88,29 @@ void MarInfo::simplifyExpression (Expression *exp) const {
              edu::sharif::twinner::trace::cv::ConcreteValue64Bits
              (UINT64 (MarInfo::initialArgv)), 0);
         delete reg;
+      }
+    } else if (dynamic_cast<edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *> (token)) {
+      edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *mem =
+          static_cast<edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *> (token);
+      if (mem->getGenerationIndex () == 0) {
+        const ADDRINT addr = mem->getAddress ();
+        const UINT64 argv0 = UINT64 (argv);
+        if (argv0 <= addr) {
+          const UINT64 diff = addr - argv0;
+          if (diff % 8 == 0) {
+            const int i = diff / 8;
+            if (i < argc) {
+              std::stringstream ss;
+              ss << "argv[" << i << "]";
+              token = new edu::sharif::twinner::trace::exptoken::NamedSymbol
+                  (ss.str (), false,
+                   // storing the address instead of the argv[i] value
+                   edu::sharif::twinner::trace::cv::ConcreteValue64Bits (addr),
+                   0);
+              delete mem;
+            }
+          }
+        }
       }
     }
 #else
