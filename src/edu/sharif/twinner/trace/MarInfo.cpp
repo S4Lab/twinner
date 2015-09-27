@@ -34,17 +34,28 @@ namespace trace {
 void *MarInfo::initialArgv = 0;
 
 MarInfo::MarInfo (int _argc, char **_argv) :
-    Savable (), argc (_argc), argv (_argv) {
+    Savable (), argc (_argc), argv (_argv), inspectionMode (false) {
+}
+
+MarInfo::MarInfo (int _argc, char **_argv, std::vector<char *> _argvis) :
+    Savable (), argc (_argc), argv (_argv), argvis (_argvis),
+    inspectionMode (true) {
   if (MarInfo::initialArgv == 0) {
     MarInfo::initialArgv = _argv;
   }
 }
 
 bool MarInfo::isConsistent () const {
+  if (!inspectionMode) {
+    throw std::runtime_error ("Method is only available in inspection mode");
+  }
   return MarInfo::initialArgv == argv;
 }
 
 void MarInfo::simplifyTrace (Trace *trace) const {
+  if (!inspectionMode) {
+    throw std::runtime_error ("Method is only available in inspection mode");
+  }
   std::list < ExecutionTraceSegment * > &segments = trace->getTraceSegments ();
   for (std::list < ExecutionTraceSegment * >::const_reverse_iterator it =
       segments.rbegin (); it != segments.rend (); ++it) {
@@ -85,6 +96,9 @@ void MarInfo::simplifyExpression (Expression *exp) const {
 }
 
 void MarInfo::saveToFile (const char *path) const {
+  if (inspectionMode) {
+    throw std::runtime_error ("Method is not available in inspection mode");
+  }
   std::ofstream out;
   out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
   if (!out.is_open ()) {
@@ -100,6 +114,10 @@ void MarInfo::saveToFile (const char *path) const {
 void MarInfo::saveToBinaryStream (std::ofstream &out) const {
   out.write (reinterpret_cast<const char *> (&argc), sizeof (argc));
   out.write (reinterpret_cast<const char *> (&argv), sizeof (argv));
+  for (int i = 0; i < argc; ++i) {
+    char *argvi = argv[i];
+    out.write (reinterpret_cast<const char *> (&argvi), sizeof (argvi));
+  }
 }
 
 MarInfo *MarInfo::readMarInfoFromFile (const char *path) {
@@ -110,13 +128,24 @@ MarInfo *MarInfo::readMarInfoFromFile (const char *path) {
         " Error in open function: " << path << '\n';
     throw std::runtime_error ("Error in reading MAR info");
   } else {
-    int argc;
-    char **argv;
-    in.read (reinterpret_cast<char *> (&argc), sizeof (argc));
-    in.read (reinterpret_cast<char *> (&argv), sizeof (argv));
+    MarInfo *res = MarInfo::loadFromBinaryStream (in);
     in.close ();
-    return new MarInfo (argc, argv);
+    return res;
   }
+}
+
+MarInfo *MarInfo::loadFromBinaryStream (std::ifstream &in) {
+  int argc;
+  char **argv;
+  in.read (reinterpret_cast<char *> (&argc), sizeof (argc));
+  in.read (reinterpret_cast<char *> (&argv), sizeof (argv));
+  std::vector<char *> argvis;
+  for (int i = 0; i < argc; ++i) {
+    char *argvi;
+    in.read (reinterpret_cast<char *> (&argvi), sizeof (argvi));
+    argvis.push_back (argvi);
+  }
+  return new MarInfo (argc, argv, argvis);
 }
 
 }

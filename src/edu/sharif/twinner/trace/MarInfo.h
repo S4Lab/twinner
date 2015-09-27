@@ -15,6 +15,8 @@
 
 #include "Savable.h"
 
+#include <vector>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -27,11 +29,14 @@ class MarInfo : public Savable {
 private:
   int argc;
   char **argv;
+  std::vector<char *> argvis;
+  bool inspectionMode;
 
   static void *initialArgv;
 
 public:
   MarInfo (int argc, char **argv);
+  MarInfo (int argc, char **argv, std::vector<char *> argvis);
 
   bool isConsistent () const;
   void simplifyTrace (Trace *trace) const;
@@ -42,6 +47,7 @@ public:
 
 private:
   void simplifyExpression (Expression *exp) const;
+  static MarInfo *loadFromBinaryStream (std::ifstream &in);
 };
 
 }
