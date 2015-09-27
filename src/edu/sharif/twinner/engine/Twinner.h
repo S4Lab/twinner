@@ -72,6 +72,7 @@ public:
 private:
   void addExecutionTrace (edu::sharif::twinner::trace::Trace *trace,
       edu::sharif::twinner::trace::MarInfo *marInfo);
+  void addExecutionTrace (edu::sharif::twinner::trace::Trace *trace);
 
   bool calculateSymbolsValuesForCoveringNextPath (
       std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols);
