@@ -83,6 +83,7 @@ public:
 
 private:
   const std::string baseCommand;
+  bool signaled;
   std::string inputArguments;
   const bool overheads;
 
@@ -100,7 +101,8 @@ public:
   void setSymbolsValues (const std::set <
       const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols) const;
 
-  edu::sharif::twinner::trace::Trace *executeSingleTraceInNormalMode () const;
+  edu::sharif::twinner::trace::Trace *executeSingleTraceInNormalMode ();
+  bool isLastExecutionSignaled () const;
 
   void changeArguments ();
   map < ADDRINT, UINT64 > executeSingleTraceInInitialStateDetectionMode () const;
@@ -116,9 +118,9 @@ public:
 private:
   typedef edu::sharif::twinner::trace::exptoken::SymbolRecord Record;
 
-  edu::sharif::twinner::trace::Trace *executeSystemCommand (std::string command) const;
+  edu::sharif::twinner::trace::Trace *executeSystemCommand (std::string command);
   edu::sharif::twinner::trace::Trace *executeSystemCommand (std::string command,
-      Measurement &measurement) const;
+      Measurement &measurement);
   edu::sharif::twinner::trace::Trace *executeAndMeasure (std::string command,
       Measurement &measurement) const;
   Measurement measureCurrentState (int ret) const;

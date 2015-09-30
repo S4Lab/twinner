@@ -69,6 +69,7 @@ Executer::Executer (std::string pinLauncher, std::string twintool,
     + (_overheads ? OVERHEAD_MEASUREMENT_OPTION : "")
     + (main ? std::string (" -main -mar ") + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
     + " -- " + inputBinary),
+    signaled (false),
     inputArguments (_inputArguments), overheads (_overheads) {
 }
 
@@ -215,7 +216,7 @@ void aggregate_symbols (
  * @return The execution trace, recorded by twintool
  */
 edu::sharif::twinner::trace::Trace *
-Executer::executeSingleTraceInNormalMode () const {
+Executer::executeSingleTraceInNormalMode () {
   /*
    *  TODO: Run command through another thread and set a timeout for execution.
    *  Also tune twintool, so it saves its progress incrementally. After a timeout,
@@ -265,30 +266,55 @@ Executer::executeSingleTraceInNormalMode () const {
   return executeSystemCommand (command);
 }
 
+bool Executer::isLastExecutionSignaled () const {
+  return signaled;
+}
+
 edu::sharif::twinner::trace::MarInfo *Executer::readMarInfo () const {
   return edu::sharif::twinner::trace::MarInfo::readMarInfoFromFile
       (MAIN_ARGS_COMMUNICATION_TEMP_FILE);
 }
 
 edu::sharif::twinner::trace::Trace *
-Executer::executeSystemCommand (std::string command) const {
+Executer::executeSystemCommand (std::string command) {
+  signaled = false;
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
   int ret = system (command.c_str ());
   edu::sharif::twinner::util::Logger::debug ()
+      << "Executer::executeSystemCommand ('" << command << "'): "
       << "The system(...) call returns code: " << ret << '\n';
+  if (WIFEXITED (ret)) {
+    edu::sharif::twinner::util::Logger::loquacious () << "normally exited; "
+        "return value was " << WEXITSTATUS (ret) << '\n';
+  } else if (WIFSIGNALED (ret)) {
+    edu::sharif::twinner::util::Logger::loquacious () << "signaled; "
+        "signal was " << WTERMSIG (ret) << '\n';
+    signaled = true;
+  }
   return edu::sharif::twinner::trace::Trace::loadFromFile
       (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
        DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
 }
 
 edu::sharif::twinner::trace::Trace *
-Executer::executeSystemCommand (std::string command, Measurement &measurement) const {
+Executer::executeSystemCommand (std::string command, Measurement &measurement) {
+  signaled = false;
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
   edu::sharif::twinner::trace::Trace *trace = executeAndMeasure (command, measurement);
+  const int ret = measurement.ret;
   edu::sharif::twinner::util::Logger::debug ()
-      << "The system(...) call returns code: " << measurement.ret << '\n';
+      << "Executer::executeSystemCommand ('" << command << "', measurement): "
+      << "The system(...) call returns code: " << ret << '\n';
+  if (WIFEXITED (ret)) {
+    edu::sharif::twinner::util::Logger::loquacious () << "normally exited; "
+        "return value was " << WEXITSTATUS (ret) << '\n';
+  } else if (WIFSIGNALED (ret)) {
+    edu::sharif::twinner::util::Logger::loquacious () << "signaled; "
+        "signal was " << WTERMSIG (ret) << '\n';
+    signaled = true;
+  }
   return trace;
 }
 
@@ -328,7 +354,7 @@ Executer::executeAndMeasure (std::string command, Measurement &m) const {
       in.read ((char *) &m, sizeof (m));
       in.close ();
       const int cmdret = WIFEXITED (status) ? WEXITSTATUS (status) : -1 /*signaled*/;
-      if (m.ret != cmdret) {
+      if (WIFEXITED (status) && m.ret != WEXITSTATUS (status)) {
         edu::sharif::twinner::util::Logger::error ()
             << "Measurement info are inconsistent (cmd ret: " << std::dec << cmdret
             << ", measurement ret: " << m.ret << ")\n";
@@ -392,6 +418,8 @@ Executer::executeSingleTraceInInitialStateDetectionMode () const {
       << "Calling system (\"" << command << "\");\n";
   int ret = system (command.c_str ());
   edu::sharif::twinner::util::Logger::debug ()
+      << "Executer::executeSingleTraceInInitialStateDetectionMode () "
+      "[command: '" << command << "']: "
       << "The system(...) call returns code: " << ret << '\n';
   return edu::sharif::twinner::trace::Trace::loadAddressToValueMapFromFile
       (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
