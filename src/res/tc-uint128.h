@@ -98,6 +98,10 @@ UINT64 operator& (const UINT128 u, const UINT64 v) {
   return u.low & v;
 }
 
+UINT64 operator& (const UINT64 v, const UINT128 u) {
+  return u.low & v;
+}
+
 UINT128 operator| (const UINT128 u, const UINT128 v) {
   return UINT128 (u.high | v.high, u.low | v.low);
 }
