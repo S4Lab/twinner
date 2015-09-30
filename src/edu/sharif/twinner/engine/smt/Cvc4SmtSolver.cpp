@@ -86,7 +86,7 @@ void aggregate_expression_symbol_values (
     edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token) {
   if (const edu::sharif::twinner::trace::exptoken::Symbol * symbol =
       dynamic_cast<edu::sharif::twinner::trace::exptoken::Symbol *> (token)) {
-    vals.insert (make_pair (symbol->toString (), &(symbol->getValue ())));
+    vals.insert (make_pair (symbol->technicalName (), &(symbol->getValue ())));
   }
 }
 
