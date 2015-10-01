@@ -36,6 +36,9 @@ void *MarInfo::initialArgv = 0;
 
 MarInfo::MarInfo (int _argc, char **_argv) :
     Savable (), argc (_argc), argv (_argv), inspectionMode (false) {
+  if (MarInfo::initialArgv == 0) {
+    MarInfo::initialArgv = _argv;
+  }
 }
 
 MarInfo::MarInfo (int _argc, char **_argv, std::vector<char *> _argvis) :
@@ -156,6 +159,13 @@ MarInfo *MarInfo::readMarInfoFromFile (const char *path) {
     in.close ();
     return res;
   }
+}
+
+void **MarInfo::getInitialArgv () {
+  if (MarInfo::initialArgv == 0) {
+    throw std::runtime_error ("MarInfo::initialArgv is not initialized yet");
+  }
+  return reinterpret_cast<void **> (MarInfo::initialArgv);
 }
 
 MarInfo *MarInfo::loadFromBinaryStream (std::ifstream &in) {

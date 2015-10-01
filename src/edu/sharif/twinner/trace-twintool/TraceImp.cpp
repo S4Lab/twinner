@@ -19,6 +19,7 @@
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
+#include "edu/sharif/twinner/trace/MarInfo.h"
 
 #include "edu/sharif/twinner/trace/exptoken/Symbol.h"
 
@@ -300,6 +301,26 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
       if (!res.second) {
         throw std::runtime_error ("Duplicate symbols are read for one memory address"
                                   " from symbols binary stream");
+      }
+      break;
+    }
+    case edu::sharif::twinner::trace::exptoken::MAIN_ARGV_I_TYPE:
+    {
+      const UINT32 i = UINT32 (record.address);
+      const ADDRINT memoryEa = ADDRINT (MarInfo::getInitialArgv () + i);
+      exp = new ExpressionImp
+          (memoryEa,
+           edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+           (record.concreteValueLsb),
+           index, true);
+      edu::sharif::twinner::util::Logger::loquacious () << "loading symbol "
+          "argv[" << i << "] == 0x" << std::hex << memoryEa
+          << " -> " << exp << '\n';
+      std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
+          memMap.insert (make_pair (memoryEa, exp));
+      if (!res.second) {
+        throw std::runtime_error ("Duplicate symbols are read for one memory address"
+                                  " from symbols binary stream [argv[i] case)");
       }
       break;
     }

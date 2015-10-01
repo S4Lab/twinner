@@ -45,6 +45,8 @@ public:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static MarInfo *readMarInfoFromFile (const char *path);
 
+  static void **getInitialArgv ();
+
 private:
   void simplifyExpression (Expression *exp) const;
   static MarInfo *loadFromBinaryStream (std::ifstream &in);
