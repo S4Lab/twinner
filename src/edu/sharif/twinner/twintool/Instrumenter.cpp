@@ -213,8 +213,8 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
   }
   std::string insAssemblyStr = INS_Disassemble (ins);
   const int size = insAssemblyStr.length () + 1;
-  UINT32 allocatedIndex = ise->getTrace ()->getMemoryManager ()->allocate (size);
-  char *allocated = ise->getTrace ()->getMemoryManager ()
+  UINT32 allocatedIndex = ise->getTraceMemoryManager ()->allocate (size);
+  char *allocated = ise->getTraceMemoryManager ()
       ->getPointerToAllocatedMemory (allocatedIndex);
   char * const insAssembly = allocated;
   //insAssembly = new char[insAssemblyStr.length () + 1];
@@ -253,7 +253,7 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
       }
     }
   }
-  ise->getTrace ()->getMemoryManager ()->deallocate (size);
+  ise->getTraceMemoryManager ()->deallocate (size);
 }
 
 Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,

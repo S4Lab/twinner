@@ -21,10 +21,10 @@ namespace twinner {
 namespace trace {
 
 class TraceImp : public Trace {
-
 public:
   TraceImp ();
-  TraceImp (std::ifstream &symbolsFileInputStream);
+  TraceImp (std::stringstream &symbolsFileInputStream,
+      edu::sharif::twinner::util::MemoryManager *_memoryManager);
   virtual ~TraceImp ();
 
   /**
@@ -85,7 +85,6 @@ private:
 
   template < typename T >
   struct TryToGetSymbolicExpressionMethod {
-
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (int size, T address,
         const edu::sharif::twinner::trace::cv::ConcreteValue &val) const;
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
@@ -98,7 +97,6 @@ private:
 
   template < typename T >
   struct GetSymbolicExpressionMethod {
-
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (int size, T address,
         const edu::sharif::twinner::trace::cv::ConcreteValue &val,
         Expression *newExpression);
@@ -131,9 +129,9 @@ private:
       typename GetSymbolicExpressionMethod < T >::
       TraceSegmentTypeWithoutConcreteValue getMethod);
 
-  void loadInitializedSymbolsFromBinaryStream (std::ifstream &in);
+  void loadInitializedSymbolsFromBinaryStream (std::stringstream &in);
   ExecutionTraceSegment *loadSingleSegmentSymbolsRecordsFromBinaryStream (int index,
-      std::ifstream &in);
+      std::stringstream &in);
 
   Expression *instantiateExpression (REG addr,
       const edu::sharif::twinner::trace::cv::ConcreteValue &val, int index);

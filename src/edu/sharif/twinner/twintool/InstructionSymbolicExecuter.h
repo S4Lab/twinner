@@ -17,9 +17,15 @@
 
 #include "Flags.h"
 
+#include <sstream>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace util {
+
+class MemoryManager;
+}
 namespace trace {
 
 class Trace;
@@ -70,7 +76,9 @@ private:
       const MutableExpressionValueProxy &opr);
 
   Instrumenter *im;
-  edu::sharif::twinner::trace::Trace *trace;
+  std::stringstream bufferForTraceLazyLoad;
+  edu::sharif::twinner::trace::Trace *lazyTrace;
+  edu::sharif::twinner::util::MemoryManager *memoryManager;
   Flags eflags;
 
   REG trackedReg;
@@ -89,13 +97,19 @@ public:
       std::ifstream &symbolsFileInputStream, bool disabled, bool _measureMode);
   InstructionSymbolicExecuter (Instrumenter *im, bool disabled);
 
-  edu::sharif::twinner::trace::Trace *getTrace () const;
+  edu::sharif::twinner::trace::Trace *getTrace ();
+  const edu::sharif::twinner::trace::Trace *getTrace () const;
 
   void disable ();
   void enable ();
 
   void syscallInvoked (const CONTEXT *context, edu::sharif::twinner::trace::Syscall s);
   void syscallReturned (CONTEXT *context) const;
+
+  edu::sharif::twinner::util::MemoryManager *getTraceMemoryManager () const;
+
+private:
+  void lazyLoad ();
 
 public:
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,

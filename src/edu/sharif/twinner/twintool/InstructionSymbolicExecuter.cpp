@@ -32,11 +32,11 @@
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 #include "edu/sharif/twinner/trace/Syscall.h"
+#include "edu/sharif/twinner/trace/WrongStateException.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/memory.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
-#include "edu/sharif/twinner/trace/WrongStateException.h"
 
 #include <stdexcept>
 
@@ -49,7 +49,10 @@ InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     Instrumenter *_im,
     std::ifstream &symbolsFileInputStream, bool _disabled, bool _measureMode) :
     im (_im),
-    trace (new edu::sharif::twinner::trace::TraceImp (symbolsFileInputStream)),
+    bufferForTraceLazyLoad (std::string
+    (std::istreambuf_iterator<char> (symbolsFileInputStream),
+    std::istreambuf_iterator<char> ())), lazyTrace (0),
+    memoryManager (edu::sharif::twinner::util::MemoryManager::allocateInstance ()),
     trackedReg (REG_INVALID_), operandSize (-1), hook (0),
     disabled (_disabled),
     measureMode (_measureMode), numberOfExecutedInstructions (0) {
@@ -58,14 +61,29 @@ InstructionSymbolicExecuter::InstructionSymbolicExecuter (
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (Instrumenter *_im,
     bool _disabled) :
     im (_im),
-    trace (new edu::sharif::twinner::trace::TraceImp ()),
+    lazyTrace (new edu::sharif::twinner::trace::TraceImp ()),
+    memoryManager (lazyTrace->getMemoryManager ()),
     trackedReg (REG_INVALID_), operandSize (-1), hook (0),
     disabled (_disabled),
     measureMode (false), numberOfExecutedInstructions (0) {
 }
 
-edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () const {
-  return trace;
+edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () {
+  lazyLoad ();
+  return lazyTrace;
+}
+
+const edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () const {
+  InstructionSymbolicExecuter *me = const_cast<InstructionSymbolicExecuter *> (this);
+  me->lazyLoad ();
+  return me->lazyTrace;
+}
+
+void InstructionSymbolicExecuter::lazyLoad () {
+  if (lazyTrace == 0) {
+    lazyTrace = new edu::sharif::twinner::trace::TraceImp
+        (bufferForTraceLazyLoad, memoryManager);
+  }
 }
 
 void InstructionSymbolicExecuter::disable () {
@@ -82,7 +100,7 @@ void InstructionSymbolicExecuter::syscallInvoked (const CONTEXT *context,
   if (disabled) {
     return;
   }
-  trace->syscallInvoked (s);
+  getTrace ()->syscallInvoked (s);
   if (measureMode) {
     numberOfExecutedInstructions++;
   }
@@ -92,10 +110,16 @@ void InstructionSymbolicExecuter::syscallReturned (CONTEXT *context) const {
   if (disabled) {
     return;
   }
+  const edu::sharif::twinner::trace::Trace *trace = getTrace ();
   trace->syscallReturned (context);
   if (measureMode) {
     trace->initializeOverwritingMemoryCells ();
   }
+}
+
+edu::sharif::twinner::util::MemoryManager *
+InstructionSymbolicExecuter::getTraceMemoryManager () const {
+  return memoryManager;
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
@@ -110,6 +134,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -136,6 +161,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMutableReg (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -163,6 +189,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxReg (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -192,6 +219,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxImd (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -219,6 +247,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine r
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -248,6 +277,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMemAuxReg (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -277,6 +307,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMemAuxImd (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -304,6 +335,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -330,6 +362,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -357,6 +390,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMutableReg (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -385,6 +419,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcRegAuxReg (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -413,6 +448,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -457,6 +493,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImdAuxReg (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -500,6 +537,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine r
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -529,6 +567,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMemAuxReg (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -556,6 +595,7 @@ void InstructionSymbolicExecuter::analysisRoutineConditionalBranch (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -578,6 +618,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -604,6 +645,7 @@ void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfReg (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -632,6 +674,7 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -661,6 +704,7 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcMem (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -691,6 +735,7 @@ void InstructionSymbolicExecuter::analysisRoutineTwoRegOneMem (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -721,6 +766,7 @@ void InstructionSymbolicExecuter::analysisRoutineOneMemTwoReg (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -751,6 +797,7 @@ void InstructionSymbolicExecuter::analysisRoutineTwoRegTwoMem (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -780,6 +827,7 @@ void InstructionSymbolicExecuter::analysisRoutineAfterOperandLessInstruction (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -803,6 +851,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImplicit (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -826,6 +875,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImplicit (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -859,6 +909,7 @@ void InstructionSymbolicExecuter::analysisRoutineRepEqualOrRepNotEqualPrefix (RE
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -884,6 +935,7 @@ void InstructionSymbolicExecuter::analysisRoutineMemoryRegisterCorrespondence (
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -909,6 +961,7 @@ void InstructionSymbolicExecuter::analysisRoutineMemoryIndexedRegisterCorrespond
     numberOfExecutedInstructions++;
     return;
   }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -946,6 +999,7 @@ void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
 
 void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "cmovbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool belowOrEqual;
@@ -965,6 +1019,7 @@ void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (
 
 void InstructionSymbolicExecuter::cmovnbeAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "cmovnbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool belowOrEqual;
@@ -985,6 +1040,7 @@ void InstructionSymbolicExecuter::cmovnbeAnalysisRoutine (
 void InstructionSymbolicExecuter::cmpxchgAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
     const MutableExpressionValueProxy &aux) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "cmpxchgAnalysisRoutine(...)\n"
       << "\tcomparison part...";
   cmpAnalysisRoutine (aux, dst);
@@ -1005,6 +1061,7 @@ void InstructionSymbolicExecuter::cmpxchgAnalysisRoutine (
 void InstructionSymbolicExecuter::pshufdAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
     const ExpressionValueProxy &order) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pshufdAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1042,6 +1099,7 @@ void InstructionSymbolicExecuter::pshufdAnalysisRoutine (
 
 void InstructionSymbolicExecuter::xchgAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const MutableExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "xchgAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1058,6 +1116,7 @@ void InstructionSymbolicExecuter::xchgAnalysisRoutine (
 
 void InstructionSymbolicExecuter::movAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "movAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1069,6 +1128,7 @@ void InstructionSymbolicExecuter::movAnalysisRoutine (
 
 void InstructionSymbolicExecuter::movsxAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "movsxAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1104,6 +1164,7 @@ void InstructionSymbolicExecuter::cmpsAnalysisRoutine (
 
 void InstructionSymbolicExecuter::adjustRsiRdiRegisters (int size,
     const MutableExpressionValueProxy &rdi, const MutableExpressionValueProxy &rsi) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsi/rdi values...";
   edu::sharif::twinner::trace::Expression *rdiexp = rdi.getExpression (trace);
   edu::sharif::twinner::trace::Expression *rsiexp = rsi.getExpression (trace);
@@ -1127,6 +1188,7 @@ void InstructionSymbolicExecuter::adjustRsiRdiRegisters (int size,
 void InstructionSymbolicExecuter::pushAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
     const MutableExpressionValueProxy &rsp) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pushAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1144,6 +1206,7 @@ void InstructionSymbolicExecuter::pushAnalysisRoutine (
 void InstructionSymbolicExecuter::popAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
     const MutableExpressionValueProxy &rsp) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "popAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1161,6 +1224,7 @@ void InstructionSymbolicExecuter::popAnalysisRoutine (
 void InstructionSymbolicExecuter::lodsdAnalysisRoutine (
     const MutableExpressionValueProxy &dstReg, const ExpressionValueProxy &srcMem,
     const MutableExpressionValueProxy &rsi) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "lodsdAnalysisRoutine(...)\n";
   movAnalysisRoutine (dstReg, srcMem);
   edu::sharif::twinner::trace::Expression *rsiexp = rsi.getExpression (trace);
@@ -1180,6 +1244,7 @@ void InstructionSymbolicExecuter::lodsdAnalysisRoutine (
 
 void InstructionSymbolicExecuter::addAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "addAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1198,6 +1263,7 @@ void InstructionSymbolicExecuter::addAnalysisRoutine (
 
 void InstructionSymbolicExecuter::adcAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "adcAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1219,6 +1285,7 @@ void InstructionSymbolicExecuter::adcAnalysisRoutine (
 
 void InstructionSymbolicExecuter::subAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "subAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1237,6 +1304,7 @@ void InstructionSymbolicExecuter::subAnalysisRoutine (
 
 void InstructionSymbolicExecuter::sbbAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "sbbAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1261,6 +1329,7 @@ void InstructionSymbolicExecuter::sbbAnalysisRoutine (
 
 void InstructionSymbolicExecuter::cmpAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "cmpAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1275,6 +1344,7 @@ void InstructionSymbolicExecuter::cmpAnalysisRoutine (
 
 void InstructionSymbolicExecuter::leaAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "leaAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1285,6 +1355,7 @@ void InstructionSymbolicExecuter::leaAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jnzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool zero;
@@ -1299,6 +1370,7 @@ void InstructionSymbolicExecuter::jnzAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::jzAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool zero;
@@ -1313,6 +1385,7 @@ void InstructionSymbolicExecuter::jzAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::jleAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jleAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool lessOrEqual;
@@ -1328,6 +1401,7 @@ void InstructionSymbolicExecuter::jleAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::jnleAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jnleAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool lessOrEqual;
@@ -1343,6 +1417,7 @@ void InstructionSymbolicExecuter::jnleAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::jlAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jlAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool less;
@@ -1357,6 +1432,7 @@ void InstructionSymbolicExecuter::jlAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::jnlAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jnlAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool less;
@@ -1371,6 +1447,7 @@ void InstructionSymbolicExecuter::jnlAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::jbeAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool belowOrEqual;
@@ -1386,6 +1463,7 @@ void InstructionSymbolicExecuter::jbeAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::jnbeAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jnbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool belowOrEqual;
@@ -1401,6 +1479,7 @@ void InstructionSymbolicExecuter::jnbeAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::jnbAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jnbAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool below;
@@ -1415,6 +1494,7 @@ void InstructionSymbolicExecuter::jnbAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::jbAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jbAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool below;
@@ -1429,6 +1509,7 @@ void InstructionSymbolicExecuter::jbAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::jsAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jsAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool sign;
@@ -1443,6 +1524,7 @@ void InstructionSymbolicExecuter::jsAnalysisRoutine (bool branchTaken) {
 }
 
 void InstructionSymbolicExecuter::jnsAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jnsAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool sign;
@@ -1458,6 +1540,7 @@ void InstructionSymbolicExecuter::jnsAnalysisRoutine (bool branchTaken) {
 
 void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
     const ConcreteValue &rspRegVal) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "callAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
@@ -1502,6 +1585,7 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
 
 void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
     const ConcreteValue &rspRegVal) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "retAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
@@ -1533,6 +1617,7 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
 
 void InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
     const ConcreteValue &rspRegVal) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jmpAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
@@ -1563,6 +1648,7 @@ void InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
 
 void InstructionSymbolicExecuter::repAnalysisRoutine (
     const MutableExpressionValueProxy &dst, bool executing, bool repEqual) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "repAnalysisRoutine(...)\n"
       << "\tgetting dst (rep) reg exp...";
   edu::sharif::twinner::trace::Expression *dstexp = dst.getExpression (trace);
@@ -1588,6 +1674,7 @@ void InstructionSymbolicExecuter::repAnalysisRoutine (
 
 void InstructionSymbolicExecuter::shlAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "shlAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1615,6 +1702,7 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
 
 void InstructionSymbolicExecuter::shrAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "shrAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1633,6 +1721,7 @@ void InstructionSymbolicExecuter::shrAnalysisRoutine (
 
 void InstructionSymbolicExecuter::sarAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "sarAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1671,6 +1760,7 @@ void InstructionSymbolicExecuter::sarAnalysisRoutine (
 
 void InstructionSymbolicExecuter::rorAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "rorAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1690,6 +1780,7 @@ void InstructionSymbolicExecuter::rorAnalysisRoutine (
 
 void InstructionSymbolicExecuter::rolAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "rolAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1710,6 +1801,7 @@ void InstructionSymbolicExecuter::rolAnalysisRoutine (
 
 void InstructionSymbolicExecuter::andAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "andAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1729,6 +1821,7 @@ void InstructionSymbolicExecuter::andAnalysisRoutine (
 
 void InstructionSymbolicExecuter::orAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "orAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1748,6 +1841,7 @@ void InstructionSymbolicExecuter::orAnalysisRoutine (
 
 void InstructionSymbolicExecuter::xorAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "xorAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1767,6 +1861,7 @@ void InstructionSymbolicExecuter::xorAnalysisRoutine (
 
 void InstructionSymbolicExecuter::testAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "testAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1786,6 +1881,7 @@ void InstructionSymbolicExecuter::testAnalysisRoutine (
 
 void InstructionSymbolicExecuter::btAnalysisRoutine (
     const MutableExpressionValueProxy &bitstring, const ExpressionValueProxy &offset) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "btAnalysisRoutine(...)\n"
       << "\tgetting offset exp...";
   edu::sharif::twinner::trace::Expression *offsetexp = offset.getExpression (trace);
@@ -1803,6 +1899,7 @@ void InstructionSymbolicExecuter::btAnalysisRoutine (
 
 void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pmovmskbAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1828,6 +1925,7 @@ void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
 
 void InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pcmpeqbAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1872,6 +1970,7 @@ void InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine (
 
 void InstructionSymbolicExecuter::pminubAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pminubAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1916,6 +2015,7 @@ void InstructionSymbolicExecuter::pminubAnalysisRoutine (
 
 void InstructionSymbolicExecuter::punpcklbwAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "punpcklbwAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1954,6 +2054,7 @@ void InstructionSymbolicExecuter::punpcklbwAnalysisRoutine (
 
 void InstructionSymbolicExecuter::punpcklwdAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "punpcklwdAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -1992,6 +2093,7 @@ void InstructionSymbolicExecuter::punpcklwdAnalysisRoutine (
 
 void InstructionSymbolicExecuter::bsfAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "bsfAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   edu::sharif::twinner::trace::Expression *srcexp =
@@ -2033,6 +2135,7 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
     const MutableExpressionValueProxy &leftDst,
     const MutableExpressionValueProxy &rightDst,
     const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "divAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -2068,6 +2171,7 @@ void InstructionSymbolicExecuter::idivAnalysisRoutine (
     const MutableExpressionValueProxy &leftDst,
     const MutableExpressionValueProxy &rightDst,
     const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "idivAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -2102,6 +2206,7 @@ void InstructionSymbolicExecuter::idivAnalysisRoutine (
 
 void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
     const CONTEXT *context, const ConcreteValue &operandSize) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "adjustDivisionMultiplicationOperands(...) hook...";
   const edu::sharif::twinner::trace::cv::ConcreteValue64Bits os = operandSize;
@@ -2164,6 +2269,7 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
     const MutableExpressionValueProxy &leftDst,
     const MutableExpressionValueProxy &rightDst,
     const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "mulAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
   const edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
@@ -2195,6 +2301,7 @@ void InstructionSymbolicExecuter::imulAnalysisRoutine (
     const MutableExpressionValueProxy &leftDst,
     const MutableExpressionValueProxy &rightDst,
     const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   operandSize = leftDst.getSize ();
   const int doubleSize = operandSize * 2;
   /*
@@ -2238,6 +2345,7 @@ void InstructionSymbolicExecuter::imulAnalysisRoutine (
 
 void InstructionSymbolicExecuter::imulAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "imulAnalysisRoutine(...): "
       "two-operands-mode\n"
       "\tgetting src exp...";
@@ -2259,6 +2367,7 @@ void InstructionSymbolicExecuter::scasAnalysisRoutine (
     const MutableExpressionValueProxy &dstReg,
     const MutableExpressionValueProxy &srcReg,
     const ExpressionValueProxy &srcMem) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "scasAnalysisRoutine(...)\n";
   cmpAnalysisRoutine (dstReg, srcMem); // comparing AL/AX/EAX/RAX with memory
   edu::sharif::twinner::trace::Expression *exp = srcReg.getExpression (trace);
@@ -2284,6 +2393,7 @@ void InstructionSymbolicExecuter::scasAnalysisRoutine (
 void InstructionSymbolicExecuter::stosAnalysisRoutine (
     const MutableExpressionValueProxy &dstMem, const MutableExpressionValueProxy &rdireg,
     const ExpressionValueProxy &srcReg) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "stosAnalysisRoutine(...)\n";
   movAnalysisRoutine (dstMem, srcReg);
   edu::sharif::twinner::trace::Expression *rdiexp = rdireg.getExpression (trace);
@@ -2306,6 +2416,7 @@ void InstructionSymbolicExecuter::leaveAnalysisRoutine (
     const MutableExpressionValueProxy &fpReg,
     const MutableExpressionValueProxy &spReg,
     const ExpressionValueProxy &srcMem) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "leaveAnalysisRoutine(...)\n"
       << "\tgetting frame pointer (to be set in stack pointer)...";
   edu::sharif::twinner::trace::Expression *rsp = fpReg.getExpression (trace);
@@ -2321,6 +2432,7 @@ void InstructionSymbolicExecuter::leaveAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "rdtscAnalysisRoutine(...)\n";
   /**
    * Now, we are right after the RDTSC instruction and time-stamp is loaded in
@@ -2358,6 +2470,7 @@ void InstructionSymbolicExecuter::cldAnalysisRoutine (const CONTEXT *context) {
 }
 
 void InstructionSymbolicExecuter::cpuidAnalysisRoutine (const CONTEXT *context) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "cpuidAnalysisRoutine(...)\n";
   /*
    * CPUID instruction will read EAX and ECX and based on their values, sets 4 registers
@@ -2401,6 +2514,7 @@ void InstructionSymbolicExecuter::cpuidAnalysisRoutine (const CONTEXT *context) 
 
 void InstructionSymbolicExecuter::incAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "incAnalysisRoutine(...)\n"
       << "\tgetting dst exp...";
   const edu::sharif::twinner::trace::Expression *dstexpOrig = opr.getExpression (trace);
@@ -2419,6 +2533,7 @@ void InstructionSymbolicExecuter::incAnalysisRoutine (
 
 void InstructionSymbolicExecuter::decAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "decAnalysisRoutine(...)\n"
       << "\tgetting dst exp...";
   const edu::sharif::twinner::trace::Expression *dstexpOrig = opr.getExpression (trace);
@@ -2437,6 +2552,7 @@ void InstructionSymbolicExecuter::decAnalysisRoutine (
 
 void InstructionSymbolicExecuter::negAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "negAnalysisRoutine(...)\n"
       << "\tgetting dst exp...";
   const edu::sharif::twinner::trace::Expression *dstexpOrig = opr.getExpression (trace);
@@ -2454,6 +2570,7 @@ void InstructionSymbolicExecuter::negAnalysisRoutine (
 
 void InstructionSymbolicExecuter::setnzAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setnzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool zero;
@@ -2475,6 +2592,7 @@ void InstructionSymbolicExecuter::setnzAnalysisRoutine (
 
 void InstructionSymbolicExecuter::setzAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool zero;
@@ -2496,6 +2614,7 @@ void InstructionSymbolicExecuter::setzAnalysisRoutine (
 
 void InstructionSymbolicExecuter::setleAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setleAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool lessOrEqual;
@@ -2518,6 +2637,7 @@ void InstructionSymbolicExecuter::setleAnalysisRoutine (
 
 void InstructionSymbolicExecuter::setnleAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setnleAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool lessOrEqual;
@@ -2540,6 +2660,7 @@ void InstructionSymbolicExecuter::setnleAnalysisRoutine (
 
 void InstructionSymbolicExecuter::setlAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setlAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool less;
@@ -2561,6 +2682,7 @@ void InstructionSymbolicExecuter::setlAnalysisRoutine (
 
 void InstructionSymbolicExecuter::setbeAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool belowOrEqual;
@@ -2583,6 +2705,7 @@ void InstructionSymbolicExecuter::setbeAnalysisRoutine (
 
 void InstructionSymbolicExecuter::setnbeAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setnbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
   bool belowOrEqual;
@@ -2605,6 +2728,7 @@ void InstructionSymbolicExecuter::setnbeAnalysisRoutine (
 
 void InstructionSymbolicExecuter::notAnalysisRoutine (
     const MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "notAnalysisRoutine(...)\n"
       << "\tgetting dst exp...";
   edu::sharif::twinner::trace::Expression *dstexp = opr.getExpression (trace);
@@ -2619,6 +2743,7 @@ void InstructionSymbolicExecuter::notAnalysisRoutine (
 void InstructionSymbolicExecuter::memoryRegisterCorrespondenceAnalysisRoutine (
     const ExpressionValueProxy &baseReg, ADDRDELTA displacement,
     ADDRINT memoryEa) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "memoryRegisterCorrespondenceAnalysisRoutine(...)\n"
       << "\tgetting base reg exp...";
@@ -2646,6 +2771,7 @@ void InstructionSymbolicExecuter::memoryIndexedRegisterCorrespondenceAnalysisRou
     const ExpressionValueProxy &baseReg, ADDRDELTA displacement,
     const ExpressionValueProxy &indexReg, UINT32 scale,
     ADDRINT memoryEa) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "memoryIndexedRegisterCorrespondenceAnalysisRoutine(...)\n"
       << "\tgetting base reg exp...";

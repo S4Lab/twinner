@@ -41,10 +41,11 @@ TraceImp::TraceImp () :
     Trace () {
 }
 
-TraceImp::TraceImp (std::ifstream &symbolsFileInputStream) :
+TraceImp::TraceImp (std::stringstream &symbolsInputStream,
+    edu::sharif::twinner::util::MemoryManager *_memoryManager) :
     Trace (1 /* Invoking dummy constructor of parent class to stop adding segments there*/) {
-  memoryManager = edu::sharif::twinner::util::MemoryManager::allocateInstance ();
-  loadInitializedSymbolsFromBinaryStream (symbolsFileInputStream);
+  memoryManager = _memoryManager;
+  loadInitializedSymbolsFromBinaryStream (symbolsInputStream);
   currentSegmentIterator = segments.end ();
   if (currentSegmentIterator != segments.begin ()) {
     currentSegmentIterator--;
@@ -218,7 +219,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
   return (getCurrentTraceSegment ()->*getMethod) (size, address, newExpression);
 }
 
-void TraceImp::loadInitializedSymbolsFromBinaryStream (std::ifstream &in) {
+void TraceImp::loadInitializedSymbolsFromBinaryStream (std::stringstream &in) {
   std::map < int, std::list < edu::sharif::twinner::trace::exptoken::SymbolRecord > >
       ::size_type s;
   in.read ((char *) &s, sizeof (s));
@@ -240,7 +241,7 @@ void TraceImp::loadInitializedSymbolsFromBinaryStream (std::ifstream &in) {
 }
 
 ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream (
-    int index, std::ifstream &in) {
+    int index, std::stringstream &in) {
   std::map < ADDRINT, Expression * > memMap;
   std::map < REG, Expression * > regMap;
   std::list < edu::sharif::twinner::trace::exptoken::SymbolRecord >::size_type s;
