@@ -48,7 +48,35 @@ NamedSymbol *NamedSymbol::clone () const {
 }
 
 std::pair < int, SymbolRecord > NamedSymbol::toSymbolRecord () const {
-  throw std::runtime_error ("NamedSymbol::toSymbolRecord () is called");
+  SymbolRecord record;
+  if (technicalName == "n_c_argv") { // argv
+    record.address = REG_RSI;
+    record.type = REGISTER_64_BITS_SYMBOL_TYPE;
+    record.concreteValueLsb = concreteValue->toUint64 ();
+    record.concreteValueMsb = 0;
+    return make_pair (generationIndex, record);
+
+  } else if (technicalName.size () > 9) { // argv[i] or argv[i][j]
+    std::stringstream ss;
+    ss << technicalName.substr (9);
+    int i;
+    std::string rest;
+    ss >> i >> rest;
+    if (rest.size () == 0) { // argv[i]
+      record.address = UINT32 (i);
+      record.type = MAIN_ARGV_I_TYPE;
+      record.concreteValueLsb = concreteValue->toUint64 ();
+      record.concreteValueMsb = 0;
+      return make_pair (generationIndex, record);
+    } else {
+      char dummy;
+      int j;
+      std::stringstream ss2;
+      ss2 << rest;
+      ss2 >> dummy >> j; // argv[i][j]
+    }
+  }
+  throw std::runtime_error ("NamedSymbol::toSymbolRecord (): Unsupported type");
 }
 
 void NamedSymbol::saveToBinaryStream (std::ofstream &out) const {
