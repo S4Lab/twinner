@@ -14,6 +14,7 @@
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
+#include "edu/sharif/twinner/trace/exptoken/NamedSymbol.h"
 #include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/exptoken/Constant.h"
@@ -331,7 +332,7 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
     if (!operandToken->isConstant ()) {
       const edu::sharif::twinner::trace::exptoken::Symbol *symbolToken =
           static_cast<const edu::sharif::twinner::trace::exptoken::Symbol *> (token);
-      const std::string name = symbolToken->technicalName ();
+      const std::string name = symbolToken->getTechnicalName ();
       std::map<std::string, Expr>::const_iterator it = symbols.find (name);
       if (it != symbols.end ()) {
         return it->second;
@@ -509,6 +510,10 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp,
     if (variableName.at (0) == 'm') { // memory symbol
       return new edu::sharif::twinner::trace::ExpressionImp
           (edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol::fromNameAndValue
+           (variableName, val));
+    } else if (variableName.at (0) == 'n') { // named symbol
+      return new edu::sharif::twinner::trace::ExpressionImp
+          (edu::sharif::twinner::trace::exptoken::NamedSymbol::fromTechnicalName
            (variableName, val));
     } else { // register symbol
       return new edu::sharif::twinner::trace::ExpressionImp

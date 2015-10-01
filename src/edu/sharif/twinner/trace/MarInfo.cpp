@@ -84,7 +84,7 @@ void MarInfo::simplifyExpression (Expression *exp) const {
           static_cast<edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *> (token);
       if (reg->getAddress () == REG_RSI && reg->getGenerationIndex () == 0) {
         token = new edu::sharif::twinner::trace::exptoken::NamedSymbol
-            ("argv", true,
+            ("argv", "n_c_argv", true,
              edu::sharif::twinner::trace::cv::ConcreteValue64Bits
              (UINT64 (MarInfo::initialArgv)), 0);
         delete reg;
@@ -100,13 +100,13 @@ void MarInfo::simplifyExpression (Expression *exp) const {
           if (diff % 8 == 0) {
             const int i = diff / 8;
             if (i < argc) {
-              std::stringstream ss;
+              std::stringstream ss, ss2;
               ss << "argv[" << i << "]";
+              ss2 << "n_v_argv_" << i;
               token = new edu::sharif::twinner::trace::exptoken::NamedSymbol
-                  (ss.str (), false,
-                   // storing the address instead of the argv[i] value
-                   edu::sharif::twinner::trace::cv::ConcreteValue64Bits (addr),
-                   0);
+                  (ss.str (), ss2.str (), false,
+                   edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+                   (UINT64 (argvis.at (i))), 0);
               delete mem;
             }
           }

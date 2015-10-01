@@ -17,6 +17,7 @@
 #include "UnsatisfiableConstraintsException.h"
 
 #include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/NamedSymbol.h"
 #include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
@@ -86,7 +87,7 @@ void aggregate_expression_symbol_values (
     edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token) {
   if (const edu::sharif::twinner::trace::exptoken::Symbol * symbol =
       dynamic_cast<edu::sharif::twinner::trace::exptoken::Symbol *> (token)) {
-    vals.insert (make_pair (symbol->technicalName (), &(symbol->getValue ())));
+    vals.insert (make_pair (symbol->getTechnicalName (), &(symbol->getValue ())));
   }
 }
 
@@ -183,6 +184,10 @@ void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
     if (it->first.at (0) == 'm') { // memory symbol
       satSolution.insert
           (edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol::fromNameAndValue
+           (it->first, v4, v3, v2, v1));
+    } else if (it->first.at (0) == 'n') { // named symbol
+      satSolution.insert
+          (edu::sharif::twinner::trace::exptoken::NamedSymbol::fromTechnicalName
            (it->first, v4, v3, v2, v1));
     } else { // register symbol
       satSolution.insert
