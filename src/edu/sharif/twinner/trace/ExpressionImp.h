@@ -23,9 +23,12 @@ namespace exptoken {
 
 class Symbol;
 }
+namespace cv {
+
+class ConcreteValue64Bits;
+}
 
 class ExpressionImp : public Expression {
-
 private:
   ExpressionImp (const ExpressionImp &exp);
 
@@ -75,6 +78,12 @@ public:
   ExpressionImp (UINT64 value = 0);
 
   virtual ExpressionImp *clone () const;
+
+private:
+  edu::sharif::twinner::trace::exptoken::ExpressionToken *
+  instantiateMemorySymbol (ADDRINT memoryEa,
+      const edu::sharif::twinner::trace::cv::ConcreteValue64Bits &concreteValue,
+      int generationIndex, bool isOverwriting) const;
 };
 
 }

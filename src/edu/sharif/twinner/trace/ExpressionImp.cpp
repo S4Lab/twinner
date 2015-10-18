@@ -18,19 +18,21 @@
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 
+#include "edu/sharif/twinner/util/Logger.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
 ExpressionImp::ExpressionImp (const ExpressionImp &exp) :
-Expression (exp) {
+    Expression (exp) {
 }
 
 ExpressionImp::ExpressionImp (REG reg,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex) :
-Expression (concreteValue.clone (), true) {
+    Expression (concreteValue.clone (), true) {
   if (concreteValue.getSize () < 64) {
     /*
      * The reg and concreteValue must always have the same precision but when the reg is
@@ -49,10 +51,38 @@ Expression (concreteValue.clone (), true) {
   }
 }
 
+edu::sharif::twinner::trace::exptoken::ExpressionToken *
+ExpressionImp::instantiateMemorySymbol (ADDRINT memoryEa,
+    const edu::sharif::twinner::trace::cv::ConcreteValue64Bits &concreteValue,
+    int generationIndex, bool isOverwriting) const {
+  if (isOverwriting) {
+    return new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
+        (memoryEa, concreteValue, generationIndex);
+  } else {
+    UINT64 currentConcreteValue = 0;
+    try {
+      currentConcreteValue = edu::sharif::twinner::util::readMemoryContent
+          (memoryEa, 8);
+    } catch (const std::runtime_error &e) {
+      edu::sharif::twinner::util::Logger::warning () << "memory is not readable; address: 0x" << std::hex << memoryEa << '\n';
+      throw;
+    }
+    try {
+      edu::sharif::twinner::util::writeMemoryContent
+          (memoryEa, (const UINT8 *) &currentConcreteValue, 8);
+      return new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
+          (memoryEa, concreteValue, generationIndex);
+    } catch (const std::runtime_error &e) {
+      edu::sharif::twinner::util::Logger::warning () << "memory is not writable; address: 0x" << std::hex << memoryEa << '\n';
+      return new edu::sharif::twinner::trace::exptoken::Constant (concreteValue);
+    }
+  }
+}
+
 ExpressionImp::ExpressionImp (ADDRINT memoryEa,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex, bool isOverwriting) :
-Expression (concreteValue.clone (), isOverwriting) {
+    Expression (concreteValue.clone (), isOverwriting) {
   if (!isOverwriting) {
     if (memoryEa < 0x7f0000000000ull) { // FIXME: Generalize this code
       // this temporary code assumes that everything out of stack (including heap) is constant
@@ -66,24 +96,23 @@ Expression (concreteValue.clone (), isOverwriting) {
     const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *cv =
         static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
         (&concreteValue);
-    stack.push_back
-        (new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
-         (memoryEa + 8, // little endian
-          edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getMsb ()),
-          generationIndex));
+    stack.push_back (instantiateMemorySymbol
+                     (memoryEa + 8, // little endian
+                      edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getMsb ()),
+                      generationIndex, isOverwriting));
     stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (64));
     stack.push_back (Operator::instantiateOperator (Operator::SHIFT_LEFT));
     stack.push_back
-        (new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
+        (instantiateMemorySymbol
          (memoryEa,
           edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getLsb ()),
-          generationIndex));
+          generationIndex, isOverwriting));
     stack.push_back (Operator::instantiateOperator (Operator::BITWISE_OR));
     break;
   }
   case 64:
-    stack.push_back (new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
-                     (memoryEa, concreteValue, generationIndex));
+    stack.push_back (instantiateMemorySymbol
+                     (memoryEa, concreteValue, generationIndex, isOverwriting));
     break;
   case 32:
   case 16:
@@ -92,16 +121,16 @@ Expression (concreteValue.clone (), isOverwriting) {
     const int offset = memoryEa % 8;
     if (offset == 0) {
       stack.push_back
-          (new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
+          (instantiateMemorySymbol
            (memoryEa,
             edu::sharif::twinner::trace::cv::ConcreteValue64Bits (concreteValue),
-            generationIndex));
+            generationIndex, isOverwriting));
     } else {
-      stack.push_back (new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
+      stack.push_back (instantiateMemorySymbol
                        (memoryEa - offset,
                         edu::sharif::twinner::trace::cv::ConcreteValue64Bits
                         (concreteValue.toUint64 () << (offset * 8)),
-                        generationIndex));
+                        generationIndex, isOverwriting));
       stack.push_back
           (new edu::sharif::twinner::trace::exptoken::Constant (offset * 8));
       stack.push_back (Operator::instantiateOperator (Operator::SHIFT_RIGHT));
@@ -120,23 +149,23 @@ Expression (concreteValue.clone (), isOverwriting) {
 }
 
 ExpressionImp::ExpressionImp (edu::sharif::twinner::trace::exptoken::Symbol *symbol) :
-Expression (symbol->getValue ().clone (), false) {
+    Expression (symbol->getValue ().clone (), false) {
   stack.push_back (symbol);
 }
 
 ExpressionImp::ExpressionImp (
     const edu::sharif::twinner::trace::cv::ConcreteValue &value) :
-Expression (value.clone (), false) {
+    Expression (value.clone (), false) {
   stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (value));
 }
 
 ExpressionImp::ExpressionImp (edu::sharif::twinner::trace::cv::ConcreteValue *value) :
-Expression (value, false) {
+    Expression (value, false) {
   stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (*value));
 }
 
 ExpressionImp::ExpressionImp (UINT64 value) :
-Expression (new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value), false) {
+    Expression (new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value), false) {
   stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant
                    (new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value)));
 }
