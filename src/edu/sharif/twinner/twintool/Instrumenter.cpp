@@ -167,6 +167,7 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_PSHUFD, DST_LARGE_REG_SRC_EITHER_LARGE_REG_OR_MEM_AUX_IMD));
   INITIALIZE (MOV_INS_WITH_LARGE_REG_INS_MODELS,
+              XED_ICLASS_MOVSD_XMM,
               XED_ICLASS_MOVAPS, XED_ICLASS_MOVDQU, XED_ICLASS_MOVDQA);
   managedInstructions.insert
       (make_pair (XED_ICLASS_BSF, DST_REG_SRC_EITHER_REG_OR_MEM));
