@@ -233,6 +233,7 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
       managedInstructions.find (op);
   if (it == managedInstructions.end ()) {
     edu::sharif::twinner::util::Logger::info ()
+        << "[opcode: " << std::dec << op << "] "
         << "Ignoring assembly instruction: " << insAssembly << '\n';
   } else {
     edu::sharif::twinner::util::Logger::debug () << "\t--> " << OPCODE_StringShort (op)
@@ -547,6 +548,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   case DST_LARGE_REG_SRC_MEM:
   {
     REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstLargeRegSrcMem,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
@@ -558,6 +562,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   case DST_LARGE_REG_SRC_MEM_AUX_IMD:
   {
     REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstLargeRegSrcMemAuxImd,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
@@ -570,6 +577,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   case DST_REG_SRC_MEM:
   {
     REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMem,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
@@ -581,6 +591,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   case DST_REG_SRC_MEM_AUX_RSI:
   {
     REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMemAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
@@ -605,6 +618,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   case DST_MEM_SRC_REG:
   {
     REG srcreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
@@ -617,6 +633,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   case DST_MEM_SRC_MUTABLE_REG:
   {
     REG srcreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMutableReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
@@ -630,6 +649,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   {
     REG srcreg = INS_OperandReg (ins, 1);
     REG auxreg = INS_OperandReg (ins, 2);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcRegAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
@@ -642,6 +664,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_MEM_SRC_LARGE_REG:
   {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
     REG srcreg = INS_OperandReg (ins, 1);
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcLargeReg,
                     IARG_PTR, ise, IARG_UINT32, op,
@@ -654,6 +679,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_MEM_SRC_IMD:
   {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcImd,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
@@ -666,6 +694,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_STK_SRC_REG:
   {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
     REG srcreg = INS_OperandReg (ins, 0);
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcRegAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
@@ -679,6 +710,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_STK_SRC_IMD:
   {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcImdAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
@@ -692,6 +726,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_STK_SRC_MEM:
   {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 1, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMemAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 1,
@@ -705,6 +745,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   case DST_REG_SRC_STK:
   {
     REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMemAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
@@ -717,6 +760,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_MEM_SRC_STK:
   {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 1, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMemAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
@@ -729,6 +778,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_MEM_SRC_MEM:
   {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 1, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcMem,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
@@ -767,6 +822,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                                 IARG_UINT32, insAssembly,
                                 IARG_END);
     } else {
+      INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                      IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                      IARG_END); // src mem
       INS_InsertPredicatedCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMem,
                                 IARG_PTR, ise, IARG_UINT32, XED_ICLASS_MOV,
                                 IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
@@ -813,6 +871,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   {
     REG dstRightReg = INS_OperandReg (ins, 1);
     REG dstLeftReg = INS_OperandReg (ins, 2);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineTwoDstRegOneSrcMem,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstLeftReg, IARG_REG_VALUE, dstLeftReg,
@@ -843,6 +904,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_MEM_SRC_IMPLICIT:
   {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcImplicit,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
@@ -853,6 +917,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   case STRING_OPERATION_REG_MEM:
   {
     const REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertPredicatedCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineStrOpRegMem,
                               IARG_PTR, ise, IARG_UINT32, op,
                               IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
@@ -866,6 +933,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   case STRING_OPERATION_MEM_REG:
   {
     const REG srcreg = INS_OperandReg (ins, 2);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
     INS_InsertPredicatedCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineStrOpMemReg,
                               IARG_PTR, ise, IARG_UINT32, op,
                               IARG_MEMORYOP_EA, 0,
@@ -881,6 +951,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   {
     const REG dstreg = REG_RDI;
     const REG srcreg = REG_RSI;
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 1, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertPredicatedCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineStrOpMemMem,
                               IARG_PTR, ise, IARG_UINT32, op,
                               IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
@@ -897,6 +973,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   {
     const REG fpreg = INS_OperandReg (ins, 2);
     const REG spreg = INS_OperandReg (ins, 3);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineTwoDstRegOneSrcMem,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, fpreg, IARG_REG_VALUE, fpreg,

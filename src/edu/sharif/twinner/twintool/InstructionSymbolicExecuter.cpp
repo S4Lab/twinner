@@ -112,9 +112,6 @@ void InstructionSymbolicExecuter::syscallReturned (CONTEXT *context) const {
   }
   const edu::sharif::twinner::trace::Trace *trace = getTrace ();
   trace->syscallReturned (context);
-  if (measureMode) {
-    trace->initializeOverwritingMemoryCells ();
-  }
 }
 
 edu::sharif::twinner::util::MemoryManager *
@@ -130,11 +127,11 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
     return;
   }
   disassembledInstruction = insAssembly;
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   if (measureMode) {
     numberOfExecutedInstructions++;
     return;
   }
-  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -157,11 +154,11 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMutableReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   if (measureMode) {
     numberOfExecutedInstructions++;
     return;
   }
-  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -185,11 +182,11 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxReg (
     return;
   }
   disassembledInstruction = insAssembly;
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   if (measureMode) {
     numberOfExecutedInstructions++;
     return;
   }
-  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
   edu::sharif::twinner::util::Logger logger =
@@ -976,6 +973,25 @@ void InstructionSymbolicExecuter::analysisRoutineMemoryIndexedRegisterCorrespond
       (RegisterResidentExpressionValueProxy (baseReg, baseRegVal), displacement,
        RegisterResidentExpressionValueProxy (indexReg, indexRegVal), scale,
        memoryEa);
+}
+
+void InstructionSymbolicExecuter::analysisRoutinePrefetchMem (
+    ADDRINT memoryEa, UINT32 memReadBytes) {
+  if (disabled) {
+    return;
+  }
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+  }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "analysisRoutinePrefetchMem(...): mem addr: 0x"
+      << std::hex << memoryEa << ", mem read bytes: 0x" << memReadBytes
+      << '\n';
+  MemoryResidentExpressionValueProxy memory (memoryEa, memReadBytes);
+  // TODO: optimize by just trying to get the value (in case of overwriting...)
+  edu::sharif::twinner::trace::Expression *exp = memory.getExpression (trace);
+  delete exp; // expression is pre-fetched and stored in the trace
 }
 
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
@@ -3553,6 +3569,12 @@ VOID analysisRoutineMemoryIndexedRegisterCorrespondence (VOID *iseptr,
        edu::sharif::twinner::trace::cv::ConcreteValue64Bits (indexRegVal),
        UINT32 (scale),
        memoryEa, insAssembly);
+}
+
+VOID analysisRoutinePrefetchMem (VOID *iseptr,
+    ADDRINT memoryEa, UINT32 memReadBytes) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutinePrefetchMem (memoryEa, memReadBytes);
 }
 
 }

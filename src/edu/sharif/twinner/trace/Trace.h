@@ -193,7 +193,6 @@ public:
   const edu::sharif::twinner::util::MemoryManager *getMemoryManager () const;
 
   void printMemoryUsageStats (const edu::sharif::twinner::util::Logger &logger) const;
-  void initializeOverwritingMemoryCells () const;
 };
 
 }

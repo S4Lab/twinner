@@ -242,6 +242,7 @@ public:
       const ConcreteValue &baseRegVal, ADDRDELTA displacement,
       REG indexReg, const ConcreteValue &indexRegVal, UINT32 scale,
       ADDRINT memoryEa, UINT32 insAssembly);
+  void analysisRoutinePrefetchMem (ADDRINT memoryEa, UINT32 memReadBytes);
 
 private:
 
@@ -939,6 +940,8 @@ VOID analysisRoutineMemoryIndexedRegisterCorrespondence (VOID *iseptr,
     ADDRINT scale,
     ADDRINT memoryEa,
     UINT32 insAssembly);
+VOID analysisRoutinePrefetchMem (VOID *iseptr,
+    ADDRINT memoryEa, UINT32 memReadBytes);
 
 }
 }

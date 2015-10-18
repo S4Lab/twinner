@@ -152,11 +152,7 @@ void Trace::syscallReturned (CONTEXT *context) const {
       exp->setOverwriting (false);
     }
   }
-}
-
-void Trace::initializeOverwritingMemoryCells () const {
-  //TODO: This can be merged with above method (see Expression::checkConcreteValueMemory)
-  const ExecutionTraceSegment *segment = *currentSegmentIterator;
+  /*
   const std::map < ADDRINT, Expression * > &map =
       segment->getMemoryAddressTo64BitsExpression ();
   for (std::map < ADDRINT, Expression * >::const_iterator it = map.begin ();
@@ -168,6 +164,7 @@ void Trace::initializeOverwritingMemoryCells () const {
       exp->getLastConcreteValue ().writeToMemoryAddress (memoryEa);
     }
   }
+   */
 }
 
 bool Trace::saveToFile (const char *path, const char *memoryPath) const {
