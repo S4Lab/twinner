@@ -63,7 +63,7 @@ KNOB < BOOL > measure (KNOB_MODE_WRITEONCE, "pintool", "measure", "",
     "if presents, trivial instruction counting instrumentation will be used instead of normal behavior");
 
 TwinTool::TwinTool () :
-im (0) {
+    im (0) {
 }
 
 TwinTool::~TwinTool () {
@@ -345,8 +345,13 @@ edu::sharif::twinner::trace::cv::ConcreteValue *readRegisterContent (
 }
 
 UINT64 readMemoryContent (ADDRINT memoryEa, size_t size) {
-  UINT64 currentConcreteValue;
-  PIN_SafeCopy (&currentConcreteValue, (const VOID *) (memoryEa), size);
+  UINT64 currentConcreteValue = 0;
+  const size_t ret = PIN_SafeCopy (&currentConcreteValue, (const VOID *) (memoryEa), size);
+  if (ret != size) {
+    edu::sharif::twinner::util::Logger::error () << "readMemoryContent(...): "
+        "trying to read " << std::dec << size << " bytes, but PIN_SafeCopy "
+        "read " << ret << " bytes\n";
+  }
   if (size < 8) {
     currentConcreteValue &= (1ull << (size * 8)) - 1;
   }
@@ -354,7 +359,13 @@ UINT64 readMemoryContent (ADDRINT memoryEa, size_t size) {
 }
 
 VOID writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
-  PIN_SafeCopy ((VOID *) memoryEa, (const VOID *) value, size);
+  const size_t ret = PIN_SafeCopy ((VOID *) memoryEa, (const VOID *) value, size);
+  if (ret != size) {
+    edu::sharif::twinner::util::Logger::error () << "writeMemoryContent(...): "
+        "trying to write " << std::dec << size << " bytes, but PIN_SafeCopy "
+        "wrote " << ret << " bytes\n";
+    throw std::runtime_error ("Error in PIN_SafeCopy");
+  }
 }
 
 VOID writeRegisterContent (CONTEXT *context, REG reg, const UINT8 *value) {
