@@ -82,7 +82,7 @@ public:
 private:
   edu::sharif::twinner::trace::exptoken::ExpressionToken *
   instantiateMemorySymbol (ADDRINT memoryEa,
-      const edu::sharif::twinner::trace::cv::ConcreteValue64Bits &concreteValue,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
       int generationIndex, bool isOverwriting) const;
 };
 

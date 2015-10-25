@@ -167,6 +167,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
     typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
     typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod)
 /* @throw (UnexpectedChangeException) */ {
+  needsDownwardPropagation = false;
   try {
     Expression *exp = (this->*tryToGetMethod) (size, address, val);
     if (exp) { // exp exists and its val matches with expected value
@@ -182,12 +183,13 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
     edu::sharif::twinner::util::Logger::loquacious () << "Unexpected value ("
         << std::hex << currentValue
         << ") was found (instead of " << val << "). "
-        "Probably, a new symbol is required to describe it.\n";
+        "A new symbol is required to describe it.\n";
   }
   // instantiate and set a new expression in the current segment
   if (!newExpression) {
     newExpression = instantiateExpression (address, val, currentSegmentIndex);
   }
+  needsDownwardPropagation = true;
   return (getCurrentTraceSegment ()->*getMethod) (size, address, val, newExpression);
 }
 
@@ -198,6 +200,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
     ::TraceTypeWithoutConcreteValue tryToGetMethod,
     typename GetSymbolicExpressionMethod < T >::
     TraceSegmentTypeWithoutConcreteValue getMethod) {
+  needsDownwardPropagation = false;
   Expression *exp = (this->*tryToGetMethod) (size, address);
   if (exp) {
     return exp;
@@ -216,6 +219,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
         (address, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (0),
          currentSegmentIndex);
   }
+  needsDownwardPropagation = true;
   return (getCurrentTraceSegment ()->*getMethod) (size, address, newExpression);
 }
 

@@ -54,6 +54,14 @@ protected:
   int currentSegmentIndex;
 
   /**
+   * Indicates that a getter method has created a new symbol and
+   * stored it in the requested address.
+   * It should be propagated downwards to ensure that no two created symbols
+   * may have a containing-enclosing relationship.
+   */
+  bool needsDownwardPropagation;
+
+  /**
    * Manages memory and allows allocation/deallocation from a pre-allocated part of the
    * memory. Used for keeping strings of disassembled instructions.
    */
@@ -121,6 +129,8 @@ public:
   virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
       Expression *newExpression = 0) /* @throw (UnexpectedChangeException) */;
+
+  bool doesLastGetterCallNeedDownwardPropagation () const;
 
   /**
    * The getter searches segments backwards to find queried value.

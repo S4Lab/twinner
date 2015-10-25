@@ -53,23 +53,24 @@ ExpressionImp::ExpressionImp (REG reg,
 
 edu::sharif::twinner::trace::exptoken::ExpressionToken *
 ExpressionImp::instantiateMemorySymbol (ADDRINT memoryEa,
-    const edu::sharif::twinner::trace::cv::ConcreteValue64Bits &concreteValue,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex, bool isOverwriting) const {
   if (isOverwriting) {
     return new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
         (memoryEa, concreteValue, generationIndex);
   } else {
+    const int size = concreteValue.getSize () / 8;
     UINT64 currentConcreteValue = 0;
     try {
       currentConcreteValue = edu::sharif::twinner::util::readMemoryContent
-          (memoryEa, 8);
+          (memoryEa, size);
     } catch (const std::runtime_error &e) {
       edu::sharif::twinner::util::Logger::warning () << "memory is not readable; address: 0x" << std::hex << memoryEa << '\n';
       throw;
     }
     try {
       edu::sharif::twinner::util::writeMemoryContent
-          (memoryEa, (const UINT8 *) &currentConcreteValue, 8);
+          (memoryEa, (const UINT8 *) &currentConcreteValue, size);
       return new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
           (memoryEa, concreteValue, generationIndex);
     } catch (const std::runtime_error &e) {
@@ -90,9 +91,7 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
       return;
     }
   }
-  switch (const int cvsize = concreteValue.getSize ()) {
-  case 128:
-  {
+  if (concreteValue.getSize () == 128) {
     const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *cv =
         static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
         (&concreteValue);
@@ -108,43 +107,9 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
           edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getLsb ()),
           generationIndex, isOverwriting));
     stack.push_back (Operator::instantiateOperator (Operator::BITWISE_OR));
-    break;
-  }
-  case 64:
+  } else {
     stack.push_back (instantiateMemorySymbol
                      (memoryEa, concreteValue, generationIndex, isOverwriting));
-    break;
-  case 32:
-  case 16:
-  case 8:
-  {
-    const int offset = memoryEa % 8;
-    if (offset == 0) {
-      stack.push_back
-          (instantiateMemorySymbol
-           (memoryEa,
-            edu::sharif::twinner::trace::cv::ConcreteValue64Bits (concreteValue),
-            generationIndex, isOverwriting));
-    } else {
-      stack.push_back (instantiateMemorySymbol
-                       (memoryEa - offset,
-                        edu::sharif::twinner::trace::cv::ConcreteValue64Bits
-                        (concreteValue.toUint64 () << (offset * 8)),
-                        generationIndex, isOverwriting));
-      stack.push_back
-          (new edu::sharif::twinner::trace::exptoken::Constant (offset * 8));
-      stack.push_back (Operator::instantiateOperator (Operator::SHIFT_RIGHT));
-    }
-    if (offset < 8 - (cvsize / 8)) {
-      stack.push_back
-          (new edu::sharif::twinner::trace::exptoken::Constant ((1ull << cvsize) - 1));
-      stack.push_back (Operator::instantiateOperator (Operator::BITWISE_AND));
-    }
-    break;
-  }
-  default:
-    throw std::runtime_error ("ExpressionImp::ExpressionImp (...): "
-                              "Unsupported concrete value size");
   }
 }
 

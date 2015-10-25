@@ -25,7 +25,6 @@ namespace twinner {
 namespace twintool {
 
 class MemoryResidentExpressionValueProxy : public MutableExpressionValueProxy {
-
 private:
   ADDRINT memoryEa;
   int memReadBytes;
@@ -50,6 +49,8 @@ public:
   virtual int getSize () const;
 
 private:
+  void emptyExpressionCache () const;
+
   void propagateChangeDownwards (int size, ADDRINT memoryEa,
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression &changedExp, bool ownExp) const;

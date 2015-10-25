@@ -86,6 +86,11 @@ MemoryResidentExpressionValueProxy::alignedMemoryRead (int size,
   edu::sharif::twinner::trace::Expression *exp =
       trace->getSymbolicExpressionByMemoryAddress (size, memoryEa, *cv);
   delete cv;
+  if (trace->doesLastGetterCallNeedDownwardPropagation ()) {
+    expCache.clear ();
+    propagateChangeDownwards (size, memoryEa, trace, *exp, false);
+    emptyExpressionCache ();
+  }
   return exp;
 }
 
@@ -188,14 +193,16 @@ void MemoryResidentExpressionValueProxy::valueIsChanged (
     propagateChangeUpwards (size, leftAlignedAddress, trace, *left);
     propagateChangeUpwards (size, rightAlignedAddress, trace, *right);
   }
+  emptyExpressionCache ();
+}
+
+void MemoryResidentExpressionValueProxy::emptyExpressionCache () const {
   for (AddrSizeToExpMap::iterator it = expCache.begin (); it != expCache.end (); ++it) {
     std::pair < const edu::sharif::twinner::trace::Expression *, bool > &p = it->second;
     if (p.second) {
       delete p.first;
     }
   }
-  // trace->printMemoryUsageStats (edu::sharif::twinner::util::Logger::debug ());
-  trace->abandonTrivialMemoryExpressions ();
 }
 
 void MemoryResidentExpressionValueProxy::propagateChangeDownwards (int size,

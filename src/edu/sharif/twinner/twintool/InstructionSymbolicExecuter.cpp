@@ -891,6 +891,7 @@ void InstructionSymbolicExecuter::analysisRoutineRunHooks (const CONTEXT *contex
 
 void InstructionSymbolicExecuter::analysisRoutineInitializeRegisters (
     CONTEXT *context) const {
+  edu::sharif::twinner::util::Logger::loquacious () << "analysisRoutineInitializeRegisters\n";
   syscallReturned (context);
   PIN_ExecuteAt (context); // never returns
 }

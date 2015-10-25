@@ -97,6 +97,10 @@ Expression *Trace::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memor
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
+bool Trace::doesLastGetterCallNeedDownwardPropagation () const {
+  return needsDownwardPropagation;
+}
+
 Expression *Trace::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
     Expression *newExpression) {
   throw std::runtime_error ("PIN infrastructure is not available");
