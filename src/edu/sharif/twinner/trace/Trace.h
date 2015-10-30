@@ -88,27 +88,27 @@ public:
    * ASSERT: The precision of regval must match with precision of reg
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &regval) const
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval)
   /* @throw (WrongStateException) */;
 
   /**
    * Searches backwards to find queried values.
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg) const;
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg);
 
   /**
    * Searches backwards to find queried values.
    * ASSERT: The precision of memval must match with precision of memoryEa location
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
-      ADDRINT memoryEa, const edu::sharif::twinner::trace::cv::ConcreteValue &memval) const
+      ADDRINT memoryEa, const edu::sharif::twinner::trace::cv::ConcreteValue &memval)
   /* @throw (WrongStateException) */;
 
   /**
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
-      ADDRINT memoryEa) const;
+      ADDRINT memoryEa);
 
   /**
    * The getter searches segments backwards to find queried value.

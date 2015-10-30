@@ -70,7 +70,7 @@ public:
    * corresponding expression differs from expected @c regval value.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &regval) const
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval)
   /* @throw (WrongStateException) */ = 0;
 
   /**
@@ -82,10 +82,12 @@ public:
    * @return symbolic expression which is living in given register at current state
    * or 0/null if there is no such expression.
    */
-  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg) const = 0;
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg) = 0;
 
   /**
    * The getter returns current value stored in one memory address.
+   * If null is stored in the requested address, it means that the expression
+   * should be lazy-loaded. In this situation, this method won't be const.
    * Ownership of returned expression is kept and caller should clone it if required.
    * Returned expression can be changed if desired.
    * ASSERT: The precision of memval must match with precision of memoryEa location.
@@ -101,11 +103,13 @@ public:
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &memval) const
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval)
   /* @throw (WrongStateException) */ = 0;
 
   /**
    * Overloads of tryToGetSymbolicExpressionByMemoryAddress (memoryEa, memval) method.
+   * If null is stored in the requested address, it means that the expression
+   * should be lazy-loaded. In this situation, this method won't be const.
    * This overload does not take care of concrete values.
    *
    * @param size The bit-precision of the memory location which its value is being read.
@@ -114,7 +118,7 @@ public:
    * state or 0/null if there is no such expression.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
-      ADDRINT memoryEa) const = 0;
+      ADDRINT memoryEa) = 0;
 
   /**
    * The getter returns current value stored in one register.

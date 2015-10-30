@@ -52,15 +52,15 @@ public:
   virtual ~ExecutionTraceSegment ();
 
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &regval) const
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval)
   /* @throw (WrongStateException) */;
-  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg) const;
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg);
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &memval) const
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval)
   /* @throw (WrongStateException) */;
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
-      ADDRINT memoryEa) const;
+      ADDRINT memoryEa);
 
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
@@ -91,11 +91,11 @@ private:
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
       int size, std::map < KEY, Expression * > &map, const KEY key,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal)
   /* @throw (WrongStateException) */;
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
-      int size, const std::map < KEY, Expression * > &map, const KEY key) const;
+      int size, const std::map < KEY, Expression * > &map, const KEY key);
   template < typename KEY >
   Expression *getSymbolicExpressionImplementation (int size,
       std::map < KEY, Expression * > &map, const KEY key,

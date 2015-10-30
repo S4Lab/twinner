@@ -57,19 +57,19 @@ TraceImp::~TraceImp () {
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByRegister (int size, REG reg,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &regval) const
+    const edu::sharif::twinner::trace::cv::ConcreteValue &regval)
 /* @throw (WrongStateException) */ {
   return tryToGetSymbolicExpressionImplementation
       (size, reg, regval, &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
 }
 
-Expression *TraceImp::tryToGetSymbolicExpressionByRegister (int size, REG reg) const {
+Expression *TraceImp::tryToGetSymbolicExpressionByRegister (int size, REG reg) {
   return tryToGetSymbolicExpressionImplementation
       (size, reg, &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
-    ADDRINT memoryEa, const edu::sharif::twinner::trace::cv::ConcreteValue &memval) const
+    ADDRINT memoryEa, const edu::sharif::twinner::trace::cv::ConcreteValue &memval)
 /* throw (WrongStateException) */ {
   return tryToGetSymbolicExpressionImplementation
       (size, memoryEa, memval,
@@ -77,7 +77,7 @@ Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
-    ADDRINT memoryEa) const {
+    ADDRINT memoryEa) {
   return tryToGetSymbolicExpressionImplementation
       (size, memoryEa, &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
 }
@@ -85,7 +85,7 @@ Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
 template < typename T >
 Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T address,
     const edu::sharif::twinner::trace::cv::ConcreteValue &val,
-    typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method) const
+    typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
 /* @throw (WrongStateException) */ {
   for (std::list < ExecutionTraceSegment * >::iterator it = currentSegmentIterator;
       it != segments.end (); ++it) {
@@ -114,7 +114,7 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
 template < typename T >
 Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T address,
     typename TryToGetSymbolicExpressionMethod < T >::
-    TraceSegmentTypeWithoutConcreteValue method) const {
+    TraceSegmentTypeWithoutConcreteValue method) {
   for (std::list < ExecutionTraceSegment * >::iterator it = currentSegmentIterator;
       it != segments.end (); ++it) {
     // searches segments starting from the current towards the oldest one
