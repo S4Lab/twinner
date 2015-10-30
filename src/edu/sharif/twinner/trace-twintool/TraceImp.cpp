@@ -167,7 +167,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
     typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
     typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod)
 /* @throw (UnexpectedChangeException) */ {
-  needsDownwardPropagation = false;
+  needsPropagation = false;
   try {
     Expression *exp = (this->*tryToGetMethod) (size, address, val);
     if (exp) { // exp exists and its val matches with expected value
@@ -189,7 +189,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
   if (!newExpression) {
     newExpression = instantiateExpression (address, val, currentSegmentIndex);
   }
-  needsDownwardPropagation = true;
+  needsPropagation = true;
   return (getCurrentTraceSegment ()->*getMethod) (size, address, val, newExpression);
 }
 
@@ -200,7 +200,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
     ::TraceTypeWithoutConcreteValue tryToGetMethod,
     typename GetSymbolicExpressionMethod < T >::
     TraceSegmentTypeWithoutConcreteValue getMethod) {
-  needsDownwardPropagation = false;
+  needsPropagation = false;
   Expression *exp = (this->*tryToGetMethod) (size, address);
   if (exp) {
     return exp;
@@ -219,7 +219,7 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
         (address, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (0),
          currentSegmentIndex);
   }
-  needsDownwardPropagation = true;
+  needsPropagation = true;
   return (getCurrentTraceSegment ()->*getMethod) (size, address, newExpression);
 }
 
@@ -229,7 +229,7 @@ void TraceImp::loadInitializedSymbolsFromBinaryStream (std::stringstream &in) {
   in.read ((char *) &s, sizeof (s));
   int index = 0;
   if (s == 0) {
-    segments.push_front (new ExecutionTraceSegment ());
+    segments.push_front (new ExecutionTraceSegment (index));
   }
 
   repeat (s) {
@@ -237,10 +237,11 @@ void TraceImp::loadInitializedSymbolsFromBinaryStream (std::stringstream &in) {
     in.read ((char *) &segmentIndex, sizeof (segmentIndex));
     ExecutionTraceSegment *segment =
         loadSingleSegmentSymbolsRecordsFromBinaryStream (segmentIndex, in);
-    while (index++ < segmentIndex) {
-      segments.push_front (new ExecutionTraceSegment ());
+    while (index < segmentIndex) {
+      segments.push_front (new ExecutionTraceSegment (index++));
     }
     segments.push_front (segment);
+    ++index;
   }
 }
 
@@ -333,7 +334,7 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
       throw std::runtime_error ("Unsupported SymbolRecord type");
     }
   }
-  return new ExecutionTraceSegment (regMap, memMap);
+  return new ExecutionTraceSegment (index, regMap, memMap);
 }
 
 Expression *TraceImp::instantiateExpression (REG address,

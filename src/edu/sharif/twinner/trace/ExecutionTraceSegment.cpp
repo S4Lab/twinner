@@ -18,8 +18,11 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
+
 #include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/Expression.h"
+
+#include "cv/ConcreteValue64Bits.h"
 
 #include <utility>
 #include <stdexcept>
@@ -32,10 +35,23 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-ExecutionTraceSegment::ExecutionTraceSegment (const std::map < REG, Expression * > &regi,
+template < >
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
+    int size, std::map < REG, Expression * > &map, const REG key,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
+/* @throw (WrongStateException) */;
+template < >
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
+    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
+/* @throw (WrongStateException) */;
+
+ExecutionTraceSegment::ExecutionTraceSegment (int index,
+    const std::map < REG, Expression * > &regi,
     const std::map < ADDRINT, Expression * > &memo,
     const std::list < Constraint * > &cnrt) :
-    registerToExpression (regi), memoryAddressTo64BitsExpression (memo), pathConstraints (cnrt) {
+    registerToExpression (regi), memoryAddressTo64BitsExpression (memo),
+    pathConstraints (cnrt), segmentIndex (index) {
   /*
    * This constructor is called by Twinner to reacquire registers/memory/constraints
    * info and use them to build its behavioral model.
@@ -44,13 +60,15 @@ ExecutionTraceSegment::ExecutionTraceSegment (const std::map < REG, Expression *
    */
 }
 
-ExecutionTraceSegment::ExecutionTraceSegment () {
+ExecutionTraceSegment::ExecutionTraceSegment (int index) :
+    segmentIndex (index) {
 }
 
-ExecutionTraceSegment::ExecutionTraceSegment (
+ExecutionTraceSegment::ExecutionTraceSegment (int index,
     const std::map < REG, Expression * > &regMap,
     const std::map < ADDRINT, Expression * > &memMap) :
-    registerToExpression (regMap), memoryAddressTo64BitsExpression (memMap) {
+    registerToExpression (regMap), memoryAddressTo64BitsExpression (memMap),
+    segmentIndex (index) {
   /*
    * This constructor is called by TwinTool and so other (128/32 bits) memory addresses
    * may be accessed too.
@@ -147,13 +165,13 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (int siz
     REG reg, const edu::sharif::twinner::trace::cv::ConcreteValue &regval) const
 /* @throw (WrongStateException) */ {
   UNUSED_VARIABLE (size);
-  return tryToGetSymbolicExpressionImplementation (registerToExpression, reg, regval);
+  return tryToGetSymbolicExpressionImplementation (size, registerToExpression, reg, regval);
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (int size,
     REG reg) const {
   UNUSED_VARIABLE (size);
-  return tryToGetSymbolicExpressionImplementation (registerToExpression, reg);
+  return tryToGetSymbolicExpressionImplementation (size, registerToExpression, reg);
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (int size,
@@ -162,19 +180,19 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (in
   switch (size) {
   case 128:
     return tryToGetSymbolicExpressionImplementation
-        (memoryAddressTo128BitsExpression, memoryEa, memval);
+        (128, memoryAddressTo128BitsExpression, memoryEa, memval);
   case 64:
     return tryToGetSymbolicExpressionImplementation
-        (memoryAddressTo64BitsExpression, memoryEa, memval);
+        (64, memoryAddressTo64BitsExpression, memoryEa, memval);
   case 32:
     return tryToGetSymbolicExpressionImplementation
-        (memoryAddressTo32BitsExpression, memoryEa, memval);
+        (32, memoryAddressTo32BitsExpression, memoryEa, memval);
   case 16:
     return tryToGetSymbolicExpressionImplementation
-        (memoryAddressTo16BitsExpression, memoryEa, memval);
+        (16, memoryAddressTo16BitsExpression, memoryEa, memval);
   case 8:
     return tryToGetSymbolicExpressionImplementation
-        (memoryAddressTo8BitsExpression, memoryEa, memval);
+        (8, memoryAddressTo8BitsExpression, memoryEa, memval);
   default:
     throw std::runtime_error ("Memory read size is not supported");
   }
@@ -185,19 +203,19 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (in
   switch (size) {
   case 128:
     return tryToGetSymbolicExpressionImplementation
-        (memoryAddressTo128BitsExpression, memoryEa);
+        (128, memoryAddressTo128BitsExpression, memoryEa);
   case 64:
     return tryToGetSymbolicExpressionImplementation
-        (memoryAddressTo64BitsExpression, memoryEa);
+        (64, memoryAddressTo64BitsExpression, memoryEa);
   case 32:
     return tryToGetSymbolicExpressionImplementation
-        (memoryAddressTo32BitsExpression, memoryEa);
+        (32, memoryAddressTo32BitsExpression, memoryEa);
   case 16:
     return tryToGetSymbolicExpressionImplementation
-        (memoryAddressTo16BitsExpression, memoryEa);
+        (16, memoryAddressTo16BitsExpression, memoryEa);
   case 8:
     return tryToGetSymbolicExpressionImplementation
-        (memoryAddressTo8BitsExpression, memoryEa);
+        (8, memoryAddressTo8BitsExpression, memoryEa);
   default:
     throw std::runtime_error ("Memory read size is not supported");
   }
@@ -214,16 +232,42 @@ template < >
 void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expression *exp,
     ADDRINT address, const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal);
 
-template < typename KEY >
+Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me,
+    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal);
+
+template < >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
-    const std::map < KEY, Expression * > &map, const KEY key,
+    int size, std::map < REG, Expression * > &map, const REG key,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
 /* @throw (WrongStateException) */ {
+  typedef REG KEY;
   typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
     Expression *exp = it->second;
+    check_concrete_value_and_throw_wrong_state_exception_on_mismatch
+        (exp, key, concreteVal);
+
+    return exp;
+  }
+}
+
+template < >
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
+    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
+/* @throw (WrongStateException) */ {
+  typedef ADDRINT KEY;
+  typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
+  if (it == map.end ()) { // not found!
+    return 0;
+  } else {
+    Expression *exp = it->second;
+    if (exp == NULL) { // expression is lazy-loaded && KEY == ADDRINT
+      return lazy_load_symbolic_expression (this, size, map, key, concreteVal);
+    }
     check_concrete_value_and_throw_wrong_state_exception_on_mismatch
         (exp, key, concreteVal);
 
@@ -245,12 +289,16 @@ void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expressio
 
 template < typename KEY >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
-    const std::map < KEY, Expression * > &map, const KEY key) const {
+    int size, const std::map < KEY, Expression * > &map, const KEY key) const {
   typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
-    return it->second;
+    Expression *exp = it->second;
+    if (exp == NULL) { // expression is lazy-loaded
+      throw "Not Implemented Yet";
+    }
+    return exp;
   }
 }
 
@@ -258,14 +306,15 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (int size, RE
     const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
     Expression *newExpression) {
   UNUSED_VARIABLE (size);
-  return getSymbolicExpressionImplementation (registerToExpression, reg, regval,
-                                              newExpression);
+  return getSymbolicExpressionImplementation
+      (size, registerToExpression, reg, regval, newExpression);
 }
 
 Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (int size, REG reg,
     Expression *newExpression) {
   UNUSED_VARIABLE (size);
-  return getSymbolicExpressionImplementation (registerToExpression, reg, newExpression);
+  return getSymbolicExpressionImplementation
+      (size, registerToExpression, reg, newExpression);
 }
 
 Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int size,
@@ -274,19 +323,19 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int siz
   switch (size) {
   case 128:
     return getSymbolicExpressionImplementation
-        (memoryAddressTo128BitsExpression, memoryEa, memval, newExpression);
+        (128, memoryAddressTo128BitsExpression, memoryEa, memval, newExpression);
   case 64:
     return getSymbolicExpressionImplementation
-        (memoryAddressTo64BitsExpression, memoryEa, memval, newExpression);
+        (64, memoryAddressTo64BitsExpression, memoryEa, memval, newExpression);
   case 32:
     return getSymbolicExpressionImplementation
-        (memoryAddressTo32BitsExpression, memoryEa, memval, newExpression);
+        (32, memoryAddressTo32BitsExpression, memoryEa, memval, newExpression);
   case 16:
     return getSymbolicExpressionImplementation
-        (memoryAddressTo16BitsExpression, memoryEa, memval, newExpression);
+        (16, memoryAddressTo16BitsExpression, memoryEa, memval, newExpression);
   case 8:
     return getSymbolicExpressionImplementation
-        (memoryAddressTo8BitsExpression, memoryEa, memval, newExpression);
+        (8, memoryAddressTo8BitsExpression, memoryEa, memval, newExpression);
   default:
     throw std::runtime_error ("Memory read size is not supported");
   }
@@ -297,19 +346,19 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int siz
   switch (size) {
   case 128:
     return getSymbolicExpressionImplementation
-        (memoryAddressTo128BitsExpression, memoryEa, newExpression);
+        (128, memoryAddressTo128BitsExpression, memoryEa, newExpression);
   case 64:
     return getSymbolicExpressionImplementation
-        (memoryAddressTo64BitsExpression, memoryEa, newExpression);
+        (64, memoryAddressTo64BitsExpression, memoryEa, newExpression);
   case 32:
     return getSymbolicExpressionImplementation
-        (memoryAddressTo32BitsExpression, memoryEa, newExpression);
+        (32, memoryAddressTo32BitsExpression, memoryEa, newExpression);
   case 16:
     return getSymbolicExpressionImplementation
-        (memoryAddressTo16BitsExpression, memoryEa, newExpression);
+        (16, memoryAddressTo16BitsExpression, memoryEa, newExpression);
   case 8:
     return getSymbolicExpressionImplementation
-        (memoryAddressTo8BitsExpression, memoryEa, newExpression);
+        (8, memoryAddressTo8BitsExpression, memoryEa, newExpression);
   default:
     throw std::runtime_error ("Memory read size is not supported");
   }
@@ -317,13 +366,13 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int siz
 
 template < typename KEY >
 Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
-    std::map < KEY, Expression * > &map, const KEY key,
+    int size, std::map < KEY, Expression * > &map, const KEY key,
     const edu::sharif::twinner::trace::cv::ConcreteValue &currentConcreteValue,
     Expression *newExpression) {
   typedef typename std::map < KEY, Expression * >::iterator MapIterator;
   try {
     Expression *exp = tryToGetSymbolicExpressionImplementation
-        (map, key, currentConcreteValue);
+        (size, map, key, currentConcreteValue);
     if (exp) {
       return exp;
     }
@@ -345,11 +394,11 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
 
 template < typename KEY >
 Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
-    std::map < KEY, Expression * > &map, const KEY key,
+    int size, std::map < KEY, Expression * > &map, const KEY key,
     Expression *newExpression) {
   typedef typename std::map < KEY, Expression * >::iterator MapIterator;
   Expression *exp = tryToGetSymbolicExpressionImplementation
-      (map, key);
+      (size, map, key);
   if (exp) {
     return exp;
   }
@@ -404,10 +453,12 @@ Expression *ExecutionTraceSegment::setSymbolicExpressionImplementation (int size
   typedef typename std::map < KEY, Expression * >::iterator MapIterator;
   // The nonOwnedExpression is owned by caller.
   // We must clone it and take ownership of the cloned object.
-  Expression *exp = nonOwnedExpression->clone (size);
+  // A null expression means that the expression should be lazy-loaded.
+  Expression *exp = nonOwnedExpression != NULL
+      ? nonOwnedExpression->clone (size) : NULL;
   std::pair < MapIterator, bool > res = map.insert (make_pair (key, exp));
   if (!res.second) { // another expression already exists. overwriting...
-    // old expression is owned by us; so it should be deleted before loosing its pointer!
+    // old expression is owned by us; so it should be deleted before missing its pointer!
     MapIterator it = res.first;
     delete it->second;
     it->second = exp;
@@ -435,6 +486,7 @@ void ExecutionTraceSegment::saveToBinaryStream (std::ofstream &out) const {
   // USE CASE: TwinTool saves segments, so Twinner can read them back
   const char *segmentMagicString = "SEG";
   out.write (segmentMagicString, 3);
+  out.write (reinterpret_cast<const char *> (&segmentIndex), sizeof (segmentIndex));
 
   saveMapToBinaryStream (out, "REG", registerToExpression);
   saveMapToBinaryStream (out, "MEM", memoryAddressTo64BitsExpression);
@@ -466,6 +518,8 @@ ExecutionTraceSegment *ExecutionTraceSegment::loadFromBinaryStream (std::ifstrea
     throw std::runtime_error
         ("Unexpected magic string while loading trace segment from binary stream");
   }
+  int segmentIndex;
+  in.read (reinterpret_cast<char *> (&segmentIndex), sizeof (segmentIndex));
   std::map < REG, Expression * > regi;
   // The memo only contains 64-bits memory symbols (+ 128/64-bits reg symbols of course)
   // Also the precision of ADDRINT is 64-bits (both memory cells and formulas are 64-bits)
@@ -475,7 +529,11 @@ ExecutionTraceSegment *ExecutionTraceSegment::loadFromBinaryStream (std::ifstrea
   loadMapFromBinaryStream (in, "MEM", memo);
   loadListFromBinaryStream (in, "CON", cnrt);
 
-  return new ExecutionTraceSegment (regi, memo, cnrt);
+  return new ExecutionTraceSegment (segmentIndex, regi, memo, cnrt);
+}
+
+int ExecutionTraceSegment::getSegmentIndex () const {
+  return segmentIndex;
 }
 
 template <typename ADDRESS>

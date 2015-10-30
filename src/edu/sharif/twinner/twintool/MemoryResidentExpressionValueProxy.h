@@ -22,6 +22,16 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace trace {
+
+class ExecutionState;
+class ExecutionTraceSegment;
+
+namespace cv {
+
+class ConcreteValue;
+}
+}
 namespace twintool {
 
 class MemoryResidentExpressionValueProxy : public MutableExpressionValueProxy {
@@ -35,6 +45,10 @@ public:
 
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const;
+  edu::sharif::twinner::trace::Expression *getExpression (
+      edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &cv) const
+  /* @throw (WrongStateException) */;
 
   virtual edu::sharif::twinner::trace::Expression
   setExpressionWithoutChangeNotification (
@@ -52,14 +66,14 @@ private:
   void emptyExpressionCache () const;
 
   void propagateChangeDownwards (int size, ADDRINT memoryEa,
-      edu::sharif::twinner::trace::Trace *trace,
+      edu::sharif::twinner::trace::ExecutionState *state,
       const edu::sharif::twinner::trace::Expression &changedExp, bool ownExp) const;
   void propagateChangeUpwards (int size, ADDRINT memoryEa,
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression &changedExp) const;
 
   void actualPropagateChangeDownwards (int size,
-      ADDRINT memoryEa, edu::sharif::twinner::trace::Trace *trace,
+      ADDRINT memoryEa, edu::sharif::twinner::trace::ExecutionState *state,
       const edu::sharif::twinner::trace::Expression *exp) const;
 
   /// returned expression is linked to the underlying expression (clone it to de-link)
@@ -71,6 +85,11 @@ private:
   edu::sharif::twinner::trace::Expression unalignedMemoryWrite (int size,
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const;
+
+  edu::sharif::twinner::trace::Expression *alignedMemoryRead (int size,
+      edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &cv) const
+  /* @throw (WrongStateException) */;
 
   /// temporary cache of any used exp during change propagation in valueIsChanged ()
   typedef std::map < std::pair < ADDRINT, int >,

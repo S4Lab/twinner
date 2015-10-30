@@ -37,13 +37,17 @@ private:
   /// Each execution trace segment is terminated with some syscall.
   Syscall syscall;
 
-  ExecutionTraceSegment (const std::map < REG, Expression * > &regi,
+  int segmentIndex;
+
+  ExecutionTraceSegment (int index,
+      const std::map < REG, Expression * > &regi,
       const std::map < ADDRINT, Expression * > &memo,
       const std::list < Constraint * > &cnrt);
 
 public:
-  ExecutionTraceSegment ();
-  ExecutionTraceSegment (const std::map < REG, Expression * > &regMap,
+  ExecutionTraceSegment (int index);
+  ExecutionTraceSegment (int index,
+      const std::map < REG, Expression * > &regMap,
       const std::map < ADDRINT, Expression * > &memMap);
   virtual ~ExecutionTraceSegment ();
 
@@ -81,23 +85,26 @@ public:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static ExecutionTraceSegment *loadFromBinaryStream (std::ifstream &in);
 
+  int getSegmentIndex () const;
+
 private:
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
-      const std::map < KEY, Expression * > &map, const KEY key,
+      int size, std::map < KEY, Expression * > &map, const KEY key,
       const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
   /* @throw (WrongStateException) */;
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
-      const std::map < KEY, Expression * > &map, const KEY key) const;
+      int size, const std::map < KEY, Expression * > &map, const KEY key) const;
   template < typename KEY >
-  Expression *getSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
-      const KEY key,
+  Expression *getSymbolicExpressionImplementation (int size,
+      std::map < KEY, Expression * > &map, const KEY key,
       const edu::sharif::twinner::trace::cv::ConcreteValue &currentConcreteValue,
       Expression *newExpression);
   template < typename KEY >
-  Expression *getSymbolicExpressionImplementation (std::map < KEY, Expression * > &map,
-      const KEY key, Expression *newExpression);
+  Expression *getSymbolicExpressionImplementation (int size,
+      std::map < KEY, Expression * > &map, const KEY key,
+      Expression *newExpression);
   template < typename KEY >
   Expression *setSymbolicExpressionImplementation (int size,
       std::map < KEY, Expression * > &map, const KEY key, const Expression *exp);

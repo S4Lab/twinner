@@ -49,7 +49,7 @@ Trace::Trace (const std::list < ExecutionTraceSegment * > &list,
 
 Trace::Trace () :
     memoryManager (edu::sharif::twinner::util::MemoryManager::allocateInstance ()) {
-  segments.push_front (new ExecutionTraceSegment ());
+  segments.push_front (new ExecutionTraceSegment (0));
   currentSegmentIterator = segments.begin ();
   currentSegmentIndex = 0;
 }
@@ -97,8 +97,8 @@ Expression *Trace::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memor
   throw std::runtime_error ("PIN infrastructure is not available");
 }
 
-bool Trace::doesLastGetterCallNeedDownwardPropagation () const {
-  return needsDownwardPropagation;
+bool Trace::doesLastGetterCallNeedPropagation () const {
+  return needsPropagation;
 }
 
 Expression *Trace::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
@@ -137,11 +137,11 @@ void Trace::addPathConstraints (
 
 void Trace::syscallInvoked (Syscall s) {
   getCurrentTraceSegment ()->setSyscall (s);
+  currentSegmentIndex++;
   if (currentSegmentIterator == segments.begin ()) {
-    segments.push_front (new ExecutionTraceSegment ());
+    segments.push_front (new ExecutionTraceSegment (currentSegmentIndex));
   }
   currentSegmentIterator--;
-  currentSegmentIndex++;
 }
 
 void Trace::syscallReturned (CONTEXT *context) const {

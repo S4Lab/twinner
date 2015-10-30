@@ -58,8 +58,10 @@ protected:
    * stored it in the requested address.
    * It should be propagated downwards to ensure that no two created symbols
    * may have a containing-enclosing relationship.
+   * For memory addresses, it should be propagated lazily upwards too
+   * in order to avoid reading unmapped memory.
    */
-  bool needsDownwardPropagation;
+  bool needsPropagation;
 
   /**
    * Manages memory and allows allocation/deallocation from a pre-allocated part of the
@@ -130,7 +132,7 @@ public:
       const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
       Expression *newExpression = 0) /* @throw (UnexpectedChangeException) */;
 
-  bool doesLastGetterCallNeedDownwardPropagation () const;
+  bool doesLastGetterCallNeedPropagation () const;
 
   /**
    * The getter searches segments backwards to find queried value.
