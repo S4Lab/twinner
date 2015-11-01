@@ -194,6 +194,11 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (in
     return tryToGetSymbolicExpressionImplementation
         (8, memoryAddressTo8BitsExpression, memoryEa, memval);
   default:
+    edu::sharif::twinner::util::Logger::error () <<
+        "ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress"
+        " (size=" << std::dec << size
+        << ", memoryEa=0x" << std::hex << memoryEa
+        << ", memval=" << memval << "): Memory read size is not supported\n";
     throw std::runtime_error ("Memory read size is not supported");
   }
 }
@@ -217,6 +222,11 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (in
     return tryToGetSymbolicExpressionImplementation
         (8, memoryAddressTo8BitsExpression, memoryEa);
   default:
+    edu::sharif::twinner::util::Logger::error () <<
+        "ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress"
+        " (size=" << std::dec << size
+        << ", memoryEa=0x" << std::hex << memoryEa
+        << "): Memory read size is not supported\n";
     throw std::runtime_error ("Memory read size is not supported");
   }
 }
@@ -337,6 +347,11 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int siz
     return getSymbolicExpressionImplementation
         (8, memoryAddressTo8BitsExpression, memoryEa, memval, newExpression);
   default:
+    edu::sharif::twinner::util::Logger::error () <<
+        "ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress"
+        " (size=" << std::dec << size
+        << ", memoryEa=0x" << std::hex << memoryEa
+        << ", memval=" << memval << "): Memory read size is not supported\n";
     throw std::runtime_error ("Memory read size is not supported");
   }
 }
@@ -360,6 +375,11 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress (int siz
     return getSymbolicExpressionImplementation
         (8, memoryAddressTo8BitsExpression, memoryEa, newExpression);
   default:
+    edu::sharif::twinner::util::Logger::error () <<
+        "ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress"
+        " (size=" << std::dec << size
+        << ", memoryEa=0x" << std::hex << memoryEa
+        << "): Memory read size is not supported\n";
     throw std::runtime_error ("Memory read size is not supported");
   }
 }

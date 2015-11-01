@@ -368,9 +368,9 @@ Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me, int size,
     msb = tmp;
   }
   edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy leftProxy
-      (key, size / 2);
+      (key, (size / 2) / 8);
   edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy rightProxy
-      (key + size / 2, size / 2);
+      (key + (size / 2), (size / 2) / 8);
   Expression *leftExp = leftProxy.getExpression (me, *lsb);
   Expression *rightExp = rightProxy.getExpression (me, *msb);
   delete lsb;
