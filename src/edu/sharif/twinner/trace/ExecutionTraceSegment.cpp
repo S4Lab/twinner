@@ -509,7 +509,17 @@ void ExecutionTraceSegment::saveToBinaryStream (std::ofstream &out) const {
   out.write (reinterpret_cast<const char *> (&segmentIndex), sizeof (segmentIndex));
 
   saveMapToBinaryStream (out, "REG", registerToExpression);
-  saveMapToBinaryStream (out, "MEM", memoryAddressTo64BitsExpression);
+  std::map < ADDRINT, Expression * > memory;
+  for (std::map < ADDRINT, Expression * >::const_iterator it =
+      memoryAddressTo64BitsExpression.begin ();
+      it != memoryAddressTo64BitsExpression.end (); ++it) {
+    ADDRINT address = it->first;
+    Expression *exp = it->second;
+    if (exp) {
+      memory.insert (make_pair (address, exp));
+    }
+  }
+  saveMapToBinaryStream (out, "MEM", memory);
   saveListToBinaryStream (out, "CON", pathConstraints);
 }
 
