@@ -647,6 +647,9 @@ int ExecutionTraceSegment::calcSizeInBytes (
   for (typename std::map < Addr, Expression * >::const_iterator it = map.begin ();
       it != map.end (); ++it) {
     size += sizeof (typename std::map < Addr, Expression * >::value_type);
+    if (it->second == NULL) {
+      continue;
+    }
     const std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * > &stack = it->second->getStack ();
     for (std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >::const_iterator it2 = stack.begin ();
         it2 != stack.end (); ++it2) {
