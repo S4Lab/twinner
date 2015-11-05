@@ -95,7 +95,7 @@ private:
   /* @throw (WrongStateException) */;
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
-      int size, const std::map < KEY, Expression * > &map, const KEY key);
+      int size, std::map < KEY, Expression * > &map, const KEY key);
   template < typename KEY >
   Expression *getSymbolicExpressionImplementation (int size,
       std::map < KEY, Expression * > &map, const KEY key,

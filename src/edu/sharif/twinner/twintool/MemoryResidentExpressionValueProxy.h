@@ -49,6 +49,8 @@ public:
       edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
       const edu::sharif::twinner::trace::cv::ConcreteValue &cv) const
   /* @throw (WrongStateException) */;
+  edu::sharif::twinner::trace::Expression *getExpression (
+      edu::sharif::twinner::trace::ExecutionTraceSegment *segment) const;
 
   virtual edu::sharif::twinner::trace::Expression
   setExpressionWithoutChangeNotification (
@@ -90,6 +92,8 @@ private:
       edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
       const edu::sharif::twinner::trace::cv::ConcreteValue &cv) const
   /* @throw (WrongStateException) */;
+  edu::sharif::twinner::trace::Expression *alignedMemoryRead (int size,
+      edu::sharif::twinner::trace::ExecutionTraceSegment *segment) const;
 
   /// temporary cache of any used exp during change propagation in valueIsChanged ()
   typedef std::map < std::pair < ADDRINT, int >,

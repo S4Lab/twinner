@@ -694,7 +694,16 @@ edu::sharif::twinner::trace::Expression *lazy_load_symbolic_expression (
     std::map < ADDRINT, edu::sharif::twinner::trace::Expression * > &map,
     const ADDRINT key,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) {
-  throw std::runtime_error ("REG expressions cannot be lazy loaded");
+  const char *msg = "The lazy_load_symbolic_expression(...) function is"
+      " only supported in TwinTool: Calling error from Twinner.\n";
+  edu::sharif::twinner::util::Logger::error () << msg;
+  throw std::runtime_error (msg);
+}
+
+edu::sharif::twinner::trace::Expression *lazy_load_symbolic_expression (
+    edu::sharif::twinner::trace::ExecutionTraceSegment *me, int size,
+    std::map < ADDRINT, edu::sharif::twinner::trace::Expression * > &map,
+    const ADDRINT key) {
   const char *msg = "The lazy_load_symbolic_expression(...) function is"
       " only supported in TwinTool: Calling error from Twinner.\n";
   edu::sharif::twinner::util::Logger::error () << msg;

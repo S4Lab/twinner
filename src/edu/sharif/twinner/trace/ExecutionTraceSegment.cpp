@@ -46,6 +46,13 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal)
 /* @throw (WrongStateException) */;
 
+template < >
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
+    int size, std::map < REG, Expression * > &map, const REG key);
+template < >
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
+    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key);
+
 ExecutionTraceSegment::ExecutionTraceSegment (int index,
     const std::map < REG, Expression * > &regi,
     const std::map < ADDRINT, Expression * > &memo,
@@ -245,6 +252,8 @@ void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expressio
 Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me,
     int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal);
+Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me,
+    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key);
 
 template < >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
@@ -297,16 +306,29 @@ void check_concrete_value_and_throw_wrong_state_exception_on_mismatch (Expressio
   exp->checkConcreteValueMemory (memoryEa, concreteVal);
 }
 
-template < typename KEY >
+template < >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
-    int size, const std::map < KEY, Expression * > &map, const KEY key) {
+    int size, std::map < REG, Expression * > &map, const REG key) {
+  typedef REG KEY;
+  typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
+  if (it == map.end ()) { // not found!
+    return 0;
+  } else {
+    return it->second;
+  }
+}
+
+template < >
+Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
+    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key) {
+  typedef ADDRINT KEY;
   typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
     Expression *exp = it->second;
     if (exp == NULL) { // expression is lazy-loaded
-      throw "Not Implemented Yet";
+      return lazy_load_symbolic_expression (this, size, map, key);
     }
     return exp;
   }

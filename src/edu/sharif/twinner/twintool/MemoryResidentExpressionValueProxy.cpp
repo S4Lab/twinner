@@ -107,11 +107,22 @@ MemoryResidentExpressionValueProxy::alignedMemoryRead (int size,
 edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::getExpression (
     edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &cv) const {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &cv) const
+/* @throw (WrongStateException) */ {
   if (!isMemoryEaAligned ()) {
     throw std::runtime_error ("This API is only for aligned memory access");
   } else {
     return alignedMemoryRead (getSize (), segment, cv)->clone ();
+  }
+}
+
+edu::sharif::twinner::trace::Expression *
+MemoryResidentExpressionValueProxy::getExpression (
+    edu::sharif::twinner::trace::ExecutionTraceSegment *segment) const {
+  if (!isMemoryEaAligned ()) {
+    throw std::runtime_error ("This API is only for aligned memory access");
+  } else {
+    return alignedMemoryRead (getSize (), segment)->clone ();
   }
 }
 
@@ -130,6 +141,31 @@ MemoryResidentExpressionValueProxy::alignedMemoryRead (int size,
       (memoryEa, cv, segment->getSegmentIndex ());
   exp = segment->getSymbolicExpressionByMemoryAddress
       (size, memoryEa, cv, newExpression);
+  expCache.clear ();
+  propagateChangeDownwards (size, memoryEa, segment, *exp, false);
+  emptyExpressionCache ();
+  return exp;
+}
+
+edu::sharif::twinner::trace::Expression *
+MemoryResidentExpressionValueProxy::alignedMemoryRead (int size,
+    edu::sharif::twinner::trace::ExecutionTraceSegment *segment) const {
+  // ASSERT: size <= 64
+  edu::sharif::twinner::trace::Expression *exp =
+      segment->tryToGetSymbolicExpressionByMemoryAddress (size, memoryEa);
+  if (exp) { // exp exists and its val matches with expected value
+    return exp;
+  } // exp does not exist at all, so it's OK to create a new one
+  const UINT64 value = edu::sharif::twinner::util::readMemoryContent (memoryEa, size / 8);
+  const edu::sharif::twinner::trace::cv::ConcreteValue *cv =
+      edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value).clone (size);
+  edu::sharif::twinner::trace::Expression *newExpression =
+      new edu::sharif::twinner::trace::ExpressionImp
+      (memoryEa, *cv, segment->getSegmentIndex ());
+  delete cv;
+
+  exp = segment->getSymbolicExpressionByMemoryAddress
+      (size, memoryEa, newExpression);
   expCache.clear ();
   propagateChangeDownwards (size, memoryEa, segment, *exp, false);
   emptyExpressionCache ();
@@ -375,6 +411,34 @@ Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me, int size,
   Expression *rightExp = rightProxy.getExpression (me, *msb);
   delete lsb;
   delete msb;
+  {
+    Expression *tmp = rightExp->clone (size);
+    delete rightExp;
+    rightExp = tmp;
+  }
+  rightExp->shiftToLeft (size / 2);
+  rightExp->bitwiseOr (leftExp);
+  delete leftExp;
+  Expression *exp = rightExp;
+  typedef typename std::map < ADDRINT, Expression * >::iterator MapIterator;
+  std::pair < MapIterator, bool > res = map.insert (make_pair (key, exp));
+  if (!res.second) { // another expression already exists. overwriting...
+    // old expression is owned by us; so it should be deleted before missing its pointer!
+    MapIterator it = res.first;
+    delete it->second;
+    it->second = exp;
+  }
+  return exp;
+}
+
+Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me, int size,
+    std::map < ADDRINT, Expression * > &map, const ADDRINT key) {
+  edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy leftProxy
+      (key, (size / 2) / 8);
+  edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy rightProxy
+      (key + (size / 2), (size / 2) / 8);
+  Expression *leftExp = leftProxy.getExpression (me);
+  Expression *rightExp = rightProxy.getExpression (me);
   {
     Expression *tmp = rightExp->clone (size);
     delete rightExp;
