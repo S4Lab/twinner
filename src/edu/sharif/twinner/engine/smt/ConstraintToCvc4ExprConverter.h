@@ -54,7 +54,7 @@ private:
 
   std::map<std::string, Expr> constants;
   Expr zero;
-  Expr max64;
+  std::map<int, Expr> maxLimits;
 
   bool initialized;
   Expr totalConstraint;

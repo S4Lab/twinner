@@ -43,10 +43,20 @@ ConstraintToCvc4ExprConverter::ConstraintToCvc4ExprConverter (ExprManager &_em,
   type = em.mkBitVectorType (128);
 
   zero = em.mkConst (BitVector (128, UINT64 (0)));
-  max64 = em.mkConst (BitVector (128, UINT64 (0)).setBit (64));
+  maxLimits.insert
+      (make_pair (64, em.mkConst (BitVector (128, UINT64 (0)).setBit (64))));
+  maxLimits.insert
+      (make_pair (32, em.mkConst (BitVector (128, UINT64 (0)).setBit (32))));
+  maxLimits.insert
+      (make_pair (16, em.mkConst (BitVector (128, UINT64 (0)).setBit (16))));
+  maxLimits.insert
+      (make_pair (8, em.mkConst (BitVector (128, UINT64 (0)).setBit (8))));
 
   constants.insert (std::make_pair ("00000000000000000", zero));
-  constants.insert (std::make_pair ("10000000000000000", max64));
+  constants.insert (std::make_pair ("10000000000000000", maxLimits.at (64)));
+  constants.insert (std::make_pair ("100000000", maxLimits.at (32)));
+  constants.insert (std::make_pair ("10000", maxLimits.at (16)));
+  constants.insert (std::make_pair ("100", maxLimits.at (8)));
 }
 
 Expr ConstraintToCvc4ExprConverter::convert (std::map<std::string, Expr> &symbols) {
@@ -338,8 +348,12 @@ Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
         return it->second;
       } else {
         Expr sym = em.mkVar (name, type);
-        if (symbolToken->getValue ().getSize () == 64 && limitSymbols) {
-          addConstraint (em.mkExpr (kind::BITVECTOR_ULT, sym, max64));
+        if (limitSymbols) {
+          const int size = symbolToken->getValue ().getSize ();
+          if (size < 128) {
+            addConstraint
+                (em.mkExpr (kind::BITVECTOR_ULT, sym, maxLimits.at (size)));
+          }
         }
         symbols.insert (std::make_pair (name, sym));
         return sym;
