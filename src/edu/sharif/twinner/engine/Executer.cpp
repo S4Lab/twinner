@@ -239,7 +239,7 @@ Executer::executeSingleTraceInNormalMode () {
     for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
         ::const_iterator it = segments.begin (); it != segments.end (); ++it) {
       const edu::sharif::twinner::trace::ExecutionTraceSegment *segment = *it;
-      aggregate_symbols (segment->getMemoryAddressTo64BitsExpression (), msyms, rsyms);
+      aggregate_symbols (segment->getMemoryAddressTo8BitsExpression (), msyms, rsyms);
       aggregate_symbols (segment->getRegisterToExpression (), msyms, rsyms);
       aggregate_symbols (segment->getPathConstraints (), msyms, rsyms);
     }

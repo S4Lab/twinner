@@ -683,6 +683,11 @@ ExecutionTraceSegment::getMemoryAddressTo64BitsExpression () const {
   return memoryAddressTo64BitsExpression;
 }
 
+const std::map < ADDRINT, Expression * > &
+ExecutionTraceSegment::getMemoryAddressTo8BitsExpression () const {
+  return memoryAddressTo8BitsExpression;
+}
+
 const std::list < Constraint * > &
 ExecutionTraceSegment::getPathConstraints () const {
   return pathConstraints;

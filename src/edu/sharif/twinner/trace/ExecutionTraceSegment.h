@@ -130,6 +130,7 @@ public:
 
   const std::map < REG, Expression * > &getRegisterToExpression () const;
   const std::map < ADDRINT, Expression * > &getMemoryAddressTo64BitsExpression () const;
+  const std::map < ADDRINT, Expression * > &getMemoryAddressTo8BitsExpression () const;
   const std::list < Constraint * > &getPathConstraints () const;
   std::list < Constraint * > &getPathConstraints ();
 
