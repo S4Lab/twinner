@@ -259,7 +259,7 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
     in.read ((char *) &record.concreteValueLsb, sizeof (record.concreteValueLsb));
     in.read ((char *) &record.concreteValueMsb, sizeof (record.concreteValueMsb));
     Expression *exp = 0;
-    int size;
+    int size = 0;
     switch (edu::sharif::twinner::trace::exptoken::SymbolType (record.type)) {
     case edu::sharif::twinner::trace::exptoken::REGISTER_64_BITS_SYMBOL_TYPE:
       exp = instantiateExpression
@@ -285,13 +285,21 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
       break;
     }
     case edu::sharif::twinner::trace::exptoken::MEMORY_8_BITS_SYMBOL_TYPE:
-      size = 8;
+      if (size == 0) {
+        size = 8;
+      }
     case edu::sharif::twinner::trace::exptoken::MEMORY_16_BITS_SYMBOL_TYPE:
-      size = 16;
+      if (size == 0) {
+        size = 16;
+      }
     case edu::sharif::twinner::trace::exptoken::MEMORY_32_BITS_SYMBOL_TYPE:
-      size = 32;
+      if (size == 0) {
+        size = 32;
+      }
     case edu::sharif::twinner::trace::exptoken::MEMORY_64_BITS_SYMBOL_TYPE:
-      size = 64;
+      if (size == 0) {
+        size = 64;
+      }
     {
       const edu::sharif::twinner::trace::cv::ConcreteValue *cv =
           edu::sharif::twinner::trace::cv::ConcreteValue64Bits
