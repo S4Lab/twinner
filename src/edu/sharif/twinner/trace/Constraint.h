@@ -105,6 +105,8 @@ public:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static Constraint *loadFromBinaryStream (std::ifstream &in);
 
+  Constraint *clone () const;
+
   std::string toString () const;
 
   const Expression *getMainExpression () const;

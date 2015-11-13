@@ -29,9 +29,7 @@ namespace smt {
 
 class Cvc4SmtSolverState {
 private:
-  ExprManager *em;
-  SmtEngine *smt;
-  std::map<std::string, Expr> *symbols;
+  std::list < const edu::sharif::twinner::trace::Constraint * > assertions;
 
 public:
   Cvc4SmtSolverState ();

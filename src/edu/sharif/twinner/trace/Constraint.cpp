@@ -77,6 +77,14 @@ Constraint *Constraint::loadFromBinaryStream (std::ifstream &in) {
   return cnrt;
 }
 
+Constraint *Constraint::clone () const {
+  if (auxExp) {
+    return new Constraint (mainExp, auxExp, type, instruction, false);
+  } else {
+    return new Constraint (mainExp, type, instruction, false);
+  }
+}
+
 std::string Constraint::toString () const {
   std::stringstream ss;
   if (type < MAXIMUM_SINGLE_OPERAND_CODED_CONSTRAINT) {
