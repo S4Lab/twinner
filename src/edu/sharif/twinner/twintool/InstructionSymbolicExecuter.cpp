@@ -990,9 +990,7 @@ void InstructionSymbolicExecuter::analysisRoutinePrefetchMem (
       << std::hex << memoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
   MemoryResidentExpressionValueProxy memory (memoryEa, memReadBytes);
-  // TODO: optimize by just trying to get the value (in case of overwriting...)
-  edu::sharif::twinner::trace::Expression *exp = memory.getExpression (trace);
-  delete exp; // expression is pre-fetched and stored in the trace
+  memory.checkForOverwrittingMemory (trace);
 }
 
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {

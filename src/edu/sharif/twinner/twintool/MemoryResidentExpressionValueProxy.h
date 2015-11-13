@@ -45,6 +45,8 @@ public:
 
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const;
+  void checkForOverwrittingMemory (
+      edu::sharif::twinner::trace::Trace *trace) const;
   edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
       const edu::sharif::twinner::trace::cv::ConcreteValue &cv) const
@@ -77,6 +79,9 @@ private:
   void actualPropagateChangeDownwards (int size,
       ADDRINT memoryEa, edu::sharif::twinner::trace::ExecutionState *state,
       const edu::sharif::twinner::trace::Expression *exp) const;
+
+  void alignedCheckForOverwrittingMemory (int size,
+      edu::sharif::twinner::trace::Trace *trace) const;
 
   /// returned expression is linked to the underlying expression (clone it to de-link)
   edu::sharif::twinner::trace::Expression *alignedMemoryRead (int size,

@@ -15,6 +15,7 @@
 #include "MemoryResidentExpressionValueProxy.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/WrongStateException.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 
@@ -69,6 +70,39 @@ MemoryResidentExpressionValueProxy::getExpression (
     delete rightExp;
     return leftExp;
   }
+}
+
+void MemoryResidentExpressionValueProxy::checkForOverwrittingMemory (
+    edu::sharif::twinner::trace::Trace *trace) const {
+  if (isMemoryEaAligned ()) {
+    alignedCheckForOverwrittingMemory (getSize (), trace);
+  } else {
+    MemoryResidentExpressionValueProxy leftProxy
+        (memoryEa - (memoryEa % memReadBytes), memReadBytes);
+    MemoryResidentExpressionValueProxy rightProxy
+        (memoryEa - (memoryEa % memReadBytes) + memReadBytes, memReadBytes);
+    leftProxy.checkForOverwrittingMemory (trace);
+    rightProxy.checkForOverwrittingMemory (trace);
+  }
+}
+
+void MemoryResidentExpressionValueProxy::alignedCheckForOverwrittingMemory (int size,
+    edu::sharif::twinner::trace::Trace *trace) const {
+  edu::sharif::twinner::trace::cv::ConcreteValue *cv;
+  if (size == 128) {
+    const UINT64 cvlsb = edu::sharif::twinner::util::readMemoryContent (memoryEa, 8);
+    const UINT64 cvmsb = edu::sharif::twinner::util::readMemoryContent (memoryEa + 8, 8);
+    cv = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits (cvmsb, cvlsb);
+  } else {
+    const UINT64 cvval =
+        edu::sharif::twinner::util::readMemoryContent (memoryEa, size / 8);
+    cv = edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cvval).clone (size);
+  }
+  try {
+    (void) trace->tryToGetSymbolicExpressionByMemoryAddress (size, memoryEa, *cv);
+  } catch (const edu::sharif::twinner::trace::WrongStateException &e) {
+  }
+  delete cv;
 }
 
 edu::sharif::twinner::trace::Expression *
