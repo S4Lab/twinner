@@ -61,6 +61,7 @@ const char *Executer::MAIN_ARGS_COMMUNICATION_TEMP_FILE =
 Executer::Executer (std::string pinLauncher, std::string twintool,
     std::string inputBinary, std::string _inputArguments, bool main, bool _overheads) :
     baseCommand (pinLauncher
+    + " -pin_memory_range 0x40000000:0x60000000"
     + " -t " + twintool
     + " -symbols " + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
     + " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
@@ -228,8 +229,9 @@ Executer::executeSingleTraceInNormalMode () {
   const std::string command = baseCommand + " " + inputArguments;
   if (overheads) {
     std::string cmd = command;
-    cmd.erase (cmd.find (OVERHEAD_MEASUREMENT_OPTION),
-               strlen (OVERHEAD_MEASUREMENT_OPTION));
+    const std::string whiteSpace (strlen (OVERHEAD_MEASUREMENT_OPTION), ' ');
+    cmd.replace (cmd.find (OVERHEAD_MEASUREMENT_OPTION),
+                 strlen (OVERHEAD_MEASUREMENT_OPTION), whiteSpace);
     Measurement ourMeasure, baselineMeasure;
     edu::sharif::twinner::trace::Trace *trace = executeSystemCommand (cmd, ourMeasure);
     const std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * > &segments =
