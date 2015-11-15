@@ -13,6 +13,7 @@
 #include "BitwiseAndOperator.h"
 
 #include "Constant.h"
+#include "Symbol.h"
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 
@@ -61,6 +62,18 @@ bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::Expression *exp,
     (*exp) = edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
     return true;
   }
+  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
+  if (stack.size () == 1) {
+    const Symbol *symbol = dynamic_cast<Symbol *> (stack.back ());
+    if (symbol) {
+      const int bitSize = symbol->getValue ().getSize ();
+      if (isTruncatingMask (operand->clone ())
+          && numberOfBits (operand->clone ()) >= bitSize) {
+        delete operand;
+        return true;
+      }
+    }
+  }
   return Operator::apply (exp, operand);
 }
 
@@ -77,13 +90,12 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
   if (stack.size () > 2) {
     std::list < ExpressionToken * >::iterator it = stack.end ();
     Operator *secondOp = dynamic_cast<Operator *> (*--it);
-    if (secondOp
-        && (secondOp->getIdentifier () == Operator::ADD
-        || secondOp->getIdentifier () == Operator::MINUS
-        || secondOp->getIdentifier () == Operator::BITWISE_OR
-        || secondOp->getIdentifier () == Operator::MULTIPLY
-        || secondOp->getIdentifier () == Operator::SHIFT_LEFT
-        || secondOp->getIdentifier () == Operator::SHIFT_RIGHT)) {
+    if (secondOp && (secondOp->getIdentifier () == Operator::ADD
+                     || secondOp->getIdentifier () == Operator::MINUS
+                     || secondOp->getIdentifier () == Operator::BITWISE_OR
+                     || secondOp->getIdentifier () == Operator::MULTIPLY
+                     || secondOp->getIdentifier () == Operator::SHIFT_LEFT
+                     || secondOp->getIdentifier () == Operator::SHIFT_RIGHT)) {
       Constant *second = dynamic_cast<Constant *> (*--it);
       if (second) {
         if (secondOp->getIdentifier () == Operator::BITWISE_OR) {
