@@ -990,7 +990,7 @@ void InstructionSymbolicExecuter::analysisRoutinePrefetchMem (
       << std::hex << memoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
   MemoryResidentExpressionValueProxy memory (memoryEa, memReadBytes);
-  memory.checkForOverwrittingMemory (trace);
+  memory.checkForOverwritingMemory (trace);
 }
 
 void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {

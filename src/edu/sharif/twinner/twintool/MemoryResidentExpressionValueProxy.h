@@ -45,7 +45,7 @@ public:
 
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace) const;
-  void checkForOverwrittingMemory (
+  void checkForOverwritingMemory (
       edu::sharif::twinner::trace::Trace *trace) const;
   edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
@@ -80,7 +80,7 @@ private:
       ADDRINT memoryEa, edu::sharif::twinner::trace::ExecutionState *state,
       const edu::sharif::twinner::trace::Expression *exp) const;
 
-  void alignedCheckForOverwrittingMemory (int size,
+  void alignedCheckForOverwritingMemory (int size,
       edu::sharif::twinner::trace::Trace *trace) const;
 
   /// returned expression is linked to the underlying expression (clone it to de-link)

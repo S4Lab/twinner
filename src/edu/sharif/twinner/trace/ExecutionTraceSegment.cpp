@@ -74,11 +74,12 @@ ExecutionTraceSegment::ExecutionTraceSegment (int index) :
 ExecutionTraceSegment::ExecutionTraceSegment (int index,
     const std::map < REG, Expression * > &regMap,
     const std::map < ADDRINT, Expression * > &memMap) :
-    registerToExpression (regMap), memoryAddressTo64BitsExpression (memMap),
-    segmentIndex (index) {
+    registerToExpression (regMap), segmentIndex (index) {
   /*
-   * This constructor is called by TwinTool and so other (128/32 bits) memory addresses
-   * may be accessed too.
+   * This constructor is called by TwinTool and so other overlapping
+   * memory addresses may be accessed too. Downwards propagation is performed
+   * right now as there is no collision between pure symbols and upwards
+   * propagation is performed lazily.
    * Also overlapping registers must be initialized based on their enclosing registers.
    */
   for (std::map < ADDRINT, Expression * >::const_iterator it = memMap.begin ();
@@ -86,7 +87,9 @@ ExecutionTraceSegment::ExecutionTraceSegment (int index,
     const ADDRINT memoryEa = it->first;
     const Expression *exp = it->second;
     const int size = exp->getLastConcreteValue ().getSize ();
+    setOverwritingMemoryExpression (size, memoryEa, exp);
     initializeOverlappingMemoryLocationsDownwards (size, memoryEa, *exp);
+    delete exp; // setOverwritingMemoryExpression has cloned the exp
     initializeOverlappingMemoryLocationsUpwards (size, memoryEa);
   }
   for (std::map < REG, Expression * >::const_iterator it = regMap.begin ();

@@ -72,21 +72,21 @@ MemoryResidentExpressionValueProxy::getExpression (
   }
 }
 
-void MemoryResidentExpressionValueProxy::checkForOverwrittingMemory (
+void MemoryResidentExpressionValueProxy::checkForOverwritingMemory (
     edu::sharif::twinner::trace::Trace *trace) const {
   if (isMemoryEaAligned ()) {
-    alignedCheckForOverwrittingMemory (getSize (), trace);
+    alignedCheckForOverwritingMemory (getSize (), trace);
   } else {
     MemoryResidentExpressionValueProxy leftProxy
         (memoryEa - (memoryEa % memReadBytes), memReadBytes);
     MemoryResidentExpressionValueProxy rightProxy
         (memoryEa - (memoryEa % memReadBytes) + memReadBytes, memReadBytes);
-    leftProxy.checkForOverwrittingMemory (trace);
-    rightProxy.checkForOverwrittingMemory (trace);
+    leftProxy.checkForOverwritingMemory (trace);
+    rightProxy.checkForOverwritingMemory (trace);
   }
 }
 
-void MemoryResidentExpressionValueProxy::alignedCheckForOverwrittingMemory (int size,
+void MemoryResidentExpressionValueProxy::alignedCheckForOverwritingMemory (int size,
     edu::sharif::twinner::trace::Trace *trace) const {
   edu::sharif::twinner::trace::cv::ConcreteValue *cv;
   if (size == 128) {
