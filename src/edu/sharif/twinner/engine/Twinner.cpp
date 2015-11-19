@@ -86,7 +86,8 @@ void check_symbol_type_and_add_it_to_set (
     std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
     edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token);
 
-void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
+void code_segment_into_twin_code (
+    const std::set < std::pair < ADDRINT, int > > &addresses,
     TwinCodeGenerationAux &aux,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment,
     int traceIndex, std::stringstream &conout);
@@ -116,7 +117,7 @@ void remove_mismatches_from_map (
     std::map < std::pair < ADDRINT, int >, UINT64 > &initialValues,
     const std::pair < ADDRINT, int > &address, const UINT64 &content);
 void code_initial_value_into_twin_code (std::stringstream &out,
-    const ADDRINT &address, const UINT64 &content);
+    const std::pair < ADDRINT, int > &address, const UINT64 &content);
 
 void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &out,
     const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
@@ -127,7 +128,7 @@ void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
 void code_registers_symbols_initiation_into_twin_code (std::stringstream &out,
     int index);
 void code_symbol_initiation_into_twin_code (TwinCodeGenerationAux &aux,
-    const ADDRINT &address);
+    const std::pair < ADDRINT, int > &address);
 void code_memory_changes (IndentedStringStream &out,
     const ADDRINT &memoryEa, edu::sharif::twinner::trace::Expression * const &exp);
 
@@ -255,7 +256,7 @@ void remove_mismatches_from_map (
   std::map < std::pair < ADDRINT, int >, UINT64 >::iterator it =
       initialValues.find (address);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << "at address: 0x" << std::hex << address
+      << "at address: 0x" << std::hex << address.first
       << "\tfirst map: 0x" << it->second
       << "\tsecond map: 0x" << content << "\n";
   if (it->second != content) {
@@ -360,24 +361,28 @@ void code_registers_symbols_initiation_into_twin_code (std::stringstream &out,
 }
 
 void code_symbol_initiation_into_twin_code (TwinCodeGenerationAux &aux,
-    const ADDRINT &address) {
+    const std::pair < ADDRINT, int > &address) {
 
   repeat (aux.depth) {
     aux.out << '\t';
   }
-  aux.out << "const UINT64 m" << std::hex << address << "_" << aux.index
-      << " = *((UINT64 *) 0x" << address << ");\n";
+  aux.out << "const UINT" << std::dec << address.second
+      << " m" << std::hex << address.first << "_" << aux.index
+      << "_" << std::dec << address.second
+      << " = *((UINT" << address.second << " *) 0x"
+      << std::hex << address.first << ");\n";
 }
 
 void Twinner::codeInitialValuesIntoTwinCode (std::stringstream &out,
-    const std::map < ADDRINT, UINT64 > &initialValues) const {
+    const std::map < std::pair < ADDRINT, int >, UINT64 > &initialValues) const {
   edu::sharif::twinner::util::foreach (initialValues,
                                        &code_initial_value_into_twin_code, out);
 }
 
 void code_initial_value_into_twin_code (std::stringstream &out,
-    const ADDRINT &address, const UINT64 &content) {
-  out << std::hex << "\t*((UINT64 *) 0x" << address << ") = 0x" << content << ";\n";
+    const std::pair < ADDRINT, int > &address, const UINT64 &content) {
+  out << "\t*((UINT" << std::dec << address.second << " *) 0x"
+      << std::hex << address.first << ") = 0x" << content << ";\n";
 }
 
 void code_trace_into_twin_code (std::stringstream &out,
@@ -389,7 +394,7 @@ void code_trace_into_twin_code (std::stringstream &out,
     0 // index
   };
   out << "\t{\n";
-  std::map < int, std::set < ADDRINT > > addresses =
+  std::map < int, std::set < std::pair < ADDRINT, int > > > addresses =
       gather_symbols_addresses_of_trace (trace);
   for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
       ::const_reverse_iterator it = trace->getTraceSegments ().rbegin ();
@@ -469,7 +474,8 @@ void check_symbol_type_and_add_it_to_set (
   }
 }
 
-void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
+void code_segment_into_twin_code (
+    const std::set < std::pair < ADDRINT, int > > &addresses,
     TwinCodeGenerationAux &aux,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment,
     int traceIndex, std::stringstream &conout) {
@@ -546,13 +552,9 @@ void extract_type_and_name_and_add_them_to_set (
   const edu::sharif::twinner::trace::exptoken::Symbol *symbol =
       dynamic_cast<edu::sharif::twinner::trace::exptoken::Symbol *> (token);
   if (symbol) {
-    const char *type;
-    if (symbol->getValue ().getSize () == 128) {
-      type = "UINT128";
-    } else {
-      type = "UINT64";
-    }
-    typesAndNames.insert (make_pair (std::string (type), symbol->toString ()));
+    std::stringstream ss;
+    ss << "UINT" << std::dec << symbol->getValue ().getSize ();
+    typesAndNames.insert (make_pair (ss.str (), symbol->toString ()));
   }
 }
 

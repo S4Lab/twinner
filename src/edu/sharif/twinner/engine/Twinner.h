@@ -79,9 +79,10 @@ private:
 
   std::map < std::pair < ADDRINT, int >, UINT64 >
   obtainInitializedMemoryValues (Executer &ex) const;
-  void codeTracesIntoTwinCode (const std::map < ADDRINT, UINT64 > &initialValues);
+  void codeTracesIntoTwinCode (
+      const std::map < std::pair < ADDRINT, int >, UINT64 > &initialValues);
   void codeInitialValuesIntoTwinCode (std::stringstream &out,
-      const std::map < ADDRINT, UINT64 > &initialValues) const;
+      const std::map < std::pair < ADDRINT, int >, UINT64 > &initialValues) const;
 };
 
 }
