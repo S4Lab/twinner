@@ -25,7 +25,6 @@ namespace twintool {
 class Instrumenter;
 
 class TwinTool {
-
 private:
 
   /**
@@ -34,7 +33,6 @@ private:
    * binary and object codes.
    */
   enum ExecutionMode {
-
     NORMAL_MODE = 0x1,
     INITIAL_STATE_DETECTION_MODE = 0x4,
   };
@@ -55,7 +53,7 @@ private:
   bool parseArgumentsAndInitializeTool ();
   void openFileForReading (std::ifstream &in, const std::string &path) const;
   ExecutionMode readExecutionModeFromBinaryStream (std::ifstream &in) const;
-  std::set < ADDRINT > readSetOfAddressesFromBinaryStream (std::ifstream &in) const;
+  std::set < std::pair < ADDRINT, int > > readSetOfAddressesFromBinaryStream (std::ifstream &in) const;
 
   void registerInstrumentationRoutines ();
 };

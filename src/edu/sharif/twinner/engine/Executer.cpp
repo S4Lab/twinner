@@ -38,7 +38,8 @@ namespace sharif {
 namespace twinner {
 namespace engine {
 
-inline void save_address (std::ofstream &out, const ADDRINT &address);
+inline void save_address (std::ofstream &out,
+    const std::pair < ADDRINT, int > &address);
 inline void add_symbol_to_map (
     std::map < int, std::list < edu::sharif::twinner::trace::exptoken::SymbolRecord > > &records,
     const edu::sharif::twinner::trace::exptoken::Symbol * const &symbol);
@@ -74,7 +75,8 @@ Executer::Executer (std::string pinLauncher, std::string twintool,
     inputArguments (_inputArguments), overheads (_overheads) {
 }
 
-void Executer::setCandidateAddresses (const std::set < ADDRINT > &addresses) const {
+void Executer::setCandidateAddresses (
+    const std::set < std::pair < ADDRINT, int > > &addresses) const {
   std::ofstream out;
   out.open (SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE,
             ios_base::out | ios_base::trunc | ios_base::binary);
@@ -88,15 +90,18 @@ void Executer::setCandidateAddresses (const std::set < ADDRINT > &addresses) con
   ExecutionMode mode = INITIAL_STATE_DETECTION_MODE;
   out.write ((const char *) &mode, sizeof (ExecutionMode));
 
-  std::set < ADDRINT >::size_type s = addresses.size ();
+  std::set < std::pair < ADDRINT, int > >::size_type s = addresses.size ();
   out.write ((const char *) &s, sizeof (s));
 
   edu::sharif::twinner::util::foreach (addresses, &save_address, out);
   out.close ();
 }
 
-void save_address (std::ofstream &out, const ADDRINT &address) {
-  out.write ((const char *) &address, sizeof (address));
+void save_address (std::ofstream &out, const std::pair < ADDRINT, int > &address) {
+  const ADDRINT symbolAddress = address.first;
+  const int symbolSize = address.second;
+  out.write ((const char *) &symbolAddress, sizeof (symbolAddress));
+  out.write ((const char *) &symbolSize, sizeof (symbolSize));
 }
 
 void Executer::setSymbolsValues (
@@ -409,7 +414,7 @@ void Executer::changeArguments () {
   delete[] buffer;
 }
 
-map < ADDRINT, UINT64 >
+map < std::pair < ADDRINT, int >, UINT64 >
 Executer::executeSingleTraceInInitialStateDetectionMode () const {
   std::string command = baseCommand + " " + inputArguments;
   if (overheads) {

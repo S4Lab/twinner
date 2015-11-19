@@ -137,7 +137,7 @@ private:
 
   InstructionSymbolicExecuter *ise;
 
-  const std::set < ADDRINT > candidateAddresses;
+  const std::set < std::pair < ADDRINT, int > > candidateAddresses;
   bool isWithinInitialStateDetectionMode;
 
   bool disabled;
@@ -146,7 +146,8 @@ public:
   Instrumenter (std::ifstream &symbolsFileInputStream,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
       bool disabled, bool measureMode);
-  Instrumenter (const std::set < ADDRINT > &candidateAddresses,
+  Instrumenter (
+      const std::set < std::pair < ADDRINT, int > > &candidateAddresses,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
       bool disabled);
   Instrumenter (const std::string &traceFilePath, const std::string &disassemblyFilePath,

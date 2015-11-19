@@ -35,7 +35,7 @@ namespace twinner {
 namespace trace {
 
 inline void write_map_entry (std::ofstream &out,
-    const ADDRINT &addr, const UINT64 &content);
+    const std::pair < ADDRINT, int > &addr, const UINT64 &content);
 
 Trace::Trace (const std::list < ExecutionTraceSegment * > &list,
     edu::sharif::twinner::util::MemoryManager *_memoryManager) :
@@ -219,7 +219,8 @@ Trace *Trace::loadFromBinaryStream (std::ifstream &in, const char *memoryPath) {
   return new Trace (list, mm);
 }
 
-bool Trace::saveAddressToValueMapToFile (const std::map < ADDRINT, UINT64 > &map,
+bool Trace::saveAddressToValueMapToFile (
+    const std::map < std::pair < ADDRINT, int >, UINT64 > &map,
     const char *path) {
   std::ofstream out;
   out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
@@ -233,22 +234,28 @@ bool Trace::saveAddressToValueMapToFile (const std::map < ADDRINT, UINT64 > &map
   return true;
 }
 
-void Trace::saveAddressToValueMapToBinaryStream (const std::map < ADDRINT, UINT64 > &map,
+void Trace::saveAddressToValueMapToBinaryStream (
+    const std::map < std::pair < ADDRINT, int >, UINT64 > &map,
     std::ofstream &out) {
   out.write ("TRA", 3);
 
-  std::map < ADDRINT, UINT64 >::size_type s = map.size ();
+  std::map < std::pair < ADDRINT, int >, UINT64 >::size_type s = map.size ();
   out.write ((const char *) &s, sizeof (s));
   edu::sharif::twinner::util::foreach (map, &write_map_entry, out);
 }
 
-void write_map_entry (std::ofstream &out, const ADDRINT &addr, const UINT64 &content) {
-  out.write ((const char *) &addr, sizeof (addr));
+void write_map_entry (std::ofstream &out,
+    const std::pair < ADDRINT, int > &addr, const UINT64 &content) {
+  const ADDRINT symbolAddress = addr.first;
+  const int symbolSize = addr.second;
+  out.write ((const char *) &symbolAddress, sizeof (symbolAddress));
+  out.write ((const char *) &symbolSize, sizeof (symbolSize));
   out.write ((const char *) &content, sizeof (content));
 }
 
-map < ADDRINT, UINT64 > Trace::loadAddressToValueMapFromFile (const char *path) {
-  map < ADDRINT, UINT64 > map;
+map < std::pair < ADDRINT, int >, UINT64 >
+Trace::loadAddressToValueMapFromFile (const char *path) {
+  map < std::pair < ADDRINT, int >, UINT64 > map;
   std::ifstream in;
   in.open (path, ios_base::in | ios_base::binary);
   if (!in.is_open ()) {
@@ -261,26 +268,29 @@ map < ADDRINT, UINT64 > Trace::loadAddressToValueMapFromFile (const char *path) 
   return map;
 }
 
-std::map < ADDRINT, UINT64 > Trace::loadAddressToValueMapFromBinaryStream (
-    std::ifstream &in) {
-  std::map < ADDRINT, UINT64 > map;
+std::map < std::pair < ADDRINT, int >, UINT64 >
+Trace::loadAddressToValueMapFromBinaryStream (std::ifstream &in) {
+  typedef std::map < std::pair < ADDRINT, int >, UINT64 > AddrToValueMap;
+  AddrToValueMap map;
   char magicString[3];
   in.read (magicString, 3);
   if (strncmp (magicString, "TRA", 3) != 0) {
     throw std::runtime_error
         ("Unexpected magic string while loading map from binary stream");
   }
-  std::map < ADDRINT, UINT64 >::size_type s;
+  AddrToValueMap::size_type s;
   in.read ((char *) &s, sizeof (s));
 
   repeat (s) {
     ADDRINT a;
     in.read ((char *) &a, sizeof (a));
+    int size;
+    in.read ((char *) &size, sizeof (size));
     UINT64 b;
     in.read ((char *) &b, sizeof (b));
 
-    std::pair < std::map < ADDRINT, UINT64 >::iterator, bool > res =
-        map.insert (make_pair (a, b));
+    std::pair < AddrToValueMap::iterator, bool > res =
+        map.insert (make_pair (make_pair (a, size), b));
     if (!res.second) {
       throw std::runtime_error ("Can not read map's entry from binary stream");
     }

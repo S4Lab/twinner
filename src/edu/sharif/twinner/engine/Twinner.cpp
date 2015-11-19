@@ -66,23 +66,24 @@ public:
 void code_trace_into_twin_code (std::stringstream &out,
     const edu::sharif::twinner::trace::Trace * const &trace,
     int traceIndex, std::stringstream &conout);
-std::map < int, std::set < ADDRINT > > gather_symbols_addresses_of_trace (
+std::map < int, std::set < std::pair < ADDRINT, int > > >
+gather_symbols_addresses_of_trace (
     const edu::sharif::twinner::trace::Trace *trace);
 void extract_memory_addresses_of_trace_segment (
-    std::map < int, std::set < ADDRINT > > &addr,
+    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
 void extract_memory_addresses_of_constraint (
-    std::map < int, std::set < ADDRINT > > &addr,
+    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
     edu::sharif::twinner::trace::Constraint * const &constraint);
 template < typename Key >
 void extract_memory_addresses_of_expression (
-    std::map < int, std::set < ADDRINT > > &addr,
+    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
     const Key &key, edu::sharif::twinner::trace::Expression * const &exp);
 void extract_memory_addresses_of_expression (
-    std::map < int, std::set < ADDRINT > > &addr,
+    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
     const edu::sharif::twinner::trace::Expression *exp);
 void check_symbol_type_and_add_it_to_set (
-    std::map < int, std::set < ADDRINT > > &addr,
+    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
     edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token);
 
 void code_segment_into_twin_code (const std::set < ADDRINT > &addresses,
@@ -111,8 +112,9 @@ template < typename Key, typename Value >
 void add_value_to_set (std::set < Value > &set,
     const Key &key, const Value &value);
 
-void remove_mismatches_from_map (std::map < ADDRINT, UINT64 > &initialValues,
-    const ADDRINT &address, const UINT64 &content);
+void remove_mismatches_from_map (
+    std::map < std::pair < ADDRINT, int >, UINT64 > &initialValues,
+    const std::pair < ADDRINT, int > &address, const UINT64 &content);
 void code_initial_value_into_twin_code (std::stringstream &out,
     const ADDRINT &address, const UINT64 &content);
 
@@ -213,31 +215,33 @@ void Twinner::generateTwinBinary () {
   }
   edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
   symbols.clear ();
-  std::map < ADDRINT, UINT64 > initialValues = obtainInitializedMemoryValues (ex);
+  const std::map < std::pair < ADDRINT, int >, UINT64 > initialValues =
+      obtainInitializedMemoryValues (ex);
   codeTracesIntoTwinCode (initialValues);
 }
 
-std::map < ADDRINT, UINT64 > Twinner::obtainInitializedMemoryValues (Executer &ex) const {
+std::map < std::pair < ADDRINT, int >, UINT64 >
+Twinner::obtainInitializedMemoryValues (Executer &ex) const {
   // step 4: `addresses` field holds candidate addresses
-  std::set < ADDRINT > addresses;
+  std::set < std::pair < ADDRINT, int > > addresses;
   for (std::list < const edu::sharif::twinner::trace::Trace * >::const_iterator it =
       traces.begin (); it != traces.end (); ++it) {
     const edu::sharif::twinner::trace::Trace *trace = *it;
-    const std::map < int, std::set < ADDRINT > > addr =
+    const std::map < int, std::set < std::pair < ADDRINT, int > > > addr =
         gather_symbols_addresses_of_trace (trace);
-    for (std::map < int, std::set < ADDRINT > >::const_iterator it2 = addr.begin ();
-        it2 != addr.end (); ++it2) {
-      const std::set < ADDRINT > &a = it2->second;
+    for (std::map < int, std::set < std::pair < ADDRINT, int > > >
+        ::const_iterator it2 = addr.begin (); it2 != addr.end (); ++it2) {
+      const std::set < std::pair < ADDRINT, int > > &a = it2->second;
       addresses.insert (a.begin (), a.end ());
     }
   }
   ex.setCandidateAddresses (addresses);
   // step 5
-  std::map < ADDRINT, UINT64 > initialValues1 =
+  std::map < std::pair < ADDRINT, int >, UINT64 > initialValues1 =
       ex.executeSingleTraceInInitialStateDetectionMode ();
   // step 6
   ex.changeArguments ();
-  std::map < ADDRINT, UINT64 > initialValues2 =
+  std::map < std::pair < ADDRINT, int >, UINT64 > initialValues2 =
       ex.executeSingleTraceInInitialStateDetectionMode ();
   // step 7
   edu::sharif::twinner::util::foreach (initialValues2,
@@ -245,9 +249,11 @@ std::map < ADDRINT, UINT64 > Twinner::obtainInitializedMemoryValues (Executer &e
   return initialValues1;
 }
 
-void remove_mismatches_from_map (std::map < ADDRINT, UINT64 > &initialValues,
-    const ADDRINT &address, const UINT64 &content) {
-  std::map < ADDRINT, UINT64 >::iterator it = initialValues.find (address);
+void remove_mismatches_from_map (
+    std::map < std::pair < ADDRINT, int >, UINT64 > &initialValues,
+    const std::pair < ADDRINT, int > &address, const UINT64 &content) {
+  std::map < std::pair < ADDRINT, int >, UINT64 >::iterator it =
+      initialValues.find (address);
   edu::sharif::twinner::util::Logger::loquacious ()
       << "at address: 0x" << std::hex << address
       << "\tfirst map: 0x" << it->second
@@ -296,7 +302,7 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
 }
 
 void Twinner::codeTracesIntoTwinCode (
-    const std::map < ADDRINT, UINT64 > &initialValues) {
+    const std::map < std::pair < ADDRINT, int >, UINT64 > &initialValues) {
   std::stringstream code;
   std::stringstream out;
   std::stringstream conout;
@@ -405,9 +411,10 @@ void code_trace_into_twin_code (std::stringstream &out,
   out << "\t}\n";
 }
 
-std::map < int, std::set < ADDRINT > > gather_symbols_addresses_of_trace (
+std::map < int, std::set < std::pair < ADDRINT, int > > >
+gather_symbols_addresses_of_trace (
     const edu::sharif::twinner::trace::Trace *trace) {
-  std::map < int, std::set < ADDRINT > > addr;
+  std::map < int, std::set < std::pair < ADDRINT, int > > > addr;
   edu::sharif::twinner::util::foreach (trace->getTraceSegments (),
                                        &extract_memory_addresses_of_trace_segment,
                                        addr);
@@ -415,7 +422,7 @@ std::map < int, std::set < ADDRINT > > gather_symbols_addresses_of_trace (
 }
 
 void extract_memory_addresses_of_trace_segment (
-    std::map < int, std::set < ADDRINT > > &addr,
+    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
   edu::sharif::twinner::util::foreach (segment->getMemoryAddressTo64BitsExpression (),
                                        &extract_memory_addresses_of_expression,
@@ -428,7 +435,8 @@ void extract_memory_addresses_of_trace_segment (
                                        addr);
 }
 
-void extract_memory_addresses_of_constraint (std::map < int, std::set < ADDRINT > > &addr,
+void extract_memory_addresses_of_constraint (
+    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
     edu::sharif::twinner::trace::Constraint * const &constraint) {
   extract_memory_addresses_of_expression (addr, constraint->getMainExpression ());
   if (constraint->getAuxExpression ()) {
@@ -437,23 +445,27 @@ void extract_memory_addresses_of_constraint (std::map < int, std::set < ADDRINT 
 }
 
 template < typename Key >
-void extract_memory_addresses_of_expression (std::map < int, std::set < ADDRINT > > &addr,
+void extract_memory_addresses_of_expression (
+    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
     const Key &key, edu::sharif::twinner::trace::Expression * const &exp) {
   extract_memory_addresses_of_expression (addr, exp);
 }
 
-void extract_memory_addresses_of_expression (std::map < int, std::set < ADDRINT > > &addr,
+void extract_memory_addresses_of_expression (
+    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
     const edu::sharif::twinner::trace::Expression *exp) {
   edu::sharif::twinner::util::foreach (exp->getStack (),
                                        &check_symbol_type_and_add_it_to_set, addr);
 }
 
-void check_symbol_type_and_add_it_to_set (std::map < int, std::set < ADDRINT > > &addr,
+void check_symbol_type_and_add_it_to_set (
+    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
     edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token) {
   const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *symbol =
       dynamic_cast<edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *> (token);
   if (symbol) {
-    addr[symbol->getGenerationIndex ()].insert (symbol->getAddress ());
+    addr[symbol->getGenerationIndex ()].insert
+        (make_pair (symbol->getAddress (), symbol->getValue ().getSize ()));
   }
 }
 

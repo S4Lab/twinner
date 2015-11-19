@@ -77,7 +77,8 @@ private:
   bool calculateSymbolsValuesForCoveringNextPath (
       std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols);
 
-  std::map < ADDRINT, UINT64 > obtainInitializedMemoryValues (Executer &ex) const;
+  std::map < std::pair < ADDRINT, int >, UINT64 >
+  obtainInitializedMemoryValues (Executer &ex) const;
   void codeTracesIntoTwinCode (const std::map < ADDRINT, UINT64 > &initialValues);
   void codeInitialValuesIntoTwinCode (std::stringstream &out,
       const std::map < ADDRINT, UINT64 > &initialValues) const;

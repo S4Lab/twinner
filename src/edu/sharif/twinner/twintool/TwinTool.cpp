@@ -247,16 +247,18 @@ TwinTool::ExecutionMode TwinTool::readExecutionModeFromBinaryStream (
   return mode;
 }
 
-std::set < ADDRINT > TwinTool::readSetOfAddressesFromBinaryStream (
+std::set < std::pair < ADDRINT, int > > TwinTool::readSetOfAddressesFromBinaryStream (
     std::ifstream &in) const {
-  std::set < ADDRINT > addresses;
-  std::set < ADDRINT >::size_type s;
+  std::set < std::pair < ADDRINT, int > > addresses;
+  std::set < std::pair < ADDRINT, int > >::size_type s;
   in.read ((char *) &s, sizeof (s));
 
   repeat (s) {
     ADDRINT address;
+    int size;
     in.read ((char *) &address, sizeof (address));
-    addresses.insert (address);
+    in.read ((char *) &size, sizeof (size));
+    addresses.insert (make_pair (address, size));
   }
   return addresses;
 }

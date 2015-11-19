@@ -37,8 +37,9 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
-inline void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > &map,
-    const ADDRINT &address);
+inline void read_memory_content_and_add_it_to_map (
+    std::map < std::pair < ADDRINT, int >, UINT64 > &map,
+    const std::pair < ADDRINT, int > &address);
 
 Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     const string &_traceFilePath, const std::string &_disassemblyFilePath,
@@ -52,7 +53,8 @@ Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
   initialize ();
 }
 
-Instrumenter::Instrumenter (const std::set < ADDRINT > &_candidateAddresses,
+Instrumenter::Instrumenter (
+    const std::set < std::pair < ADDRINT, int > > &_candidateAddresses,
     const std::string &_traceFilePath, const std::string &_disassemblyFilePath,
     bool _disabled) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
@@ -1121,7 +1123,7 @@ void Instrumenter::syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt,
 }
 
 void Instrumenter::saveMemoryContentsToFile (const char *path) const {
-  std::map < ADDRINT, UINT64 > map;
+  std::map < std::pair < ADDRINT, int >, UINT64 > map;
   edu::sharif::twinner::util::foreach (candidateAddresses,
                                        &read_memory_content_and_add_it_to_map, map);
   if (!ise->getTrace ()->saveAddressToValueMapToFile (map, path)) {
@@ -1129,11 +1131,14 @@ void Instrumenter::saveMemoryContentsToFile (const char *path) const {
   }
 }
 
-void read_memory_content_and_add_it_to_map (std::map < ADDRINT, UINT64 > &map,
-    const ADDRINT &address) {
-  //TODO: Communicate mem-read size and read 64bits or 128bits values accordingly
-  map.insert (make_pair (address,
-                         edu::sharif::twinner::util::readMemoryContent (address, 8)));
+void read_memory_content_and_add_it_to_map (
+    std::map < std::pair < ADDRINT, int >, UINT64 > &map,
+    const std::pair < ADDRINT, int > &address) {
+  const ADDRINT symbolAddress = address.first;
+  const int symbolSize = address.second;
+  const UINT64 value = edu::sharif::twinner::util::readMemoryContent
+      (symbolAddress, symbolSize / 8);
+  map.insert (make_pair (make_pair (symbolAddress, symbolSize), value));
 }
 
 void Instrumenter::aboutToExit (INT32 code) {

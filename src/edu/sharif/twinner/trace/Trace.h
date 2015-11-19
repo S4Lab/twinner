@@ -166,9 +166,11 @@ public:
 
   bool saveToFile (const char *path, const char *memoryPath) const;
   static Trace *loadFromFile (const char *path, const char *memoryPath);
-  static bool saveAddressToValueMapToFile (const std::map < ADDRINT, UINT64 > &map,
+  static bool saveAddressToValueMapToFile (
+      const std::map < std::pair < ADDRINT, int >, UINT64 > &map,
       const char *path);
-  static map < ADDRINT, UINT64 > loadAddressToValueMapFromFile (const char *path);
+  static map < std::pair < ADDRINT, int >, UINT64 >
+  loadAddressToValueMapFromFile (const char *path);
 
   const std::list < ExecutionTraceSegment * > &getTraceSegments () const;
   std::list < ExecutionTraceSegment * > &getTraceSegments ();
@@ -177,9 +179,10 @@ private:
   void saveToBinaryStream (std::ofstream &out) const;
   static Trace *loadFromBinaryStream (std::ifstream &in, const char *memoryPath);
   static void saveAddressToValueMapToBinaryStream (
-      const std::map < ADDRINT, UINT64 > &map, std::ofstream &out);
-  static map < ADDRINT, UINT64 > loadAddressToValueMapFromBinaryStream (
-      std::ifstream &in);
+      const std::map < std::pair < ADDRINT, int >, UINT64 > &map,
+      std::ofstream &out);
+  static map < std::pair < ADDRINT, int >, UINT64 >
+  loadAddressToValueMapFromBinaryStream (std::ifstream &in);
 
 protected:
 

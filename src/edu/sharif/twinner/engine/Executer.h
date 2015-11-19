@@ -97,7 +97,8 @@ public:
   Executer (std::string pinLauncher, std::string twintool, std::string inputBinary,
       std::string inputArguments, bool main, bool overheads);
 
-  void setCandidateAddresses (const std::set < ADDRINT > &addresses) const;
+  void setCandidateAddresses (
+      const std::set < std::pair < ADDRINT, int > > &addresses) const;
   void setSymbolsValues (const std::set <
       const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols) const;
 
@@ -105,7 +106,8 @@ public:
   bool isLastExecutionSignaled () const;
 
   void changeArguments ();
-  map < ADDRINT, UINT64 > executeSingleTraceInInitialStateDetectionMode () const;
+  map < std::pair < ADDRINT, int >, UINT64 >
+  executeSingleTraceInInitialStateDetectionMode () const;
 
   /**
    * Reads main() args info and wraps read info in a new MarInfo instance.
