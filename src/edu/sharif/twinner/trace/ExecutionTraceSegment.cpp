@@ -85,8 +85,9 @@ ExecutionTraceSegment::ExecutionTraceSegment (int index,
       it != memMap.end (); ++it) {
     const ADDRINT memoryEa = it->first;
     const Expression *exp = it->second;
-    initializeOverlappingMemoryLocationsDownwards (64, memoryEa, *exp);
-    initializeOverlappingMemoryLocationsUpwards (memoryEa, *exp);
+    const int size = exp->getLastConcreteValue ().getSize ();
+    initializeOverlappingMemoryLocationsDownwards (size, memoryEa, *exp);
+    initializeOverlappingMemoryLocationsUpwards (size, memoryEa);
   }
   for (std::map < REG, Expression * >::const_iterator it = regMap.begin ();
       it != regMap.end (); ++it) {
@@ -153,19 +154,16 @@ void ExecutionTraceSegment::initializeOverlappingMemoryLocationsDownwards (int s
   }
 }
 
-void ExecutionTraceSegment::initializeOverlappingMemoryLocationsUpwards (ADDRINT memoryEa,
-    const Expression &expression) {
-  if (memoryEa % 16 == 0) { // 128-bits aligned
-    const Expression *neighbor =
-        tryToGetSymbolicExpressionByMemoryAddress (64, memoryEa + 8);
-    if (neighbor) {
-      Expression *exp = neighbor->clone (128); // MSB
-      exp->shiftToLeft (64);
-      exp->bitwiseOr (&expression); // expression will be cloned internally
-      setOverwritingMemoryExpression (128, memoryEa, exp);
-      delete exp;
-    } // else // in this case, the 128-bits expression won't be read and is not needed
-  } // else // the aligned expression will cover this case too.
+void ExecutionTraceSegment::initializeOverlappingMemoryLocationsUpwards (
+    int size, ADDRINT address) {
+  while (size <= 64) {
+    const bool twoSizeBitsAligned = (address % (size / 4) == 0);
+    if (!twoSizeBitsAligned) {
+      address -= size / 8;
+    }
+    size *= 2;
+    setSymbolicExpressionByMemoryAddress (size, address, NULL);
+  }
 }
 
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (int size,
