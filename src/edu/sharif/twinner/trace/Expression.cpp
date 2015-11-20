@@ -153,7 +153,7 @@ void Expression::convertToInfixExpression (Stack &st, std::stringstream &ss) con
       break;
     }
   } else if (token) {
-    ss << token->toString (); // single operand
+    ss << token->getTechnicalName (); // single operand
   } else {
     edu::sharif::twinner::util::Logger::error () << "Missing expression token\n";
   }

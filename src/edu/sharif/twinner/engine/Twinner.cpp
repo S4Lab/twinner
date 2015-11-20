@@ -91,18 +91,31 @@ void code_segment_into_twin_code (
     TwinCodeGenerationAux &aux,
     edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment,
     int traceIndex, std::stringstream &conout);
-void extract_types_and_names (
-    std::set< std::pair< std::string, std::string > > &typesAndNames,
+
+struct Variable {
+  std::string type;
+  std::string technicalName;
+  std::string name;
+
+  Variable (std::string _type, std::string _technicalName, std::string _name)
+      : type (_type), technicalName (_technicalName), name (_name) {
+  }
+
+  bool operator< (const Variable &v) const {
+    return technicalName < v.technicalName;
+  }
+};
+
+void extract_types_and_names (std::set< Variable > &typesAndNames,
     const edu::sharif::twinner::trace::Constraint *simplifiedConstraint);
-void extract_types_and_names (
-    std::set< std::pair< std::string, std::string > > &typesAndNames,
+void extract_types_and_names (std::set< Variable > &typesAndNames,
     const edu::sharif::twinner::trace::Expression *exp);
-void extract_type_and_name_and_add_them_to_set (
-    std::set< std::pair< std::string, std::string > > &typesAndNames,
+void extract_type_and_names_and_add_them_to_set (
+    std::set< Variable > &typesAndNames,
     edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token);
 void code_condition_function_and_if (IndentedStringStream &iss,
     std::string constraintString, int traceIndex, int segmentIndex,
-    std::set< std::pair< std::string, std::string > > typesAndNames,
+    std::set< Variable > typesAndNames,
     std::stringstream &conout);
 
 void delete_symbol (const edu::sharif::twinner::trace::exptoken::Symbol * const &symbol);
@@ -310,7 +323,7 @@ void Twinner::codeTracesIntoTwinCode (
   code << '\n';
   code << "#include \"twincode.h\"\n";
   code << '\n';
-  out << "int main () {\n";
+  out << "int main (int argc, char *argv[]) {\n";
   out << "\tstruct RegistersSet regs;\n";
   out << "\tSAVE_REGISTERS (regs);\n";
   out << '\t';
@@ -489,7 +502,7 @@ void code_segment_into_twin_code (
       (std::list < const edu::sharif::twinner::trace::Constraint * >
        (pathConstraints.begin (), pathConstraints.end ()));
   std::stringstream out;
-  std::set< std::pair< std::string, std::string > > typesAndNames;
+  std::set< Variable > typesAndNames;
   bool first = true;
   for (std::list < const edu::sharif::twinner::trace::Constraint * >
       ::const_reverse_iterator it = simplifiedConstraints.rbegin ();
@@ -527,8 +540,7 @@ void code_segment_into_twin_code (
   aux.out << iss.str ();
 }
 
-void extract_types_and_names (
-    std::set< std::pair< std::string, std::string > > &typesAndNames,
+void extract_types_and_names (std::set< Variable > &typesAndNames,
     const edu::sharif::twinner::trace::Constraint *simplifiedConstraint) {
   extract_types_and_names
       (typesAndNames, simplifiedConstraint->getMainExpression ());
@@ -538,38 +550,37 @@ void extract_types_and_names (
   }
 }
 
-void extract_types_and_names (
-    std::set< std::pair< std::string, std::string > > &typesAndNames,
+void extract_types_and_names (std::set< Variable > &typesAndNames,
     const edu::sharif::twinner::trace::Expression *exp) {
   edu::sharif::twinner::util::foreach
-      (exp->getStack (), &extract_type_and_name_and_add_them_to_set,
+      (exp->getStack (), &extract_type_and_names_and_add_them_to_set,
        typesAndNames);
 }
 
-void extract_type_and_name_and_add_them_to_set (
-    std::set< std::pair< std::string, std::string > > &typesAndNames,
+void extract_type_and_names_and_add_them_to_set (
+    std::set< Variable > &typesAndNames,
     edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token) {
   const edu::sharif::twinner::trace::exptoken::Symbol *symbol =
       dynamic_cast<edu::sharif::twinner::trace::exptoken::Symbol *> (token);
   if (symbol) {
     std::stringstream ss;
     ss << "UINT" << std::dec << symbol->getValue ().getSize ();
-    typesAndNames.insert (make_pair (ss.str (), symbol->toString ()));
+    typesAndNames.insert (Variable (ss.str (),
+                                    symbol->getTechnicalName (),
+                                    symbol->toString ()));
   }
 }
 
 void code_condition_function_and_if (IndentedStringStream &iss,
     std::string constraintString, int traceIndex, int segmentIndex,
-    std::set< std::pair< std::string, std::string > > typesAndNames,
+    std::set< Variable > typesAndNames,
     std::stringstream &conout) {
   std::stringstream conditionName;
   conditionName << "trace_" << traceIndex << "_condition_" << segmentIndex;
 
-  typedef std::pair< std::string, std::string > TypeAndName;
-  typedef std::set< TypeAndName > TypesAndNamesSet;
   std::stringstream typedArguments, arguments;
   bool first = true;
-  for (typename TypesAndNamesSet::const_iterator it = typesAndNames.begin ();
+  for (std::set< Variable >::const_iterator it = typesAndNames.begin ();
       it != typesAndNames.end (); ++it) {
     if (first) {
       first = false;
@@ -577,8 +588,8 @@ void code_condition_function_and_if (IndentedStringStream &iss,
       typedArguments << ", ";
       arguments << ", ";
     }
-    typedArguments << it->first << ' ' << it->second;
-    arguments << it->second;
+    typedArguments << it->type << ' ' << it->technicalName;
+    arguments << "UINT64 (" << it->name << ")";
   }
 
   conout << "bool " << conditionName.str () << " ("
