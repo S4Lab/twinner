@@ -17,7 +17,7 @@ if [ "a$fullpreparation" = "afull" ]; then
 			echo "Disabling ASLR for multiple executions..."
 			echo 0 | sudo tee /proc/sys/kernel/randomize_va_space > /dev/null
 		fi
-		echo "Disabling swap for memory loop safty..."
+		echo "Disabling swap for memory loop safety..."
 		sudo swapoff -a
 		sudo -k
 	fi
