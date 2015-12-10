@@ -640,6 +640,13 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * IMUL is signed multiply and has three models.
+   * This method implements the three operands model.
+   */
+  void imulAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src, const ExpressionValueProxy &imd);
+
+  /**
    * SCAS instruction compares AL/AX/EAX/RAX (the dstReg) and a given srcMem value
    * which is pointed to by the DI/EDI/RDI (the srcReg) and sets the EFLAGS based on
    * the comparison result.
@@ -811,12 +818,22 @@ VOID analysisRoutineDstLargeRegSrcLargeRegAuxImd (VOID *iseptr, UINT32 opcode,
     UINT32 srcReg, const PIN_REGISTER *srcRegVal,
     ADDRINT auxImmediateValue,
     UINT32 insAssembly);
+VOID analysisRoutineDstRegSrcRegAuxImd (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    ADDRINT auxImmediateValue,
+    UINT32 insAssembly);
 VOID analysisRoutineDstLargeRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, const PIN_REGISTER *dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
     UINT32 insAssembly);
 VOID analysisRoutineDstLargeRegSrcMemAuxImd (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, const PIN_REGISTER *dstRegVal,
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    ADDRINT auxImmediateValue,
+    UINT32 insAssembly);
+VOID analysisRoutineDstRegSrcMemAuxImd (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
     ADDRINT auxImmediateValue,
     UINT32 insAssembly);

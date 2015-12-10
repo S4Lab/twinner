@@ -282,11 +282,15 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_IMUL:
     switch (INS_OperandCount (ins)) {
     case 3:
+      // two operands
       return INS_OperandIsReg (ins, 1) ? DST_REG_SRC_REG : DST_REG_SRC_MEM;
     case 4:
       if (INS_OperandIsImmediate (ins, 2)) {
-        throw std::runtime_error ("Unsupported IMUL model (3-operands)");
+        // three operands
+        return INS_OperandIsReg (ins, 1) ?
+            DST_REG_SRC_REG_AUX_IMD : DST_REG_SRC_MEM_AUX_IMD;
       }
+      // one operand
       return INS_OperandIsReg (ins, 0) ? DST_REG_REG_SRC_REG : DST_REG_REG_SRC_MEM;
     }
     throw std::runtime_error ("Unknown IMUL model");
@@ -548,6 +552,19 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_END);
     break;
   }
+  case DST_REG_SRC_REG_AUX_IMD:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    REG srcreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcRegAuxImd,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
+                    IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_ADDRINT, INS_OperandImmediate (ins, 2),
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
   case DST_LARGE_REG_SRC_MEM:
   {
     REG dstreg = INS_OperandReg (ins, 0);
@@ -571,6 +588,21 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstLargeRegSrcMemAuxImd,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
+                    IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_ADDRINT, INS_OperandImmediate (ins, 2),
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_REG_SRC_MEM_AUX_IMD:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // src mem
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcMemAuxImd,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
                     IARG_ADDRINT, INS_OperandImmediate (ins, 2),
                     IARG_UINT32, insAssembly,

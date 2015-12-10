@@ -2378,6 +2378,25 @@ void InstructionSymbolicExecuter::imulAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::imulAnalysisRoutine (
+    const MutableExpressionValueProxy &dst,
+    const ExpressionValueProxy &src, const ExpressionValueProxy &imd) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious () << "imulAnalysisRoutine(...): "
+      "three-operands-mode\n"
+      "\tgetting src exp...";
+  edu::sharif::twinner::trace::Expression *srcexp = src.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting imd exp...";
+  const edu::sharif::twinner::trace::Expression *imdexp = imd.getExpression (trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tmultiplying (dst = src * imd)...";
+  srcexp->multiply (imdexp);
+  delete imdexp;
+  dst.setExpression (trace, srcexp); // sets and truncates expression
+  delete srcexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::scasAnalysisRoutine (
     const MutableExpressionValueProxy &dstReg,
     const MutableExpressionValueProxy &srcReg,
@@ -2961,6 +2980,8 @@ InstructionSymbolicExecuter::DoubleSourcesAnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToDoubleSourcesAnalysisRoutine (
     OPCODE op) const {
   switch (op) {
+  case XED_ICLASS_IMUL:
+    return &InstructionSymbolicExecuter::imulAnalysisRoutine;
   case XED_ICLASS_PSHUFD:
     return &InstructionSymbolicExecuter::pshufdAnalysisRoutine;
   default:
@@ -3187,6 +3208,20 @@ VOID analysisRoutineDstLargeRegSrcLargeRegAuxImd (VOID *iseptr, UINT32 opcode,
        insAssembly);
 }
 
+VOID analysisRoutineDstRegSrcRegAuxImd (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    ADDRINT auxImmediateValue,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineDstRegSrcRegAuxImd
+      (ise->convertOpcodeToDoubleSourcesAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxImmediateValue),
+       insAssembly);
+}
+
 VOID analysisRoutineDstLargeRegSrcMem (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, const PIN_REGISTER *dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,
@@ -3208,6 +3243,20 @@ VOID analysisRoutineDstLargeRegSrcMemAuxImd (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineDstRegSrcMemAuxImd
       (ise->convertOpcodeToDoubleSourcesAnalysisRoutine ((OPCODE) opcode),
        (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue128Bits (*dstRegVal),
+       srcMemoryEa, memReadBytes,
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxImmediateValue),
+       insAssembly);
+}
+
+VOID analysisRoutineDstRegSrcMemAuxImd (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, ADDRINT dstRegVal,
+    ADDRINT srcMemoryEa, UINT32 memReadBytes,
+    ADDRINT auxImmediateValue,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineDstRegSrcMemAuxImd
+      (ise->convertOpcodeToDoubleSourcesAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),
        srcMemoryEa, memReadBytes,
        edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxImmediateValue),
        insAssembly);
