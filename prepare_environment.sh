@@ -22,6 +22,7 @@ if [ "a$fullpreparation" = "afull" ]; then
 		sudo -k
 	fi
 	sudo su sandbox -c 'mkdir -p /tmp/twinner'
+	export LD_LIBRARY_PATH=/home/john/twinner/pin-2.14-linux/intel64/runtime
 fi
 echo "Done."
-
+bash
