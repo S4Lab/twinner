@@ -37,6 +37,8 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
+using namespace instructionmodels;
+
 inline void read_memory_content_and_add_it_to_map (
     std::map < std::pair < ADDRINT, int >, UINT64 > &map,
     const std::pair < ADDRINT, int > &address);
