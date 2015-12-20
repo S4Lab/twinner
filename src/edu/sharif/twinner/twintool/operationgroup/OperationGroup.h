@@ -28,7 +28,6 @@ namespace twintool {
 namespace operationgroup {
 
 class OperationGroup {
-
 protected:
   OperationGroup ();
 
@@ -63,28 +62,27 @@ public:
 
 template <int N>
 class NaryOperationGroup : public OperationGroup {
-
 protected:
   ConstExpressionPtr exp[N];
 
   NaryOperationGroup () :
-      OperationGroup () {
+  OperationGroup () {
   }
 
   NaryOperationGroup (ConstExpressionPtr exp1) :
-      OperationGroup () {
+  OperationGroup () {
     exp[0] = exp1;
   }
 
   NaryOperationGroup (ConstExpressionPtr exp1, ConstExpressionPtr exp2) :
-      OperationGroup () {
+  OperationGroup () {
     exp[0] = exp1;
     exp[1] = exp2;
   }
 
   NaryOperationGroup (ConstExpressionPtr exp1, ConstExpressionPtr exp2,
       ConstExpressionPtr exp3) :
-      OperationGroup () {
+  OperationGroup () {
     exp[0] = exp1;
     exp[1] = exp2;
     exp[2] = exp3;
@@ -99,10 +97,24 @@ public:
   }
 };
 
+template <>
+class NaryOperationGroup<0> : public OperationGroup {
+protected:
+
+  NaryOperationGroup () :
+  OperationGroup () {
+  }
+
+public:
+
+  virtual ~NaryOperationGroup () {
+  }
+};
+
 }
 }
 }
 }
 }
 
-#endif	/* OperationGroup.h */
+#endif /* OperationGroup.h */
