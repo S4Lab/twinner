@@ -115,6 +115,13 @@ public:
   inline const Logger &operator<< (ios_base &(*func)(ios_base &)) const {
     return actualWrite (func);
   }
+#ifdef TARGET_WINDOWS
+
+  inline const Logger &operator<< (const UINT64 u) const {
+    return actualWrite (u);
+  }
+#endif
+#ifdef TARGET_LINUX
 
   inline const Logger &operator<< (struct std::_Setw w) const {
     return actualWrite (w);
@@ -128,6 +135,31 @@ public:
   inline const Logger &operator<< (struct std::_Setprecision f) const {
     return actualWrite (f);
   }
+#endif
+#ifdef TARGET_WINDOWS
+
+  template<class _Arg>
+  inline const Logger &operator<< (struct std::_Smanip<_Arg> w) const {
+    return actualWrite (w);
+  }
+
+  template<class _Elem>
+  inline const Logger &operator<< (struct std::_Fillobj<_Elem> f) const {
+    return actualWrite (f);
+  }
+
+  inline const Logger &operator<< (const UINT8 u) const {
+    return actualWrite (u);
+  }
+
+  inline const Logger &operator<< (const OPCODE op) const {
+    return actualWrite (op);
+  }
+
+  inline const Logger &operator<< (const bool b) const {
+    return actualWrite (b);
+  }
+#endif
 
   template <typename T>
   const Logger &actualWrite (const T &t) const {
