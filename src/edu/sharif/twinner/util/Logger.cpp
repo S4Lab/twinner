@@ -27,7 +27,7 @@ namespace sharif {
 namespace twinner {
 namespace util {
 
-Logger::VerbosenessLevel Logger::verbose = Logger::WARNING;
+Logger::VerbosenessLevel Logger::verbose = Logger::WARNING_VERBOSENESS;
 
 const char *Logger::NORMAL_COLOR = "\x1B[0m";
 const char *Logger::TYPE_COLOR = "\x1B[37;45m"; // BLACK on WHITE
@@ -49,38 +49,43 @@ Logger::~Logger () {
 }
 
 Logger Logger::error () {
-  return Logger (Logger::verbose >= Logger::ERROR, "ERROR", ERROR_COLOR);
+  return Logger (Logger::verbose >= Logger::ERROR_VERBOSENESS,
+                 "ERROR", ERROR_COLOR);
 }
 
 Logger Logger::warning () {
-  return Logger (Logger::verbose >= Logger::WARNING, "WARNING", WARNING_COLOR);
+  return Logger (Logger::verbose >= Logger::WARNING_VERBOSENESS,
+                 "WARNING", WARNING_COLOR);
 }
 
 Logger Logger::info () {
-  return Logger (Logger::verbose >= Logger::INFO, "INFO", INFO_COLOR);
+  return Logger (Logger::verbose >= Logger::INFO_VERBOSENESS,
+                 "INFO", INFO_COLOR);
 }
 
 Logger Logger::debug () {
-  return Logger (Logger::verbose >= Logger::DEBUG, "DEBUG", DEBUG_COLOR);
+  return Logger (Logger::verbose >= Logger::DEBUG_VERBOSENESS,
+                 "DEBUG", DEBUG_COLOR);
 }
 
 Logger Logger::loquacious () {
-  return Logger (Logger::verbose >= Logger::LOQUACIOUS, "LOQUACIOUS", LOQUACIOUS_COLOR);
+  return Logger (Logger::verbose >= Logger::LOQUACIOUS_VERBOSENESS,
+                 "LOQUACIOUS", LOQUACIOUS_COLOR);
 }
 
 bool Logger::setVerbosenessLevel (const std::string &verboseStr) {
   if (verboseStr == "quiet") {
-    verbose = QUIET;
+    verbose = QUIET_VERBOSENESS;
   } else if (verboseStr == "error") {
-    verbose = ERROR;
+    verbose = ERROR_VERBOSENESS;
   } else if (verboseStr == "warning") {
-    verbose = WARNING;
+    verbose = WARNING_VERBOSENESS;
   } else if (verboseStr == "info") {
-    verbose = INFO;
+    verbose = INFO_VERBOSENESS;
   } else if (verboseStr == "debug") {
-    verbose = DEBUG;
+    verbose = DEBUG_VERBOSENESS;
   } else if (verboseStr == "loquacious") {
-    verbose = LOQUACIOUS;
+    verbose = LOQUACIOUS_VERBOSENESS;
   } else {
     return false;
   }
@@ -89,40 +94,40 @@ bool Logger::setVerbosenessLevel (const std::string &verboseStr) {
 
 const char *Logger::getVerbosenessLevelAsString () {
   switch (verbose) {
-  case QUIET:
+  case QUIET_VERBOSENESS:
     return "quiet";
-  case ERROR:
+  case ERROR_VERBOSENESS:
     return "error";
-  case WARNING:
+  case WARNING_VERBOSENESS:
     return "warning";
-  case INFO:
+  case INFO_VERBOSENESS:
     return "info";
-  case DEBUG:
+  case DEBUG_VERBOSENESS:
     return "debug";
-  case LOQUACIOUS:
+  case LOQUACIOUS_VERBOSENESS:
     return "loquacious";
   default:
     throw std::runtime_error ("Verboseness level is corrupted");
   }
 }
 
-const Logger &Logger::operator<< (
-    const edu::sharif::twinner::trace::Expression *exp) const {
+const Logger &Logger::operator<<
+(const edu::sharif::twinner::trace::Expression *exp) const {
   return (*this) << "Expression(" << exp->toString () << ')';
 }
 
-const Logger &Logger::operator<< (
-    const edu::sharif::twinner::trace::Constraint *c) const {
+const Logger &Logger::operator<<
+(const edu::sharif::twinner::trace::Constraint *c) const {
   return (*this) << "Constraint(" << c->toString () << ')';
 }
 
-const Logger &Logger::operator<< (
-    const edu::sharif::twinner::trace::exptoken::ExpressionToken *token) const {
+const Logger &Logger::operator<<
+(const edu::sharif::twinner::trace::exptoken::ExpressionToken *token) const {
   return (*this) << "Token(" << token->toString () << ')';
 }
 
-const Logger &Logger::operator<< (
-    const edu::sharif::twinner::trace::cv::ConcreteValue &value) const {
+const Logger &Logger::operator<<
+(const edu::sharif::twinner::trace::cv::ConcreteValue &value) const {
   if (dynamic_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *> (&value)) {
     const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *value128imp =
         static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *> (&value);
