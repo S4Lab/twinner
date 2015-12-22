@@ -15,8 +15,6 @@
 
 #include "Operand.h"
 
-#include "pin.H"
-
 namespace edu {
 namespace sharif {
 namespace twinner {

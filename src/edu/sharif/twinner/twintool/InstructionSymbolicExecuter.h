@@ -13,7 +13,7 @@
 #ifndef INSTRUCTION_SYMBOLIC_EXECUTER_H
 #define INSTRUCTION_SYMBOLIC_EXECUTER_H
 
-#include "pin.H"
+#include "edu/sharif/twinner/pin-wrapper.h"
 
 #include "Flags.h"
 

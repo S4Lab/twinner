@@ -13,7 +13,7 @@
 #ifndef INSTRUMENTER_H
 #define INSTRUMENTER_H
 
-#include "pin.H"
+#include "edu/sharif/twinner/pin-wrapper.h"
 
 #include <string>
 #include <map>

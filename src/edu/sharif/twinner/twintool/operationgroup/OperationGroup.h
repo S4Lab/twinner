@@ -13,6 +13,8 @@
 #ifndef OPERATION_GROUP_H
 #define OPERATION_GROUP_H
 
+#include "edu/sharif/twinner/pin-wrapper.h"
+
 #include <stdint.h>
 #include <list>
 

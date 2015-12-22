@@ -11,7 +11,9 @@
  */
 
 #ifndef SAVABLE_H
-#define	SAVABLE_H
+#define SAVABLE_H
+
+#include "edu/sharif/twinner/pin-wrapper.h"
 
 #include <list>
 #include <fstream>
@@ -28,7 +30,6 @@ namespace trace {
  * binary format.
  */
 class Savable {
-
 protected:
 
   Savable () {
@@ -90,4 +91,4 @@ void loadListFromBinaryStream (std::ifstream &in,
 }
 }
 
-#endif	/* Savable.h */
+#endif /* Savable.h */

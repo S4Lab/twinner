@@ -13,6 +13,8 @@
 #ifndef MUTABLE_EXPRESSION_VALUE_PROXY_H
 #define MUTABLE_EXPRESSION_VALUE_PROXY_H
 
+#include "edu/sharif/twinner/pin-wrapper.h"
+
 #include "ExpressionValueProxy.h"
 
 namespace edu {
@@ -27,7 +29,6 @@ namespace twintool {
  * that there is no side-effect.
  */
 class MutableExpressionValueProxy : public ExpressionValueProxy {
-
 protected:
 
   MutableExpressionValueProxy () {
@@ -57,7 +58,7 @@ public:
    * @param trace The execution trace which changing expression will be saved there.
    * @param exp The new expression which should be cloned and set over the proxied
    * expression. This expression object may be truncated (and casted) to be fitted.
-   * 
+   *
    * @return A temp-object equal to the given expression (before calling this method).
    */
   virtual edu::sharif::twinner::trace::Expression

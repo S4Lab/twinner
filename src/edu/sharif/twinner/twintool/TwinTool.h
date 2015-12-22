@@ -13,7 +13,7 @@
 #ifndef TWIN_TOOL_H
 #define TWIN_TOOL_H
 
-#include "pin.H"
+#include "edu/sharif/twinner/pin-wrapper.h"
 
 #include <set>
 

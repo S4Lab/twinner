@@ -10,29 +10,26 @@
  * This file is part of Twinner project.
  */
 
-#ifndef SYSCALL_H
-#define SYSCALL_H
+#ifndef PIN_WRAPPER_H
+#define PIN_WRAPPER_H
 
-#include "edu/sharif/twinner/pin-wrapper.h"
+#ifdef TARGET_WINDOWS
+#define REAL_TARGET_IS_WINDOWS
+#endif
 
-namespace edu {
-namespace sharif {
-namespace twinner {
-namespace trace {
+#ifdef __GNUG__
 
-class Syscall {
-private:
-  SYSCALL_STANDARD standard;
+#define COMPILER_IS_COMPATIBLE
+#include "pin.H"
+#undef TARGET_WINDOWS
+#undef TARGET_LINUX
+#define TARGET_LINUX
 
-public:
-  Syscall ();
-  Syscall (SYSCALL_STANDARD standard);
-  ~Syscall ();
-};
+#else
 
-}
-}
-}
-}
+#include "pin.H"
 
-#endif /* Syscall.h */
+#endif
+
+
+#endif /* pin-wrapper.h */

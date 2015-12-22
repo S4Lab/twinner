@@ -27,6 +27,8 @@
  Public License.
  */
 
+#include "edu/sharif/twinner/pin-wrapper.h"
+
 #include <cstring>
 #include <string>
 #include <vector>

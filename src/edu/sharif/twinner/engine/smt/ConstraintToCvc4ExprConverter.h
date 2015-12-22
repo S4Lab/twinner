@@ -22,8 +22,6 @@
 #include "edu/sharif/twinner/trace/exptoken/Operator.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 
-#include "pin.H"
-
 namespace edu {
 namespace sharif {
 namespace twinner {

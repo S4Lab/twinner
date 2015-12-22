@@ -13,8 +13,6 @@
 #ifndef EXECUTER_H
 #define EXECUTER_H
 
-#include "pin.H"
-
 #include <string>
 #include <set>
 #include <map>

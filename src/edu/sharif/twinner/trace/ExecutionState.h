@@ -13,8 +13,6 @@
 #ifndef EXECUTIONSTATE_H_
 #define EXECUTIONSTATE_H_
 
-#include "pin.H"
-
 #include "Savable.h"
 
 namespace edu {

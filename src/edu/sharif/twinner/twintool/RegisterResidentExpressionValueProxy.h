@@ -15,8 +15,6 @@
 
 #include "MutableExpressionValueProxy.h"
 
-#include "pin.H"
-
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -29,7 +27,6 @@ class ConcreteValue;
 namespace twintool {
 
 class RegisterResidentExpressionValueProxy : public MutableExpressionValueProxy {
-
 private:
   typedef edu::sharif::twinner::trace::cv::ConcreteValue ConcreteValue;
 

@@ -11,9 +11,9 @@
  */
 
 #ifndef MEMORY_H
-#define	MEMORY_H
+#define MEMORY_H
 
-#include "pin.H"
+#include "edu/sharif/twinner/pin-wrapper.h"
 
 namespace edu {
 namespace sharif {
@@ -55,4 +55,4 @@ inline UINT64 truncateValue (UINT64 value, int countOfBytes) {
 }
 }
 
-#endif	/* memory.h */
+#endif /* memory.h */

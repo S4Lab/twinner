@@ -13,8 +13,6 @@
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
-#include "pin.H"
-
 #include <iostream>
 #include <iomanip>
 #include <map>

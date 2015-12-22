@@ -10,6 +10,8 @@
  * This file is part of Twinner project.
  */
 
+#include "edu/sharif/twinner/pin-wrapper.h"
+
 #include "TreeNode.h"
 
 #include "edu/sharif/twinner/trace/Constraint.h"

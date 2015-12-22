@@ -13,8 +13,6 @@
 #ifndef TWINNER_H
 #define TWINNER_H
 
-#include "pin.H"
-
 #include <string>
 #include <set>
 #include <map>

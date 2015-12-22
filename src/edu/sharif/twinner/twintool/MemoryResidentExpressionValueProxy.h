@@ -15,8 +15,6 @@
 
 #include "MutableExpressionValueProxy.h"
 
-#include "pin.H"
-
 #include <map>
 
 namespace edu {
