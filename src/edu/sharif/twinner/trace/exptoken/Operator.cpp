@@ -32,6 +32,7 @@
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/max.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -185,9 +186,10 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
   }
   exp->setLastConcreteValue (finalCv);
   if (lastConstant) {
-    const int size = std::max (std::max (exp->getLastConcreteValue ().getSize (),
-                                         lastConstant->getValue ().getSize ()),
-                               operand->getSize ());
+    const int size = edu::sharif::twinner::util::max
+        (exp->getLastConcreteValue ().getSize (),
+         lastConstant->getValue ().getSize (),
+         operand->getSize ());
     edu::sharif::twinner::trace::cv::ConcreteValue *cv =
         lastConstant->getValue ().clone (size);
     bool overflow;

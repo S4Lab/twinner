@@ -18,6 +18,8 @@
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
+#include "edu/sharif/twinner/util/max.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -69,9 +71,10 @@ Operator::SimplificationStatus MultiplyOperator::deepSimplify (
         delete divideOrBitwiseAndOp;
         delete second;
       } else {
-        const int size = std::max (std::max (exp->getLastConcreteValue ().getSize (),
-                                             second->getValue ().getSize ()),
-                                   operand->getSize ());
+        const int size = edu::sharif::twinner::util::max
+            (exp->getLastConcreteValue ().getSize (),
+             second->getValue ().getSize (),
+             operand->getSize ());
         edu::sharif::twinner::trace::cv::ConcreteValue *cv =
             second->getValue ().clone (size);
         (*cv) /= (*operand);

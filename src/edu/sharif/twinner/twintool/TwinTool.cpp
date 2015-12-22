@@ -12,7 +12,12 @@
 
 #include "TwinTool.h"
 
+#ifdef TARGET_LINUX
 #include <unistd.h>
+#endif
+#ifdef TARGET_WINDOWS
+#include "inc/unistd-win.h"
+#endif
 #include <fstream>
 #include <list>
 #include <stdexcept>

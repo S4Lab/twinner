@@ -34,6 +34,7 @@
 #include "edu/sharif/twinner/trace/Syscall.h"
 #include "edu/sharif/twinner/trace/WrongStateException.h"
 
+#include "edu/sharif/twinner/util/max.h"
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/memory.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
@@ -2783,7 +2784,8 @@ void InstructionSymbolicExecuter::memoryRegisterCorrespondenceAnalysisRoutine (
       << "\tgetting base reg exp...";
   edu::sharif::twinner::trace::Expression *baseexp =
       baseReg.getExpression (trace);
-  const int size = max (baseexp->getLastConcreteValue ().getSize (), 64);
+  const int size = edu::sharif::twinner::util::max
+      (baseexp->getLastConcreteValue ().getSize (), 64);
   if (displacement > 0) {
     baseexp->add (displacement);
   } else {
@@ -2815,8 +2817,9 @@ void InstructionSymbolicExecuter::memoryIndexedRegisterCorrespondenceAnalysisRou
       << "\tgetting index reg exp...";
   edu::sharif::twinner::trace::Expression *indexexp =
       indexReg.getExpression (trace);
-  const int size = max (max (baseexp->getLastConcreteValue ().getSize (), 64),
-                        indexexp->getLastConcreteValue ().getSize ());
+  const int size = edu::sharif::twinner::util::max
+      (baseexp->getLastConcreteValue ().getSize (),
+       64, indexexp->getLastConcreteValue ().getSize ());
   if (displacement > 0) {
     baseexp->add (displacement);
   } else {
