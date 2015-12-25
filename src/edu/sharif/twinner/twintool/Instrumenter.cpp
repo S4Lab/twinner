@@ -549,7 +549,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
                     IARG_UINT32, srcreg, IARG_REG_CONST_REFERENCE, srcreg,
-                    IARG_ADDRINT, INS_OperandImmediate (ins, 2),
+                    IARG_ADDRINT, ADDRINT (INS_OperandImmediate (ins, 2)),
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -562,7 +562,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
-                    IARG_ADDRINT, INS_OperandImmediate (ins, 2),
+                    IARG_ADDRINT, ADDRINT (INS_OperandImmediate (ins, 2)),
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -591,7 +591,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
-                    IARG_ADDRINT, INS_OperandImmediate (ins, 2),
+                    IARG_ADDRINT, ADDRINT (INS_OperandImmediate (ins, 2)),
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -606,7 +606,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
-                    IARG_ADDRINT, INS_OperandImmediate (ins, 2),
+                    IARG_ADDRINT, ADDRINT (INS_OperandImmediate (ins, 2)),
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -647,7 +647,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstRegSrcImd,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
-                    IARG_ADDRINT, INS_OperandImmediate (ins, 1),
+                    IARG_ADDRINT, ADDRINT (INS_OperandImmediate (ins, 1)),
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -722,7 +722,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcImd,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
-                    IARG_ADDRINT, INS_OperandImmediate (ins, 1),
+                    IARG_ADDRINT, ADDRINT (INS_OperandImmediate (ins, 1)),
                     IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
@@ -753,7 +753,7 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcImdAuxReg,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
-                    IARG_ADDRINT, INS_OperandImmediate (ins, 0),
+                    IARG_ADDRINT, ADDRINT (INS_OperandImmediate (ins, 0)),
                     IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
                     IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
@@ -1117,7 +1117,7 @@ void Instrumenter::printDebugInformation (INS ins, const char *insAssembly) cons
     } else if (isMem) {
       debug << "mem";
     } else if (isImmed) {
-      debug << "immediate (" << INS_OperandImmediate (ins, i) << ')';
+      debug << "immediate (" << ADDRINT (INS_OperandImmediate (ins, i)) << ')';
     } else if (isFixedMem) {
       debug << "fixed-mem";
     } else if (isImplicit) {
