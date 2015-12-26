@@ -218,6 +218,9 @@ void Twinner::generateTwinBinary () {
     // steps 1, 2, and 3
     ex.setSymbolsValues (symbols);
     edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTraceInNormalMode ();
+    if (ex.isLastExecutionSignaled ()) {
+      abort ();
+    }
 
     edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
     symbols.clear ();
