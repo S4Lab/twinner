@@ -126,6 +126,9 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
   edu::sharif::twinner::trace::Trace *trace =
       edu::sharif::twinner::trace::Trace::loadFromFile
       (traceFilePath.c_str (), memoryFilePath.c_str ());
+  if (trace == 0) {
+    return -1;
+  }
   trace->printCompleteState (edu::sharif::twinner::util::Logger::info ());
 
   edu::sharif::twinner::engine::search::ConstraintTree ct;
