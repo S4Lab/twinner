@@ -34,6 +34,8 @@ struct SymbolRecord;
 }
 namespace engine {
 
+struct Measurement;
+
 class Executer {
 public:
 
@@ -68,12 +70,6 @@ public:
   static const char *OVERHEAD_MEASUREMENT_OPTION;
 
   /**
-   * Indicating name of the temp file, being used to communicate the overhead measurements
-   * from the forked children process (which runs Twintool) to its parent (i.e. Twinner).
-   */
-  static const char *OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE;
-
-  /**
    * Indicating name of the temp file, being used to communicate information
    * about the main() args when code is instrumented in main()-only mode.
    */
@@ -84,12 +80,6 @@ private:
   bool signaled;
   std::string inputArguments;
   const bool overheads;
-
-  struct Measurement {
-    int ret;
-    UINT64 cputime;
-    UINT64 mss; // maximum segment size (in kilobytes)
-  } __attribute__ ((packed));
 
 public:
   Executer (std::string pinLauncher, std::string twintool, std::string inputBinary,
@@ -121,9 +111,6 @@ private:
   edu::sharif::twinner::trace::Trace *executeSystemCommand (std::string command);
   edu::sharif::twinner::trace::Trace *executeSystemCommand (std::string command,
       Measurement &measurement);
-  edu::sharif::twinner::trace::Trace *executeAndMeasure (std::string command,
-      Measurement &measurement) const;
-  Measurement measureCurrentState (int ret) const;
 
   bool saveSymbolRecordsToFile (ExecutionMode mode,
       std::map < int, std::list < Record > > records) const;

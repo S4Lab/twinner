@@ -18,10 +18,6 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <sys/resource.h>
-
 #include "edu/sharif/twinner/trace/MarInfo.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Trace.h"
@@ -40,6 +36,14 @@ namespace sharif {
 namespace twinner {
 namespace engine {
 
+struct Measurement {
+  int ret; // full return value including termination and exit codes
+  uint64_t cputime; // including user/system/kernel times in microseconds
+  uint64_t mss; // maximum segment size (in kilobytes)
+};
+
+bool executeAndMeasure (std::string command, Measurement &m);
+
 inline void save_address (std::ofstream &out,
     const std::pair < ADDRINT, int > &address);
 inline void add_symbol_to_map (
@@ -56,8 +60,6 @@ const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/tr
 const char *Executer::DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE =
     "/tmp/twinner/memory.dat";
 const char *Executer::OVERHEAD_MEASUREMENT_OPTION = " -measure";
-const char *Executer::OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE =
-    "/tmp/twinner/measurements.dat";
 const char *Executer::MAIN_ARGS_COMMUNICATION_TEMP_FILE =
     "/tmp/twinner/main-args-reporting.dat";
 
@@ -325,71 +327,6 @@ Executer::executeSystemCommand (std::string command, Measurement &measurement) {
     signaled = true;
   }
   return trace;
-}
-
-edu::sharif::twinner::trace::Trace *
-Executer::executeAndMeasure (std::string command, Measurement &m) const {
-  pid_t childPid = fork ();
-  if (childPid < 0) {
-    edu::sharif::twinner::util::Logger::error () << "Cannot fork!\n";
-    abort ();
-  } else if (childPid == 0) { // executed in the child process
-    const int ret = system (command.c_str ());
-    Measurement measurement = measureCurrentState (ret);
-    std::ofstream out;
-    const char *path = OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE;
-    out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
-    if (!out.is_open ()) {
-      edu::sharif::twinner::util::Logger::error () << "Can not write measurement info:"
-          " Error in open function: " << path << '\n';
-    } else {
-      out.write ((const char *) &measurement, sizeof (measurement));
-      out.close ();
-    }
-    exit (ret);
-
-  } else { // executed in the parent process
-    int status;
-    if (childPid != waitpid (childPid, &status, 0)) {
-      edu::sharif::twinner::util::Logger::warning () << "Error while waiting for child\n";
-    }
-    std::ifstream in;
-    const char *path = OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE;
-    in.open (path, ios_base::in | ios_base::binary);
-    if (!in.is_open ()) {
-      edu::sharif::twinner::util::Logger::error () << "Can not read measurement info:"
-          " Error in open function: " << path << '\n';
-    } else {
-      in.read ((char *) &m, sizeof (m));
-      in.close ();
-      const int cmdret = WIFEXITED (status) ? WEXITSTATUS (status) : -1 /*signaled*/;
-      if (WIFEXITED (status) && m.ret != WEXITSTATUS (status)) {
-        edu::sharif::twinner::util::Logger::error ()
-            << "Measurement info are inconsistent (cmd ret: " << std::dec << cmdret
-            << ", measurement ret: " << m.ret << ")\n";
-      }
-    }
-  }
-  return edu::sharif::twinner::trace::Trace::loadFromFile
-      (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
-       DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
-}
-
-UINT64 operator+ (struct timeval a, struct timeval b) {
-  return (a.tv_sec + b.tv_sec) * 1000 * 1000 + (a.tv_usec + b.tv_usec);
-}
-
-Executer::Measurement Executer::measureCurrentState (int ret) const {
-  Measurement measurement;
-  measurement.ret = ret;
-  struct rusage usage;
-  if (getrusage (RUSAGE_CHILDREN, &usage) != 0) {
-    edu::sharif::twinner::util::Logger::error () << "Error in getrusage()\n";
-  } else {
-    measurement.cputime = usage.ru_utime + usage.ru_stime;
-    measurement.mss = usage.ru_maxrss;
-  }
-  return measurement;
 }
 
 void Executer::changeArguments () {
