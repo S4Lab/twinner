@@ -312,12 +312,12 @@ namespace util {
  * Similar but more limited implementations are provided for Twinner.
  */
 
-const Logger &operator<< (const Logger &logger, REG reg) {
+const Logger &operator<< (const Logger &logger, LEVEL_BASE::REG reg) {
   return logger << "Reg(" << REG_StringShort (reg) << ")";
 }
 
 edu::sharif::twinner::trace::cv::ConcreteValue *readRegisterContent (
-    const CONTEXT *context, REG reg) {
+    const CONTEXT *context, LEVEL_BASE::REG reg) {
   /// XXX: Only full-size registers (e.g. RAX, RSP) are safe to be read
   PIN_REGISTER buffer;
   PIN_GetContextRegval (context, REG_FullRegName (reg), buffer.byte);
@@ -375,7 +375,8 @@ VOID writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
   }
 }
 
-VOID writeRegisterContent (CONTEXT *context, REG reg, const UINT8 *value) {
+VOID writeRegisterContent (CONTEXT *context,
+    LEVEL_BASE::REG reg, const UINT8 *value) {
   PIN_SetContextRegval (context, reg, value);
 }
 

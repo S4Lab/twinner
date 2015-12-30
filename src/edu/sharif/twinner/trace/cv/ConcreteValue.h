@@ -39,7 +39,7 @@ public:
   virtual ConcreteValue &operator= (const ConcreteValue &v) = 0;
 
   virtual void writeToMemoryAddress (ADDRINT memoryEa) const = 0;
-  virtual void writeToRegister (CONTEXT *context, REG reg) const = 0;
+  virtual void writeToRegister (CONTEXT *context, LEVEL_BASE::REG reg) const = 0;
 
   friend std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
       const ConcreteValue &me);
@@ -227,4 +227,4 @@ public:
 }
 }
 
-#endif	/* ConcreteValue.h */
+#endif /* ConcreteValue.h */

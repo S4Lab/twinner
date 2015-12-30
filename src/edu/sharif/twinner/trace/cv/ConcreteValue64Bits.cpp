@@ -39,7 +39,8 @@ ConcreteValue64Bits::ConcreteValue64Bits (const ConcreteValue &cv) :
 ConcreteValue64Bits::~ConcreteValue64Bits () {
 }
 
-void ConcreteValue64Bits::writeToRegister (CONTEXT *context, REG reg) const {
+void ConcreteValue64Bits::writeToRegister (CONTEXT *context,
+    LEVEL_BASE::REG reg) const {
   PIN_REGISTER buffer;
   memset (buffer.byte, 0, sizeof (buffer));
   buffer.qword[0] = value;

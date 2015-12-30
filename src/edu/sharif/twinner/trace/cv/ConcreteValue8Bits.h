@@ -22,13 +22,12 @@ namespace trace {
 namespace cv {
 
 class ConcreteValue8Bits : public ConcreteValueAbstractImp<8, UINT8> {
-
 public:
   ConcreteValue8Bits (UINT8 value);
   ConcreteValue8Bits (const ConcreteValue &cv);
   virtual ~ConcreteValue8Bits ();
 
-  virtual void writeToRegister (CONTEXT *context, REG reg) const;
+  virtual void writeToRegister (CONTEXT *context, LEVEL_BASE::REG reg) const;
 
   virtual ConcreteValue8Bits *twosComplement () const;
   virtual ConcreteValue8Bits *bitwiseNegated () const;
@@ -45,4 +44,4 @@ protected:
 }
 }
 
-#endif	/* ConcreteValue8Bits.h */
+#endif /* ConcreteValue8Bits.h */

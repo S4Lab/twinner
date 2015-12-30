@@ -24,11 +24,12 @@ namespace util {
  * Caller is owner of the returned concrete value object.
  */
 edu::sharif::twinner::trace::cv::ConcreteValue *readRegisterContent (
-    const CONTEXT *context, REG reg);
+    const CONTEXT *context, LEVEL_BASE::REG reg);
 
 UINT64 readMemoryContent (ADDRINT memoryEa, size_t size);
 VOID writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size);
-VOID writeRegisterContent (CONTEXT *context, REG reg, const UINT8 *value);
+VOID writeRegisterContent (CONTEXT *context,
+    LEVEL_BASE::REG reg, const UINT8 *value);
 
 inline UINT64 truncateValue (UINT64 value, int countOfBytes) {
   switch (countOfBytes) {

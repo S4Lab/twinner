@@ -22,13 +22,12 @@ namespace trace {
 namespace cv {
 
 class ConcreteValue64Bits : public ConcreteValueAbstractImp<64, UINT64> {
-
 public:
   ConcreteValue64Bits (UINT64 value);
   ConcreteValue64Bits (const ConcreteValue &cv);
   virtual ~ConcreteValue64Bits ();
 
-  virtual void writeToRegister (CONTEXT *context, REG reg) const;
+  virtual void writeToRegister (CONTEXT *context, LEVEL_BASE::REG reg) const;
 
   virtual ConcreteValue64Bits *twosComplement () const;
   virtual ConcreteValue64Bits *bitwiseNegated () const;
@@ -47,4 +46,4 @@ protected:
 }
 }
 
-#endif	/* ConcreteValue64Bits.h */
+#endif /* ConcreteValue64Bits.h */

@@ -39,7 +39,7 @@ namespace util {
 
 class Logger;
 
-extern const Logger &operator<< (const Logger &logger, REG reg);
+extern const Logger &operator<< (const Logger &logger, LEVEL_BASE::REG reg);
 
 class Logger {
 private:
@@ -112,10 +112,10 @@ public:
     return actualWrite (t);
   }
 
-  inline const Logger &operator<< (ios_base &(*func)(ios_base &)) const {
-    return actualWrite (func);
+  inline const Logger &operator<< (std::ios_base &(*f)(std::ios_base &)) const {
+    return actualWrite (f);
   }
-#ifdef TARGET_WINDOWS
+#ifdef REAL_TARGET_IS_WINDOWS
 
   inline const Logger &operator<< (const UINT64 u) const {
     return actualWrite (u);

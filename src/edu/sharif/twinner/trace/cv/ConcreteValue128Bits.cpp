@@ -85,7 +85,8 @@ void ConcreteValue128Bits::writeToMemoryAddress (ADDRINT memoryEa) const {
       (memoryEa, (const UINT8 *) qword, 2 * sizeof (UINT64));
 }
 
-void ConcreteValue128Bits::writeToRegister (CONTEXT *context, REG reg) const {
+void ConcreteValue128Bits::writeToRegister (CONTEXT *context,
+    LEVEL_BASE::REG reg) const {
   PIN_REGISTER buffer;
   memset (buffer.byte, 0, sizeof (buffer));
   buffer.qword[0] = lsb;

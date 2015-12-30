@@ -683,13 +683,14 @@ namespace util {
  * Similar but more advanced implementations are provided for TwinTool.
  */
 
-const Logger &operator<< (const Logger &logger, REG reg) {
+const Logger &operator<< (const Logger &logger, LEVEL_BASE::REG reg) {
   return logger << (UINT32) reg;
 }
 
 edu::sharif::twinner::trace::cv::ConcreteValue *readRegisterContent (
-    const CONTEXT *context, REG reg) {
-  const char *msg = "The readRegisterContent(...) method is only supported in TwinTool:"
+    const CONTEXT *context, LEVEL_BASE::REG reg) {
+  const char *msg =
+      "The readRegisterContent(...) method is only supported in TwinTool:"
       " Calling error from Twinner.\n";
   edu::sharif::twinner::util::Logger::error () << msg;
   throw std::runtime_error (msg);
@@ -709,8 +710,10 @@ VOID writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
   throw std::runtime_error (msg);
 }
 
-VOID writeRegisterContent (CONTEXT *context, REG reg, const UINT8 *value) {
-  const char *msg = "The writeRegisterContent(...) method is only supported in TwinTool:"
+VOID writeRegisterContent (CONTEXT *context,
+    LEVEL_BASE::REG reg, const UINT8 *value) {
+  edu::sharif::twinner::util::Logger::error ()
+      << "The writeRegisterContent(...) method is only supported in TwinTool:"
       " Calling error from Twinner.\n";
   edu::sharif::twinner::util::Logger::error () << msg;
   throw std::runtime_error (msg);

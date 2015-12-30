@@ -22,13 +22,12 @@ namespace trace {
 namespace cv {
 
 class ConcreteValue16Bits : public ConcreteValueAbstractImp<16, UINT16> {
-
 public:
   ConcreteValue16Bits (UINT16 value);
   ConcreteValue16Bits (const ConcreteValue &cv);
   virtual ~ConcreteValue16Bits ();
 
-  virtual void writeToRegister (CONTEXT *context, REG reg) const;
+  virtual void writeToRegister (CONTEXT *context, LEVEL_BASE::REG reg) const;
 
   virtual ConcreteValue16Bits *twosComplement () const;
   virtual ConcreteValue16Bits *bitwiseNegated () const;
@@ -45,4 +44,4 @@ protected:
 }
 }
 
-#endif	/* ConcreteValue16Bits.h */
+#endif /* ConcreteValue16Bits.h */

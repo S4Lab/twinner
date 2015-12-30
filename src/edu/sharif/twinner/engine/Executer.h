@@ -94,7 +94,7 @@ public:
   bool isLastExecutionSignaled () const;
 
   void changeArguments ();
-  map < std::pair < ADDRINT, int >, UINT64 >
+  std::map < std::pair < ADDRINT, int >, UINT64 >
   executeSingleTraceInInitialStateDetectionMode () const;
 
   /**

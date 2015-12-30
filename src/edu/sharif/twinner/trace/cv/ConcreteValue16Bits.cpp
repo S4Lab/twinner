@@ -39,7 +39,8 @@ ConcreteValue16Bits::ConcreteValue16Bits (const ConcreteValue &cv) :
 ConcreteValue16Bits::~ConcreteValue16Bits () {
 }
 
-void ConcreteValue16Bits::writeToRegister (CONTEXT *context, REG reg) const {
+void ConcreteValue16Bits::writeToRegister (CONTEXT *context,
+    LEVEL_BASE::REG reg) const {
   PIN_REGISTER buffer;
   memset (buffer.byte, 0, sizeof (buffer));
   buffer.word[0] = value;
