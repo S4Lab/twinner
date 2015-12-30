@@ -38,6 +38,12 @@
 
 using namespace std;
 
+#ifdef TARGET_IA32E
+#define VAR_TYPE "UINT64"
+#else
+#define VAR_TYPE "UINT32"
+#endif
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -365,8 +371,8 @@ void code_registers_symbols_initiation_into_twin_code (std::stringstream &out,
     "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "rsp", "rbp",
     "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
   };
-  out << std::dec << "const UINT64 " << registersNames[0] << "_" << index <<
-      " = regs." << registersNames[0];
+  out << std::dec << "const " VAR_TYPE " "
+      << registersNames[0] << "_" << index << " = regs." << registersNames[0];
   for (int i = 1; i < 16; ++i) {
     out << ", " << registersNames[i] << "_" << index << " = regs." << registersNames[i];
   }
@@ -594,7 +600,7 @@ void code_condition_function_and_if (IndentedStringStream &iss,
       arguments << ", ";
     }
     typedArguments << it->type << ' ' << it->technicalName;
-    arguments << "UINT64 (" << it->name << ")";
+    arguments << VAR_TYPE " (" << it->name << ")";
   }
 
   conout << "bool " << conditionName.str () << " ("
@@ -608,15 +614,16 @@ void code_condition_function_and_if (IndentedStringStream &iss,
 void code_memory_symbolic_changes_of_one_segment (IndentedStringStream &out,
     const edu::sharif::twinner::trace::ExecutionTraceSegment *segment) {
   out.indented () << "/*Memory Changes*/\n";
-  const std::map < ADDRINT, edu::sharif::twinner::trace::Expression * > &memToExp =
-      segment->getMemoryAddressTo64BitsExpression ();
+  const std::map < ADDRINT, edu::sharif::twinner::trace::Expression * > &
+      memToExp = segment->getMemoryAddressTo64BitsExpression ();
   edu::sharif::twinner::util::foreach (memToExp, &code_memory_changes, out);
 }
 
 void code_memory_changes (IndentedStringStream &out,
-    const ADDRINT &memoryEa, edu::sharif::twinner::trace::Expression * const &exp) {
-  out.indented () << "*((UINT64 *) 0x" << std::hex << memoryEa << ") = "
-      "UINT64 (" << exp->toString () << ");\n";
+    const ADDRINT &memoryEa,
+    edu::sharif::twinner::trace::Expression * const &exp) {
+  out.indented () << "*((" VAR_TYPE " *) 0x" << std::hex << memoryEa << ") = "
+      VAR_TYPE " (" << exp->toString () << ");\n";
 }
 
 void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
@@ -652,7 +659,7 @@ void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
         regToExp.find (regs[i].id);
     out.indented () << "regs." << regs[i].name << " = ";
     if (it != regToExp.end ()) {
-      out << "UINT64 (" << it->second->toString () << ");\n";
+      out << VAR_TYPE " (" << it->second->toString () << ");\n";
     } else {
       out << regs[i].name << "_" << index << ";\n";
     }
