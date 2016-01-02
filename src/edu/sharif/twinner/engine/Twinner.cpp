@@ -367,18 +367,34 @@ void Twinner::codeTracesIntoTwinCode (
 
 void code_registers_symbols_initiation_into_twin_code (std::stringstream &out,
     int index) {
-  const char *registersNames[] = {// count == 16
+  const char *registersNames[] = {
+#ifdef TARGET_IA32E
     "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "rsp", "rbp",
     "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
+#else
+    "eax", "ebx", "ecx", "edx", "edi", "esi", "esp", "ebp"
+#endif
   };
   out << std::dec << "const " VAR_TYPE " "
       << registersNames[0] << "_" << index << " = regs." << registersNames[0];
-  for (int i = 1; i < 16; ++i) {
+  for (int i = 1;
+#ifdef TARGET_IA32E
+      i < 16;
+#else
+      i < 8;
+#endif
+      ++i) {
     out << ", " << registersNames[i] << "_" << index << " = regs." << registersNames[i];
   }
   out << ";\n";
   out << std::dec << "const UINT128 xmm0_" << index << " = UINT128 (regs.xmm0)";
-  for (int i = 1; i < 16; ++i) {
+  for (int i = 1;
+#ifdef TARGET_IA32E
+      i < 16;
+#else
+      i < 8;
+#endif
+      ++i) {
     out << ", xmm" << i << "_" << index << " = UINT128 (regs.xmm" << i << ")";
   }
   out << ";\n";
@@ -633,7 +649,8 @@ void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
   struct RegInfo {
     const char *name;
     REG id;
-  } const regs[] = {// count == 16
+  } const regs[] = {
+#ifdef TARGET_IA32E
     {"rax", REG_RAX},
     {"rbx", REG_RBX},
     {"rcx", REG_RCX},
@@ -650,13 +667,29 @@ void code_registers_symbolic_changes_of_one_segment (IndentedStringStream &out,
     {"r13", REG_R13},
     {"r14", REG_R14},
     {"r15", REG_R15}
+#else
+    {"eax", REG_EAX},
+    {"ebx", REG_EBX},
+    {"ecx", REG_ECX},
+    {"edx", REG_EDX},
+    {"edi", REG_EDI},
+    {"esi", REG_ESI},
+    {"esp", REG_ESP},
+    {"ebp", REG_EBP}
+#endif
   };
   out.indented () << "/*Registers Changes*/\n";
   const std::map < REG, edu::sharif::twinner::trace::Expression * > &regToExp =
       segment->getRegisterToExpression ();
-  for (int i = 0; i < 16; ++i) {
-    std::map < REG, edu::sharif::twinner::trace::Expression * >::const_iterator it =
-        regToExp.find (regs[i].id);
+  for (int i = 0;
+#ifdef TARGET_IA32E
+      i < 16;
+#else
+      i < 8;
+#endif
+      ++i) {
+    std::map < REG, edu::sharif::twinner::trace::Expression * >::const_iterator
+    it = regToExp.find (regs[i].id);
     out.indented () << "regs." << regs[i].name << " = ";
     if (it != regToExp.end ()) {
       out << VAR_TYPE " (" << it->second->toString () << ");\n";

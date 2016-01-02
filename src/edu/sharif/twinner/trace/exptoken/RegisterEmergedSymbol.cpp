@@ -15,6 +15,7 @@
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 
+#include "edu/sharif/twinner/trace/cv/ConcreteValue32Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 
@@ -47,6 +48,7 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::clone () const {
 std::pair < int, SymbolRecord > RegisterEmergedSymbol::toSymbolRecord () const {
   SymbolRecord record;
   record.address = address;
+#ifdef TARGET_IA32E
   if (dynamic_cast<const edu::sharif::twinner::trace::cv::ConcreteValue64Bits *>
       (concreteValue)) {
     record.type = REGISTER_64_BITS_SYMBOL_TYPE;
@@ -54,6 +56,13 @@ std::pair < int, SymbolRecord > RegisterEmergedSymbol::toSymbolRecord () const {
         static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue64Bits *>
         (concreteValue)->getValue ();
     record.concreteValueMsb = 0;
+#else
+  if (dynamic_cast<const edu::sharif::twinner::trace::cv::ConcreteValue32Bits *>
+      (concreteValue)) {
+    record.type = REGISTER_32_BITS_SYMBOL_TYPE;
+    record.concreteValueLsb = concreteValue->toUint64 ();
+    record.concreteValueMsb = 0;
+#endif
   } else if (dynamic_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
       (concreteValue)) {
     record.type = REGISTER_128_BITS_SYMBOL_TYPE;
@@ -103,6 +112,7 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::strin
          generationIndex);
 
   } else {
+#ifdef TARGET_IA32E
     if (v4 != 0 || v3 != 0) {
       throw std::runtime_error ("RegisterEmergedSymbol::fromNameAndValue (...): "
                                 "Illegal value: This register is only 64 bits.");
@@ -110,6 +120,14 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::strin
     const UINT64 value = (UINT64 (v2) << 32) | v1;
     return new RegisterEmergedSymbol
         (reg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value), generationIndex);
+#else
+    if (v4 != 0 || v3 != 0 || v2 != 0) {
+      throw std::runtime_error ("RegisterEmergedSymbol::fromNameAndValue (...): "
+                                "Illegal value: This register is only 32 bits.");
+    }
+    return new RegisterEmergedSymbol
+        (reg, edu::sharif::twinner::trace::cv::ConcreteValue32Bits (v1), generationIndex);
+#endif
   }
 }
 
@@ -137,9 +155,14 @@ bool RegisterEmergedSymbol::operator== (const ExpressionToken &token) const {
 }
 
 const char *RegisterEmergedSymbol::getRegisterName () const {
-  // ASSERT: address is a 64 bits or 128 bits register
+#ifdef TARGET_IA32E
+  // ASSERT: address is a 16, 64, or 128 bits register
+#else
+  // ASSERT: address is a 16, 32, or 128 bits register
+#endif
   // Above assertion is ensured during instantiation in the ExpressionImp class
   switch (address) {
+#ifdef TARGET_IA32E
   case REG_RAX:
     return "rax";
   case REG_RBX:
@@ -156,6 +179,25 @@ const char *RegisterEmergedSymbol::getRegisterName () const {
     return "rsp";
   case REG_RBP:
     return "rbp";
+#else
+  case REG_EAX:
+    return "eax";
+  case REG_EBX:
+    return "ebx";
+  case REG_ECX:
+    return "ecx";
+  case REG_EDX:
+    return "edx";
+  case REG_EDI:
+    return "edi";
+  case REG_ESI:
+    return "esi";
+  case REG_ESP:
+    return "esp";
+  case REG_EBP:
+    return "ebp";
+#endif
+#ifdef TARGET_IA32E
   case REG_R8:
     return "r8";
   case REG_R9:
@@ -172,6 +214,7 @@ const char *RegisterEmergedSymbol::getRegisterName () const {
     return "r14";
   case REG_R15:
     return "r15";
+#endif
   case REG_XMM0:
     return "xmm0";
   case REG_XMM1:
@@ -188,6 +231,7 @@ const char *RegisterEmergedSymbol::getRegisterName () const {
     return "xmm6";
   case REG_XMM7:
     return "xmm7";
+#ifdef TARGET_IA32E
   case REG_XMM8:
     return "xmm8";
   case REG_XMM9:
@@ -204,6 +248,7 @@ const char *RegisterEmergedSymbol::getRegisterName () const {
     return "xmm14";
   case REG_XMM15:
     return "xmm15";
+#endif
   default:
     throw std::runtime_error ("Register emerged symbols must correspond to 64 bits "
                               "or 128 bits (XMM series) regs");
@@ -211,6 +256,7 @@ const char *RegisterEmergedSymbol::getRegisterName () const {
 }
 
 REG RegisterEmergedSymbol::getRegisterFromName (const std::string &name) {
+#ifdef TARGET_IA32E
   if (name == "rax") {
     return REG_RAX;
   } else if (name == "rbx") {
@@ -227,6 +273,25 @@ REG RegisterEmergedSymbol::getRegisterFromName (const std::string &name) {
     return REG_RSP;
   } else if (name == "rbp") {
     return REG_RBP;
+#else
+  if (name == "eax") {
+    return REG_EAX;
+  } else if (name == "ebx") {
+    return REG_EBX;
+  } else if (name == "ecx") {
+    return REG_ECX;
+  } else if (name == "edx") {
+    return REG_EDX;
+  } else if (name == "edi") {
+    return REG_EDI;
+  } else if (name == "esi") {
+    return REG_ESI;
+  } else if (name == "esp") {
+    return REG_ESP;
+  } else if (name == "ebp") {
+    return REG_EBP;
+#endif
+#ifdef TARGET_IA32E
   } else if (name == "r8") {
     return REG_R8;
   } else if (name == "r9") {
@@ -243,6 +308,7 @@ REG RegisterEmergedSymbol::getRegisterFromName (const std::string &name) {
     return REG_R14;
   } else if (name == "r15") {
     return REG_R15;
+#endif
   } else if (name == "xmm0") {
     return REG_XMM0;
   } else if (name == "xmm1") {
@@ -259,6 +325,7 @@ REG RegisterEmergedSymbol::getRegisterFromName (const std::string &name) {
     return REG_XMM6;
   } else if (name == "xmm7") {
     return REG_XMM7;
+#ifdef TARGET_IA32E
   } else if (name == "xmm8") {
     return REG_XMM8;
   } else if (name == "xmm9") {
@@ -275,6 +342,7 @@ REG RegisterEmergedSymbol::getRegisterFromName (const std::string &name) {
     return REG_XMM14;
   } else if (name == "xmm15") {
     return REG_XMM15;
+#endif
   } else {
     const std::string msg = "Unknown Register Name: ";
     throw std::runtime_error (msg + name);
@@ -291,6 +359,7 @@ bool RegisterEmergedSymbol::is128BitsRegister (REG reg) {
   case REG_XMM5:
   case REG_XMM6:
   case REG_XMM7:
+#ifdef TARGET_IA32E
   case REG_XMM8:
   case REG_XMM9:
   case REG_XMM10:
@@ -299,6 +368,7 @@ bool RegisterEmergedSymbol::is128BitsRegister (REG reg) {
   case REG_XMM13:
   case REG_XMM14:
   case REG_XMM15:
+#endif
     return true;
   default:
     return false;
@@ -318,6 +388,7 @@ RegisterEmergedSymbol::RegisterType RegisterEmergedSymbol::getRegisterType (REG 
 
 int RegisterEmergedSymbol::getRegisterIndex (REG reg) {
   switch (reg) {
+#ifdef TARGET_IA32E
   case REG_RAX:
     return 0;
   case REG_RBX:
@@ -334,6 +405,25 @@ int RegisterEmergedSymbol::getRegisterIndex (REG reg) {
     return 6;
   case REG_RBP:
     return 7;
+#else
+  case REG_EAX:
+    return 0;
+  case REG_EBX:
+    return 1;
+  case REG_ECX:
+    return 2;
+  case REG_EDX:
+    return 3;
+  case REG_EDI:
+    return 4;
+  case REG_ESI:
+    return 5;
+  case REG_ESP:
+    return 6;
+  case REG_EBP:
+    return 7;
+#endif
+#ifdef TARGET_IA32E
   case REG_R8:
     return 8;
   case REG_R9:
@@ -350,6 +440,7 @@ int RegisterEmergedSymbol::getRegisterIndex (REG reg) {
     return 14;
   case REG_R15:
     return 15;
+#endif
   default:
     return -1;
   }
@@ -357,6 +448,7 @@ int RegisterEmergedSymbol::getRegisterIndex (REG reg) {
 
 REG RegisterEmergedSymbol::getOverlappingRegisterByIndex (int external, int internal) {
   const REG registers[][5] = {
+#ifdef TARGET_IA32E
     {REG_RAX, REG_EAX, REG_AX, REG_AH, REG_AL}, // 0
     {REG_RBX, REG_EBX, REG_BX, REG_BH, REG_BL},
     {REG_RCX, REG_ECX, REG_CX, REG_CH, REG_CL},
@@ -365,6 +457,17 @@ REG RegisterEmergedSymbol::getOverlappingRegisterByIndex (int external, int inte
     {REG_RSI, REG_ESI, REG_SI, REG_INVALID_, REG_SIL},
     {REG_RSP, REG_ESP, REG_SP, REG_INVALID_, REG_SPL},
     {REG_RBP, REG_EBP, REG_BP, REG_INVALID_, REG_BPL},
+#else
+    {REG_INVALID_, REG_EAX, REG_AX, REG_AH, REG_AL}, // 0
+    {REG_INVALID_, REG_EBX, REG_BX, REG_BH, REG_BL},
+    {REG_INVALID_, REG_ECX, REG_CX, REG_CH, REG_CL},
+    {REG_INVALID_, REG_EDX, REG_DX, REG_DH, REG_DL},
+    {REG_INVALID_, REG_EDI, REG_DI, REG_INVALID_, REG_INVALID_}, // 4
+    {REG_INVALID_, REG_ESI, REG_SI, REG_INVALID_, REG_INVALID_},
+    {REG_INVALID_, REG_ESP, REG_SP, REG_INVALID_, REG_INVALID_},
+    {REG_INVALID_, REG_EBP, REG_BP, REG_INVALID_, REG_INVALID_},
+#endif
+#ifdef TARGET_IA32E
     {REG_R8, REG_R8D, REG_R8W, REG_INVALID_, REG_R8B}, // 8
     {REG_R9, REG_R9D, REG_R9W, REG_INVALID_, REG_R9B},
     {REG_R10, REG_R10D, REG_R10W, REG_INVALID_, REG_R10B},
@@ -373,6 +476,7 @@ REG RegisterEmergedSymbol::getOverlappingRegisterByIndex (int external, int inte
     {REG_R13, REG_R13D, REG_R13W, REG_INVALID_, REG_R13B},
     {REG_R14, REG_R14D, REG_R14W, REG_INVALID_, REG_R14B},
     {REG_R15, REG_R15D, REG_R15W, REG_INVALID_, REG_R15B},
+#endif
   };
   return registers[external][internal];
 }
@@ -383,8 +487,10 @@ void RegisterEmergedSymbol::initializeSubRegisters (REG reg,
   if (regIndex == -1) { // e.g. xmm registers
     return;
   }
+#ifdef TARGET_IA32E
   segment->setSymbolicExpressionByRegister
       (32, getOverlappingRegisterByIndex (regIndex, 1), &expression)->truncate (32);
+#endif
   Expression *reg16 = segment->setSymbolicExpressionByRegister
       (16, getOverlappingRegisterByIndex (regIndex, 2), &expression);
   reg16->truncate (16);
@@ -395,8 +501,11 @@ void RegisterEmergedSymbol::initializeSubRegisters (REG reg,
         (8, getOverlappingRegisterByIndex (regIndex, 3), temp);
     delete temp;
   }
-  segment->setSymbolicExpressionByRegister
-      (8, getOverlappingRegisterByIndex (regIndex, 4), &expression)->truncate (8);
+  const REG lowest8Bits = getOverlappingRegisterByIndex (regIndex, 4);
+  if (lowest8Bits != REG_INVALID_) {
+    segment->setSymbolicExpressionByRegister
+        (8, lowest8Bits, &expression)->truncate (8);
+  }
 }
 
 }

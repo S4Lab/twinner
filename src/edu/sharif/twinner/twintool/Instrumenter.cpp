@@ -635,8 +635,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_MEMORYOP_EA, 0,
-                    IARG_UINT32, REG_RSI, IARG_REG_VALUE, REG_RSI,
-                    IARG_MEMORYREAD_SIZE,
+#ifdef TARGET_IA32E
+        IARG_UINT32, REG_RSI, IARG_REG_VALUE, REG_RSI,
+#else
+        IARG_UINT32, REG_ESI, IARG_REG_VALUE, REG_ESI,
+#endif
+        IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -739,8 +743,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
-                    IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
-                    IARG_MEMORYREAD_SIZE,
+#ifdef TARGET_IA32E
+        IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
+#else
+        IARG_UINT32, REG_ESP, IARG_REG_VALUE, REG_ESP,
+#endif
+        IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -754,8 +762,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_ADDRINT, ADDRINT (INS_OperandImmediate (ins, 0)),
-                    IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
-                    IARG_MEMORYREAD_SIZE,
+#ifdef TARGET_IA32E
+        IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
+#else
+        IARG_UINT32, REG_ESP, IARG_REG_VALUE, REG_ESP,
+#endif
+        IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
 
@@ -773,8 +785,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 1,
                     IARG_MEMORYOP_EA, 0,
-                    IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
-                    IARG_MEMORYREAD_SIZE,
+#ifdef TARGET_IA32E
+        IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
+#else
+        IARG_UINT32, REG_ESP, IARG_REG_VALUE, REG_ESP,
+#endif
+        IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -789,8 +805,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                     IARG_MEMORYOP_EA, 0,
-                    IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
-                    IARG_MEMORYREAD_SIZE,
+#ifdef TARGET_IA32E
+        IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
+#else
+        IARG_UINT32, REG_ESP, IARG_REG_VALUE, REG_ESP,
+#endif
+        IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -807,8 +827,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_MEMORYOP_EA, 0,
                     IARG_MEMORYOP_EA, 1,
-                    IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
-                    IARG_MEMORYREAD_SIZE,
+#ifdef TARGET_IA32E
+        IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
+#else
+        IARG_UINT32, REG_ESP, IARG_REG_VALUE, REG_ESP,
+#endif
+        IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
@@ -885,8 +909,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   {
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineBeforeChangeOfReg,
                     IARG_PTR, ise, IARG_UINT32, op,
-                    IARG_UINT32, REG_RSP,
-                    IARG_UINT32, insAssembly,
+#ifdef TARGET_IA32E
+        IARG_UINT32, REG_RSP,
+#else
+        IARG_UINT32, REG_ESP,
+#endif
+        IARG_UINT32, insAssembly,
                     IARG_END);
     break;
   }
@@ -961,8 +989,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                               IARG_PTR, ise, IARG_UINT32, op,
                               IARG_UINT32, dstreg, IARG_REG_VALUE, dstreg,
                               IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
-                              IARG_UINT32, REG_RDI, IARG_REG_VALUE, REG_RDI,
-                              IARG_UINT32, insAssembly,
+#ifdef TARGET_IA32E
+        IARG_UINT32, REG_RDI, IARG_REG_VALUE, REG_RDI,
+#else
+        IARG_UINT32, REG_EDI, IARG_REG_VALUE, REG_EDI,
+#endif
+        IARG_UINT32, insAssembly,
                               IARG_END);
     instrumentRepPrefix (op, ins, insAssembly);
     break;
@@ -976,8 +1008,12 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     INS_InsertPredicatedCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineStrOpMemReg,
                               IARG_PTR, ise, IARG_UINT32, op,
                               IARG_MEMORYOP_EA, 0,
-                              IARG_UINT32, REG_RDI, IARG_REG_VALUE, REG_RDI,
-                              IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+#ifdef TARGET_IA32E
+        IARG_UINT32, REG_RDI, IARG_REG_VALUE, REG_RDI,
+#else
+        IARG_UINT32, REG_EDI, IARG_REG_VALUE, REG_EDI,
+#endif
+        IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
                               IARG_MEMORYREAD_SIZE,
                               IARG_UINT32, insAssembly,
                               IARG_END);
@@ -986,8 +1022,13 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case STRING_OPERATION_MEM_MEM:
   {
+#ifdef TARGET_IA32E
     const REG dstreg = REG_RDI;
     const REG srcreg = REG_RSI;
+#else
+    const REG dstreg = REG_EDI;
+    const REG srcreg = REG_ESI;
+#endif
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
                     IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
                     IARG_END); // dst mem
@@ -1034,7 +1075,12 @@ void Instrumenter::instrumentMemoryRegisterCorrespondence (INS ins,
     if (INS_OperandIsMemory (ins, i)) {
       REG baseReg = INS_OperandMemoryBaseReg (ins, i);
       if (baseReg != REG_INVALID ()
-          && (baseReg == REG_RBP || baseReg == REG_RAX)) {
+#ifdef TARGET_IA32E
+          && (baseReg == REG_RBP || baseReg == REG_RAX)
+#else
+          && (baseReg == REG_EBP || baseReg == REG_EAX)
+#endif
+          ) {
         // TODO: generalize above register check
         ADDRDELTA displacement = INS_OperandMemoryDisplacement (ins, i);
         REG indexReg = INS_OperandMemoryIndexReg (ins, i);

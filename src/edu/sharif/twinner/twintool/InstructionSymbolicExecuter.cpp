@@ -1560,7 +1560,11 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
   edu::sharif::twinner::util::Logger::loquacious () << "callAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
+#ifdef TARGET_IA32E
       trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
+#else
+      trace->tryToGetSymbolicExpressionByRegister (32, REG_ESP);
+#endif
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
     edu::sharif::twinner::util::Logger::loquacious ()
         << "\tadjusting rsp...";
@@ -1605,7 +1609,11 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
   edu::sharif::twinner::util::Logger::loquacious () << "retAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
+#ifdef TARGET_IA32E
       trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
+#else
+      trace->tryToGetSymbolicExpressionByRegister (32, REG_ESP);
+#endif
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
     const ConcreteValue &oldVal = rsp->getLastConcreteValue ();
     if (oldVal < rspRegVal) {
@@ -1637,7 +1645,11 @@ void InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
   edu::sharif::twinner::util::Logger::loquacious () << "jmpAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
   edu::sharif::twinner::trace::Expression *rsp =
+#ifdef TARGET_IA32E
       trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
+#else
+      trace->tryToGetSymbolicExpressionByRegister (64, REG_ESP);
+#endif
   if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
     const ConcreteValue &oldVal = rsp->getLastConcreteValue ();
     if (oldVal != rspRegVal) { // This jump had side-effect on RSP
@@ -2241,10 +2253,12 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
     leftReg = REG_EDX;
     rightReg = REG_EAX;
     break;
+#ifdef TARGET_IA32E
   case 64:
     leftReg = REG_RDX;
     rightReg = REG_RAX;
     break;
+#endif
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "adjustDivisionMultiplicationOperands(...) hook: "

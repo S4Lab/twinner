@@ -84,10 +84,12 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
   edu::sharif::twinner::trace::Expression *temp;
   const Reg::RegisterType regType = Reg::getRegisterType (reg, REG_Size (reg));
   switch (regType) {
+#ifdef TARGET_IA32E
   case Reg::REG_32_BITS_TYPE:
     trace->setSymbolicExpressionByRegister
         (64, Reg::getOverlappingRegisterByIndex (regIndex, 0), &changedExp);
     break;
+#endif
   case Reg::REG_8_BITS_UPPER_HALF_TYPE:
     reg16 = trace->getSymbolicExpressionByRegister
         (16, Reg::getOverlappingRegisterByIndex (regIndex, 2));
@@ -102,9 +104,11 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
     break;
   }
   switch (regType) {
+#ifdef TARGET_IA32E
   case Reg::REG_64_BITS_TYPE:
     trace->setSymbolicExpressionByRegister
         (32, Reg::getOverlappingRegisterByIndex (regIndex, 1), &changedExp)->truncate (32);
+#endif
   case Reg::REG_32_BITS_TYPE:
     reg16 = trace->setSymbolicExpressionByRegister
         (16, Reg::getOverlappingRegisterByIndex (regIndex, 2), &changedExp);
@@ -121,20 +125,29 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
           (8, Reg::getOverlappingRegisterByIndex (regIndex, 3), temp);
       delete temp;
     }
-    trace->setSymbolicExpressionByRegister
-        (8, Reg::getOverlappingRegisterByIndex (regIndex, 4), &changedExp)->truncate (8);
+  {
+    const REG lowest8Bits = Reg::getOverlappingRegisterByIndex (regIndex, 4);
+    if (lowest8Bits != REG_INVALID_) {
+      trace->setSymbolicExpressionByRegister
+          (8, lowest8Bits, &changedExp)->truncate (8);
+    }
+  }
     if (regType != Reg::REG_16_BITS_TYPE) {
       break;
     }
   case Reg::REG_8_BITS_UPPER_HALF_TYPE:
+#ifdef TARGET_IA32E
     putExpressionInLeastSignificantBitsOfRegister
         (trace, 64, Reg::getOverlappingRegisterByIndex (regIndex, 0), 16, *constReg16);
+#endif
     putExpressionInLeastSignificantBitsOfRegister
         (trace, 32, Reg::getOverlappingRegisterByIndex (regIndex, 1), 16, *constReg16);
     break;
   case Reg::REG_8_BITS_LOWER_HALF_TYPE:
+#ifdef TARGET_IA32E
     putExpressionInLeastSignificantBitsOfRegister
         (trace, 64, Reg::getOverlappingRegisterByIndex (regIndex, 0), 8, changedExp);
+#endif
     putExpressionInLeastSignificantBitsOfRegister
         (trace, 32, Reg::getOverlappingRegisterByIndex (regIndex, 1), 8, changedExp);
     putExpressionInLeastSignificantBitsOfRegister
