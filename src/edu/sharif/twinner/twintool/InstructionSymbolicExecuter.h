@@ -734,6 +734,11 @@ private:
   void setlAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
   /**
+   * SETNL sets opr to 1 iff SF == OF (and sets it to 0 otherwise).
+   */
+  void setnlAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
+  /**
    * SETBE sets opr to 1 iff ZF=1 or CF=1 (and sets it to 0 otherwise).
    */
   void setbeAnalysisRoutine (const MutableExpressionValueProxy &opr);
