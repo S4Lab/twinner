@@ -262,7 +262,7 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal)
 /* @throw (WrongStateException) */ {
   typedef REG KEY;
-  typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
+  std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
@@ -280,7 +280,7 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal)
 /* @throw (WrongStateException) */ {
   typedef ADDRINT KEY;
-  typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
+  std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
@@ -311,7 +311,7 @@ template < >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
     int size, std::map < REG, Expression * > &map, const REG key) {
   typedef REG KEY;
-  typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
+  std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
@@ -323,7 +323,7 @@ template < >
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
     int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key) {
   typedef ADDRINT KEY;
-  typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
+  std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {

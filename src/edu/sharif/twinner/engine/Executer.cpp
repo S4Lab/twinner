@@ -146,7 +146,7 @@ void Executer::saveSymbolRecordsToBinaryStream (std::ofstream &out,
   out.write ("SYM", 3);
   out.write ((const char *) &mode, sizeof (ExecutionMode));
 
-  typename std::map < int, std::list < Record > >::size_type s = records.size ();
+  std::map < int, std::list < Record > >::size_type s = records.size ();
   out.write ((const char *) &s, sizeof (s));
 
   edu::sharif::twinner::util::foreach (records, &save_records_list, out);

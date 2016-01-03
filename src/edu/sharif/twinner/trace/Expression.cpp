@@ -39,7 +39,7 @@ Expression::Expression (const Stack &stk,
 
 Expression::Expression (const Expression &exp) :
     lastConcreteValue (exp.lastConcreteValue->clone ()), isOverwriting (false) {
-  for (typename Stack::const_iterator it = exp.stack.begin ();
+  for (Stack::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const edu::sharif::twinner::trace::exptoken::ExpressionToken *et = *it;
     stack.push_back (et->clone ());
@@ -50,7 +50,7 @@ Expression &Expression::operator= (const Expression &exp) {
   (*lastConcreteValue) = (*exp.lastConcreteValue);
   isOverwriting = false;
   Stack clonedStack;
-  for (typename Stack::const_iterator it = exp.stack.begin ();
+  for (Stack::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const edu::sharif::twinner::trace::exptoken::ExpressionToken *et = *it;
     clonedStack.push_back (et->clone ());
@@ -65,7 +65,7 @@ Expression &Expression::operator= (const Expression &exp) {
 
 Expression::Expression (int size, const Expression &exp) :
     lastConcreteValue (exp.lastConcreteValue->clone (size)), isOverwriting (false) {
-  for (typename Stack::const_iterator it = exp.stack.begin ();
+  for (Stack::const_iterator it = exp.stack.begin ();
       it != exp.stack.end (); ++it) {
     const edu::sharif::twinner::trace::exptoken::ExpressionToken *et = *it;
     stack.push_back (et->clone ());

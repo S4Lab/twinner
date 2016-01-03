@@ -454,7 +454,7 @@ Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me, int size,
   rightExp->bitwiseOr (leftExp);
   delete leftExp;
   Expression *exp = rightExp;
-  typedef typename std::map < ADDRINT, Expression * >::iterator MapIterator;
+  typedef std::map < ADDRINT, Expression * >::iterator MapIterator;
   std::pair < MapIterator, bool > res = map.insert (make_pair (key, exp));
   if (!res.second) { // another expression already exists. overwriting...
     // old expression is owned by us; so it should be deleted before missing its pointer!
@@ -482,7 +482,7 @@ Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me, int size,
   rightExp->bitwiseOr (leftExp);
   delete leftExp;
   Expression *exp = rightExp;
-  typedef typename std::map < ADDRINT, Expression * >::iterator MapIterator;
+  typedef std::map < ADDRINT, Expression * >::iterator MapIterator;
   std::pair < MapIterator, bool > res = map.insert (make_pair (key, exp));
   if (!res.second) { // another expression already exists. overwriting...
     // old expression is owned by us; so it should be deleted before missing its pointer!
