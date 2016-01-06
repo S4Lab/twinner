@@ -29,6 +29,13 @@
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
 
+#ifdef TARGET_WINDOWS
+#define WIFEXITED(w)    (((w) & 0xffffff00) == 0)
+#define WIFSIGNALED(w)  (!WIFEXITED(w))
+#define WEXITSTATUS(w)  (w)
+#define WTERMSIG(w)     (w)
+#endif
+
 using namespace std;
 
 namespace edu {
