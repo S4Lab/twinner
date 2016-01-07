@@ -10,32 +10,30 @@
  * This file is part of Twinner project.
  */
 
-#ifndef UNEXPECTED_CHANGE_EXCEPTION_H
-#define UNEXPECTED_CHANGE_EXCEPTION_H
+#ifndef UNEXPECTED_CHANGE_H
+#define UNEXPECTED_CHANGE_H
 
-#include "edu/sharif/twinner/trace/WrongStateException.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
+#include "edu/sharif/twinner/trace/StateSummary.h"
 
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-class UnexpectedChangeException : public WrongStateException {
-
+class UnexpectedChange {
 public:
 
-  UnexpectedChangeException (REG reg,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &expectedVal,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &currentVal) :
-      WrongStateException (prepareRegisterMessage (reg, expectedVal, currentVal),
-      expectedVal, currentVal) {
+  static void adoptStateSummary (StateSummary &state, REG reg) {
+    state.setUnexpectedChangeState
+        (prepareRegisterMessage (reg, state.getExpectedStateValue (),
+        state.getCurrentStateValue ()));
   }
 
-  UnexpectedChangeException (ADDRINT address,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &expectedVal,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &currentVal) :
-      WrongStateException (prepareMemoryMessage (address, expectedVal, currentVal),
-      expectedVal, currentVal) {
+  static void adoptStateSummary (StateSummary &state, ADDRINT address) {
+    state.setUnexpectedChangeState
+        (prepareMemoryMessage (address, state.getExpectedStateValue (),
+        state.getCurrentStateValue ()));
   }
 
   static const std::string prepareRegisterMessage (REG reg,
@@ -67,4 +65,4 @@ public:
 }
 }
 
-#endif	/* UnexpectedChangeException.h */
+#endif /* UnexpectedChange.h */
