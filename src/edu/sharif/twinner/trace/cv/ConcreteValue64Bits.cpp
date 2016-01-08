@@ -39,12 +39,13 @@ ConcreteValue64Bits::ConcreteValue64Bits (const ConcreteValue &cv) :
 ConcreteValue64Bits::~ConcreteValue64Bits () {
 }
 
-void ConcreteValue64Bits::writeToRegister (CONTEXT *context,
+bool ConcreteValue64Bits::writeToRegister (CONTEXT *context,
     LEVEL_BASE::REG reg) const {
   PIN_REGISTER buffer;
   memset (buffer.byte, 0, sizeof (buffer));
   buffer.qword[0] = value;
-  edu::sharif::twinner::util::writeRegisterContent (context, reg, buffer.byte);
+  return edu::sharif::twinner::util::writeRegisterContent
+      (context, reg, buffer.byte);
 }
 
 ConcreteValue64Bits *ConcreteValue64Bits::twosComplement () const {
@@ -59,7 +60,10 @@ ConcreteValue64Bits *ConcreteValue64Bits::bitwiseNegated () const {
 
 ConcreteValue *ConcreteValue64Bits::signExtended (int length) const {
   if (length != 128) {
-    throw std::runtime_error ("The only available target for sign extension from 64-bits is 128-bits");
+    edu::sharif::twinner::util::Logger::error ()
+        << "ConcreteValue64Bits::signExtended (length=" << length << "): The "
+        "only available target for sign extension from 64-bits is 128-bits\n";
+    abort ();
   }
   if (isNegative ()) {
     return new ConcreteValue128Bits (-1, value);
@@ -82,9 +86,10 @@ ConcreteValue *ConcreteValue64Bits::realClone (int length) const {
   case 128:
     return new ConcreteValue128Bits (0, value);
   default:
-    std::stringstream ss;
-    ss << "ConcreteValue64Bits::clone (" << length << "): Unsupported length";
-    throw std::runtime_error (ss.str ());
+    edu::sharif::twinner::util::Logger::error ()
+        << "ConcreteValue64Bits::clone (" << length << "):"
+        " Unsupported length\n";
+    abort ();
   }
 }
 

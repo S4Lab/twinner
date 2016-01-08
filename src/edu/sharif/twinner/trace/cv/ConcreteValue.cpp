@@ -49,8 +49,9 @@ ConcreteValue *ConcreteValue::loadFromBinaryStream (std::ifstream &in) {
   case 128:
     return ConcreteValue128Bits::loadFromBinaryStream (in);
   default:
-    throw std::runtime_error ("ConcreteValue::loadFromBinaryStream(...): "
-                              "Unsupported size.");
+    edu::sharif::twinner::util::Logger::error ()
+        << "ConcreteValue::loadFromBinaryStream(...): Unsupported size.\n";
+    abort ();
   }
 }
 

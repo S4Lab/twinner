@@ -45,9 +45,12 @@ public:
    * @param trace The execution trace which changing expression will be saved there.
    * @param exp The new expression which should be cloned and set over the proxied
    * expression. This expression object may be truncated (and casted) to be fitted.
+   * @param state Indicates whether the last seen concrete value differs
+   * from the expected value (this may happen due to the overlapping locations).
    */
   virtual void setExpression (edu::sharif::twinner::trace::Trace *trace,
-      const edu::sharif::twinner::trace::Expression *exp) const;
+      const edu::sharif::twinner::trace::Expression *exp,
+      edu::sharif::twinner::trace::StateSummary &state) const;
 
   /**
    * Clones the given expression, i.e. exp, and assigns it to the proxied expression

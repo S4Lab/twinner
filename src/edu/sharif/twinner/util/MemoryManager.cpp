@@ -14,8 +14,8 @@
 
 #include "MemoryManager.h"
 
-#include <stdexcept>
 #include <fstream>
+#include <stdlib.h>
 
 #include "Logger.h"
 
@@ -38,12 +38,10 @@ MemoryManager::~MemoryManager () {
   delete memory;
 }
 
-MemoryManager *MemoryManager::allocateInstance () {
-  if (MemoryManager::me) {
-    throw std::runtime_error ("MemoryManager::allocateInstance (): "
-                              "An instance is already allocated.");
+MemoryManager *MemoryManager::getInstance () {
+  if (MemoryManager::me == 0) {
+    MemoryManager::me = new MemoryManager ();
   }
-  MemoryManager::me = new MemoryManager ();
   return MemoryManager::me;
 }
 
@@ -51,10 +49,10 @@ MemoryManager *MemoryManager::loadFromFile (const char *path) {
   std::ifstream in;
   in.open (path, ios_base::in | ios_base::binary);
   if (!in.is_open ()) {
-    edu::sharif::twinner::util::Logger::error () << "Can not read memory data:"
+    edu::sharif::twinner::util::Logger::error ()
+        << "MemoryManager::loadFromFile (...): Can not read memory data:"
         " Error in open function: " << path << '\n';
-    throw std::runtime_error ("MemoryManager::loadFromFile (...) method: "
-                              "Can not read memory data");
+    return 0;
   }
   uint32_t after_last_allocated_byte_index;
   in.read ((char *) &after_last_allocated_byte_index,
@@ -65,43 +63,49 @@ MemoryManager *MemoryManager::loadFromFile (const char *path) {
   return new MemoryManager (after_last_allocated_byte_index, memory_area);
 }
 
-void MemoryManager::saveToFile (const char *path) const {
+bool MemoryManager::saveToFile (const char *path) const {
   std::ofstream out;
   out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
   if (!out.is_open ()) {
-    edu::sharif::twinner::util::Logger::error () << "Can not write memory data:"
+    edu::sharif::twinner::util::Logger::error ()
+        << "MemoryManager::saveToFile (...): Can not write memory data:"
         " Error in open function: " << path << '\n';
-    throw std::runtime_error ("MemoryManager::saveToFile (...) method: "
-                              "Can not write memory data");
+    return false;
   }
   out.write ((const char *) &afterLastAllocatedByteIndex,
              sizeof (afterLastAllocatedByteIndex));
   out.write (memory, afterLastAllocatedByteIndex);
   out.close ();
+  return true;
 }
 
-uint32_t MemoryManager::allocate (uint32_t size) {
+bool MemoryManager::allocate (uint32_t &index, uint32_t size) {
   if (size == 0) {
-    throw std::runtime_error
-        ("allocate_memory_from_instructions_disassembly_shared_memory_area (...) "
-         "function: size must be positive");
+    edu::sharif::twinner::util::Logger::error ()
+        << "MemoryManager::allocate (size=" << size << "): "
+        "size must be positive\n";
+    return false;
   }
   if (afterLastAllocatedByteIndex + size > capacity) {
-    // throw std::bad_alloc ();
-    throw std::runtime_error
-        ("allocate_memory_from_instructions_disassembly_shared_memory_area (...) "
-         "function: Out of memory!");
+    edu::sharif::twinner::util::Logger::error ()
+        << "MemoryManager::allocate (size=" << size << "): "
+        "Out of memory!\n";
+    return false;
   }
   const uint32_t allocated = afterLastAllocatedByteIndex;
   afterLastAllocatedByteIndex += size;
-  return allocated + 1;
+  index = allocated + 1;
+  return true;
 }
 
 void MemoryManager::deallocate (uint32_t size) {
   if (size == 0 || size > afterLastAllocatedByteIndex) {
-    throw std::runtime_error
-        ("deallocate_memory_from_instructions_disassembly_shared_memory_area (...) "
-         "function : size must be positive and smaller than currently allocated area");
+    edu::sharif::twinner::util::Logger::error ()
+        << "MemoryManager::deallocate (...): "
+        "deallocate_memory_from_instructions_disassembly_shared_memory_area "
+        "function: size must be positive"
+        " and smaller than currently allocated area\n";
+    abort ();
   }
   afterLastAllocatedByteIndex -= size;
 }

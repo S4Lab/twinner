@@ -31,11 +31,9 @@ class OperationGroup;
 }
 
 class Flags {
-
 public:
 
   enum FlagState {
-
     UNDEFINED_FSTATE,
     DEFAULT_FSTATE,
     SET_FSTATE,
@@ -179,7 +177,7 @@ public:
 
   /**
    * Instantiates a new constraint object denoting that whether underlying expression
-   * matches with sing (S) condition. The last concrete value of the expression
+   * matches with sign (S) condition. The last concrete value of the expression
    * indicates that S should be satisfied or its negate should be satisfied.
    * @param instruction The instruction which was cause of this constraint instantiation.
    * @param sign Indicates whether requested constraint is created or its negated.

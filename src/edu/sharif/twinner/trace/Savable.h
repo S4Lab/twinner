@@ -18,7 +18,9 @@
 #include <list>
 #include <fstream>
 #include <string.h>
-#include <stdexcept>
+#include <stdlib.h>
+
+#include "edu/sharif/twinner/util/Logger.h"
 
 namespace edu {
 namespace sharif {
@@ -75,8 +77,10 @@ void loadListFromBinaryStream (std::ifstream &in,
   char magicString[3];
   in.read (magicString, 3);
   if (strncmp (magicString, expectedMagicString, 3) != 0) {
-    throw std::runtime_error
-        ("Unexpected magic string while loading list from binary stream");
+    edu::sharif::twinner::util::Logger::error ()
+        << "loadListFromBinaryStream (...): "
+        "Unexpected magic string while loading list from binary stream\n";
+    abort ();
   }
   typename std::list< SAVABLE * >::size_type s;
   in.read ((char *) &s, sizeof (s));

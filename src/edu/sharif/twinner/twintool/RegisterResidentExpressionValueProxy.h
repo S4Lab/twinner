@@ -46,7 +46,8 @@ public:
   virtual ~RegisterResidentExpressionValueProxy ();
 
   virtual edu::sharif::twinner::trace::Expression *getExpression (
-      edu::sharif::twinner::trace::Trace *trace) const;
+      edu::sharif::twinner::trace::Trace *trace,
+      edu::sharif::twinner::trace::StateSummary &state) const;
 
   virtual edu::sharif::twinner::trace::Expression
   setExpressionWithoutChangeNotification (
@@ -55,7 +56,8 @@ public:
 
   virtual void valueIsChanged (
       edu::sharif::twinner::trace::Trace *trace,
-      const edu::sharif::twinner::trace::Expression &changedExp) const;
+      const edu::sharif::twinner::trace::Expression &changedExp,
+      edu::sharif::twinner::trace::StateSummary &state) const;
 
   virtual int getSize () const;
 

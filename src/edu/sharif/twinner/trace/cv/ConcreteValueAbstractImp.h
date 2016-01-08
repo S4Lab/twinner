@@ -70,8 +70,8 @@ public:
     out.write ((const char *) &value, sizeof (value));
   }
 
-  virtual void writeToMemoryAddress (ADDRINT memoryEa) const {
-    edu::sharif::twinner::util::writeMemoryContent
+  virtual bool writeToMemoryAddress (ADDRINT memoryEa) const {
+    return edu::sharif::twinner::util::writeMemoryContent
         (memoryEa, (const UINT8 *) &value, sizeof (value));
   }
 
@@ -222,7 +222,8 @@ public:
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator/= (const ConcreteValue &cv) {
     const UINT64 cvValue = cv.toUint64 ();
     if (cvValue == 0) {
-      throw std::runtime_error ("division by zero");
+      edu::sharif::twinner::util::Logger::error () << "division by zero\n";
+      abort ();
     }
     value /= cvValue;
     cf = false;
@@ -233,7 +234,8 @@ public:
       const ConcreteValue &divisor) {
     const INT64 cvValue = INT64 (ValueType (divisor.toUint64 ()));
     if (cvValue == 0) {
-      throw std::runtime_error ("division by zero");
+      edu::sharif::twinner::util::Logger::error () << "division by zero\n";
+      abort ();
     }
     INT64 res = INT64 (value);
     res /= cvValue;
@@ -253,7 +255,8 @@ public:
       const ConcreteValue &divisor) {
     const INT64 cvValue = INT64 (ValueType (divisor.toUint64 ()));
     if (cvValue == 0) {
-      throw std::runtime_error ("remainder by zero");
+      edu::sharif::twinner::util::Logger::error () << "remainder by zero\n";
+      abort ();
     }
     INT64 res = INT64 (value);
     res %= cvValue;
@@ -319,8 +322,11 @@ public:
 
 template<> inline
 ConcreteValue *ConcreteValueAbstractImp<64, UINT64>::signExtended (int length) const {
-  throw std::runtime_error
-      ("64-bits sign-extension is not supported by ConcreteValueAbstractImp");
+  edu::sharif::twinner::util::Logger::error ()
+      << "ConcreteValueAbstractImp<64, UINT64>::signExtended (length="
+      << length << "): 64-bits sign-extension is not supported"
+      " by ConcreteValueAbstractImp\n";
+  abort ();
 }
 
 template<> inline
@@ -368,4 +374,4 @@ public:
 }
 }
 
-#endif	/* ConcreteValueAbstractImp.h */
+#endif /* ConcreteValueAbstractImp.h */

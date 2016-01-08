@@ -26,8 +26,6 @@
 
 #include "Instrumenter.h"
 
-#include "edu/sharif/twinner/exception/AbstractException.h"
-
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 
@@ -77,26 +75,7 @@ TwinTool::~TwinTool () {
   }
 }
 
-void my_terminate_handler () {
-  edu::sharif::twinner::util::Logger::error () << "terminate is called\n";
-  try {
-    throw;
-  } catch (const edu::sharif::twinner::exception::AbstractException &e) {
-    edu::sharif::twinner::util::Logger::error ()
-        << "AbstractException::what (): " << e.what () << '\n';
-    e.printStackBacktrace ();
-  } catch (const std::exception &e) {
-    edu::sharif::twinner::util::Logger::error ()
-        << "std::exception::what (): " << e.what () << '\n';
-  } catch (...) {
-    edu::sharif::twinner::util::Logger::error ()
-        << "unknown exception is thrown!\n";
-  }
-  abort ();
-}
-
 INT32 TwinTool::run (int argc, char *argv[]) {
-  set_terminate (my_terminate_handler);
   /*
    * Initialize PIN library. Print help message if -h(elp) is specified
    * in the command line or the command line is invalid.
@@ -210,15 +189,21 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
       break;
     case INITIAL_STATE_DETECTION_MODE:
       if (measureMode) {
-        throw std::runtime_error ("measure and initial-state-detection modes "
-                                  "cannot be enabled simultaneously");
+        edu::sharif::twinner::util::Logger::error ()
+            << "TwinTool::parseArgumentsAndInitializeTool (): "
+            "measure and initial-state-detection modes "
+            "cannot be enabled simultaneously\n";
+        return false;
       }
       im = new Instrumenter (readSetOfAddressesFromBinaryStream (in),
                              traceFilePath, disassemblyFilePath, justAnalyzeMainRoutine);
       break;
     default:
       in.close ();
-      throw std::runtime_error ("Unknown execution mode");
+      edu::sharif::twinner::util::Logger::error ()
+          << "TwinTool::parseArgumentsAndInitializeTool (): "
+          "Unknown execution mode\n";
+      return false;
     }
     in.close ();
   } else {
@@ -233,9 +218,10 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
 void TwinTool::openFileForReading (std::ifstream &in, const std::string &path) const {
   in.open (path.c_str (), ios_base::in | ios_base::binary);
   if (!in.is_open ()) {
-    edu::sharif::twinner::util::Logger::error () << "Can not read from binary file:"
-        " Error in open function: " << path << '\n';
-    throw std::runtime_error ("Can not read from binary file");
+    edu::sharif::twinner::util::Logger::error ()
+        << "TwinTool::openFileForReading (in=..., path=" << path << "):"
+        " Can not read from binary file due to error in open function\n";
+    abort ();
   }
 }
 
@@ -244,8 +230,10 @@ TwinTool::ExecutionMode TwinTool::readExecutionModeFromBinaryStream (
   char magicString[3];
   in.read (magicString, 3);
   if (strncmp (magicString, "SYM", 3) != 0) {
-    throw std::runtime_error
-        ("Unexpected magic string while reading symbols input file from binary stream");
+    edu::sharif::twinner::util::Logger::error ()
+        << "TwinTool::readExecutionModeFromBinaryStream (...): Unexpected "
+        "magic string while reading symbols input file from binary stream\n";
+    abort ();
   }
   ExecutionMode mode;
   in.read ((char *) &mode, sizeof (mode));
@@ -344,40 +332,45 @@ edu::sharif::twinner::trace::cv::ConcreteValue *readRegisterContent (
     return new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
         (buffer.qword[1], buffer.qword[0]);
   default:
-    throw std::runtime_error ("util::readRegisterContent (...) method: "
-                              "Size of requested register is unsupported.");
+    edu::sharif::twinner::util::Logger::error ()
+        << "util::readRegisterContent (...) function"
+        " [size=" << std::dec << REG_Size (reg) << "]:"
+        " size of the requested register is unsupported\n";
+    abort ();
   }
   return edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value).clone
       (REG_Size (reg) * 8);
 }
 
-UINT64 readMemoryContent (ADDRINT memoryEa, size_t size) {
-  UINT64 currentConcreteValue = 0;
-  const size_t ret = PIN_SafeCopy (&currentConcreteValue, (const VOID *) (memoryEa), size);
+BOOL readMemoryContent (UINT64 &outValue, ADDRINT memoryEa, size_t size) {
+  edu::sharif::twinner::util::Logger::loquacious () << "readMemoryContent: 0x"
+      << std::hex << memoryEa << " / size: 0x" << size << " bytes\n";
+  outValue = 0;
+  const size_t ret = PIN_SafeCopy (&outValue, (const VOID *) (memoryEa), size);
   if (ret != size) {
     edu::sharif::twinner::util::Logger::error () << "readMemoryContent(...): "
         "trying to read " << std::dec << size << " bytes, but PIN_SafeCopy "
         "read " << ret << " bytes\n";
+    return false;
   }
   if (size < 8) {
-    currentConcreteValue &= (1ull << (size * 8)) - 1;
+    outValue &= (1ull << (size * 8)) - 1;
   }
-  return currentConcreteValue;
+  return true;
 }
 
-VOID writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
+BOOL writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
   const size_t ret = PIN_SafeCopy ((VOID *) memoryEa, (const VOID *) value, size);
   if (ret != size) {
-    edu::sharif::twinner::util::Logger::error () << "writeMemoryContent(...): "
-        "trying to write " << std::dec << size << " bytes, but PIN_SafeCopy "
-        "wrote " << ret << " bytes\n";
-    throw std::runtime_error ("Error in PIN_SafeCopy");
+    return false;
   }
+  return true;
 }
 
-VOID writeRegisterContent (CONTEXT *context,
+BOOL writeRegisterContent (CONTEXT *context,
     LEVEL_BASE::REG reg, const UINT8 *value) {
   PIN_SetContextRegval (context, reg, value);
+  return true;
 }
 
 }

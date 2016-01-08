@@ -43,8 +43,16 @@ RegisterResidentExpressionValueProxy::~RegisterResidentExpressionValueProxy () {
 
 edu::sharif::twinner::trace::Expression *
 RegisterResidentExpressionValueProxy::getExpression (
-    edu::sharif::twinner::trace::Trace *trace) const {
-  return trace->getSymbolicExpressionByRegister (getSize (), reg, *regVal)->clone ();
+    edu::sharif::twinner::trace::Trace *trace,
+    edu::sharif::twinner::trace::StateSummary &state) const {
+  edu::sharif::twinner::trace::Expression *exp =
+      trace->getSymbolicExpressionByRegister
+      (getSize (), reg, *regVal, 0, state);
+  if (exp) {
+    return exp->clone ();
+  } else {
+    return 0;
+  }
 }
 
 edu::sharif::twinner::trace::Expression
@@ -68,7 +76,8 @@ void RegisterResidentExpressionValueProxy::putExpressionInLeastSignificantBitsOf
 
 void RegisterResidentExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
-    const edu::sharif::twinner::trace::Expression &changedExp) const {
+    const edu::sharif::twinner::trace::Expression &changedExp,
+    edu::sharif::twinner::trace::StateSummary &state) const {
   typedef edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol Reg;
   edu::sharif::twinner::util::Logger::loquacious () << "(register value is changed to "
       << &changedExp << ")\n";

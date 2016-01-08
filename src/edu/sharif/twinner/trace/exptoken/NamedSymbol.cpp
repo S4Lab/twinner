@@ -76,7 +76,9 @@ std::pair < int, SymbolRecord > NamedSymbol::toSymbolRecord () const {
       ss2 >> dummy >> j; // argv[i][j]
     }
   }
-  throw std::runtime_error ("NamedSymbol::toSymbolRecord (): Unsupported type");
+  edu::sharif::twinner::util::Logger::error ()
+      << "NamedSymbol::toSymbolRecord (): Unsupported type\n";
+  abort ();
 }
 
 void NamedSymbol::saveToBinaryStream (std::ofstream &out) const {
@@ -116,7 +118,7 @@ NamedSymbol *NamedSymbol::loadFromBinaryStream (std::ifstream &in) {
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown NamedSymbol constant value;"
         " C or V was expected but got " << c << '\n';
-    throw std::runtime_error ("Unknown NamedSymbol constant value");
+    abort ();
   }
   NamedSymbol *symbol = new NamedSymbol (name, techName, constant);
   symbol->Symbol::loadFromBinaryStream (in);
@@ -169,7 +171,7 @@ NamedSymbol *NamedSymbol::fromTechnicalName (const std::string &name,
   edu::sharif::twinner::util::Logger::error ()
       << "NamedSymbol::fromTechnicalName (name=" << name
       << ", value=" << value << ") failed\n";
-  throw std::runtime_error ("NamedSymbol::fromTechnicalName (...) failed");
+  abort ();
 }
 
 NamedSymbol *NamedSymbol::fromTechnicalName (const std::string &name,

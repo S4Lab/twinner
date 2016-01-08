@@ -73,8 +73,10 @@ std::pair < int, SymbolRecord > RegisterEmergedSymbol::toSymbolRecord () const {
         static_cast<const edu::sharif::twinner::trace::cv::ConcreteValue128Bits *>
         (concreteValue)->getMsb ();
   } else {
-    throw std::runtime_error ("RegisterEmergedSymbol::toSymbolRecord () method: "
-                              "Unsupported concrete value type.");
+    edu::sharif::twinner::util::Logger::error ()
+        << "RegisterEmergedSymbol::toSymbolRecord () method: "
+        "Unsupported concrete value type.\n";
+    abort ();
   }
   return make_pair (generationIndex, record);
 }
@@ -114,16 +116,20 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::strin
   } else {
 #ifdef TARGET_IA32E
     if (v4 != 0 || v3 != 0) {
-      throw std::runtime_error ("RegisterEmergedSymbol::fromNameAndValue (...): "
-                                "Illegal value: This register is only 64 bits.");
+      edu::sharif::twinner::util::Logger::error ()
+          << "RegisterEmergedSymbol::fromNameAndValue (...): "
+          "Illegal value: It has not more than 64 bits.\n";
+      abort ();
     }
     const UINT64 value = (UINT64 (v2) << 32) | v1;
     return new RegisterEmergedSymbol
         (reg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value), generationIndex);
 #else
     if (v4 != 0 || v3 != 0 || v2 != 0) {
-      throw std::runtime_error ("RegisterEmergedSymbol::fromNameAndValue (...): "
-                                "Illegal value: This register is only 32 bits.");
+      edu::sharif::twinner::util::Logger::error ()
+          << "RegisterEmergedSymbol::fromNameAndValue (...): "
+          "Illegal value: It has not more than 32 bits.\n";
+      abort ();
     }
     return new RegisterEmergedSymbol
         (reg, edu::sharif::twinner::trace::cv::ConcreteValue32Bits (v1), generationIndex);
@@ -250,8 +256,16 @@ const char *RegisterEmergedSymbol::getRegisterName () const {
     return "xmm15";
 #endif
   default:
-    throw std::runtime_error ("Register emerged symbols must correspond to 64 bits "
-                              "or 128 bits (XMM series) regs");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Register emerged symbols must correspond to "
+        "16 bits (segment registers) "
+#ifdef TARGET_IA32E
+        "64 bits "
+#else
+        "32 bits "
+#endif
+        "or 128 bits (XMM series) registers\n";
+    abort ();
   }
 }
 
@@ -344,8 +358,9 @@ REG RegisterEmergedSymbol::getRegisterFromName (const std::string &name) {
     return REG_XMM15;
 #endif
   } else {
-    const std::string msg = "Unknown Register Name: ";
-    throw std::runtime_error (msg + name);
+    edu::sharif::twinner::util::Logger::error ()
+        << "Unknown Register Name: " << name << '\n';
+    abort ();
   }
 }
 

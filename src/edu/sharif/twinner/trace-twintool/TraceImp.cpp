@@ -30,7 +30,7 @@
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
 
-#include "UnexpectedChangeException.h"
+#include "UnexpectedChange.h"
 
 namespace edu {
 namespace sharif {
@@ -57,10 +57,11 @@ TraceImp::~TraceImp () {
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByRegister (int size, REG reg,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &regval)
-/* @throw (WrongStateException) */ {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+    StateSummary &state) {
   return tryToGetSymbolicExpressionImplementation
-      (size, reg, regval, &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister);
+      (size, reg, regval,
+       &ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister, state);
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByRegister (int size, REG reg) {
@@ -69,11 +70,12 @@ Expression *TraceImp::tryToGetSymbolicExpressionByRegister (int size, REG reg) {
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
-    ADDRINT memoryEa, const edu::sharif::twinner::trace::cv::ConcreteValue &memval)
-/* throw (WrongStateException) */ {
+    ADDRINT memoryEa, const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+    StateSummary &state) {
   return tryToGetSymbolicExpressionImplementation
       (size, memoryEa, memval,
-       &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress);
+       &ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress,
+       state);
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
@@ -85,27 +87,23 @@ Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
 template < typename T >
 Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T address,
     const edu::sharif::twinner::trace::cv::ConcreteValue &val,
-    typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
-/* @throw (WrongStateException) */ {
+    typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method,
+    StateSummary &state) {
   for (std::list < ExecutionTraceSegment * >::iterator it = currentSegmentIterator;
       it != segments.end (); ++it) {
     // searches segments starting from the current towards the oldest one
     ExecutionTraceSegment *seg = *it;
-    try {
-      Expression *exp = (seg->*method) (size, address, val);
-      if (exp) {
-        return exp;
-      }
-    } catch (const WrongStateException &e) {
+    Expression *exp = (seg->*method) (size, address, val, state);
+    if (exp) {
+      return exp;
+    }
+    if (state.isWrongState ()) {
       if (it == currentSegmentIterator) {
-        const edu::sharif::twinner::trace::cv::ConcreteValue &currentValue =
-            e.getCurrentStateValue ();
         getCurrentTraceSegment ()->printRegistersValues
             (edu::sharif::twinner::util::Logger::loquacious ());
-        throw UnexpectedChangeException (address, val, currentValue);
-      } else {
-        throw;
+        UnexpectedChange::adoptStateSummary (state, address);
       }
+      break;
     }
   }
   return 0;
@@ -129,11 +127,11 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
 
 Expression *TraceImp::getSymbolicExpressionByRegister (int size, REG reg,
     const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
-    Expression *newExpression) /* @throw (UnexpectedChangeException) */ {
+    Expression *newExpression, StateSummary &state) {
   return getSymbolicExpressionImplementation
       (size, reg, regval, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByRegister,
-       &ExecutionTraceSegment::getSymbolicExpressionByRegister);
+       &ExecutionTraceSegment::getSymbolicExpressionByRegister, state);
 }
 
 Expression *TraceImp::getSymbolicExpressionByRegister (int size, REG reg,
@@ -146,11 +144,11 @@ Expression *TraceImp::getSymbolicExpressionByRegister (int size, REG reg,
 
 Expression *TraceImp::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
     const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
-    Expression *newExpression) /* @throw (UnexpectedChangeException) */ {
+    Expression *newExpression, StateSummary &state) {
   return getSymbolicExpressionImplementation
       (size, memoryEa, memval, newExpression,
        &TraceImp::tryToGetSymbolicExpressionByMemoryAddress,
-       &ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress);
+       &ExecutionTraceSegment::getSymbolicExpressionByMemoryAddress, state);
 }
 
 Expression *TraceImp::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
@@ -165,32 +163,33 @@ template < typename T >
 Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
     const edu::sharif::twinner::trace::cv::ConcreteValue &val, Expression *newExpression,
     typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
-    typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod)
-/* @throw (UnexpectedChangeException) */ {
+    typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod,
+    StateSummary &state) {
   needsPropagation = false;
-  try {
-    Expression *exp = (this->*tryToGetMethod) (size, address, val);
-    if (exp) { // exp exists and its val matches with expected value
-      return exp;
-    } // exp does not exist at all, so it's OK to create a new one
+  Expression *exp = (this->*tryToGetMethod) (size, address, val, state);
+  if (exp) { // exp exists and its val matches with expected value
+    return exp;
+  } // exp does not exist at all, so it's OK to create a new one
 
-  } catch (const UnexpectedChangeException &e) {
-    throw;
-
-  } catch (const WrongStateException &e) {
+  if (state.isUnexpectedChangeState ()) {
+    return 0;
+  }
+  if (state.isWrongState ()) {
     const edu::sharif::twinner::trace::cv::ConcreteValue &currentValue =
-        e.getCurrentStateValue ();
+        state.getCurrentStateValue ();
     edu::sharif::twinner::util::Logger::loquacious () << "Unexpected value ("
         << std::hex << currentValue
         << ") was found (instead of " << val << "). "
         "A new symbol is required to describe it.\n";
+    state.clear ();
   }
   // instantiate and set a new expression in the current segment
   if (!newExpression) {
     newExpression = instantiateExpression (address, val, currentSegmentIndex);
   }
   needsPropagation = true;
-  return (getCurrentTraceSegment ()->*getMethod) (size, address, val, newExpression);
+  return (getCurrentTraceSegment ()->*getMethod) (size, address, val,
+                                                  newExpression, state);
 }
 
 template < typename T >
@@ -279,8 +278,11 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
       std::pair < std::map < REG, Expression * >::iterator, bool > res =
           regMap.insert (make_pair (REG (record.address), exp));
       if (!res.second) {
-        throw std::runtime_error
-            ("Duplicate symbols are read for one register from symbols binary stream");
+        edu::sharif::twinner::util::Logger::error ()
+            << "TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream"
+            " (...): Duplicate symbols are read for one register"
+            " from symbols binary stream\n";
+        abort ();
       }
       break;
     }
@@ -323,8 +325,11 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
       std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
           memMap.insert (make_pair (ADDRINT (record.address), exp));
       if (!res.second) {
-        throw std::runtime_error ("Duplicate symbols are read for one memory address"
-                                  " from symbols binary stream");
+        edu::sharif::twinner::util::Logger::error ()
+            << "TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream"
+            " (...): Duplicate symbols are read for one memory address"
+            " from symbols binary stream\n";
+        abort ();
       }
       break;
     }
@@ -343,13 +348,20 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
       std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
           memMap.insert (make_pair (memoryEa, exp));
       if (!res.second) {
-        throw std::runtime_error ("Duplicate symbols are read for one memory address"
-                                  " from symbols binary stream [argv[i] case)");
+        edu::sharif::twinner::util::Logger::error ()
+            << "TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream"
+            " (...): Duplicate symbols are read for one memory address"
+            " from symbols binary stream [argv[i] case)\n";
+        abort ();
       }
       break;
     }
     default:
-      throw std::runtime_error ("Unsupported SymbolRecord type");
+      edu::sharif::twinner::util::Logger::error ()
+          << "TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream"
+          " (...): Unsupported SymbolRecord type: "
+          << std::dec << record.type << '\n';
+      abort ();
     }
   }
   return new ExecutionTraceSegment (index, regMap, memMap);

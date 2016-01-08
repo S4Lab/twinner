@@ -195,7 +195,9 @@ Constraint *Constraint::instantiateNegatedConstraint () const {
   case NON_EQUAL:
     return new Constraint (mainExp, auxExp, EQUAL, instruction, false);
   default:
-    throw std::runtime_error ("Unknown ComparisonType");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Unknown ComparisonType: " << std::dec << type << '\n';
+    abort ();
   }
 }
 

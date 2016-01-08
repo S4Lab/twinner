@@ -20,6 +20,7 @@ namespace trace {
 
 class Expression;
 class Trace;
+class StateSummary;
 }
 namespace twintool {
 
@@ -31,7 +32,6 @@ namespace twintool {
  * may cause side-effect upon such read failures).
  */
 class ExpressionValueProxy {
-
 private:
   ExpressionValueProxy (const ExpressionValueProxy &evp); /// disable copy-constructor
 
@@ -55,19 +55,26 @@ public:
    * instance is returned which must be deleted by the caller. For changing the underlying
    * instance, the setter methods must be used.
    * @param trace Trace object which this expression will be resolved upon it.
+   * @param state Indicates whether the last seen concrete value differs
+   * from the expected value.
+   *
    * @return The cloned expression object.
    */
   virtual edu::sharif::twinner::trace::Expression *getExpression (
-      edu::sharif::twinner::trace::Trace *trace) const = 0;
+      edu::sharif::twinner::trace::Trace *trace,
+      edu::sharif::twinner::trace::StateSummary &state) const = 0;
 
   /**
    * This method should be called whenever the proxied expression undergoes any change.
    * @param trace The trace which changed expression has been kept there.
    * @param changedExp The expression which is changed.
+   * @param state Indicates whether the last seen concrete value differs
+   * from the expected value (this may happen due to the overlapping locations).
    */
   virtual void valueIsChanged (
       edu::sharif::twinner::trace::Trace *trace,
-      const edu::sharif::twinner::trace::Expression &changedExp) const = 0;
+      const edu::sharif::twinner::trace::Expression &changedExp,
+      edu::sharif::twinner::trace::StateSummary &state) const = 0;
 };
 
 }
@@ -75,4 +82,4 @@ public:
 }
 }
 
-#endif	/* ExpressionValueProxy.h */
+#endif /* ExpressionValueProxy.h */

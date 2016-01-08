@@ -245,6 +245,12 @@ public:
   void analysisRoutinePrefetchMem (ADDRINT memoryEa, UINT32 memReadBytes);
 
 private:
+  edu::sharif::twinner::trace::Expression *getExpression (
+      const ExpressionValueProxy &proxy,
+      edu::sharif::twinner::trace::Trace *trace) const;
+  void setExpression (const MutableExpressionValueProxy &dst,
+      edu::sharif::twinner::trace::Trace *trace,
+      const edu::sharif::twinner::trace::Expression *exp) const;
 
   /**
    * Run hooks from last instruction (if any) and reset them afterwards.

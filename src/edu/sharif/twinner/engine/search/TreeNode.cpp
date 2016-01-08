@@ -32,8 +32,8 @@ static int lastDebugId = 0;
 
 TreeNode::TreeNode (TreeNode *p, const edu::sharif::twinner::trace::Constraint *c,
     const edu::sharif::twinner::util::MemoryManager *m) :
-debugId (++lastDebugId),
-parent (p), constraint (c), memoryManager (m) {
+    debugId (++lastDebugId),
+    parent (p), constraint (c), memoryManager (m) {
   if (p) {
     p->children.push_back (this);
   }

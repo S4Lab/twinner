@@ -28,6 +28,8 @@ class Constraint : public Savable {
 public:
 
   enum ComparisonType {
+    INVALID,
+
     // zero
     NON_POSITIVE, NON_NEGATIVE, NON_ZERO,
     POSITIVE, NEGATIVE, ZERO,

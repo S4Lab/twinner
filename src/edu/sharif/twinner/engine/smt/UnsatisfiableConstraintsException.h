@@ -13,7 +13,7 @@
 #ifndef UNSATISFIABLE_CONSTRAINTS_EXCEPTION_H
 #define UNSATISFIABLE_CONSTRAINTS_EXCEPTION_H
 
-#include "edu/sharif/twinner/exception/AbstractException.h"
+#include <stdexcept>
 
 namespace edu {
 namespace sharif {
@@ -24,12 +24,11 @@ namespace smt {
 /**
  * This exception indicates that constraints are unsatisfiable simultaneously.
  */
-class UnsatisfiableConstraintsException : public edu::sharif::twinner::exception::AbstractException {
-
+class UnsatisfiableConstraintsException : public std::exception {
 public:
 
-  UnsatisfiableConstraintsException () :
-      AbstractException ("Constraints are not satisfiable simultaneously.") {
+  virtual const char *what () const throw () {
+    return "Constraints are not satisfiable simultaneously.";
   }
 };
 
@@ -39,4 +38,4 @@ public:
 }
 }
 
-#endif	/* UnsatisfiableConstraintsException.h */
+#endif /* UnsatisfiableConstraintsException.h */

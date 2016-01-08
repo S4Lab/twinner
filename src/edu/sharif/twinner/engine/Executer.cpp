@@ -92,10 +92,11 @@ void Executer::setCandidateAddresses (
   out.open (SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE,
             ios_base::out | ios_base::trunc | ios_base::binary);
   if (!out.is_open ()) {
-    edu::sharif::twinner::util::Logger::error () << "Can not write memory addresses"
-        " to file: Error in open function: "
+    edu::sharif::twinner::util::Logger::error ()
+        << "Executer::setCandidateAddresses (...): "
+        "Can not write memory addresses to file due to error in open function: "
         << SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE << '\n';
-    throw std::runtime_error ("Error in saving memory addresses in binary file");
+    abort ();
   }
   out.write ("SYM", 3);
   ExecutionMode mode = INITIAL_STATE_DETECTION_MODE;
@@ -121,7 +122,10 @@ void Executer::setSymbolsValues (
   edu::sharif::twinner::util::foreach (symbols, &add_symbol_to_map, records);
 
   if (!saveSymbolRecordsToFile (NORMAL_MODE, records)) {
-    throw std::runtime_error ("Error in saving symbols in binary file");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Executer::setSymbolsValues (...): "
+        "Error in saving symbols in binary file\n";
+    abort ();
   }
 }
 
@@ -250,6 +254,9 @@ Executer::executeSingleTraceInNormalMode () {
                  strlen (OVERHEAD_MEASUREMENT_OPTION), whiteSpace);
     Measurement ourMeasure, baselineMeasure;
     edu::sharif::twinner::trace::Trace *trace = executeSystemCommand (cmd, ourMeasure);
+    if (trace == 0) {
+      return 0;
+    }
     const std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * > &segments =
         trace->getTraceSegments ();
     std::map < ADDRINT, const edu::sharif::twinner::trace::exptoken::Symbol * > msyms;
@@ -271,7 +278,12 @@ Executer::executeSingleTraceInNormalMode () {
       symbols.insert (it->second);
     }
     setSymbolsValues (symbols);
-    executeSystemCommand (command, baselineMeasure);
+    if (executeSystemCommand (command, baselineMeasure) == 0) {
+      return 0;
+    }
+    //    std::string normalCommand = "./obj-intel64/mpwpl-manual-virt-obf.out ";
+    //    normalCommand += inputArguments;
+    //    executeSystemCommand (normalCommand, baselineMeasure);
     double cpuOverhead = ourMeasure.cputime;
     cpuOverhead = ((cpuOverhead / baselineMeasure.cputime) - 1) * 100;
     double memoryOverhead = ourMeasure.mss;
@@ -320,7 +332,12 @@ Executer::executeSystemCommand (std::string command, Measurement &measurement) {
   signaled = false;
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
-  edu::sharif::twinner::trace::Trace *trace = executeAndMeasure (command, measurement);
+  edu::sharif::twinner::trace::Trace *trace = 0;
+  if (executeAndMeasure (command, measurement)) {
+    trace = edu::sharif::twinner::trace::Trace::loadFromFile
+        (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
+         DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
+  }
   const int ret = measurement.ret;
   edu::sharif::twinner::util::Logger::debug ()
       << "Executer::executeSystemCommand ('" << command << "', measurement): "

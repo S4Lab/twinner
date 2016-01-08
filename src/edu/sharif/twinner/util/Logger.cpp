@@ -109,7 +109,11 @@ const char *Logger::getVerbosenessLevelAsString () {
   case LOQUACIOUS_VERBOSENESS:
     return "loquacious";
   default:
-    throw std::runtime_error ("Verboseness level is corrupted");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Logger::getVerbosenessLevelAsString ()"
+        " [verbose=" << std::dec << verbose << "]: "
+        "corrupted verboseness level\n";
+    abort ();
   }
 }
 

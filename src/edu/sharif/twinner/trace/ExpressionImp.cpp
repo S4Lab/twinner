@@ -61,20 +61,21 @@ ExpressionImp::instantiateMemorySymbol (ADDRINT memoryEa,
   } else {
     const int size = concreteValue.getSize () / 8;
     UINT64 currentConcreteValue = 0;
-    try {
-      currentConcreteValue = edu::sharif::twinner::util::readMemoryContent
-          (memoryEa, size);
-    } catch (const std::runtime_error &e) {
-      edu::sharif::twinner::util::Logger::warning () << "memory is not readable; address: 0x" << std::hex << memoryEa << '\n';
-      throw;
+    if (!edu::sharif::twinner::util::readMemoryContent
+        (currentConcreteValue, memoryEa, size)) {
+      edu::sharif::twinner::util::Logger::warning ()
+          << "memory is not readable;"
+          " address: 0x" << std::hex << memoryEa << '\n';
+      abort ();
     }
-    try {
-      edu::sharif::twinner::util::writeMemoryContent
-          (memoryEa, (const UINT8 *) &currentConcreteValue, size);
+    if (edu::sharif::twinner::util::writeMemoryContent
+        (memoryEa, (const UINT8 *) &currentConcreteValue, size)) {
       return new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
           (memoryEa, concreteValue, generationIndex);
-    } catch (const std::runtime_error &e) {
-      edu::sharif::twinner::util::Logger::warning () << "memory is not writable; address: 0x" << std::hex << memoryEa << '\n';
+    } else {
+      edu::sharif::twinner::util::Logger::warning ()
+          << "memory is not writable;"
+          " address: 0x" << std::hex << memoryEa << '\n';
       return new edu::sharif::twinner::trace::exptoken::Constant (concreteValue);
     }
   }

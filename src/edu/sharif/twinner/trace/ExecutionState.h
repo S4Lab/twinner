@@ -26,6 +26,7 @@ namespace trace {
 
 class Expression;
 class Constraint;
+class StateSummary;
 
 namespace cv {
 
@@ -61,15 +62,15 @@ public:
    * @param size The size of the reg in bits.
    * @param reg The register which its value is returned.
    * @param regval The concrete value which currently lives in given register.
+   * @param state Indicates whether the last concrete value of the reg's
+   * corresponding expression differs from the expected regval value.
+   *
    * @return symbolic expression which is living in given register at current state
    * or 0/null if there is no such expression.
-   *
-   * @except Throws a WrongStateException, if the last concrete value of the reg's
-   * corresponding expression differs from expected @c regval value.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &regval)
-  /* @throw (WrongStateException) */ = 0;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+      StateSummary &state) = 0;
 
   /**
    * Overload of tryToGetSymbolicExpressionByRegister (reg, regval) method.
@@ -93,16 +94,16 @@ public:
    * @param size The bit-precision of the memory location which its value is being read.
    * @param memoryEa The memory effective address which its value will be returned.
    * @param memval The concrete value which currently lives at given memory address.
+   * @param state Indicates whether the last concrete value of the mem's
+   * corresponding expression differs from the expected memval value.
+   *
    * @return symbolic expression which is living at the given memory address at current
    * state or 0/null if there is no such expression.
-   *
-   * @except Throws a WrongStateException, if the last concrete value of the mem's
-   * corresponding expression differs from expected @c memval value.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &memval)
-  /* @throw (WrongStateException) */ = 0;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+      StateSummary &state) = 0;
 
   /**
    * Overloads of tryToGetSymbolicExpressionByMemoryAddress (memoryEa, memval) method.
@@ -135,17 +136,19 @@ public:
    * @param reg The register which its value is returned.
    * @param regval The concrete value which currently lives in given register.
    * @param newExpression The expression which will be set if there was no current value.
-   * @return symbolic expression which is living in register at current state.
+   * @param state Can be used to indicate that the state is normal or whether
+   * 1. there exists some set exp in the last/current execution state (so its
+   * concrete value must match with the expected regval value) AND
+   * 2. concrete values differ AND
+   * 3. there was no syscall between corresponding instructions (since when
+   * the last concrete value had been captured till now).
+   * Thus there must be some ignored instruction in the trace.
    *
-   * @except Throws an UnexpectedChangeException, if 1. there exists some set exp in the
-   * last/current execution state (so its concrete value must match with the
-   * expected @c regval value) AND 2. concrete values differ AND 3. there was no syscall
-   * between corresponding instructions (since when the last concrete value had been
-   * captured till now) thus there must be some ignored instruction in the trace.
+   * @return symbolic expression which is living in register at current state.
    */
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
-      Expression *newExpression) = 0 /* @throw (UnexpectedChangeException) */;
+      Expression *newExpression, StateSummary &state) = 0;
 
   /**
    * Overload of getSymbolicExpressionByRegister (reg, regval, newExpression)
@@ -179,17 +182,19 @@ public:
    * @param memoryEa The memory effective address which its value will be returned.
    * @param memval The concrete value which currently lives at given memory address.
    * @param newExpression The expression which will be set if there was no current value.
-   * @return symbolic expression which is living at the given memory address at current state.
+   * @param state Can be used to indicate that the state is normal or whether
+   * 1. there exists some set exp in the last/current execution trace segment
+   * (so its concrete value must match with the expected memval value) AND
+   * 2. concrete values differ AND
+   * 3. there was no syscall between corresponding instructions (since when
+   * the last concrete value had been captured till now).
+   * Thus there must be some ignored instruction in the trace.
    *
-   * @except Throws an UnexpectedChangeException, if 1. there exists some set exp in the
-   * last/current execution trace segment (so its concrete value must match with the
-   * expected @c memval value) AND 2. concrete values differ AND 3. there was no syscall
-   * between corresponding instructions (since when the last concrete value had been
-   * captured till now) thus there must be some ignored instruction in the trace.
+   * @return symbolic expression which is living at the given memory address at current state.
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
-      Expression *newExpression) = 0 /* @throw (UnexpectedChangeException) */;
+      Expression *newExpression, StateSummary &state) = 0;
 
   /**
    * Overload of getSymbolicExpressionByMemoryAddress (memoryEa, memval, newExpression)

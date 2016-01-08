@@ -174,7 +174,7 @@ public:
 
   void setMainArgsReportingFilePath (const std::string &marFilePath);
 
-  void instrumentSingleInstruction (INS ins);
+  bool instrumentSingleInstruction (INS ins);
 
   void syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std);
   void syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std);

@@ -79,19 +79,20 @@ void ConcreteValue128Bits::saveToBinaryStream (std::ofstream &out) const {
   out.write ((const char *) &msb, sizeof (msb));
 }
 
-void ConcreteValue128Bits::writeToMemoryAddress (ADDRINT memoryEa) const {
+bool ConcreteValue128Bits::writeToMemoryAddress (ADDRINT memoryEa) const {
   const UINT64 qword[] = {lsb, msb};
-  edu::sharif::twinner::util::writeMemoryContent
+  return edu::sharif::twinner::util::writeMemoryContent
       (memoryEa, (const UINT8 *) qword, 2 * sizeof (UINT64));
 }
 
-void ConcreteValue128Bits::writeToRegister (CONTEXT *context,
+bool ConcreteValue128Bits::writeToRegister (CONTEXT *context,
     LEVEL_BASE::REG reg) const {
   PIN_REGISTER buffer;
   memset (buffer.byte, 0, sizeof (buffer));
   buffer.qword[0] = lsb;
   buffer.qword[1] = msb;
-  edu::sharif::twinner::util::writeRegisterContent (context, reg, buffer.byte);
+  return edu::sharif::twinner::util::writeRegisterContent
+      (context, reg, buffer.byte);
 }
 
 std::basic_ostream<char> &operator<< (std::basic_ostream<char> &stream,
@@ -170,7 +171,9 @@ ConcreteValue128Bits *ConcreteValue128Bits::bitwiseNegated () const {
 }
 
 ConcreteValue *ConcreteValue128Bits::signExtended (int length) const {
-  throw std::runtime_error ("Larger than 128-bits concrete values are not supported for sign-extension");
+  edu::sharif::twinner::util::Logger::error () << "Larger than 128-bits"
+      " concrete values are not supported for sign-extension\n";
+  abort ();
 }
 
 ConcreteValue *ConcreteValue128Bits::realClone (int length) const {
@@ -187,9 +190,10 @@ ConcreteValue *ConcreteValue128Bits::realClone (int length) const {
   case 128:
     return new ConcreteValue128Bits (msb, lsb);
   default:
-    std::stringstream ss;
-    ss << "ConcreteValue128Bits::clone (" << length << "): Unsupported length";
-    throw std::runtime_error (ss.str ());
+    edu::sharif::twinner::util::Logger::error ()
+        << "ConcreteValue128Bits::clone (" << length << "):"
+        " Unsupported length\n";
+    abort ();
   }
 }
 
@@ -369,8 +373,9 @@ void ConcreteValue128Bits::divide (
     divisorSign = absolute (divisor);
   }
   if (divisor.isZero ()) {
-    throw std::runtime_error ("ConcreteValue128Bits::divide(...) method: "
-                              "Division by zero!");
+    edu::sharif::twinner::util::Logger::error ()
+        << "ConcreteValue128Bits::divide(...) method: Division by zero!\n";
+    abort ();
   } else if (divisor > dividend) {
     quotient = 0;
     remainder = (ConcreteValue &) dividend;

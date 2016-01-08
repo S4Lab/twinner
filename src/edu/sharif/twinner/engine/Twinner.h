@@ -65,7 +65,7 @@ public:
   void setJustAnalyzeMainRoutine (bool main);
   void setMeasureOverheads (bool measureOverheads);
 
-  void generateTwinBinary ();
+  bool generateTwinBinary ();
 
 private:
   void addExecutionTrace (edu::sharif::twinner::trace::Trace *trace,

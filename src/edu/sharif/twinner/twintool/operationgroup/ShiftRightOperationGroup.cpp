@@ -10,9 +10,6 @@
  * This file is part of Twinner project.
  */
 
-#include <stdexcept>
-#include <list>
-
 #include "ShiftRightOperationGroup.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
@@ -57,17 +54,19 @@ ShiftRightOperationGroup::instantiateConstraintForZeroCase (bool &zero,
 std::list <OperationGroup::ConstraintPtr>
 ShiftRightOperationGroup::instantiateConstraintForLessCase (bool &less,
     uint32_t instruction) const {
-  throw std::runtime_error
-      ("ShiftRightOperationGroup"
-       "::instantiateConstraintForLessCase (...): Not implemented yet.");
+  edu::sharif::twinner::util::Logger::error ()
+      << "ShiftRightOperationGroup"
+      "::instantiateConstraintForLessCase (...): Not implemented yet.\n";
+  abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
 ShiftRightOperationGroup::instantiateConstraintForLessOrEqualCase (
     bool &lessOrEqual, uint32_t instruction) const {
-  throw std::runtime_error
-      ("ShiftRightOperationGroup"
-       "::instantiateConstraintForLessOrEqualCase (...): Not implemented yet.");
+  edu::sharif::twinner::util::Logger::error ()
+      << "ShiftRightOperationGroup"
+      "::instantiateConstraintForLessOrEqualCase (...): Not implemented yet.\n";
+  abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
@@ -85,9 +84,11 @@ ShiftRightOperationGroup::instantiateConstraintForBelowCase (bool &below,
 std::list <OperationGroup::ConstraintPtr>
 ShiftRightOperationGroup::instantiateConstraintForBelowOrEqualCase (
     bool &belowOrEqual, uint32_t instruction) const {
-  throw std::runtime_error
-      ("ShiftRightOperationGroup"
-       "::instantiateConstraintForBelowOrEqualCase (...): Not implemented yet.");
+  edu::sharif::twinner::util::Logger::error ()
+      << "ShiftRightOperationGroup"
+      "::instantiateConstraintForBelowOrEqualCase (...):"
+      " Not implemented yet.\n";
+  abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>

@@ -51,14 +51,19 @@ MarInfo::MarInfo (int _argc, char **_argv, std::vector<char *> _argvis) :
 
 bool MarInfo::isConsistent () const {
   if (!inspectionMode) {
-    throw std::runtime_error ("Method is only available in inspection mode");
+    edu::sharif::twinner::util::Logger::error () << "MarInfo::isConsistent ():"
+        " Method is only available in inspection mode\n";
+    abort ();
   }
   return MarInfo::initialArgv == argv;
 }
 
 void MarInfo::simplifyTrace (Trace *trace) const {
   if (!inspectionMode) {
-    throw std::runtime_error ("Method is only available in inspection mode");
+    edu::sharif::twinner::util::Logger::error ()
+        << "MarInfo::simplifyTrace (...):"
+        " Method is only available in inspection mode\n";
+    abort ();
   }
   std::list < ExecutionTraceSegment * > &segments = trace->getTraceSegments ();
   for (std::list < ExecutionTraceSegment * >::const_reverse_iterator it =
@@ -124,15 +129,18 @@ void MarInfo::simplifyExpression (Expression *exp) const {
 
 void MarInfo::saveToFile (const char *path) const {
   if (inspectionMode) {
-    throw std::runtime_error ("Method is not available in inspection mode");
+    edu::sharif::twinner::util::Logger::error ()
+        << "MarInfo::saveToFile (...):"
+        " Method is not available in inspection mode\n";
+    abort ();
   }
   std::ofstream out;
   out.open (path, ios_base::out | ios_base::trunc | ios_base::binary);
   if (!out.is_open ()) {
     edu::sharif::twinner::util::Logger::error ()
-        << "Can not report main() args: Error in open function: "
-        << path << '\n';
-    throw std::runtime_error ("Error in reporting main() args during opening file");
+        << "MarInfo::saveToFile (path=" << path << "): "
+        << "Can not report main() args due to error in open function\n";
+    abort ();
   }
   saveToBinaryStream (out);
   out.close ();
@@ -151,9 +159,10 @@ MarInfo *MarInfo::readMarInfoFromFile (const char *path) {
   std::ifstream in;
   in.open (path, ios_base::in | ios_base::binary);
   if (!in.is_open ()) {
-    edu::sharif::twinner::util::Logger::error () << "Can not read mar info:"
-        " Error in open function: " << path << '\n';
-    throw std::runtime_error ("Error in reading MAR info");
+    edu::sharif::twinner::util::Logger::error ()
+        << "MarInfo::readMarInfoFromFile (path=" << path << "): "
+        << "Can not read mar info due to error in open function\n";
+    abort ();
   } else {
     MarInfo *res = MarInfo::loadFromBinaryStream (in);
     in.close ();
@@ -163,7 +172,10 @@ MarInfo *MarInfo::readMarInfoFromFile (const char *path) {
 
 void **MarInfo::getInitialArgv () {
   if (MarInfo::initialArgv == 0) {
-    throw std::runtime_error ("MarInfo::initialArgv is not initialized yet");
+    edu::sharif::twinner::util::Logger::error ()
+        << "MarInfo::getInitialArgv (): "
+        "The MarInfo::initialArgv is not initialized yet\n";
+    abort ();
   }
   return reinterpret_cast<void **> (MarInfo::initialArgv);
 }

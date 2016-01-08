@@ -73,19 +73,22 @@ public:
    * becomes a 64-bits Expr in practice. This behavior may be changed whenever multiple
    * bitvector lengths were supported by this converter.
    *
+   * @param ok Indicates that conversion was correct and return value is valid.
    * @param symbols The output map of symbol name to its Expr instance.
    * @return An Expr representing all given constraints (specified by the constructor).
    */
-  Expr convert (std::map<std::string, Expr> &symbols);
+  Expr convert (bool &ok, std::map<std::string, Expr> &symbols);
 
   /**
    * Converts back CVC4 Expr to Twinner's format constraint.
    *
+   * @param ok Indicates that conversion was correct and return value is valid.
    * @param exp The CVC4 Expr expression to converted back to Twinner's format.
    * @param vals Concrete values of the variables which are used in the exp.
    * @return The Twinner's format constraint of the given expression.
    */
-  std::list < const edu::sharif::twinner::trace::Constraint * > convertBack (Expr exp,
+  std::list < const edu::sharif::twinner::trace::Constraint * > convertBack (
+      bool &ok, Expr exp,
       const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals);
 
 private:
@@ -100,7 +103,8 @@ private:
       const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals,
       Combiner &combiner, BitLengthTracker &tracker, const char *name);
 
-  Expr convertConstraintToCvc4Expr (std::map<std::string, Expr> &symbols,
+  Expr convertConstraintToCvc4Expr (bool &ok,
+      std::map<std::string, Expr> &symbols,
       const edu::sharif::twinner::trace::Constraint *constraint);
   edu::sharif::twinner::trace::Constraint *convertCvc4ExprToConstraint (Expr &exp,
       const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals);
@@ -120,14 +124,16 @@ private:
   edu::sharif::twinner::trace::Constraint::ComparisonType
   exprVsExprKindToComparisonType (Kind kind) const;
 
-  Expr convertExpressionToCvc4Expr (std::map<std::string, Expr> &symbols,
+  Expr convertExpressionToCvc4Expr (bool &ok,
+      std::map<std::string, Expr> &symbols,
       const edu::sharif::twinner::trace::Expression *exp);
-  Expr convertExpressionToCvc4Expr (std::map<std::string, Expr> &symbols,
+  Expr convertExpressionToCvc4Expr (bool &ok,
+      std::map<std::string, Expr> &symbols,
       std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >::const_iterator &top);
   edu::sharif::twinner::trace::Expression *convertCvc4ExprToExpression (Expr &exp,
       const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals);
 
-  UINT64 extractConstantUint64 (
+  UINT64 extractConstantUint64 (bool &ok,
       std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >::const_iterator &top);
   Expr signExtendCvc4Expr (Expr &operand, UINT64 source, UINT64 target);
 
@@ -141,4 +147,4 @@ private:
 }
 }
 
-#endif	/* ConstraintToCvc4ExprConverter.h */
+#endif /* ConstraintToCvc4ExprConverter.h */

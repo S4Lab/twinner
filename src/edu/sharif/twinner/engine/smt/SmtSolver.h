@@ -54,34 +54,36 @@ public:
    * @param constraints List of constraints which are supposed to be satisfied.
    * @param symbols Set of symbols values of the example assignment (output).
    *
-   * @except Throws UnsatisfiableConstraintsException if constraints are unsatisfiable.
+   * @return True if and only if constraints are satisfiable.
    */
-  virtual void solveConstraints (
+  virtual bool solveConstraints (
       const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-      std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols) const
-  /* @throw (UnsatisfiableConstraintsException) */ = 0;
+      std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols) const = 0;
 
   /**
    * Simplifies the given constraint and returns an equivalent but simpler constraint.
    * Caller is responsible for deleting the instantiated returned constraint object.
    *
+   * @param ok False if and only if an error occurs during the simplification.
    * @param constraint The constraint which should be simplified.
    * @return A constraint which is equivalent to given one, but simpler; owned by caller
    */
   virtual std::list < const edu::sharif::twinner::trace::Constraint * >
-  simplifyConstraint (const edu::sharif::twinner::trace::Constraint *
-      constraint) const = 0;
+  simplifyConstraint (bool &ok,
+      const edu::sharif::twinner::trace::Constraint *constraint) const = 0;
 
   /**
    * Same as above method, but allows a list of constraints to be inputted.
    * These constraints will be BOOLEAN-ANDed before simplification. The returned
    * constraint is owned by the caller and should be "delete"ed.
    *
+   * @param ok False if and only if an error occurs during the simplification.
    * @param constraints List of constraints that their AND should be simplified.
    * @return A constraints which is equivalent to AND of given ones, but simpler.
    */
   virtual std::list < const edu::sharif::twinner::trace::Constraint * >
-  simplifyConstraints (std::list < const edu::sharif::twinner::trace::Constraint * >
+  simplifyConstraints (bool &ok,
+      std::list < const edu::sharif::twinner::trace::Constraint * >
       constraints) const = 0;
 
   /**
@@ -122,4 +124,4 @@ public:
 }
 }
 
-#endif	/* SmtSolver.h */
+#endif /* SmtSolver.h */

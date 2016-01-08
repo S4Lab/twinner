@@ -10,9 +10,6 @@
  * This file is part of Twinner project.
  */
 
-#include <stdexcept>
-#include <list>
-
 #include "AdditionOperationGroup.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
@@ -28,14 +25,17 @@ namespace operationgroup {
 
 AdditionOperationGroup::AdditionOperationGroup (ConstExpressionPtr mainExp,
     ConstExpressionPtr auxExp) :
-NaryOperationGroup (mainExp, auxExp) {
+    NaryOperationGroup (mainExp, auxExp) {
 }
 
 OperationGroup::ExpressionPtr AdditionOperationGroup::getCarryExpression () const {
   const int size = exp[0]->getLastConcreteValue ().getSize ();
   if (size > 64) {
-    throw std::runtime_error ("AdditionOperationGroup::getCarryExpression (...):"
-                              " Too large bit-length for expression");
+    edu::sharif::twinner::util::Logger::error ()
+        << "AdditionOperationGroup::getCarryExpression ()"
+        " [size=" << std::dec << size << "]:"
+        "Too large bit-length for expression\n";
+    abort ();
   }
   OperationGroup::ExpressionPtr doublePrecision = exp[0]->clone (size * 2);
   doublePrecision->add (exp[1]);

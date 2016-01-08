@@ -62,39 +62,62 @@ Trace::~Trace () {
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByRegister (int size, REG reg,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &regval)
-/* @throw (WrongStateException) */ {
-  throw std::runtime_error ("PIN infrastructure is not available");
+    const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+    StateSummary &state) {
+  edu::sharif::twinner::util::Logger::error ()
+      << "Trace::tryToGetSymbolicExpressionByRegister (...): "
+      "PIN infrastructure is not available\n";
+  abort ();
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByRegister (int size, REG reg) {
-  throw std::runtime_error ("PIN infrastructure is not available");
+  edu::sharif::twinner::util::Logger::error ()
+      << "Trace::tryToGetSymbolicExpressionByRegister (...): "
+      "PIN infrastructure is not available\n";
+  abort ();
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &memval)
-/* @throw (WrongStateException) */ {
-  throw std::runtime_error ("PIN infrastructure is not available");
+    const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+    StateSummary &state) {
+  edu::sharif::twinner::util::Logger::error ()
+      << "Trace::tryToGetSymbolicExpressionByMemoryAddress (...): "
+      "PIN infrastructure is not available\n";
+  abort ();
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (int size,
     ADDRINT memoryEa) {
-  throw std::runtime_error ("PIN infrastructure is not available");
+  edu::sharif::twinner::util::Logger::error ()
+      << "Trace::tryToGetSymbolicExpressionByMemoryAddress (...): "
+      "PIN infrastructure is not available\n";
+  abort ();
 }
 
 Expression *Trace::getSymbolicExpressionByRegister (int size, REG reg,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &regval, Expression *newExpression) {
-  throw std::runtime_error ("PIN infrastructure is not available");
+    const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+    Expression *newExpression, StateSummary &state) {
+  edu::sharif::twinner::util::Logger::error ()
+      << "Trace::getSymbolicExpressionByRegister (...): "
+      "PIN infrastructure is not available\n";
+  abort ();
 }
 
 Expression *Trace::getSymbolicExpressionByRegister (int size, REG reg,
     Expression *newExpression) {
-  throw std::runtime_error ("PIN infrastructure is not available");
+  edu::sharif::twinner::util::Logger::error ()
+      << "Trace::getSymbolicExpressionByRegister (...): "
+      "PIN infrastructure is not available\n";
+  abort ();
 }
 
 Expression *Trace::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &memval, Expression *newExpression) {
-  throw std::runtime_error ("PIN infrastructure is not available");
+    const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+    Expression *newExpression, StateSummary &state) {
+  edu::sharif::twinner::util::Logger::error ()
+      << "Trace::getSymbolicExpressionByMemoryAddress (...): "
+      "PIN infrastructure is not available\n";
+  abort ();
 }
 
 bool Trace::doesLastGetterCallNeedPropagation () const {
@@ -103,7 +126,10 @@ bool Trace::doesLastGetterCallNeedPropagation () const {
 
 Expression *Trace::getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
     Expression *newExpression) {
-  throw std::runtime_error ("PIN infrastructure is not available");
+  edu::sharif::twinner::util::Logger::error ()
+      << "Trace::getSymbolicExpressionByMemoryAddress (...): "
+      "PIN infrastructure is not available\n";
+  abort ();
 }
 
 Expression *Trace::setSymbolicExpressionByRegister (int regsize, REG reg,
@@ -121,8 +147,10 @@ void Trace::addPathConstraints (
     const std::list <edu::sharif::twinner::trace::Constraint *> &c,
     const edu::sharif::twinner::trace::Constraint *lastConstraint) {
   if (lastConstraint) {
-    throw std::runtime_error ("Trace::addPathConstraints (): "
-                              "lastConstraint argument must be null");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Trace::addPathConstraints (): "
+        "lastConstraint argument must be null\n";
+    abort ();
   }
   for (std::list < ExecutionTraceSegment * >::iterator it =
       currentSegmentIterator; it != segments.end (); ++it) {
@@ -152,23 +180,15 @@ void Trace::syscallReturned (CONTEXT *context) const {
     const REG reg = it->first;
     Expression *exp = it->second;
     if (exp->isOverwritingExpression ()) {
-      exp->getLastConcreteValue ().writeToRegister (context, reg);
+      if (!exp->getLastConcreteValue ().writeToRegister (context, reg)) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "Error in writeToRegister (...)"
+            " called from Trace::syscallReturned (...)\n";
+        abort ();
+      }
       exp->setOverwriting (false);
     }
   }
-  /*
-  const std::map < ADDRINT, Expression * > &map =
-      segment->getMemoryAddressTo64BitsExpression ();
-  for (std::map < ADDRINT, Expression * >::const_iterator it = map.begin ();
-      it != map.end (); ++it) {
-    const ADDRINT memoryEa = it->first;
-    Expression *exp = it->second;
-    if (exp->isOverwritingExpression ()) {
-      exp->setOverwriting (false);
-      exp->getLastConcreteValue ().writeToMemoryAddress (memoryEa);
-    }
-  }
-   */
 }
 
 bool Trace::saveToFile (const char *path, const char *memoryPath) const {
@@ -216,6 +236,9 @@ Trace *Trace::loadFromBinaryStream (std::ifstream &in, const char *memoryPath) {
   loadListFromBinaryStream (in, "TRA", list);
   edu::sharif::twinner::util::MemoryManager *mm =
       edu::sharif::twinner::util::MemoryManager::loadFromFile (memoryPath);
+  if (mm == 0) {
+    return 0;
+  }
   return new Trace (list, mm);
 }
 
@@ -275,8 +298,10 @@ Trace::loadAddressToValueMapFromBinaryStream (std::ifstream &in) {
   char magicString[3];
   in.read (magicString, 3);
   if (strncmp (magicString, "TRA", 3) != 0) {
-    throw std::runtime_error
-        ("Unexpected magic string while loading map from binary stream");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Trace::loadAddressToValueMapFromBinaryStream (...): "
+        "Unexpected magic string while loading map from binary stream\n";
+    abort ();
   }
   AddrToValueMap::size_type s;
   in.read ((char *) &s, sizeof (s));
@@ -292,7 +317,10 @@ Trace::loadAddressToValueMapFromBinaryStream (std::ifstream &in) {
     std::pair < AddrToValueMap::iterator, bool > res =
         map.insert (make_pair (make_pair (a, size), b));
     if (!res.second) {
-      throw std::runtime_error ("Can not read map's entry from binary stream");
+      edu::sharif::twinner::util::Logger::error ()
+          << "Trace::loadAddressToValueMapFromBinaryStream (...): "
+          "Can not read map's entry from binary stream\n";
+      abort ();
     }
   }
   return map;

@@ -60,13 +60,20 @@ bool Cvc4SmtSolverState::checkValidity (
   //smt->setOption ("trace", "limit");
   //smt->setOption ("verbosity", 10);
   std::map<std::string, Expr> symbols;
+  bool ok;
   if (!assertions.empty ()) {
     ConstraintToCvc4ExprConverter assertionsConverter (em, true, assertions);
-    Expr assertionsCvc4Constraint = assertionsConverter.convert (symbols);
+    Expr assertionsCvc4Constraint = assertionsConverter.convert (ok, symbols);
+    if (!ok) {
+      return false;
+    }
     smt.assertFormula (assertionsCvc4Constraint);
   }
   ConstraintToCvc4ExprConverter converter (em, true, cons);
-  Expr cvc4Constraint = converter.convert (symbols);
+  Expr cvc4Constraint = converter.convert (ok, symbols);
+  if (!ok) {
+    return false;
+  }
   Result res = smt.query (cvc4Constraint);
   return res.isValid ();
 }

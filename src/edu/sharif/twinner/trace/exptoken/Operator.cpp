@@ -118,8 +118,10 @@ Operator *Operator::instantiateNegatedOperator () const {
   case SHIFT_RIGHT:
     return new ShiftLeftOperator ();
   default:
-    throw std::runtime_error ("Operator::instantiateNegatedOperator (): "
-                              "This operator is not negatable");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Operator::instantiateNegatedOperator (): "
+        "This operator is not negatable\n";
+    abort ();
   }
 }
 
@@ -245,9 +247,7 @@ bool Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
   edu::sharif::twinner::util::Logger::error ()
       << "Operator::apply(ConcreteValue &, const ConcreteValue &):"
       " Unknown OperatorIdentifier: " << std::dec << oi << '\n';
-  throw std::runtime_error
-      ("Operator::apply(ConcreteValue &, const ConcreteValue &):"
-       " Non-handled operator identifier");
+  abort ();
   //return dst.getCarryBit ();
 }
 
@@ -258,7 +258,10 @@ std::string Operator::toString () const {
   case SIGN_EXTEND:
     return "signExtend";
   default:
-    throw std::runtime_error ("Operator::toString(...): Non-handled operator identifier");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Operator::toString(...): Non-handled operator identifier: "
+        << std::dec << oi << '\n';
+    abort ();
   }
 }
 

@@ -32,7 +32,6 @@
 #include "edu/sharif/twinner/util/iterationtools.h"
 
 #include "edu/sharif/twinner/engine/smt/SmtSolver.h"
-#include "edu/sharif/twinner/engine/smt/UnsatisfiableConstraintsException.h"
 #include "smt/Cvc4SmtSolver.h"
 #include "search/ConstraintTree.h"
 
@@ -214,7 +213,7 @@ void Twinner::setMeasureOverheads (bool measureOverheads) {
  * 7. Remove all addresses who have different values between two runs of steps 5 and 6
  * and initialize remaining addresses in the Twin code.
  */
-void Twinner::generateTwinBinary () {
+bool Twinner::generateTwinBinary () {
   Executer ex (pin, twintool, input, arguments, main, overheads);
   set < const edu::sharif::twinner::trace::exptoken::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
@@ -224,6 +223,9 @@ void Twinner::generateTwinBinary () {
     // steps 1, 2, and 3
     ex.setSymbolsValues (symbols);
     edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTraceInNormalMode ();
+    if (trace == 0) {
+      return false;
+    }
     if (ex.isLastExecutionSignaled ()) {
       abort ();
     }
@@ -243,6 +245,7 @@ void Twinner::generateTwinBinary () {
   const std::map < std::pair < ADDRINT, int >, UINT64 > initialValues =
       obtainInitializedMemoryValues (ex);
   codeTracesIntoTwinCode (initialValues);
+  return true;
 }
 
 std::map < std::pair < ADDRINT, int >, UINT64 >
@@ -316,11 +319,10 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
   std::list < const edu::sharif::twinner::trace::Constraint * > clist;
   ctree->dumpTree ();
   while (ctree->getNextConstraintsList (clist)) {
-    try {
-      edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->solveConstraints
-          (clist, symbols);
+    const bool ok = edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+        ->solveConstraints (clist, symbols);
+    if (ok) {
       return true;
-    } catch (const edu::sharif::twinner::engine::smt::UnsatisfiableConstraintsException &e) {
     }
   }
   return false;
@@ -523,11 +525,16 @@ void code_segment_into_twin_code (
       (addresses, &code_symbol_initiation_into_twin_code, aux);
   const std::list < edu::sharif::twinner::trace::Constraint * > &pathConstraints =
       segment->getPathConstraints ();
+  bool ok;
   std::list < const edu::sharif::twinner::trace::Constraint * > simplifiedConstraints =
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
       ->simplifyConstraints
-      (std::list < const edu::sharif::twinner::trace::Constraint * >
+      (ok, std::list < const edu::sharif::twinner::trace::Constraint * >
        (pathConstraints.begin (), pathConstraints.end ()));
+  if (!ok) {
+    throw std::runtime_error ("code_segment_into_twin_code (...):"
+                              " Error in constraints simplification");
+  }
   std::stringstream out;
   std::set< Variable > typesAndNames;
   bool first = true;
@@ -736,27 +743,26 @@ edu::sharif::twinner::trace::cv::ConcreteValue *readRegisterContent (
   throw std::runtime_error (msg);
 }
 
-UINT64 readMemoryContent (ADDRINT memoryEa, size_t size) {
-  const char *msg = "The readMemoryContent(...) method is only supported in TwinTool:"
+BOOL readMemoryContent (UINT64 &outValue, ADDRINT memoryEa, size_t size) {
+  edu::sharif::twinner::util::Logger::error ()
+      << "The readMemoryContent (...) function is only available in TwinTool:"
       " Calling error from Twinner.\n";
-  edu::sharif::twinner::util::Logger::error () << msg;
-  throw std::runtime_error (msg);
+  return false;
 }
 
-VOID writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
-  const char *msg = "The writeMemoryContent(...) method is only supported in TwinTool:"
+BOOL writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
+  edu::sharif::twinner::util::Logger::error ()
+      << "The writeMemoryContent (...) function is only available in TwinTool:"
       " Calling error from Twinner.\n";
-  edu::sharif::twinner::util::Logger::error () << msg;
-  throw std::runtime_error (msg);
+  return false;
 }
 
-VOID writeRegisterContent (CONTEXT *context,
+BOOL writeRegisterContent (CONTEXT *context,
     LEVEL_BASE::REG reg, const UINT8 *value) {
   edu::sharif::twinner::util::Logger::error ()
       << "The writeRegisterContent(...) method is only supported in TwinTool:"
       " Calling error from Twinner.\n";
-  edu::sharif::twinner::util::Logger::error () << msg;
-  throw std::runtime_error (msg);
+  return false;
 }
 
 }
@@ -766,7 +772,8 @@ edu::sharif::twinner::trace::Expression *lazy_load_symbolic_expression (
     edu::sharif::twinner::trace::ExecutionTraceSegment *me, int size,
     std::map < ADDRINT, edu::sharif::twinner::trace::Expression * > &map,
     const ADDRINT key,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
+    edu::sharif::twinner::trace::StateSummary &state) {
   const char *msg = "The lazy_load_symbolic_expression(...) function is"
       " only supported in TwinTool: Calling error from Twinner.\n";
   edu::sharif::twinner::util::Logger::error () << msg;

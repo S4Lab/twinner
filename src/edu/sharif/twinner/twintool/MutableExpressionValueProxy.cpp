@@ -21,8 +21,10 @@ namespace twintool {
 
 void MutableExpressionValueProxy::setExpression (
     edu::sharif::twinner::trace::Trace *trace,
-    const edu::sharif::twinner::trace::Expression *exp) const {
-  valueIsChanged (trace, setExpressionWithoutChangeNotification (trace, exp));
+    const edu::sharif::twinner::trace::Expression *exp,
+    edu::sharif::twinner::trace::StateSummary &state) const {
+  valueIsChanged
+      (trace, setExpressionWithoutChangeNotification (trace, exp), state);
 }
 
 void MutableExpressionValueProxy::truncate (

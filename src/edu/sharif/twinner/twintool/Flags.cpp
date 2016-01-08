@@ -58,8 +58,9 @@ edu::sharif::twinner::trace::Expression *Flags::getCarryFlag () const {
     return cfexp->clone ();
   default:
     edu::sharif::twinner::util::Logger::error ()
-        << "Unknown state for CF (0x" << std::hex << int (cf) << ")\n";
-    throw std::runtime_error ("Unknown CF state");
+        << "Flags::getCarryFlag () [cf=" << std::hex << int (cf) << "]: "
+        "Unknown CF state\n";
+    abort ();
   }
 }
 
@@ -149,7 +150,8 @@ Flags::instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
       break;
     case DEFAULT_FSTATE:
       if (sf != DEFAULT_FSTATE) {
-        throw std::runtime_error ("Not implemented yet");
+        edu::sharif::twinner::util::Logger::error () << "Not implemented yet\n";
+        abort ();
       }
       list = op->instantiateConstraintForLessOrEqualCase (lessOrEqual, instruction);
       break;
@@ -181,7 +183,8 @@ Flags::instantiateConstraintForLessCase (bool &less, uint32_t instruction) const
     break;
   case DEFAULT_FSTATE:
     if (sf != DEFAULT_FSTATE) {
-      throw std::runtime_error ("Not implemented yet");
+      edu::sharif::twinner::util::Logger::error () << "Not implemented yet\n";
+      abort ();
     }
     list = op->instantiateConstraintForLessCase (less, instruction);
     break;

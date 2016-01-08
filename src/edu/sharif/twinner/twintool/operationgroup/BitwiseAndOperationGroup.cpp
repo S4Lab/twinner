@@ -10,9 +10,6 @@
  * This file is part of Twinner project.
  */
 
-#include <stdexcept>
-#include <list>
-
 #include "BitwiseAndOperationGroup.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
@@ -31,9 +28,10 @@ BitwiseAndOperationGroup::BitwiseAndOperationGroup (ConstExpressionPtr mainExp) 
 
 OperationGroup::ExpressionPtr BitwiseAndOperationGroup::getCarryExpression () const {
   edu::sharif::twinner::util::Logger::error ()
-      << "BitwiseAndOperationGroup always clears CF and so this code is unreachable!\n";
-  throw std::runtime_error
-      ("BitwiseAndOperationGroup::getCarryExpression (): unreachable code");
+      << "BitwiseAndOperationGroup::getCarryExpression (): "
+      "BitwiseAndOperationGroup always clears CF and so"
+      " this code is unreachable!\n";
+  abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
@@ -49,30 +47,30 @@ std::list <OperationGroup::ConstraintPtr>
 BitwiseAndOperationGroup::instantiateConstraintForLessCase (bool &less,
     uint32_t instruction) const {
   edu::sharif::twinner::util::Logger::error ()
-      << "BitwiseAndOperationGroup always clears OF and so this code is unreachable!\n";
-  throw std::runtime_error
-      ("BitwiseAndOperationGroup::instantiateConstraintForLessCase ():"
-       " unreachable code");
+      << "BitwiseAndOperationGroup::instantiateConstraintForLessCase (...): "
+      "BitwiseAndOperationGroup always clears OF and so"
+      " this code is unreachable!\n";
+  abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
 BitwiseAndOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
     uint32_t instruction) const {
   edu::sharif::twinner::util::Logger::error ()
-      << "BitwiseAndOperationGroup always clears OF and so this code is unreachable!\n";
-  throw std::runtime_error
-      ("BitwiseAndOperationGroup::instantiateConstraintForLessOrEqualCase ():"
-       " unreachable code");
+      << "BitwiseAndOperationGroup::instantiateConstraintForLessOrEqualCase"
+      " (...): BitwiseAndOperationGroup always clears OF and so"
+      " this code is unreachable!\n";
+  abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
 BitwiseAndOperationGroup::instantiateConstraintForBelowCase (bool &below,
     uint32_t instruction) const {
   edu::sharif::twinner::util::Logger::error ()
-      << "BitwiseAndOperationGroup always clears CF and so this code is unreachable!\n";
-  throw std::runtime_error
-      ("BitwiseAndOperationGroup::instantiateConstraintForBelowCase ():"
-       " unreachable code");
+      << "BitwiseAndOperationGroup::instantiateConstraintForBelowCase (...): "
+      "BitwiseAndOperationGroup always clears CF and so"
+      " this code is unreachable!\n";
+  abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>

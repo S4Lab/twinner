@@ -76,9 +76,10 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::loadFromBinaryStream (std::ifstream &i
 MemoryEmergedSymbol *MemoryEmergedSymbol::fromNameAndValue (const std::string &name,
     UINT32 v4, UINT32 v3, UINT32 v2, UINT32 v1) {
   if (v4 != 0 || v3 != 0) {
-    throw std::runtime_error ("MemoryEmergedSymbol::fromNameAndValue (...): "
-                              "Illegal value: Currently, all memory symbols"
-                              " have at most 64 bits.");
+    edu::sharif::twinner::util::Logger::error ()
+        << "MemoryEmergedSymbol::fromNameAndValue (...): Illegal value:"
+        " Currently, all memory symbols have at most 64 bits.\n";
+    abort ();
   }
   const UINT64 value = (UINT64 (v2) << 32) | v1;
   return MemoryEmergedSymbol::fromNameAndValue

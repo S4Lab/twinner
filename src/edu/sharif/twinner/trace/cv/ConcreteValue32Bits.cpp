@@ -40,12 +40,13 @@ ConcreteValue32Bits::ConcreteValue32Bits (const ConcreteValue &cv) :
 ConcreteValue32Bits::~ConcreteValue32Bits () {
 }
 
-void ConcreteValue32Bits::writeToRegister (CONTEXT *context,
+bool ConcreteValue32Bits::writeToRegister (CONTEXT *context,
     LEVEL_BASE::REG reg) const {
   PIN_REGISTER buffer;
   memset (buffer.byte, 0, sizeof (buffer));
   buffer.dword[0] = value;
-  edu::sharif::twinner::util::writeRegisterContent (context, reg, buffer.byte);
+  return edu::sharif::twinner::util::writeRegisterContent
+      (context, reg, buffer.byte);
 }
 
 ConcreteValue32Bits *ConcreteValue32Bits::twosComplement () const {
@@ -72,9 +73,10 @@ ConcreteValue *ConcreteValue32Bits::realClone (int length) const {
   case 128:
     return new ConcreteValue128Bits (0, value);
   default:
-    std::stringstream ss;
-    ss << "ConcreteValue32Bits::clone (" << length << "): Unsupported length";
-    throw std::runtime_error (ss.str ());
+    edu::sharif::twinner::util::Logger::error ()
+        << "ConcreteValue32Bits::clone (" << length << "):"
+        " Unsupported length\n";
+    abort ();
   }
 }
 

@@ -21,7 +21,6 @@ namespace twinner {
 namespace util {
 
 class MemoryManager {
-
 private:
   static MemoryManager *me;
 
@@ -35,12 +34,12 @@ private:
 public:
   ~MemoryManager ();
 
-  static MemoryManager *allocateInstance ();
+  static MemoryManager *getInstance ();
   static MemoryManager *loadFromFile (const char *path);
 
-  void saveToFile (const char *path) const;
+  bool saveToFile (const char *path) const;
 
-  uint32_t allocate (uint32_t size);
+  bool allocate (uint32_t &index, uint32_t size);
   void deallocate (uint32_t size);
 
   const char *getPointerToAllocatedMemory (uint32_t index) const;

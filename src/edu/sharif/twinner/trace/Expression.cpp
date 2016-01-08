@@ -14,7 +14,6 @@
 
 #include "edu/sharif/twinner/trace/exptoken/Constant.h"
 #include "edu/sharif/twinner/trace/exptoken/Symbol.h"
-#include "WrongStateException.h"
 #include "ExpressionImp.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
@@ -22,6 +21,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/memory.h"
+#include "StateSummary.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -160,7 +160,9 @@ void Expression::convertToInfixExpression (Stack &st, std::stringstream &ss) con
 }
 
 void Expression::unaryOperation (Operator *op, const Expression *exp) {
-  throw std::runtime_error ("Expression::unaryOperation: Not yet implemented");
+  edu::sharif::twinner::util::Logger::error ()
+      << "Expression::unaryOperation: Not yet implemented\n";
+  abort ();
 }
 
 void Expression::binaryOperation (Operator *op, const Expression *exp) {
@@ -314,8 +316,9 @@ void Expression::truncate (int bits) {
   edu::sharif::twinner::trace::cv::ConcreteValue *mask;
   if (bits > 128) {
     edu::sharif::twinner::util::Logger::error ()
-        << "Truncating to " << std::dec << bits << " bits.\n";
-    throw std::runtime_error ("Expression::truncate(...): number of bits is too large");
+        << "Expression::truncate(bits=" << std::dec << bits << "): "
+        "number of bits is too large\n";
+    abort ();
   } else if (bits == 128) {
     mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
         (UINT64 (-1), UINT64 (-1));
@@ -344,9 +347,9 @@ void Expression::makeLeastSignificantBitsZero (int bits) {
   const int size = lastConcreteValue->getSize ();
   if (bits > size) {
     edu::sharif::twinner::util::Logger::error ()
-        << "Cannot make " << std::dec << bits << " bits zero.\n";
-    throw std::runtime_error ("Expression::makeLeastSignificantBitsZero(...): "
-                              "number of bits is too large");
+        << "Expression::makeLeastSignificantBitsZero(bits="
+        << std::dec << bits << "): number of bits is too large\n";
+    abort ();
   } else if (bits == 128) {
     mask = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits
         (UINT64 (0), UINT64 (0));
@@ -385,7 +388,11 @@ void Expression::bitwiseNegate () {
 Expression *Expression::signExtended (int size) const {
   const int mySize = lastConcreteValue->getSize ();
   if (size < mySize) {
-    throw std::runtime_error ("Sign-extension cannot truncate the expression");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Expression::signExtended (size=" << std::dec << size << ") "
+        "[current size=" << mySize << "]:"
+        " Sign-extension cannot truncate the expression\n";
+    abort ();
   } else if (size == mySize) { // no change is required
     return clone (size);
   } else {
@@ -428,27 +435,34 @@ const Expression::Stack &Expression::getStack () const {
 }
 
 void Expression::checkConcreteValueReg (REG reg,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
-/* @throw (WrongStateException) */ {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
+    StateSummary &state) const {
   if (*lastConcreteValue == concreteVal) {
     return;
   }
   // for reg case, isOverwriting is set to false after the syscall instruction
-  throw WrongStateException (concreteVal, *lastConcreteValue);
+  state.initWrongState (concreteVal, *lastConcreteValue);
 }
 
 void Expression::checkConcreteValueMemory (ADDRINT memoryEa,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal)
-/* @throw (WrongStateException) */ {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
+    StateSummary &state) {
   if (*lastConcreteValue == concreteVal) {
     isOverwriting = false; // overwriting just works at first getting/synchronization
     return;
   }
   if (!isOverwriting) {
-    throw WrongStateException (concreteVal, *lastConcreteValue);
+    state.initWrongState (concreteVal, *lastConcreteValue);
+    return;
   }
   isOverwriting = false;
-  lastConcreteValue->writeToMemoryAddress (memoryEa);
+  if (!lastConcreteValue->writeToMemoryAddress (memoryEa)) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Expression::checkConcreteValueMemory"
+        " (memoryEa=0x" << std::hex << memoryEa << ", ...):"
+        " cannot overwrite memory value\n";
+    abort ();
+  }
 }
 
 std::pair<Expression::Stack::const_iterator, Expression::Stack::const_iterator>

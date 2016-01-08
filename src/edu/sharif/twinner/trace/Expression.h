@@ -377,11 +377,11 @@ public:
   const Stack &getStack () const;
 
   void checkConcreteValueReg (REG reg,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal) const
-  /* @throw (WrongStateException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
+      StateSummary &state) const;
   void checkConcreteValueMemory (ADDRINT memoryEa,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal)
-  /* @throw (WrongStateException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
+      StateSummary &state);
 
   bool operator== (const Expression &exp) const;
 

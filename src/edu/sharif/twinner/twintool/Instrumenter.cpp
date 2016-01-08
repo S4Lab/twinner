@@ -222,7 +222,7 @@ void Instrumenter::setMainArgsReportingFilePath (const std::string &_marFilePath
   marFilePath = _marFilePath;
 }
 
-void Instrumenter::instrumentSingleInstruction (INS ins) {
+bool Instrumenter::instrumentSingleInstruction (INS ins) {
   if (disabled) {
     RTN rtn = INS_Rtn (ins);
     if (RTN_Valid (rtn) && RTN_Name (rtn) == "main") {
@@ -231,7 +231,13 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
   }
   std::string insAssemblyStr = INS_Disassemble (ins);
   const int size = insAssemblyStr.length () + 1;
-  UINT32 allocatedIndex = ise->getTraceMemoryManager ()->allocate (size);
+  UINT32 allocatedIndex;
+  if (!ise->getTraceMemoryManager ()->allocate (allocatedIndex, size)) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Instrumenter::instrumentSingleInstruction (...):"
+        " Memory allocation failed\n";
+    return false;
+  }
   char *allocated = ise->getTraceMemoryManager ()
       ->getPointerToAllocatedMemory (allocatedIndex);
   char * const insAssembly = allocated;
@@ -262,17 +268,19 @@ void Instrumenter::instrumentSingleInstruction (INS ins) {
     if (model) {
       if (expectedModels & model) {
         instrumentSingleInstruction (model, op, ins, allocatedIndex);
-        return;
+        return true;
 
       } else {
         edu::sharif::twinner::util::Logger::error ()
-            << "UnExpected instruction model (expectedModels = "
+            << "Instrumenter::instrumentSingleInstruction (...):"
+            " UnExpected instruction model (expectedModels = "
             << int (expectedModels) << ", model = " << int (model) << ")\n";
-        throw std::runtime_error ("UnExpected instruction model");
+        return false;
       }
     }
   }
   ise->getTraceMemoryManager ()->deallocate (size);
+  return true;
 }
 
 Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
@@ -308,7 +316,10 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
       // one operand
       return INS_OperandIsReg (ins, 0) ? DST_REG_REG_SRC_REG : DST_REG_REG_SRC_MEM;
     }
-    throw std::runtime_error ("Unknown IMUL model");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Instrumenter::getInstructionModel (op=" << op << ", ins=...): "
+        "Unknown IMUL model\n";
+    abort ();
   case XED_ICLASS_INC:
   case XED_ICLASS_DEC:
   case XED_ICLASS_NEG:
@@ -363,7 +374,10 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForPushInstructi
   } else if (sourceIsImmed) {
     return DST_STK_SRC_IMD;
   } else {
-    throw std::runtime_error ("Unknown PUSH instruction model");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Instrumenter::getInstructionModelForPushInstruction (...): "
+        "Unknown PUSH instruction model\n";
+    abort ();
   }
 }
 
@@ -376,7 +390,10 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForPopInstructio
   } else if (destIsMem) {
     return DST_MEM_SRC_STK;
   } else {
-    throw std::runtime_error ("Unknown POP instruction model");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Instrumenter::getInstructionModelForPopInstruction (...): "
+        "Unknown POP instruction model\n";
+    abort ();
   }
 }
 
@@ -457,7 +474,10 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
     return DST_MEM_SRC_MEM;
 
   } else {
-    throw std::runtime_error ("Unknown instruction model");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Instrumenter::getInstructionModelForNormalInstruction (...): "
+        "Unknown instruction model\n";
+    abort ();
   }
 }
 
@@ -1079,7 +1099,10 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
     break;
   }
   default:
-    throw std::runtime_error ("Unknown instruction model");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Instrumenter::instrumentSingleInstruction (model="
+        << std::dec << model << ", ...): Unknown instruction model\n";
+    abort ();
   }
 }
 
@@ -1136,7 +1159,10 @@ void Instrumenter::instrumentRepPrefix (OPCODE op, INS ins, UINT32 insAssembly) 
   if (repe || repne) {
     REG repreg = INS_RepCountRegister (ins);
     if (repreg == REG_INVALID ()) {
-      throw std::runtime_error ("INS_Rep(ne)Prefix conflicts INS_RepCountRegister");
+      edu::sharif::twinner::util::Logger::error ()
+          << "Instrumenter::instrumentRepPrefix (...): "
+          "INS_Rep(ne)Prefix conflicts INS_RepCountRegister\n";
+      abort ();
     }
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineRepPrefix,
                     IARG_PTR, ise, IARG_UINT32, op,
@@ -1222,7 +1248,10 @@ void Instrumenter::saveMemoryContentsToFile (const char *path) const {
   edu::sharif::twinner::util::foreach (candidateAddresses,
                                        &read_memory_content_and_add_it_to_map, map);
   if (!ise->getTrace ()->saveAddressToValueMapToFile (map, path)) {
-    throw std::runtime_error ("Can not save address-to-value map into binary file");
+    edu::sharif::twinner::util::Logger::error ()
+        << "Instrumenter::saveMemoryContentsToFile (path=" << path << "): "
+        "Can not save address-to-value map into binary file\n";
+    abort ();
   }
 }
 
@@ -1231,8 +1260,14 @@ void read_memory_content_and_add_it_to_map (
     const std::pair < ADDRINT, int > &address) {
   const ADDRINT symbolAddress = address.first;
   const int symbolSize = address.second;
-  const UINT64 value = edu::sharif::twinner::util::readMemoryContent
-      (symbolAddress, symbolSize / 8);
+  UINT64 value;
+  if (!edu::sharif::twinner::util::readMemoryContent
+      (value, symbolAddress, symbolSize / 8)) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "read_memory_content_and_add_it_to_map (...) function:"
+        " error reading memory value\n";
+    abort ();
+  }
   map.insert (make_pair (make_pair (symbolAddress, symbolSize), value));
 }
 

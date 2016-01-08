@@ -52,24 +52,24 @@ public:
   virtual ~ExecutionTraceSegment ();
 
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &regval)
-  /* @throw (WrongStateException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+      StateSummary &state);
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg);
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &memval)
-  /* @throw (WrongStateException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+      StateSummary &state);
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa);
 
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
-      Expression *newExpression);
+      Expression *newExpression, StateSummary &state);
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       Expression *newExpression);
   virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
-      Expression *newExpression);
+      Expression *newExpression, StateSummary &state);
   virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       Expression *newExpression);
 
@@ -91,8 +91,8 @@ private:
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
       int size, std::map < KEY, Expression * > &map, const KEY key,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal)
-  /* @throw (WrongStateException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
+      StateSummary &state);
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
       int size, std::map < KEY, Expression * > &map, const KEY key);
@@ -100,7 +100,7 @@ private:
   Expression *getSymbolicExpressionImplementation (int size,
       std::map < KEY, Expression * > &map, const KEY key,
       const edu::sharif::twinner::trace::cv::ConcreteValue &currentConcreteValue,
-      Expression *newExpression);
+      Expression *newExpression, StateSummary &state);
   template < typename KEY >
   Expression *getSymbolicExpressionImplementation (int size,
       std::map < KEY, Expression * > &map, const KEY key,

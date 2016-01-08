@@ -10,9 +10,6 @@
  * This file is part of Twinner project.
  */
 
-#include <stdexcept>
-#include <list>
-
 #include "ShiftArithmeticRightOperationGroup.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
@@ -57,17 +54,19 @@ ShiftArithmeticRightOperationGroup::instantiateConstraintForZeroCase (bool &zero
 std::list <OperationGroup::ConstraintPtr>
 ShiftArithmeticRightOperationGroup::instantiateConstraintForLessCase (bool &less,
     uint32_t instruction) const {
-  throw std::runtime_error
-      ("ShiftArithmeticRightOperationGroup"
-       "::instantiateConstraintForLessCase (...): Not implemented yet.");
+  edu::sharif::twinner::util::Logger::error ()
+      << "ShiftArithmeticRightOperationGroup"
+      "::instantiateConstraintForLessCase (...): Not implemented yet.\n";
+  abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
 ShiftArithmeticRightOperationGroup::instantiateConstraintForLessOrEqualCase (
     bool &lessOrEqual, uint32_t instruction) const {
-  throw std::runtime_error
-      ("ShiftArithmeticRightOperationGroup"
-       "::instantiateConstraintForLessOrEqualCase (...): Not implemented yet.");
+  edu::sharif::twinner::util::Logger::error ()
+      << "ShiftArithmeticRightOperationGroup"
+      "::instantiateConstraintForLessOrEqualCase (...): Not implemented yet.\n";
+  abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
@@ -85,9 +84,11 @@ ShiftArithmeticRightOperationGroup::instantiateConstraintForBelowCase (bool &bel
 std::list <OperationGroup::ConstraintPtr>
 ShiftArithmeticRightOperationGroup::instantiateConstraintForBelowOrEqualCase (
     bool &belowOrEqual, uint32_t instruction) const {
-  throw std::runtime_error
-      ("ShiftArithmeticRightOperationGroup"
-       "::instantiateConstraintForBelowOrEqualCase (...): Not implemented yet.");
+  edu::sharif::twinner::util::Logger::error ()
+      << "ShiftArithmeticRightOperationGroup"
+      "::instantiateConstraintForBelowOrEqualCase (...):"
+      " Not implemented yet.\n";
+  abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>

@@ -14,8 +14,7 @@
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
-
-#include <stdexcept>
+#include "edu/sharif/twinner/trace/StateSummary.h"
 
 namespace edu {
 namespace sharif {
@@ -33,14 +32,19 @@ ConstantExpressionValueProxy::~ConstantExpressionValueProxy () {
 }
 
 edu::sharif::twinner::trace::Expression *ConstantExpressionValueProxy::getExpression (
-    edu::sharif::twinner::trace::Trace *trace) const {
+    edu::sharif::twinner::trace::Trace *trace,
+    edu::sharif::twinner::trace::StateSummary &state) const {
   return exp->clone ();
 }
 
 void ConstantExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
-    const edu::sharif::twinner::trace::Expression &changedExp) const {
-  throw std::runtime_error ("Constant expression is not supposed to be changed");
+    const edu::sharif::twinner::trace::Expression &changedExp,
+    edu::sharif::twinner::trace::StateSummary &state) const {
+  edu::sharif::twinner::util::Logger::error ()
+      << "ConstantExpressionValueProxy::valueIsChanged (...): "
+      "Constant expression is not supposed to be changed\n";
+  abort ();
 }
 
 }

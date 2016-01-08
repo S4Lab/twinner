@@ -42,13 +42,14 @@ public:
   MemoryResidentExpressionValueProxy (ADDRINT memoryEa, int memReadBytes = -1);
 
   virtual edu::sharif::twinner::trace::Expression *getExpression (
-      edu::sharif::twinner::trace::Trace *trace) const;
+      edu::sharif::twinner::trace::Trace *trace,
+      edu::sharif::twinner::trace::StateSummary &state) const;
   void checkForOverwritingMemory (
       edu::sharif::twinner::trace::Trace *trace) const;
   edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &cv) const
-  /* @throw (WrongStateException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &cv,
+      edu::sharif::twinner::trace::StateSummary &state) const;
   edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::ExecutionTraceSegment *segment) const;
 
@@ -60,7 +61,8 @@ public:
 
   virtual void valueIsChanged (
       edu::sharif::twinner::trace::Trace *trace,
-      const edu::sharif::twinner::trace::Expression &changedExp) const;
+      const edu::sharif::twinner::trace::Expression &changedExp,
+      edu::sharif::twinner::trace::StateSummary &state) const;
 
   virtual int getSize () const;
 
@@ -72,7 +74,8 @@ private:
       const edu::sharif::twinner::trace::Expression &changedExp, bool ownExp) const;
   void propagateChangeUpwards (int size, ADDRINT memoryEa,
       edu::sharif::twinner::trace::Trace *trace,
-      const edu::sharif::twinner::trace::Expression &changedExp) const;
+      const edu::sharif::twinner::trace::Expression &changedExp,
+      edu::sharif::twinner::trace::StateSummary &state) const;
 
   void actualPropagateChangeDownwards (int size,
       ADDRINT memoryEa, edu::sharif::twinner::trace::ExecutionState *state,
@@ -83,7 +86,8 @@ private:
 
   /// returned expression is linked to the underlying expression (clone it to de-link)
   edu::sharif::twinner::trace::Expression *alignedMemoryRead (int size,
-      edu::sharif::twinner::trace::Trace *trace) const;
+      edu::sharif::twinner::trace::Trace *trace,
+      edu::sharif::twinner::trace::StateSummary &state) const;
   edu::sharif::twinner::trace::Expression alignedMemoryWrite (int size,
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression *exp) const;
@@ -93,8 +97,8 @@ private:
 
   edu::sharif::twinner::trace::Expression *alignedMemoryRead (int size,
       edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &cv) const
-  /* @throw (WrongStateException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &cv,
+      edu::sharif::twinner::trace::StateSummary &state) const;
   edu::sharif::twinner::trace::Expression *alignedMemoryRead (int size,
       edu::sharif::twinner::trace::ExecutionTraceSegment *segment) const;
 
@@ -104,9 +108,10 @@ private:
   AddrSizeToExpMap; // (addr, size) -> (exp*, owned?)
   mutable AddrSizeToExpMap expCache;
 
-  const edu::sharif::twinner::trace::Expression *getNeighborExpression (int size,
-      ADDRINT address, edu::sharif::twinner::trace::Trace *trace,
-      bool &readFromCache) const;
+  const edu::sharif::twinner::trace::Expression *getNeighborExpression (
+      int size, ADDRINT address, edu::sharif::twinner::trace::Trace *trace,
+      bool &readFromCache,
+      edu::sharif::twinner::trace::StateSummary &state) const;
 };
 
 }

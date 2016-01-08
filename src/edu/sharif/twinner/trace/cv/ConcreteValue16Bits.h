@@ -27,7 +27,7 @@ public:
   ConcreteValue16Bits (const ConcreteValue &cv);
   virtual ~ConcreteValue16Bits ();
 
-  virtual void writeToRegister (CONTEXT *context, LEVEL_BASE::REG reg) const;
+  virtual bool writeToRegister (CONTEXT *context, LEVEL_BASE::REG reg) const;
 
   virtual ConcreteValue16Bits *twosComplement () const;
   virtual ConcreteValue16Bits *bitwiseNegated () const;

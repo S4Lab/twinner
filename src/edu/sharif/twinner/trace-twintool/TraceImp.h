@@ -31,8 +31,8 @@ public:
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &regval)
-  /* @throw (WrongStateException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+      StateSummary &state);
 
   /**
    * Searches backwards to find queried values.
@@ -44,8 +44,8 @@ public:
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &memval)
-  /* @throw (WrongStateException) */;
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+      StateSummary &state);
 
   /**
    * Searches backwards to find queried values.
@@ -59,7 +59,7 @@ public:
    */
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
-      Expression *newExpression = 0) /* @throw (UnexpectedChangeException) */;
+      Expression *newExpression, StateSummary &state);
 
   /**
    * The getter searches segments backwards to find queried value.
@@ -73,7 +73,7 @@ public:
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
-      Expression *newExpression = 0) /* @throw (UnexpectedChangeException) */;
+      Expression *newExpression, StateSummary &state);
 
   /**
    * The getter searches segments backwards to find queried value.
@@ -86,11 +86,13 @@ private:
   template < typename T >
   struct TryToGetSymbolicExpressionMethod {
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (int size, T address,
-        const edu::sharif::twinner::trace::cv::ConcreteValue &val);
+        const edu::sharif::twinner::trace::cv::ConcreteValue &val,
+        StateSummary &state);
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
         int size, T address);
     typedef Expression *(TraceImp::*TraceType) (int size, T address,
-        const edu::sharif::twinner::trace::cv::ConcreteValue &val);
+        const edu::sharif::twinner::trace::cv::ConcreteValue &val,
+        StateSummary &state);
     typedef Expression *(TraceImp::*TraceTypeWithoutConcreteValue) (int size,
         T address);
   };
@@ -99,7 +101,7 @@ private:
   struct GetSymbolicExpressionMethod {
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentType) (int size, T address,
         const edu::sharif::twinner::trace::cv::ConcreteValue &val,
-        Expression *newExpression);
+        Expression *newExpression, StateSummary &state);
     typedef Expression *(ExecutionTraceSegment::*TraceSegmentTypeWithoutConcreteValue) (
         int size, T address, Expression *newExpression);
   };
@@ -107,8 +109,8 @@ private:
   template < typename T >
   Expression *tryToGetSymbolicExpressionImplementation (int size, T address,
       const edu::sharif::twinner::trace::cv::ConcreteValue &val,
-      typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method)
-  /* @throw (WrongStateException) */;
+      typename TryToGetSymbolicExpressionMethod < T >::TraceSegmentType method,
+      StateSummary &state);
   template < typename T >
   Expression *tryToGetSymbolicExpressionImplementation (int size, T address,
       typename TryToGetSymbolicExpressionMethod < T >::
@@ -119,8 +121,8 @@ private:
       const edu::sharif::twinner::trace::cv::ConcreteValue &val,
       Expression *newExpression,
       typename TryToGetSymbolicExpressionMethod < T >::TraceType tryToGetMethod,
-      typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod)
-  /* @throw (UnexpectedChangeException) */;
+      typename GetSymbolicExpressionMethod < T >::TraceSegmentType getMethod,
+      StateSummary &state);
   template < typename T >
   Expression *getSymbolicExpressionImplementation (int size, T address,
       Expression *newExpression,

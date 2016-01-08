@@ -16,7 +16,6 @@
 
 #include "Cvc4SmtSolverState.h"
 #include "ConstraintToCvc4ExprConverter.h"
-#include "UnsatisfiableConstraintsException.h"
 
 #include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/exptoken/NamedSymbol.h"
@@ -44,10 +43,9 @@ Cvc4SmtSolver::~Cvc4SmtSolver () {
   delete state;
 }
 
-void Cvc4SmtSolver::solveConstraints (
+bool Cvc4SmtSolver::solveConstraints (
     const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-    std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &satSolution) const
-/* @throw (UnsatisfiableConstraintsException) */ {
+    std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &satSolution) const {
   edu::sharif::twinner::util::Logger::loquacious ()
       << "Cvc4SmtSolver::solveConstraints (...)\n";
   ExprManager em;
@@ -62,8 +60,12 @@ void Cvc4SmtSolver::solveConstraints (
 
   std::map<std::string, Expr> symbols;
   // FIXME: all operations that are supposed to overflow, must use explicit bitwise and
-  Expr totalConstraint =
-      ConstraintToCvc4ExprConverter (em, true, constraints).convert (symbols);
+  bool ok;
+  Expr totalConstraint = ConstraintToCvc4ExprConverter
+      (em, true, constraints).convert (ok, symbols);
+  if (!ok) {
+    return false;
+  }
   try {
     edu::sharif::twinner::util::Logger::loquacious ()
         << "starting SmtEngine::checkSat(...)\n";
@@ -73,15 +75,15 @@ void Cvc4SmtSolver::solveConstraints (
         << "checkSat(...) returned: " << res << '\n';
     if (res.isSat ()) {
       fillSatSolution (smt, symbols, satSolution);
-      return;
+      return true;
     }
   } catch (const Exception &e) {
     edu::sharif::twinner::util::Logger::warning ()
         << "CVC4 throws an exception: " << e.what () << '\n';
   }
-  edu::sharif::twinner::util::Logger::loquacious ()
-      << "throwing UnsatisfiableConstraintsException...\n";
-  throw UnsatisfiableConstraintsException ();
+  edu::sharif::twinner::util::Logger::error ()
+      << "Unsatisfiable Constraints ...\n";
+  return false;
 }
 
 void aggregate_expression_symbol_values (
@@ -107,16 +109,17 @@ void aggregate_symbol_values (
 }
 
 std::list < const edu::sharif::twinner::trace::Constraint * >
-Cvc4SmtSolver::simplifyConstraint (
+Cvc4SmtSolver::simplifyConstraint (bool &ok,
     const edu::sharif::twinner::trace::Constraint *constraint) const {
   std::list < const edu::sharif::twinner::trace::Constraint * > constraints;
   constraints.push_back (constraint);
-  return simplifyConstraints (constraints);
+  return simplifyConstraints (ok, constraints);
 }
 
 std::list < const edu::sharif::twinner::trace::Constraint * >
-Cvc4SmtSolver::simplifyConstraints (
+Cvc4SmtSolver::simplifyConstraints (bool &ok,
     std::list < const edu::sharif::twinner::trace::Constraint * > constraints) const {
+  ok = true;
   //  edu::sharif::twinner::util::Logger::loquacious ()
   //      << "Cvc4SmtSolver::simplifyConstraint (...)\n";
   ExprManager em;
@@ -135,12 +138,16 @@ Cvc4SmtSolver::simplifyConstraints (
   }
   ConstraintToCvc4ExprConverter converter (em, false, constraints);
   std::map<std::string, Expr> symbols;
-  Expr cvc4Constraint = converter.convert (symbols);
+  Expr cvc4Constraint = converter.convert (ok, symbols);
+  if (!ok) {
+    std::list < const edu::sharif::twinner::trace::Constraint * > emptyList;
+    return emptyList;
+  }
   Expr simple = smt.simplify (cvc4Constraint);
   std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> vals;
   edu::sharif::twinner::util::foreach
       (constraints, aggregate_symbol_values, vals);
-  return converter.convertBack (simple, vals);
+  return converter.convertBack (ok, simple, vals);
 }
 
 void Cvc4SmtSolver::clearState () {

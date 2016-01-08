@@ -31,15 +31,15 @@ public:
   Cvc4SmtSolver ();
   virtual ~Cvc4SmtSolver ();
 
-  virtual void solveConstraints (
+  virtual bool solveConstraints (
       const std::list < const edu::sharif::twinner::trace::Constraint * > &constraints,
-      std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols) const
-  /* @throws (UnsatisfiableConstraintsException) */;
+      std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols) const;
 
   virtual std::list < const edu::sharif::twinner::trace::Constraint * >
-  simplifyConstraint (const edu::sharif::twinner::trace::Constraint *constraint) const;
+  simplifyConstraint (bool &ok,
+      const edu::sharif::twinner::trace::Constraint *constraint) const;
   virtual std::list < const edu::sharif::twinner::trace::Constraint * >
-  simplifyConstraints (
+  simplifyConstraints (bool &ok,
       std::list < const edu::sharif::twinner::trace::Constraint * > constraints) const;
 
   virtual void clearState ();
@@ -53,4 +53,4 @@ public:
 }
 }
 
-#endif	/* Cvc4SmtSolver.h */
+#endif /* Cvc4SmtSolver.h */

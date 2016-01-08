@@ -111,9 +111,11 @@ int run (string input, string args, string twintool, string pin, string twin,
   tw.setJustAnalyzeMainRoutine (main);
   tw.setMeasureOverheads (measureOverheads);
 
-  tw.generateTwinBinary ();
-
-  return 0;
+  if (tw.generateTwinBinary ()) {
+    return 0;
+  } else {
+    return -4;
+  }
 }
 
 int checkTraceFile (string traceFilePath, string memoryFilePath) {

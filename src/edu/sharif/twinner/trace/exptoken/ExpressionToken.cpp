@@ -51,7 +51,7 @@ ExpressionToken *ExpressionToken::loadFromBinaryStream (std::ifstream &in) {
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown expression token's type: " << type << '\n';
-    throw std::runtime_error ("Unknown expression token's type");
+    abort ();
   }
 }
 
