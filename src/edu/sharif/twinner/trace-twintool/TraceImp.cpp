@@ -23,6 +23,7 @@
 
 #include "edu/sharif/twinner/trace/exptoken/Symbol.h"
 
+#include "edu/sharif/twinner/trace/cv/ConcreteValue32Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 
@@ -260,11 +261,19 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
     Expression *exp = 0;
     int size = 0;
     switch (edu::sharif::twinner::trace::exptoken::SymbolType (record.type)) {
+#ifdef TARGET_IA32E
     case edu::sharif::twinner::trace::exptoken::REGISTER_64_BITS_SYMBOL_TYPE:
       exp = instantiateExpression
           (REG (record.address),
            edu::sharif::twinner::trace::cv::ConcreteValue64Bits
            (record.concreteValueLsb), index);
+#else
+    case edu::sharif::twinner::trace::exptoken::REGISTER_32_BITS_SYMBOL_TYPE:
+      exp = instantiateExpression
+          (REG (record.address),
+           edu::sharif::twinner::trace::cv::ConcreteValue32Bits
+           (record.concreteValueLsb), index);
+#endif
     case edu::sharif::twinner::trace::exptoken::REGISTER_128_BITS_SYMBOL_TYPE:
     {
       if (exp == 0) {
