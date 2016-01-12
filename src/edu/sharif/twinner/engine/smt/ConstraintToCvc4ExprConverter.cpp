@@ -44,15 +44,15 @@ ConstraintToCvc4ExprConverter::ConstraintToCvc4ExprConverter (ExprManager &_em,
     limitSymbols (_limitSymbols) {
   type = em.mkBitVectorType (128);
 
-  zero = em.mkConst (BitVector (128, UINT64 (0)));
+  zero = em.mkConst (BitVector (128, UINT32 (0)));
   maxLimits.insert
-      (make_pair (64, em.mkConst (BitVector (128, UINT64 (0)).setBit (64))));
+      (make_pair (64, em.mkConst (BitVector (128, UINT32 (0)).setBit (64))));
   maxLimits.insert
-      (make_pair (32, em.mkConst (BitVector (128, UINT64 (0)).setBit (32))));
+      (make_pair (32, em.mkConst (BitVector (128, UINT32 (0)).setBit (32))));
   maxLimits.insert
-      (make_pair (16, em.mkConst (BitVector (128, UINT64 (0)).setBit (16))));
+      (make_pair (16, em.mkConst (BitVector (128, UINT32 (0)).setBit (16))));
   maxLimits.insert
-      (make_pair (8, em.mkConst (BitVector (128, UINT64 (0)).setBit (8))));
+      (make_pair (8, em.mkConst (BitVector (128, UINT32 (0)).setBit (8))));
 
   constants.insert (std::make_pair ("00000000000000000", zero));
   constants.insert (std::make_pair ("10000000000000000", maxLimits.at (64)));
