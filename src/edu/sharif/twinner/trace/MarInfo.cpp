@@ -121,8 +121,44 @@ void MarInfo::simplifyExpression (Expression *exp) const {
         }
       }
     }
+#elif defined(TARGET_IA32) && defined(REAL_TARGET_IS_WINDOWS)
+    // In Windows 7, with ASLR disabled, argv is placed at 0x12ff4c
+    // This code can be generalized by getting the argv's address
+    // in addition to the argc and the argv values too.
+    if (dynamic_cast<edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *> (token)) {
+      edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *mem =
+          static_cast<edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *> (token);
+      if (mem->getGenerationIndex () == 0) {
+        const ADDRINT addr = mem->getAddress ();
+        if (addr == 0x12ff4c) {
+          token = new edu::sharif::twinner::trace::exptoken::NamedSymbol
+              ("argv", "n_c_argv", true,
+               edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+               (UINT64 (MarInfo::initialArgv)), 0);
+          delete mem;
+        } else {
+          const UINT64 argv0 = UINT64 (argv);
+          if (argv0 <= addr) {
+            const UINT64 diff = addr - argv0;
+            if (diff % 8 == 0) {
+              const int i = diff / 8;
+              if (i < argc) {
+                std::stringstream ss, ss2;
+                ss << "argv[" << i << "]";
+                ss2 << "n_v_argv_" << i;
+                token = new edu::sharif::twinner::trace::exptoken::NamedSymbol
+                    (ss.str (), ss2.str (), false,
+                     edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+                     (UINT64 (argvis.at (i))), 0);
+                delete mem;
+              }
+            }
+          }
+        }
+      }
+    }
 #else
-#error "Unsupported architecture"
+#error "Unsupported architecture and/or OS"
 #endif
   }
 }

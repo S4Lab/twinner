@@ -50,12 +50,18 @@ NamedSymbol *NamedSymbol::clone () const {
 std::pair < int, SymbolRecord > NamedSymbol::toSymbolRecord () const {
   SymbolRecord record;
   if (technicalName == "n_c_argv") { // argv
+#ifdef TARGET_IA32E
     record.address = REG_RSI;
     record.type = REGISTER_64_BITS_SYMBOL_TYPE;
     record.concreteValueLsb = concreteValue->toUint64 ();
     record.concreteValueMsb = 0;
     return make_pair (generationIndex, record);
-
+#elif defined(TARGET_IA32) && defined(TARGET_WINDOWS)
+    record.address = 0x12ff4c;
+    record.type = MEMORY_32_BITS_SYMBOL_TYPE;
+    record.concreteValueLsb = concreteValue->toUint64 ();
+    record.concreteValueMsb = 0;
+#endif
   } else if (technicalName.size () > 9) { // argv[i] or argv[i][j]
     std::stringstream ss;
     ss << technicalName.substr (9);
