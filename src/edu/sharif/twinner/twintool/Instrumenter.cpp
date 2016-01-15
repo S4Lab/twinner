@@ -1279,6 +1279,18 @@ void Instrumenter::aboutToExit (INT32 code) {
   if (ise->getTrace ()->saveToFile
       (traceFilePath.c_str (), disassemblyFilePath.c_str ())) {
     logger << "Done.\n";
+    logger << "Saving MarInfo...";
+    std::ofstream out;
+    out.open (marFilePath, ios_base::out | ios_base::trunc | ios_base::binary);
+    if (!out.is_open ()) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "Instrumenter::aboutToExit (path=" << marFilePath << "): "
+          << "Can not report main() args due to error in open function\n";
+      abort ();
+    }
+    out << marCache;
+    out.close ();
+    logger << "Done.\n";
   } else {
     logger << "Failed.\n";
   }
@@ -1294,14 +1306,15 @@ void Instrumenter::enable () {
   ise->enable ();
 }
 
-void Instrumenter::reportMainArgs (int argc, char **argv) {
+void Instrumenter::reportMainArguments (int argc, char **argv) {
   static bool calledOnce = false;
   if (disabled || calledOnce) {
     return;
   }
   calledOnce = true;
-  edu::sharif::twinner::trace::MarInfo (argc, argv)
-      .saveToFile (marFilePath.c_str ());
+  std::stringstream ss;
+  edu::sharif::twinner::trace::MarInfo (argc, argv).saveToOutputStream (ss);
+  marCache = ss.str ();
 }
 
 void Instrumenter::printInstructionsStatisticsInfo () const {
@@ -1375,10 +1388,12 @@ VOID startAnalysis (VOID *v) {
 }
 
 VOID reportMainArgs (VOID *v, ADDRINT *arg0, ADDRINT *arg1) {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "reportMainArgs (...) function is called\n";
   Instrumenter *im = (Instrumenter *) v;
   int argc = *reinterpret_cast<int *> (arg0);
   char **argv = *reinterpret_cast<char ***> (arg1);
-  im->reportMainArgs (argc, argv);
+  im->reportMainArguments (argc, argv);
 }
 
 VOID syscallIsAboutToBeCalled (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std,

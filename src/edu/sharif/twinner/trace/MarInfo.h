@@ -43,6 +43,7 @@ public:
 
   void saveToFile (const char *path) const;
   virtual void saveToBinaryStream (std::ofstream &out) const;
+  void saveToOutputStream (std::ostream &out) const;
   static MarInfo *readMarInfoFromFile (const char *path);
 
   static void **getInitialArgv ();

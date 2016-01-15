@@ -183,6 +183,12 @@ void MarInfo::saveToFile (const char *path) const {
 }
 
 void MarInfo::saveToBinaryStream (std::ofstream &out) const {
+  saveToOutputStream (out);
+}
+
+void MarInfo::saveToOutputStream (std::ostream &out) const {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "argc=0x" << std::hex << argc << ", argv=0x" << ADDRINT (argv) << "\n";
   out.write (reinterpret_cast<const char *> (&argc), sizeof (argc));
   out.write (reinterpret_cast<const char *> (&argv), sizeof (argv));
   for (int i = 0; i < argc; ++i) {

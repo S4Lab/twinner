@@ -152,6 +152,7 @@ private:
   std::string traceFilePath; // save final execution trace into this file
   std::string disassemblyFilePath; // save disassembled instructions into this file
   std::string marFilePath; // save final main() args report into this file
+  std::string marCache;
 
   InstructionSymbolicExecuter *ise;
 
@@ -183,7 +184,7 @@ public:
   void disable ();
   void enable ();
 
-  void reportMainArgs (int argc, char **argv);
+  void reportMainArguments (int argc, char **argv);
 
 private:
   void initialize ();
