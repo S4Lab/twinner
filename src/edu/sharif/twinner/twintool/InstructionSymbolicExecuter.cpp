@@ -46,6 +46,12 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
+#ifdef TARGET_IA32E
+static const int STACK_OPERATION_UNIT_SIZE = 8; // bytes
+#else
+static const int STACK_OPERATION_UNIT_SIZE = 4; // bytes
+#endif
+
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     Instrumenter *_im,
     std::ifstream &symbolsFileInputStream, bool _disabled, bool _measureMode) :
@@ -1663,10 +1669,11 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
       // some items have been pushed into stack by CALL and so RSP is decremented
       ConcreteValue *cv = oldVal.clone ();
       (*cv) -= rspRegVal;
-      if ((*cv) == 8) {
+      if ((*cv) == STACK_OPERATION_UNIT_SIZE) {
         edu::sharif::twinner::util::Logger::loquacious ()
             << "\tupdating stack (pushing the ret address)...";
-        MemoryResidentExpressionValueProxy stack (rspRegVal.toUint64 (), 8);
+        MemoryResidentExpressionValueProxy stack (rspRegVal.toUint64 (),
+                                                  STACK_OPERATION_UNIT_SIZE);
         edu::sharif::twinner::trace::StateSummary state;
         edu::sharif::twinner::trace::Expression *exp =
             stack.getExpression (trace, state);
@@ -1682,7 +1689,8 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
         }
       } else {
         edu::sharif::twinner::util::Logger::warning ()
-            << "CALL decremented RSP more/less than 8 bytes;"
+            << "CALL decremented RSP more/less than "
+            << STACK_OPERATION_UNIT_SIZE << " bytes;"
             " check for CALL_FAR instruction!\n";
       }
       rsp->minus (cv);
@@ -1715,10 +1723,14 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
       (*cv) -= oldVal;
       edu::sharif::twinner::util::Logger::loquacious ()
           << "\tadjusting rsp, amount = " << *cv;
-      const bool normalRetInstruction = ((*cv) == 8) || ((*cv) == 16);
+      const bool normalRetInstruction = ((*cv) == STACK_OPERATION_UNIT_SIZE)
+          || ((*cv) == 2 * STACK_OPERATION_UNIT_SIZE);
       if (!normalRetInstruction) {
         edu::sharif::twinner::util::Logger::error ()
-            << "\tret instruction must pop either 8 or 16 bytes\n";
+            << "InstructionSymbolicExecuter::retAnalysisRoutine (...): "
+            "ret instruction must pop either "
+            << STACK_OPERATION_UNIT_SIZE << " or "
+            << (2 * STACK_OPERATION_UNIT_SIZE) << " bytes\n";
         abort ();
       }
       rsp->add (cv);
