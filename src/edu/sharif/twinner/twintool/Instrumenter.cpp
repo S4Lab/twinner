@@ -1344,12 +1344,7 @@ OPCODE Instrumenter::convertConditionalMoveToJumpOpcode (OPCODE cmovcc) const {
   }
 }
 
-VOID instrumentSingleInstruction (INS ins, VOID * v) {
-  Instrumenter *im = (Instrumenter *) v;
-  im->instrumentSingleInstruction (ins);
-}
-
-VOID imageIsLoaded (IMG img, VOID *v) {
+void Instrumenter::instrumentImage (IMG img) {
   edu::sharif::twinner::util::Logger log = edu::sharif::twinner::util::Logger::debug ();
   log << "Instrumenting image...";
   RTN mainRoutine = RTN_FindByName (img, "main");
@@ -1378,6 +1373,18 @@ VOID imageIsLoaded (IMG img, VOID *v) {
     return;
   }
   log << '\n';
+}
+
+VOID instrumentSingleInstruction (INS ins, VOID * v) {
+  Instrumenter *im = (Instrumenter *) v;
+  if (!im->instrumentSingleInstruction (ins)) {
+    abort ();
+  }
+}
+
+VOID imageIsLoaded (IMG img, VOID *v) {
+  Instrumenter *im = (Instrumenter *) v;
+  im->instrumentImage (img);
 }
 
 VOID startAnalysis (VOID *v) {

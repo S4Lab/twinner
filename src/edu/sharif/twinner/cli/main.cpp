@@ -36,7 +36,6 @@ void printHelp (string progName, const ArgParser::Option options[]);
 void printLicense ();
 
 enum ArgumentsParsingStatus {
-
   CHECK_MODE,
   EXIT_NORMALLY, ERROR_OCCURRED, CONTINUE_NORMALLY
 };
@@ -156,7 +155,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     { 'm', "main", ArgParser::NO, "restrict analysis to after the main() function", false, false},
     { 'M', "measure", ArgParser::NO, "run each trace twice and report on overheads of twintool", false, false},
     { 'c', "check", ArgParser::YES, "check validity of a trace file and its memory file"
-     " (must be the last argument)", false, true},
+      " (must be the last argument)", false, true},
     { 0, 0, ArgParser::NO, 0, false, false}
   };
   const ArgParser parser (argc, argv, options, true);

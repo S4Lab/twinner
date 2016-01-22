@@ -53,7 +53,7 @@ InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     bufferForTraceLazyLoad (std::string
     (std::istreambuf_iterator<char> (symbolsFileInputStream),
     std::istreambuf_iterator<char> ())), lazyTrace (0),
-    memoryManager (edu::sharif::twinner::util::MemoryManager::allocateInstance ()),
+    memoryManager (edu::sharif::twinner::util::MemoryManager::getInstance ()),
     trackedReg (REG_INVALID_), operandSize (-1), hook (0),
     disabled (_disabled),
     measureMode (_measureMode), numberOfExecutedInstructions (0) {

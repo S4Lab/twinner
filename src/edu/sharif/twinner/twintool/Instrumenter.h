@@ -174,6 +174,7 @@ public:
   ~Instrumenter ();
 
   void setMainArgsReportingFilePath (const std::string &marFilePath);
+  void instrumentImage (IMG img);
 
   bool instrumentSingleInstruction (INS ins);
 

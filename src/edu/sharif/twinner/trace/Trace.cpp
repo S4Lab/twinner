@@ -48,7 +48,7 @@ Trace::Trace (const std::list < ExecutionTraceSegment * > &list,
 }
 
 Trace::Trace () :
-    memoryManager (edu::sharif::twinner::util::MemoryManager::allocateInstance ()) {
+    memoryManager (edu::sharif::twinner::util::MemoryManager::getInstance ()) {
   segments.push_front (new ExecutionTraceSegment (0));
   currentSegmentIterator = segments.begin ();
   currentSegmentIndex = 0;
@@ -205,8 +205,7 @@ bool Trace::saveToFile (const char *path, const char *memoryPath) const {
   }
   saveToBinaryStream (out);
   out.close ();
-  memoryManager->saveToFile (memoryPath);
-  return true;
+  return memoryManager->saveToFile (memoryPath);
 }
 
 void Trace::saveToBinaryStream (std::ofstream &out) const {
