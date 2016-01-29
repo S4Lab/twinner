@@ -3246,6 +3246,7 @@ InstructionSymbolicExecuter::convertOpcodeToOneToThreeOperandsAnalysisRoutine (
     OPCODE op) const {
   switch (op) {
   case XED_ICLASS_MOVSQ:
+  case XED_ICLASS_MOVSD:
     return &InstructionSymbolicExecuter::movsAnalysisRoutine;
   case XED_ICLASS_CMPSB:
   case XED_ICLASS_CMPSW:
