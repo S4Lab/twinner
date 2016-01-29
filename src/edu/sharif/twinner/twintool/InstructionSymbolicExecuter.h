@@ -760,6 +760,11 @@ private:
   void setnbeAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
   /**
+   * SETNB sets opr to 1 iff CF=0 (and sets it to 0 otherwise).
+   */
+  void setnbAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
+  /**
    * NOT one's complements the opr.
    * opr <- NOT(opr)
    */
