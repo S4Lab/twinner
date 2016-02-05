@@ -23,7 +23,6 @@ namespace twintool {
 namespace operationgroup {
 
 class DummyOperationGroup : public NaryOperationGroup<0> {
-
 private:
   const std::string name;
 
@@ -32,6 +31,8 @@ public:
 
   virtual ExpressionPtr getCarryExpression () const;
 
+  virtual std::list <ConstraintPtr> instantiateConstraintForOverflowCase (
+      bool &overflow, uint32_t instruction) const;
   virtual std::list <ConstraintPtr> instantiateConstraintForZeroCase (bool &zero,
       uint32_t instruction) const;
   virtual std::list <ConstraintPtr> instantiateConstraintForLessCase (bool &less,
@@ -55,4 +56,4 @@ public:
 }
 }
 
-#endif	/* DummyOperationGroup.h */
+#endif /* DummyOperationGroup.h */

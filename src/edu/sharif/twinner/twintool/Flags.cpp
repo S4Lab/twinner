@@ -100,6 +100,30 @@ void Flags::setCarryFlag (const edu::sharif::twinner::trace::Expression *exp) {
 }
 
 std::list <edu::sharif::twinner::trace::Constraint *>
+Flags::instantiateConstraintForOverflowCase (bool &overflow,
+    uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  switch (of) {
+  case UNDEFINED_FSTATE:
+    edu::sharif::twinner::util::Logger::warning ()
+        << "Using OF while is in undefined state (assuming that it is CLEAR)\n";
+  case CLEAR_FSTATE:
+    overflow = false;
+    break;
+  case SET_FSTATE:
+    overflow = true;
+    break;
+  case DEFAULT_FSTATE:
+    list = op->instantiateConstraintForOverflowCase (overflow, instruction);
+    break;
+  default:
+    edu::sharif::twinner::util::Logger::error ()
+        << "Unknown state for OF (0x" << std::hex << int (of) << ")\n";
+  }
+  return list;
+}
+
+std::list <edu::sharif::twinner::trace::Constraint *>
 Flags::instantiateConstraintForZeroCase (bool &zero, uint32_t instruction) const {
   std::list <edu::sharif::twinner::trace::Constraint *> list;
   switch (zf) {

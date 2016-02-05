@@ -22,12 +22,13 @@ namespace twintool {
 namespace operationgroup {
 
 class BitwiseAndOperationGroup : public NaryOperationGroup<1> {
-
 public:
   BitwiseAndOperationGroup (ConstExpressionPtr mainExp);
 
   virtual ExpressionPtr getCarryExpression () const;
 
+  virtual std::list <ConstraintPtr> instantiateConstraintForOverflowCase (
+      bool &overflow, uint32_t instruction) const;
   virtual std::list <ConstraintPtr> instantiateConstraintForZeroCase (bool &zero,
       uint32_t instruction) const;
   virtual std::list <ConstraintPtr> instantiateConstraintForLessCase (bool &less,
@@ -52,4 +53,4 @@ public:
 }
 }
 
-#endif	/* BitwiseAndOperationGroup.h */
+#endif /* BitwiseAndOperationGroup.h */

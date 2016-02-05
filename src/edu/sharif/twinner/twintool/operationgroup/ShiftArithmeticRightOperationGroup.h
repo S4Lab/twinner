@@ -22,13 +22,14 @@ namespace twintool {
 namespace operationgroup {
 
 class ShiftArithmeticRightOperationGroup : public NaryOperationGroup<2> {
-
 public:
   ShiftArithmeticRightOperationGroup (ConstExpressionPtr mainExp,
       ConstExpressionPtr auxExp);
 
   virtual ExpressionPtr getCarryExpression () const;
 
+  virtual std::list <ConstraintPtr> instantiateConstraintForOverflowCase (
+      bool &overflow, uint32_t instruction) const;
   virtual std::list <ConstraintPtr> instantiateConstraintForZeroCase (bool &zero,
       uint32_t instruction) const;
   virtual std::list <ConstraintPtr> instantiateConstraintForLessCase (bool &less,
@@ -52,4 +53,4 @@ public:
 }
 }
 
-#endif	/* ShiftArithmeticRightOperationGroup.h */
+#endif /* ShiftArithmeticRightOperationGroup.h */

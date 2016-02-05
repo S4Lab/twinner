@@ -35,6 +35,15 @@ OperationGroup::ExpressionPtr DummyOperationGroup::getCarryExpression () const {
 }
 
 std::list <OperationGroup::ConstraintPtr>
+DummyOperationGroup::instantiateConstraintForOverflowCase (bool &overflow,
+    uint32_t instruction) const {
+  edu::sharif::twinner::util::Logger::error ()
+      << "DummyOperationGroup::instantiateConstraintForOverflowCase (...): "
+      << name << " case is not implemented yet\n";
+  abort ();
+}
+
+std::list <OperationGroup::ConstraintPtr>
 DummyOperationGroup::instantiateConstraintForZeroCase (bool &zero,
     uint32_t instruction) const {
   edu::sharif::twinner::util::Logger::error ()

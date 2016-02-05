@@ -115,6 +115,19 @@ public:
   void setCarryFlag (const edu::sharif::twinner::trace::Expression *exp);
 
   /**
+   * Instantiates a new constraint object denoting that whether the underlying
+   * expression matches with the overflow (O) condition.
+   * The last concrete value of the expression indicates that O should be
+   * satisfied or its negate should be satisfied.
+   * @param instruction The instruction which was cause of this constraint instantiation.
+   * @param overflow Indicates whether requested constraint is created or its negated.
+   *
+   * @return A new constraint instance denoting whether current eflags matches with O.
+   */
+  std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForOverflowCase (bool &overflow, uint32_t instruction) const;
+
+  /**
    * Instantiates a new constraint object denoting ZF's (zero flag) state. The last
    * concrete value of the expression indicates that ZF should be satisfied or its negate
    * should be satisfied.

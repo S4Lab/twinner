@@ -40,6 +40,15 @@ ShiftArithmeticRightOperationGroup::getCarryExpression () const {
 }
 
 std::list <OperationGroup::ConstraintPtr>
+ShiftArithmeticRightOperationGroup::instantiateConstraintForOverflowCase (
+    bool &overflow, uint32_t instruction) const {
+  edu::sharif::twinner::util::Logger::error () <<
+      "ShiftArithmeticRightOperationGroup::instantiateConstraintForOverflowCase"
+      " (...): Not yet implemented\n";
+  abort ();
+}
+
+std::list <OperationGroup::ConstraintPtr>
 ShiftArithmeticRightOperationGroup::instantiateConstraintForZeroCase (bool &zero,
     uint32_t instruction) const {
   std::list <OperationGroup::ConstraintPtr> list;

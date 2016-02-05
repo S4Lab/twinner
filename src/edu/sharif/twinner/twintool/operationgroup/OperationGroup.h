@@ -45,6 +45,8 @@ public:
 
   virtual ExpressionPtr getCarryExpression () const = 0;
 
+  virtual std::list <ConstraintPtr> instantiateConstraintForOverflowCase (
+      bool &overflow, uint32_t instruction) const = 0; // OF == 1
   virtual std::list <ConstraintPtr> instantiateConstraintForZeroCase (bool &zero,
       uint32_t instruction) const = 0; // ZF == 1
   virtual std::list <ConstraintPtr> instantiateConstraintForLessCase (bool &less,

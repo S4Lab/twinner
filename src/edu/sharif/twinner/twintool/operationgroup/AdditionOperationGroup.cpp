@@ -46,6 +46,15 @@ OperationGroup::ExpressionPtr AdditionOperationGroup::getCarryExpression () cons
 }
 
 std::list <OperationGroup::ConstraintPtr>
+AdditionOperationGroup::instantiateConstraintForOverflowCase (
+    bool &overflow, uint32_t instruction) const {
+  edu::sharif::twinner::util::Logger::error ()
+      << "AdditionOperationGroup::instantiateConstraintForOverflowCase"
+      " (...): Not yet implemented\n";
+  abort ();
+}
+
+std::list <OperationGroup::ConstraintPtr>
 AdditionOperationGroup::instantiateConstraintForZeroCase (bool &zero,
     uint32_t instruction) const {
   const int precision = exp[0]->getLastConcreteValue ().getSize ();
