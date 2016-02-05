@@ -323,6 +323,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_INC:
   case XED_ICLASS_DEC:
   case XED_ICLASS_NEG:
+  case XED_ICLASS_SETO:
   case XED_ICLASS_SETNZ:
   case XED_ICLASS_SETZ:
   case XED_ICLASS_SETLE:

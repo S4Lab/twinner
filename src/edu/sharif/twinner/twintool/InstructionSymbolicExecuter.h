@@ -715,6 +715,11 @@ private:
   void negAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
   /**
+   * SETO sets opr to 1 iff OF=1 (and sets it to 0 otherwise).
+   */
+  void setoAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
+  /**
    * SETNZ sets opr to 1 iff ZF=0 (and sets it to 0 otherwise).
    */
   void setnzAnalysisRoutine (const MutableExpressionValueProxy &opr);
