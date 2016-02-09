@@ -39,6 +39,14 @@ namespace twintool {
 
 using namespace instructionmodels;
 
+#ifdef TARGET_LINUX
+#define MAIN_ROUTINE_NAME "main"
+#elif TARGET_WINDOWS
+#define MAIN_ROUTINE_NAME "__main"
+#else
+#error "Unsupported OS"
+#endif
+
 inline void read_memory_content_and_add_it_to_map (
     std::map < std::pair < ADDRINT, int >, UINT64 > &map,
     const std::pair < ADDRINT, int > &address);
@@ -225,8 +233,13 @@ void Instrumenter::setMainArgsReportingFilePath (const std::string &_marFilePath
 bool Instrumenter::instrumentSingleInstruction (INS ins) {
   if (disabled) {
     RTN rtn = INS_Rtn (ins);
-    if (RTN_Valid (rtn) && RTN_Name (rtn) == "main") {
-      enable ();
+    if (RTN_Valid (rtn)) {
+      const string name = RTN_Name (rtn);
+      edu::sharif::twinner::util::Logger::loquacious ()
+          << "routine: " << name << '\n';
+      if (name == MAIN_ROUTINE_NAME) {
+        enable ();
+      }
     }
   }
   std::string insAssemblyStr = INS_Disassemble (ins);
@@ -1347,11 +1360,12 @@ OPCODE Instrumenter::convertConditionalMoveToJumpOpcode (OPCODE cmovcc) const {
 }
 
 void Instrumenter::instrumentImage (IMG img) {
-  edu::sharif::twinner::util::Logger log = edu::sharif::twinner::util::Logger::debug ();
-  log << "Instrumenting image...";
-  RTN mainRoutine = RTN_FindByName (img, "main");
+  edu::sharif::twinner::util::Logger log =
+      edu::sharif::twinner::util::Logger::debug ();
+  log << "Instrumenter::instrumentImage (img)\n";
+  RTN mainRoutine = RTN_FindByName (img, MAIN_ROUTINE_NAME);
   if (RTN_Valid (mainRoutine)) {
-    log << " routine: main";
+    log << " routine: " MAIN_ROUTINE_NAME "\n";
     RTN_Open (mainRoutine);
     /*
      * All instructions before main() routine are owned by RTLD.
@@ -1360,19 +1374,17 @@ void Instrumenter::instrumentImage (IMG img) {
      * so instrumenter and analysis routines should be disabled afterwards.
      */
     RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) startAnalysis,
-                    IARG_PTR, v,
+                    IARG_PTR, this,
                     IARG_END);
     RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
-                    IARG_PTR, v,
+                    IARG_PTR, this,
                     IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0,
                     IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1,
                     IARG_END);
     RTN_InsertCall (mainRoutine, IPOINT_AFTER, (AFUNPTR) terminateAnalysis,
-                    IARG_PTR, v,
+                    IARG_PTR, this,
                     IARG_END);
     RTN_Close (mainRoutine);
-    log << '\n';
-    return;
   }
   log << '\n';
 }

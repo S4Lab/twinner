@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <unistd.h>
 
 #include "ArgParser.h"
