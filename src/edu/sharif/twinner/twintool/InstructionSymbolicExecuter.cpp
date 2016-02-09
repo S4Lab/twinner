@@ -1249,7 +1249,7 @@ void InstructionSymbolicExecuter::pushAnalysisRoutine (
   delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsp...";
   edu::sharif::twinner::trace::Expression *rspexp = getExpression (rsp, trace);
-  rspexp->minus (8);
+  rspexp->minus (STACK_OPERATION_UNIT_SIZE);
   setExpression (rsp, trace, rspexp);
   delete rspexp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
@@ -1268,7 +1268,7 @@ void InstructionSymbolicExecuter::popAnalysisRoutine (
   delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsp...";
   edu::sharif::twinner::trace::Expression *rspexp = getExpression (rsp, trace);
-  rspexp->add (8);
+  rspexp->add (STACK_OPERATION_UNIT_SIZE);
   setExpression (rsp, trace, rspexp);
   delete rspexp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
@@ -2635,7 +2635,7 @@ void InstructionSymbolicExecuter::leaveAnalysisRoutine (
   setExpression (fpReg, trace, memexp);
   delete memexp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsp...";
-  rsp->add (8);
+  rsp->add (STACK_OPERATION_UNIT_SIZE);
   setExpression (spReg, trace, rsp);
   delete rsp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
