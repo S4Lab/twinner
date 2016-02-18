@@ -71,7 +71,8 @@ const char *Executer::MAIN_ARGS_COMMUNICATION_TEMP_FILE =
     "/tmp/twinner/main-args-reporting.dat";
 
 Executer::Executer (std::string pinLauncher, std::string twintool,
-    std::string inputBinary, std::string _inputArguments, bool main, bool _overheads) :
+    std::string inputBinary, std::string _inputArguments,
+    std::string endpoints, bool main, bool _overheads) :
     baseCommand (pinLauncher
     + " -pin_memory_range 0x40000000:0x60000000"
     + " -t " + twintool
@@ -81,9 +82,16 @@ Executer::Executer (std::string pinLauncher, std::string twintool,
     + " -verbose " + edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString ()
     + (_overheads ? OVERHEAD_MEASUREMENT_OPTION : "")
     + (main ? std::string (" -main -mar ") + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
+    + (endpoints != "" ? std::string (" -endpoints ") + endpoints
+       + " -mar " + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
     + " -- " + inputBinary),
     signaled (false),
     inputArguments (_inputArguments), overheads (_overheads) {
+  if (main && endpoints != "") {
+    edu::sharif::twinner::util::Logger::error ()
+        << "The -main and -endpoints are mutually exclusive.\n";
+    abort ();
+  }
 }
 
 void Executer::setCandidateAddresses (

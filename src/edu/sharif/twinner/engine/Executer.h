@@ -82,8 +82,9 @@ private:
   const bool overheads;
 
 public:
-  Executer (std::string pinLauncher, std::string twintool, std::string inputBinary,
-      std::string inputArguments, bool main, bool overheads);
+  Executer (std::string pinLauncher, std::string twintool,
+      std::string inputBinary, std::string inputArguments,
+      std::string endpoints, bool main, bool overheads);
 
   void setCandidateAddresses (
       const std::set < std::pair < ADDRINT, int > > &addresses) const;

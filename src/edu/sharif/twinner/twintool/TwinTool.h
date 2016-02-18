@@ -38,6 +38,7 @@ private:
   };
 
   Instrumenter *im;
+  bool justAnalyzeMainRoutine;
 
 public:
   TwinTool ();

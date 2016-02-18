@@ -42,18 +42,20 @@ enum ArgumentsParsingStatus {
 };
 
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
-    string &input, string &args, string &twintool, string &pin, string &twin,
+    string &input, string &args, string &endpoints,
+    string &twintool, string &pin, string &twin,
     bool &justAnalyzeMainRoutine, bool &measureOverheads);
-int run (string input, string args, string twintool, string pin, string twin,
+int run (string input, string args, string endpoints,
+    string twintool, string pin, string twin,
     bool main, bool measureOverheads);
 int checkTraceFile (string traceFilePath, string memoryFilePath);
 
 int main (int argc, char *argv[]) {
-  string input, args, twintool, pin, twin;
+  string input, args, endpoints, twintool, pin, twin;
   bool justAnalyzeMainRoutine = false;
   bool measureOverheads = false;
   switch (parseArguments (argc, argv,
-                          input, args, twintool, pin, twin,
+                          input, args, endpoints, twintool, pin, twin,
                           justAnalyzeMainRoutine, measureOverheads)) {
   case CONTINUE_NORMALLY:
     // checking mandatory arguments...
@@ -68,7 +70,7 @@ int main (int argc, char *argv[]) {
       printError (argv[0], "permission denied: can not write to output twin binary!");
     } else {
       // all files are OK...
-      return run (input, args, twintool, pin, twin,
+      return run (input, args, endpoints, twintool, pin, twin,
                   justAnalyzeMainRoutine, measureOverheads);
     }
     return -2;
@@ -91,13 +93,15 @@ int main (int argc, char *argv[]) {
   }
 }
 
-int run (string input, string args, string twintool, string pin, string twin,
+int run (string input, string args, string endpoints,
+    string twintool, string pin, string twin,
     bool main, bool measureOverheads) {
   edu::sharif::twinner::util::Logger::info ()
       << "[verboseness level: "
       << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n"
       "Input binary file: " << input << '\n'
       << (args.empty () ? "" : ("Input binary arguments: " + args))
+      << (endpoints.empty () ? "" : ("Analysis Endpoints: " + endpoints))
       << "\nTwinTool pintool: " << twintool
       << "\nPin launcher: " << pin
       << "\nOutput twin file: " << twin << '\n';
@@ -108,6 +112,7 @@ int run (string input, string args, string twintool, string pin, string twin,
   tw.setPinLauncherPath (pin);
   tw.setTwinBinaryPath (twin);
   tw.setInputBinaryArguments (args);
+  tw.setAnalysisEndpoints (endpoints);
   tw.setJustAnalyzeMainRoutine (main);
   tw.setMeasureOverheads (measureOverheads);
 
@@ -139,7 +144,8 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
 }
 
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
-    string &input, string &args, string &twintool, string &pin, string &twin,
+    string &input, string &args, string &endpoints,
+    string &twintool, string &pin, string &twin,
     bool &justAnalyzeMainRoutine, bool &measureOverheads) {
   char *progName = argv[0];
 
@@ -150,6 +156,8 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     { 'L', "license", ArgParser::NO, "output license information and exit", false, true},
     { 'i', "input", ArgParser::YES, "input obfuscated binary file", true, false},
     { 'a', "args", ArgParser::YES, "arguments for input binary file", false, false},
+    { 'e', "analysis-endpoints", ArgParser::YES, "comma separated"
+      " instruction addresses to start/end analysis", false, false},
     { 't', "tool", ArgParser::YES, "twintool executable/library file", true, false},
     { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true, false},
     { 'o', "output", ArgParser::YES, "path/name of the generated twin binary", true, false},
@@ -203,6 +211,9 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       break;
     case 'a':
       args = parser.argument (argind);
+      break;
+    case 'e':
+      endpoints = parser.argument (argind);
       break;
     case 't':
       twintool = parser.argument (argind);

@@ -160,17 +160,23 @@ private:
   bool isWithinInitialStateDetectionMode;
 
   bool disabled;
+  ADDRINT start;
+  ADDRINT end;
 
 public:
   Instrumenter (std::ifstream &symbolsFileInputStream,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
-      bool disabled, bool measureMode);
+      bool disabled,
+      ADDRINT start, ADDRINT end, bool measureMode);
   Instrumenter (
       const std::set < std::pair < ADDRINT, int > > &candidateAddresses,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
-      bool disabled);
-  Instrumenter (const std::string &traceFilePath, const std::string &disassemblyFilePath,
-      bool disabled);
+      bool disabled,
+      ADDRINT start, ADDRINT end);
+  Instrumenter (const std::string &traceFilePath,
+      const std::string &disassemblyFilePath,
+      bool disabled,
+      ADDRINT start, ADDRINT end);
   ~Instrumenter ();
 
   void setMainArgsReportingFilePath (const std::string &marFilePath);

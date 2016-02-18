@@ -53,12 +53,14 @@ inline void read_memory_content_and_add_it_to_map (
 
 Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     const string &_traceFilePath, const std::string &_disassemblyFilePath,
-    bool _disabled, bool measureMode) :
+    bool _disabled,
+    ADDRINT _start, ADDRINT _end, bool measureMode) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, symbolsFileInStream,
     _disabled, measureMode)),
     isWithinInitialStateDetectionMode (false),
     disabled (_disabled),
+    start (_start), end (_end),
     totalCountOfInstructions (0) {
   initialize ();
 }
@@ -66,22 +68,25 @@ Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
 Instrumenter::Instrumenter (
     const std::set < std::pair < ADDRINT, int > > &_candidateAddresses,
     const std::string &_traceFilePath, const std::string &_disassemblyFilePath,
-    bool _disabled) :
+    bool _disabled, ADDRINT _start, ADDRINT _end) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, _disabled)),
     candidateAddresses (_candidateAddresses),
     isWithinInitialStateDetectionMode (true),
     disabled (_disabled),
+    start (_start), end (_end),
     totalCountOfInstructions (0) {
   initialize ();
 }
 
 Instrumenter::Instrumenter (const string &_traceFilePath,
-    const std::string &_disassemblyFilePath, bool _disabled) :
+    const std::string &_disassemblyFilePath, bool _disabled,
+    ADDRINT _start, ADDRINT _end) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, _disabled)),
     isWithinInitialStateDetectionMode (false),
     disabled (_disabled),
+    start (_start), end (_end),
     totalCountOfInstructions (0) {
   initialize ();
 }
@@ -231,7 +236,7 @@ void Instrumenter::setMainArgsReportingFilePath (const std::string &_marFilePath
 }
 
 bool Instrumenter::instrumentSingleInstruction (INS ins) {
-  if (disabled) {
+  if (disabled && (start == end)) {
     RTN rtn = INS_Rtn (ins);
     if (RTN_Valid (rtn)) {
       const string name = RTN_Name (rtn);
@@ -1241,9 +1246,10 @@ void Instrumenter::syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt,
   edu::sharif::twinner::util::Logger::loquacious () << "***** syscallEntryPoint *****\n";
   ise->syscallInvoked (ctxt, edu::sharif::twinner::trace::Syscall (std));
 
-  if (isWithinInitialStateDetectionMode) {
-    edu::sharif::twinner::util::Logger::debug () << "Gathering initial contents of"
-        " requested memory addresses, right before first syscall\n";
+  if (isWithinInitialStateDetectionMode && !disabled) {
+    edu::sharif::twinner::util::Logger::debug ()
+        << "Gathering initial contents of requested memory addresses,"
+        " right before first syscall\n";
     saveMemoryContentsToFile (traceFilePath.c_str ());
     edu::sharif::twinner::util::Logger::debug () << "Done.\tExiting...\n";
     exit (0); // think about probably acquired locks of application
@@ -1319,6 +1325,15 @@ void Instrumenter::disable () {
 void Instrumenter::enable () {
   disabled = false;
   ise->enable ();
+  if (isWithinInitialStateDetectionMode) {
+    edu::sharif::twinner::util::Logger::debug ()
+        << "Instrumenter::enable (): "
+        "Gathering initial contents of requested memory addresses,"
+        " right before first syscall\n";
+    saveMemoryContentsToFile (traceFilePath.c_str ());
+    edu::sharif::twinner::util::Logger::debug () << "Done.\tExiting...\n";
+    exit (0); // think about probably acquired locks of application
+  }
 }
 
 void Instrumenter::reportMainArguments (int argc, char **argv) {
@@ -1363,30 +1378,65 @@ void Instrumenter::instrumentImage (IMG img) {
   edu::sharif::twinner::util::Logger log =
       edu::sharif::twinner::util::Logger::debug ();
   log << "Instrumenter::instrumentImage (img)\n";
-  RTN mainRoutine = RTN_FindByName (img, MAIN_ROUTINE_NAME);
-  if (RTN_Valid (mainRoutine)) {
-    log << " routine: " MAIN_ROUTINE_NAME "\n";
-    RTN_Open (mainRoutine);
-    /*
-     * All instructions before main() routine are owned by RTLD.
-     * So we should start instrumenting instructions thereafter.
-     * Also instructions after returning from main() are owned by RTLD and
-     * so instrumenter and analysis routines should be disabled afterwards.
-     */
-    RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) startAnalysis,
-                    IARG_PTR, this,
-                    IARG_END);
-    RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
-                    IARG_PTR, this,
-                    IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0,
-                    IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1,
-                    IARG_END);
-    RTN_InsertCall (mainRoutine, IPOINT_AFTER, (AFUNPTR) terminateAnalysis,
-                    IARG_PTR, this,
-                    IARG_END);
-    RTN_Close (mainRoutine);
+  int state = 0;
+  if (start != end) {
+    for (SEC section = IMG_SecHead (img);
+        SEC_Valid (section); section = SEC_Next (section)) {
+      for (RTN routine = SEC_RtnHead (section);
+          RTN_Valid (routine); routine = RTN_Next (routine)) {
+        RTN_Open (routine);
+        for (INS ins = RTN_InsHead (routine);
+            INS_Valid (ins); ins = INS_Next (ins)) {
+          const ADDRINT addr = INS_Address (ins);
+          if (addr == start) {
+            INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) startAnalysis,
+                            IARG_PTR, this,
+                            IARG_END);
+            INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
+                            IARG_PTR, this,
+                            IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0,
+                            IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1,
+                            IARG_END);
+            ++state;
+          } else if (addr == end) {
+            INS_InsertCall (ins, IPOINT_AFTER, (AFUNPTR) terminateAnalysis,
+                            IARG_PTR, this,
+                            IARG_END);
+            ++state;
+          }
+          if (state == 2) {
+            RTN_Close (routine);
+            return;
+          }
+        }
+        RTN_Close (routine);
+      }
+    }
+  } else {
+    RTN mainRoutine = RTN_FindByName (img, MAIN_ROUTINE_NAME);
+    if (RTN_Valid (mainRoutine)) {
+      log << " routine: " MAIN_ROUTINE_NAME "\n";
+      RTN_Open (mainRoutine);
+      /*
+       * All instructions before main() routine are owned by RTLD.
+       * So we should start instrumenting instructions thereafter.
+       * Also instructions after returning from main() are owned by RTLD and
+       * so instrumenter and analysis routines should be disabled afterwards.
+       */
+      RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) startAnalysis,
+                      IARG_PTR, this,
+                      IARG_END);
+      RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
+                      IARG_PTR, this,
+                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0,
+                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1,
+                      IARG_END);
+      RTN_InsertCall (mainRoutine, IPOINT_AFTER, (AFUNPTR) terminateAnalysis,
+                      IARG_PTR, this,
+                      IARG_END);
+      RTN_Close (mainRoutine);
+    }
   }
-  log << '\n';
 }
 
 VOID instrumentSingleInstruction (INS ins, VOID * v) {

@@ -57,10 +57,13 @@ KNOB < string > verbose (KNOB_MODE_WRITEONCE, "pintool", "verbose", "warning",
 KNOB < BOOL > main (KNOB_MODE_WRITEONCE, "pintool", "main", "",
     "if presents, only main() routine and what is called by it will be analyzed");
 
+KNOB < string > endpoints (KNOB_MODE_WRITEONCE, "pintool", "endpoints", "",
+    "comma separated instruction addresses to start/end analysis");
+
 KNOB < string > mainArgsReportingOutputFilePath (KNOB_MODE_WRITEONCE,
     "pintool", "mar", "/tmp/twinner/main-args-reporting.dat",
     "specify file path for saving main() arguments information"
-    " (just in -main mode");
+    " (in -main and -endpoints modes");
 
 KNOB < BOOL > measure (KNOB_MODE_WRITEONCE, "pintool", "measure", "",
     "if presents, trivial instruction counting instrumentation will be used instead of normal behavior");
@@ -156,12 +159,31 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     edu::sharif::twinner::util::Logger::debug () << "Testing debug messages\n";
     edu::sharif::twinner::util::Logger::loquacious () << "Testing loquacious messages\n";
   }*/
-  bool justAnalyzeMainRoutine = main.Value ();
+  justAnalyzeMainRoutine = main.Value ();
   if (justAnalyzeMainRoutine) {
     edu::sharif::twinner::util::Logger::info ()
         << "Only main() routine will be analyzed.\n";
+  }
+  string endpointsStr = endpoints.Value ();
+  ADDRINT start = 0, end = 0;
+  if (endpointsStr != "") {
+    const std::string::size_type separator = endpointsStr.find (",");
+    if (separator == std::string::npos) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "Analysis endpoints are not well formed.\n";
+      return false;
+    }
+    std::stringstream startStr (endpointsStr.substr (0, separator));
+    startStr >> std::hex >> start;
+    std::stringstream endStr (endpointsStr.substr (separator + 1));
+    endStr >> std::hex >> end;
+    edu::sharif::twinner::util::Logger::info ()
+        << "Analysis endpoints are specified:"
+        " 0x" << std::hex << start << " - 0x" << end << '\n';
+  }
+  if (justAnalyzeMainRoutine || start != end) {
     if (mainArgsReportingFilePath.empty ()) {
-      printError ("In the --main mode,"
+      printError ("In the --main and --endpoints modes,"
                   " main() arguments information must be saved somewhere."
                   " Use --mar to specify the path!");
       return false;
@@ -172,6 +194,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
                   + mainArgsReportingFilePath);
       return false;
     }
+    justAnalyzeMainRoutine = true;
   }
   bool measureMode = measure.Value ();
   if (measureMode) {
@@ -185,7 +208,8 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     switch (mode) {
     case NORMAL_MODE:
       im = new Instrumenter (in, traceFilePath, disassemblyFilePath,
-                             justAnalyzeMainRoutine, measureMode);
+                             justAnalyzeMainRoutine,
+                             start, end, measureMode);
       break;
     case INITIAL_STATE_DETECTION_MODE:
       if (measureMode) {
@@ -196,7 +220,9 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
         return false;
       }
       im = new Instrumenter (readSetOfAddressesFromBinaryStream (in),
-                             traceFilePath, disassemblyFilePath, justAnalyzeMainRoutine);
+                             traceFilePath, disassemblyFilePath,
+                             justAnalyzeMainRoutine,
+                             start, end);
       break;
     default:
       in.close ();
@@ -207,9 +233,11 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     }
     in.close ();
   } else {
-    im = new Instrumenter (traceFilePath, disassemblyFilePath, justAnalyzeMainRoutine);
+    im = new Instrumenter (traceFilePath, disassemblyFilePath,
+                           justAnalyzeMainRoutine,
+                           start, end);
   }
-  if (justAnalyzeMainRoutine) {
+  if (justAnalyzeMainRoutine) { // this includes  {|| start != end} scenario
     im->setMainArgsReportingFilePath (mainArgsReportingFilePath);
   }
   return true;
@@ -257,8 +285,7 @@ std::set < std::pair < ADDRINT, int > > TwinTool::readSetOfAddressesFromBinarySt
 }
 
 void TwinTool::registerInstrumentationRoutines () {
-  bool justAnalyzeMainRoutine = main.Value ();
-  if (justAnalyzeMainRoutine) {
+  if (justAnalyzeMainRoutine) { // this includes main and endpoints scenarios
     /**
      * This is required for -main option. That option commands instrumentation to start
      * from the main() routine instead of RTLD start point. Finding the main() routine

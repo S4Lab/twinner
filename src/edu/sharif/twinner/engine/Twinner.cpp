@@ -183,6 +183,10 @@ void Twinner::setInputBinaryArguments (string arguments) {
   this->arguments = arguments;
 }
 
+void Twinner::setAnalysisEndpoints (string endpoints) {
+  this->endpoints = endpoints;
+}
+
 void Twinner::setJustAnalyzeMainRoutine (bool main) {
   this->main = main;
 }
@@ -214,7 +218,8 @@ void Twinner::setMeasureOverheads (bool measureOverheads) {
  * and initialize remaining addresses in the Twin code.
  */
 bool Twinner::generateTwinBinary () {
-  Executer ex (pin, twintool, input, arguments, main, overheads);
+  Executer ex (pin, twintool, input, arguments,
+               endpoints, main, overheads);
   set < const edu::sharif::twinner::trace::exptoken::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;
@@ -250,6 +255,8 @@ bool Twinner::generateTwinBinary () {
 
 std::map < std::pair < ADDRINT, int >, UINT64 >
 Twinner::obtainInitializedMemoryValues (Executer &ex) const {
+  edu::sharif::twinner::util::Logger::debug ()
+      << "Gathering initial memory values...\n";
   // step 4: `addresses` field holds candidate addresses
   std::set < std::pair < ADDRINT, int > > addresses;
   for (std::list < const edu::sharif::twinner::trace::Trace * >::const_iterator it =
