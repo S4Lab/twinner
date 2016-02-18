@@ -54,12 +54,13 @@ inline void read_memory_content_and_add_it_to_map (
 Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     const string &_traceFilePath, const std::string &_disassemblyFilePath,
     bool _disabled,
-    ADDRINT _start, ADDRINT _end, bool measureMode) :
+    ADDRINT _start, ADDRINT _end, bool _naive, bool measureMode) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, symbolsFileInStream,
     _disabled, measureMode)),
     isWithinInitialStateDetectionMode (false),
-    disabled (_disabled),
+    disabled (_disabled || _naive),
+    naive (_naive),
     start (_start), end (_end),
     totalCountOfInstructions (0) {
   initialize ();
@@ -81,11 +82,12 @@ Instrumenter::Instrumenter (
 
 Instrumenter::Instrumenter (const string &_traceFilePath,
     const std::string &_disassemblyFilePath, bool _disabled,
-    ADDRINT _start, ADDRINT _end) :
+    ADDRINT _start, ADDRINT _end, bool _naive) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, _disabled)),
     isWithinInitialStateDetectionMode (false),
-    disabled (_disabled),
+    disabled (_disabled || _naive),
+    naive (_naive),
     start (_start), end (_end),
     totalCountOfInstructions (0) {
   initialize ();
@@ -236,7 +238,7 @@ void Instrumenter::setMainArgsReportingFilePath (const std::string &_marFilePath
 }
 
 bool Instrumenter::instrumentSingleInstruction (INS ins) {
-  if (disabled && (start == end)) {
+  if (disabled && !naive && (start == end)) {
     RTN rtn = INS_Rtn (ins);
     if (RTN_Valid (rtn)) {
       const string name = RTN_Name (rtn);
@@ -276,6 +278,10 @@ bool Instrumenter::instrumentSingleInstruction (INS ins) {
   if (it == managedInstructions.end ()) {
     edu::sharif::twinner::util::Logger::info ()
         << "[opcode: " << std::dec << op << "] "
+        << "Ignoring assembly instruction: " << insAssembly << '\n';
+  } else if (naive) {
+    edu::sharif::twinner::util::Logger::info ()
+        << "[opcode: " << std::dec << op << "] [NAIVE MODE] "
         << "Ignoring assembly instruction: " << insAssembly << '\n';
   } else {
     edu::sharif::twinner::util::Logger::debug () << "\t--> " << OPCODE_StringShort (op)

@@ -65,6 +65,9 @@ KNOB < string > mainArgsReportingOutputFilePath (KNOB_MODE_WRITEONCE,
     "specify file path for saving main() arguments information"
     " (in -main and -endpoints modes");
 
+KNOB < BOOL > naive (KNOB_MODE_WRITEONCE, "pintool", "naive", "",
+    "if presents, just print info about instructions with no instrumentation");
+
 KNOB < BOOL > measure (KNOB_MODE_WRITEONCE, "pintool", "measure", "",
     "if presents, trivial instruction counting instrumentation will be used instead of normal behavior");
 
@@ -159,6 +162,11 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     edu::sharif::twinner::util::Logger::debug () << "Testing debug messages\n";
     edu::sharif::twinner::util::Logger::loquacious () << "Testing loquacious messages\n";
   }*/
+  const bool naiveMode = naive.Value ();
+  if (naiveMode) {
+    edu::sharif::twinner::util::Logger::info ()
+        << "Naive mode: just print info with no instrumentation.\n";
+  }
   justAnalyzeMainRoutine = main.Value ();
   if (justAnalyzeMainRoutine) {
     edu::sharif::twinner::util::Logger::info ()
@@ -209,7 +217,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     case NORMAL_MODE:
       im = new Instrumenter (in, traceFilePath, disassemblyFilePath,
                              justAnalyzeMainRoutine,
-                             start, end, measureMode);
+                             start, end, naiveMode, measureMode);
       break;
     case INITIAL_STATE_DETECTION_MODE:
       if (measureMode) {
@@ -217,6 +225,11 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
             << "TwinTool::parseArgumentsAndInitializeTool (): "
             "measure and initial-state-detection modes "
             "cannot be enabled simultaneously\n";
+        return false;
+      }
+      if (naiveMode) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "INITIAL_STATE_DETECTION_MODE conflicts with naive mode.\n";
         return false;
       }
       im = new Instrumenter (readSetOfAddressesFromBinaryStream (in),
@@ -235,7 +248,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
   } else {
     im = new Instrumenter (traceFilePath, disassemblyFilePath,
                            justAnalyzeMainRoutine,
-                           start, end);
+                           start, end, naiveMode);
   }
   if (justAnalyzeMainRoutine) { // this includes  {|| start != end} scenario
     im->setMainArgsReportingFilePath (mainArgsReportingFilePath);

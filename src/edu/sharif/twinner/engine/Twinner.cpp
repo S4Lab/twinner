@@ -191,6 +191,10 @@ void Twinner::setJustAnalyzeMainRoutine (bool main) {
   this->main = main;
 }
 
+void Twinner::setNaiveMode (bool naive) {
+  this->naive = naive;
+}
+
 void Twinner::setMeasureOverheads (bool measureOverheads) {
   this->overheads = measureOverheads;
 }
@@ -219,7 +223,7 @@ void Twinner::setMeasureOverheads (bool measureOverheads) {
  */
 bool Twinner::generateTwinBinary () {
   Executer ex (pin, twintool, input, arguments,
-               endpoints, main, overheads);
+               endpoints, main, naive, overheads);
   set < const edu::sharif::twinner::trace::exptoken::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;
