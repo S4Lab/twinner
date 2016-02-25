@@ -44,21 +44,22 @@ enum ArgumentsParsingStatus {
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &input, string &args, string &endpoints,
     string &twintool, string &pin, string &twin,
-    bool &justAnalyzeMainRoutine,
+    bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads);
 int run (string input, string args, string endpoints,
     string twintool, string pin, string twin,
-    bool main, bool naive, bool measureOverheads);
+    bool main, string stackOffset, bool naive, bool measureOverheads);
 int checkTraceFile (string traceFilePath, string memoryFilePath);
 
 int main (int argc, char *argv[]) {
   string input, args, endpoints, twintool, pin, twin;
   bool justAnalyzeMainRoutine = false;
+  string stackOffset;
   bool naive = false;
   bool measureOverheads = false;
   switch (parseArguments (argc, argv,
                           input, args, endpoints, twintool, pin, twin,
-                          justAnalyzeMainRoutine,
+                          justAnalyzeMainRoutine, stackOffset,
                           naive, measureOverheads)) {
   case CONTINUE_NORMALLY:
     // checking mandatory arguments...
@@ -74,7 +75,7 @@ int main (int argc, char *argv[]) {
     } else {
       // all files are OK...
       return run (input, args, endpoints, twintool, pin, twin,
-                  justAnalyzeMainRoutine, naive, measureOverheads);
+                  justAnalyzeMainRoutine, stackOffset, naive, measureOverheads);
     }
     return -2;
 
@@ -98,7 +99,7 @@ int main (int argc, char *argv[]) {
 
 int run (string input, string args, string endpoints,
     string twintool, string pin, string twin,
-    bool main, bool naive, bool measureOverheads) {
+    bool main, string stackOffset, bool naive, bool measureOverheads) {
   edu::sharif::twinner::util::Logger::info ()
       << "[verboseness level: "
       << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n"
@@ -117,6 +118,7 @@ int run (string input, string args, string endpoints,
   tw.setInputBinaryArguments (args);
   tw.setAnalysisEndpoints (endpoints);
   tw.setJustAnalyzeMainRoutine (main);
+  tw.setStackOffset (stackOffset);
   tw.setNaiveMode (naive);
   tw.setMeasureOverheads (measureOverheads);
 
@@ -150,7 +152,7 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &input, string &args, string &endpoints,
     string &twintool, string &pin, string &twin,
-    bool &justAnalyzeMainRoutine,
+    bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads) {
   char *progName = argv[0];
 
@@ -169,6 +171,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true, false},
     { 'o', "output", ArgParser::YES, "path/name of the generated twin binary", true, false},
     { 'm', "main", ArgParser::NO, "restrict analysis to after the main() function", false, false},
+    { 's', "stack-offset", ArgParser::YES, "stack offset for main() arguments", false, false},
     { 'M', "measure", ArgParser::NO, "run each trace twice and report on overheads of twintool", false, false},
     { 'c', "check", ArgParser::YES, "check validity of a trace file and its memory file"
       " (must be the last argument)", false, true},
@@ -236,6 +239,9 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       break;
     case 'm':
       justAnalyzeMainRoutine = true;
+      break;
+    case 's':
+      stackOffset = parser.argument (argind);
       break;
     case 'M':
       measureOverheads = true;

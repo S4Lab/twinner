@@ -65,6 +65,11 @@ KNOB < string > mainArgsReportingOutputFilePath (KNOB_MODE_WRITEONCE,
     "specify file path for saving main() arguments information"
     " (in -main and -endpoints modes");
 
+KNOB < int > stackOffset (KNOB_MODE_WRITEONCE,
+    "pintool", "stack-offset", "0",
+    "the stack offset (in terms of the number of arguments) for main() args"
+    " (in -main and -endpoints modes");
+
 KNOB < BOOL > naive (KNOB_MODE_WRITEONCE, "pintool", "naive", "",
     "if presents, just print info about instructions with no instrumentation");
 
@@ -204,6 +209,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     }
     justAnalyzeMainRoutine = true;
   }
+  const int stackOffsetValue = stackOffset.Value ();
   bool measureMode = measure.Value ();
   if (measureMode) {
     edu::sharif::twinner::util::Logger::info () << "Measure mode: "
@@ -216,7 +222,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     switch (mode) {
     case NORMAL_MODE:
       im = new Instrumenter (in, traceFilePath, disassemblyFilePath,
-                             justAnalyzeMainRoutine,
+                             justAnalyzeMainRoutine, stackOffsetValue,
                              start, end, naiveMode, measureMode);
       break;
     case INITIAL_STATE_DETECTION_MODE:
@@ -234,7 +240,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
       }
       im = new Instrumenter (readSetOfAddressesFromBinaryStream (in),
                              traceFilePath, disassemblyFilePath,
-                             justAnalyzeMainRoutine,
+                             justAnalyzeMainRoutine, stackOffsetValue,
                              start, end);
       break;
     default:
@@ -247,7 +253,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     in.close ();
   } else {
     im = new Instrumenter (traceFilePath, disassemblyFilePath,
-                           justAnalyzeMainRoutine,
+                           justAnalyzeMainRoutine, stackOffsetValue,
                            start, end, naiveMode);
   }
   if (justAnalyzeMainRoutine) { // this includes  {|| start != end} scenario

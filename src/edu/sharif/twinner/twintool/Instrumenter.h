@@ -160,6 +160,7 @@ private:
   bool isWithinInitialStateDetectionMode;
 
   bool disabled;
+  int stackOffset;
   bool naive;
   ADDRINT start;
   ADDRINT end;
@@ -167,16 +168,16 @@ private:
 public:
   Instrumenter (std::ifstream &symbolsFileInputStream,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
-      bool disabled,
+      bool disabled, int stackOffset,
       ADDRINT start, ADDRINT end, bool naive, bool measureMode);
   Instrumenter (
       const std::set < std::pair < ADDRINT, int > > &candidateAddresses,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
-      bool disabled,
+      bool disabled, int stackOffset,
       ADDRINT start, ADDRINT end);
   Instrumenter (const std::string &traceFilePath,
       const std::string &disassemblyFilePath,
-      bool disabled,
+      bool disabled, int stackOffset,
       ADDRINT start, ADDRINT end, bool naive);
   ~Instrumenter ();
 

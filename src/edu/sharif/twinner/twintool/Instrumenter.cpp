@@ -53,13 +53,14 @@ inline void read_memory_content_and_add_it_to_map (
 
 Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     const string &_traceFilePath, const std::string &_disassemblyFilePath,
-    bool _disabled,
+    bool _disabled, int _stackOffset,
     ADDRINT _start, ADDRINT _end, bool _naive, bool measureMode) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, symbolsFileInStream,
     _disabled, measureMode)),
     isWithinInitialStateDetectionMode (false),
     disabled (_disabled || _naive),
+    stackOffset (_stackOffset),
     naive (_naive),
     start (_start), end (_end),
     totalCountOfInstructions (0) {
@@ -69,24 +70,26 @@ Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
 Instrumenter::Instrumenter (
     const std::set < std::pair < ADDRINT, int > > &_candidateAddresses,
     const std::string &_traceFilePath, const std::string &_disassemblyFilePath,
-    bool _disabled, ADDRINT _start, ADDRINT _end) :
+    bool _disabled, int _stackOffset, ADDRINT _start, ADDRINT _end) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, _disabled)),
     candidateAddresses (_candidateAddresses),
     isWithinInitialStateDetectionMode (true),
     disabled (_disabled),
+    stackOffset (_stackOffset),
     start (_start), end (_end),
     totalCountOfInstructions (0) {
   initialize ();
 }
 
 Instrumenter::Instrumenter (const string &_traceFilePath,
-    const std::string &_disassemblyFilePath, bool _disabled,
+    const std::string &_disassemblyFilePath, bool _disabled, int _stackOffset,
     ADDRINT _start, ADDRINT _end, bool _naive) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, _disabled)),
     isWithinInitialStateDetectionMode (false),
     disabled (_disabled || _naive),
+    stackOffset (_stackOffset),
     naive (_naive),
     start (_start), end (_end),
     totalCountOfInstructions (0) {
@@ -1400,8 +1403,8 @@ void Instrumenter::instrumentImage (IMG img) {
                             IARG_END);
             INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
                             IARG_PTR, this,
-                            IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0,
-                            IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1,
+                            IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
+                            IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
                             IARG_END);
             ++state;
           } else if (addr == end) {
@@ -1434,8 +1437,8 @@ void Instrumenter::instrumentImage (IMG img) {
                       IARG_END);
       RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
                       IARG_PTR, this,
-                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0,
-                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1,
+                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
+                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
                       IARG_END);
       RTN_InsertCall (mainRoutine, IPOINT_AFTER, (AFUNPTR) terminateAnalysis,
                       IARG_PTR, this,
