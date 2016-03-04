@@ -664,6 +664,34 @@ void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfReg (
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfRegWithArg (
+    SuddenlyChangedRegWithArgAnalysisRoutine routine,
+    REG reg, ADDRINT argImmediateValue,
+    UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineBeforeChangeOfRegWithArg(INS: "
+      << insAssemblyStr << ")\n"
+      "\tregistering register to be tracked...";
+  trackedReg = reg;
+  arg = argImmediateValue;
+  hookWithArg = routine;
+  logger << "done\n";
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
     DoubleDestinationsAnalysisRoutine routine,
     REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
@@ -1738,6 +1766,48 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
             "ret instruction must pop either "
             << STACK_OPERATION_UNIT_SIZE << " or "
             << (2 * STACK_OPERATION_UNIT_SIZE) << " bytes\n";
+        abort ();
+      }
+      rsp->add (cv);
+      // TODO: call valueIsChanged from an expression proxy to address ESP, SP, and SPL
+
+    } else {
+      edu::sharif::twinner::util::Logger::warning ()
+          << "RSP is not incremented at all after RET instruction!\n";
+    }
+  }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
+void InstructionSymbolicExecuter::retWithArgAnalysisRoutine (
+    const CONTEXT *context, const ConcreteValue &rspRegVal, ADDRINT offset) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "retWithArgAnalysisRoutine(...)\n"
+      << "\tgetting rsp reg exp...";
+  edu::sharif::twinner::trace::Expression *rsp =
+#ifdef TARGET_IA32E
+      trace->tryToGetSymbolicExpressionByRegister (64, REG_RSP);
+#else
+      trace->tryToGetSymbolicExpressionByRegister (32, REG_ESP);
+#endif
+  if (rsp) { // If we are not tracking RSP yet, it's not required to adjust its value
+    const ConcreteValue &oldVal = rsp->getLastConcreteValue ();
+    if (oldVal < rspRegVal) {
+      // some items have been popped out from the stack by RET and so RSP is incremented
+      ConcreteValue *cv = rspRegVal.clone ();
+      (*cv) -= oldVal;
+      edu::sharif::twinner::util::Logger::loquacious ()
+          << "\tadjusting rsp, amount = " << *cv;
+      const bool normalRetInstruction =
+          ((*cv) == STACK_OPERATION_UNIT_SIZE + offset)
+          || ((*cv) == 2 * STACK_OPERATION_UNIT_SIZE + offset);
+      if (!normalRetInstruction) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "InstructionSymbolicExecuter::retWithArgAnalysisRoutine (...): "
+            "ret instruction must pop either "
+            << (STACK_OPERATION_UNIT_SIZE + offset) << " or "
+            << (2 * STACK_OPERATION_UNIT_SIZE + offset) << " bytes\n";
         abort ();
       }
       rsp->add (cv);
@@ -3346,6 +3416,20 @@ InstructionSymbolicExecuter::convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
   }
 }
 
+InstructionSymbolicExecuter::SuddenlyChangedRegWithArgAnalysisRoutine
+InstructionSymbolicExecuter::convertOpcodeToSuddenlyChangedRegWithArgAnalysisRoutine (
+    OPCODE op) const {
+  switch (op) {
+  case XED_ICLASS_RET_NEAR:
+    return &InstructionSymbolicExecuter::retWithArgAnalysisRoutine;
+  default:
+    edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
+        "Suddenly Changed Register (with arg): Unknown opcode: "
+        << OPCODE_StringShort (op) << '\n';
+    abort ();
+  }
+}
+
 InstructionSymbolicExecuter::OperandLessAnalysisRoutine
 InstructionSymbolicExecuter::convertOpcodeToOperandLessAnalysisRoutine (
     OPCODE op) const {
@@ -3729,6 +3813,16 @@ VOID analysisRoutineBeforeChangeOfReg (VOID *iseptr, UINT32 opcode,
   ise->analysisRoutineBeforeChangeOfReg
       (ise->convertOpcodeToSuddenlyChangedRegAnalysisRoutine ((OPCODE) opcode),
        (REG) reg,
+       insAssembly);
+}
+
+VOID analysisRoutineBeforeChangeOfRegWithArg (VOID *iseptr, UINT32 opcode,
+    UINT32 reg, ADDRINT argImmediateValue,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineBeforeChangeOfRegWithArg
+      (ise->convertOpcodeToSuddenlyChangedRegWithArgAnalysisRoutine ((OPCODE) opcode),
+       (REG) reg, argImmediateValue,
        insAssembly);
 }
 

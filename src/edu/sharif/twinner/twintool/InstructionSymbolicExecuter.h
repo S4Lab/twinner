@@ -72,6 +72,7 @@ private:
   typedef Hook SuddenlyChangedRegAnalysisRoutine;
   typedef void (InstructionSymbolicExecuter::*HookWithArg) (
       const CONTEXT *context, const ConcreteValue &value, ADDRINT arg);
+  typedef HookWithArg SuddenlyChangedRegWithArgAnalysisRoutine;
   typedef void (InstructionSymbolicExecuter::*OperandLessAnalysisRoutine) (
       const CONTEXT *context);
   typedef void (InstructionSymbolicExecuter::*SingleOperandAnalysisRoutine) (
@@ -199,6 +200,10 @@ public:
       UINT32 insAssembly);
   void analysisRoutineBeforeChangeOfReg (SuddenlyChangedRegAnalysisRoutine routine,
       REG reg,
+      UINT32 insAssembly);
+  void analysisRoutineBeforeChangeOfRegWithArg (
+      SuddenlyChangedRegWithArgAnalysisRoutine routine,
+      REG reg, ADDRINT argImmediateValue,
       UINT32 insAssembly);
   void analysisRoutineTwoDstRegOneSrcReg (DoubleDestinationsAnalysisRoutine routine,
       REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
@@ -473,6 +478,13 @@ private:
    * symbolic value with its concrete value.
    */
   void retAnalysisRoutine (const CONTEXT *context, const ConcreteValue &rspRegVal);
+
+  /**
+   * RET arg instruction is executed and RSP is changed.
+   * This method will synchronize its symbolic value with its concrete value.
+   */
+  void retWithArgAnalysisRoutine (const CONTEXT *context,
+      const ConcreteValue &rspRegVal, ADDRINT arg);
 
   /**
    * JMP instruction performs an unconditional jump.
@@ -813,6 +825,8 @@ public:
       OPCODE op) const;
   SuddenlyChangedRegAnalysisRoutine convertOpcodeToSuddenlyChangedRegAnalysisRoutine (
       OPCODE op) const;
+  SuddenlyChangedRegWithArgAnalysisRoutine
+  convertOpcodeToSuddenlyChangedRegWithArgAnalysisRoutine (OPCODE op) const;
   OperandLessAnalysisRoutine convertOpcodeToOperandLessAnalysisRoutine (
       OPCODE op) const;
   SingleOperandAnalysisRoutine convertOpcodeToSingleOperandAnalysisRoutine (
@@ -932,6 +946,9 @@ VOID analysisRoutineDstRegSrcAdg (VOID *iseptr, UINT32 opcode,
     UINT32 insAssembly);
 VOID analysisRoutineBeforeChangeOfReg (VOID *iseptr, UINT32 opcode,
     UINT32 reg,
+    UINT32 insAssembly);
+VOID analysisRoutineBeforeChangeOfRegWithArg (VOID *iseptr, UINT32 opcode,
+    UINT32 reg, ADDRINT argImmediateValue,
     UINT32 insAssembly);
 VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstLeftReg, ADDRINT dstLeftRegVal,

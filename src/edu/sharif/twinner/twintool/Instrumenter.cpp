@@ -373,8 +373,11 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
       return JMP_CC_INS_MODELS;
     case XED_CATEGORY_CMOV:
       return CMOV_INS_MODELS;
-    case XED_CATEGORY_CALL:
     case XED_CATEGORY_RET:
+      if (INS_OperandIsImmediate (ins, 0)) {
+        return RET_INS_WITH_ARG_MODEL;
+      }
+    case XED_CATEGORY_CALL:
     case XED_CATEGORY_UNCOND_BR:
       return DST_RSP_SRC_CALL;
     case XED_CATEGORY_STRINGOP:
@@ -979,6 +982,20 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
         IARG_UINT32, REG_ESP,
 #endif
         IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case RET_INS_WITH_ARG_MODEL:
+  {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineBeforeChangeOfRegWithArg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+#ifdef TARGET_IA32E
+        IARG_UINT32, REG_RSP,
+#else
+        IARG_UINT32, REG_ESP,
+#endif
+        IARG_ADDRINT, ADDRINT (INS_OperandImmediate (ins, 0)),
+                    IARG_UINT32, insAssembly,
                     IARG_END);
     break;
   }
