@@ -1029,10 +1029,17 @@ void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
   if (trackedReg != REG_INVALID_) {
     ConcreteValue *value =
         edu::sharif::twinner::util::readRegisterContent (context, trackedReg);
-    Hook hfunc = hook;
-    trackedReg = REG_INVALID_;
-    hook = 0;
-    (this->*hfunc) (context, *value);
+    if (hook) {
+      Hook hfunc = hook;
+      trackedReg = REG_INVALID_;
+      hook = 0;
+      (this->*hfunc) (context, *value);
+    } else {
+      HookWithArg hfunc = hookWithArg;
+      trackedReg = REG_INVALID_;
+      hookWithArg = 0;
+      (this->*hfunc) (context, *value, arg);
+    }
     delete value;
 
   } else if (operandSize > 0) {

@@ -70,6 +70,8 @@ private:
   typedef void (InstructionSymbolicExecuter::*Hook) (const CONTEXT *context,
       const ConcreteValue &value);
   typedef Hook SuddenlyChangedRegAnalysisRoutine;
+  typedef void (InstructionSymbolicExecuter::*HookWithArg) (
+      const CONTEXT *context, const ConcreteValue &value, ADDRINT arg);
   typedef void (InstructionSymbolicExecuter::*OperandLessAnalysisRoutine) (
       const CONTEXT *context);
   typedef void (InstructionSymbolicExecuter::*SingleOperandAnalysisRoutine) (
@@ -84,6 +86,9 @@ private:
   REG trackedReg;
   int operandSize;
   Hook hook;
+
+  ADDRINT arg;
+  HookWithArg hookWithArg;
 
   UINT32 disassembledInstruction;
 
