@@ -255,6 +255,18 @@ const char *RegisterEmergedSymbol::getRegisterName () const {
   case REG_XMM15:
     return "xmm15";
 #endif
+  case REG_SEG_CS:
+    return "cs"; // code segment
+  case REG_SEG_SS:
+    return "ss"; // stack segment
+  case REG_SEG_DS:
+    return "ds"; // data segment
+  case REG_SEG_ES:
+    return "es"; // data segment
+  case REG_SEG_FS:
+    return "fs"; // data segment
+  case REG_SEG_GS:
+    return "gs"; // data segment
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Register emerged symbols must correspond to "
@@ -357,6 +369,18 @@ REG RegisterEmergedSymbol::getRegisterFromName (const std::string &name) {
   } else if (name == "xmm15") {
     return REG_XMM15;
 #endif
+  } else if (name == "cs") {
+    return REG_SEG_CS;
+  } else if (name == "ss") {
+    return REG_SEG_SS;
+  } else if (name == "ds") {
+    return REG_SEG_DS;
+  } else if (name == "es") {
+    return REG_SEG_ES;
+  } else if (name == "fs") {
+    return REG_SEG_FS;
+  } else if (name == "gs") {
+    return REG_SEG_GS;
   } else {
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown Register Name: " << name << '\n';
