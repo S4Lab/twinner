@@ -1199,6 +1199,24 @@ void InstructionSymbolicExecuter::xchgAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::xaddAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const MutableExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious () << "xaddAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  edu::sharif::twinner::trace::Expression *srcexp = getExpression (src, trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp = getExpression (dst, trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting src exp...";
+  setExpression (src, trace, dstexp);
+  srcexp->add (dstexp);
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  setExpression (dst, trace, srcexp);
+  delete srcexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::movAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
@@ -3270,6 +3288,8 @@ InstructionSymbolicExecuter::convertOpcodeToMutableSourceAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_XCHG:
     return &InstructionSymbolicExecuter::xchgAnalysisRoutine;
+  case XED_ICLASS_XADD:
+    return &InstructionSymbolicExecuter::xaddAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Having Mutable Source operand: Unknown opcode: "

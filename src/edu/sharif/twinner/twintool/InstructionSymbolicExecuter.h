@@ -304,6 +304,13 @@ private:
       const MutableExpressionValueProxy &src);
 
   /**
+   * XADD instruction exchanges values of dst (r/m) and src (r) and
+   * loads sum of two operands in the dst atomically
+   */
+  void xaddAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const MutableExpressionValueProxy &src);
+
+  /**
    * MOV has 5 models
    * r <- r/m/i
    * m <- r/i
