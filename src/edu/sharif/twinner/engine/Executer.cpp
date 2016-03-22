@@ -18,6 +18,8 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <unistd.h>
+
 #include "edu/sharif/twinner/trace/MarInfo.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Trace.h"
@@ -319,6 +321,7 @@ edu::sharif::twinner::trace::MarInfo *Executer::readMarInfo () const {
 edu::sharif::twinner::trace::Trace *
 Executer::executeSystemCommand (std::string command) {
   signaled = false;
+  unlinkCommunicationFiles ();
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
   int ret = system (command.c_str ());
@@ -341,6 +344,7 @@ Executer::executeSystemCommand (std::string command) {
 edu::sharif::twinner::trace::Trace *
 Executer::executeSystemCommand (std::string command, Measurement &measurement) {
   signaled = false;
+  unlinkCommunicationFiles ();
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
   edu::sharif::twinner::trace::Trace *trace = 0;
@@ -390,6 +394,7 @@ void Executer::changeArguments () {
 
 map < std::pair < ADDRINT, int >, UINT64 >
 Executer::executeSingleTraceInInitialStateDetectionMode () const {
+  unlinkCommunicationFiles ();
   std::string command = baseCommand + " " + inputArguments;
   if (overheads) {
     command.erase (command.find (OVERHEAD_MEASUREMENT_OPTION),
@@ -404,6 +409,22 @@ Executer::executeSingleTraceInInitialStateDetectionMode () const {
       << "The system(...) call returns code: " << ret << '\n';
   return edu::sharif::twinner::trace::Trace::loadAddressToValueMapFromFile
       (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
+}
+
+void Executer::unlinkCommunicationFiles () const {
+  const char *twintoolOutputFiles[] = {
+    EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
+    DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE,
+    MAIN_ARGS_COMMUNICATION_TEMP_FILE,
+    0
+  };
+  for (const char **path = twintoolOutputFiles; *path; ++path) {
+    if (access (*path, F_OK) == 0 && unlink (*path) == -1) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "Error: Cannot delete the " << (*path) << " file.\n";
+      abort ();
+    }
+  }
 }
 
 }
