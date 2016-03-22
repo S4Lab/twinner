@@ -6,7 +6,8 @@ INCLUDEPATH := -I ../src/res/
 
 TARGETS := multi-path-with-printf-leafs-test \
 	multi-path-with-printf-leafs-test.twin \
-	mpwpl-manual-virt-obf
+	mpwpl-manual-virt-obf \
+	mpwpl-manual-virt-obf.twin
 
 all: $(TARGETS:=.cfg.png)
 
