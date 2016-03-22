@@ -26,7 +26,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace engine {
-namespace search {
+namespace etg {
 
 static int lastDebugId = 0;
 

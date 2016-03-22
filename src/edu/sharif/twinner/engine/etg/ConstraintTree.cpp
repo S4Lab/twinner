@@ -29,7 +29,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace engine {
-namespace search {
+namespace etg {
 
 ConstraintTree::ConstraintTree () :
     root (new TreeNode ()), iterator (root) {

@@ -24,12 +24,11 @@ class Trace;
 class Constraint;
 }
 namespace engine {
-namespace search {
+namespace etg {
 
 class TreeNode;
 
 class ConstraintTree {
-
 private:
   TreeNode *root;
   TreeNode *iterator;
@@ -51,4 +50,4 @@ public:
 }
 }
 
-#endif	/* ConstraintTree.h*/
+#endif /* ConstraintTree.h*/

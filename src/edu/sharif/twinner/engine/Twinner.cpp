@@ -32,8 +32,9 @@
 #include "edu/sharif/twinner/util/iterationtools.h"
 
 #include "edu/sharif/twinner/engine/smt/SmtSolver.h"
-#include "smt/Cvc4SmtSolver.h"
-#include "search/ConstraintTree.h"
+#include "edu/sharif/twinner/engine/smt/Cvc4SmtSolver.h"
+
+#include "edu/sharif/twinner/engine/etg/ConstraintTree.h"
 
 using namespace std;
 
@@ -153,7 +154,7 @@ void code_memory_changes (IndentedStringStream &out,
     const ADDRINT &memoryEa, edu::sharif::twinner::trace::Expression * const &exp);
 
 Twinner::Twinner () :
-    ctree (new edu::sharif::twinner::engine::search::ConstraintTree ()) {
+    ctree (new edu::sharif::twinner::engine::etg::ConstraintTree ()) {
   edu::sharif::twinner::engine::smt::SmtSolver::init
       (new edu::sharif::twinner::engine::smt::Cvc4SmtSolver ());
 }

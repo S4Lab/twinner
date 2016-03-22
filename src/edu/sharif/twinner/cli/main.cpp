@@ -21,7 +21,7 @@
 
 #include "edu/sharif/twinner/engine/Twinner.h"
 #include "edu/sharif/twinner/trace/Trace.h"
-#include "edu/sharif/twinner/engine/search/ConstraintTree.h"
+#include "edu/sharif/twinner/engine/etg/ConstraintTree.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 
@@ -144,7 +144,7 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
   }
   trace->printCompleteState (edu::sharif::twinner::util::Logger::info ());
 
-  edu::sharif::twinner::engine::search::ConstraintTree ct;
+  edu::sharif::twinner::engine::etg::ConstraintTree ct;
   ct.addConstraints (trace);
   return 0;
 }

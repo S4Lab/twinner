@@ -28,7 +28,7 @@ namespace trace {
 class Constraint;
 }
 namespace engine {
-namespace search {
+namespace etg {
 
 class TreeNode {
 private:
@@ -92,4 +92,4 @@ public:
 }
 }
 
-#endif	/* TreeNode.h*/
+#endif /* TreeNode.h*/
