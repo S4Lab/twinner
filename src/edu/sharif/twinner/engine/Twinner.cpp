@@ -148,13 +148,10 @@ bool Twinner::generateTwinBinary () {
     // steps 1, 2, and 3
     ex.setSymbolsValues (symbols);
     edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTraceInNormalMode ();
-    if (trace == 0) {
-      return false;
+    if (trace == 0 || ex.isLastExecutionSignaled ()) {
+      // TODO: encode the abortion scenario in the twincode
+      break;
     }
-    if (ex.isLastExecutionSignaled ()) {
-      abort ();
-    }
-
     edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
     symbols.clear ();
     if (main) {
