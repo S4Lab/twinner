@@ -26,6 +26,7 @@ class MemoryManager;
 namespace trace {
 
 class Constraint;
+class ExecutionTraceSegment;
 }
 namespace engine {
 namespace etg {
@@ -39,6 +40,8 @@ private:
   std::list < TreeNode * > children;
   const edu::sharif::twinner::trace::Constraint *constraint;
   const edu::sharif::twinner::util::MemoryManager *memoryManager;
+
+  const edu::sharif::twinner::trace::ExecutionTraceSegment *segment;
 
 public:
   TreeNode (TreeNode *parent = 0, const edu::sharif::twinner::trace::Constraint *c = 0,
@@ -84,6 +87,13 @@ public:
 
   void dumpConstraints (edu::sharif::twinner::util::Logger &logger) const;
   void dumpSubTree (edu::sharif::twinner::util::Logger &logger) const;
+
+  bool hasAnyChild () const;
+  void registerCorrespondingSegment (
+      const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
+  const edu::sharif::twinner::trace::ExecutionTraceSegment *getSegment () const;
+  const std::list < TreeNode * > &getChildren () const;
+  const edu::sharif::twinner::trace::Constraint *getConstraint () const;
 };
 
 }

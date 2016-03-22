@@ -60,6 +60,7 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
         depth++;
       }
     }
+    node->registerCorrespondingSegment (segment);
   }
   iterator = root;
 }
@@ -83,6 +84,10 @@ void ConstraintTree::dumpTree () const {
       edu::sharif::twinner::util::Logger::debug ();
   root->dumpConstraints (logger);
   root->dumpSubTree (logger);
+}
+
+const TreeNode *ConstraintTree::getRoot () const {
+  return root;
 }
 
 }

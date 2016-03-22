@@ -42,6 +42,8 @@ public:
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
 
   void dumpTree () const;
+
+  const TreeNode *getRoot () const;
 };
 
 }
