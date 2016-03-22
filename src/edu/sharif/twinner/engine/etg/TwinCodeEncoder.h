@@ -94,7 +94,8 @@ private:
       int depth, int index);
 
   void encodeConstraintAndChildren (ConstTreeNode *node, int depth, int index);
-  void encodeConstraint (ConstConstraintPtr constraint, int depth);
+  void encodeConstraint (std::list < ConstConstraintPtr > constraints,
+      int depth);
   void encodeTransformations (const TraceSegment *segment,
       int depth, int index);
   void encodeChildren (ConstTreeNode *node, int depth, int index);

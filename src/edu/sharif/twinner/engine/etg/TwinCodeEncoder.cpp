@@ -148,7 +148,13 @@ void TwinCodeEncoder::declareMemorySymbols (
 
 void TwinCodeEncoder::encodeConstraintAndChildren (ConstTreeNode *node,
     int depth, int index) {
-  encodeConstraint (node->getConstraint (), depth);
+  std::list < ConstConstraintPtr > constraints;
+  while (!(node->getSegment ()) && node->getChildren ().size () == 1) {
+    constraints.push_back (node->getConstraint ());
+    node = node->getChildren ().front ();
+  }
+  constraints.push_back (node->getConstraint ());
+  encodeConstraint (constraints, depth);
   const TraceSegment *segment = node->getSegment ();
   if (segment) {
     encodeTransformations (segment, depth + 1, index++);
@@ -162,12 +168,12 @@ void TwinCodeEncoder::encodeConstraintAndChildren (ConstTreeNode *node,
   out.indented () << '}';
 }
 
-void TwinCodeEncoder::encodeConstraint (ConstConstraintPtr constraint,
-    int depth) {
+void TwinCodeEncoder::encodeConstraint (
+    std::list < ConstConstraintPtr > constraints, int depth) {
   bool ok;
   std::list < ConstConstraintPtr > simplifiedConstraints =
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
-      ->simplifyConstraint (ok, constraint);
+      ->simplifyConstraints (ok, constraints);
   if (!ok) {
     edu::sharif::twinner::util::Logger::error ()
         << "TwinCodeEncoder::encodeConstraint (...):"
@@ -259,7 +265,6 @@ void TwinCodeEncoder::encodeTransformations (const TraceSegment *segment,
     int depth, int index) {
   out.setDepth (depth);
   out.indented () << "/*Memory Changes*/\n";
-  const std::map < ADDRINT, Expression * > &m = segment->getMemoryAddressTo64BitsExpression ();
   edu::sharif::twinner::util::foreach
       (segment->getMemoryAddressTo64BitsExpression (),
        &TwinCodeEncoder::codeMemoryChanges, this);
