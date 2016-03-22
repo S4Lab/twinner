@@ -35,6 +35,7 @@
 #include "edu/sharif/twinner/engine/smt/Cvc4SmtSolver.h"
 
 #include "edu/sharif/twinner/engine/etg/ConstraintTree.h"
+#include "edu/sharif/twinner/engine/etg/AddressAggregator.h"
 
 using namespace std;
 
@@ -59,25 +60,6 @@ struct TwinCodeGenerationAux {
 void code_trace_into_twin_code (std::stringstream &out,
     const edu::sharif::twinner::trace::Trace * const &trace,
     int traceIndex, std::stringstream &conout);
-std::map < int, std::set < std::pair < ADDRINT, int > > >
-gather_symbols_addresses_of_trace (
-    const edu::sharif::twinner::trace::Trace *trace);
-void extract_memory_addresses_of_trace_segment (
-    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
-    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment);
-void extract_memory_addresses_of_constraint (
-    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
-    edu::sharif::twinner::trace::Constraint * const &constraint);
-template < typename Key >
-void extract_memory_addresses_of_expression (
-    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
-    const Key &key, edu::sharif::twinner::trace::Expression * const &exp);
-void extract_memory_addresses_of_expression (
-    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
-    const edu::sharif::twinner::trace::Expression *exp);
-void check_symbol_type_and_add_it_to_set (
-    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
-    edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token);
 
 void code_segment_into_twin_code (
     const std::set < std::pair < ADDRINT, int > > &addresses,
@@ -119,8 +101,9 @@ template < typename Key, typename Value >
 void add_value_to_set (std::set < Value > &set,
     const Key &key, const Value &value);
 
-void remove_mismatches_from_map (
-    std::map < std::pair < ADDRINT, int >, UINT64 > &initialValues,
+void find_intersection (
+    std::pair< std::map < std::pair < ADDRINT, int >, UINT64 > &,
+    std::map < std::pair < ADDRINT, int >, UINT64 > &> &sets,
     const std::pair < ADDRINT, int > &address, const UINT64 &content);
 void code_initial_value_into_twin_code (std::stringstream &out,
     const std::pair < ADDRINT, int > &address, const UINT64 &content);
@@ -253,42 +236,46 @@ Twinner::obtainInitializedMemoryValues (Executer &ex) const {
       << "Gathering initial memory values...\n";
   // step 4: `addresses` field holds candidate addresses
   std::set < std::pair < ADDRINT, int > > addresses;
-  for (std::list < const edu::sharif::twinner::trace::Trace * >::const_iterator it =
-      traces.begin (); it != traces.end (); ++it) {
-    const edu::sharif::twinner::trace::Trace *trace = *it;
-    const std::map < int, std::set < std::pair < ADDRINT, int > > > addr =
-        gather_symbols_addresses_of_trace (trace);
-    for (std::map < int, std::set < std::pair < ADDRINT, int > > >
-        ::const_iterator it2 = addr.begin (); it2 != addr.end (); ++it2) {
-      const std::set < std::pair < ADDRINT, int > > &a = it2->second;
-      addresses.insert (a.begin (), a.end ());
-    }
+  std::map < int, std::set < std::pair < ADDRINT, int > > > addressToSize;
+  edu::sharif::twinner::engine::etg::AddressAggregator
+      (traces, addressToSize).gatherSymbolsAddressToSize ();
+  for (std::map < int, std::set < std::pair < ADDRINT, int > > >
+      ::const_iterator it = addressToSize.begin ();
+      it != addressToSize.end (); ++it) {
+    const std::set < std::pair < ADDRINT, int > > &a = it->second;
+    addresses.insert (a.begin (), a.end ());
   }
   ex.setCandidateAddresses (addresses);
   // step 5
-  std::map < std::pair < ADDRINT, int >, UINT64 > initialValues1 =
-      ex.executeSingleTraceInInitialStateDetectionMode ();
+  typedef std::map < std::pair < ADDRINT, int >, UINT64 > MemoryMap;
+  MemoryMap iv1 = ex.executeSingleTraceInInitialStateDetectionMode ();
   // step 6
   ex.changeArguments ();
-  std::map < std::pair < ADDRINT, int >, UINT64 > initialValues2 =
-      ex.executeSingleTraceInInitialStateDetectionMode ();
+  MemoryMap iv2 = ex.executeSingleTraceInInitialStateDetectionMode ();
   // step 7
-  edu::sharif::twinner::util::foreach (initialValues2,
-                                       &remove_mismatches_from_map, initialValues1);
-  return initialValues1;
+  MemoryMap intersection;
+  std::pair<MemoryMap &, MemoryMap &> sets (iv2, intersection);
+  edu::sharif::twinner::util::foreach (iv1, &find_intersection, sets);
+  return intersection;
 }
 
-void remove_mismatches_from_map (
-    std::map < std::pair < ADDRINT, int >, UINT64 > &initialValues,
+void find_intersection (
+    std::pair< std::map < std::pair < ADDRINT, int >, UINT64 > &,
+    std::map < std::pair < ADDRINT, int >, UINT64 > &> &sets,
     const std::pair < ADDRINT, int > &address, const UINT64 &content) {
-  std::map < std::pair < ADDRINT, int >, UINT64 >::iterator it =
-      initialValues.find (address);
+  typedef std::map < std::pair < ADDRINT, int >, UINT64 > MemoryMap;
+  const MemoryMap &iv2 = sets.first;
+  MemoryMap &intersection = sets.second;
+  MemoryMap::const_iterator it = iv2.find (address);
+  if (it == iv2.end ()) {
+    return;
+  }
   edu::sharif::twinner::util::Logger::loquacious ()
       << "at address: 0x" << std::hex << address.first
-      << "\tfirst map: 0x" << it->second
-      << "\tsecond map: 0x" << content << "\n";
-  if (it->second != content) {
-    initialValues.erase (it);
+      << "\tfirst map: 0x" << content
+      << "\tsecond map: 0x" << it->second << "\n";
+  if (it->second == content) {
+    intersection.insert (*it);
   }
 }
 
@@ -457,64 +444,6 @@ void code_trace_into_twin_code (std::stringstream &out,
     out << "}\n";
   }
   out << "\t}\n";
-}
-
-std::map < int, std::set < std::pair < ADDRINT, int > > >
-gather_symbols_addresses_of_trace (
-    const edu::sharif::twinner::trace::Trace *trace) {
-  std::map < int, std::set < std::pair < ADDRINT, int > > > addr;
-  edu::sharif::twinner::util::foreach (trace->getTraceSegments (),
-                                       &extract_memory_addresses_of_trace_segment,
-                                       addr);
-  return addr;
-}
-
-void extract_memory_addresses_of_trace_segment (
-    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
-    edu::sharif::twinner::trace::ExecutionTraceSegment * const &segment) {
-  edu::sharif::twinner::util::foreach (segment->getMemoryAddressTo64BitsExpression (),
-                                       &extract_memory_addresses_of_expression,
-                                       addr);
-  edu::sharif::twinner::util::foreach (segment->getRegisterToExpression (),
-                                       &extract_memory_addresses_of_expression,
-                                       addr);
-  edu::sharif::twinner::util::foreach (segment->getPathConstraints (),
-                                       &extract_memory_addresses_of_constraint,
-                                       addr);
-}
-
-void extract_memory_addresses_of_constraint (
-    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
-    edu::sharif::twinner::trace::Constraint * const &constraint) {
-  extract_memory_addresses_of_expression (addr, constraint->getMainExpression ());
-  if (constraint->getAuxExpression ()) {
-    extract_memory_addresses_of_expression (addr, constraint->getAuxExpression ());
-  }
-}
-
-template < typename Key >
-void extract_memory_addresses_of_expression (
-    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
-    const Key &key, edu::sharif::twinner::trace::Expression * const &exp) {
-  extract_memory_addresses_of_expression (addr, exp);
-}
-
-void extract_memory_addresses_of_expression (
-    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
-    const edu::sharif::twinner::trace::Expression *exp) {
-  edu::sharif::twinner::util::foreach (exp->getStack (),
-                                       &check_symbol_type_and_add_it_to_set, addr);
-}
-
-void check_symbol_type_and_add_it_to_set (
-    std::map < int, std::set < std::pair < ADDRINT, int > > > &addr,
-    edu::sharif::twinner::trace::exptoken::ExpressionToken * const &token) {
-  const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *symbol =
-      dynamic_cast<edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *> (token);
-  if (symbol) {
-    addr[symbol->getGenerationIndex ()].insert
-        (make_pair (symbol->getAddress (), symbol->getValue ().getSize ()));
-  }
 }
 
 void code_segment_into_twin_code (

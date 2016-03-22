@@ -1310,10 +1310,10 @@ void read_memory_content_and_add_it_to_map (
   UINT64 value;
   if (!edu::sharif::twinner::util::readMemoryContent
       (value, symbolAddress, symbolSize / 8)) {
-    edu::sharif::twinner::util::Logger::error ()
+    edu::sharif::twinner::util::Logger::warning ()
         << "read_memory_content_and_add_it_to_map (...) function:"
         " error reading memory value\n";
-    abort ();
+    return;
   }
   map.insert (make_pair (make_pair (symbolAddress, symbolSize), value));
 }
@@ -1328,7 +1328,8 @@ void Instrumenter::aboutToExit (INT32 code) {
     logger << "Done.\n";
     logger << "Saving MarInfo...";
     std::ofstream out;
-    out.open (marFilePath, ios_base::out | ios_base::trunc | ios_base::binary);
+    out.open (marFilePath.c_str (),
+              ios_base::out | ios_base::trunc | ios_base::binary);
     if (!out.is_open ()) {
       edu::sharif::twinner::util::Logger::error ()
           << "Instrumenter::aboutToExit (path=" << marFilePath << "): "
