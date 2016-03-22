@@ -55,21 +55,6 @@ struct TwinCodeGenerationAux {
   unsigned int index;
 };
 
-class IndentedStringStream : public std::stringstream {
-private:
-  const std::string indentation;
-
-public:
-
-  IndentedStringStream (const std::string &_indentation) :
-      indentation (_indentation) {
-  }
-
-  IndentedStringStream &indented () {
-    (*this) << (indentation);
-    return *this;
-  }
-};
 
 void code_trace_into_twin_code (std::stringstream &out,
     const edu::sharif::twinner::trace::Trace * const &trace,

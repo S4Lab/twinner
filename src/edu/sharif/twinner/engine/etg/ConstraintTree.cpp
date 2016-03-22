@@ -47,8 +47,9 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
       trace->getTraceSegments ();
   for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
       ::const_reverse_iterator it = segments.rbegin (); it != segments.rend (); ++it) {
+    const edu::sharif::twinner::trace::ExecutionTraceSegment *segment = *it;
     const std::list < edu::sharif::twinner::trace::Constraint * > &constraints =
-        (*it)->getPathConstraints ();
+        segment->getPathConstraints ();
     for (std::list < edu::sharif::twinner::trace::Constraint * >
         ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
       const edu::sharif::twinner::trace::Constraint *constraint = *it2;
