@@ -147,13 +147,19 @@ void TwinCodeEncoder::declareMemorySymbols (
 }
 
 void TwinCodeEncoder::encodeConstraintAndChildren (ConstTreeNode *node,
-    int depth, int index) {
+    int depth, int index, bool bypassConstraint) {
   std::list < ConstConstraintPtr > constraints;
   while (!(node->getSegment ()) && node->getChildren ().size () == 1) {
-    constraints.push_back (node->getConstraint ());
+    if (bypassConstraint) {
+      bypassConstraint = false;
+    } else {
+      constraints.push_back (node->getConstraint ());
+    }
     node = node->getChildren ().front ();
   }
-  constraints.push_back (node->getConstraint ());
+  if (!bypassConstraint) {
+    constraints.push_back (node->getConstraint ());
+  }
   encodeConstraint (constraints, depth);
   const TraceSegment *segment = node->getSegment ();
   if (segment) {
@@ -339,18 +345,53 @@ void TwinCodeEncoder::codeRegisterChanges (const TraceSegment *segment,
 void TwinCodeEncoder::encodeChildren (ConstTreeNode *node,
     int depth, int index) {
   const std::list < TreeNode * > &children = node->getChildren ();
-  bool first = true;
-  for (std::list < TreeNode * >::const_iterator it = children.begin ();
-      it != children.end (); ++it) {
-    ConstTreeNode *child = *it;
-    if (first) {
-      first = false;
-    } else {
-      out << " else ";
+  switch (children.size ()) {
+  case 1:
+    encodeConstraintAndChildren (children.front (), depth, index);
+    break;
+  case 2:
+  {
+    ConstConstraintPtr c1not =
+        children.front ()->getConstraint ()->instantiateNegatedConstraint ();
+    edu::sharif::twinner::engine::smt::SmtSolver *solver =
+        edu::sharif::twinner::engine::smt::SmtSolver::getInstance ();
+    solver->clearState ();
+    solver->assertConstraint (c1not);
+    const bool valid =
+        solver->checkValidity (children.back ()->getConstraint ());
+    solver->clearState ();
+    delete c1not;
+    if (!valid) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "TwinCodeEncoder::encodeChildren (...): Assertion failed.\n";
+      abort ();
     }
-    encodeConstraintAndChildren (child, depth, index);
+    encodeConstraintAndChildren (children.front (), depth, index);
+    out << " else ";
+    encodeConstraintAndChildren (children.back (), depth, index, true);
+    break;
+  }
+  default:
+    edu::sharif::twinner::util::Logger::error ()
+        << "TwinCodeEncoder::encodeChildren (...):"
+        " There are more than 2 children. Assertion failed.\n";
+    abort ();
   }
   out << '\n';
+  /*
+    bool first = true;
+    for (std::list < TreeNode * >::const_iterator it = children.begin ();
+        it != children.end (); ++it) {
+      ConstTreeNode *child = *it;
+      if (first) {
+        first = false;
+      } else {
+        out << " else ";
+      }
+      encodeConstraintAndChildren (child, depth, index);
+    }
+    out << '\n';
+   */
 }
 
 }

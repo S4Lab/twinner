@@ -93,7 +93,8 @@ private:
   void declareMemorySymbols (const std::set < AddrToSize > &addrToSize,
       int depth, int index);
 
-  void encodeConstraintAndChildren (ConstTreeNode *node, int depth, int index);
+  void encodeConstraintAndChildren (ConstTreeNode *node, int depth, int index,
+      bool bypassConstraint = false);
   void encodeConstraint (std::list < ConstConstraintPtr > constraints,
       int depth);
   void encodeTransformations (const TraceSegment *segment,
