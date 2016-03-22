@@ -4,7 +4,7 @@
  * Copyright © 2013-2016 Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -24,8 +24,12 @@ namespace util {
 
 template <typename Key, typename Value, typename Aux = void * >
 class ForEach {
-
 public:
+
+  template <typename Clazz> struct MemberVisitor {
+    typedef void (Clazz::*ItemVisitor) (const Value &item);
+    typedef void (Clazz::*PairVisitor) (const Key &key, const Value &value);
+  };
   typedef void (*ItemVisitor) (const Value &item);
   typedef void (*ItemVisitorWithAux) (Aux &aux, const Value &item);
   typedef void (*PairVisitor) (const Key &key, const Value &value);
@@ -39,6 +43,16 @@ public:
     for (typename ListType::const_iterator it = list.begin (); it != list.end (); ++it) {
       const Value &item = *it;
       visitor (item);
+    }
+  }
+
+  template <typename Clazz>
+  static inline void iterate (const ListType &list,
+      typename MemberVisitor<Clazz>::ItemVisitor visitor, Clazz *obj) {
+    for (typename ListType::const_iterator it = list.begin ();
+        it != list.end (); ++it) {
+      const Value &item = *it;
+      (obj->*visitor) (item);
     }
   }
 
@@ -69,6 +83,17 @@ public:
       const Key &key = it->first;
       const Value &value = it->second;
       visitor (key, value);
+    }
+  }
+
+  template <typename Clazz>
+  static inline void iterate (const MapType &map,
+      typename MemberVisitor<Clazz>::PairVisitor visitor, Clazz *obj) {
+    for (typename MapType::const_iterator it = map.begin ();
+        it != map.end (); ++it) {
+      const Key &key = it->first;
+      const Value &value = it->second;
+      (obj->*visitor) (key, value);
     }
   }
 
@@ -117,11 +142,27 @@ void foreach (const std::map < Key, Value > &map,
   edu::sharif::twinner::util::ForEach < Key, Value >::iterate (map, visitor);
 }
 
+template < typename Key, typename Value, typename Clazz >
+void foreach (const std::map < Key, Value > &map,
+    typename edu::sharif::twinner::util::ForEach < Key, Value >
+    ::template MemberVisitor<Clazz>::PairVisitor visitor, Clazz *obj) {
+  edu::sharif::twinner::util::ForEach < Key, Value >
+      ::iterate (map, visitor, obj);
+}
+
 template < typename Value >
 void foreach (const std::list < Value > &list,
     typename edu::sharif::twinner::util::ForEach < int, Value >
     ::ItemVisitor visitor) {
   edu::sharif::twinner::util::ForEach < int, Value >::iterate (list, visitor);
+}
+
+template < typename Value, typename Clazz >
+void foreach (const std::list < Value > &list,
+    typename edu::sharif::twinner::util::ForEach < int, Value >
+    ::template MemberVisitor<Clazz>::ItemVisitor visitor, Clazz *obj) {
+  edu::sharif::twinner::util::ForEach < int, Value >
+      ::iterate (list, visitor, obj);
 }
 
 template < typename Value >
@@ -136,4 +177,4 @@ void foreach (const std::set < Value > &set,
 }
 }
 
-#endif	/* IterationTools.h */
+#endif /* IterationTools.h */
