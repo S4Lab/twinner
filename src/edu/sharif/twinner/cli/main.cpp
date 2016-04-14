@@ -43,22 +43,25 @@ enum ArgumentsParsingStatus {
 
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &input, string &args, string &endpoints,
+    string &safeFunctions,
     string &twintool, string &pin, string &twin,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads);
 int run (string input, string args, string endpoints,
+    string safeFunctions,
     string twintool, string pin, string twin,
     bool main, string stackOffset, bool naive, bool measureOverheads);
 int checkTraceFile (string traceFilePath, string memoryFilePath);
 
 int main (int argc, char *argv[]) {
-  string input, args, endpoints, twintool, pin, twin;
+  string input, args, endpoints, safeFunctions, twintool, pin, twin;
   bool justAnalyzeMainRoutine = false;
   string stackOffset;
   bool naive = false;
   bool measureOverheads = false;
   switch (parseArguments (argc, argv,
-                          input, args, endpoints, twintool, pin, twin,
+                          input, args, endpoints, safeFunctions,
+                          twintool, pin, twin,
                           justAnalyzeMainRoutine, stackOffset,
                           naive, measureOverheads)) {
   case CONTINUE_NORMALLY:
@@ -74,7 +77,7 @@ int main (int argc, char *argv[]) {
       printError (argv[0], "permission denied: can not write to output twin binary!");
     } else {
       // all files are OK...
-      return run (input, args, endpoints, twintool, pin, twin,
+      return run (input, args, endpoints, safeFunctions, twintool, pin, twin,
                   justAnalyzeMainRoutine, stackOffset, naive, measureOverheads);
     }
     return -2;
@@ -97,7 +100,7 @@ int main (int argc, char *argv[]) {
   }
 }
 
-int run (string input, string args, string endpoints,
+int run (string input, string args, string endpoints, string safeFunctions,
     string twintool, string pin, string twin,
     bool main, string stackOffset, bool naive, bool measureOverheads) {
   edu::sharif::twinner::util::Logger::info ()
@@ -106,6 +109,7 @@ int run (string input, string args, string endpoints,
       "Input binary file: " << input << '\n'
       << (args.empty () ? "" : ("Input binary arguments: " + args + "\n"))
       << (endpoints.empty () ? "" : ("Analysis Endpoints: " + endpoints + "\n"))
+      << (safeFunctions.empty () ? "" : ("Safe Functions: " + safeFunctions + "\n"))
       << "TwinTool pintool: " << twintool
       << "\nPin launcher: " << pin
       << "\nOutput twin file: " << twin << '\n';
@@ -117,6 +121,7 @@ int run (string input, string args, string endpoints,
   tw.setTwinBinaryPath (twin);
   tw.setInputBinaryArguments (args);
   tw.setAnalysisEndpoints (endpoints);
+  tw.setSafeFunctions (safeFunctions);
   tw.setJustAnalyzeMainRoutine (main);
   tw.setStackOffset (stackOffset);
   tw.setNaiveMode (naive);
@@ -151,6 +156,7 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
 
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &input, string &args, string &endpoints,
+    string &safeFunctions,
     string &twintool, string &pin, string &twin,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads) {
@@ -165,6 +171,9 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     { 'a', "args", ArgParser::YES, "arguments for input binary file", false, false},
     { 'e', "analysis-endpoints", ArgParser::YES, "comma separated"
       " instruction addresses to start/end analysis", false, false},
+    { 'S', "safe-functions", ArgParser::YES, "comma separated"
+      " list of functions to be preserved in the twincode\n",
+      false, false},
     { 'n', "naive", ArgParser::NO,
       "do not instrument; just print instructions", false, false},
     { 't', "tool", ArgParser::YES, "twintool executable/library file", true, false},
@@ -224,6 +233,9 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       break;
     case 'e':
       endpoints = parser.argument (argind);
+      break;
+    case 'S':
+      safeFunctions = parser.argument (argind);
       break;
     case 'n':
       naive = true;

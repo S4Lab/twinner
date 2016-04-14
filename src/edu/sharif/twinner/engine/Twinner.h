@@ -48,6 +48,7 @@ private:
   std::string twin;
   std::string arguments;
   std::string endpoints;
+  std::string safeFunctions;
   bool main; // just analyze after the main() function
   string stackOffset; // in number of arguments (not bytes)
   bool naive; // just print about visited instructions with no instrumentation
@@ -66,6 +67,7 @@ public:
   void setTwinBinaryPath (std::string twin);
   void setInputBinaryArguments (std::string arguments);
   void setAnalysisEndpoints (std::string endpoints);
+  void setSafeFunctions (std::string safeFunctions);
   void setJustAnalyzeMainRoutine (bool main);
   void setStackOffset (std::string stackOffset);
   void setNaiveMode (bool naive);

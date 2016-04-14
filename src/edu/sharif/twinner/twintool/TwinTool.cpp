@@ -60,6 +60,9 @@ KNOB < BOOL > main (KNOB_MODE_WRITEONCE, "pintool", "main", "",
 KNOB < string > endpoints (KNOB_MODE_WRITEONCE, "pintool", "endpoints", "",
     "comma separated instruction addresses to start/end analysis");
 
+KNOB < string > safeFunctions (KNOB_MODE_WRITEONCE, "pintool", "safe-functions", "",
+    "comma separated functions to be preserved");
+
 KNOB < string > mainArgsReportingOutputFilePath (KNOB_MODE_WRITEONCE,
     "pintool", "mar", "/tmp/twinner/main-args-reporting.dat",
     "specify file path for saving main() arguments information"
@@ -193,6 +196,31 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     edu::sharif::twinner::util::Logger::info ()
         << "Analysis endpoints are specified:"
         " 0x" << std::hex << start << " - 0x" << end << '\n';
+  }
+  string safeFunctionsStr = safeFunctions.Value ();
+  vector<std::string> safeFunctionsNames;
+  if (safeFunctionsStr != "") {
+    safeFunctionsStr += ",";
+    std::string::size_type last = 0;
+    for (std::string::size_type separator = safeFunctionsStr.find (",");
+        separator != std::string::npos;
+        separator = safeFunctionsStr.find (",", last = separator + 1)) {
+      if (separator == last) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "Safe functions string is not well formed.\n";
+        return false;
+      }
+      safeFunctionsNames.push_back
+          (safeFunctionsStr.substr (last, separator - last));
+    }
+    edu::sharif::twinner::util::Logger logger =
+        edu::sharif::twinner::util::Logger::info ();
+    logger << "Safe functions are:";
+    for (vector<std::string>::const_iterator it = safeFunctionsNames.begin ();
+        it != safeFunctionsNames.end (); ++it) {
+      logger << ' ' << *it;
+    }
+    logger << '\n';
   }
   if (justAnalyzeMainRoutine || start != end) {
     if (mainArgsReportingFilePath.empty ()) {

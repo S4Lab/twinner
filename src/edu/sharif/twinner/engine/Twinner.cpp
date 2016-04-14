@@ -99,6 +99,10 @@ void Twinner::setAnalysisEndpoints (string endpoints) {
   this->endpoints = endpoints;
 }
 
+void Twinner::setSafeFunctions (string safeFunctions) {
+  this->safeFunctions = safeFunctions;
+}
+
 void Twinner::setJustAnalyzeMainRoutine (bool main) {
   this->main = main;
 }
@@ -139,7 +143,8 @@ void Twinner::setMeasureOverheads (bool measureOverheads) {
  */
 bool Twinner::generateTwinBinary () {
   Executer ex (pin, twintool, input, arguments,
-               endpoints, main, stackOffset, naive, overheads);
+               endpoints, safeFunctions,
+               main, stackOffset, naive, overheads);
   set < const edu::sharif::twinner::trace::exptoken::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;

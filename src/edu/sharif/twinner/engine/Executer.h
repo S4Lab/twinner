@@ -84,8 +84,8 @@ private:
 public:
   Executer (std::string pinLauncher, std::string twintool,
       std::string inputBinary, std::string inputArguments,
-      std::string endpoints, bool main, std::string stackOffset,
-      bool naive, bool overheads);
+      std::string endpoints, std::string safeFunctions,
+      bool main, std::string stackOffset, bool naive, bool overheads);
 
   void setCandidateAddresses (
       const std::set < std::pair < ADDRINT, int > > &addresses) const;
