@@ -104,9 +104,9 @@ int run (string input, string args, string endpoints,
       << "[verboseness level: "
       << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n"
       "Input binary file: " << input << '\n'
-      << (args.empty () ? "" : ("Input binary arguments: " + args))
-      << (endpoints.empty () ? "" : ("Analysis Endpoints: " + endpoints))
-      << "\nTwinTool pintool: " << twintool
+      << (args.empty () ? "" : ("Input binary arguments: " + args + "\n"))
+      << (endpoints.empty () ? "" : ("Analysis Endpoints: " + endpoints + "\n"))
+      << "TwinTool pintool: " << twintool
       << "\nPin launcher: " << pin
       << "\nOutput twin file: " << twin << '\n';
 
