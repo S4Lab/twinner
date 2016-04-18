@@ -172,7 +172,8 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     { 'e', "analysis-endpoints", ArgParser::YES, "comma separated"
       " instruction addresses to start/end analysis", false, false},
     { 'S', "safe-functions", ArgParser::YES, "comma separated"
-      " list of functions to be preserved in the twincode\n",
+      " list of functions to be preserved in the twincode\n"
+      "\t\teach function format: <func-name>@0x<hex-address>#(<args-no>|auto)",
       false, false},
     { 'n', "naive", ArgParser::NO,
       "do not instrument; just print instructions", false, false},
