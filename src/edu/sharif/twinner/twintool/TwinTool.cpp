@@ -29,6 +29,8 @@
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 
+#include "edu/sharif/twinner/trace-twintool/FunctionInfo.h"
+
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 
@@ -198,7 +200,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
         " 0x" << std::hex << start << " - 0x" << end << '\n';
   }
   string safeFunctionsStr = safeFunctions.Value ();
-  vector<std::string> safeFunctionsNames;
+  vector<edu::sharif::twinner::trace::FunctionInfo> safeFunctionsInfo;
   if (safeFunctionsStr != "") {
     safeFunctionsStr += ",";
     std::string::size_type last = 0;
@@ -210,14 +212,16 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
             << "Safe functions string is not well formed.\n";
         return false;
       }
-      safeFunctionsNames.push_back
-          (safeFunctionsStr.substr (last, separator - last));
+      safeFunctionsInfo.push_back
+          (edu::sharif::twinner::trace::FunctionInfo
+           (safeFunctionsStr.substr (last, separator - last)));
     }
     edu::sharif::twinner::util::Logger logger =
         edu::sharif::twinner::util::Logger::info ();
     logger << "Safe functions are:";
-    for (vector<std::string>::const_iterator it = safeFunctionsNames.begin ();
-        it != safeFunctionsNames.end (); ++it) {
+    for (vector<edu::sharif::twinner::trace::FunctionInfo>
+        ::const_iterator it = safeFunctionsInfo.begin ();
+        it != safeFunctionsInfo.end (); ++it) {
       logger << ' ' << *it;
     }
     logger << '\n';
