@@ -55,8 +55,6 @@ private:
   void openFileForReading (std::ifstream &in, const std::string &path) const;
   ExecutionMode readExecutionModeFromBinaryStream (std::ifstream &in) const;
   std::set < std::pair < ADDRINT, int > > readSetOfAddressesFromBinaryStream (std::ifstream &in) const;
-
-  void registerInstrumentationRoutines ();
 };
 
 }

@@ -30,6 +30,7 @@ namespace trace {
 
 class Trace;
 class Syscall;
+class FunctionInfo;
 
 namespace cv {
 
@@ -78,6 +79,8 @@ private:
   typedef void (InstructionSymbolicExecuter::*SingleOperandAnalysisRoutine) (
       const MutableExpressionValueProxy &opr);
 
+  typedef edu::sharif::twinner::trace::FunctionInfo FunctionInfo;
+
   Instrumenter *im;
   std::stringstream bufferForTraceLazyLoad;
   edu::sharif::twinner::trace::Trace *lazyTrace;
@@ -118,6 +121,9 @@ private:
   void lazyLoad ();
 
 public:
+  void analysisRoutineBeforeCallingSafeFunction (const FunctionInfo &fi,
+      UINT32 insAssembly, const CONTEXT *context);
+
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
       REG srcReg, const ConcreteValue &srcRegVal,
@@ -266,6 +272,11 @@ private:
    * Run hooks from last instruction (if any) and reset them afterwards.
    */
   void runHooks (const CONTEXT *context);
+
+  /**
+   * Register the safe function as a segment terminator in the trace
+   */
+  void registerSafeFunction (const FunctionInfo &fi, const CONTEXT *context);
 
   /**
    * CMOVBE (Conditional Move) moves src to dst iff (CF=1 || ZF=1).

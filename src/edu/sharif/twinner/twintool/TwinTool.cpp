@@ -108,7 +108,7 @@ INT32 TwinTool::run (int argc, char *argv[]) {
     return -2;
   }
 
-  registerInstrumentationRoutines ();
+  im->registerInstrumentationRoutines ();
 
   // Start the program, never returns
   PIN_StartProgram ();
@@ -255,7 +255,8 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     case NORMAL_MODE:
       im = new Instrumenter (in, traceFilePath, disassemblyFilePath,
                              justAnalyzeMainRoutine, stackOffsetValue,
-                             start, end, naiveMode, measureMode);
+                             start, end, safeFunctionsInfo,
+                             naiveMode, measureMode);
       break;
     case INITIAL_STATE_DETECTION_MODE:
       if (measureMode) {
@@ -286,7 +287,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
   } else {
     im = new Instrumenter (traceFilePath, disassemblyFilePath,
                            justAnalyzeMainRoutine, stackOffsetValue,
-                           start, end, naiveMode);
+                           start, end, safeFunctionsInfo, naiveMode);
   }
   if (justAnalyzeMainRoutine) { // this includes  {|| start != end} scenario
     im->setMainArgsReportingFilePath (mainArgsReportingFilePath);
@@ -333,26 +334,6 @@ std::set < std::pair < ADDRINT, int > > TwinTool::readSetOfAddressesFromBinarySt
     addresses.insert (make_pair (address, size));
   }
   return addresses;
-}
-
-void TwinTool::registerInstrumentationRoutines () {
-  if (justAnalyzeMainRoutine) { // this includes main and endpoints scenarios
-    /**
-     * This is required for -main option. That option commands instrumentation to start
-     * from the main() routine instead of RTLD start point. Finding the main() routine
-     * requires symbols (so it's not reliable and is not recommended for real malwares).
-     */
-    PIN_InitSymbols ();
-
-    IMG_AddInstrumentFunction ((IMAGECALLBACK) imageIsLoaded, im);
-  }
-  //TODO: Consider instrumenting at higher granularity for more performance
-  INS_AddInstrumentFunction (instrumentSingleInstruction, im);
-
-  PIN_AddSyscallEntryFunction (syscallIsAboutToBeCalled, im);
-  PIN_AddSyscallExitFunction (syscallIsReturned, im);
-
-  PIN_AddFiniFunction (applicationIsAboutToExit, im);
 }
 
 template < typename T >

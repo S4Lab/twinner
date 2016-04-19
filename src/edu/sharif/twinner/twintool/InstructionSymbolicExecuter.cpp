@@ -26,13 +26,16 @@
 #include "edu/sharif/twinner/twintool/operationgroup/ShiftArithmeticRightOperationGroup.h"
 #include "edu/sharif/twinner/twintool/operationgroup/ShiftRightOperationGroup.h"
 
-#include "edu/sharif/twinner/trace-twintool/TraceImp.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
-#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
-#include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 #include "edu/sharif/twinner/trace/Syscall.h"
 #include "edu/sharif/twinner/trace/StateSummary.h"
+
+#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
+
+#include "edu/sharif/twinner/trace-twintool/TraceImp.h"
+#include "edu/sharif/twinner/trace-twintool/FunctionInfo.h"
 
 #include "edu/sharif/twinner/util/max.h"
 #include "edu/sharif/twinner/util/Logger.h"
@@ -124,6 +127,27 @@ void InstructionSymbolicExecuter::syscallReturned (CONTEXT *context) const {
 edu::sharif::twinner::util::MemoryManager *
 InstructionSymbolicExecuter::getTraceMemoryManager () const {
   return memoryManager;
+}
+
+void InstructionSymbolicExecuter::analysisRoutineBeforeCallingSafeFunction (
+    const FunctionInfo &fi, UINT32 insAssembly, const CONTEXT *context) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << std::hex << "analysisRoutineBeforeCallingSafeFunction(INS: "
+      << insAssemblyStr << "): before calling " << fi << '\n';
+  registerSafeFunction (fi, context);
+  trace->printRegistersValues (logger);
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
@@ -1077,6 +1101,11 @@ void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
     hook = 0;
     (this->*hfunc) (context, os);
   }
+}
+
+void InstructionSymbolicExecuter::registerSafeFunction (const FunctionInfo &fi,
+    const CONTEXT *context) {
+  // TODO: Implement it
 }
 
 void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (

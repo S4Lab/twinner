@@ -22,6 +22,10 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace trace {
+
+class FunctionInfo;
+}
 namespace twintool {
 
 class InstructionSymbolicExecuter;
@@ -165,12 +169,15 @@ private:
   bool naive;
   ADDRINT start;
   ADDRINT end;
+  std::vector<edu::sharif::twinner::trace::FunctionInfo> safeFunctionsInfo;
 
 public:
   Instrumenter (std::ifstream &symbolsFileInputStream,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
       bool disabled, int stackOffset,
-      ADDRINT start, ADDRINT end, bool naive, bool measureMode);
+      ADDRINT start, ADDRINT end,
+      std::vector<edu::sharif::twinner::trace::FunctionInfo> safeFunctionsInfo,
+      bool naive, bool measureMode);
   Instrumenter (
       const std::set < std::pair < ADDRINT, int > > &candidateAddresses,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
@@ -179,11 +186,17 @@ public:
   Instrumenter (const std::string &traceFilePath,
       const std::string &disassemblyFilePath,
       bool disabled, int stackOffset,
-      ADDRINT start, ADDRINT end, bool naive);
+      ADDRINT start, ADDRINT end,
+      std::vector<edu::sharif::twinner::trace::FunctionInfo> safeFunctionsInfo,
+      bool naive);
   ~Instrumenter ();
+
+  void registerInstrumentationRoutines ();
 
   void setMainArgsReportingFilePath (const std::string &marFilePath);
   void instrumentImage (IMG img);
+  void instrumentSafeFunctions (IMG img);
+  bool instrumentSafeFunctions (INS ins, UINT32 insAssembly) const;
 
   bool instrumentSingleInstruction (INS ins);
 
@@ -193,6 +206,10 @@ public:
   void aboutToExit (INT32 code);
   void disable ();
   void enable ();
+
+  void beforeSafeFunction (const edu::sharif::twinner::trace::FunctionInfo &fi,
+      UINT32 insAssembly, const CONTEXT *context);
+  void afterSafeFunction (CONTEXT *context);
 
   void reportMainArguments (int argc, char **argv);
 
@@ -224,8 +241,14 @@ private:
   OPCODE convertConditionalMoveToJumpOpcode (OPCODE cmovcc) const;
 };
 
-VOID instrumentSingleInstruction (INS ins, VOID *v);
+VOID instrumentSingleInst (INS ins, VOID *v);
 VOID imageIsLoaded (IMG img, VOID *v);
+
+VOID instrumentSafeFuncs (IMG img, VOID *v);
+VOID beforeSafeFunc (VOID *v, VOID *p, UINT32 insAssembly,
+    const CONTEXT *context);
+VOID afterSafeFunc (VOID *v, CONTEXT *context);
+
 VOID startAnalysis (VOID *v);
 VOID reportMainArgs (VOID *v, ADDRINT *arg0, ADDRINT *arg1);
 VOID syscallIsAboutToBeCalled (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std,

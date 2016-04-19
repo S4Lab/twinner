@@ -24,6 +24,7 @@
 
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/Syscall.h"
+#include "edu/sharif/twinner/trace-twintool/FunctionInfo.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
@@ -54,7 +55,9 @@ inline void read_memory_content_and_add_it_to_map (
 Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     const string &_traceFilePath, const std::string &_disassemblyFilePath,
     bool _disabled, int _stackOffset,
-    ADDRINT _start, ADDRINT _end, bool _naive, bool measureMode) :
+    ADDRINT _start, ADDRINT _end,
+    std::vector<edu::sharif::twinner::trace::FunctionInfo> _safeFunctionsInfo,
+    bool _naive, bool measureMode) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, symbolsFileInStream,
     _disabled, measureMode)),
@@ -63,6 +66,7 @@ Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     stackOffset (_stackOffset),
     naive (_naive),
     start (_start), end (_end),
+    safeFunctionsInfo (_safeFunctionsInfo),
     totalCountOfInstructions (0) {
   initialize ();
 }
@@ -84,7 +88,9 @@ Instrumenter::Instrumenter (
 
 Instrumenter::Instrumenter (const string &_traceFilePath,
     const std::string &_disassemblyFilePath, bool _disabled, int _stackOffset,
-    ADDRINT _start, ADDRINT _end, bool _naive) :
+    ADDRINT _start, ADDRINT _end,
+    std::vector<edu::sharif::twinner::trace::FunctionInfo> _safeFunctionsInfo,
+    bool _naive) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, _disabled)),
     isWithinInitialStateDetectionMode (false),
@@ -92,6 +98,7 @@ Instrumenter::Instrumenter (const string &_traceFilePath,
     stackOffset (_stackOffset),
     naive (_naive),
     start (_start), end (_end),
+    safeFunctionsInfo (_safeFunctionsInfo),
     totalCountOfInstructions (0) {
   initialize ();
 }
@@ -234,6 +241,79 @@ void Instrumenter::initialize (InstructionModel model, const OPCODE opcodes[]) {
 
 Instrumenter::~Instrumenter () {
   delete ise;
+}
+
+void Instrumenter::registerInstrumentationRoutines () {
+  if (disabled) { // this includes main and endpoints scenarios
+    /**
+     * This is required for -main option. That option commands instrumentation
+     * to start from the main() routine instead of the RTLD start point.
+     * Finding the main() routine requires symbols (so it's not reliable and
+     * is not recommended for real malwares).
+     * Other approach (start/end based scenario) always works.
+     */
+    PIN_InitSymbols ();
+
+    IMG_AddInstrumentFunction ((IMAGECALLBACK) imageIsLoaded, this);
+  }
+  if (!safeFunctionsInfo.empty ()) {
+    if (!disabled) {
+      PIN_InitSymbols ();
+    }
+    IMG_AddInstrumentFunction ((IMAGECALLBACK) instrumentSafeFuncs, this);
+  }
+  //TODO: Consider instrumenting at higher granularity for more performance
+  INS_AddInstrumentFunction (instrumentSingleInst, this);
+
+  PIN_AddSyscallEntryFunction (syscallIsAboutToBeCalled, this);
+  PIN_AddSyscallExitFunction (syscallIsReturned, this);
+
+  PIN_AddFiniFunction (applicationIsAboutToExit, this);
+}
+
+void Instrumenter::instrumentSafeFunctions (IMG img) {
+  for (std::vector<edu::sharif::twinner::trace::FunctionInfo>
+      ::const_iterator it = safeFunctionsInfo.begin ();
+      it != safeFunctionsInfo.end (); ++it) {
+    const std::string name = it->getName ();
+    RTN safeRoutine = RTN_FindByName (img, name.c_str ());
+    if (RTN_Valid (safeRoutine)) {
+      edu::sharif::twinner::util::Logger::debug ()
+          << "Instrumenter::instrumentSafeFunctions (img):"
+          " instrumenting ret from the ``" << name << "'' safe routine\n";
+      RTN_Open (safeRoutine);
+      RTN_InsertCall (safeRoutine, IPOINT_AFTER, (AFUNPTR) afterSafeFunc,
+                      IARG_PTR, this,
+                      IARG_CONTEXT,
+                      IARG_END);
+      RTN_Close (safeRoutine);
+    }
+  }
+}
+
+bool Instrumenter::instrumentSafeFunctions (INS ins, UINT32 insAssembly) const {
+  if (INS_IsDirectCall (ins)) {
+    const ADDRINT target = INS_DirectBranchOrCallTargetAddress (ins);
+    for (std::vector<edu::sharif::twinner::trace::FunctionInfo>
+        ::const_iterator it = safeFunctionsInfo.begin ();
+        it != safeFunctionsInfo.end (); ++it) {
+      const edu::sharif::twinner::trace::FunctionInfo &fi = *it;
+      if (fi.getAddress () == target) {
+        const std::string name = fi.getName ();
+        edu::sharif::twinner::util::Logger::debug ()
+            << "Instrumenter::instrumentSafeFunctions (ins):"
+            " instrumenting call to the ``" << name << "'' safe routine\n";
+        INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) beforeSafeFunc,
+                        IARG_PTR, this,
+                        IARG_PTR, &fi,
+                        IARG_UINT32, insAssembly,
+                        IARG_CONST_CONTEXT,
+                        IARG_END);
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 void Instrumenter::setMainArgsReportingFilePath (const std::string &_marFilePath) {
@@ -974,6 +1054,9 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
   case DST_RSP_SRC_CALL:
   {
+    if (instrumentSafeFunctions (ins, insAssembly)) {
+      break; // ins is handled
+    }
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineBeforeChangeOfReg,
                     IARG_PTR, ise, IARG_UINT32, op,
 #ifdef TARGET_IA32E
@@ -1363,6 +1446,21 @@ void Instrumenter::enable () {
   }
 }
 
+void Instrumenter::beforeSafeFunction (
+    const edu::sharif::twinner::trace::FunctionInfo &fi, UINT32 insAssembly,
+    const CONTEXT *context) {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "Instrumenter::beforeSafeFunction ()\n";
+  ise->analysisRoutineBeforeCallingSafeFunction (fi, insAssembly, context);
+  disable ();
+}
+
+void Instrumenter::afterSafeFunction (CONTEXT *context) {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "Instrumenter::afterSafeFunction ()\n";
+  enable ();
+}
+
 void Instrumenter::reportMainArguments (int argc, char **argv) {
   static bool calledOnce = false;
   if (disabled || calledOnce) {
@@ -1466,7 +1564,7 @@ void Instrumenter::instrumentImage (IMG img) {
   }
 }
 
-VOID instrumentSingleInstruction (INS ins, VOID * v) {
+VOID instrumentSingleInst (INS ins, VOID * v) {
   Instrumenter *im = (Instrumenter *) v;
   if (!im->instrumentSingleInstruction (ins)) {
     abort ();
@@ -1476,6 +1574,24 @@ VOID instrumentSingleInstruction (INS ins, VOID * v) {
 VOID imageIsLoaded (IMG img, VOID *v) {
   Instrumenter *im = (Instrumenter *) v;
   im->instrumentImage (img);
+}
+
+VOID instrumentSafeFuncs (IMG img, VOID *v) {
+  Instrumenter *im = (Instrumenter *) v;
+  im->instrumentSafeFunctions (img);
+}
+
+VOID beforeSafeFunc (VOID *v, VOID *p, UINT32 insAssembly,
+    const CONTEXT *context) {
+  Instrumenter *im = (Instrumenter *) v;
+  const edu::sharif::twinner::trace::FunctionInfo *fi =
+      (const edu::sharif::twinner::trace::FunctionInfo *) p;
+  im->beforeSafeFunction (*fi, insAssembly, context);
+}
+
+VOID afterSafeFunc (VOID *v, CONTEXT *context) {
+  Instrumenter *im = (Instrumenter *) v;
+  im->afterSafeFunction (context);
 }
 
 VOID startAnalysis (VOID *v) {
