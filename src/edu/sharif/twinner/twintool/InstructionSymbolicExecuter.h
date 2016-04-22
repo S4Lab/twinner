@@ -112,8 +112,9 @@ public:
   void disable ();
   void enable ();
 
-  void syscallInvoked (const CONTEXT *context, edu::sharif::twinner::trace::Syscall s);
-  void syscallReturned (CONTEXT *context) const;
+  void syscallInvoked (const CONTEXT *context,
+      edu::sharif::twinner::trace::Syscall s);
+  void startNewTraceSegment (CONTEXT *context) const;
 
   edu::sharif::twinner::util::MemoryManager *getTraceMemoryManager () const;
 

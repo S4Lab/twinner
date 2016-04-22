@@ -162,15 +162,15 @@ public:
       const std::list <edu::sharif::twinner::trace::Constraint *> &c,
       const edu::sharif::twinner::trace::Constraint *lastConstraint = 0);
 
-  void syscallInvoked (Syscall s);
-  void syscallReturned (CONTEXT *context) const;
+  void terminateTraceSegment (TraceSegmentTerminator *tst);
+  void initializeNewTraceSegment (CONTEXT *context) const;
 
   bool saveToFile (const char *path, const char *memoryPath) const;
   static Trace *loadFromFile (const char *path, const char *memoryPath);
   static bool saveAddressToValueMapToFile (
       const std::map < std::pair < ADDRINT, int >, UINT64 > &map,
       const char *path);
-  static map < std::pair < ADDRINT, int >, UINT64 >
+  static std::map < std::pair < ADDRINT, int >, UINT64 >
   loadAddressToValueMapFromFile (const char *path);
 
   const std::list < ExecutionTraceSegment * > &getTraceSegments () const;
@@ -182,7 +182,7 @@ private:
   static void saveAddressToValueMapToBinaryStream (
       const std::map < std::pair < ADDRINT, int >, UINT64 > &map,
       std::ofstream &out);
-  static map < std::pair < ADDRINT, int >, UINT64 >
+  static std::map < std::pair < ADDRINT, int >, UINT64 >
   loadAddressToValueMapFromBinaryStream (std::ifstream &in);
 
 protected:

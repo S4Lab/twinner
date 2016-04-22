@@ -24,6 +24,8 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+class TraceSegmentTerminator;
+
 class ExecutionTraceSegment : public ExecutionState {
 private:
   std::map < REG, Expression * > registerToExpression;
@@ -34,15 +36,15 @@ private:
   std::map < ADDRINT, Expression * > memoryAddressTo16BitsExpression;
   std::map < ADDRINT, Expression * > memoryAddressTo8BitsExpression;
   std::list < Constraint * > pathConstraints;
-  /// Each execution trace segment is terminated with some syscall.
-  Syscall syscall;
+  TraceSegmentTerminator *terminator;
 
   int segmentIndex;
 
   ExecutionTraceSegment (int index,
       const std::map < REG, Expression * > &regi,
       const std::map < ADDRINT, Expression * > &memo,
-      const std::list < Constraint * > &cnrt);
+      const std::list < Constraint * > &cnrt,
+      TraceSegmentTerminator *terminator);
 
 public:
   ExecutionTraceSegment (int index);
@@ -136,8 +138,8 @@ public:
 
   int printMemoryUsageStats (const edu::sharif::twinner::util::Logger &logger) const;
 
-  void setSyscall (Syscall syscall);
-  Syscall getSyscall () const;
+  void setTerminator (TraceSegmentTerminator *terminator);
+  const TraceSegmentTerminator *getTerminator () const;
 
 private:
   template <typename Addr>

@@ -30,6 +30,7 @@
 #include "edu/sharif/twinner/trace/Constraint.h"
 #include "edu/sharif/twinner/trace/Syscall.h"
 #include "edu/sharif/twinner/trace/StateSummary.h"
+#include "edu/sharif/twinner/trace/SyscallInvocation.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
@@ -110,18 +111,20 @@ void InstructionSymbolicExecuter::syscallInvoked (const CONTEXT *context,
   if (disabled) {
     return;
   }
-  getTrace ()->syscallInvoked (s);
+  getTrace ()->terminateTraceSegment
+      (new edu::sharif::twinner::trace::SyscallInvocation (s));
   if (measureMode) {
     numberOfExecutedInstructions++;
   }
 }
 
-void InstructionSymbolicExecuter::syscallReturned (CONTEXT *context) const {
+void InstructionSymbolicExecuter::startNewTraceSegment (
+    CONTEXT *context) const {
   if (disabled) {
     return;
   }
   const edu::sharif::twinner::trace::Trace *trace = getTrace ();
-  trace->syscallReturned (context);
+  trace->initializeNewTraceSegment (context);
 }
 
 edu::sharif::twinner::util::MemoryManager *
@@ -951,7 +954,7 @@ void InstructionSymbolicExecuter::analysisRoutineRunHooks (const CONTEXT *contex
 void InstructionSymbolicExecuter::analysisRoutineInitializeRegisters (
     CONTEXT *context) const {
   edu::sharif::twinner::util::Logger::loquacious () << "analysisRoutineInitializeRegisters\n";
-  syscallReturned (context);
+  startNewTraceSegment (context);
   PIN_ExecuteAt (context); // never returns
 }
 

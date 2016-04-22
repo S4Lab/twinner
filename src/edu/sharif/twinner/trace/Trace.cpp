@@ -163,8 +163,8 @@ void Trace::addPathConstraints (
   getCurrentTraceSegment ()->addPathConstraints (c, lastConstraint);
 }
 
-void Trace::syscallInvoked (Syscall s) {
-  getCurrentTraceSegment ()->setSyscall (s);
+void Trace::terminateTraceSegment (TraceSegmentTerminator *tst) {
+  getCurrentTraceSegment ()->setTerminator (tst);
   currentSegmentIndex++;
   if (currentSegmentIterator == segments.begin ()) {
     segments.push_front (new ExecutionTraceSegment (currentSegmentIndex));
@@ -172,7 +172,7 @@ void Trace::syscallInvoked (Syscall s) {
   currentSegmentIterator--;
 }
 
-void Trace::syscallReturned (CONTEXT *context) const {
+void Trace::initializeNewTraceSegment (CONTEXT *context) const {
   const ExecutionTraceSegment *segment = *currentSegmentIterator;
   const std::map < REG, Expression * > &map = segment->getRegisterToExpression ();
   for (std::map < REG, Expression * >::const_iterator it = map.begin ();
@@ -183,7 +183,7 @@ void Trace::syscallReturned (CONTEXT *context) const {
       if (!exp->getLastConcreteValue ().writeToRegister (context, reg)) {
         edu::sharif::twinner::util::Logger::error ()
             << "Error in writeToRegister (...)"
-            " called from Trace::syscallReturned (...)\n";
+            " called from Trace::initializeNewTraceSegment (...)\n";
         abort ();
       }
       exp->setOverwriting (false);

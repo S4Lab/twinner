@@ -23,6 +23,7 @@
 
 #include "cv/ConcreteValue64Bits.h"
 #include "StateSummary.h"
+#include "TraceSegmentTerminator.h"
 
 #include <utility>
 #include <stdexcept>
@@ -56,9 +57,10 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionImplementation (
 ExecutionTraceSegment::ExecutionTraceSegment (int index,
     const std::map < REG, Expression * > &regi,
     const std::map < ADDRINT, Expression * > &memo,
-    const std::list < Constraint * > &cnrt) :
+    const std::list < Constraint * > &cnrt,
+    TraceSegmentTerminator *_terminator) :
     registerToExpression (regi), memoryAddressTo64BitsExpression (memo),
-    pathConstraints (cnrt), segmentIndex (index) {
+    pathConstraints (cnrt), terminator (_terminator), segmentIndex (index) {
   /*
    * This constructor is called by Twinner to reacquire registers/memory/constraints
    * info and use them to build its behavioral model.
@@ -68,13 +70,13 @@ ExecutionTraceSegment::ExecutionTraceSegment (int index,
 }
 
 ExecutionTraceSegment::ExecutionTraceSegment (int index) :
-    segmentIndex (index) {
+    terminator (0), segmentIndex (index) {
 }
 
 ExecutionTraceSegment::ExecutionTraceSegment (int index,
     const std::map < REG, Expression * > &regMap,
     const std::map < ADDRINT, Expression * > &memMap) :
-    registerToExpression (regMap), segmentIndex (index) {
+    registerToExpression (regMap), terminator (0), segmentIndex (index) {
   /*
    * This constructor is called by TwinTool and so other overlapping
    * memory addresses may be accessed too. Downwards propagation is performed
@@ -123,6 +125,7 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
     delete pathConstraints.front ();
     pathConstraints.pop_front ();
   }
+  delete terminator;
 }
 
 void ExecutionTraceSegment::setOverwritingMemoryExpression (int size,
@@ -705,6 +708,11 @@ void ExecutionTraceSegment::printCompleteState (
   printMemoryAddressesValues (logger);
   logger << "Constraints:\n";
   printPathConstraints (logger);
+  if (terminator) {
+    logger << "Terminator: " << terminator->toString () << '\n';
+  } else {
+    logger << "Terminator: no terminator\n";
+  }
 }
 
 const std::map < REG, Expression * > &
@@ -774,12 +782,18 @@ int ExecutionTraceSegment::printMemoryUsageStats (
   return total;
 }
 
-void ExecutionTraceSegment::setSyscall (Syscall _syscall) {
-  syscall = _syscall;
+void ExecutionTraceSegment::setTerminator (TraceSegmentTerminator *tst) {
+  if (terminator) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "ExecutionTraceSegment::setTerminator (TraceSegmentTerminator):"
+        " Segment terminator is already set.\n";
+    abort ();
+  }
+  terminator = tst;
 }
 
-Syscall ExecutionTraceSegment::getSyscall () const {
-  return syscall;
+const TraceSegmentTerminator *ExecutionTraceSegment::getTerminator () const {
+  return terminator;
 }
 
 }

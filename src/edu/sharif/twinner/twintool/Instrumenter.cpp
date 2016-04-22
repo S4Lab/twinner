@@ -1370,7 +1370,7 @@ void Instrumenter::syscallExitPoint (THREADID threadIndex, CONTEXT *ctxt,
   UNUSED_VARIABLE (threadIndex);
   UNUSED_VARIABLE (std);
   edu::sharif::twinner::util::Logger::loquacious () << "*** syscallExitPoint ***\n";
-  ise->syscallReturned (ctxt);
+  ise->startNewTraceSegment (ctxt);
 }
 
 void Instrumenter::saveMemoryContentsToFile (const char *path) const {
