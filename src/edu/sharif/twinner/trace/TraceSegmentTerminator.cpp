@@ -24,6 +24,24 @@ TraceSegmentTerminator::TraceSegmentTerminator () {
 TraceSegmentTerminator::~TraceSegmentTerminator () {
 }
 
+TraceSegmentTerminator *TraceSegmentTerminator::loadFromBinaryStream (
+    std::ifstream &in) {
+  char terminatorMagicString[3];
+  in.read (terminatorMagicString, 3);
+  if (strncmp (terminatorMagicString, "NTM", 3) == 0) {
+    return 0; // no terminator
+
+  } else if (strncmp (terminatorMagicString, "SYS", 3) == 0) {
+    return SyscallInvocation::loadFromBinaryStream (in);
+
+  } else {
+    edu::sharif::twinner::util::Logger::error ()
+        << "TraceSegmentTerminator::loadFromBinaryStream (...): Unexpected "
+        "magic string while loading trace segment terminator"
+        " from the binary stream\n";
+    abort ();
+  }
+}
 
 }
 }

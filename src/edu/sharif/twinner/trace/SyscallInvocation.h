@@ -33,6 +33,9 @@ public:
   Syscall getSyscall () const;
 
   virtual std::string toString () const;
+
+  virtual void saveToBinaryStream (std::ofstream &out) const;
+  static SyscallInvocation *loadFromBinaryStream (std::ifstream &in);
 };
 
 }

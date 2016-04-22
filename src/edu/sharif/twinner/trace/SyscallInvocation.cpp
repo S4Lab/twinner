@@ -32,6 +32,18 @@ std::string SyscallInvocation::toString () const {
   return "SyscallInvocation ()";
 }
 
+void SyscallInvocation::saveToBinaryStream (std::ofstream &out) const {
+  const char *terminatorMagicString = "SYS";
+  out.write (terminatorMagicString, 3);
+  out.write (reinterpret_cast<const char *> (&syscall), sizeof (syscall));
+}
+
+SyscallInvocation *SyscallInvocation::loadFromBinaryStream (std::ifstream &in) {
+  Syscall syscall;
+  in.read (reinterpret_cast<char *> (&syscall), sizeof (syscall));
+  return new SyscallInvocation (syscall);
+}
+
 
 }
 }

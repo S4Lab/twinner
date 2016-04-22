@@ -13,18 +13,22 @@
 #ifndef TRACE_SEGMENT_TERMINATOR_H
 #define TRACE_SEGMENT_TERMINATOR_H
 
+#include "Savable.h"
+
 
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-class TraceSegmentTerminator {
+class TraceSegmentTerminator : public Savable {
 protected:
   TraceSegmentTerminator ();
 
 public:
   virtual ~TraceSegmentTerminator ();
+
+  static TraceSegmentTerminator *loadFromBinaryStream (std::ifstream &in);
 
   virtual std::string toString () const = 0;
 };

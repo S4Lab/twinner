@@ -573,6 +573,12 @@ void ExecutionTraceSegment::saveToBinaryStream (std::ofstream &out) const {
   }
   saveMapToBinaryStream (out, "MEM", memory);
   saveListToBinaryStream (out, "CON", pathConstraints);
+  if (terminator) {
+    terminator->saveToBinaryStream (out);
+  } else {
+    const char *noTerminatorString = "NTM";
+    out.write (noTerminatorString, 3);
+  }
 }
 
 template <typename ADDRESS>
@@ -613,7 +619,10 @@ ExecutionTraceSegment *ExecutionTraceSegment::loadFromBinaryStream (std::ifstrea
   loadMapFromBinaryStream (in, "MEM", memo);
   loadListFromBinaryStream (in, "CON", cnrt);
 
-  return new ExecutionTraceSegment (segmentIndex, regi, memo, cnrt);
+  TraceSegmentTerminator *terminator =
+      TraceSegmentTerminator::loadFromBinaryStream (in);
+
+  return new ExecutionTraceSegment (segmentIndex, regi, memo, cnrt, terminator);
 }
 
 int ExecutionTraceSegment::getSegmentIndex () const {
