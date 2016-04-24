@@ -12,6 +12,7 @@
 
 #include "TraceSegmentTerminator.h"
 #include "SyscallInvocation.h"
+#include "FunctionInvocation.h"
 
 namespace edu {
 namespace sharif {
@@ -33,6 +34,9 @@ TraceSegmentTerminator *TraceSegmentTerminator::loadFromBinaryStream (
 
   } else if (strncmp (terminatorMagicString, "SYS", 3) == 0) {
     return SyscallInvocation::loadFromBinaryStream (in);
+
+  } else if (strncmp (terminatorMagicString, "FUN", 3) == 0) {
+    return FunctionInvocation::loadFromBinaryStream (in);
 
   } else {
     edu::sharif::twinner::util::Logger::error ()

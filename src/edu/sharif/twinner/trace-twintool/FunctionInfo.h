@@ -40,10 +40,28 @@ public:
   FunctionInfo (std::string encodedInfo);
   virtual ~FunctionInfo ();
 
+  /**
+   * Reads the symbolic expression which is going to be passed to the function
+   * as described by the trace and context objects.
+   * This function works only if context describes the state of the program
+   * right before running the call instruction (in the caller-site).
+   * The returned symbolic expression is owned by the caller and
+   * must be deleted.
+   *
+   * @param i Index of the requested argument; first argument has 0 index.
+   * @param trace The trace describing symbolic state of the program.
+   * @param context The context of the program in the caller site.
+   * @return A new symbolic expression describing the requested argument.
+   */
+  Expression *getArgument (int i, Trace *trace, const CONTEXT *context) const;
+
   bool isAutoArgs () const;
   int getArgsNo () const;
   ADDRINT getAddress () const;
   std::string getName () const;
+
+private:
+  Expression *getArgument (REG reg, Trace *trace, const CONTEXT *context) const;
 };
 
 const edu::sharif::twinner::util::Logger &operator<< (

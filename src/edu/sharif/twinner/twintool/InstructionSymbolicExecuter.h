@@ -31,6 +31,7 @@ namespace trace {
 class Trace;
 class Syscall;
 class FunctionInfo;
+class FunctionInvocation;
 
 namespace cv {
 
@@ -278,6 +279,10 @@ private:
    * Register the safe function as a segment terminator in the trace
    */
   void registerSafeFunction (const FunctionInfo &fi, const CONTEXT *context);
+
+  edu::sharif::twinner::trace::FunctionInvocation *
+  instantiateFunctionInvocation (const FunctionInfo &fi,
+      edu::sharif::twinner::trace::Trace *trace, const CONTEXT *context) const;
 
   /**
    * CMOVBE (Conditional Move) moves src to dst iff (CF=1 || ZF=1).

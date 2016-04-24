@@ -31,6 +31,7 @@
 #include "edu/sharif/twinner/trace/Syscall.h"
 #include "edu/sharif/twinner/trace/StateSummary.h"
 #include "edu/sharif/twinner/trace/SyscallInvocation.h"
+#include "edu/sharif/twinner/trace/FunctionInvocation.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
@@ -1108,7 +1109,32 @@ void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
 
 void InstructionSymbolicExecuter::registerSafeFunction (const FunctionInfo &fi,
     const CONTEXT *context) {
-  // TODO: Implement it
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::trace::FunctionInvocation *f =
+      instantiateFunctionInvocation (fi, trace, context);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << '\t' << f->getCallingLine ();
+  getTrace ()->terminateTraceSegment (f);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
+edu::sharif::twinner::trace::FunctionInvocation *
+InstructionSymbolicExecuter::instantiateFunctionInvocation (
+    const FunctionInfo &fi, edu::sharif::twinner::trace::Trace *trace,
+    const CONTEXT *context) const {
+  std::string name = fi.getName ();
+  std::list<edu::sharif::twinner::trace::Expression *> args;
+  if (fi.isAutoArgs ()) {
+    edu::sharif::twinner::util::Logger::warning () << "argsNo=auto but "
+        << name << " function is not supported by auto yet";
+  } else {
+    const int argsNo = fi.getArgsNo ();
+    for (int i = 0; i < argsNo; ++i) {
+      args.push_back (fi.getArgument (i, trace, context));
+    }
+  }
+  return new edu::sharif::twinner::trace::FunctionInvocation
+      (name, args);
 }
 
 void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (

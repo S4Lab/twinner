@@ -1459,6 +1459,7 @@ void Instrumenter::afterSafeFunction (CONTEXT *context) {
   edu::sharif::twinner::util::Logger::loquacious ()
       << "Instrumenter::afterSafeFunction ()\n";
   enable ();
+  ise->startNewTraceSegment (context);
 }
 
 void Instrumenter::reportMainArguments (int argc, char **argv) {

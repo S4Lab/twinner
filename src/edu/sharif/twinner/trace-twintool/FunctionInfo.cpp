@@ -15,7 +15,15 @@
 #include <sstream>
 #include <stdlib.h>
 
+#include "edu/sharif/twinner/twintool/RegisterResidentExpressionValueProxy.h"
+
 #include "edu/sharif/twinner/util/Logger.h"
+
+#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/StateSummary.h"
+
+#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 
 namespace edu {
 namespace sharif {
@@ -73,6 +81,30 @@ FunctionInfo::FunctionInfo (std::string encodedInfo) {
 }
 
 FunctionInfo::~FunctionInfo () {
+}
+
+Expression *FunctionInfo::getArgument (int i, Trace *trace,
+    const CONTEXT *context) const {
+  int offset;
+  const REG regs[] = {
+    REG_RDI, REG_RSI, REG_RDX, REG_RCX, REG_R8, REG_R9
+  };
+  return getArgument (regs[i], trace, context);
+}
+
+Expression *FunctionInfo::getArgument (REG reg, Trace *trace,
+    const CONTEXT *context) const {
+  edu::sharif::twinner::twintool::RegisterResidentExpressionValueProxy proxy
+      (reg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+       (PIN_GetContextReg (context, reg)));
+  edu::sharif::twinner::trace::StateSummary state;
+  edu::sharif::twinner::trace::Expression *exp =
+      proxy.getExpression (trace, state);
+  if (state.isWrongState ()) {
+    edu::sharif::twinner::util::Logger::error () << state.getMessage () << '\n';
+    abort ();
+  }
+  return exp;
 }
 
 bool FunctionInfo::isAutoArgs () const {
