@@ -13,7 +13,7 @@
 #include "Constraint.h"
 
 #include "ExecutionState.h"
-#include "Expression.h"
+#include "ExpressionImp.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 
@@ -285,6 +285,13 @@ Constraint *Constraint::instantiateSignConstraint (bool &sign,
 Constraint *Constraint::instantiateSignConstraint (bool &sign,
     const Expression *mainExp, uint32_t instruction) {
   return Constraint::instantiateLessConstraint (sign, mainExp, instruction);
+}
+
+Constraint *Constraint::instantiateTautology (bool valid) {
+  const Expression *zero = new ExpressionImp ();
+  Constraint *res = new Constraint (zero, valid ? ZERO : NON_ZERO, 0, false);
+  delete zero;
+  return res;
 }
 
 }

@@ -153,6 +153,8 @@ public:
       const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
   static Constraint *instantiateSignConstraint (bool &sign,
       const Expression *mainExp, uint32_t instruction);
+
+  static Constraint *instantiateTautology (bool valid);
 };
 
 }

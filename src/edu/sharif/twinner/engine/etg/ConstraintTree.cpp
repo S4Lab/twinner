@@ -32,11 +32,14 @@ namespace engine {
 namespace etg {
 
 ConstraintTree::ConstraintTree () :
-    root (new TreeNode ()), iterator (root) {
+    root (new TreeNode ()), iterator (root),
+    alwaysTrue (edu::sharif::twinner::trace::Constraint
+    ::instantiateTautology (true)) {
 }
 
 ConstraintTree::~ConstraintTree () {
   delete root;
+  delete alwaysTrue;
 }
 
 void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *trace) {
@@ -50,6 +53,7 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
     const edu::sharif::twinner::trace::ExecutionTraceSegment *segment = *it;
     const std::list < edu::sharif::twinner::trace::Constraint * > &constraints =
         segment->getPathConstraints ();
+    TreeNode const *pre = node;
     for (std::list < edu::sharif::twinner::trace::Constraint * >
         ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
       const edu::sharif::twinner::trace::Constraint *constraint = *it2;
@@ -59,6 +63,10 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
         node = next;
         depth++;
       }
+    }
+    if (node == pre) { // Each segment must have at least one constraint
+      node = node->addConstraint
+          (alwaysTrue, trace->getMemoryManager (), false);
     }
     node->registerCorrespondingSegment (segment);
   }

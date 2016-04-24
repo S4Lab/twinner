@@ -92,13 +92,8 @@ ConstraintToCvc4ExprConverter::convertBack (bool &ok, Expr exp,
     }
   } else if (exp.getKind () == kind::CONST_BOOLEAN) {
     const bool state = exp.getConst <bool> ();
-    const edu::sharif::twinner::trace::Expression *zero =
-        new edu::sharif::twinner::trace::ExpressionImp ();
     edu::sharif::twinner::trace::Constraint *res =
-        new edu::sharif::twinner::trace::Constraint
-        (zero, state ? edu::sharif::twinner::trace::Constraint::ZERO
-         : edu::sharif::twinner::trace::Constraint::NON_ZERO, 0, false);
-    delete zero;
+        edu::sharif::twinner::trace::Constraint::instantiateTautology (state);
     lst.push_back (res);
   } else {
     const edu::sharif::twinner::trace::Constraint *c =

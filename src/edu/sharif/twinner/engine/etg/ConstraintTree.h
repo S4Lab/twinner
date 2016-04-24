@@ -32,6 +32,7 @@ class ConstraintTree {
 private:
   TreeNode *root;
   TreeNode *iterator;
+  const edu::sharif::twinner::trace::Constraint * const alwaysTrue;
 
 public:
   ConstraintTree ();
