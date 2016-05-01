@@ -318,6 +318,13 @@ BOOL readMemoryContent (UINT64 &outValue, ADDRINT memoryEa, size_t size) {
   return false;
 }
 
+BOOL readStringFromMemory (std::string &outValue, const ADDRINT memoryEa) {
+  edu::sharif::twinner::util::Logger::error ()
+      << "The readStringFromMemory (...) function is only available in"
+      " TwinTool: Calling error from Twinner.\n";
+  return false;
+}
+
 BOOL writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
   edu::sharif::twinner::util::Logger::error ()
       << "The writeMemoryContent (...) function is only available in TwinTool:"

@@ -27,6 +27,7 @@ edu::sharif::twinner::trace::cv::ConcreteValue *readRegisterContent (
     const CONTEXT *context, LEVEL_BASE::REG reg);
 
 BOOL readMemoryContent (UINT64 &outValue, ADDRINT memoryEa, size_t size);
+BOOL readStringFromMemory (std::string &outValue, const ADDRINT memoryEa);
 BOOL writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size);
 BOOL writeRegisterContent (CONTEXT *context,
     LEVEL_BASE::REG reg, const UINT8 *value);

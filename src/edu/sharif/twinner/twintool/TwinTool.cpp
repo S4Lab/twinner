@@ -418,6 +418,35 @@ BOOL readMemoryContent (UINT64 &outValue, ADDRINT memoryEa, size_t size) {
   return true;
 }
 
+/// reads an string from the memory upto 1000 bytes
+
+BOOL readStringFromMemory (std::string &outValue, const ADDRINT memoryEa) {
+  edu::sharif::twinner::util::Logger::loquacious () << "readStringFromMemory:"
+      " 0x" << std::hex << memoryEa << '\n';
+#ifdef TARGET_IA32E
+  const int step = 8; // bytes
+#else
+  const int step = 4; // bytes
+#endif
+  size_t copiedBytes = step;
+  const char * const initialAddress = (const char *) memoryEa;
+  for (const char *address = initialAddress;
+      copiedBytes == step && address < initialAddress + 1000;
+      address += step) {
+    UINT64 value = 0;
+    copiedBytes = PIN_SafeCopy (&value, address, step);
+    const char *bytes = (const char *) &value;
+    for (size_t i = 0; i < copiedBytes; ++i) {
+      const char c = bytes[i];
+      if (c == 0) {
+        return true;
+      }
+      outValue += c;
+    }
+  }
+  return false;
+}
+
 BOOL writeMemoryContent (ADDRINT memoryEa, const UINT8 *value, size_t size) {
   const size_t ret = PIN_SafeCopy ((VOID *) memoryEa, (const VOID *) value, size);
   if (ret != size) {

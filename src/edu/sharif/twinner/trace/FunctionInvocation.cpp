@@ -23,9 +23,10 @@ namespace twinner {
 namespace trace {
 
 FunctionInvocation::FunctionInvocation (std::string _name,
-    std::list<Expression *> _args) :
+    std::list<Expression *> _args, std::string _firstArgumentAsString) :
     TraceSegmentTerminator (),
-    name (_name), args (_args) {
+    name (_name), args (_args),
+    firstArgumentAsString (_firstArgumentAsString) {
 }
 
 FunctionInvocation::~FunctionInvocation () {
@@ -44,6 +45,10 @@ void FunctionInvocation::saveToBinaryStream (std::ofstream &out) const {
   out.write (name.c_str (), name.length ());
 
   saveListToBinaryStream (out, "ARG", args);
+
+  const int strLength = firstArgumentAsString.length ();
+  out.write (reinterpret_cast<const char *> (&strLength), sizeof (strLength));
+  out.write (firstArgumentAsString.c_str (), firstArgumentAsString.length ());
 }
 
 FunctionInvocation *FunctionInvocation::loadFromBinaryStream (
@@ -58,7 +63,14 @@ FunctionInvocation *FunctionInvocation::loadFromBinaryStream (
   std::list<Expression *> args;
   loadListFromBinaryStream (in, "ARG", args);
 
-  return new FunctionInvocation (nameStr, args);
+  int strLength = 0;
+  in.read (reinterpret_cast<char *> (&strLength), sizeof (strLength));
+  char *str = new char[strLength];
+  in.read (str, strLength);
+  const std::string firstArgumentAsString (str, strLength);
+  delete[] str;
+
+  return new FunctionInvocation (nameStr, args, firstArgumentAsString);
 }
 
 
