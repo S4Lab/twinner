@@ -38,10 +38,14 @@ public:
       std::string firstArgumentAsString);
   virtual ~FunctionInvocation ();
 
+  virtual std::string getCallingLine () const;
   virtual std::string toString () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static FunctionInvocation *loadFromBinaryStream (std::ifstream &in);
+
+private:
+  void encodeString (std::stringstream &ss, std::string str) const;
 };
 
 }

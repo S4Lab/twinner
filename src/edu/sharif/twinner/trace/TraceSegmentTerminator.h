@@ -30,6 +30,7 @@ public:
 
   static TraceSegmentTerminator *loadFromBinaryStream (std::ifstream &in);
 
+  virtual std::string getCallingLine () const = 0;
   virtual std::string toString () const = 0;
 };
 

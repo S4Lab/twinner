@@ -32,6 +32,7 @@ public:
 
   Syscall getSyscall () const;
 
+  virtual std::string getCallingLine () const;
   virtual std::string toString () const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;

@@ -28,6 +28,10 @@ Syscall SyscallInvocation::getSyscall () const {
   return syscall;
 }
 
+std::string SyscallInvocation::getCallingLine () const {
+  return "regs = setRegistersValuesAndInvokeSyscall (regs);";
+}
+
 std::string SyscallInvocation::toString () const {
   return "SyscallInvocation ()";
 }

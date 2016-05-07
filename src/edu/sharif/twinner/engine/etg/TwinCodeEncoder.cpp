@@ -17,6 +17,7 @@
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
+#include "edu/sharif/twinner/trace/TraceSegmentTerminator.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
@@ -275,6 +276,11 @@ void TwinCodeEncoder::encodeTransformations (const TraceSegment *segment,
       (segment->getMemoryAddressTo64BitsExpression (),
        &TwinCodeEncoder::codeMemoryChanges, this);
   codeRegisterChanges (segment, index);
+  if (!segment->getTerminator ()) { // this must be the last segment
+    out.indented () << "return int (regs.rax);\n";
+    return;
+  }
+  out.indented () << segment->getTerminator ()->getCallingLine () << '\n';
   declareRegisterSymbols (index + 1);
   declareMemorySymbols (addressToSize[index + 1], depth, index + 1);
 }
@@ -339,7 +345,6 @@ void TwinCodeEncoder::codeRegisterChanges (const TraceSegment *segment,
       out << regs[i].name << "_" << index << ";\n";
     }
   }
-  out.indented () << "regs = setRegistersValuesAndInvokeSyscall (regs);\n";
 }
 
 void TwinCodeEncoder::encodeChildren (ConstTreeNode *node,

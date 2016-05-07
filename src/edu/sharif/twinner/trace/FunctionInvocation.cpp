@@ -32,8 +32,31 @@ FunctionInvocation::FunctionInvocation (std::string _name,
 FunctionInvocation::~FunctionInvocation () {
 }
 
+std::string FunctionInvocation::getCallingLine () const {
+  std::stringstream ss;
+  ss << name << " (";
+  bool first = true;
+  for (std::list<Expression *>::const_iterator it = args.begin ();
+      it != args.end (); ++it) {
+    const Expression *arg = *it;
+    if (first) {
+      first = false;
+      if (!firstArgumentAsString.empty ()) {
+        ss << "/*";
+        encodeString (ss, firstArgumentAsString);
+        ss << "*/ ";
+      }
+    } else {
+      ss << ", ";
+    }
+    ss << arg->toString ();
+  }
+  ss << ");";
+  return ss.str ();
+}
+
 std::string FunctionInvocation::toString () const {
-  return "FunctionInvocation ()";
+  return "FunctionInvocation (calling-line=" + getCallingLine () + ")";
 }
 
 void FunctionInvocation::saveToBinaryStream (std::ofstream &out) const {
@@ -71,6 +94,35 @@ FunctionInvocation *FunctionInvocation::loadFromBinaryStream (
   delete[] str;
 
   return new FunctionInvocation (nameStr, args, firstArgumentAsString);
+}
+
+void FunctionInvocation::encodeString (std::stringstream &ss, std::string str) const {
+  ss << '"';
+  for (std::string::const_iterator it = str.begin (); it != str.end (); ++it) {
+    const char c = *it;
+    if (c == '\\') {
+      ss << "\\\\";
+    } else if (c == ' ' || ispunct (c) || isalnum (c)) {
+      ss << c;
+    } else if (c == '\r') {
+      ss << "\\r";
+    } else if (c == '\n') {
+      ss << "\\n";
+    } else if (c == '\a') {
+      ss << "\\a";
+    } else if (c == '\b') {
+      ss << "\\b";
+    } else if (c == '\f') {
+      ss << "\\f";
+    } else if (c == '\t') {
+      ss << "\\t";
+    } else if (c == '\v') {
+      ss << "\\v";
+    } else {
+      ss << "\\x" << std::hex << int (c);
+    }
+  }
+  ss << '"';
 }
 
 
