@@ -78,6 +78,7 @@ public:
 private:
   void addExecutionTrace (edu::sharif::twinner::trace::Trace *trace,
       edu::sharif::twinner::trace::MarInfo *marInfo);
+  bool isTraceConsistent (edu::sharif::twinner::trace::Trace *trace) const;
   void addExecutionTrace (edu::sharif::twinner::trace::Trace *trace);
 
   bool calculateSymbolsValuesForCoveringNextPath (

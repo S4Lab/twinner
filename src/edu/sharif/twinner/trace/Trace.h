@@ -29,6 +29,7 @@ namespace trace {
 
 class Syscall;
 class ExecutionTraceSegment;
+class TraceSegmentTerminator;
 
 class Trace : public ExecutionState {
 protected:
