@@ -86,11 +86,25 @@ FunctionInfo::~FunctionInfo () {
 Expression *FunctionInfo::getArgument (int i, Trace *trace,
     const CONTEXT *context) const {
   int offset;
-  const REG regs[] = {
-    REG_RDI, REG_RSI, REG_RDX, REG_RCX, REG_R8, REG_R9
-  };
-  return getArgument (regs[i], trace, context);
+#if defined(TARGET_IA32E) && defined(TARGET_LINUX)
+  // args are in RDI, RSI, RDX, RCX, R8, R9, and in the stack respectively
+  if (i < 6) {
+    const REG regs[] = {
+      REG_RDI, REG_RSI, REG_RDX, REG_RCX, REG_R8, REG_R9
+    };
+    return getArgument (regs[i], trace, context);
+  }
+  offset = (i - 6) * 8;
+#elif defined(TARGET_IA32)
+  // args are in the stack respectively (first argument is pushed last)
+  offset = i * 4;
+#else
+#error "Unsupported architecture and/or OS"
+#endif
+  return getArgument (offset, PIN_GetContextReg (context, REG_RSP),
+                      trace, context);
 }
+#ifdef TARGET_IA32E
 
 Expression *FunctionInfo::getArgument (REG reg, Trace *trace,
     const CONTEXT *context) const {
@@ -105,6 +119,17 @@ Expression *FunctionInfo::getArgument (REG reg, Trace *trace,
     abort ();
   }
   return exp;
+}
+#endif
+
+Expression *FunctionInfo::getArgument (int offset, ADDRINT topOfStack,
+    Trace *trace, const CONTEXT *context) const {
+  edu::sharif::twinner::util::Logger::error ()
+      << "FunctionInfo::getArgument (offset=0x" << std::hex << offset
+      << ", topOfStack=0x" << topOfStack << ", trace, context):"
+      " Not implemented yet\n";
+  abort ();
+  return 0;
 }
 
 bool FunctionInfo::isAutoArgs () const {

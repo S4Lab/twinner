@@ -61,7 +61,11 @@ public:
   std::string getName () const;
 
 private:
+#ifdef TARGET_IA32E
   Expression *getArgument (REG reg, Trace *trace, const CONTEXT *context) const;
+#endif
+  Expression *getArgument (int offset, ADDRINT topOfStack, Trace *trace,
+      const CONTEXT *context) const;
 };
 
 const edu::sharif::twinner::util::Logger &operator<< (
