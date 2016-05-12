@@ -101,13 +101,18 @@ private:
       int depth, int index);
   void encodeChildren (ConstTreeNode *node, int depth, int index);
 
-  void extractTypesAndNames (std::set< Variable > &typesAndNames,
-      ConstConstraintPtr simplifiedConstraint);
-  void extractTypesAndNames (std::set< Variable > &typesAndNames,
-      ConstExpressionPtr exp);
-
   void codeMemoryChanges (const Address &memoryEa, ExpressionPtr exp);
   void codeRegisterChanges (const TraceSegment *segment, int index);
+
+  bool simplifyConstraints (std::stringstream &ss,
+      std::set< Variable > &typesAndNames,
+      const std::list < ConstConstraintPtr > &constraints) const;
+  void extractTypesAndNames (std::set< Variable > &typesAndNames,
+      ConstConstraintPtr simplifiedConstraint) const;
+  void extractTypesAndNames (std::set< Variable > &typesAndNames,
+      ConstExpressionPtr exp) const;
+  std::string replaceAll (std::string str,
+      std::string part, std::string substitute) const;
 };
 
 }

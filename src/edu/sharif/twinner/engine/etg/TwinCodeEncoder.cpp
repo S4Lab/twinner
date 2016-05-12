@@ -175,20 +175,19 @@ void TwinCodeEncoder::encodeConstraintAndChildren (ConstTreeNode *node,
   out.indented () << '}';
 }
 
-void TwinCodeEncoder::encodeConstraint (
-    std::list < ConstConstraintPtr > constraints, int depth) {
+bool TwinCodeEncoder::simplifyConstraints (std::stringstream &ss,
+    std::set< Variable > &typesAndNames,
+    const std::list < ConstConstraintPtr > &constraints) const {
   bool ok;
   std::list < ConstConstraintPtr > simplifiedConstraints =
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
       ->simplifyConstraints (ok, constraints);
   if (!ok) {
     edu::sharif::twinner::util::Logger::error ()
-        << "TwinCodeEncoder::encodeConstraint (...):"
+        << "TwinCodeEncoder::simplifyConstraints (...):"
         " Error in constraints simplification\n";
     abort ();
   }
-  std::stringstream ss;
-  std::set< Variable > typesAndNames;
   bool first = true;
   for (std::list < ConstConstraintPtr >
       ::const_reverse_iterator it = simplifiedConstraints.rbegin ();
@@ -208,39 +207,67 @@ void TwinCodeEncoder::encodeConstraint (
     extractTypesAndNames (typesAndNames, simplifiedConstraint);
     delete simplifiedConstraint;
   }
-  if (!first) {
-    const std::string constraintString = ss.str ();
-    std::stringstream conditionName;
-    conditionName << "cond_" << (++conditionIndex);
+  return !first;
+}
 
-    std::stringstream typedArguments, arguments;
-    bool first = true;
+void TwinCodeEncoder::encodeConstraint (
+    std::list < ConstConstraintPtr > constraints, int depth) {
+  std::stringstream ss;
+  std::set< Variable > typesAndNames;
+  const bool mustConstraintBeEncoded = simplifyConstraints
+      (ss, typesAndNames, constraints);
+  if (!mustConstraintBeEncoded) {
+    out << "{\n";
+    return;
+  }
+  const std::string constraintString = ss.str ();
+  if (constraintString.length () < 200) { // inline the constraint
+    std::string inlinedConstraintString = constraintString;
     for (std::set< Variable >::const_iterator it = typesAndNames.begin ();
         it != typesAndNames.end (); ++it) {
-      if (first) {
-        first = false;
-      } else {
-        typedArguments << ", ";
-        arguments << ", ";
-      }
-      typedArguments << it->type << ' ' << it->technicalName;
-      arguments << VAR_TYPE " (" << it->name << ")";
+      std::stringstream castedName;
+      castedName << VAR_TYPE << " (" << it->name << ")";
+      inlinedConstraintString = replaceAll
+          (inlinedConstraintString, it->technicalName, castedName.str ());
     }
-
-    conout << "bool " << conditionName.str () << " ("
-        << typedArguments.str () << ") {\n";
-    conout << "\treturn " << constraintString << ";\n";
-    edu::sharif::twinner::util::Logger::loquacious () << constraintString << '\n';
-    conout << "}\n\n";
-    out << "if (" << conditionName.str () << " ("
-        << arguments.str () << ")) {\n";
-  } else {
-    out << "if (true) {\n";
+    out << "if (" << inlinedConstraintString << ") {\n";
+    return;
   }
+  std::stringstream conditionName;
+  conditionName << "cond_" << (++conditionIndex);
+  std::stringstream typedArguments, arguments;
+  bool first = true;
+  for (std::set< Variable >::const_iterator it = typesAndNames.begin ();
+      it != typesAndNames.end (); ++it) {
+    if (first) {
+      first = false;
+    } else {
+      typedArguments << ", ";
+      arguments << ", ";
+    }
+    typedArguments << it->type << ' ' << it->technicalName;
+    arguments << VAR_TYPE " (" << it->name << ")";
+  }
+  conout << "bool " << conditionName.str () << " ("
+      << typedArguments.str () << ") {\n";
+  conout << "\treturn " << constraintString << ";\n";
+  conout << "}\n\n";
+  out << "if (" << conditionName.str () << " ("
+      << arguments.str () << ")) {\n";
+  return;
+}
+
+std::string TwinCodeEncoder::replaceAll (std::string str,
+    std::string part, std::string substitute) const {
+  for (std::string::size_type pos = str.find (part); pos != std::string::npos;
+      pos = str.find (part, pos + substitute.length ())) {
+    str.replace (pos, part.length (), substitute);
+  }
+  return str;
 }
 
 void TwinCodeEncoder::extractTypesAndNames (std::set< Variable > &typesAndNames,
-    ConstConstraintPtr simplifiedConstraint) {
+    ConstConstraintPtr simplifiedConstraint) const {
   extractTypesAndNames
       (typesAndNames, simplifiedConstraint->getMainExpression ());
   if (simplifiedConstraint->getAuxExpression ()) {
@@ -263,7 +290,7 @@ void extract_type_and_name (std::set< Variable > &typesAndNames,
 }
 
 void TwinCodeEncoder::extractTypesAndNames (std::set< Variable > &typesAndNames,
-    ConstExpressionPtr exp) {
+    ConstExpressionPtr exp) const {
   edu::sharif::twinner::util::foreach
       (exp->getStack (), &extract_type_and_name, typesAndNames);
 }
