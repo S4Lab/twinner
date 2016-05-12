@@ -1124,52 +1124,58 @@ InstructionSymbolicExecuter::instantiateFunctionInvocation (
     const CONTEXT *context) const {
   std::string name = fi.getName ();
   std::list<edu::sharif::twinner::trace::Expression *> args;
-  std::string firstArgumentAsString;
-  if (fi.isAutoArgs ()) {
-    if (name == "printf") {
-      /*
-       * Assuming that printf arguments are marked by simple %d, %s, etc.
-       * in the format string. Pointing to arguments by their position numbers
-       * causes wrong number of arguments to be guessed here.
-       */
-      // TODO: Support all cases of the printf format string
-      edu::sharif::twinner::trace::Expression *formatString =
-          fi.getArgument (0, trace, context);
-      args.push_back (formatString);
-      const ADDRINT formatStringPointer =
-          formatString->getLastConcreteValue ().toUint64 ();
-      if (!edu::sharif::twinner::util::readStringFromMemory
-          (firstArgumentAsString, formatStringPointer)) {
-        firstArgumentAsString = "";
-        edu::sharif::twinner::util::Logger::warning ()
-            << "first argument of the ``printf'' cannot be read as a C string";
-      } else {
-        int argsNo = 0; // extra args after the format string
-        for (int i = 0, len = firstArgumentAsString.length (); i < len; ++i) {
-          if (firstArgumentAsString[i] == '%') {
-            if (i + 1 < len && firstArgumentAsString[i + 1] == '%') {
-              ++i;
-              continue;
-            }
-            ++argsNo;
-          }
-        }
-        for (int i = 0; i < argsNo; ++i) {
-          args.push_back (fi.getArgument (i + 1, trace, context));
-        }
-      }
-    } else {
-      edu::sharif::twinner::util::Logger::warning () << "argsNo=auto but "
-          << name << " function is not supported by auto yet";
-    }
-  } else {
+  if (!fi.isAutoArgs ()) {
     const int argsNo = fi.getArgsNo ();
     for (int i = 0; i < argsNo; ++i) {
       args.push_back (fi.getArgument (i, trace, context));
     }
+    return new edu::sharif::twinner::trace::FunctionInvocation
+        (name, args, fi.getTypes ());
   }
-  return new edu::sharif::twinner::trace::FunctionInvocation
-      (name, args, firstArgumentAsString);
+  std::string firstArgumentAsString;
+  std::list<std::string> types;
+  if (name == "printf") {
+    /*
+     * Assuming that printf arguments are marked by simple %d, %s, etc.
+     * in the format string. Pointing to arguments by their position numbers
+     * causes wrong number of arguments to be guessed here.
+     */
+    // TODO: Support all cases of the printf format string
+    edu::sharif::twinner::trace::Expression *formatString =
+        fi.getArgument (0, trace, context);
+    args.push_back (formatString);
+    types.push_back ("const char *");
+    const ADDRINT formatStringPointer =
+        formatString->getLastConcreteValue ().toUint64 ();
+    if (!edu::sharif::twinner::util::readStringFromMemory
+        (firstArgumentAsString, formatStringPointer)) {
+      edu::sharif::twinner::util::Logger::warning ()
+          << "first argument of the ``printf'' cannot be read as a C string";
+      return new edu::sharif::twinner::trace::FunctionInvocation
+          (name, args, types);
+    }
+    int argsNo = 0; // extra args after the format string
+    for (int i = 0, len = firstArgumentAsString.length (); i < len; ++i) {
+      if (firstArgumentAsString[i] == '%') {
+        if (i + 1 < len && firstArgumentAsString[i + 1] == '%') {
+          ++i;
+          continue;
+        }
+        ++argsNo;
+        types.push_back ("UINT64");
+      }
+    }
+    for (int i = 0; i < argsNo; ++i) {
+      args.push_back (fi.getArgument (i + 1, trace, context));
+    }
+    return new edu::sharif::twinner::trace::FunctionInvocation
+        (name, args, types, firstArgumentAsString);
+
+  } else {
+    edu::sharif::twinner::util::Logger::warning () << "argsNo=auto but "
+        << name << " function is not supported by auto yet";
+    return new edu::sharif::twinner::trace::FunctionInvocation (name);
+  }
 }
 
 void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (
