@@ -80,10 +80,20 @@ void FunctionInvocation::saveToBinaryStream (std::ofstream &out) const {
 
   const int nameLength = name.length ();
   out.write (reinterpret_cast<const char *> (&nameLength), sizeof (nameLength));
-  out.write (name.c_str (), name.length ());
+  out.write (name.c_str (), nameLength);
 
   saveListToBinaryStream (out, "ARG", args);
-
+  {
+    const char *typesMagicString = "TYP";
+    out.write (typesMagicString, 3);
+    for (typename std::list<std::string>::const_iterator it = types.begin ();
+        it != types.end (); ++it) {
+      const std::string &type = *it;
+      const int len = type.length ();
+      out.write (reinterpret_cast<const char *> (&len), sizeof (len));
+      out.write (type.c_str (), len);
+    }
+  }
   const int strLength = firstArgumentAsString.length ();
   out.write (reinterpret_cast<const char *> (&strLength), sizeof (strLength));
   out.write (firstArgumentAsString.c_str (), firstArgumentAsString.length ());
@@ -100,7 +110,27 @@ FunctionInvocation *FunctionInvocation::loadFromBinaryStream (
 
   std::list<Expression *> args;
   loadListFromBinaryStream (in, "ARG", args);
-
+  std::list<std::string> types;
+  {
+    char magicString[3];
+    in.read (magicString, 3);
+    if (strncmp (magicString, "TYP", 3) != 0) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "FunctionInvocation::loadListFromBinaryStream (in): "
+          "Unexpected magic string while loading argument types\n";
+      abort ();
+    }
+    const int argsNo = args.size ();
+    for (int i = 0; i < argsNo; ++i) {
+      int typeLength = 0;
+      in.read (reinterpret_cast<char *> (&typeLength), sizeof (typeLength));
+      char *typeStr = new char[typeLength];
+      in.read (typeStr, typeLength);
+      const std::string type (typeStr, typeLength);
+      delete[] typeStr;
+      types.push_back (type);
+    }
+  }
   int strLength = 0;
   in.read (reinterpret_cast<char *> (&strLength), sizeof (strLength));
   char *str = new char[strLength];
@@ -108,7 +138,7 @@ FunctionInvocation *FunctionInvocation::loadFromBinaryStream (
   const std::string firstArgumentAsString (str, strLength);
   delete[] str;
 
-  return new FunctionInvocation (nameStr, args, firstArgumentAsString);
+  return new FunctionInvocation (nameStr, args, types, firstArgumentAsString);
 }
 
 void FunctionInvocation::encodeString (std::stringstream &ss, std::string str) const {
