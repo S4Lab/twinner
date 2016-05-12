@@ -112,7 +112,9 @@ std::string Expression::toString () const {
   Stack st = Stack (stack);
   std::stringstream ss;
   convertToInfixExpression (st, ss);
-  ss << " /*" << *lastConcreteValue << "*/";
+  if (!isTrivial ()) {
+    ss << " /*" << *lastConcreteValue << "*/";
+  }
   return ss.str ();
 }
 
