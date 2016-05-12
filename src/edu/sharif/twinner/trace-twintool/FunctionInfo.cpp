@@ -36,7 +36,8 @@ FunctionInfo::FunctionInfo (std::string encodedInfo) {
     edu::sharif::twinner::util::Logger::error ()
         << "FunctionInfo::FunctionInfo (encodedInfo=" << encodedInfo << "):"
         " function address is missing."
-        " Expected format: <func-name>@0x<hex-address>#(<args-no>|auto)\n";
+        " Expected format: <func-name>@0x<hex-address>"
+        "#(<args-no>{arg1type!arg2type!...!argntype}|auto)\n";
     abort ();
   }
   name = encodedInfo.substr (0, atsign);
@@ -45,7 +46,8 @@ FunctionInfo::FunctionInfo (std::string encodedInfo) {
     edu::sharif::twinner::util::Logger::error ()
         << "FunctionInfo::FunctionInfo (encodedInfo=" << encodedInfo << "):"
         " args number is missing."
-        " Expected format: <func-name>@0x<hex-address>#(<args-no>|auto)\n";
+        " Expected format: <func-name>@0x<hex-address>"
+        "#(<args-no>{arg1type!arg2type!...!argntype}|auto)\n";
     abort ();
   }
   const std::string addressStr =
@@ -68,15 +70,51 @@ FunctionInfo::FunctionInfo (std::string encodedInfo) {
   if (argsStr == "auto") {
     argsNo = 0;
     autoArgs = true;
-  } else {
-    autoArgs = false;
-    argsNo = int (strtol (argsStr.c_str (), &endptr, 10));
-    if (*endptr) {
+    return;
+  }
+  autoArgs = false;
+  const std::string::size_type typesSign = argsStr.find ("{");
+  if (typesSign == std::string::npos
+      || argsStr[argsStr.length () - 1] != '}') {
+    edu::sharif::twinner::util::Logger::error ()
+        << "FunctionInfo::FunctionInfo (encodedInfo=" << encodedInfo << "):"
+        " argument types are required in the non-auto mode."
+        " Expected format: <func-name>@0x<hex-address>"
+        "#(<args-no>{arg1type!arg2type!...!argntype}|auto)\n"
+        "Example 1: test@0x400400#2{int!const int *}\n"
+        "Example 2: test@0x400400#0{}\n";
+    abort ();
+  }
+  argsNo = int (strtol (argsStr.substr (0, typesSign).c_str (), &endptr, 10));
+  if (*endptr || argsNo < 0) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "FunctionInfo::FunctionInfo (encodedInfo=" << encodedInfo << "):"
+        " arguments number should be either ``auto'' or a decimal number.\n";
+    abort ();
+  }
+  const std::string typesStr =
+      argsStr.substr (typesSign + 1, argsStr.length () - typesSign - 2) + '!';
+  if (argsNo == 0 && typesStr == "!") {
+    return;
+  }
+  std::string::size_type last = 0;
+  for (std::string::size_type separator = typesStr.find ("!");
+      separator != std::string::npos;
+      separator = typesStr.find ("!", last = separator + 1)) {
+    if (separator == last) {
       edu::sharif::twinner::util::Logger::error ()
           << "FunctionInfo::FunctionInfo (encodedInfo=" << encodedInfo << "):"
-          " arguments number should be either ``auto'' or a decimal number.\n";
+          " empty argument type is given.\n";
       abort ();
     }
+    types.push_back (typesStr.substr (last, separator - last));
+  }
+  if (unsigned (argsNo) != types.size ()) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "FunctionInfo::FunctionInfo (encodedInfo=" << encodedInfo << "):"
+        " the number of args (" << std::dec << argsNo << ") does not match"
+        " with the number of given types (" << types.size () << ")\n";
+    abort ();
   }
 }
 
@@ -140,6 +178,10 @@ int FunctionInfo::getArgsNo () const {
   return argsNo;
 }
 
+const std::list<std::string> &FunctionInfo::getTypes () const {
+  return types;
+}
+
 ADDRINT FunctionInfo::getAddress () const {
   return address;
 }
@@ -155,7 +197,18 @@ const edu::sharif::twinner::util::Logger &operator<<
   if (fi.isAutoArgs ()) {
     return log << ", args=auto)";
   } else {
-    return log << ", args=" << fi.getArgsNo () << ")";
+    log << ", args=" << fi.getArgsNo () << '{';
+    bool first = true;
+    for (std::list<std::string>::const_iterator it = fi.getTypes ().begin ();
+        it != fi.getTypes ().end (); ++it) {
+      if (first) {
+        first = false;
+      } else {
+        log << '!';
+      }
+      log << (*it);
+    }
+    return log << "})";
   }
 }
 

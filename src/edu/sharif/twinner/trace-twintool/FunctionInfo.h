@@ -14,6 +14,7 @@
 #define FUNCTION_INFO_H
 
 #include <string>
+#include <list>
 
 #include "edu/sharif/twinner/pin-wrapper.h"
 
@@ -34,6 +35,7 @@ private:
   std::string name;
   ADDRINT address;
   int argsNo;
+  std::list<std::string> types;
   bool autoArgs;
 
 public:
@@ -57,6 +59,7 @@ public:
 
   bool isAutoArgs () const;
   int getArgsNo () const;
+  const std::list<std::string> &getTypes () const;
   ADDRINT getAddress () const;
   std::string getName () const;
 

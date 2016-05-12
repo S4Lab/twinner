@@ -113,7 +113,6 @@ int run (string input, string args, string endpoints, string safeFunctions,
       << "TwinTool pintool: " << twintool
       << "\nPin launcher: " << pin
       << "\nOutput twin file: " << twin << '\n';
-
   edu::sharif::twinner::engine::Twinner tw;
   tw.setInputBinaryPath (input);
   tw.setTwinToolPath (twintool);
@@ -173,7 +172,8 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       " instruction addresses to start/end analysis", false, false},
     { 'S', "safe-functions", ArgParser::YES, "comma separated"
       " list of functions to be preserved in the twincode\n"
-      "\t\teach function format: <func-name>@0x<hex-address>#(<args-no>|auto)",
+      "\t\teach function format: <func-name>@0x<hex-address>#(<args-no>"
+      "{arg1type!arg2type!...!argntype}|auto)",
       false, false},
     { 'n', "naive", ArgParser::NO,
       "do not instrument; just print instructions", false, false},

@@ -87,7 +87,8 @@ Executer::Executer (std::string pinLauncher, std::string twintool,
     + (main ? std::string (" -main -mar ") + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
     + (endpoints != "" ? std::string (" -endpoints ") + endpoints
        + " -mar " + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
-    + (safeFunctions != "" ? std::string (" -safe-functions ") + safeFunctions : "")
+    + (safeFunctions != "" ? std::string (" -safe-functions ")
+       + "'" + safeFunctions + "'" : "")
     + (stackOffset != "" ? std::string (" -stack-offset ") + stackOffset : "")
     + (naive ? " -naive" : "")
     + " -- " + inputBinary),
