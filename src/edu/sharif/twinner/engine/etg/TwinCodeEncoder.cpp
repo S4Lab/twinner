@@ -338,11 +338,9 @@ void TwinCodeEncoder::codeRegisterChanges (const TraceSegment *segment,
       ++i) {
     std::map < REG, Expression * >::const_iterator it =
         regToExp.find (regs[i].id);
-    out.indented () << "regs." << regs[i].name << " = ";
     if (it != regToExp.end ()) {
-      out << VAR_TYPE " (" << it->second->toString () << ");\n";
-    } else {
-      out << regs[i].name << "_" << index << ";\n";
+      out.indented () << "regs." << regs[i].name << " = "
+          << VAR_TYPE " (" << it->second->toString () << ");\n";
     }
   }
 }
