@@ -31,10 +31,15 @@ class FunctionInvocation : public TraceSegmentTerminator {
 private:
   std::string name;
   std::list<Expression *> args;
+  std::list<std::string> types;
   std::string firstArgumentAsString;
 
 public:
-  FunctionInvocation (std::string name, std::list<Expression *> args,
+  FunctionInvocation (std::string name);
+  FunctionInvocation (std::string name,
+      const std::list<Expression *> &args, const std::list<std::string> &types);
+  FunctionInvocation (std::string name,
+      const std::list<Expression *> &args, const std::list<std::string> &types,
       std::string firstArgumentAsString);
   virtual ~FunctionInvocation ();
 

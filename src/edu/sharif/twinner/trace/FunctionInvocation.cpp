@@ -22,10 +22,23 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-FunctionInvocation::FunctionInvocation (std::string _name,
-    std::list<Expression *> _args, std::string _firstArgumentAsString) :
+FunctionInvocation::FunctionInvocation (std::string _name) :
     TraceSegmentTerminator (),
-    name (_name), args (_args),
+    name (_name) {
+}
+
+FunctionInvocation::FunctionInvocation (std::string _name,
+    const std::list<Expression *> &_args,
+    const std::list<std::string> &_types) :
+    TraceSegmentTerminator (),
+    name (_name), args (_args), types (_types) {
+}
+
+FunctionInvocation::FunctionInvocation (std::string _name,
+    const std::list<Expression *> &_args, const std::list<std::string> &_types,
+    std::string _firstArgumentAsString) :
+    TraceSegmentTerminator (),
+    name (_name), args (_args), types (_types),
     firstArgumentAsString (_firstArgumentAsString) {
 }
 
@@ -36,9 +49,11 @@ std::string FunctionInvocation::getCallingLine () const {
   std::stringstream ss;
   ss << name << " (";
   bool first = true;
+  std::list<std::string>::const_iterator tt = types.begin ();
   for (std::list<Expression *>::const_iterator it = args.begin ();
-      it != args.end (); ++it) {
+      it != args.end (); ++it, ++tt) {
     const Expression *arg = *it;
+    const std::string &type = *tt;
     if (first) {
       first = false;
       if (!firstArgumentAsString.empty ()) {
@@ -49,7 +64,7 @@ std::string FunctionInvocation::getCallingLine () const {
     } else {
       ss << ", ";
     }
-    ss << arg->toString ();
+    ss << '(' << type << ") " << arg->toString ();
   }
   ss << ");";
   return ss.str ();
