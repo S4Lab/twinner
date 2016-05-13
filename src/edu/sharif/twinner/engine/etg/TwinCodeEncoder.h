@@ -93,9 +93,16 @@ private:
   void declareMemorySymbols (const std::set < AddrToSize > &addrToSize,
       int depth, int index);
 
-  void encodeConstraintAndChildren (ConstTreeNode *node, int depth, int index,
+  /**
+   * @return true iff the subgraph is encoded under an if-construct
+   */
+  bool encodeConstraintAndChildren (ConstTreeNode *node, int depth, int index,
       bool bypassConstraint = false);
-  void encodeConstraint (std::list < ConstConstraintPtr > constraints,
+
+  /**
+   * @return true iff the constraint is encoded using an if-construct
+   */
+  bool encodeConstraint (std::list < ConstConstraintPtr > constraints,
       int depth);
   void encodeTransformations (const TraceSegment *segment,
       int depth, int index);

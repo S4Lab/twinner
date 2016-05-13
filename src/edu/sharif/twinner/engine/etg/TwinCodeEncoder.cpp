@@ -147,7 +147,7 @@ void TwinCodeEncoder::declareMemorySymbols (
   }
 }
 
-void TwinCodeEncoder::encodeConstraintAndChildren (ConstTreeNode *node,
+bool TwinCodeEncoder::encodeConstraintAndChildren (ConstTreeNode *node,
     int depth, int index, bool bypassConstraint) {
   std::list < ConstConstraintPtr > constraints;
   while (!(node->getSegment ()) && node->getChildren ().size () == 1) {
@@ -161,7 +161,7 @@ void TwinCodeEncoder::encodeConstraintAndChildren (ConstTreeNode *node,
   if (!bypassConstraint) {
     constraints.push_back (node->getConstraint ());
   }
-  encodeConstraint (constraints, depth);
+  const bool constraintIsEncoded = encodeConstraint (constraints, depth);
   const TraceSegment *segment = node->getSegment ();
   if (segment) {
     encodeTransformations (segment, depth + 1, index++);
@@ -173,6 +173,7 @@ void TwinCodeEncoder::encodeConstraintAndChildren (ConstTreeNode *node,
   }
   out.setDepth (depth);
   out.indented () << '}';
+  return constraintIsEncoded;
 }
 
 bool TwinCodeEncoder::simplifyConstraints (std::stringstream &ss,
@@ -210,7 +211,7 @@ bool TwinCodeEncoder::simplifyConstraints (std::stringstream &ss,
   return !first;
 }
 
-void TwinCodeEncoder::encodeConstraint (
+bool TwinCodeEncoder::encodeConstraint (
     std::list < ConstConstraintPtr > constraints, int depth) {
   std::stringstream ss;
   std::set< Variable > typesAndNames;
@@ -218,7 +219,7 @@ void TwinCodeEncoder::encodeConstraint (
       (ss, typesAndNames, constraints);
   if (!mustConstraintBeEncoded) {
     out << "{\n";
-    return;
+    return false;
   }
   const std::string constraintString = ss.str ();
   if (constraintString.length () < 200) { // inline the constraint
@@ -231,7 +232,7 @@ void TwinCodeEncoder::encodeConstraint (
           (inlinedConstraintString, it->technicalName, castedName.str ());
     }
     out << "if (" << inlinedConstraintString << ") {\n";
-    return;
+    return true;
   }
   std::stringstream conditionName;
   conditionName << "cond_" << (++conditionIndex);
@@ -254,7 +255,7 @@ void TwinCodeEncoder::encodeConstraint (
   conout << "}\n\n";
   out << "if (" << conditionName.str () << " ("
       << arguments.str () << ")) {\n";
-  return;
+  return true;
 }
 
 std::string TwinCodeEncoder::replaceAll (std::string str,
@@ -396,9 +397,10 @@ void TwinCodeEncoder::encodeChildren (ConstTreeNode *node,
           << "TwinCodeEncoder::encodeChildren (...): Assertion failed.\n";
       abort ();
     }
-    encodeConstraintAndChildren (children.front (), depth, index);
-    out << " else ";
-    encodeConstraintAndChildren (children.back (), depth, index, true);
+    if (encodeConstraintAndChildren (children.front (), depth, index)) {
+      out << " else ";
+      encodeConstraintAndChildren (children.back (), depth, index, true);
+    }
     break;
   }
   default:
