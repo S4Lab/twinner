@@ -109,10 +109,12 @@ bool Expression::isOverwritingExpression () const {
 }
 
 std::string Expression::toString () const {
-  Stack st = Stack (stack);
   std::stringstream ss;
-  convertToInfixExpression (st, ss);
-  if (!isTrivial ()) {
+  if (isTrivial ()) {
+    ss << *lastConcreteValue;
+  } else {
+    Stack st = Stack (stack);
+    convertToInfixExpression (st, ss);
     ss << " /*" << *lastConcreteValue << "*/";
   }
   return ss.str ();
