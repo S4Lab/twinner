@@ -1171,6 +1171,23 @@ InstructionSymbolicExecuter::instantiateFunctionInvocation (
     return new edu::sharif::twinner::trace::FunctionInvocation
         (name, args, types, firstArgumentAsString);
 
+  } else if (name == "puts") {
+    edu::sharif::twinner::trace::Expression *stringArg =
+        fi.getArgument (0, trace, context);
+    args.push_back (stringArg);
+    types.push_back ("const char *");
+    const ADDRINT formatStringPointer =
+        stringArg->getLastConcreteValue ().toUint64 ();
+    if (!edu::sharif::twinner::util::readStringFromMemory
+        (firstArgumentAsString, formatStringPointer)) {
+      edu::sharif::twinner::util::Logger::warning ()
+          << "first argument of the ``puts'' cannot be read as a C string";
+      return new edu::sharif::twinner::trace::FunctionInvocation
+          (name, args, types);
+    }
+    return new edu::sharif::twinner::trace::FunctionInvocation
+        (name, args, types, firstArgumentAsString);
+
   } else {
     edu::sharif::twinner::util::Logger::warning () << "argsNo=auto but "
         << name << " function is not supported by auto yet";
