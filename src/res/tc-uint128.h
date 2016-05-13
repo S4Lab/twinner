@@ -260,6 +260,14 @@ UINT64 logicalShiftToRight (const UINT64 v, const int bits) {
   return v >> bits;
 }
 
+UINT128 logicalShiftToLeft (const UINT128 v, const int bits) {
+  return v << bits;
+}
+
+UINT128 logicalShiftToLeft (const UINT64 v, const int bits) {
+  return UINT128(0, v) << bits;
+}
+
 UINT64 arithmeticShiftToRight (const UINT64 v, const int bits) {
   return (INT64 (v) >> bits);
 }
