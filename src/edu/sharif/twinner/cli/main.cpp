@@ -29,7 +29,7 @@ using namespace std;
 
 using namespace edu::sharif::twinner::cli;
 
-const char *VERSION_NUMBER = "0.14.0";
+const char *VERSION_NUMBER = "0.22.0";
 
 void printError (string progName, string errorMessage);
 void printVersion ();
