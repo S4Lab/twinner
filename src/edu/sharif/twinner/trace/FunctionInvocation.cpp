@@ -86,7 +86,7 @@ void FunctionInvocation::saveToBinaryStream (std::ofstream &out) const {
   {
     const char *typesMagicString = "TYP";
     out.write (typesMagicString, 3);
-    for (typename std::list<std::string>::const_iterator it = types.begin ();
+    for (std::list<std::string>::const_iterator it = types.begin ();
         it != types.end (); ++it) {
       const std::string &type = *it;
       const int len = type.length ();
