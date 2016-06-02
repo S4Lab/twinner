@@ -123,7 +123,6 @@ FunctionInfo::~FunctionInfo () {
 
 Expression *FunctionInfo::getArgument (int i, Trace *trace,
     const CONTEXT *context) const {
-  int offset;
 #if defined(TARGET_IA32E) && defined(TARGET_LINUX)
   // args are in RDI, RSI, RDX, RCX, R8, R9, and in the stack respectively
   if (i < 6) {
@@ -132,15 +131,16 @@ Expression *FunctionInfo::getArgument (int i, Trace *trace,
     };
     return getArgument (regs[i], trace, context);
   }
-  offset = (i - 6) * 8;
+  const int offset = (i - 6) * 8;
+  const ADDRINT topOfStack = PIN_GetContextReg (context, REG_RSP);
 #elif defined(TARGET_IA32)
   // args are in the stack respectively (first argument is pushed last)
-  offset = i * 4;
+  const int offset = i * 4;
+  const ADDRINT topOfStack = PIN_GetContextReg (context, REG_ESP);
 #else
 #error "Unsupported architecture and/or OS"
 #endif
-  return getArgument (offset, PIN_GetContextReg (context, REG_RSP),
-                      trace, context);
+  return getArgument (offset, topOfStack, trace, context);
 }
 #ifdef TARGET_IA32E
 
