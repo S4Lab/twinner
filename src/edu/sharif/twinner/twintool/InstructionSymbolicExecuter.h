@@ -358,6 +358,13 @@ private:
       const ExpressionValueProxy &src);
 
   /**
+   * Sign extends the (src) into (dst:src). That is, fills (dst) with
+   * the sign bit of the (src).
+   */
+  void cdqAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * MOV String to String reads from [rsi]/srcMem and moves to [rdi]/dstMem and
    * increments/decrements rdi/rsi registers
    */

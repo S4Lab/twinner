@@ -189,8 +189,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_IMUL, IMUL_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_IDIV, IDIV_INS_MODELS));
-  managedInstructions.insert
-      (make_pair (XED_ICLASS_CDQE, DST_REG_SRC_REG));
+  INITIALIZE (DST_REG_SRC_REG,
+              XED_ICLASS_CDQE, XED_ICLASS_CDQ);
   INITIALIZE (TEST_INS_MODELS,
               XED_ICLASS_TEST, XED_ICLASS_BT);
   INITIALIZE (OPERAND_LESS,

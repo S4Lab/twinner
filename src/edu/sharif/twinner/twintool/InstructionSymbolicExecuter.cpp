@@ -1434,6 +1434,38 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::cdqAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious () << "cdqAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  edu::sharif::twinner::trace::Expression *srcexp = getExpression (src, trace);
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tinstantiating constraint...";
+  bool sign;
+  std::list <edu::sharif::twinner::trace::Constraint *> cc;
+  cc.push_back
+      (edu::sharif::twinner::trace::Constraint::instantiateLessConstraint
+       (sign, srcexp, disassembledInstruction));
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraints (cc);
+  delete srcexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp;
+  if (sign) {
+    edu::sharif::twinner::trace::cv::ConcreteValue64Bits fullOne (UINT64 (-1));
+    dstexp = new edu::sharif::twinner::trace::ExpressionImp
+        (fullOne.clone (dst.getSize ()));
+  } else {
+    edu::sharif::twinner::trace::cv::ConcreteValue64Bits fullZero (UINT64 (0));
+    dstexp = new edu::sharif::twinner::trace::ExpressionImp
+        (fullZero.clone (dst.getSize ()));
+  }
+  setExpression (dst, trace, dstexp);
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::movsAnalysisRoutine (
     const MutableExpressionValueProxy &rdi, const MutableExpressionValueProxy &rsi,
     const MutableExpressionValueProxy &dstMem, const ExpressionValueProxy &srcMem) {
@@ -3413,6 +3445,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_MOVSX:
   case XED_ICLASS_MOVSXD:
     return &InstructionSymbolicExecuter::movsxAnalysisRoutine;
+  case XED_ICLASS_CDQ:
+    return &InstructionSymbolicExecuter::cdqAnalysisRoutine;
   case XED_ICLASS_CMOVBE:
     return &InstructionSymbolicExecuter::cmovbeAnalysisRoutine;
   case XED_ICLASS_CMOVNBE:
