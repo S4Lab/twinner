@@ -321,6 +321,15 @@ private:
       const ExpressionValueProxy &src, const ExpressionValueProxy &order);
 
   /**
+   * SHLD shifts (dst,src) to left as much as (shift) and stores it in (dst).
+   * That is, the (dst) is shifted left by (shift) and its lower order bits
+   * are filled with the shifted (src) instead of zero.
+   * The last bit which goes out of (dst) is stored in CF.
+   */
+  void shldAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src, const ExpressionValueProxy &shift);
+
+  /**
    * XCHG instruction exchanges values of dst (r/m) and src (r) atomically
    */
   void xchgAnalysisRoutine (const MutableExpressionValueProxy &dst,

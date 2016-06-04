@@ -1328,6 +1328,47 @@ void InstructionSymbolicExecuter::pshufdAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::shldAnalysisRoutine (
+    const MutableExpressionValueProxy &dst,
+    const ExpressionValueProxy &src, const ExpressionValueProxy &shift) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious () << "shldAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  edu::sharif::twinner::trace::Expression *srcexp = getExpression (src, trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexpOrig =
+      getExpression (dst, trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting shift exp...";
+  edu::sharif::twinner::trace::Expression *shiftexp =
+      getExpression (shift, trace);
+  if (dst.getSize () == 64) {
+    shiftexp->bitwiseAnd (0x3F); // % 64
+  } else {
+    shiftexp->bitwiseAnd (0x1F); // % 32
+  }
+  edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
+  edu::sharif::twinner::util::Logger::loquacious () << "\tshifting operation...";
+  dstexp->shiftToLeft (shiftexp);
+  // truncate bits which are shifted left, outside of dst boundaries
+  dst.truncate (dstexp);
+  // fill lower bits with src
+  edu::sharif::twinner::trace::Expression *fillexp =
+      new edu::sharif::twinner::trace::ExpressionImp
+      (srcexp->getLastConcreteValue ().getSize ());
+  fillexp->minus (shiftexp);
+  srcexp->shiftToRight (fillexp);
+  delete fillexp;
+  dstexp->bitwiseOr (srcexp);
+  delete srcexp;
+  setExpression (dst, trace, dstexp);
+  delete dstexp;
+  delete dstexpOrig;
+  delete shiftexp;
+  eflags.setFlags (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
+                   ("ShiftLeftOperationGroup"));
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::xchgAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const MutableExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
@@ -3501,6 +3542,8 @@ InstructionSymbolicExecuter::convertOpcodeToDoubleSourcesAnalysisRoutine (
     return &InstructionSymbolicExecuter::imulAnalysisRoutine;
   case XED_ICLASS_PSHUFD:
     return &InstructionSymbolicExecuter::pshufdAnalysisRoutine;
+  case XED_ICLASS_SHLD:
+    return &InstructionSymbolicExecuter::shldAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Double Sources: Unknown opcode: " << OPCODE_StringShort (op) << '\n';

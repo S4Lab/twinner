@@ -168,6 +168,8 @@ void Instrumenter::initialize () {
   INITIALIZE (SHIFT_INS_MODELS,
               XED_ICLASS_SHL, XED_ICLASS_SHR, XED_ICLASS_SAR,
               XED_ICLASS_ROR, XED_ICLASS_ROL);
+  managedInstructions.insert
+      (make_pair (XED_ICLASS_SHLD, SHIFT_DOUBLE_PRECISION_INS_MODELS));
   INITIALIZE (DST_REG_REG_SRC_EITHER_REG_OR_MEM,
               XED_ICLASS_DIV, XED_ICLASS_MUL);
   /*
