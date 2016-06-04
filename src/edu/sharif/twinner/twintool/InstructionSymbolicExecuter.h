@@ -179,6 +179,12 @@ public:
       REG auxReg, const ConcreteValue &auxRegVal,
       UINT32 memReadBytes,
       UINT32 insAssembly);
+  void analysisRoutineDstMemSrcRegAuxImd (DoubleSourcesAnalysisRoutine routine,
+      ADDRINT dstMemoryEa,
+      REG srcReg, const ConcreteValue &srcRegVal,
+      const ConcreteValue &auxImmediateValue,
+      UINT32 memReadBytes,
+      UINT32 insAssembly);
   void analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       const ConcreteValue &srcImmediateValue,
@@ -934,6 +940,12 @@ VOID analysisRoutineDstMemSrcRegAuxReg (VOID *iseptr, UINT32 opcode,
     ADDRINT dstMemoryEa,
     UINT32 srcReg, ADDRINT srcRegVal,
     UINT32 auxReg, ADDRINT auxRegVal,
+    UINT32 memReadBytes,
+    UINT32 insAssembly);
+VOID analysisRoutineDstMemSrcRegAuxImd (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    ADDRINT auxImmediateValue,
     UINT32 memReadBytes,
     UINT32 insAssembly);
 VOID analysisRoutineDstMemSrcLargeReg (VOID *iseptr, UINT32 opcode,

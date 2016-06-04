@@ -467,6 +467,37 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcRegAuxReg (
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineDstMemSrcRegAuxImd (
+    DoubleSourcesAnalysisRoutine routine,
+    ADDRINT dstMemoryEa,
+    REG srcReg, const ConcreteValue &srcRegVal,
+    const ConcreteValue &auxImmediateValue,
+    UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  if (disabled) {
+    return;
+  }
+  disassembledInstruction = insAssembly;
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << std::hex << "analysisRoutineDstMemSrcRegAuxImd(INS: "
+      << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
+      << ", src reg: " << REG_StringShort (srcReg)
+      << ", aux imd: " << auxImmediateValue << '\n';
+  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
+                    ConstantExpressionValueProxy (auxImmediateValue, memReadBytes * 8));
+  logger << "Registers:\n";
+  trace->printRegistersValues (logger);
+}
+
 void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine routine,
     ADDRINT dstMemoryEa,
     const ConcreteValue &srcImmediateValue,
@@ -3846,6 +3877,22 @@ VOID analysisRoutineDstMemSrcRegAuxReg (VOID *iseptr, UINT32 opcode,
        dstMemoryEa,
        (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
        (REG) auxReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxRegVal),
+       memReadBytes,
+       insAssembly);
+}
+
+VOID analysisRoutineDstMemSrcRegAuxImd (VOID *iseptr, UINT32 opcode,
+    ADDRINT dstMemoryEa,
+    UINT32 srcReg, ADDRINT srcRegVal,
+    ADDRINT auxImmediateValue,
+    UINT32 memReadBytes,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineDstMemSrcRegAuxImd
+      (ise->convertOpcodeToDoubleSourcesAnalysisRoutine ((OPCODE) opcode),
+       dstMemoryEa,
+       (REG) srcReg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (auxImmediateValue),
        memReadBytes,
        insAssembly);
 }

@@ -564,15 +564,19 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
     if (sourceRegIsXmm) {
       return DST_MEM_SRC_LARGE_REG;
     } else {
-      if (INS_OperandCount (ins) > 2 && INS_OperandIsReg (ins, 2)
-          && REG_is_gr_any_size (INS_OperandReg (ins, 2))) {
-        return DST_MEM_SRC_REG_AUX_REG;
-      } else {
-        if (INS_OperandWritten (ins, 1)) {
-          return DST_MEM_SRC_MUTABLE_REG;
-        } else {
-          return DST_MEM_SRC_REG;
+      if (INS_OperandCount (ins) > 2) {
+        if (INS_OperandIsReg (ins, 2)
+            && REG_is_gr_any_size (INS_OperandReg (ins, 2))) {
+          return DST_MEM_SRC_REG_AUX_REG;
+
+        } else if (INS_OperandIsImmediate (ins, 2)) {
+          return DST_MEM_SRC_REG_AUX_IMD;
         }
+      }
+      if (INS_OperandWritten (ins, 1)) {
+        return DST_MEM_SRC_MUTABLE_REG;
+      } else {
+        return DST_MEM_SRC_REG;
       }
     }
 
@@ -585,12 +589,11 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
   } else if (destIsMem && sourceIsMem) {
     return DST_MEM_SRC_MEM;
 
-  } else {
-    edu::sharif::twinner::util::Logger::error ()
-        << "Instrumenter::getInstructionModelForNormalInstruction (...): "
-        "Unknown instruction model\n";
-    abort ();
   }
+  edu::sharif::twinner::util::Logger::error ()
+      << "Instrumenter::getInstructionModelForNormalInstruction (...): "
+      "Unknown instruction model\n";
+  abort ();
 }
 
 inline void Instrumenter::checkForInitialState (INS ins) const {
@@ -845,6 +848,22 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                     IARG_MEMORYOP_EA, 0,
                     IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
                     IARG_UINT32, auxreg, IARG_REG_VALUE, auxreg,
+                    IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_MEM_SRC_REG_AUX_IMD:
+  {
+    REG srcreg = INS_OperandReg (ins, 1);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcRegAuxImd,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_MEMORYOP_EA, 0,
+                    IARG_UINT32, srcreg, IARG_REG_VALUE, srcreg,
+                    IARG_ADDRINT, ADDRINT (INS_OperandImmediate (ins, 2)),
                     IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
                     IARG_END);
