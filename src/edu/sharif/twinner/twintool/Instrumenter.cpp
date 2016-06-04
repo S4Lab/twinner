@@ -532,15 +532,18 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
     } else if (destRegIsXmm && !sourceRegIsXmm) {
       return DST_LARGE_REG_SRC_REG;
     } else {
-      if (INS_OperandCount (ins) > 2 && INS_OperandIsReg (ins, 2)
-          && REG_is_gr_any_size (INS_OperandReg (ins, 2))) {
-        return DST_REG_SRC_REG_AUX_REG;
-      } else {
-        if (INS_OperandWritten (ins, 1)) {
-          return DST_REG_SRC_MUTABLE_REG;
-        } else {
-          return DST_REG_SRC_REG;
+      if (INS_OperandCount (ins) > 2) {
+        if (INS_OperandIsReg (ins, 2)
+            && REG_is_gr_any_size (INS_OperandReg (ins, 2))) {
+          return DST_REG_SRC_REG_AUX_REG;
+        } else if (INS_OperandIsImmediate (ins, 2)) {
+          return DST_REG_SRC_REG_AUX_IMD;
         }
+      }
+      if (INS_OperandWritten (ins, 1)) {
+        return DST_REG_SRC_MUTABLE_REG;
+      } else {
+        return DST_REG_SRC_REG;
       }
     }
 
