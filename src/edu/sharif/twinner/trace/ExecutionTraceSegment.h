@@ -111,6 +111,10 @@ private:
   Expression *setSymbolicExpressionImplementation (int size,
       std::map < KEY, Expression * > &map, const KEY key, const Expression *exp);
 
+  template < typename KEY >
+  void setExpression (std::map < KEY, Expression * > &map,
+      const KEY key, Expression *exp);
+
   template <typename ADDRESS>
   void saveMapToBinaryStream (std::ofstream &out,
       const char *magicString, const std::map < ADDRESS, Expression * > &map) const;

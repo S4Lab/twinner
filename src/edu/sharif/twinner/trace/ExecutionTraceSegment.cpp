@@ -432,7 +432,6 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
     int size, std::map < KEY, Expression * > &map, const KEY key,
     const edu::sharif::twinner::trace::cv::ConcreteValue &currentConcreteValue,
     Expression *newExpression, StateSummary &state) {
-  typedef typename std::map < KEY, Expression * >::iterator MapIterator;
   Expression *exp = tryToGetSymbolicExpressionImplementation
       (size, map, key, currentConcreteValue, state);
   if (exp) {
@@ -447,12 +446,7 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
         " newExpression is null!\n";
     abort ();
   }
-  std::pair < MapIterator, bool > res = map.insert (make_pair (key, newExpression));
-  if (!res.second) { // another expression already exists. overwriting...
-    MapIterator it = res.first;
-    delete it->second;
-    it->second = newExpression;
-  }
+  setExpression (map, key, newExpression);
   return newExpression;
 }
 
@@ -460,7 +454,6 @@ template < typename KEY >
 Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
     int size, std::map < KEY, Expression * > &map, const KEY key,
     Expression *newExpression) {
-  typedef typename std::map < KEY, Expression * >::iterator MapIterator;
   Expression *exp = tryToGetSymbolicExpressionImplementation
       (size, map, key);
   if (exp) {
@@ -472,14 +465,7 @@ Expression *ExecutionTraceSegment::getSymbolicExpressionImplementation (
         " newExpression is null!\n";
     abort ();
   }
-  std::pair < MapIterator, bool > res = map.insert (make_pair (key, newExpression));
-  if (!res.second) {
-    // as there was no expression (regardless of concrete value), this case is impossible!
-    edu::sharif::twinner::util::Logger::error ()
-        << "ExecutionTraceSegment::getSymbolicExpressionImplementation method:"
-        " can not set expression, while there was no prior expression!\n";
-    abort ();
-  }
+  setExpression (map, key, newExpression);
   return newExpression;
 }
 
@@ -522,20 +508,25 @@ template < typename KEY >
 Expression *ExecutionTraceSegment::setSymbolicExpressionImplementation (int size,
     std::map < KEY, Expression * > &map, const KEY key,
     const Expression *nonOwnedExpression) {
-  typedef typename std::map < KEY, Expression * >::iterator MapIterator;
   // The nonOwnedExpression is owned by caller.
   // We must clone it and take ownership of the cloned object.
   // A null expression means that the expression should be lazy-loaded.
   Expression *exp = nonOwnedExpression != NULL
       ? nonOwnedExpression->clone (size) : NULL;
+  setExpression (map, key, exp);
+  return exp;
+}
+
+template < typename KEY >
+void ExecutionTraceSegment::setExpression (std::map < KEY, Expression * > &map,
+    const KEY key, Expression *exp) {
+  typedef typename std::map < KEY, Expression * >::iterator MapIterator;
   std::pair < MapIterator, bool > res = map.insert (make_pair (key, exp));
   if (!res.second) { // another expression already exists. overwriting...
-    // old expression is owned by us; so it should be deleted before missing its pointer!
     MapIterator it = res.first;
     delete it->second;
     it->second = exp;
   }
-  return exp;
 }
 
 void ExecutionTraceSegment::addPathConstraints (
