@@ -170,11 +170,11 @@ Expression *TraceImp::getSymbolicExpressionImplementation (int size, T address,
   Expression *exp = (this->*tryToGetMethod) (size, address, val, state);
   if (exp) { // exp exists and its val matches with expected value
     return exp;
-  } // exp does not exist at all, so it's OK to create a new one
-
+  }
   if (state.isUnexpectedChangeState ()) {
     return 0;
   }
+  // exp does not exist at all, so it's OK to create a new one
   if (state.isWrongState ()) {
     const edu::sharif::twinner::trace::cv::ConcreteValue &currentValue =
         state.getCurrentStateValue ();

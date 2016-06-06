@@ -532,10 +532,11 @@ Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me, int size,
     delete msb;
     msb = tmp;
   }
+  const int halfSizeBytes = (size / 2) / 8;
   edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy leftProxy
-      (key, (size / 2) / 8);
+      (key, halfSizeBytes);
   edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy rightProxy
-      (key + (size / 2), (size / 2) / 8);
+      (key + halfSizeBytes, halfSizeBytes);
   Expression *leftExp = leftProxy.getExpression (me, *lsb, state);
   if (state.isWrongState ()) {
     return 0;
@@ -568,10 +569,11 @@ Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me, int size,
 
 Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me, int size,
     std::map < ADDRINT, Expression * > &map, const ADDRINT key) {
+  const int halfSizeBytes = (size / 2) / 8;
   edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy leftProxy
-      (key, (size / 2) / 8);
+      (key, halfSizeBytes);
   edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy rightProxy
-      (key + (size / 2), (size / 2) / 8);
+      (key + halfSizeBytes, halfSizeBytes);
   Expression *leftExp = leftProxy.getExpression (me);
   Expression *rightExp = rightProxy.getExpression (me);
   {
