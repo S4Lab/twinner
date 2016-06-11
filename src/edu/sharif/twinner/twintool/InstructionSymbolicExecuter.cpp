@@ -3553,6 +3553,7 @@ InstructionSymbolicExecuter::convertOpcodeToDoubleDestinationsAnalysisRoutine (
   case XED_ICLASS_IMUL:
     return &InstructionSymbolicExecuter::imulAnalysisRoutine;
   case XED_ICLASS_SCASB:
+  case XED_ICLASS_SCASW:
     return &InstructionSymbolicExecuter::scasAnalysisRoutine;
   case XED_ICLASS_STOSB:
   case XED_ICLASS_STOSW:
