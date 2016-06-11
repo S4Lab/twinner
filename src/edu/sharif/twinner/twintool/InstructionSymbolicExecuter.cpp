@@ -3088,11 +3088,9 @@ void InstructionSymbolicExecuter::negAnalysisRoutine (
   edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->twosComplement ();
   setExpression (opr, trace, dstexp);
   delete dstexp;
-  delete dstexpOrig;
-  //TODO: set CF == (dstexpOrig is not zero) and other flags based on dstexp result
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
-       ("NegationOperationGroup"));
+      (new edu::sharif::twinner::twintool::operationgroup::SubtractOperationGroup
+       (new edu::sharif::twinner::trace::ExpressionImp (UINT64 (0)), dstexpOrig));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
