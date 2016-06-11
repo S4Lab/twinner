@@ -262,7 +262,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxImd (
       << ", aux imd: 0x" << auxImmediateValue << '\n';
   (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
                     RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
-                    ConstantExpressionValueProxy (auxImmediateValue, 8));
+                    ConstantExpressionValueProxy (auxImmediateValue, 64));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }

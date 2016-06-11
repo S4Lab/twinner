@@ -54,7 +54,7 @@ KNOB < string > disassemblyOutputFilePath (KNOB_MODE_WRITEONCE, "pintool", "memo
     "specify file path for saving disassembled instructions memory");
 
 KNOB < string > verbose (KNOB_MODE_WRITEONCE, "pintool", "verbose", "warning",
-    "specify the level of verboseness: { quiet, error, warning, info, debug }");
+    "specify the level of verboseness: { quiet, error, warning, info, debug, loquacious }");
 
 KNOB < BOOL > main (KNOB_MODE_WRITEONCE, "pintool", "main", "",
     "if presents, only main() routine and what is called by it will be analyzed");
