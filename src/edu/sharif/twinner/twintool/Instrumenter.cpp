@@ -166,6 +166,7 @@ void Instrumenter::initialize () {
   managedInstructions.insert
       (make_pair (XED_ICLASS_LEAVE, LEAVE_INS_MODELS));
   INITIALIZE (SHIFT_INS_MODELS,
+              XED_ICLASS_TEST, XED_ICLASS_BT,
               XED_ICLASS_SHL, XED_ICLASS_SHR, XED_ICLASS_SAR,
               XED_ICLASS_ROR, XED_ICLASS_ROL);
   managedInstructions.insert
@@ -191,8 +192,6 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_IDIV, IDIV_INS_MODELS));
   INITIALIZE (DST_REG_SRC_REG,
               XED_ICLASS_CDQE, XED_ICLASS_CDQ);
-  INITIALIZE (TEST_INS_MODELS,
-              XED_ICLASS_TEST, XED_ICLASS_BT);
   INITIALIZE (OPERAND_LESS,
               XED_ICLASS_RDTSC, // read time-stamp counter
               XED_ICLASS_CLD, // clear direction flag (DF)
