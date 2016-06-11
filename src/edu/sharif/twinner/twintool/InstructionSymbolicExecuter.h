@@ -609,6 +609,13 @@ private:
       const ExpressionValueProxy &bitoffset);
 
   /**
+   * BTR is bit test and reset instruction. It acts like BT and also
+   * resets the selected bit to zero.
+   */
+  void btrAnalysisRoutine (const MutableExpressionValueProxy &bitstring,
+      const ExpressionValueProxy &bitoffset);
+
+  /**
    * PMOVMSKB is a packed-move instruction which moves mask-byte of src reg to dat reg.
    * Mask-byte: read MSB of each byte of a reg and put those bits together. A 128-bits reg
    * has 16 bytes and its mask-byte has 16-bits or 2 bytes. Remaining bits in left-side of
