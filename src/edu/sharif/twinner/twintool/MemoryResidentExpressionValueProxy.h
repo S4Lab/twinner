@@ -32,6 +32,12 @@ class ConcreteValue;
 }
 namespace twintool {
 
+#ifdef TARGET_IA32E
+static const int STACK_OPERATION_UNIT_SIZE = 8; // bytes
+#else
+static const int STACK_OPERATION_UNIT_SIZE = 4; // bytes
+#endif
+
 class MemoryResidentExpressionValueProxy : public MutableExpressionValueProxy {
 private:
   ADDRINT memoryEa;

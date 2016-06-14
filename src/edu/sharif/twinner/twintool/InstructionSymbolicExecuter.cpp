@@ -51,12 +51,6 @@ namespace sharif {
 namespace twinner {
 namespace twintool {
 
-#ifdef TARGET_IA32E
-static const int STACK_OPERATION_UNIT_SIZE = 8; // bytes
-#else
-static const int STACK_OPERATION_UNIT_SIZE = 4; // bytes
-#endif
-
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     Instrumenter *_im,
     std::ifstream &symbolsFileInputStream, bool _disabled, bool _measureMode) :
