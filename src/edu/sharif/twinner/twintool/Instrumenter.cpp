@@ -1550,7 +1550,7 @@ void Instrumenter::instrumentImage (IMG img) {
                             IARG_END);
             ++state;
           } else if (addr == end) {
-            INS_InsertCall (ins, IPOINT_AFTER, (AFUNPTR) terminateAnalysis,
+            INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) terminateAnalysis,
                             IARG_PTR, this,
                             IARG_END);
             ++state;
