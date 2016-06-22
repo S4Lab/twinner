@@ -7,4 +7,7 @@ twintool:
 twinner:
 	make -f twinner.makefile twinner
 
+clean:
+	rm -rf {obj-ia32,obj-intel64}/{edu,Trace.*,Twinner*,TwinTool.*}
+
 .PHONY: all twintool twinner
