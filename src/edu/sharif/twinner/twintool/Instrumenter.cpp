@@ -134,7 +134,7 @@ void Instrumenter::initialize () {
   INITIALIZE (MOV_ZX_AND_SX_INS_MODELS,
               XED_ICLASS_MOVZX, XED_ICLASS_MOVSX, XED_ICLASS_MOVSXD);
   managedInstructions.insert // xmm <- r/m  OR  r/m <- xmm
-      (make_pair (XED_ICLASS_MOVD, DST_LARGE_REG_SRC_EITHER_REG_OR_MEM_OR_VICE_VERSA));
+      (std::make_pair (XED_ICLASS_MOVD, DST_LARGE_REG_SRC_EITHER_REG_OR_MEM_OR_VICE_VERSA));
   INITIALIZE (CMOV_INS_MODELS,
               XED_ICLASS_CMOVB, XED_ICLASS_CMOVBE, XED_ICLASS_CMOVL,
               XED_ICLASS_CMOVLE, XED_ICLASS_CMOVNB, XED_ICLASS_CMOVNBE,
@@ -156,6 +156,8 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_JMP, JMP_INS_MODELS));
   managedInstructions.insert // ignoring syscall as it is handled by callback routines
       (make_pair (XED_ICLASS_SYSCALL, NOP_INS_MODELS));
+  INITIALIZE (SYSCALL_INS_MODEL,
+              XED_ICLASS_SYSCALL, XED_ICLASS_SYSENTER);
   INITIALIZE (JMP_CC_INS_MODELS,
               XED_ICLASS_JB, XED_ICLASS_JBE, XED_ICLASS_JL, XED_ICLASS_JLE,
               XED_ICLASS_JNB, XED_ICLASS_JNBE, XED_ICLASS_JNL, XED_ICLASS_JNLE,
@@ -404,8 +406,10 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_POP:
     return getInstructionModelForPopInstruction (ins);
   case XED_ICLASS_NOP:
-  case XED_ICLASS_SYSCALL:
     return NOP_INS_MODELS;
+  case XED_ICLASS_SYSCALL:
+  case XED_ICLASS_SYSENTER:
+    return SYSCALL_INS_MODEL;
   case XED_ICLASS_RDTSC:
   case XED_ICLASS_CLD:
   case XED_ICLASS_CPUID:
@@ -626,6 +630,21 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
                   IARG_END);
   instrumentMemoryRegisterCorrespondence (ins, insAssembly);
   switch (model) {
+  case SYSCALL_INS_MODEL:
+  {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineSyscall,
+                    IARG_PTR, ise,
+                    IARG_SYSCALL_NUMBER,
+                    IARG_SYSARG_VALUE, 0,
+                    IARG_SYSARG_VALUE, 1,
+                    IARG_SYSARG_VALUE, 2,
+                    IARG_SYSARG_VALUE, 3,
+                    IARG_SYSARG_VALUE, 4,
+                    IARG_SYSARG_VALUE, 5,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
   case DST_REG_SRC_REG:
   {
     REG dstreg = INS_OperandReg (ins, 0);
@@ -1381,7 +1400,6 @@ void Instrumenter::syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt,
   UNUSED_VARIABLE (threadIndex);
   edu::sharif::twinner::util::Logger::loquacious () << "***** syscallEntryPoint *****\n";
   ise->syscallInvoked (ctxt, edu::sharif::twinner::trace::Syscall (std));
-
   if (isWithinInitialStateDetectionMode && !disabled) {
     edu::sharif::twinner::util::Logger::debug ()
         << "Gathering initial contents of requested memory addresses,"

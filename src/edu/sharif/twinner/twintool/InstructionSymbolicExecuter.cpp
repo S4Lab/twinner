@@ -148,6 +148,28 @@ void InstructionSymbolicExecuter::analysisRoutineBeforeCallingSafeFunction (
   trace->printRegistersValues (logger);
 }
 
+void InstructionSymbolicExecuter::analysisRoutineSyscall (ADDRINT syscallNumber,
+    ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3,
+    ADDRINT arg4, ADDRINT arg5,
+    UINT32 insAssembly) {
+  // we should report syscalls even while the ise is disabled
+  disassembledInstruction = insAssembly;
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  if (measureMode) {
+    numberOfExecutedInstructions++;
+    return;
+  }
+  const char *insAssemblyStr =
+      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::util::Logger logger =
+      edu::sharif::twinner::util::Logger::loquacious ();
+  logger << "analysisRoutineSyscall(INS: "
+      << insAssemblyStr << "): syscall number: 0x" << std::hex << syscallNumber
+      << ", args0: 0x" << arg0 << ", args1: 0x" << arg1
+      << ", args2: 0x" << arg2 << ", args3: 0x" << arg3
+      << ", args4: 0x" << arg4 << ", args5: 0x" << arg5 << '\n';
+}
+
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
     REG dstReg, const ConcreteValue &dstRegVal,
     REG srcReg, const ConcreteValue &srcRegVal,
@@ -3756,6 +3778,16 @@ InstructionSymbolicExecuter::convertOpcodeToSingleOperandAnalysisRoutine (
         "Single Operand: Unknown opcode: " << OPCODE_StringShort (op) << '\n';
     abort ();
   }
+}
+
+VOID analysisRoutineSyscall (VOID *iseptr,
+    ADDRINT syscallNumber,
+    ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3,
+    ADDRINT arg4, ADDRINT arg5,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineSyscall
+      (syscallNumber, arg0, arg1, arg2, arg3, arg4, arg5, insAssembly);
 }
 
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,

@@ -126,6 +126,10 @@ public:
   void analysisRoutineBeforeCallingSafeFunction (const FunctionInfo &fi,
       UINT32 insAssembly, const CONTEXT *context);
 
+  void analysisRoutineSyscall (ADDRINT syscallNumber,
+      ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3,
+      ADDRINT arg4, ADDRINT arg5,
+      UINT32 insAssembly);
   void analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
       REG srcReg, const ConcreteValue &srcRegVal,
@@ -886,6 +890,11 @@ public:
       OPCODE op) const;
 };
 
+VOID analysisRoutineSyscall (VOID *iseptr,
+    ADDRINT syscallNumber,
+    ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3,
+    ADDRINT arg4, ADDRINT arg5,
+    UINT32 insAssembly);
 VOID analysisRoutineDstRegSrcReg (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, ADDRINT dstRegVal,
     UINT32 srcReg, ADDRINT srcRegVal,
