@@ -29,25 +29,26 @@ namespace sharif {
 namespace twinner {
 namespace util {
 
+namespace internal {
 
-const char *Logger::NORMAL_COLOR = "\x1B[0m";
-const char *Logger::TYPE_COLOR = "\x1B[37;45m"; // BLACK on WHITE
-const char *Logger::ERROR_COLOR = "\x1B[31m"; // RED
-const char *Logger::WARNING_COLOR = "\x1B[33;1m"; // BOLD YELLOW
-const char *Logger::INFO_COLOR = "\x1B[33m"; // YELLOW
-const char *Logger::DEBUG_COLOR = "\x1B[32m"; // GREEN
-const char *Logger::LOQUACIOUS_COLOR = "\x1B[34m"; // BLUE
+const char *NORMAL_COLOR = "\x1B[0m";
+const char *TYPE_COLOR = "\x1B[37;45m"; // BLACK on WHITE
+const char *ERROR_COLOR = "\x1B[31m"; // RED
+const char *WARNING_COLOR = "\x1B[33;1m"; // BOLD YELLOW
+const char *INFO_COLOR = "\x1B[33m"; // YELLOW
+const char *DEBUG_COLOR = "\x1B[32m"; // GREEN
+const char *LOQUACIOUS_COLOR = "\x1B[34m"; // BLUE
 
 }
 
-Logger::Logger (LogStream::VerbosenessLevel level,
+Logger::Logger (internal::VerbosenessLevel level,
     const char *type, const char *_color) :
     stream (*LogStream::getInstance ()),
     enabled (level <= stream.getVerbosenessLevel ()),
     color (_color) {
   if (enabled) {
     stream.write ('[');
-    actualWrite (type, TYPE_COLOR);
+    actualWrite (type, internal::TYPE_COLOR);
     stream.write ("]: ");
   }
 }
@@ -57,28 +58,28 @@ Logger::~Logger () {
 }
 
 Logger Logger::error () {
-  return Logger (LogStream::ERROR_VERBOSENESS,
-                 "ERROR", ERROR_COLOR);
+  return Logger (internal::ERROR_VERBOSENESS,
+                 "ERROR", internal::ERROR_COLOR);
 }
 
 Logger Logger::warning () {
-  return Logger (LogStream::WARNING_VERBOSENESS,
-                 "WARNING", WARNING_COLOR);
+  return Logger (internal::WARNING_VERBOSENESS,
+                 "WARNING", internal::WARNING_COLOR);
 }
 
 Logger Logger::info () {
-  return Logger (LogStream::INFO_VERBOSENESS,
-                 "INFO", INFO_COLOR);
+  return Logger (internal::INFO_VERBOSENESS,
+                 "INFO", internal::INFO_COLOR);
 }
 
 Logger Logger::debug () {
-  return Logger (LogStream::DEBUG_VERBOSENESS,
-                 "DEBUG", DEBUG_COLOR);
+  return Logger (internal::DEBUG_VERBOSENESS,
+                 "DEBUG", internal::DEBUG_COLOR);
 }
 
 Logger Logger::loquacious () {
-  return Logger (LogStream::LOQUACIOUS_VERBOSENESS,
-                 "LOQUACIOUS", LOQUACIOUS_COLOR);
+  return Logger (internal::LOQUACIOUS_VERBOSENESS,
+                 "LOQUACIOUS", internal::LOQUACIOUS_COLOR);
 }
 
 const Logger &Logger::operator<<

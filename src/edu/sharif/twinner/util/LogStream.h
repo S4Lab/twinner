@@ -22,19 +22,25 @@ namespace sharif {
 namespace twinner {
 namespace util {
 
+namespace internal {
+
+enum VerbosenessLevel {
+  QUIET_VERBOSENESS, ERROR_VERBOSENESS,
+  WARNING_VERBOSENESS, INFO_VERBOSENESS,
+  DEBUG_VERBOSENESS, LOQUACIOUS_VERBOSENESS
+};
+
+VerbosenessLevel stringToVerbosenessLevel (std::string verboseStr);
+std::string verbosenessLevelToString (VerbosenessLevel verboseness);
+}
+
 class LogStream {
 private:
-  enum VerbosenessLevel {
-    QUIET_VERBOSENESS, ERROR_VERBOSENESS,
-    WARNING_VERBOSENESS, INFO_VERBOSENESS,
-    DEBUG_VERBOSENESS, LOQUACIOUS_VERBOSENESS
-  };
   static LogStream *me;
 
-  const VerbosenessLevel verboseness;
-  friend class Logger;
+  const internal::VerbosenessLevel verboseness;
 
-  LogStream (VerbosenessLevel level);
+  LogStream (internal::VerbosenessLevel level);
 
 public:
   ~LogStream ();
@@ -44,12 +50,9 @@ public:
   static void destroy ();
 
   std::string getVerbosenessLevelAsString () const;
-  VerbosenessLevel getVerbosenessLeivel () const;
+  internal::VerbosenessLevel getVerbosenessLevel () const;
 
   void flush ();
-
-  static VerbosenessLevel stringToVerbosenessLevel (std::string verboseStr);
-  static std::string verbosenessLevelToString (VerbosenessLevel verboseness);
 
   template <typename T>
   LogStream &write (const T &t) {

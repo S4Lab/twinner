@@ -41,26 +41,29 @@ class ConcreteValue;
 }
 namespace util {
 
+namespace internal {
+
+extern const char *NORMAL_COLOR;
+extern const char *TYPE_COLOR;
+extern const char *ERROR_COLOR;
+extern const char *WARNING_COLOR;
+extern const char *INFO_COLOR;
+extern const char *DEBUG_COLOR;
+extern const char *LOQUACIOUS_COLOR;
+}
+
 class Logger;
 
 extern const Logger &operator<< (const Logger &logger, LEVEL_BASE::REG reg);
 
 class Logger {
 private:
-  static const char *NORMAL_COLOR;
-  static const char *TYPE_COLOR;
-  static const char *ERROR_COLOR;
-  static const char *WARNING_COLOR;
-  static const char *INFO_COLOR;
-  static const char *DEBUG_COLOR;
-  static const char *LOQUACIOUS_COLOR;
-
-  const bool enabled;
   LogStream &stream;
+  const bool enabled;
   const char *color;
 
 public:
-  Logger (LogStream::VerbosenessLevel level,
+  Logger (internal::VerbosenessLevel level,
       const char *type, const char *color);
   ~Logger ();
 
@@ -172,7 +175,7 @@ public:
   template <typename T>
   const Logger &actualWrite (const T &value, const char *_color) const {
     if (enabled) {
-      stream.write (_color).write (value).write (NORMAL_COLOR);
+      stream.write (_color).write (value).write (internal::NORMAL_COLOR);
     }
     return *this;
   }

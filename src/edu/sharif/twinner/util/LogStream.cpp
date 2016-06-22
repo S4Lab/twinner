@@ -26,7 +26,7 @@ namespace util {
 
 LogStream *LogStream::me = 0;
 
-LogStream::LogStream (VerbosenessLevel level) :
+LogStream::LogStream (internal::VerbosenessLevel level) :
     verboseness (level) {
 }
 
@@ -37,7 +37,8 @@ bool LogStream::init (std::string verboseStr) {
   if (LogStream::me) {
     return false;
   }
-  LogStream::me = new LogStream (LogStream::stringToVerbosenessLevel (verboseStr));
+  LogStream::me =
+      new LogStream (internal::stringToVerbosenessLevel (verboseStr));
   return true;
 }
 
@@ -51,10 +52,10 @@ void LogStream::destroy () {
 }
 
 std::string LogStream::getVerbosenessLevelAsString () const {
-  return LogStream::verbosenessLevelToString (verboseness);
+  return internal::verbosenessLevelToString (verboseness);
 }
 
-LogStream::VerbosenessLevel LogStream::getVerbosenessLevel () const {
+internal::VerbosenessLevel LogStream::getVerbosenessLevel () const {
   return verboseness;
 }
 
@@ -62,7 +63,9 @@ void LogStream::flush () {
   std::cout.flush ();
 }
 
-LogStream::VerbosenessLevel LogStream::stringToVerbosenessLevel (std::string verboseStr) {
+namespace internal {
+
+VerbosenessLevel stringToVerbosenessLevel (std::string verboseStr) {
   if (verboseStr == "quiet") {
     return QUIET_VERBOSENESS;
   } else if (verboseStr == "error") {
@@ -84,7 +87,7 @@ LogStream::VerbosenessLevel LogStream::stringToVerbosenessLevel (std::string ver
   }
 }
 
-std::string LogStream::verbosenessLevelToString (VerbosenessLevel verboseness) {
+std::string verbosenessLevelToString (VerbosenessLevel verboseness) {
   switch (verboseness) {
   case QUIET_VERBOSENESS:
     return "quiet";
@@ -107,6 +110,7 @@ std::string LogStream::verbosenessLevelToString (VerbosenessLevel verboseness) {
   }
 }
 
+}
 
 }
 }
