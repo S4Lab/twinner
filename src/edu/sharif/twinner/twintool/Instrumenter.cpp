@@ -124,7 +124,8 @@ Instrumenter::Instrumenter (const string &_traceFilePath,
 void Instrumenter::initialize () {
   edu::sharif::twinner::util::Logger::info ()
       << "Instrumenter class created [verboseness level: "
-      << edu::sharif::twinner::util::LogStream::getVerbosenessLevelAsString () << "]\n";
+      << edu::sharif::twinner::util::LogStream::getInstance ()
+      ->getVerbosenessLevelAsString () << "]\n";
   INITIALIZE (COMMON_INS_MODELS,
               XED_ICLASS_MOV, XED_ICLASS_ADD, XED_ICLASS_ADC,
               XED_ICLASS_SUB, XED_ICLASS_SBB, XED_ICLASS_CMP,
@@ -1650,8 +1651,11 @@ VOID syscallIsReturned (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD st
 }
 
 VOID applicationIsAboutToExit (INT32 code, VOID * v) {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "********** applicationIsAboutToExit(...) **********\n";
   Instrumenter *im = (Instrumenter *) v;
   im->aboutToExit (code);
+  edu::sharif::twinner::util::LogStream::destroy ();
 }
 
 VOID terminateAnalysis (VOID *imptr) {

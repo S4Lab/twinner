@@ -24,32 +24,68 @@ namespace sharif {
 namespace twinner {
 namespace util {
 
-LogStream::VerbosenessLevel LogStream::verbose = LogStream::WARNING_VERBOSENESS;
+LogStream *LogStream::me = 0;
+
+LogStream::LogStream (VerbosenessLevel level) :
+    verboseness (level) {
+}
 
 LogStream::~LogStream () {
 }
 
-bool LogStream::setVerbosenessLevel (const std::string &verboseStr) {
-  if (verboseStr == "quiet") {
-    verbose = QUIET_VERBOSENESS;
-  } else if (verboseStr == "error") {
-    verbose = ERROR_VERBOSENESS;
-  } else if (verboseStr == "warning") {
-    verbose = WARNING_VERBOSENESS;
-  } else if (verboseStr == "info") {
-    verbose = INFO_VERBOSENESS;
-  } else if (verboseStr == "debug") {
-    verbose = DEBUG_VERBOSENESS;
-  } else if (verboseStr == "loquacious") {
-    verbose = LOQUACIOUS_VERBOSENESS;
-  } else {
+bool LogStream::init (std::string verboseStr) {
+  if (LogStream::me) {
     return false;
   }
+  LogStream::me = new LogStream (LogStream::stringToVerbosenessLevel (verboseStr));
   return true;
 }
 
-const char *LogStream::getVerbosenessLevelAsString () {
-  switch (verbose) {
+LogStream *LogStream::getInstance () {
+  return LogStream::me;
+}
+
+void LogStream::destroy () {
+  delete LogStream::me;
+  LogStream::me = 0;
+}
+
+std::string LogStream::getVerbosenessLevelAsString () const {
+  return LogStream::verbosenessLevelToString (verboseness);
+}
+
+LogStream::VerbosenessLevel LogStream::getVerbosenessLevel () const {
+  return verboseness;
+}
+
+void LogStream::flush () {
+  std::cout.flush ();
+}
+
+LogStream::VerbosenessLevel LogStream::stringToVerbosenessLevel (std::string verboseStr) {
+  if (verboseStr == "quiet") {
+    return QUIET_VERBOSENESS;
+  } else if (verboseStr == "error") {
+    return ERROR_VERBOSENESS;
+  } else if (verboseStr == "warning") {
+    return WARNING_VERBOSENESS;
+  } else if (verboseStr == "info") {
+    return INFO_VERBOSENESS;
+  } else if (verboseStr == "debug") {
+    return DEBUG_VERBOSENESS;
+  } else if (verboseStr == "loquacious") {
+    return LOQUACIOUS_VERBOSENESS;
+  } else {
+    edu::sharif::twinner::util::Logger::error ()
+        << "stringToVerbosenessLevel (...)"
+        " [verboseStr=" << std::dec << verboseStr << "]: "
+        "corrupted verboseness level\n";
+    abort ();
+  }
+}
+
+std::string LogStream::verbosenessLevelToString (VerbosenessLevel verboseness) {
+  switch (verboseness) {
   case QUIET_VERBOSENESS:
     return "quiet";
   case ERROR_VERBOSENESS:
@@ -64,16 +100,13 @@ const char *LogStream::getVerbosenessLevelAsString () {
     return "loquacious";
   default:
     edu::sharif::twinner::util::Logger::error ()
-        << "Logger::getVerbosenessLevelAsString ()"
-        " [verbose=" << std::dec << verbose << "]: "
+        << "verbosenessLevelToString (...)"
+        " [verbose=" << std::dec << verboseness << "]: "
         "corrupted verboseness level\n";
     abort ();
   }
 }
 
-void LogStream::flush () {
-  std::cout.flush ();
-}
 
 }
 }

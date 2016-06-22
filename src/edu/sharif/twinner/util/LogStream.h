@@ -29,17 +29,27 @@ private:
     WARNING_VERBOSENESS, INFO_VERBOSENESS,
     DEBUG_VERBOSENESS, LOQUACIOUS_VERBOSENESS
   };
+  static LogStream *me;
 
-  static VerbosenessLevel verbose;
+  const VerbosenessLevel verboseness;
   friend class Logger;
+
+  LogStream (VerbosenessLevel level);
 
 public:
   ~LogStream ();
 
-  static bool setVerbosenessLevel (const std::string &verboseStr);
-  static const char *getVerbosenessLevelAsString ();
+  static bool init (std::string verboseStr, std::string logfile);
+  static LogStream *getInstance ();
+  static void destroy ();
+
+  std::string getVerbosenessLevelAsString () const;
+  VerbosenessLevel getVerbosenessLeivel () const;
 
   void flush ();
+
+  static VerbosenessLevel stringToVerbosenessLevel (std::string verboseStr);
+  static std::string verbosenessLevelToString (VerbosenessLevel verboseness);
 
   template <typename T>
   LogStream &write (const T &t) {

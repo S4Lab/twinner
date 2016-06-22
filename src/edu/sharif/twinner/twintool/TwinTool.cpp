@@ -161,7 +161,8 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     return false;
   }
   // At the end, traceFilePath will be opened and execution trace will be saved in it.
-  if (!edu::sharif::twinner::util::LogStream::setVerbosenessLevel (verbose.Value ())) {
+  if (!edu::sharif::twinner::util::LogStream::init
+      (verbose.Value ())) {
     printError ("undefined verboseness level: " + verbose.Value ());
     return false;
   }

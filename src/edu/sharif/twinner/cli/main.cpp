@@ -54,7 +54,15 @@ int run (string input, string args, string endpoints,
     bool main, string stackOffset, bool naive, bool measureOverheads);
 int checkTraceFile (string traceFilePath, string memoryFilePath);
 
+int startTwinner (int argc, char *argv[]);
+
 int main (int argc, char *argv[]) {
+  int res = startTwinner (argc, argv);
+  edu::sharif::twinner::util::LogStream::destroy ();
+  return res;
+}
+
+int startTwinner (int argc, char *argv[]) {
   string input, args, endpoints, safeFunctions, twintool, pin, twin;
   bool justAnalyzeMainRoutine = false;
   string stackOffset;
@@ -106,7 +114,8 @@ int run (string input, string args, string endpoints, string safeFunctions,
     bool main, string stackOffset, bool naive, bool measureOverheads) {
   edu::sharif::twinner::util::Logger::info ()
       << "[verboseness level: "
-      << edu::sharif::twinner::util::LogStream::getVerbosenessLevelAsString () << "]\n"
+      << edu::sharif::twinner::util::LogStream::getInstance ()
+      ->getVerbosenessLevelAsString () << "]\n"
       "Input binary file: " << input << '\n'
       << (args.empty () ? "" : ("Input binary arguments: " + args + "\n"))
       << (endpoints.empty () ? "" : ("Analysis Endpoints: " + endpoints + "\n"))
@@ -137,7 +146,8 @@ int run (string input, string args, string endpoints, string safeFunctions,
 int checkTraceFile (string traceFilePath, string memoryFilePath) {
   edu::sharif::twinner::util::Logger::info ()
       << "[verboseness level: "
-      << edu::sharif::twinner::util::LogStream::getVerbosenessLevelAsString () << "]\n"
+      << edu::sharif::twinner::util::LogStream::getInstance ()
+      ->getVerbosenessLevelAsString () << "]\n"
       << "Trace file: " << traceFilePath << '\n'
       << "Memory file: " << memoryFilePath << '\n';
 
@@ -263,7 +273,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       return ERROR_OCCURRED;
     }
   }
-  if (!edu::sharif::twinner::util::LogStream::setVerbosenessLevel
+  if (!edu::sharif::twinner::util::LogStream::init
       (verboseStr)) {
     printError (progName, "undefined verboseness level: " + verboseStr);
     return ERROR_OCCURRED;

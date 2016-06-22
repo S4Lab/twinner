@@ -38,8 +38,13 @@ const char *Logger::INFO_COLOR = "\x1B[33m"; // YELLOW
 const char *Logger::DEBUG_COLOR = "\x1B[32m"; // GREEN
 const char *Logger::LOQUACIOUS_COLOR = "\x1B[34m"; // BLUE
 
-Logger::Logger (bool _enabled, const char *type, const char *_color) :
-    enabled (_enabled), color (_color) {
+}
+
+Logger::Logger (LogStream::VerbosenessLevel level,
+    const char *type, const char *_color) :
+    stream (*LogStream::getInstance ()),
+    enabled (level <= stream.getVerbosenessLevel ()),
+    color (_color) {
   if (enabled) {
     stream.write ('[');
     actualWrite (type, TYPE_COLOR);
@@ -52,27 +57,27 @@ Logger::~Logger () {
 }
 
 Logger Logger::error () {
-  return Logger (LogStream::verbose >= LogStream::ERROR_VERBOSENESS,
+  return Logger (LogStream::ERROR_VERBOSENESS,
                  "ERROR", ERROR_COLOR);
 }
 
 Logger Logger::warning () {
-  return Logger (LogStream::verbose >= LogStream::WARNING_VERBOSENESS,
+  return Logger (LogStream::WARNING_VERBOSENESS,
                  "WARNING", WARNING_COLOR);
 }
 
 Logger Logger::info () {
-  return Logger (LogStream::verbose >= LogStream::INFO_VERBOSENESS,
+  return Logger (LogStream::INFO_VERBOSENESS,
                  "INFO", INFO_COLOR);
 }
 
 Logger Logger::debug () {
-  return Logger (LogStream::verbose >= LogStream::DEBUG_VERBOSENESS,
+  return Logger (LogStream::DEBUG_VERBOSENESS,
                  "DEBUG", DEBUG_COLOR);
 }
 
 Logger Logger::loquacious () {
-  return Logger (LogStream::verbose >= LogStream::LOQUACIOUS_VERBOSENESS,
+  return Logger (LogStream::LOQUACIOUS_VERBOSENESS,
                  "LOQUACIOUS", LOQUACIOUS_COLOR);
 }
 

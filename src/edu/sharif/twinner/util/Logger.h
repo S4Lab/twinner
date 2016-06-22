@@ -13,6 +13,8 @@
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
+#include "edu/sharif/twinner/pin-wrapper.h"
+
 #include <iostream>
 #include <iomanip>
 #include <map>
@@ -54,19 +56,25 @@ private:
   static const char *LOQUACIOUS_COLOR;
 
   const bool enabled;
+  LogStream &stream;
   const char *color;
 
-  mutable LogStream stream;
-
 public:
-  Logger (bool enabled, const char *type, const char *_color);
+  Logger (LogStream::VerbosenessLevel level,
+      const char *type, const char *color);
   ~Logger ();
 
+  static Logger error ();
+  static Logger warning ();
+  static Logger info ();
+  static Logger debug ();
+  static Logger loquacious ();
+
   template <typename KEY, typename VALUE>
-  const Logger &operator<< (const std::map < KEY, VALUE > map) const;
+  const Logger &operator<< (const std::map < KEY, VALUE > &map) const;
 
   template <typename VALUE>
-  const Logger &operator<< (const std::list < VALUE > map) const;
+  const Logger &operator<< (const std::list < VALUE > &list) const;
 
   const Logger &operator<< (const edu::sharif::twinner::trace::Expression *exp) const;
   const Logger &operator<< (const edu::sharif::twinner::trace::Constraint *c) const;
@@ -168,42 +176,31 @@ public:
     }
     return *this;
   }
-
-  operator bool () const {
-    return enabled;
-  }
-
-  static Logger error ();
-  static Logger warning ();
-  static Logger info ();
-  static Logger debug ();
-  static Logger loquacious ();
 };
 
 template <typename KEY, typename VALUE>
-const edu::sharif::twinner::util::Logger &Logger::operator<< (
-    const std::map < KEY, VALUE > map) const {
+const Logger &Logger::operator<< (const std::map < KEY, VALUE > &map) const {
   if (enabled) {
+    (*this) << "Map{\n";
     for (typename std::map < KEY, VALUE >::const_iterator it = map.begin ();
         it != map.end (); ++it) {
-      const KEY k = it->first;
-      const VALUE v = it->second;
-
-      (*this) << std::hex << "Key(" << k << ") => Value(" << v << ")\n";
+      (*this) << std::hex << "Key(" << it->first << ")"
+          " => Value(" << it->second << ")\n";
     }
+    (*this) << "}\n";
   }
   return *this;
 }
 
 template <typename VALUE>
-const edu::sharif::twinner::util::Logger &Logger::operator<< (
-    const std::list < VALUE > map) const {
+const Logger &Logger::operator<< (const std::list < VALUE > &list) const {
   if (enabled) {
-    for (typename std::list < VALUE >::const_iterator it = map.begin ();
-        it != map.end (); ++it) {
-      const VALUE v = *it;
-      (*this) << std::hex << v << '\n';
+    (*this) << "List{\n";
+    for (typename std::list < VALUE >::const_iterator it = list.begin ();
+        it != list.end (); ++it) {
+      (*this) << std::hex << (*it) << '\n';
     }
+    (*this) << "}\n";
   }
   return *this;
 }
@@ -213,4 +210,4 @@ const edu::sharif::twinner::util::Logger &Logger::operator<< (
 }
 }
 
-#endif /* LOGGER_H_ */
+#endif /* Logger.h */
