@@ -28,6 +28,7 @@
 #include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/LogStream.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
 
@@ -82,7 +83,7 @@ Executer::Executer (std::string pinLauncher, std::string twintool,
     + " -symbols " + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
     + " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
     + " -memory " + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
-    + " -verbose " + edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString ()
+    + " -verbose " + edu::sharif::twinner::util::LogStream::getVerbosenessLevelAsString ()
     + (_overheads ? OVERHEAD_MEASUREMENT_OPTION : "")
     + (main ? std::string (" -main -mar ") + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
     + (endpoints != "" ? std::string (" -endpoints ") + endpoints

@@ -27,6 +27,7 @@
 #include "Instrumenter.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/LogStream.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 
 #include "edu/sharif/twinner/trace-twintool/FunctionInfo.h"
@@ -160,7 +161,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     return false;
   }
   // At the end, traceFilePath will be opened and execution trace will be saved in it.
-  if (!edu::sharif::twinner::util::Logger::setVerbosenessLevel (verbose.Value ())) {
+  if (!edu::sharif::twinner::util::LogStream::setVerbosenessLevel (verbose.Value ())) {
     printError ("undefined verboseness level: " + verbose.Value ());
     return false;
   }

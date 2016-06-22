@@ -24,6 +24,7 @@
 #include "edu/sharif/twinner/engine/etg/ConstraintTree.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/LogStream.h"
 
 using namespace std;
 
@@ -105,7 +106,7 @@ int run (string input, string args, string endpoints, string safeFunctions,
     bool main, string stackOffset, bool naive, bool measureOverheads) {
   edu::sharif::twinner::util::Logger::info ()
       << "[verboseness level: "
-      << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n"
+      << edu::sharif::twinner::util::LogStream::getVerbosenessLevelAsString () << "]\n"
       "Input binary file: " << input << '\n'
       << (args.empty () ? "" : ("Input binary arguments: " + args + "\n"))
       << (endpoints.empty () ? "" : ("Analysis Endpoints: " + endpoints + "\n"))
@@ -136,7 +137,7 @@ int run (string input, string args, string endpoints, string safeFunctions,
 int checkTraceFile (string traceFilePath, string memoryFilePath) {
   edu::sharif::twinner::util::Logger::info ()
       << "[verboseness level: "
-      << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n"
+      << edu::sharif::twinner::util::LogStream::getVerbosenessLevelAsString () << "]\n"
       << "Trace file: " << traceFilePath << '\n'
       << "Memory file: " << memoryFilePath << '\n';
 
@@ -164,7 +165,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
   const ArgParser::Option options[] = {
     { 'h', "help", ArgParser::NO, "display this help message and exit", false, true},
     { 'V', "version", ArgParser::NO, "output version number string and exit", false, true},
-    { 'v', "verbose", ArgParser::YES, "verbose operation", false, false},
+    { 'v', "verbose", ArgParser::YES, "verboseness level (default: warning)", false, false},
     { 'L', "license", ArgParser::NO, "output license information and exit", false, true},
     { 'i', "input", ArgParser::YES, "input obfuscated binary file", true, false},
     { 'a', "args", ArgParser::YES, "arguments for input binary file", false, false},
@@ -192,6 +193,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     printError (progName, parser.error ());
     return ERROR_OCCURRED;
   }
+  string verboseStr = "warning";
   for (int argind = 0; argind < parser.arguments (); ++argind) {
     const int code = parser.code (argind);
     if (!code) { // no more options
@@ -205,11 +207,8 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       printVersion ();
       return EXIT_NORMALLY;
     case 'v':
-      if (!edu::sharif::twinner::util::Logger::setVerbosenessLevel
-          (parser.argument (argind))) {
-        printError (progName, "undefined verboseness level: " + parser.argument (argind));
-        return ERROR_OCCURRED;
-      }
+      verboseStr = parser.argument (argind);
+      break;
       break;
     case 'L':
       printLicense ();
@@ -263,6 +262,11 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       printError (progName, "Can not parse arguments!");
       return ERROR_OCCURRED;
     }
+  }
+  if (!edu::sharif::twinner::util::LogStream::setVerbosenessLevel
+      (verboseStr)) {
+    printError (progName, "undefined verboseness level: " + verboseStr);
+    return ERROR_OCCURRED;
   }
   return CONTINUE_NORMALLY;
 }

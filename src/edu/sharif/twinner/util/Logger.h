@@ -18,6 +18,8 @@
 #include <map>
 #include <list>
 
+#include "LogStream.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -43,13 +45,6 @@ extern const Logger &operator<< (const Logger &logger, LEVEL_BASE::REG reg);
 
 class Logger {
 private:
-
-  enum VerbosenessLevel {
-    QUIET_VERBOSENESS, ERROR_VERBOSENESS,
-    WARNING_VERBOSENESS, INFO_VERBOSENESS,
-    DEBUG_VERBOSENESS, LOQUACIOUS_VERBOSENESS
-  };
-
   static const char *NORMAL_COLOR;
   static const char *TYPE_COLOR;
   static const char *ERROR_COLOR;
@@ -58,10 +53,10 @@ private:
   static const char *DEBUG_COLOR;
   static const char *LOQUACIOUS_COLOR;
 
-  static VerbosenessLevel verbose;
-
   const bool enabled;
   const char *color;
+
+  mutable LogStream stream;
 
 public:
   Logger (bool enabled, const char *type, const char *_color);
@@ -162,9 +157,14 @@ public:
 #endif
 
   template <typename T>
-  const Logger &actualWrite (const T &t) const {
+  inline const Logger &actualWrite (const T &value) const {
+    return actualWrite (value, color);
+  }
+
+  template <typename T>
+  const Logger &actualWrite (const T &value, const char *_color) const {
     if (enabled) {
-      std::cout << color << t << NORMAL_COLOR;
+      stream.write (_color).write (value).write (NORMAL_COLOR);
     }
     return *this;
   }
@@ -178,9 +178,6 @@ public:
   static Logger info ();
   static Logger debug ();
   static Logger loquacious ();
-
-  static bool setVerbosenessLevel (const std::string &verboseStr);
-  static const char *getVerbosenessLevelAsString ();
 };
 
 template <typename KEY, typename VALUE>

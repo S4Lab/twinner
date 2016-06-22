@@ -27,6 +27,7 @@
 #include "edu/sharif/twinner/trace-twintool/FunctionInfo.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/LogStream.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/memory.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
@@ -123,7 +124,7 @@ Instrumenter::Instrumenter (const string &_traceFilePath,
 void Instrumenter::initialize () {
   edu::sharif::twinner::util::Logger::info ()
       << "Instrumenter class created [verboseness level: "
-      << edu::sharif::twinner::util::Logger::getVerbosenessLevelAsString () << "]\n";
+      << edu::sharif::twinner::util::LogStream::getVerbosenessLevelAsString () << "]\n";
   INITIALIZE (COMMON_INS_MODELS,
               XED_ICLASS_MOV, XED_ICLASS_ADD, XED_ICLASS_ADC,
               XED_ICLASS_SUB, XED_ICLASS_SBB, XED_ICLASS_CMP,

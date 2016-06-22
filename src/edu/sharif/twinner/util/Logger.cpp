@@ -29,7 +29,6 @@ namespace sharif {
 namespace twinner {
 namespace util {
 
-Logger::VerbosenessLevel Logger::verbose = Logger::WARNING_VERBOSENESS;
 
 const char *Logger::NORMAL_COLOR = "\x1B[0m";
 const char *Logger::TYPE_COLOR = "\x1B[37;45m"; // BLACK on WHITE
@@ -42,79 +41,39 @@ const char *Logger::LOQUACIOUS_COLOR = "\x1B[34m"; // BLUE
 Logger::Logger (bool _enabled, const char *type, const char *_color) :
     enabled (_enabled), color (_color) {
   if (enabled) {
-    std::cout << '[' << TYPE_COLOR << type << NORMAL_COLOR << "]: ";
+    stream.write ('[');
+    actualWrite (type, TYPE_COLOR);
+    stream.write ("]: ");
   }
 }
 
 Logger::~Logger () {
-  std::cout.flush ();
+  stream.flush ();
 }
 
 Logger Logger::error () {
-  return Logger (Logger::verbose >= Logger::ERROR_VERBOSENESS,
+  return Logger (LogStream::verbose >= LogStream::ERROR_VERBOSENESS,
                  "ERROR", ERROR_COLOR);
 }
 
 Logger Logger::warning () {
-  return Logger (Logger::verbose >= Logger::WARNING_VERBOSENESS,
+  return Logger (LogStream::verbose >= LogStream::WARNING_VERBOSENESS,
                  "WARNING", WARNING_COLOR);
 }
 
 Logger Logger::info () {
-  return Logger (Logger::verbose >= Logger::INFO_VERBOSENESS,
+  return Logger (LogStream::verbose >= LogStream::INFO_VERBOSENESS,
                  "INFO", INFO_COLOR);
 }
 
 Logger Logger::debug () {
-  return Logger (Logger::verbose >= Logger::DEBUG_VERBOSENESS,
+  return Logger (LogStream::verbose >= LogStream::DEBUG_VERBOSENESS,
                  "DEBUG", DEBUG_COLOR);
 }
 
 Logger Logger::loquacious () {
-  return Logger (Logger::verbose >= Logger::LOQUACIOUS_VERBOSENESS,
+  return Logger (LogStream::verbose >= LogStream::LOQUACIOUS_VERBOSENESS,
                  "LOQUACIOUS", LOQUACIOUS_COLOR);
-}
-
-bool Logger::setVerbosenessLevel (const std::string &verboseStr) {
-  if (verboseStr == "quiet") {
-    verbose = QUIET_VERBOSENESS;
-  } else if (verboseStr == "error") {
-    verbose = ERROR_VERBOSENESS;
-  } else if (verboseStr == "warning") {
-    verbose = WARNING_VERBOSENESS;
-  } else if (verboseStr == "info") {
-    verbose = INFO_VERBOSENESS;
-  } else if (verboseStr == "debug") {
-    verbose = DEBUG_VERBOSENESS;
-  } else if (verboseStr == "loquacious") {
-    verbose = LOQUACIOUS_VERBOSENESS;
-  } else {
-    return false;
-  }
-  return true;
-}
-
-const char *Logger::getVerbosenessLevelAsString () {
-  switch (verbose) {
-  case QUIET_VERBOSENESS:
-    return "quiet";
-  case ERROR_VERBOSENESS:
-    return "error";
-  case WARNING_VERBOSENESS:
-    return "warning";
-  case INFO_VERBOSENESS:
-    return "info";
-  case DEBUG_VERBOSENESS:
-    return "debug";
-  case LOQUACIOUS_VERBOSENESS:
-    return "loquacious";
-  default:
-    edu::sharif::twinner::util::Logger::error ()
-        << "Logger::getVerbosenessLevelAsString ()"
-        " [verbose=" << std::dec << verbose << "]: "
-        "corrupted verboseness level\n";
-    abort ();
-  }
 }
 
 const Logger &Logger::operator<<
