@@ -176,6 +176,9 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     { 'h', "help", ArgParser::NO, "display this help message and exit", false, true},
     { 'V', "version", ArgParser::NO, "output version number string and exit", false, true},
     { 'v', "verbose", ArgParser::YES, "verboseness level (default: warning)", false, false},
+    { 'l', "logfilename", ArgParser::YES, "log file names pattern"
+      " (default: out; twinner will write to out.log and twintool instances"
+      " will write to out-<id>.log files)", false, false},
     { 'L', "license", ArgParser::NO, "output license information and exit", false, true},
     { 'i', "input", ArgParser::YES, "input obfuscated binary file", true, false},
     { 'a', "args", ArgParser::YES, "arguments for input binary file", false, false},
@@ -203,7 +206,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     printError (progName, parser.error ());
     return ERROR_OCCURRED;
   }
-  string verboseStr = "warning";
+  string verboseStr = "warning", logfileStr = "out";
   for (int argind = 0; argind < parser.arguments (); ++argind) {
     const int code = parser.code (argind);
     if (!code) { // no more options
@@ -219,6 +222,8 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     case 'v':
       verboseStr = parser.argument (argind);
       break;
+    case 'l':
+      logfileStr = parser.argument (argind);
       break;
     case 'L':
       printLicense ();
@@ -274,7 +279,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     }
   }
   if (!edu::sharif::twinner::util::LogStream::init
-      (verboseStr)) {
+      (verboseStr, logfileStr)) {
     printError (progName, "undefined verboseness level: " + verboseStr);
     return ERROR_OCCURRED;
   }

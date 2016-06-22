@@ -538,7 +538,6 @@ void ExecutionTraceSegment::addPathConstraints (
     if (c->isTrivial () || (lastConstraint && (*lastConstraint) == (*c))) {
       delete c;
     } else {
-      edu::sharif::twinner::util::Logger::warning () << "adding " << c << '\n';
       pathConstraints.push_back (c);
       lastConstraint = c;
     }

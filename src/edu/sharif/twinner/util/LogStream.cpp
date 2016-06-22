@@ -15,7 +15,6 @@
 #include "Logger.h"
 
 #include <stdexcept>
-#include <iostream>
 #include <sstream>
 #include <stdlib.h>
 
@@ -26,19 +25,25 @@ namespace util {
 
 LogStream *LogStream::me = 0;
 
-LogStream::LogStream (internal::VerbosenessLevel level) :
-    verboseness (level) {
+LogStream::LogStream (internal::VerbosenessLevel level, const std::string &logfile) :
+    verboseness (level), logfileName (logfile),
+    out ((logfile + ".log").c_str ()) {
+  if (!out.is_open ()) {
+    std::cerr << "Cannot open the logfile: " << logfile << std::endl;
+    abort ();
+  }
 }
 
 LogStream::~LogStream () {
+  out.close ();
 }
 
-bool LogStream::init (std::string verboseStr) {
+bool LogStream::init (std::string verboseStr, std::string logfile) {
   if (LogStream::me) {
     return false;
   }
   LogStream::me =
-      new LogStream (internal::stringToVerbosenessLevel (verboseStr));
+      new LogStream (internal::stringToVerbosenessLevel (verboseStr), logfile);
   return true;
 }
 
@@ -59,8 +64,12 @@ internal::VerbosenessLevel LogStream::getVerbosenessLevel () const {
   return verboseness;
 }
 
+std::string LogStream::getLogfileName () const {
+  return logfileName;
+}
+
 void LogStream::flush () {
-  std::cout.flush ();
+  out.flush ();
 }
 
 namespace internal {

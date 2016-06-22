@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <fstream>
 #include <unistd.h>
 
@@ -64,6 +65,14 @@ inline void save_records_list (std::ofstream &out, const int &segmentIndex,
 inline void save_record (std::ofstream &out,
     const edu::sharif::twinner::trace::exptoken::SymbolRecord &record);
 
+int Executer::lastUsedId = 0;
+
+std::string Executer::getUniqueLogfileName () {
+  std::stringstream ss;
+  ss << edu::sharif::twinner::util::LogStream::getInstance ()->getLogfileName ()
+      << "-" << (++lastUsedId);
+  return ss.str ();
+}
 
 const char *Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE = "/tmp/twinner/symbols.dat";
 const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/trace.dat";
@@ -85,6 +94,7 @@ Executer::Executer (std::string pinLauncher, std::string twintool,
     + " -memory " + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
     + " -verbose " + edu::sharif::twinner::util::LogStream::getInstance ()
     ->getVerbosenessLevelAsString ()
+    + " -logfilename " + getUniqueLogfileName ()
     + (_overheads ? OVERHEAD_MEASUREMENT_OPTION : "")
     + (main ? std::string (" -main -mar ") + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
     + (endpoints != "" ? std::string (" -endpoints ") + endpoints

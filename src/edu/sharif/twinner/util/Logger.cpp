@@ -21,7 +21,6 @@
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
 
 #include <stdexcept>
-#include <iomanip>
 #include <sstream>
 
 namespace edu {

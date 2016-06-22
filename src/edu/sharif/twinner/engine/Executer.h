@@ -37,6 +37,10 @@ namespace engine {
 struct Measurement;
 
 class Executer {
+private:
+  static int lastUsedId;
+  static std::string getUniqueLogfileName ();
+
 public:
 
   enum ExecutionMode {

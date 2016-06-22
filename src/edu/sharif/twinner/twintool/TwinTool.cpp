@@ -57,6 +57,10 @@ KNOB < string > disassemblyOutputFilePath (KNOB_MODE_WRITEONCE, "pintool", "memo
 KNOB < string > verbose (KNOB_MODE_WRITEONCE, "pintool", "verbose", "warning",
     "specify the level of verboseness: { quiet, error, warning, info, debug, loquacious }");
 
+KNOB < string > logfilename (KNOB_MODE_WRITEONCE, "pintool", "logfilename",
+    "out-1000",
+    "specify a unique logfile name (it will be truncated if it exists)");
+
 KNOB < BOOL > main (KNOB_MODE_WRITEONCE, "pintool", "main", "",
     "if presents, only main() routine and what is called by it will be analyzed");
 
@@ -162,7 +166,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
   }
   // At the end, traceFilePath will be opened and execution trace will be saved in it.
   if (!edu::sharif::twinner::util::LogStream::init
-      (verbose.Value ())) {
+      (verbose.Value (), logfilename.Value ())) {
     printError ("undefined verboseness level: " + verbose.Value ());
     return false;
   }

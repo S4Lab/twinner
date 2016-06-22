@@ -24,10 +24,6 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace util {
-
-class Logger;
-}
 namespace trace {
 namespace cv {
 

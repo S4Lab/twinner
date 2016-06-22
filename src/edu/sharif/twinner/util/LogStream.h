@@ -39,8 +39,10 @@ private:
   static LogStream *me;
 
   const internal::VerbosenessLevel verboseness;
+  const std::string logfileName;
+  std::ofstream out;
 
-  LogStream (internal::VerbosenessLevel level);
+  LogStream (internal::VerbosenessLevel level, const std::string &logfile);
 
 public:
   ~LogStream ();
@@ -51,12 +53,13 @@ public:
 
   std::string getVerbosenessLevelAsString () const;
   internal::VerbosenessLevel getVerbosenessLevel () const;
+  std::string getLogfileName () const;
 
   void flush ();
 
   template <typename T>
   LogStream &write (const T &t) {
-    std::cout << t;
+    out << t;
     return *this;
   }
 };
