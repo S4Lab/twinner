@@ -15,7 +15,7 @@
 
 #include "TraceSegmentTerminator.h"
 
-#include "Syscall.h"
+#include "edu/sharif/twinner/trace/syscall/Syscall.h"
 
 namespace edu {
 namespace sharif {
@@ -24,13 +24,13 @@ namespace trace {
 
 class SyscallInvocation : public TraceSegmentTerminator {
 private:
-  Syscall syscall;
+  edu::sharif::twinner::trace::syscall::Syscall syscall;
 
 public:
-  SyscallInvocation (Syscall syscall);
+  SyscallInvocation (edu::sharif::twinner::trace::syscall::Syscall syscall);
   virtual ~SyscallInvocation ();
 
-  Syscall getSyscall () const;
+  edu::sharif::twinner::trace::syscall::Syscall getSyscall () const;
 
   virtual std::string getCallingLine () const;
   virtual std::string toString () const;

@@ -23,7 +23,7 @@
 #include "edu/sharif/twinner/trace/MarInfo.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
-#include "edu/sharif/twinner/trace/Syscall.h"
+#include "edu/sharif/twinner/trace/syscall/Syscall.h"
 #include "edu/sharif/twinner/trace-twintool/FunctionInfo.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
@@ -1399,7 +1399,7 @@ void Instrumenter::syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt,
     SYSCALL_STANDARD std) {
   UNUSED_VARIABLE (threadIndex);
   edu::sharif::twinner::util::Logger::loquacious () << "***** syscallEntryPoint *****\n";
-  ise->syscallInvoked (ctxt, edu::sharif::twinner::trace::Syscall (std));
+  ise->syscallInvoked (ctxt, edu::sharif::twinner::trace::syscall::Syscall (std));
   if (isWithinInitialStateDetectionMode && !disabled) {
     edu::sharif::twinner::util::Logger::debug ()
         << "Gathering initial contents of requested memory addresses,"

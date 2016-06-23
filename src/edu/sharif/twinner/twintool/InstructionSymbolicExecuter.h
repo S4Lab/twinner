@@ -29,10 +29,13 @@ class MemoryManager;
 namespace trace {
 
 class Trace;
-class Syscall;
 class FunctionInfo;
 class FunctionInvocation;
 
+namespace syscall {
+
+class Syscall;
+}
 namespace cv {
 
 class ConcreteValue;
@@ -114,7 +117,7 @@ public:
   void enable ();
 
   void syscallInvoked (const CONTEXT *context,
-      edu::sharif::twinner::trace::Syscall s);
+      edu::sharif::twinner::trace::syscall::Syscall s);
   void startNewTraceSegment (CONTEXT *context) const;
 
   edu::sharif::twinner::util::MemoryManager *getTraceMemoryManager () const;

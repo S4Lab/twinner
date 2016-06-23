@@ -19,7 +19,6 @@
 
 #include "Expression.h"
 #include "Constraint.h"
-#include "Syscall.h"
 #include "ExecutionTraceSegment.h"
 
 #include "edu/sharif/twinner/engine/Executer.h"
@@ -27,7 +26,9 @@
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
+
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
+#include "edu/sharif/twinner/trace/syscall/Syscall.h"
 
 namespace edu {
 namespace sharif {

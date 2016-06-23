@@ -4,7 +4,7 @@
  * Copyright © 2013-2016 Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -16,18 +16,20 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace syscall {
 
 Syscall::Syscall () :
-standard (SYSCALL_STANDARD_INVALID) {
+    standard (SYSCALL_STANDARD_INVALID) {
 }
 
 Syscall::Syscall (SYSCALL_STANDARD _standard) :
-standard (_standard) {
+    standard (_standard) {
 }
 
 Syscall::~Syscall () {
 }
 
+}
 }
 }
 }

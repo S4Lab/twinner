@@ -19,6 +19,7 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace syscall {
 
 class Syscall {
 private:
@@ -30,6 +31,7 @@ public:
   ~Syscall ();
 };
 
+}
 }
 }
 }

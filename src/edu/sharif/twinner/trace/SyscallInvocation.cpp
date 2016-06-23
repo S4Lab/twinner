@@ -17,14 +17,16 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-SyscallInvocation::SyscallInvocation (Syscall _syscall) :
+SyscallInvocation::SyscallInvocation (
+    edu::sharif::twinner::trace::syscall::Syscall _syscall) :
     TraceSegmentTerminator (), syscall (_syscall) {
 }
 
 SyscallInvocation::~SyscallInvocation () {
 }
 
-Syscall SyscallInvocation::getSyscall () const {
+edu::sharif::twinner::trace::syscall::Syscall
+SyscallInvocation::getSyscall () const {
   return syscall;
 }
 
@@ -43,7 +45,7 @@ void SyscallInvocation::saveToBinaryStream (std::ofstream &out) const {
 }
 
 SyscallInvocation *SyscallInvocation::loadFromBinaryStream (std::ifstream &in) {
-  Syscall syscall;
+  edu::sharif::twinner::trace::syscall::Syscall syscall;
   in.read (reinterpret_cast<char *> (&syscall), sizeof (syscall));
   return new SyscallInvocation (syscall);
 }

@@ -15,7 +15,8 @@
 
 #include "ExecutionState.h"
 #include "Constraint.h"
-#include "Syscall.h"
+
+#include "edu/sharif/twinner/trace/syscall/Syscall.h"
 
 #include <map>
 

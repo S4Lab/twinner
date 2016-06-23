@@ -28,7 +28,7 @@
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
-#include "edu/sharif/twinner/trace/Syscall.h"
+#include "edu/sharif/twinner/trace/syscall/Syscall.h"
 #include "edu/sharif/twinner/trace/StateSummary.h"
 #include "edu/sharif/twinner/trace/SyscallInvocation.h"
 #include "edu/sharif/twinner/trace/FunctionInvocation.h"
@@ -101,7 +101,7 @@ void InstructionSymbolicExecuter::enable () {
 }
 
 void InstructionSymbolicExecuter::syscallInvoked (const CONTEXT *context,
-    edu::sharif::twinner::trace::Syscall s) {
+    edu::sharif::twinner::trace::syscall::Syscall s) {
   runHooks (context);
   if (disabled) {
     return;
