@@ -28,10 +28,11 @@
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
-#include "edu/sharif/twinner/trace/syscall/Syscall.h"
 #include "edu/sharif/twinner/trace/StateSummary.h"
 #include "edu/sharif/twinner/trace/SyscallInvocation.h"
 #include "edu/sharif/twinner/trace/FunctionInvocation.h"
+
+#include "edu/sharif/twinner/trace/syscall/Syscall.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
@@ -161,13 +162,14 @@ void InstructionSymbolicExecuter::analysisRoutineSyscall (ADDRINT syscallNumber,
   }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+  edu::sharif::twinner::trace::syscall::Syscall const &syscall =
+      edu::sharif::twinner::trace::syscall::Syscall
+      (syscallNumber, arg0, arg1, arg2, arg3, arg4, arg5);
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineSyscall(INS: "
-      << insAssemblyStr << "): syscall number: 0x" << std::hex << syscallNumber
-      << ", args0: 0x" << arg0 << ", args1: 0x" << arg1
-      << ", args2: 0x" << arg2 << ", args3: 0x" << arg3
-      << ", args4: 0x" << arg4 << ", args5: 0x" << arg5 << '\n';
+      << insAssemblyStr << "): syscall-representation: "
+      << syscall.getRepresentation () << '\n';
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,

@@ -25,10 +25,23 @@ class Syscall {
 private:
   SYSCALL_STANDARD standard;
 
+  ADDRINT syscallNumber;
+  ADDRINT arg0;
+  ADDRINT arg1;
+  ADDRINT arg2;
+  ADDRINT arg3;
+  ADDRINT arg4;
+  ADDRINT arg5;
+
 public:
   Syscall ();
   Syscall (SYSCALL_STANDARD standard);
+  Syscall (ADDRINT syscallNumber,
+      ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3,
+      ADDRINT arg4, ADDRINT arg5);
   ~Syscall ();
+
+  std::string getRepresentation () const;
 };
 
 }
