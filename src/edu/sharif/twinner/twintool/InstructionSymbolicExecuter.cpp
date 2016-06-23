@@ -33,6 +33,9 @@
 #include "edu/sharif/twinner/trace/FunctionInvocation.h"
 
 #include "edu/sharif/twinner/trace/syscall/Syscall.h"
+#ifdef TARGET_IS_32BITS_WINDOWS7_SP1
+#include "edu/sharif/twinner/trace/syscall/X86Windows7Sp1Syscall.h"
+#endif
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
@@ -162,9 +165,15 @@ void InstructionSymbolicExecuter::analysisRoutineSyscall (ADDRINT syscallNumber,
   }
   const char *insAssemblyStr =
       trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+#ifdef TARGET_IS_32BITS_WINDOWS7_SP1
+  edu::sharif::twinner::trace::syscall::Syscall const &syscall =
+      edu::sharif::twinner::trace::syscall::X86Windows7Sp1Syscall
+      (syscallNumber, arg0, arg1, arg2, arg3, arg4, arg5);
+#else
   edu::sharif::twinner::trace::syscall::Syscall const &syscall =
       edu::sharif::twinner::trace::syscall::Syscall
       (syscallNumber, arg0, arg1, arg2, arg3, arg4, arg5);
+#endif
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineSyscall(INS: "

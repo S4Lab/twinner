@@ -10,10 +10,10 @@
  * This file is part of Twinner project.
  */
 
-#ifndef SYSCALL_H
-#define SYSCALL_H
+#ifndef X86_WINDOWS7_SP1_SYSCALL_H
+#define X86_WINDOWS7_SP1_SYSCALL_H
 
-#include "edu/sharif/twinner/pin-wrapper.h"
+#include "Syscall.h"
 
 namespace edu {
 namespace sharif {
@@ -21,37 +21,19 @@ namespace twinner {
 namespace trace {
 namespace syscall {
 
-class Syscall {
-private:
-  SYSCALL_STANDARD standard;
-
-  ADDRINT syscallNumber;
-  ADDRINT arg0;
-  ADDRINT arg1;
-  ADDRINT arg2;
-  ADDRINT arg3;
-  ADDRINT arg4;
-  ADDRINT arg5;
-
+class X86Windows7Sp1Syscall : public Syscall {
 public:
-  Syscall ();
-  Syscall (SYSCALL_STANDARD standard);
-  Syscall (ADDRINT syscallNumber,
+  X86Windows7Sp1Syscall (ADDRINT syscallNumber,
       ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3,
       ADDRINT arg4, ADDRINT arg5);
-  ~Syscall ();
-
-  std::string getRepresentation () const;
+  virtual ~X86Windows7Sp1Syscall ();
 
 protected:
-
-  struct SyscallInformation {
-    unsigned int number;
-    const char *name;
-  };
-
   virtual const SyscallInformation *begin () const;
   virtual const SyscallInformation *end () const;
+
+private:
+  static const SyscallInformation SYSCALLS_TABLE[406];
 };
 
 }
@@ -60,4 +42,4 @@ protected:
 }
 }
 
-#endif /* Syscall.h */
+#endif /* X86Windows7Sp1Syscall.h */

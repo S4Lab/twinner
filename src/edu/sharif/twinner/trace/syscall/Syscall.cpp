@@ -42,11 +42,28 @@ Syscall::~Syscall () {
 
 std::string Syscall::getRepresentation () const {
   std::stringstream ss;
+  for (const SyscallInformation *si = begin (); si != end (); ++si) {
+    if (si->number == syscallNumber) {
+      ss << "/*syscall-number=0x" << std::hex << syscallNumber << "*/ "
+          << si->name << " (0x" << arg0
+          << ", 0x" << arg1 << ", 0x" << arg2 << ", 0x" << arg3
+          << ", 0x" << arg4 << ", 0x" << arg5 << ")";
+      return ss.str ();
+    }
+  }
   ss << "GeneralSyscall (syscall-number=0x" << std::hex << syscallNumber
       << ", arg0=0x" << arg0
       << ", arg1=0x" << arg1 << ", arg2=0x" << arg2 << ", arg3=0x" << arg3
       << ", arg4=0x" << arg4 << ", arg5=0x" << arg5 << ")";
   return ss.str ();
+}
+
+const Syscall::SyscallInformation *Syscall::begin () const {
+  return 0;
+}
+
+const Syscall::SyscallInformation *Syscall::end () const {
+  return 0;
 }
 
 }

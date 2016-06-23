@@ -17,6 +17,12 @@
 #define REAL_TARGET_IS_WINDOWS
 #endif
 
+#if defined(TARGET_IA32E) && defined(TARGET_LINUX)
+#define TARGET_IS_64BITS_LINUX
+#elif defined(TARGET_IA32) && defined(TARGET_WINDOWS)
+#define TARGET_IS_32BITS_WINDOWS7_SP1
+#endif
+
 #ifdef __GNUG__
 
 #define COMPILER_IS_COMPATIBLE
