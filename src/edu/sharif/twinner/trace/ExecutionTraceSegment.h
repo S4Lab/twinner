@@ -141,15 +141,10 @@ public:
   const std::list < Constraint * > &getPathConstraints () const;
   std::list < Constraint * > &getPathConstraints ();
 
-  int printMemoryUsageStats (const edu::sharif::twinner::util::Logger &logger) const;
-
   void setTerminator (TraceSegmentTerminator *terminator);
   const TraceSegmentTerminator *getTerminator () const;
 
 private:
-  template <typename Addr>
-  int calcSizeInBytes (const std::map < Addr, Expression * > &map) const;
-
   void initializeOverlappingMemoryLocationsDownwards (int size,
       ADDRINT memoryEa, const Expression &changedExp,
       bool shouldTruncate = false, int shiftAmount = 0);
