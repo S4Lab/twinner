@@ -1459,6 +1459,7 @@ void Instrumenter::aboutToExit (INT32 code) {
   } else {
     logger << "Failed.\n";
   }
+  edu::sharif::twinner::util::LogStream::destroy ();
 }
 
 void Instrumenter::disable () {
@@ -1672,7 +1673,6 @@ VOID applicationIsAboutToExit (INT32 code, VOID * v) {
       << "********** applicationIsAboutToExit(...) **********\n";
   Instrumenter *im = (Instrumenter *) v;
   im->aboutToExit (code);
-  edu::sharif::twinner::util::LogStream::destroy ();
 }
 
 VOID terminateAnalysis (VOID *imptr) {
