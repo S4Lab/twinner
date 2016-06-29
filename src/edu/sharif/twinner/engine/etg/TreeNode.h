@@ -94,6 +94,12 @@ public:
   const edu::sharif::twinner::trace::ExecutionTraceSegment *getSegment () const;
   const std::list < TreeNode * > &getChildren () const;
   const edu::sharif::twinner::trace::Constraint *getConstraint () const;
+
+private:
+  TreeNode *addConstraint (TreeNode *parent,
+      const edu::sharif::twinner::trace::Constraint *c,
+      const edu::sharif::twinner::util::MemoryManager *m,
+      bool performValidityCheck);
 };
 
 }

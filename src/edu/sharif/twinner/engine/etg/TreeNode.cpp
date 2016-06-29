@@ -15,6 +15,7 @@
 #include "TreeNode.h"
 
 #include "edu/sharif/twinner/trace/Constraint.h"
+#include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 
 #include "edu/sharif/twinner/engine/smt/SmtSolver.h"
 
@@ -64,16 +65,37 @@ TreeNode *TreeNode::addConstraint (
       ->assertConstraint (c);
   for (TreeNode *n = this; true; n = n->children.back ()) {
     if (n->children.empty ()) {
-      new TreeNode (n, c, m);
+      return addConstraint (n, c, m, performValidityCheck);
     } else if ((*n->children.back ()->constraint) != (*c)) {
       if (edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
           ->checkValidity (n->children.back ()->constraint)) {
         continue;
       }
-      new TreeNode (n, c, m);
+      return addConstraint (n, c, m, performValidityCheck);
     }
     return n->children.back ();
   }
+}
+
+TreeNode *TreeNode::addConstraint (TreeNode *parent,
+    const edu::sharif::twinner::trace::Constraint *c,
+    const edu::sharif::twinner::util::MemoryManager *m,
+    bool performValidityCheck) {
+  if (performValidityCheck && parent != this) {
+    edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+        ->popLastAssertion ();
+    edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+        ->assertConstraint (parent->constraint);
+    if (edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+        ->checkValidity (c)) {
+      return parent;
+    }
+    edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+        ->popLastAssertion ();
+    edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+        ->assertConstraint (c);
+  }
+  return new TreeNode (parent, c, m);
 }
 
 TreeNode *TreeNode::getRightMostDeepestGrandChild (
