@@ -15,7 +15,7 @@ fi
 
 if [ "a$fullpreparation" = "afull" ]; then
 	echo "Full preparation..."
-	mkdir -p /tmp/twinner
+	mkdir -p deploy/tmp/twinner
 	#export LD_LIBRARY_PATH=/home/john/twinner/pin-2.14-linux/intel64/runtime
 fi
 echo "Done."
