@@ -103,6 +103,10 @@ void Twinner::setSafeFunctions (string safeFunctions) {
   this->safeFunctions = safeFunctions;
 }
 
+void Twinner::setTempFolder (std::string tmpfolder) {
+  this->tmpfolder = tmpfolder;
+}
+
 void Twinner::setJustAnalyzeMainRoutine (bool main) {
   this->main = main;
 }
@@ -147,7 +151,7 @@ bool Twinner::generateTwinBinary () {
   int i = 1;
   while (somePathsAreNotCovered) {
     Executer ex (i, pin, twintool, input, arguments,
-                 endpoints, safeFunctions,
+                 endpoints, safeFunctions, tmpfolder,
                  main, stackOffset, naive, overheads);
     edu::sharif::twinner::util::Logger::debug () << "Executing trace # " << i++ << '\n';
     // steps 1, 2, and 3
@@ -171,7 +175,7 @@ bool Twinner::generateTwinBinary () {
   symbols.clear ();
   {
     Executer ex (i, pin, twintool, input, arguments,
-                 endpoints, safeFunctions,
+                 endpoints, safeFunctions, tmpfolder,
                  main, stackOffset, naive, overheads);
     const std::map < std::pair < ADDRINT, int >, UINT64 > initialValues =
         obtainInitializedMemoryValues (ex);

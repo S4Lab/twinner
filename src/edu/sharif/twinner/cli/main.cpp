@@ -45,11 +45,12 @@ enum ArgumentsParsingStatus {
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &input, string &args, string &endpoints,
     string &safeFunctions,
+    string &tmpfolder,
     string &twintool, string &pin, string &twin,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads);
 int run (string input, string args, string endpoints,
-    string safeFunctions,
+    string safeFunctions, string tmpfolder,
     string twintool, string pin, string twin,
     bool main, string stackOffset, bool naive, bool measureOverheads);
 int checkTraceFile (string traceFilePath, string memoryFilePath);
@@ -63,14 +64,14 @@ int main (int argc, char *argv[]) {
 }
 
 int startTwinner (int argc, char *argv[]) {
-  string input, args, endpoints, safeFunctions, twintool, pin, twin;
+  string input, args, endpoints, safeFunctions, tmpfolder, twintool, pin, twin;
   bool justAnalyzeMainRoutine = false;
   string stackOffset;
   bool naive = false;
   bool measureOverheads = false;
   switch (parseArguments (argc, argv,
                           input, args, endpoints, safeFunctions,
-                          twintool, pin, twin,
+                          tmpfolder, twintool, pin, twin,
                           justAnalyzeMainRoutine, stackOffset,
                           naive, measureOverheads)) {
   case CONTINUE_NORMALLY:
@@ -86,7 +87,8 @@ int startTwinner (int argc, char *argv[]) {
       printError (argv[0], "permission denied: can not write to output twin binary!");
     } else {
       // all files are OK...
-      return run (input, args, endpoints, safeFunctions, twintool, pin, twin,
+      return run (input, args, endpoints, safeFunctions,
+                  tmpfolder, twintool, pin, twin,
                   justAnalyzeMainRoutine, stackOffset, naive, measureOverheads);
     }
     return -2;
@@ -110,7 +112,7 @@ int startTwinner (int argc, char *argv[]) {
 }
 
 int run (string input, string args, string endpoints, string safeFunctions,
-    string twintool, string pin, string twin,
+    string tmpfolder, string twintool, string pin, string twin,
     bool main, string stackOffset, bool naive, bool measureOverheads) {
   edu::sharif::twinner::util::Logger::info ()
       << "[verboseness level: "
@@ -120,6 +122,7 @@ int run (string input, string args, string endpoints, string safeFunctions,
       << (args.empty () ? "" : ("Input binary arguments: " + args + "\n"))
       << (endpoints.empty () ? "" : ("Analysis Endpoints: " + endpoints + "\n"))
       << (safeFunctions.empty () ? "" : ("Safe Functions: " + safeFunctions + "\n"))
+      << "Temp folder: " << tmpfolder << '\n'
       << "TwinTool pintool: " << twintool
       << "\nPin launcher: " << pin
       << "\nOutput twin file: " << twin << '\n';
@@ -131,6 +134,7 @@ int run (string input, string args, string endpoints, string safeFunctions,
   tw.setInputBinaryArguments (args);
   tw.setAnalysisEndpoints (endpoints);
   tw.setSafeFunctions (safeFunctions);
+  tw.setTempFolder (tmpfolder);
   tw.setJustAnalyzeMainRoutine (main);
   tw.setStackOffset (stackOffset);
   tw.setNaiveMode (naive);
@@ -167,6 +171,7 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &input, string &args, string &endpoints,
     string &safeFunctions,
+    string &tmpfolder,
     string &twintool, string &pin, string &twin,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads) {
@@ -192,6 +197,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     { 'n', "naive", ArgParser::NO,
       "do not instrument; just print instructions", false, false},
     { 't', "tool", ArgParser::YES, "twintool executable/library file", true, false},
+    { 'T', "tmpfolder", ArgParser::YES, "tmp folder (default: /tmp)", false, false},
     { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true, false},
     { 'o', "output", ArgParser::YES, "path/name of the generated twin binary", true, false},
     { 'm', "main", ArgParser::NO, "restrict analysis to after the main() function", false, false},
@@ -207,6 +213,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     return ERROR_OCCURRED;
   }
   string verboseStr = "warning", logfileStr = "out";
+  tmpfolder = "/tmp";
   for (int argind = 0; argind < parser.arguments (); ++argind) {
     const int code = parser.code (argind);
     if (!code) { // no more options
@@ -257,6 +264,9 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       break;
     case 't':
       twintool = parser.argument (argind);
+      break;
+    case 'T':
+      tmpfolder = parser.argument (argind);
       break;
     case 'p':
       pin = parser.argument (argind);

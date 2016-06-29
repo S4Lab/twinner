@@ -72,32 +72,34 @@ std::string Executer::getUniqueLogfileName (int uniqueId) {
   return ss.str ();
 }
 
-const char *Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE = "/tmp/twinner/symbols.dat";
-const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/tmp/twinner/trace.dat";
+const char *Executer::SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE = "/twinner/symbols.dat";
+const char *Executer::EXECUTION_TRACE_COMMUNICATION_TEMP_FILE = "/twinner/trace.dat";
 const char *Executer::DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE =
-    "/tmp/twinner/memory.dat";
+    "/twinner/memory.dat";
 const char *Executer::OVERHEAD_MEASUREMENT_OPTION = " -measure";
 const char *Executer::MAIN_ARGS_COMMUNICATION_TEMP_FILE =
-    "/tmp/twinner/main-args-reporting.dat";
+    "/twinner/main-args-reporting.dat";
 
 Executer::Executer (int uniqueId,
     std::string pinLauncher, std::string twintool,
     std::string inputBinary, std::string _inputArguments,
     std::string endpoints, std::string safeFunctions,
+    std::string _tmpfolder,
     bool main, std::string stackOffset, bool naive, bool _overheads) :
+    tmpfolder (_tmpfolder),
     baseCommand (pinLauncher
     + " -pin_memory_range 0x40000000:0x60000000"
     + " -t " + twintool
-    + " -symbols " + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
-    + " -trace " + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
-    + " -memory " + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
+    + " -symbols " + tmpfolder + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
+    + " -trace " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
+    + " -memory " + tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
     + " -verbose " + edu::sharif::twinner::util::LogStream::getInstance ()
     ->getVerbosenessLevelAsString ()
     + " -logfilename " + getUniqueLogfileName (uniqueId)
     + (_overheads ? OVERHEAD_MEASUREMENT_OPTION : "")
-    + (main ? std::string (" -main -mar ") + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
+    + (main ? std::string (" -main -mar ") + tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
     + (endpoints != "" ? std::string (" -endpoints ") + endpoints
-       + " -mar " + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
+       + " -mar " + tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
     + (safeFunctions != "" ? std::string (" -safe-functions ")
        + "'" + safeFunctions + "'" : "")
     + (stackOffset != "" ? std::string (" -stack-offset ") + stackOffset : "")
@@ -115,13 +117,13 @@ Executer::Executer (int uniqueId,
 void Executer::setCandidateAddresses (
     const std::set < std::pair < ADDRINT, int > > &addresses) const {
   std::ofstream out;
-  out.open (SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE,
+  out.open ((tmpfolder + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE).c_str (),
             ios_base::out | ios_base::trunc | ios_base::binary);
   if (!out.is_open ()) {
     edu::sharif::twinner::util::Logger::error ()
         << "Executer::setCandidateAddresses (...): "
         "Can not write memory addresses to file due to error in open function: "
-        << SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE << '\n';
+        << tmpfolder << SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE << '\n';
     abort ();
   }
   out.write ("SYM", 3);
@@ -166,11 +168,13 @@ void add_symbol_to_map (
 bool Executer::saveSymbolRecordsToFile (ExecutionMode mode,
     std::map < int, std::list < Record > > records) const {
   std::ofstream out;
-  out.open (SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE,
+  out.open ((tmpfolder + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE).c_str (),
             ios_base::out | ios_base::trunc | ios_base::binary);
   if (!out.is_open ()) {
-    edu::sharif::twinner::util::Logger::error () << "Can not write symbols to file:"
-        " Error in open function: " << SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE << '\n';
+    edu::sharif::twinner::util::Logger::error ()
+        << "Can not write symbols to file:"
+        " Error in open function: "
+        << tmpfolder << SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE << '\n';
     return false;
   }
   saveSymbolRecordsToBinaryStream (out, mode, records);
@@ -328,7 +332,7 @@ bool Executer::isLastExecutionSignaled () const {
 
 edu::sharif::twinner::trace::MarInfo *Executer::readMarInfo () const {
   return edu::sharif::twinner::trace::MarInfo::readMarInfoFromFile
-      (MAIN_ARGS_COMMUNICATION_TEMP_FILE);
+      ((tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE).c_str ());
 }
 
 edu::sharif::twinner::trace::Trace *
@@ -350,8 +354,8 @@ Executer::executeSystemCommand (std::string command) {
     signaled = true;
   }
   return edu::sharif::twinner::trace::Trace::loadFromFile
-      (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
-       DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
+      ((tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE).c_str (),
+       (tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE).c_str ());
 }
 
 edu::sharif::twinner::trace::Trace *
@@ -363,8 +367,8 @@ Executer::executeSystemCommand (std::string command, Measurement &measurement) {
   edu::sharif::twinner::trace::Trace *trace = 0;
   if (executeAndMeasure (command, measurement)) {
     trace = edu::sharif::twinner::trace::Trace::loadFromFile
-        (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
-         DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
+        ((tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE).c_str (),
+         (tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE.c_str ()));
   }
   const int ret = measurement.ret;
   edu::sharif::twinner::util::Logger::debug ()
@@ -421,20 +425,20 @@ Executer::executeSingleTraceInInitialStateDetectionMode () const {
       "[command: '" << command << "']: "
       << "The system(...) call returns code: " << ret << '\n';
   return edu::sharif::twinner::trace::Trace::loadAddressToValueMapFromFile
-      (EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
+      ((tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE.c_str ());
 }
 
 void Executer::unlinkCommunicationFiles () const {
-  const char *twintoolOutputFiles[] = {
-    EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
-    DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE,
-    MAIN_ARGS_COMMUNICATION_TEMP_FILE,
-    0
-  };
-  for (const char **path = twintoolOutputFiles; *path; ++path) {
-    if (access (*path, F_OK) == 0 && unlink (*path) == -1) {
+  std::list<std::string> tmpFiles;
+  tmpFiles.push_back (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
+  tmpFiles.push_back (tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
+  tmpFiles.push_back (tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE);
+  for (std::list<std::string>::const_iterator it = tmpFiles.begin ();
+      it != tmpFiles.end (); ++it) {
+    const char *path = it->c_str ();
+    if (access (path, F_OK) == 0 && unlink (path) == -1) {
       edu::sharif::twinner::util::Logger::error ()
-          << "Error: Cannot delete the " << (*path) << " file.\n";
+          << "Error: Cannot delete the " << path << " file.\n";
       abort ();
     }
   }

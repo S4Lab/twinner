@@ -79,6 +79,7 @@ public:
   static const char *MAIN_ARGS_COMMUNICATION_TEMP_FILE;
 
 private:
+  const std::string tmpfolder;
   const std::string baseCommand;
   bool signaled;
   std::string inputArguments;
@@ -88,6 +89,7 @@ public:
   Executer (int uniqueId, std::string pinLauncher, std::string twintool,
       std::string inputBinary, std::string inputArguments,
       std::string endpoints, std::string safeFunctions,
+      std::string tmpfolder,
       bool main, std::string stackOffset, bool naive, bool overheads);
 
   void setCandidateAddresses (
