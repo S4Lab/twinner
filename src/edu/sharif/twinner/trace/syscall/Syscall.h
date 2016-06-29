@@ -51,6 +51,9 @@ public:
   ADDRINT getArg4 () const;
   ADDRINT getArg5 () const;
 
+  virtual bool isProcessTerminatingSyscall () const;
+  virtual ADDRINT getExitCodeArgument () const;
+
 protected:
 
   struct SyscallInformation {

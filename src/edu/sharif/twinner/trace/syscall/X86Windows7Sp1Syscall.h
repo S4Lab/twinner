@@ -28,6 +28,9 @@ public:
       ADDRINT arg4, ADDRINT arg5);
   virtual ~X86Windows7Sp1Syscall ();
 
+  virtual bool isProcessTerminatingSyscall () const;
+  virtual ADDRINT getExitCodeArgument () const;
+
 protected:
   virtual const SyscallInformation *begin () const;
   virtual const SyscallInformation *end () const;

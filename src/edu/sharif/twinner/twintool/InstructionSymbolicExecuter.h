@@ -298,6 +298,12 @@ private:
       edu::sharif::twinner::trace::Trace *trace, const CONTEXT *context) const;
 
   /**
+   * Called before invocation of every syscall and before the syscallInvoked ().
+   */
+  void syscallAnalysisRoutine (
+      edu::sharif::twinner::trace::syscall::Syscall const &syscall);
+
+  /**
    * CMOVBE (Conditional Move) moves src to dst iff (CF=1 || ZF=1).
    */
   void cmovbeAnalysisRoutine (const MutableExpressionValueProxy &dst,

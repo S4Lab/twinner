@@ -86,6 +86,14 @@ ADDRINT Syscall::getArg5 () const {
   return arg5;
 }
 
+bool Syscall::isProcessTerminatingSyscall () const {
+  return false;
+}
+
+ADDRINT Syscall::getExitCodeArgument () const {
+  return 0;
+}
+
 const Syscall::SyscallInformation *Syscall::begin () const {
   return 0;
 }

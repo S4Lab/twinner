@@ -179,6 +179,7 @@ void InstructionSymbolicExecuter::analysisRoutineSyscall (ADDRINT syscallNumber,
   logger << "analysisRoutineSyscall(INS: "
       << insAssemblyStr << "): syscall-representation: "
       << syscall.getRepresentation () << '\n';
+  syscallAnalysisRoutine (syscall);
 }
 
 void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine routine,
@@ -1250,6 +1251,17 @@ InstructionSymbolicExecuter::instantiateFunctionInvocation (
     edu::sharif::twinner::util::Logger::warning () << "argsNo=auto but "
         << name << " function is not supported by auto yet";
     return new edu::sharif::twinner::trace::FunctionInvocation (name);
+  }
+}
+
+void InstructionSymbolicExecuter::syscallAnalysisRoutine (
+    edu::sharif::twinner::trace::syscall::Syscall const &syscall) {
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "syscallAnalysisRoutine(...)\n";
+  if (syscall.isProcessTerminatingSyscall ()) {
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tsyscall is a process terminating one; exit code is 0x"
+        << std::hex << syscall.getExitCodeArgument () << '\n';
   }
 }
 

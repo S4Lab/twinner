@@ -436,6 +436,14 @@ X86Windows7Sp1Syscall::X86Windows7Sp1Syscall (ADDRINT _syscallNumber,
 X86Windows7Sp1Syscall::~X86Windows7Sp1Syscall () {
 }
 
+bool X86Windows7Sp1Syscall::isProcessTerminatingSyscall () const {
+  return getSyscallNumber () == 0x0172;
+}
+
+ADDRINT X86Windows7Sp1Syscall::getExitCodeArgument () const {
+  return getArg1 ();
+}
+
 const Syscall::SyscallInformation *X86Windows7Sp1Syscall::begin () const {
   return X86Windows7Sp1Syscall::SYSCALLS_TABLE;
 }
