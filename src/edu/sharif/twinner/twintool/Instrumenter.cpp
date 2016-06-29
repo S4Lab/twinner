@@ -601,13 +601,13 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
 inline void Instrumenter::checkForInitialState (INS ins) const {
   static bool firstTime = true;
   if (firstTime && !disabled) {
-    firstTime = false;
     // initializing registers, right before execution of first instrumented instruction
     INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineInitializeRegisters,
                     IARG_PTR, ise,
                     IARG_CONTEXT,
                     IARG_END);
   }
+  firstTime = false;
 }
 
 void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE op,
@@ -1557,6 +1557,11 @@ void Instrumenter::instrumentImage (IMG img) {
                             IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
                             IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
                             IARG_END);
+            INS_InsertCall (ins, IPOINT_BEFORE,
+                            (AFUNPTR) analysisRoutineInitializeRegisters,
+                            IARG_PTR, ise,
+                            IARG_CONTEXT,
+                            IARG_END);
             ++state;
           } else if (addr == end) {
             INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) terminateAnalysis,
@@ -1590,6 +1595,11 @@ void Instrumenter::instrumentImage (IMG img) {
                       IARG_PTR, this,
                       IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
                       IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
+                      IARG_END);
+      RTN_InsertCall (mainRoutine, IPOINT_BEFORE,
+                      (AFUNPTR) analysisRoutineInitializeRegisters,
+                      IARG_PTR, ise,
+                      IARG_CONTEXT,
                       IARG_END);
       RTN_InsertCall (mainRoutine, IPOINT_AFTER, (AFUNPTR) terminateAnalysis,
                       IARG_PTR, this,
