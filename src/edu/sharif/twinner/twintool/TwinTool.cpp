@@ -252,6 +252,10 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
   if (measureMode) {
     edu::sharif::twinner::util::Logger::info () << "Measure mode: "
         "instruction counting instrumentation will be used instead of normal behavior.\n";
+    if (!hasSymbolsInputFile) {
+      edu::sharif::twinner::util::Logger::warning ()
+          << "No symbols input file is given; ignoring the measure mode.\n";
+    }
   }
   if (hasSymbolsInputFile) {
     std::ifstream in;
