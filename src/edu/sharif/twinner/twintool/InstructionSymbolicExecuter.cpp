@@ -120,6 +120,8 @@ void InstructionSymbolicExecuter::syscallInvoked (const CONTEXT *context,
 void InstructionSymbolicExecuter::startNewTraceSegment (
     CONTEXT *context) const {
   if (disabled) {
+    edu::sharif::twinner::util::Logger::warning ()
+        << "startNewTraceSegment is called while the ISE is disabled\n";
     return;
   }
   const edu::sharif::twinner::trace::Trace *trace = getTrace ();
