@@ -87,9 +87,11 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
   edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
   std::list < ExpressionToken * >::iterator it = stack.end ();
   const Operator *op = static_cast<Operator *> (*--it);
-  if (op->getIdentifier () == Operator::BITWISE_AND) {
+  if (op->getIdentifier () == Operator::BITWISE_AND
+      || op->getIdentifier () == Operator::BITWISE_OR) {
     Constant *mask = dynamic_cast<Constant *> (*--it);
     if (mask) {
+      // exp: Z [&|] mask
       edu::sharif::twinner::trace::cv::ConcreteValue *cv = mask->getValue ().clone ();
       (*cv) >>= (*operand);
       stack.pop_back (); // removes op
@@ -97,20 +99,22 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
       delete op;
       delete mask;
       exp->shiftToRight (operand);
-      exp->bitwiseAnd (cv);
+      if (op->getIdentifier () == Operator::BITWISE_AND) {
+        exp->bitwiseAnd (cv);
+      } else {
+        exp->bitwiseOr (cv);
+      }
       return COMPLETED;
     }
-  } else if (op->getIdentifier () == Operator::ADD
-      || op->getIdentifier () == Operator::BITWISE_OR) {
+  } else if (op->getIdentifier () == Operator::ADD) {
     Constant *second = dynamic_cast<Constant *> (*--it);
     if (second) {
       const Operator *andOp = dynamic_cast<Operator *> (*--it);
       if (andOp && andOp->getIdentifier () == Operator::BITWISE_AND) {
         Constant *mask = dynamic_cast<Constant *> (*--it);
         if (mask) {
-          // exp: (Z & mask) [+|] second
-          if (op->getIdentifier () == Operator::BITWISE_OR
-              || areBitsDisjoint (mask->getValue (), second->getValue ())) {
+          // exp: (Z & mask) + second
+          if (areBitsDisjoint (mask->getValue (), second->getValue ())) {
             edu::sharif::twinner::trace::cv::ConcreteValue *cv =
                 second->getValue ().clone ();
             (*cv) >>= (*operand);
@@ -119,11 +123,7 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
             delete op;
             delete second;
             exp->shiftToRight (operand);
-            if (op->getIdentifier () == Operator::ADD) {
-              exp->add (cv);
-            } else {
-              exp->bitwiseOr (cv);
-            }
+            exp->add (cv);
             return COMPLETED;
           }
         }
