@@ -19,6 +19,7 @@
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "MarInfo.h"
 
 namespace edu {
 namespace sharif {
@@ -86,7 +87,8 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
     int generationIndex, bool isOverwriting) :
     Expression (concreteValue.clone (), isOverwriting) {
   if (!isOverwriting) {
-    if (memoryEa < 0x7f0000000000ull) { // FIXME: Generalize this code
+    //    if (memoryEa < 0x7f0000000000ull) {
+    if (memoryEa < ADDRINT (MarInfo::getInitialArgv ())) { // FIXME: Generalize this code
       // this temporary code assumes that everything out of stack (including heap) is constant
       stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (concreteValue));
       return;
