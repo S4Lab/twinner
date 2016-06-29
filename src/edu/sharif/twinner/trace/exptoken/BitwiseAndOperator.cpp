@@ -130,6 +130,14 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
               || !(second = dynamic_cast<Constant *> (*--it))) {
             return RESTART_SIMPLIFICATION;
           }
+        } else if (secondOp->getIdentifier () == Operator::SHIFT_LEFT) {
+          // exp == (...) << second
+          if (isTruncatingMask (operand->clone ())
+              && second->getValue () >= numberOfBits (operand->clone ())) {
+            delete operand;
+            (*exp) = edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
+            return COMPLETED;
+          }
         }
         if (stack.size () <= 4) {
           return CAN_NOT_SIMPLIFY;
