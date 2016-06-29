@@ -154,6 +154,26 @@ protected:
     COMPLETED // operator is not used and can be deleted
   };
 
+  /**
+   * Tries to simplify the {exp} {this operator} {operand} expression.
+   * It may update exp, has ownership of the operand, and return one of
+   * three possible outcomes:
+   * 1. can not simplify; in this case the {exp} may be simplified/modified,
+   *    but {operand} is not used,
+   * 2. need restart; in this case operand is not used too, but exp is
+   *    simplified in a way that restarting the {apply} operation can gain
+   *    more simplifications,
+   * 3. complete simplification; in this case operand is used (caller should
+   *    not touch it) and {this operator} is not used (caller should delete it).
+   *
+   * ASSUMPTION: The exp stack contains more than two elements and consequently,
+   *             an operator is placed on top of its stack (with at least
+   *             two operands below it).
+   *
+   * @param exp The expression which this operator is applied upon it
+   * @param operand The right-hand operand
+   * @return The final status of the performed simplification
+   */
   virtual SimplificationStatus deepSimplify (edu::sharif::twinner::trace::Expression *exp,
       edu::sharif::twinner::trace::cv::ConcreteValue *operand);
 };
