@@ -197,9 +197,9 @@ void MarInfo::saveToOutputStream (std::ostream &out) const {
   }
 }
 
-MarInfo *MarInfo::readMarInfoFromFile (const char *path) {
+MarInfo *MarInfo::readMarInfoFromFile (std::string path) {
   std::ifstream in;
-  in.open (path, ios_base::in | ios_base::binary);
+  in.open (path.c_str (), ios_base::in | ios_base::binary);
   if (!in.is_open ()) {
     edu::sharif::twinner::util::Logger::error ()
         << "MarInfo::readMarInfoFromFile (path=" << path << "): "

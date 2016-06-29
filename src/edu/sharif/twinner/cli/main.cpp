@@ -157,7 +157,7 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
 
   edu::sharif::twinner::trace::Trace *trace =
       edu::sharif::twinner::trace::Trace::loadFromFile
-      (traceFilePath.c_str (), memoryFilePath.c_str ());
+      (traceFilePath, memoryFilePath);
   if (trace == 0) {
     return -1;
   }

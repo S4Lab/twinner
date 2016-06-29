@@ -167,12 +167,12 @@ public:
   void initializeNewTraceSegment (CONTEXT *context) const;
 
   bool saveToFile (const char *path, const char *memoryPath) const;
-  static Trace *loadFromFile (const char *path, const char *memoryPath);
+  static Trace *loadFromFile (std::string path, std::string memoryPath);
   static bool saveAddressToValueMapToFile (
       const std::map < std::pair < ADDRINT, int >, UINT64 > &map,
       const char *path);
   static std::map < std::pair < ADDRINT, int >, UINT64 >
-  loadAddressToValueMapFromFile (const char *path);
+  loadAddressToValueMapFromFile (std::string path);
 
   const std::list < ExecutionTraceSegment * > &getTraceSegments () const;
   std::list < ExecutionTraceSegment * > &getTraceSegments ();

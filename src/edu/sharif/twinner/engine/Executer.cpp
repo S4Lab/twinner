@@ -332,7 +332,7 @@ bool Executer::isLastExecutionSignaled () const {
 
 edu::sharif::twinner::trace::MarInfo *Executer::readMarInfo () const {
   return edu::sharif::twinner::trace::MarInfo::readMarInfoFromFile
-      ((tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE).c_str ());
+      (tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE);
 }
 
 edu::sharif::twinner::trace::Trace *
@@ -354,8 +354,8 @@ Executer::executeSystemCommand (std::string command) {
     signaled = true;
   }
   return edu::sharif::twinner::trace::Trace::loadFromFile
-      ((tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE).c_str (),
-       (tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE).c_str ());
+      (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
+       tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
 }
 
 edu::sharif::twinner::trace::Trace *
@@ -367,8 +367,8 @@ Executer::executeSystemCommand (std::string command, Measurement &measurement) {
   edu::sharif::twinner::trace::Trace *trace = 0;
   if (executeAndMeasure (command, measurement)) {
     trace = edu::sharif::twinner::trace::Trace::loadFromFile
-        ((tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE).c_str (),
-         (tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE.c_str ()));
+        (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
+         tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
   }
   const int ret = measurement.ret;
   edu::sharif::twinner::util::Logger::debug ()
@@ -424,8 +424,11 @@ Executer::executeSingleTraceInInitialStateDetectionMode () const {
       << "Executer::executeSingleTraceInInitialStateDetectionMode () "
       "[command: '" << command << "']: "
       << "The system(...) call returns code: " << ret << '\n';
+  if (ret != 0) {
+    abort ();
+  }
   return edu::sharif::twinner::trace::Trace::loadAddressToValueMapFromFile
-      ((tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE.c_str ());
+      (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
 }
 
 void Executer::unlinkCommunicationFiles () const {

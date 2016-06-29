@@ -218,15 +218,15 @@ void Trace::saveToBinaryStream (std::ofstream &out) const {
  * and the caller must delete it. If path does not exist, an exception will be raised.
  * @return A newed Trace object loaded from file "path".
  */
-Trace *Trace::loadFromFile (const char *path, const char *memoryPath) {
+Trace *Trace::loadFromFile (std::string path, std::string memoryPath) {
   std::ifstream in;
-  in.open (path, ios_base::in | ios_base::binary);
+  in.open (path.c_str (), ios_base::in | ios_base::binary);
   if (!in.is_open ()) {
     edu::sharif::twinner::util::Logger::error () << "Can not read trace info:"
         " Error in open function: " << path << '\n';
     return 0;
   }
-  Trace *trace = Trace::loadFromBinaryStream (in, memoryPath);
+  Trace *trace = Trace::loadFromBinaryStream (in, memoryPath.c_str ());
   in.close ();
   return trace;
 }
@@ -277,10 +277,10 @@ void write_map_entry (std::ofstream &out,
 }
 
 map < std::pair < ADDRINT, int >, UINT64 >
-Trace::loadAddressToValueMapFromFile (const char *path) {
+Trace::loadAddressToValueMapFromFile (std::string path) {
   map < std::pair < ADDRINT, int >, UINT64 > map;
   std::ifstream in;
-  in.open (path, ios_base::in | ios_base::binary);
+  in.open (path.c_str (), ios_base::in | ios_base::binary);
   if (!in.is_open ()) {
     edu::sharif::twinner::util::Logger::error () << "Can not read address-to-value map:"
         " Error in open function: " << path << '\n';
