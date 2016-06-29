@@ -58,6 +58,34 @@ std::string Syscall::getRepresentation () const {
   return ss.str ();
 }
 
+ADDRINT Syscall::getSyscallNumber () const {
+  return syscallNumber;
+}
+
+ADDRINT Syscall::getArg0 () const {
+  return arg0;
+}
+
+ADDRINT Syscall::getArg1 () const {
+  return arg1;
+}
+
+ADDRINT Syscall::getArg2 () const {
+  return arg2;
+}
+
+ADDRINT Syscall::getArg3 () const {
+  return arg3;
+}
+
+ADDRINT Syscall::getArg4 () const {
+  return arg4;
+}
+
+ADDRINT Syscall::getArg5 () const {
+  return arg5;
+}
+
 const Syscall::SyscallInformation *Syscall::begin () const {
   return 0;
 }

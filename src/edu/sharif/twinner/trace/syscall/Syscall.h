@@ -43,6 +43,14 @@ public:
 
   std::string getRepresentation () const;
 
+  ADDRINT getSyscallNumber () const;
+  ADDRINT getArg0 () const;
+  ADDRINT getArg1 () const;
+  ADDRINT getArg2 () const;
+  ADDRINT getArg3 () const;
+  ADDRINT getArg4 () const;
+  ADDRINT getArg5 () const;
+
 protected:
 
   struct SyscallInformation {
