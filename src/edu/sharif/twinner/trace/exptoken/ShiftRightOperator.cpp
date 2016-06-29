@@ -96,14 +96,14 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
       (*cv) >>= (*operand);
       stack.pop_back (); // removes op
       stack.pop_back (); // removes mask
-      delete op;
-      delete mask;
       exp->shiftToRight (operand);
       if (op->getIdentifier () == Operator::BITWISE_AND) {
         exp->bitwiseAnd (cv);
       } else {
         exp->bitwiseOr (cv);
       }
+      delete op;
+      delete mask;
       return COMPLETED;
     }
   } else if (op->getIdentifier () == Operator::ADD) {
