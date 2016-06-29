@@ -38,8 +38,7 @@ struct Measurement;
 
 class Executer {
 private:
-  static int lastUsedId;
-  static std::string getUniqueLogfileName ();
+  static std::string getUniqueLogfileName (int uniqueId);
 
 public:
 
@@ -86,7 +85,7 @@ private:
   const bool overheads;
 
 public:
-  Executer (std::string pinLauncher, std::string twintool,
+  Executer (int uniqueId, std::string pinLauncher, std::string twintool,
       std::string inputBinary, std::string inputArguments,
       std::string endpoints, std::string safeFunctions,
       bool main, std::string stackOffset, bool naive, bool overheads);

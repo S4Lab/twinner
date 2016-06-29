@@ -142,13 +142,13 @@ void Twinner::setMeasureOverheads (bool measureOverheads) {
  * and initialize remaining addresses in the Twin code.
  */
 bool Twinner::generateTwinBinary () {
-  Executer ex (pin, twintool, input, arguments,
-               endpoints, safeFunctions,
-               main, stackOffset, naive, overheads);
   set < const edu::sharif::twinner::trace::exptoken::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;
   while (somePathsAreNotCovered) {
+    Executer ex (i, pin, twintool, input, arguments,
+                 endpoints, safeFunctions,
+                 main, stackOffset, naive, overheads);
     edu::sharif::twinner::util::Logger::debug () << "Executing trace # " << i++ << '\n';
     // steps 1, 2, and 3
     ex.setSymbolsValues (symbols);
@@ -169,9 +169,14 @@ bool Twinner::generateTwinBinary () {
   }
   edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
   symbols.clear ();
-  const std::map < std::pair < ADDRINT, int >, UINT64 > initialValues =
-      obtainInitializedMemoryValues (ex);
-  codeTracesIntoTwinCode (initialValues);
+  {
+    Executer ex (i, pin, twintool, input, arguments,
+                 endpoints, safeFunctions,
+                 main, stackOffset, naive, overheads);
+    const std::map < std::pair < ADDRINT, int >, UINT64 > initialValues =
+        obtainInitializedMemoryValues (ex);
+    codeTracesIntoTwinCode (initialValues);
+  }
   return true;
 }
 

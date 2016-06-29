@@ -65,12 +65,10 @@ inline void save_records_list (std::ofstream &out, const int &segmentIndex,
 inline void save_record (std::ofstream &out,
     const edu::sharif::twinner::trace::exptoken::SymbolRecord &record);
 
-int Executer::lastUsedId = 0;
-
-std::string Executer::getUniqueLogfileName () {
+std::string Executer::getUniqueLogfileName (int uniqueId) {
   std::stringstream ss;
   ss << edu::sharif::twinner::util::LogStream::getInstance ()->getLogfileName ()
-      << "-" << (++lastUsedId);
+      << "-" << uniqueId;
   return ss.str ();
 }
 
@@ -82,7 +80,8 @@ const char *Executer::OVERHEAD_MEASUREMENT_OPTION = " -measure";
 const char *Executer::MAIN_ARGS_COMMUNICATION_TEMP_FILE =
     "/tmp/twinner/main-args-reporting.dat";
 
-Executer::Executer (std::string pinLauncher, std::string twintool,
+Executer::Executer (int uniqueId,
+    std::string pinLauncher, std::string twintool,
     std::string inputBinary, std::string _inputArguments,
     std::string endpoints, std::string safeFunctions,
     bool main, std::string stackOffset, bool naive, bool _overheads) :
@@ -94,7 +93,7 @@ Executer::Executer (std::string pinLauncher, std::string twintool,
     + " -memory " + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
     + " -verbose " + edu::sharif::twinner::util::LogStream::getInstance ()
     ->getVerbosenessLevelAsString ()
-    + " -logfilename " + getUniqueLogfileName ()
+    + " -logfilename " + getUniqueLogfileName (uniqueId)
     + (_overheads ? OVERHEAD_MEASUREMENT_OPTION : "")
     + (main ? std::string (" -main -mar ") + MAIN_ARGS_COMMUNICATION_TEMP_FILE : "")
     + (endpoints != "" ? std::string (" -endpoints ") + endpoints
