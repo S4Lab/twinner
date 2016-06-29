@@ -107,7 +107,29 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
             (*exp) = edu::sharif::twinner::trace::ExpressionImp (operand);
             return COMPLETED;
           }
-          delete secondCv;
+          if (stack.size () <= 4) {
+            delete secondCv;
+            return CAN_NOT_SIMPLIFY;
+          }
+          // temporarily remove the secondOp and reapply it later
+          stack.pop_back (); // removes secondOp
+          stack.pop_back (); // removes second
+          edu::sharif::twinner::trace::cv::ConcreteValue *operandCopy =
+              operand->clone ();
+          const SimplificationStatus status = deepSimplify (exp, operandCopy);
+          if (status != COMPLETED) {
+            delete operandCopy;
+          }
+          exp->bitwiseOr (secondCv);
+          if (status == RESTART_SIMPLIFICATION || stack.size () < 3) {
+            return RESTART_SIMPLIFICATION;
+          }
+          it = stack.end ();
+          if (!(secondOp = dynamic_cast<Operator *> (*--it))
+              || secondOp->getIdentifier () != Operator::BITWISE_OR
+              || !(second = dynamic_cast<Constant *> (*--it))) {
+            return RESTART_SIMPLIFICATION;
+          }
         }
         if (stack.size () <= 4) {
           return CAN_NOT_SIMPLIFY;
