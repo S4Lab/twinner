@@ -1669,6 +1669,15 @@ VOID syscallIsReturned (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD st
 }
 
 VOID applicationIsAboutToExit (INT32 code, VOID * v) {
+  static bool called = false;
+  if (called) {
+    // Logger is not available here
+    std::cerr << "applicationIsAboutToExit (0x" << std::hex << code
+        << ", 0x" << ADDRINT (v) << ") is called more than once!"
+        " Ignoring the duplicate call\n";
+    return;
+  }
+  called = true;
   edu::sharif::twinner::util::Logger::loquacious ()
       << "********** applicationIsAboutToExit(...) **********\n";
   Instrumenter *im = (Instrumenter *) v;
