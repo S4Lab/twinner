@@ -327,17 +327,6 @@ void Instrumenter::setMainArgsReportingFilePath (const std::string &_marFilePath
 }
 
 bool Instrumenter::instrumentSingleInstruction (INS ins) {
-  if (disabled && !naive && (start == end)) {
-    RTN rtn = INS_Rtn (ins);
-    if (RTN_Valid (rtn)) {
-      const string name = RTN_Name (rtn);
-      edu::sharif::twinner::util::Logger::loquacious ()
-          << "routine: " << name << '\n';
-      if (name == MAIN_ROUTINE_NAME) {
-        enable ();
-      }
-    }
-  }
   std::stringstream ss;
   ss << INS_Disassemble (ins) << " @" << std::hex << INS_Address (ins);
   const std::string insAssemblyStr = ss.str ();
