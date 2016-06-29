@@ -37,6 +37,8 @@ public:
 
   void assertConstraints
   (std::list < const edu::sharif::twinner::trace::Constraint * > constraints);
+  void popLastAssertion ();
+
   bool checkValidity
   (std::list < const edu::sharif::twinner::trace::Constraint * > constraints);
 };
@@ -47,4 +49,4 @@ public:
 }
 }
 
-#endif	/* Cvc4SmtSolverState.h */
+#endif /* Cvc4SmtSolverState.h */

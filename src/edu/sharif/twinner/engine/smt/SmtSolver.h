@@ -103,6 +103,14 @@ public:
       constraint) = 0;
 
   /**
+   * Cancels the effect of the last asserted constraint.
+   *
+   * If n constraints had been asserted, after this call the SMT solver context
+   * will become equivalent to when only n-1 constraints have been asserted.
+   */
+  virtual void popLastAssertion () = 0;
+
+  /**
    * Checks validity of the given constraint based on asserted constraints in
    * the current context. The constraint is valid if it can be proven to be
    * always true based on the asserted constraints.

@@ -46,6 +46,12 @@ void Cvc4SmtSolverState::assertConstraints (
   }
 }
 
+void Cvc4SmtSolverState::popLastAssertion () {
+  const edu::sharif::twinner::trace::Constraint *c = assertions.back ();
+  delete c;
+  assertions.pop_back ();
+}
+
 bool Cvc4SmtSolverState::checkValidity (
     std::list < const edu::sharif::twinner::trace::Constraint * > cons) {
   ExprManager em;

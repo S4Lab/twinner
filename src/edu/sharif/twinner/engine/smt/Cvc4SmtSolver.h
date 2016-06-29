@@ -44,6 +44,8 @@ public:
 
   virtual void clearState ();
   virtual void assertConstraint (const edu::sharif::twinner::trace::Constraint *constraint);
+  virtual void popLastAssertion ();
+
   virtual bool checkValidity (const edu::sharif::twinner::trace::Constraint *constraint);
 };
 

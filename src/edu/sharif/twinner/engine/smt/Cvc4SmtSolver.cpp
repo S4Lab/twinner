@@ -162,6 +162,10 @@ void Cvc4SmtSolver::assertConstraint (
   state->assertConstraints (constraints);
 }
 
+void Cvc4SmtSolver::popLastAssertion () {
+  state->popLastAssertion ();
+}
+
 bool Cvc4SmtSolver::checkValidity (
     const edu::sharif::twinner::trace::Constraint *constraint) {
   std::list < const edu::sharif::twinner::trace::Constraint * > constraints;
