@@ -22,7 +22,6 @@ namespace trace {
 namespace exptoken {
 
 class BitwiseAndOperator : public Operator {
-
 public:
   BitwiseAndOperator ();
   BitwiseAndOperator (const BitwiseAndOperator &ao);
@@ -47,6 +46,15 @@ protected:
 private:
   void initializeSimplificationRules ();
 
+  bool propagateDeepSimplificationToSubExpressions (
+      std::list < ExpressionToken * > &stack,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &operand);
+  bool propagateDeepSimplificationToSubExpression (
+      edu::sharif::twinner::trace::Expression *exp,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &operand);
+  std::list < ExpressionToken * >::iterator findNextOperand (
+      std::list < ExpressionToken * >::iterator it);
+
   bool isTruncatingMask (edu::sharif::twinner::trace::cv::ConcreteValue *cv) const;
   int numberOfBits (edu::sharif::twinner::trace::cv::ConcreteValue *cv) const;
   bool isEquallyOrMoreLimitedThan (
@@ -60,4 +68,4 @@ private:
 }
 }
 
-#endif	/* BitwiseAndOperator.h */
+#endif /* BitwiseAndOperator.h */

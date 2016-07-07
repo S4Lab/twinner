@@ -86,9 +86,16 @@ bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &
 Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
     edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
-  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
+  std::list < ExpressionToken * > &stack = exp->getStack ();
   std::list < ExpressionToken * >::iterator it = stack.end ();
   Operator *secondOp = static_cast<Operator *> (*--it);
+  if (secondOp->getIdentifier () == Operator::BITWISE_OR) {
+    if (propagateDeepSimplificationToSubExpressions (stack, *operand)) {
+      return RESTART_SIMPLIFICATION;
+    }
+    it = stack.end ();
+    secondOp = static_cast<Operator *> (*--it);
+  }
   if (secondOp->getIdentifier () == Operator::ADD
       || secondOp->getIdentifier () == Operator::MINUS
       || secondOp->getIdentifier () == Operator::BITWISE_OR
@@ -106,29 +113,7 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
           (*exp) = edu::sharif::twinner::trace::ExpressionImp (operand);
           return COMPLETED;
         }
-        if (stack.size () <= 4) {
-          delete secondCv;
-          return CAN_NOT_SIMPLIFY;
-        }
-        // temporarily remove the secondOp and reapply it later
-        stack.pop_back (); // removes secondOp
-        stack.pop_back (); // removes second
-        edu::sharif::twinner::trace::cv::ConcreteValue *operandCopy =
-            operand->clone ();
-        const SimplificationStatus status = deepSimplify (exp, operandCopy);
-        if (status != COMPLETED) {
-          delete operandCopy;
-        }
-        exp->bitwiseOr (secondCv);
-        if (status == RESTART_SIMPLIFICATION || stack.size () < 3) {
-          return RESTART_SIMPLIFICATION;
-        }
-        it = stack.end ();
-        if (!(secondOp = dynamic_cast<Operator *> (*--it))
-            || secondOp->getIdentifier () != Operator::BITWISE_OR
-            || !(second = dynamic_cast<Constant *> (*--it))) {
-          return RESTART_SIMPLIFICATION;
-        }
+        delete secondCv;
       } else if (secondOp->getIdentifier () == Operator::SHIFT_LEFT) {
         // exp == (...) << second
         if (isTruncatingMask (operand->clone ())
@@ -247,6 +232,65 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
     }
   }
   return CAN_NOT_SIMPLIFY;
+}
+
+bool BitwiseAndOperator::propagateDeepSimplificationToSubExpressions (
+    std::list < ExpressionToken * > &stack,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &operand) {
+  std::list < ExpressionToken * >::iterator it = stack.end ();
+  Operator *op = static_cast<Operator *> (*--it);
+  std::list < ExpressionToken * >::iterator rightOperand = findNextOperand (it);
+  edu::sharif::twinner::trace::Expression rightExp (rightOperand, it);
+  edu::sharif::twinner::trace::Expression leftExp (stack.begin (), rightOperand);
+  stack.clear ();
+  bool needsRestart =
+      propagateDeepSimplificationToSubExpression (&rightExp, operand)
+      || propagateDeepSimplificationToSubExpression (&leftExp, operand);
+  std::list < ExpressionToken * > &leftStack = leftExp.getStack ();
+  std::list < ExpressionToken * > &rightStack = rightExp.getStack ();
+  stack.insert (stack.end (), leftStack.begin (), leftStack.end ());
+  leftStack.clear ();
+  stack.insert (stack.end (), rightStack.begin (), rightStack.end ());
+  rightStack.clear ();
+  stack.push_back (op);
+  return needsRestart || (stack.size () < 3);
+}
+
+bool BitwiseAndOperator::propagateDeepSimplificationToSubExpression (
+    edu::sharif::twinner::trace::Expression *exp,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &operand) {
+  if (exp->getStack ().size () > 2) {
+    edu::sharif::twinner::trace::cv::ConcreteValue *operandCopy =
+        operand.clone ();
+    const SimplificationStatus status = deepSimplify (exp, operandCopy);
+    if (status != COMPLETED) {
+      delete operandCopy;
+    }
+    return status == RESTART_SIMPLIFICATION;
+  }
+  return false;
+}
+
+std::list < ExpressionToken * >::iterator BitwiseAndOperator::findNextOperand (
+    std::list < ExpressionToken * >::iterator it) {
+  Operator *op = dynamic_cast<Operator *> (*--it);
+  if (op) {
+    switch (op->getType ()) {
+    case edu::sharif::twinner::trace::exptoken::Operator::SignExtension:
+      it = findNextOperand (it);
+    case edu::sharif::twinner::trace::exptoken::Operator::Binary:
+    case edu::sharif::twinner::trace::exptoken::Operator::FunctionalBinary:
+      it = findNextOperand (it);
+    case edu::sharif::twinner::trace::exptoken::Operator::Unary:
+      it = findNextOperand (it);
+      break;
+    default:
+      edu::sharif::twinner::util::Logger::error () << "Unknown operator type\n";
+      abort ();
+      break;
+    }
+  }
+  return it;
 }
 
 bool BitwiseAndOperator::isTruncatingMask (

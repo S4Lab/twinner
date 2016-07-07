@@ -46,6 +46,13 @@ Expression::Expression (const Expression &exp) :
   }
 }
 
+Expression::Expression (Stack::iterator begin, Stack::iterator end) :
+    stack (begin, end) {
+  lastConcreteValue =
+      new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (UINT64 (0));
+  isOverwriting = false;
+}
+
 Expression &Expression::operator= (const Expression &exp) {
   (*lastConcreteValue) = (*exp.lastConcreteValue);
   isOverwriting = false;

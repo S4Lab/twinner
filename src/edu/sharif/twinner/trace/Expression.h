@@ -81,6 +81,15 @@ public:
   Expression &operator= (const Expression &exp);
 
   /**
+   * Instantiates an expression by filling its stack from [begin, end) range.
+   * The concrete value is not important in this case.
+   *
+   * @param begin The inclusive begin iterator for filling the stack.
+   * @param end The exclusive end iterator for filling the stack.
+   */
+  Expression (Stack::iterator begin, Stack::iterator end);
+
+  /**
    * Deletes all hold expression tokens and destructs the expression instance.
    */
   ~Expression ();
