@@ -21,12 +21,14 @@ using namespace edu::sharif::twinner::util;
 
 void test1 ();
 void test2 ();
+void test3 ();
 
 int main (int argc, char *argv[]) {
   LogStream::init ("loquacious", "out-test-shift-left-and-bitwise-and-or");
   MarInfo (argc, argv);
   test1 ();
   test2 ();
+  test3 ();
   LogStream::destroy ();
   return 0;
 }
@@ -92,6 +94,22 @@ void test2 () {
   exp2->bitwiseAnd (0xffffffff);
   exp->bitwiseOr (exp2);
   exp->bitwiseAnd (0xffffffff);
+  Logger::info () << "exp: " << exp << '\n';
+}
+
+void test3 () {
+  Logger::info () << "test 3: simplifying (logicalShiftToRight ((((m220010_1_32 & 0xffffffff) << 0x20) | (signExtend_0x20_0x8 (m22cca5_0_8) & 0xffffffff)), 0x20) & 0xffffffff) << 0x20\n";
+  const Expression *m220010_1_32 = new ExpressionImp (0x220010, ConcreteValue32Bits (0x00400450), 1, true);
+  const Expression *m22cca5_0_8 = new ExpressionImp (0x22cca5, ConcreteValue8Bits (0x33), 0, true);
+  Expression *exp = m220010_1_32->clone ();
+  exp->bitwiseAnd (0xffffffff);
+  exp->shiftToLeft (0x20);
+  Expression *exp2 = m22cca5_0_8->signExtended (0x20);
+  exp2->bitwiseAnd (0xffffffff);
+  exp->bitwiseOr (exp2);
+  exp->shiftToRight (0x20);
+  exp->bitwiseAnd (0xffffffff);
+  exp->shiftToLeft (0x20);
   Logger::info () << "exp: " << exp << '\n';
 }
 
