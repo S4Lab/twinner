@@ -46,10 +46,11 @@ Expression::Expression (const Expression &exp) :
   }
 }
 
-Expression::Expression (Stack::iterator begin, Stack::iterator end) :
+Expression::Expression (Stack::iterator begin, Stack::iterator end,
+    int bitsize) :
     stack (begin, end) {
-  lastConcreteValue =
-      new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (UINT64 (0));
+  edu::sharif::twinner::trace::cv::ConcreteValue64Bits zero (UINT64 (0));
+  lastConcreteValue = zero.clone (bitsize);
   isOverwriting = false;
 }
 

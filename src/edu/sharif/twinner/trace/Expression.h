@@ -83,11 +83,14 @@ public:
   /**
    * Instantiates an expression by filling its stack from [begin, end) range.
    * The concrete value is not important in this case.
+   * And the size of the concrete value (precision of the expression) is
+   * indicated by the bitsize parameter.
    *
    * @param begin The inclusive begin iterator for filling the stack.
    * @param end The exclusive end iterator for filling the stack.
+   * @param bitsize The size of the concrete value in bits.
    */
-  Expression (Stack::iterator begin, Stack::iterator end);
+  Expression (Stack::iterator begin, Stack::iterator end, int bitsize);
 
   /**
    * Deletes all hold expression tokens and destructs the expression instance.

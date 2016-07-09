@@ -48,7 +48,8 @@ private:
 
   bool propagateDeepSimplificationToSubExpressions (
       std::list < ExpressionToken * > &stack,
-      const edu::sharif::twinner::trace::cv::ConcreteValue &operand);
+      const edu::sharif::twinner::trace::cv::ConcreteValue &operand,
+      int bitsize);
   bool propagateDeepSimplificationToSubExpression (
       edu::sharif::twinner::trace::Expression *exp,
       const edu::sharif::twinner::trace::cv::ConcreteValue &operand);

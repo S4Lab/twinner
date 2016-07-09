@@ -90,7 +90,8 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
   std::list < ExpressionToken * >::iterator it = stack.end ();
   Operator *secondOp = static_cast<Operator *> (*--it);
   if (secondOp->getIdentifier () == Operator::BITWISE_OR) {
-    if (propagateDeepSimplificationToSubExpressions (stack, *operand)) {
+    if (propagateDeepSimplificationToSubExpressions
+        (stack, *operand, exp->getLastConcreteValue ().getSize ())) {
       return RESTART_SIMPLIFICATION;
     }
     it = stack.end ();
@@ -236,12 +237,14 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
 
 bool BitwiseAndOperator::propagateDeepSimplificationToSubExpressions (
     std::list < ExpressionToken * > &stack,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &operand) {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &operand,
+    int bitsize) {
   std::list < ExpressionToken * >::iterator it = stack.end ();
   Operator *op = static_cast<Operator *> (*--it);
   std::list < ExpressionToken * >::iterator rightOperand = findNextOperand (it);
-  edu::sharif::twinner::trace::Expression rightExp (rightOperand, it);
-  edu::sharif::twinner::trace::Expression leftExp (stack.begin (), rightOperand);
+  edu::sharif::twinner::trace::Expression rightExp (rightOperand, it, bitsize);
+  edu::sharif::twinner::trace::Expression leftExp
+      (stack.begin (), rightOperand, bitsize);
   stack.clear ();
   bool needsRestart =
       propagateDeepSimplificationToSubExpression (&rightExp, operand)
