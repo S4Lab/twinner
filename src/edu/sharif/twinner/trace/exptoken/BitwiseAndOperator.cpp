@@ -284,9 +284,25 @@ bool BitwiseAndOperator::propagateDeepSimplificationToSubExpressions (
 bool BitwiseAndOperator::propagateDeepSimplificationToSubExpression (
     edu::sharif::twinner::trace::Expression *exp,
     const edu::sharif::twinner::trace::cv::ConcreteValue &operand) {
-  if (exp->getStack ().size () > 2) {
+  std::list < ExpressionToken * > &stack = exp->getStack ();
+  if (stack.size () > 2) {
     edu::sharif::twinner::trace::cv::ConcreteValue *operandCopy =
         operand.clone ();
+    std::list < ExpressionToken * >::iterator it = stack.end ();
+    const Operator *op = static_cast<Operator *> (*--it);
+    if (op->getIdentifier () == Operator::BITWISE_AND) {
+      Constant *mask = dynamic_cast<Constant *> (*--it);
+      if (mask) {
+        (*operandCopy) &= mask->getValue ();
+        if (operandCopy->isZero ()) {
+          delete operandCopy;
+          (*exp) = edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
+        } else {
+          mask->setValue (operandCopy);
+        }
+        return false;
+      }
+    }
     const SimplificationStatus status = deepSimplify (exp, operandCopy);
     if (status != COMPLETED) {
       delete operandCopy;
