@@ -42,7 +42,7 @@ OperationGroup::ExpressionPtr AdditionOperationGroup::getCarryExpression () cons
   doublePrecision->shiftToRight (size);
   OperationGroup::ExpressionPtr truncexp = doublePrecision->clone (size);
   delete doublePrecision;
-  truncexp->truncate (size);
+  truncexp->bitwiseAnd (0x1);
   return truncexp;
 }
 
