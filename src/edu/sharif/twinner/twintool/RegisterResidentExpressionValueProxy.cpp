@@ -88,7 +88,6 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
     return;
   }
   const edu::sharif::twinner::trace::Expression *constReg16 = &changedExp;
-  edu::sharif::twinner::trace::Expression *reg16 = 0;
   edu::sharif::twinner::trace::Expression *temp;
   const Reg::RegisterType regType = Reg::getRegisterType (reg, REG_Size (reg));
   switch (regType) {
@@ -99,7 +98,9 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
     break;
 #endif
   case Reg::REG_8_BITS_UPPER_HALF_TYPE:
-    reg16 = trace->getSymbolicExpressionByRegister
+  {
+    edu::sharif::twinner::trace::Expression *reg16 =
+        trace->getSymbolicExpressionByRegister
         (16, Reg::getOverlappingRegisterByIndex (regIndex, 2));
     reg16->truncate (8);
     temp = changedExp.clone (16);
@@ -108,6 +109,7 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
     delete temp;
     constReg16 = reg16;
     break;
+  }
   default: // second switch-case will address the default case
     break;
   }
@@ -118,19 +120,14 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
         (32, Reg::getOverlappingRegisterByIndex (regIndex, 1), &changedExp)->truncate (32);
 #endif
   case Reg::REG_32_BITS_TYPE:
-    reg16 = trace->setSymbolicExpressionByRegister
-        (16, Reg::getOverlappingRegisterByIndex (regIndex, 2), &changedExp);
-    reg16->truncate (16);
+    trace->setSymbolicExpressionByRegister
+        (16, Reg::getOverlappingRegisterByIndex (regIndex, 2), &changedExp)->truncate (16);
   case Reg::REG_16_BITS_TYPE:
     if (Reg::getOverlappingRegisterByIndex (regIndex, 3) != REG_INVALID_) {
-      if (regType == Reg::REG_16_BITS_TYPE) {
-        temp = changedExp.clone (16);
-      } else {
-        temp = reg16->clone (16);
-      }
+      temp = changedExp.clone (16);
       temp->shiftToRight (8);
       trace->setSymbolicExpressionByRegister
-          (8, Reg::getOverlappingRegisterByIndex (regIndex, 3), temp);
+          (8, Reg::getOverlappingRegisterByIndex (regIndex, 3), temp)->truncate (8);
       delete temp;
     }
   {

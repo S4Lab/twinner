@@ -42,6 +42,7 @@ OperationGroup::ExpressionPtr AdditionOperationGroup::getCarryExpression () cons
   doublePrecision->shiftToRight (size);
   OperationGroup::ExpressionPtr truncexp = doublePrecision->clone (size);
   delete doublePrecision;
+  truncexp->truncate (size);
   return truncexp;
 }
 

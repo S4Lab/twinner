@@ -530,14 +530,13 @@ void RegisterEmergedSymbol::initializeSubRegisters (REG reg,
   segment->setSymbolicExpressionByRegister
       (32, getOverlappingRegisterByIndex (regIndex, 1), &expression)->truncate (32);
 #endif
-  Expression *reg16 = segment->setSymbolicExpressionByRegister
-      (16, getOverlappingRegisterByIndex (regIndex, 2), &expression);
-  reg16->truncate (16);
+  segment->setSymbolicExpressionByRegister
+      (16, getOverlappingRegisterByIndex (regIndex, 2), &expression)->truncate (16);
   if (getOverlappingRegisterByIndex (regIndex, 3) != REG_INVALID_) {
-    edu::sharif::twinner::trace::Expression *temp = reg16->clone (16);
+    edu::sharif::twinner::trace::Expression *temp = expression.clone (16);
     temp->shiftToRight (8);
     segment->setSymbolicExpressionByRegister
-        (8, getOverlappingRegisterByIndex (regIndex, 3), temp);
+        (8, getOverlappingRegisterByIndex (regIndex, 3), temp)->truncate (8);
     delete temp;
   }
   const REG lowest8Bits = getOverlappingRegisterByIndex (regIndex, 4);

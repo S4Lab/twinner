@@ -135,8 +135,7 @@ void ExecutionTraceSegment::setOverwritingMemoryExpression (int size,
 }
 
 void ExecutionTraceSegment::initializeOverlappingMemoryLocationsDownwards (int size,
-    ADDRINT memoryEa, const Expression &expression,
-    bool shouldTruncate, int shiftAmount) {
+    ADDRINT memoryEa, const Expression &expression, int shiftAmount) {
   size /= 2;
   if (size >= 8) {
     Expression *exp = expression.clone ();
@@ -147,16 +146,14 @@ void ExecutionTraceSegment::initializeOverlappingMemoryLocationsDownwards (int s
     setOverwritingMemoryExpression (size, memoryEa, exp);
     delete exp;
     initializeOverlappingMemoryLocationsDownwards (size, memoryEa, expression,
-                                                   true, shiftAmount);
+                                                   shiftAmount);
     exp = expression.clone ();
     exp->shiftToRight (shiftAmount + size); // MSB (right-side in little-endian)
-    if (shouldTruncate) {
-      exp->truncate (size);
-    }
+    exp->truncate (size);
     setOverwritingMemoryExpression (size, memoryEa + size / 8, exp);
     delete exp;
     initializeOverlappingMemoryLocationsDownwards (size, memoryEa + size / 8, expression,
-                                                   shouldTruncate, shiftAmount + size);
+                                                   shiftAmount + size);
   }
 }
 

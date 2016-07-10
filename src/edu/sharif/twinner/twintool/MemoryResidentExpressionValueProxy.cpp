@@ -77,9 +77,9 @@ MemoryResidentExpressionValueProxy::getExpression (
     }
     leftExp->shiftToRight (8 * (memoryEa % memReadBytes));
     rightExp->shiftToLeft (8 * (memReadBytes - (memoryEa % memReadBytes)));
-    rightExp->truncate (memReadBytes * 8);
     leftExp->bitwiseOr (rightExp);
     delete rightExp;
+    leftExp->truncate (memReadBytes * 8);
     return leftExp;
   }
 }
@@ -337,9 +337,9 @@ MemoryResidentExpressionValueProxy::unalignedMemoryWrite (int size,
   rightProxy.alignedMemoryWrite (size, trace, right);
   left->shiftToRight (8 * (memoryEa % memReadBytes));
   right->shiftToLeft (8 * (memReadBytes - (memoryEa % memReadBytes)));
-  right->truncate (size);
   left->bitwiseOr (right);
   delete right;
+  left->truncate (size);
   edu::sharif::twinner::trace::Expression ret = *left;
   delete left;
   return ret;
@@ -412,6 +412,7 @@ void MemoryResidentExpressionValueProxy::propagateChangeDownwards (int size,
     if (expCache.find (make_pair (memoryEa, size)) == expCache.end ()) {
       edu::sharif::twinner::trace::Expression *exp = changedExp.clone ();
       exp->shiftToRight (size); // MSB (right-side in little-endian)
+      exp->truncate (size);
       actualPropagateChangeDownwards (size, memoryEa, state, exp);
       // exp is now owned by the expCache and will be deleted by it later
     }

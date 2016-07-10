@@ -756,6 +756,7 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp,
       if (bits == 0) {
         return 0;
       }
+      // FIXME: Truncate the result
       shiftee->shiftToRight (bits);
       delete bits;
       return shiftee;

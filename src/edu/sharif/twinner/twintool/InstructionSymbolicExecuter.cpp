@@ -2684,8 +2684,10 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
   leftDstExp->remainder (srcexp);
   rightDstExp->divide (srcexp);
   delete srcexp;
+  leftDstExp->truncate (operandSize);
   leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
   delete leftDstExp;
+  rightDstExp->truncate (operandSize);
   rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
   delete rightDstExp;
   // At this point, symbolic quotient and remainder are calculated correctly.
@@ -2724,8 +2726,10 @@ void InstructionSymbolicExecuter::idivAnalysisRoutine (
   leftDstExp->signedRemainder (srcexp);
   rightDstExp->signedDivide (srcexp);
   delete srcexp;
+  leftDstExp->truncate (operandSize);
   leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
   delete leftDstExp;
+  rightDstExp->truncate (operandSize);
   rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
   delete rightDstExp;
   // At this point, symbolic quotient and remainder are calculated correctly.
@@ -2828,9 +2832,10 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
   delete srcexp;
   leftDstExp = rightDstExp->clone ();
   leftDstExp->shiftToRight (operandSize);
-  rightDstExp->truncate (operandSize);
+  leftDstExp->truncate (operandSize);
   leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
   delete leftDstExp;
+  rightDstExp->truncate (operandSize);
   rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
   delete rightDstExp;
   // At this point, symbolic multiplication result is calculated correctly.
@@ -2876,9 +2881,10 @@ void InstructionSymbolicExecuter::imulAnalysisRoutine (
   delete srcexp;
   leftDstExp = rightDstExp->clone ();
   leftDstExp->shiftToRight (operandSize);
-  rightDstExp->truncate (operandSize);
+  leftDstExp->truncate (operandSize);
   leftDst.setExpressionWithoutChangeNotification (trace, leftDstExp);
   delete leftDstExp;
+  rightDstExp->truncate (operandSize);
   rightDst.setExpressionWithoutChangeNotification (trace, rightDstExp);
   delete rightDstExp;
   // At this point, symbolic multiplication result is calculated correctly.
