@@ -288,7 +288,6 @@ MemoryResidentExpressionValueProxy::alignedMemoryWrite (int size,
     const edu::sharif::twinner::trace::Expression *exp) const {
   edu::sharif::twinner::trace::Expression *newExp =
       trace->setSymbolicExpressionByMemoryAddress (size, memoryEa, exp);
-  truncate (newExp);
   return *newExp;
 }
 

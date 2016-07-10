@@ -1135,11 +1135,13 @@ void InstructionSymbolicExecuter::setExpression (
     edu::sharif::twinner::trace::Trace *trace,
     edu::sharif::twinner::trace::Expression *exp, bool shouldDeleteExp) const {
   edu::sharif::twinner::trace::StateSummary state;
+  if (!shouldDeleteExp) {
+    exp = exp->clone ();
+  }
+  dst.truncate (exp);
   // following call clones the exp and so we should delete ours
   dst.setExpression (trace, exp, state);
-  if (shouldDeleteExp) {
-    delete exp;
-  }
+  delete exp;
   if (state.isWrongState ()) {
     edu::sharif::twinner::util::Logger::error () << state.getMessage () << '\n';
     abort ();

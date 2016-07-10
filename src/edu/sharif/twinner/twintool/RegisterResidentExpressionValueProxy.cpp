@@ -61,7 +61,6 @@ RegisterResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     const edu::sharif::twinner::trace::Expression *exp) const {
   edu::sharif::twinner::trace::Expression *newExp =
       trace->setSymbolicExpressionByRegister (getSize (), reg, exp);
-  truncate (newExp);
   return *newExp;
 }
 

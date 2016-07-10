@@ -44,7 +44,8 @@ public:
    * valueIsChanged() method to notify about changes.
    * @param trace The execution trace which changing expression will be saved there.
    * @param exp The new expression which should be cloned and set over the proxied
-   * expression. This expression object may be truncated (and casted) to be fitted.
+   * expression. This expression object must have been truncated but its
+   * concrete value may have any size and will be casted to fit.
    * @param state Indicates whether the last seen concrete value differs
    * from the expected value (this may happen due to the overlapping locations).
    */
@@ -60,7 +61,8 @@ public:
    * no effect on the underlying proxied expression.
    * @param trace The execution trace which changing expression will be saved there.
    * @param exp The new expression which should be cloned and set over the proxied
-   * expression. This expression object may be truncated (and casted) to be fitted.
+   * expression. This expression object must have been truncated but its
+   * concrete value may have any size and will be casted to fit.
    *
    * @return A temp-object equal to the given expression (before calling this method).
    */
