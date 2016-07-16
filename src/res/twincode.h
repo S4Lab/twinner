@@ -15,6 +15,7 @@
 
 #include <inttypes.h>
 #include <stdexcept>
+#include <stdio.h>
 
 typedef uint8_t UINT8;
 typedef uint16_t UINT16;
@@ -30,4 +31,4 @@ typedef int64_t INT64;
 #include "tc-sign-extension.h"
 #include "tc-registers.h"
 
-#endif	/* twincode.h */
+#endif /* twincode.h */

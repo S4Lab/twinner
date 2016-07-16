@@ -305,7 +305,11 @@ void TwinCodeEncoder::encodeTransformations (const TraceSegment *segment,
        &TwinCodeEncoder::codeMemoryChanges, this);
   codeRegisterChanges (segment, index);
   if (!segment->getTerminator ()) { // this must be the last segment
+#ifdef TARGET_IA32E
     out.indented () << "return int (regs.rax);\n";
+#else
+    out.indented () << "return int (regs.eax);\n";
+#endif
     return;
   }
   out.indented () << segment->getTerminator ()->getCallingLine () << '\n';
