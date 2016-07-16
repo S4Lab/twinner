@@ -13,6 +13,7 @@ TARGETS := simple-condition-test \
 	runtime-simplification
 TWIN_TARGETS := simple-condition-test \
 	multi-path-with-printf-leafs-test \
+	mpwpl-manual-virt-obf \
 	#upx-test
 
 all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
@@ -23,6 +24,9 @@ runtime-simplification.out: runtime-simplification.s
 mpwpl-manual-virt-obf.out: mpwpl-manual-virt-obf.c
 	g++ -c -g -Wa,-a,-ad --std=c++11 mpwpl-manual-virt-obf.c > mpwpl-manual-virt-obf.lst
 	g++ --std=c++11 mpwpl-manual-virt-obf.c -o mpwpl-manual-virt-obf.out
+
+%.win32.twin.out: %.win32.twin.c
+	g++ -std=c++11 -DARCHITECTURE_32 -g $(INCLUDEPATH) $< -o $@
 
 %.twin.out: %.twin.c
 	g++ -std=c++11 -g $(INCLUDEPATH) $< -o $@
