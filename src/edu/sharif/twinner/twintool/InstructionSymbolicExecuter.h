@@ -520,6 +520,11 @@ private:
   void jbAnalysisRoutine (bool branchTaken);
 
   /**
+   * JO jumps if OF=1 which means that last operation caused a signed overflow
+   */
+  void joAnalysisRoutine (bool branchTaken);
+
+  /**
    * JS jumps if SF=1 which means that corresponding expression was < 0
    */
   void jsAnalysisRoutine (bool branchTaken);
