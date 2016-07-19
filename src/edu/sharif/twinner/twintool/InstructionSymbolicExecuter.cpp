@@ -1376,6 +1376,13 @@ void InstructionSymbolicExecuter::pshufdAnalysisRoutine (
 
 void InstructionSymbolicExecuter::shldAnalysisRoutine (
     const MutableExpressionValueProxy &dst,
+    const ExpressionValueProxy &src, const MutableExpressionValueProxy &bits) {
+  shldAnalysisRoutine
+      (dst, src, static_cast<const ExpressionValueProxy &> (bits));
+}
+
+void InstructionSymbolicExecuter::shldAnalysisRoutine (
+    const MutableExpressionValueProxy &dst,
     const ExpressionValueProxy &src, const ExpressionValueProxy &shift) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "shldAnalysisRoutine(...)\n"
@@ -3555,6 +3562,8 @@ InstructionSymbolicExecuter::convertOpcodeToAuxOperandHavingAnalysisRoutine (
     return &InstructionSymbolicExecuter::popAnalysisRoutine;
   case XED_ICLASS_LODSD:
     return &InstructionSymbolicExecuter::lodsdAnalysisRoutine;
+  case XED_ICLASS_SHLD:
+    return &InstructionSymbolicExecuter::shldAnalysisRoutine;
   default:
     edu::sharif::twinner::util::Logger::error () << "Analysis routine: "
         "Having an auxiliary third (dst) operand: Unknown opcode: "

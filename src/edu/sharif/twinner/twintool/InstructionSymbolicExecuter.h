@@ -341,6 +341,8 @@ private:
    * The last bit which goes out of (dst) is stored in CF.
    */
   void shldAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src, const MutableExpressionValueProxy &bits);
+  void shldAnalysisRoutine (const MutableExpressionValueProxy &dst,
       const ExpressionValueProxy &src, const ExpressionValueProxy &shift);
 
   /**
