@@ -85,6 +85,19 @@ public:
       const edu::sharif::twinner::twintool::operationgroup::OperationGroup *operation);
 
   /**
+   * Fills the output parameter flags with the EFLAGS/RFLAGS register content
+   * and returns a list of constraints which should be satisfied in order
+   * to make the EFLAGS equal to the obtained value.
+   *
+   * @param flags The output parameter filled with the concrete EFLAGS value.
+   * @param instruction The instruction which was cause of this constraint instantiation.
+   *
+   * @return Constraints which should be satisfied to lead to the current flags value.
+   */
+  std::list <edu::sharif::twinner::trace::Constraint *> getFlagsExpression (
+      uint32_t &flags, uint32_t instruction) const;
+
+  /**
    * Sets or clears the OF independent of other flags.
    *
    * @param set Indicates whether OF should be set or cleared

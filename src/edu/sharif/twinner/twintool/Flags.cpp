@@ -75,6 +75,26 @@ void Flags::setFlags (
   }
 }
 
+std::list <edu::sharif::twinner::trace::Constraint *>
+Flags::getFlagsExpression (uint32_t &flags, uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  bool overflow;
+  list.splice (list.end (), instantiateConstraintForOverflowCase (overflow, instruction));
+  bool direction = getDirectionFlag ();
+  bool sign;
+  list.splice (list.end (), instantiateConstraintForSignCase (sign, instruction));
+  bool zero;
+  list.splice (list.end (), instantiateConstraintForZeroCase (zero, instruction));
+  bool parity;
+  list.splice (list.end (), instantiateConstraintForParityCase (parity, instruction));
+  bool carry;
+  list.splice (list.end (), instantiateConstraintForCarryCase (carry, instruction));
+  flags = ((overflow ? 1u : 0) << 11) | ((direction ? 1u : 0) << 10)
+      | (1u << 9) | ((sign ? 1u : 0) << 7) | ((zero ? 1u : 0) << 6)
+      | ((parity ? 1u : 0) << 2) | (1u << 1) | (carry ? 1u : 0);
+  return list;
+}
+
 void Flags::setOverflowFlag (bool set) {
   of = set ? SET_FSTATE : CLEAR_FSTATE;
 }
