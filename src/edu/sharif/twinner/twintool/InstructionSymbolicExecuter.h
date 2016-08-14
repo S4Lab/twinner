@@ -400,6 +400,13 @@ private:
       const ExpressionValueProxy &srcMem);
 
   /**
+   * PUSHFD pushes FLAGS onto stack.
+   */
+  void pushfdAnalysisRoutine (const MutableExpressionValueProxy &stack,
+      const ExpressionValueProxy &flags,
+      const MutableExpressionValueProxy &rsp);
+
+  /**
    * PUSH has 3 models
    * m <- r/m/i
    */

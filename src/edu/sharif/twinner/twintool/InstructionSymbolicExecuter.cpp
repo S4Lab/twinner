@@ -1552,6 +1552,27 @@ void InstructionSymbolicExecuter::adjustRsiRdiRegisters (int size,
   setExpression (rsi, trace, rsiexp);
 }
 
+void InstructionSymbolicExecuter::pushfdAnalysisRoutine (
+    const MutableExpressionValueProxy &stack, const ExpressionValueProxy &,
+    const MutableExpressionValueProxy &rsp) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious () << "pushfdAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  uint32_t flags;
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
+      eflags.getFlagsExpression (flags, disassembledInstruction);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraints...";
+  trace->addPathConstraints (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  setExpression (stack, trace, new edu::sharif::twinner::trace::ExpressionImp
+                 (UINT64 (flags)));
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsp...";
+  edu::sharif::twinner::trace::Expression *rspexp = getExpression (rsp, trace);
+  rspexp->minus (stack.getSize () / 8);
+  setExpression (rsp, trace, rspexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::pushAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
     const MutableExpressionValueProxy &rsp) {
@@ -3596,6 +3617,8 @@ InstructionSymbolicExecuter::convertOpcodeToAuxOperandHavingAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_CMPXCHG:
     return &InstructionSymbolicExecuter::cmpxchgAnalysisRoutine;
+  case XED_ICLASS_PUSHFD:
+    return &InstructionSymbolicExecuter::pushfdAnalysisRoutine;
   case XED_ICLASS_PUSH:
     return &InstructionSymbolicExecuter::pushAnalysisRoutine;
   case XED_ICLASS_POP:

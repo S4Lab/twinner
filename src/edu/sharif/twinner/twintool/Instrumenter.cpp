@@ -147,6 +147,8 @@ void Instrumenter::initialize () {
   INITIALIZE (DST_EITHER_REG_OR_MEM_SRC_MUTABLE_REG,
               XED_ICLASS_XCHG, XED_ICLASS_XADD);
   managedInstructions.insert
+      (make_pair (XED_ICLASS_PUSHFD, DST_STK_SRC_IMPLICIT));
+  managedInstructions.insert
       (make_pair (XED_ICLASS_PUSH, PUSH_INS_MODELS));
   managedInstructions.insert
       (make_pair (XED_ICLASS_POP, POP_INS_MODELS));
@@ -391,6 +393,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
     INS ins) const {
   switch (op) {
   case XED_ICLASS_PUSH:
+  case XED_ICLASS_PUSHFD:
     return getInstructionModelForPushInstruction (ins);
   case XED_ICLASS_POP:
     return getInstructionModelForPopInstruction (ins);
