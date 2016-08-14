@@ -479,12 +479,15 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForPushInstructi
   bool sourceIsReg = INS_OperandIsReg (ins, 0);
   bool sourceIsMem = INS_OperandIsMemory (ins, 0);
   bool sourceIsImmed = INS_OperandIsImmediate (ins, 0);
+  bool sourceIsImplicit = INS_OperandIsImplicit (ins, 0);
   if (sourceIsReg) {
     return DST_STK_SRC_REG;
   } else if (sourceIsMem) {
     return DST_STK_SRC_MEM;
   } else if (sourceIsImmed) {
     return DST_STK_SRC_IMD;
+  } else if (sourceIsImplicit) {
+    return DST_STK_SRC_IMPLICIT;
   } else {
     edu::sharif::twinner::util::Logger::error ()
         << "Instrumenter::getInstructionModelForPushInstruction (...): "
@@ -931,6 +934,26 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
         IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
 #else
         IARG_UINT32, REG_ESP, IARG_REG_VALUE, REG_ESP,
+#endif
+        IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_STK_SRC_IMPLICIT:
+  {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutinePrefetchMem,
+                    IARG_PTR, ise, IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_END); // dst mem
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstMemSrcRegAuxReg,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_MEMORYOP_EA, 0,
+#ifdef TARGET_IA32E
+        IARG_UINT32, REG_RFLAGS, IARG_REG_VALUE, REG_RFLAGS,
+                    IARG_UINT32, REG_RSP, IARG_REG_VALUE, REG_RSP,
+#else
+        IARG_UINT32, REG_EFLAGS, IARG_REG_VALUE, REG_EFLAGS,
+                    IARG_UINT32, REG_ESP, IARG_REG_VALUE, REG_ESP,
 #endif
         IARG_MEMORYREAD_SIZE,
                     IARG_UINT32, insAssembly,
