@@ -178,6 +178,18 @@ public:
 
   /**
    * Instantiates a new constraint object denoting that whether underlying expression
+   * matches with parity (P) condition. The last concrete value of the expression
+   * indicates that P should be satisfied or its negate should be satisfied.
+   * @param instruction The instruction which was cause of this constraint instantiation.
+   * @param parity Indicates whether requested constraint is created or its negated.
+   *
+   * @return A constraint instance denoting whether current eflags matches with P.
+   */
+  std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForParityCase (bool &parity, uint32_t instruction) const;
+
+  /**
+   * Instantiates a new constraint object denoting that whether underlying expression
    * matches with below (B) condition. The last concrete value of the expression
    * indicates that B should be satisfied or its negate should be satisfied.
    * @param instruction The instruction which was cause of this constraint instantiation.
@@ -199,6 +211,13 @@ public:
    */
   std::list <edu::sharif::twinner::trace::Constraint *>
   instantiateConstraintForSignCase (bool &sign, uint32_t instruction) const;
+
+private:
+  /**
+   * Calculates the XOR of eight least significant bits of the given expression.
+   */
+  edu::sharif::twinner::trace::Expression *calculateParity (
+      edu::sharif::twinner::trace::Expression *exp) const;
 };
 
 }

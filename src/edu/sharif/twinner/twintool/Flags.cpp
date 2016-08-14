@@ -269,6 +269,52 @@ Flags::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
 }
 
 std::list <edu::sharif::twinner::trace::Constraint *>
+Flags::instantiateConstraintForParityCase (bool &parity, uint32_t instruction) const {
+  std::list <edu::sharif::twinner::trace::Constraint *> list;
+  switch (pf) {
+  case UNDEFINED_FSTATE:
+    edu::sharif::twinner::util::Logger::warning ()
+        << "Using PF while is in undefined state (assuming that it is CLEAR)\n";
+  case CLEAR_FSTATE:
+    parity = false;
+    break;
+  case SET_FSTATE:
+    parity = true;
+    break;
+  case DEFAULT_FSTATE:
+  {
+    edu::sharif::twinner::trace::Expression *exp = op->getOperationResult ();
+    exp = calculateParity (exp);
+    list.push_back
+        (edu::sharif::twinner::trace::Constraint::instantiateEqualConstraint
+         (parity, exp, instruction));
+    delete exp;
+    break;
+  }
+  default:
+    edu::sharif::twinner::util::Logger::error ()
+        << "Unknown state for PF (0x" << std::hex << int (pf) << ")\n";
+  }
+  return list;
+}
+
+edu::sharif::twinner::trace::Expression *Flags::calculateParity (
+    edu::sharif::twinner::trace::Expression *exp) const {
+  exp->truncate (8);
+  edu::sharif::twinner::trace::Expression *xorOfBits = exp->clone (8);
+  xorOfBits->bitwiseAnd (0x1);
+  for (int i = 1; i < 8; ++i) {
+    edu::sharif::twinner::trace::Expression *bit = exp->clone (8);
+    bit->shiftToRight (i);
+    bit->bitwiseAnd (0x1);
+    xorOfBits->bitwiseXor (bit);
+    delete bit;
+  }
+  delete exp;
+  return xorOfBits;
+}
+
+std::list <edu::sharif::twinner::trace::Constraint *>
 Flags::instantiateConstraintForBelowCase (bool &below, uint32_t instruction) const {
   std::list <edu::sharif::twinner::trace::Constraint *> list;
   switch (cf) {
