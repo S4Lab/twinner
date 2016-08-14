@@ -124,6 +124,12 @@ ShiftArithmeticRightOperationGroup::operationResultIsLessThanZero (bool &less,
   return list;
 }
 
+OperationGroup::ExpressionPtr ShiftArithmeticRightOperationGroup::getOperationResult () const {
+  edu::sharif::twinner::trace::Expression *dstexp = exp[0]->clone ();
+  dstexp->arithmeticShiftToRight (exp[1]);
+  return dstexp;
+}
+
 }
 }
 }

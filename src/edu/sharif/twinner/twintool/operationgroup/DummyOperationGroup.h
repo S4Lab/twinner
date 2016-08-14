@@ -48,6 +48,7 @@ public:
       bool &lessOrEqual, uint32_t instruction) const;
   virtual std::list <ConstraintPtr> operationResultIsLessThanZero (bool &lessOrEqual,
       uint32_t instruction) const;
+  virtual ExpressionPtr getOperationResult () const;
 };
 
 }

@@ -107,6 +107,10 @@ BitwiseAndOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
   return list;
 }
 
+OperationGroup::ExpressionPtr BitwiseAndOperationGroup::getOperationResult () const {
+  return exp[0]->clone ();
+}
+
 }
 }
 }

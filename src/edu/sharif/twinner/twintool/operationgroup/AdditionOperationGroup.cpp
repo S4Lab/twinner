@@ -147,6 +147,12 @@ AdditionOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
   return list;
 }
 
+OperationGroup::ExpressionPtr AdditionOperationGroup::getOperationResult () const {
+  OperationGroup::ExpressionPtr mainExp = exp[0]->clone ();
+  mainExp->add (exp[1]);
+  return mainExp;
+}
+
 }
 }
 }

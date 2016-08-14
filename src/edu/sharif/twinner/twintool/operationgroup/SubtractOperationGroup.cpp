@@ -124,6 +124,12 @@ SubtractOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
   return list;
 }
 
+OperationGroup::ExpressionPtr SubtractOperationGroup::getOperationResult () const {
+  OperationGroup::ExpressionPtr mainExp = exp[0]->clone ();
+  mainExp->minus (exp[1]);
+  return mainExp;
+}
+
 }
 }
 }

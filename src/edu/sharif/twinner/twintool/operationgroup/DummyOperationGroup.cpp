@@ -106,6 +106,13 @@ DummyOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
   abort ();
 }
 
+OperationGroup::ExpressionPtr DummyOperationGroup::getOperationResult () const {
+  edu::sharif::twinner::util::Logger::error ()
+      << "DummyOperationGroup::getOperationResult (...): "
+      << name << " case is not implemented yet\n";
+  abort ();
+}
+
 }
 }
 }

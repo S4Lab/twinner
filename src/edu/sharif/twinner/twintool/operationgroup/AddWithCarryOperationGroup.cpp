@@ -146,6 +146,13 @@ AddWithCarryOperationGroup::operationResultIsLessThanZero (bool &less,
   return list;
 }
 
+OperationGroup::ExpressionPtr AddWithCarryOperationGroup::getOperationResult () const {
+  OperationGroup::ExpressionPtr mainExp = exp[0]->clone ();
+  mainExp->add (exp[1]);
+  mainExp->add (exp[2]);
+  return mainExp;
+}
+
 }
 }
 }
