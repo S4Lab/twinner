@@ -29,9 +29,9 @@ namespace twintool {
 
 Flags::Flags () :
     op (0),
-    of (DEFAULT_FSTATE), df (CLEAR_FSTATE), sf (DEFAULT_FSTATE), zf (DEFAULT_FSTATE),
-    pf (DEFAULT_FSTATE), cf (DEFAULT_FSTATE),
+    df (CLEAR_FSTATE),
     cfexp (0) {
+  of = sf = zf = pf = cf = UNDEFINED_FSTATE;
 }
 
 Flags::~Flags () {
