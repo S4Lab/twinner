@@ -315,6 +315,11 @@ edu::sharif::twinner::trace::Expression *Flags::calculateParity (
 }
 
 std::list <edu::sharif::twinner::trace::Constraint *>
+Flags::instantiateConstraintForCarryCase (bool &carry, uint32_t instruction) const {
+  return instantiateConstraintForBelowCase (carry, instruction);
+}
+
+std::list <edu::sharif::twinner::trace::Constraint *>
 Flags::instantiateConstraintForBelowCase (bool &below, uint32_t instruction) const {
   std::list <edu::sharif::twinner::trace::Constraint *> list;
   switch (cf) {

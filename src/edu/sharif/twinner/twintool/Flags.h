@@ -189,6 +189,12 @@ public:
   instantiateConstraintForParityCase (bool &parity, uint32_t instruction) const;
 
   /**
+   * Alias of instantiateConstraintForBelowCase method.
+   */
+  std::list <edu::sharif::twinner::trace::Constraint *>
+  instantiateConstraintForCarryCase (bool &carry, uint32_t instruction) const;
+
+  /**
    * Instantiates a new constraint object denoting that whether underlying expression
    * matches with below (B) condition. The last concrete value of the expression
    * indicates that B should be satisfied or its negate should be satisfied.
