@@ -37,6 +37,11 @@ edu::sharif::twinner::trace::Expression *ConstantExpressionValueProxy::getExpres
   return exp->clone ();
 }
 
+edu::sharif::twinner::trace::cv::ConcreteValue *
+ConstantExpressionValueProxy::getConcreteValue () const {
+  return exp->getLastConcreteValue ().clone ();
+}
+
 void ConstantExpressionValueProxy::valueIsChanged (
     edu::sharif::twinner::trace::Trace *trace,
     const edu::sharif::twinner::trace::Expression &changedExp,

@@ -49,6 +49,8 @@ public:
       edu::sharif::twinner::trace::Trace *trace,
       edu::sharif::twinner::trace::StateSummary &state) const;
 
+  virtual edu::sharif::twinner::trace::cv::ConcreteValue *getConcreteValue () const;
+
   virtual void valueIsChanged (
       edu::sharif::twinner::trace::Trace *trace,
       const edu::sharif::twinner::trace::Expression &changedExp,

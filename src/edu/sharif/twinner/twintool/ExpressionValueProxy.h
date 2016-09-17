@@ -21,6 +21,11 @@ namespace trace {
 class Expression;
 class Trace;
 class StateSummary;
+
+namespace cv {
+
+class ConcreteValue;
+}
 }
 namespace twintool {
 
@@ -63,6 +68,14 @@ public:
   virtual edu::sharif::twinner::trace::Expression *getExpression (
       edu::sharif::twinner::trace::Trace *trace,
       edu::sharif::twinner::trace::StateSummary &state) const = 0;
+
+  /**
+   * Returns the concrete value which the underlying expression is supposed
+   * to have. The returned object is owned by the caller.
+   *
+   * @return The cloned concrete value of the supposed underlying expression.
+   */
+  virtual edu::sharif::twinner::trace::cv::ConcreteValue *getConcreteValue () const = 0;
 
   /**
    * This method should be called whenever the proxied expression undergoes any change.

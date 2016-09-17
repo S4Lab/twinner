@@ -84,6 +84,34 @@ MemoryResidentExpressionValueProxy::getExpression (
   }
 }
 
+edu::sharif::twinner::trace::cv::ConcreteValue *
+MemoryResidentExpressionValueProxy::getConcreteValue () const {
+  bool ok = true;
+  const int size = getSize ();
+  edu::sharif::twinner::trace::cv::ConcreteValue *cv;
+  if (size == 128) {
+    UINT64 cvlsb;
+    ok = ok &&
+        edu::sharif::twinner::util::readMemoryContent (cvlsb, memoryEa, 8);
+    UINT64 cvmsb;
+    ok = ok &&
+        edu::sharif::twinner::util::readMemoryContent (cvmsb, memoryEa + 8, 8);
+    cv = new edu::sharif::twinner::trace::cv::ConcreteValue128Bits (cvmsb, cvlsb);
+  } else {
+    UINT64 cvval;
+    ok = ok &&
+        edu::sharif::twinner::util::readMemoryContent (cvval, memoryEa, size / 8);
+    cv = edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cvval).clone (size);
+  }
+  if (!ok) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "MemoryResidentExpressionValueProxy::getConcreteValue"
+        " (): error reading memory value\n";
+    abort ();
+  }
+  return cv;
+}
+
 void MemoryResidentExpressionValueProxy::checkForOverwritingMemory (
     edu::sharif::twinner::trace::Trace *trace) const {
   if (isMemoryEaAligned ()) {

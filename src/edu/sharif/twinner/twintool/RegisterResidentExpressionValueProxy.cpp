@@ -55,6 +55,11 @@ RegisterResidentExpressionValueProxy::getExpression (
   }
 }
 
+edu::sharif::twinner::trace::cv::ConcreteValue *
+RegisterResidentExpressionValueProxy::getConcreteValue () const {
+  return regVal->clone ();
+}
+
 edu::sharif::twinner::trace::Expression
 RegisterResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
     edu::sharif::twinner::trace::Trace *trace,
