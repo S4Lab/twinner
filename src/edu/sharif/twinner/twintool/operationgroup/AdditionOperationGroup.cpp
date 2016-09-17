@@ -136,13 +136,13 @@ AdditionOperationGroup::operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
 }
 
 std::list <OperationGroup::ConstraintPtr>
-AdditionOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
+AdditionOperationGroup::operationResultIsLessThanZero (bool &less,
     uint32_t instruction) const {
   std::list <OperationGroup::ConstraintPtr> list;
   OperationGroup::ExpressionPtr mainExp = exp[0]->clone ();
   mainExp->add (exp[1]);
   list.push_back (OperationGroup::Constraint::instantiateLessConstraint
-                  (lessOrEqual, mainExp, instruction));
+                  (less, mainExp, instruction));
   delete mainExp;
   return list;
 }

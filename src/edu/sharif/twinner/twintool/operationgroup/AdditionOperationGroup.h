@@ -42,7 +42,7 @@ public:
 
   virtual std::list <ConstraintPtr> operationResultIsLessOrEqualWithZero (
       bool &lessOrEqual, uint32_t instruction) const;
-  virtual std::list <ConstraintPtr> operationResultIsLessThanZero (bool &lessOrEqual,
+  virtual std::list <ConstraintPtr> operationResultIsLessThanZero (bool &less,
       uint32_t instruction) const;
   virtual ExpressionPtr getOperationResult () const;
 };
