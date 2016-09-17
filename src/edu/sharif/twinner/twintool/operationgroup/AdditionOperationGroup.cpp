@@ -49,10 +49,15 @@ OperationGroup::ExpressionPtr AdditionOperationGroup::getCarryExpression () cons
 std::list <OperationGroup::ConstraintPtr>
 AdditionOperationGroup::instantiateConstraintForOverflowCase (
     bool &overflow, uint32_t instruction) const {
-  edu::sharif::twinner::util::Logger::error ()
-      << "AdditionOperationGroup::instantiateConstraintForOverflowCase"
-      " (...): Not yet implemented\n";
-  abort ();
+  bool op0Sign, op1Sign, resSign;
+  std::list <OperationGroup::ConstraintPtr> list =
+      operationResultIsLessThanZero (resSign, instruction);
+  list.push_back (OperationGroup::Constraint::instantiateLessConstraint
+                  (op0Sign, exp[0], instruction));
+  list.push_back (OperationGroup::Constraint::instantiateLessConstraint
+                  (op1Sign, exp[1], instruction));
+  overflow = (op0Sign == op1Sign) && (op0Sign != resSign);
+  return list;
 }
 
 std::list <OperationGroup::ConstraintPtr>
