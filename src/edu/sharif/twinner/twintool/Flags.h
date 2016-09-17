@@ -88,8 +88,12 @@ public:
    * Fills the output parameter flags with the EFLAGS/RFLAGS register content
    * and returns a list of constraints which should be satisfied in order
    * to make the EFLAGS equal to the obtained value.
+   * The flags parameter initially contains the concrete value of the EFLAGS
+   * which will be used for initializing those flag bits which are in the
+   * unknown state.
    *
-   * @param flags The output parameter filled with the concrete EFLAGS value.
+   * @param flags The output parameter filled with the concrete EFLAGS value; it
+   * initially contains the concrete value of the expected EFLAGS.
    * @param instruction The instruction which was cause of this constraint instantiation.
    *
    * @return Constraints which should be satisfied to lead to the current flags value.

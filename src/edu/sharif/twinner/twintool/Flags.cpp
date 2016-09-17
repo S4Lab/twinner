@@ -77,17 +77,18 @@ void Flags::setFlags (
 
 std::list <edu::sharif::twinner::trace::Constraint *>
 Flags::getFlagsExpression (uint32_t &flags, uint32_t instruction) const {
+  // TODO: Set undefined bits based on their concrete state
   std::list <edu::sharif::twinner::trace::Constraint *> list;
-  bool overflow;
+  bool overflow = (flags >> 11) & 0x1;
   list.splice (list.end (), instantiateConstraintForOverflowCase (overflow, instruction));
   bool direction = getDirectionFlag ();
-  bool sign;
+  bool sign = (flags >> 7) & 0x1;
   list.splice (list.end (), instantiateConstraintForSignCase (sign, instruction));
-  bool zero;
+  bool zero = (flags >> 6) & 0x1;
   list.splice (list.end (), instantiateConstraintForZeroCase (zero, instruction));
-  bool parity;
+  bool parity = (flags >> 2) & 0x1;
   list.splice (list.end (), instantiateConstraintForParityCase (parity, instruction));
-  bool carry;
+  bool carry = flags & 0x1;
   list.splice (list.end (), instantiateConstraintForCarryCase (carry, instruction));
   flags = ((overflow ? 1u : 0) << 11) | ((direction ? 1u : 0) << 10)
       | (1u << 9) | ((sign ? 1u : 0) << 7) | ((zero ? 1u : 0) << 6)
@@ -126,7 +127,13 @@ Flags::instantiateConstraintForOverflowCase (bool &overflow,
   switch (of) {
   case UNDEFINED_FSTATE:
     edu::sharif::twinner::util::Logger::warning ()
-        << "Using OF while is in undefined state (assuming that it is CLEAR)\n";
+        << "Using OF while is in undefined state (assuming that it is ";
+    if (overflow) {
+      edu::sharif::twinner::util::Logger::warning () << "SET)\n";
+    } else {
+      edu::sharif::twinner::util::Logger::warning () << "CLEAR)\n";
+    }
+    break;
   case CLEAR_FSTATE:
     overflow = false;
     break;
@@ -149,7 +156,13 @@ Flags::instantiateConstraintForZeroCase (bool &zero, uint32_t instruction) const
   switch (zf) {
   case UNDEFINED_FSTATE:
     edu::sharif::twinner::util::Logger::warning ()
-        << "Using ZF while is in undefined state (assuming that it is CLEAR)\n";
+        << "Using ZF while is in undefined state (assuming that it is ";
+    if (zero) {
+      edu::sharif::twinner::util::Logger::warning () << "SET)\n";
+    } else {
+      edu::sharif::twinner::util::Logger::warning () << "CLEAR)\n";
+    }
+    break;
   case CLEAR_FSTATE:
     zero = false;
     break;
@@ -294,7 +307,13 @@ Flags::instantiateConstraintForParityCase (bool &parity, uint32_t instruction) c
   switch (pf) {
   case UNDEFINED_FSTATE:
     edu::sharif::twinner::util::Logger::warning ()
-        << "Using PF while is in undefined state (assuming that it is CLEAR)\n";
+        << "Using PF while is in undefined state (assuming that it is ";
+    if (parity) {
+      edu::sharif::twinner::util::Logger::warning () << "SET)\n";
+    } else {
+      edu::sharif::twinner::util::Logger::warning () << "CLEAR)\n";
+    }
+    break;
   case CLEAR_FSTATE:
     parity = false;
     break;
@@ -345,7 +364,13 @@ Flags::instantiateConstraintForBelowCase (bool &below, uint32_t instruction) con
   switch (cf) {
   case UNDEFINED_FSTATE:
     edu::sharif::twinner::util::Logger::warning ()
-        << "Using CF while is in undefined state (assuming that it is CLEAR)\n";
+        << "Using CF while is in undefined state (assuming that it is ";
+    if (below) {
+      edu::sharif::twinner::util::Logger::warning () << "SET)\n";
+    } else {
+      edu::sharif::twinner::util::Logger::warning () << "CLEAR)\n";
+    }
+    break;
   case CLEAR_FSTATE:
     below = false;
     break;
@@ -374,7 +399,13 @@ Flags::instantiateConstraintForSignCase (bool &sign, uint32_t instruction) const
   switch (sf) {
   case UNDEFINED_FSTATE:
     edu::sharif::twinner::util::Logger::warning ()
-        << "Using SF while is in undefined state (assuming that it is CLEAR)\n";
+        << "Using SF while is in undefined state (assuming that it is ";
+    if (sign) {
+      edu::sharif::twinner::util::Logger::warning () << "SET)\n";
+    } else {
+      edu::sharif::twinner::util::Logger::warning () << "CLEAR)\n";
+    }
+    break;
   case CLEAR_FSTATE:
     sign = false;
     break;

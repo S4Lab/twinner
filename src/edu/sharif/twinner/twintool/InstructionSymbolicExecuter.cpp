@@ -1553,19 +1553,21 @@ void InstructionSymbolicExecuter::adjustRsiRdiRegisters (int size,
 }
 
 void InstructionSymbolicExecuter::pushfdAnalysisRoutine (
-    const MutableExpressionValueProxy &stack, const ExpressionValueProxy &,
+    const MutableExpressionValueProxy &stack, const ExpressionValueProxy &flags,
     const MutableExpressionValueProxy &rsp) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pushfdAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  uint32_t flags;
+  edu::sharif::twinner::trace::cv::ConcreteValue *cv = flags.getConcreteValue ();
+  uint32_t flagsConcreteValue = cv->toUint64 ();
+  delete cv;
   std::list <edu::sharif::twinner::trace::Constraint *> cc =
-      eflags.getFlagsExpression (flags, disassembledInstruction);
+      eflags.getFlagsExpression (flagsConcreteValue, disassembledInstruction);
   edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraints...";
   trace->addPathConstraints (cc);
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
   setExpression (stack, trace, new edu::sharif::twinner::trace::ExpressionImp
-                 (UINT64 (flags)));
+                 (UINT64 (flagsConcreteValue)));
   edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsp...";
   edu::sharif::twinner::trace::Expression *rspexp = getExpression (rsp, trace);
   rspexp->minus (stack.getSize () / 8);
