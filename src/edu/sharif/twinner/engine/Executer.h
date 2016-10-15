@@ -81,15 +81,18 @@ public:
 private:
   const std::string tmpfolder;
   const std::string baseCommand;
+  const std::string inputBinaryHash;
   bool signaled;
   std::string inputArguments;
+  bool newRecord;
+  bool replayRecord;
   const bool overheads;
 
 public:
   Executer (int uniqueId, std::string pinLauncher, std::string twintool,
       std::string inputBinary, std::string inputArguments,
-      std::string endpoints, std::string safeFunctions,
-      std::string tmpfolder,
+      std::string endpoints, bool newRecord, bool replayRecord,
+      std::string safeFunctions, std::string tmpfolder,
       bool main, std::string stackOffset, bool naive, bool overheads);
 
   void setCandidateAddresses (
@@ -127,6 +130,12 @@ private:
   std::set < ADDRINT > loadChangedAddressesFromFile (const char *path) const;
 
   void unlinkCommunicationFiles () const;
+  std::string calculateHash (std::string file) const;
+  std::string calculateStringHash (std::string str) const;
+  void recordExecutionResult (std::string inputBinaryHash,
+      std::string argsHash, std::string symbolsHash) const;
+  bool restoreExecutionResult (std::string inputBinaryHash,
+      std::string argsHash, std::string symbolsHash) const;
 };
 
 }

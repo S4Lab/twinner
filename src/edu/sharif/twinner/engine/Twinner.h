@@ -49,6 +49,8 @@ private:
   std::string twin;
   std::string arguments;
   std::string endpoints;
+  bool newRecord;
+  bool replayRecord;
   std::string safeFunctions;
   std::string tmpfolder;
   bool main; // just analyze after the main() function
@@ -70,6 +72,7 @@ public:
   void setTwinBinaryPath (std::string twin);
   void setInputBinaryArguments (std::string arguments);
   void setAnalysisEndpoints (std::string endpoints);
+  void setRecord (bool newRecord, bool replayRecord);
   void setSafeFunctions (std::string safeFunctions);
   void setTempFolder (std::string tmpfolder);
   void setJustAnalyzeMainRoutine (bool main);

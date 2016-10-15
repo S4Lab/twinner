@@ -45,12 +45,14 @@ enum ArgumentsParsingStatus {
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &etgpath,
     string &input, string &args, string &endpoints,
+    bool &newRecord, bool &replayRecord,
     string &safeFunctions,
     string &tmpfolder,
     string &twintool, string &pin, string &twin,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads);
 int run (string etgpath, string input, string args, string endpoints,
+    bool newRecord, bool replayRecord,
     string safeFunctions, string tmpfolder,
     string twintool, string pin, string twin,
     bool main, string stackOffset, bool naive, bool measureOverheads);
@@ -68,11 +70,13 @@ int startTwinner (int argc, char *argv[]) {
   string etgpath;
   string input, args, endpoints, safeFunctions, tmpfolder, twintool, pin, twin;
   bool justAnalyzeMainRoutine = false;
+  bool newRecord, replayRecord;
   string stackOffset;
   bool naive = false;
   bool measureOverheads = false;
   switch (parseArguments (argc, argv, etgpath,
-                          input, args, endpoints, safeFunctions,
+                          input, args, endpoints, newRecord, replayRecord,
+                          safeFunctions,
                           tmpfolder, twintool, pin, twin,
                           justAnalyzeMainRoutine, stackOffset,
                           naive, measureOverheads)) {
@@ -91,7 +95,7 @@ int startTwinner (int argc, char *argv[]) {
       printError (argv[0], "permission denied: can not write to output twin binary!");
     } else {
       // all files are OK...
-      return run (etgpath, input, args, endpoints,
+      return run (etgpath, input, args, endpoints, newRecord, replayRecord,
                   safeFunctions,
                   tmpfolder, twintool, pin, twin,
                   justAnalyzeMainRoutine, stackOffset, naive, measureOverheads);
@@ -117,7 +121,7 @@ int startTwinner (int argc, char *argv[]) {
 }
 
 int run (string etgpath, string input, string args,
-    string endpoints,
+    string endpoints, bool newRecord, bool replayRecord,
     string safeFunctions,
     string tmpfolder, string twintool, string pin, string twin,
     bool main, string stackOffset, bool naive, bool measureOverheads) {
@@ -141,6 +145,7 @@ int run (string etgpath, string input, string args,
   tw.setTwinBinaryPath (twin);
   tw.setInputBinaryArguments (args);
   tw.setAnalysisEndpoints (endpoints);
+  tw.setRecord (newRecord, replayRecord);
   tw.setSafeFunctions (safeFunctions);
   tw.setTempFolder (tmpfolder);
   tw.setJustAnalyzeMainRoutine (main);
@@ -179,6 +184,7 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &etgpath,
     string &input, string &args, string &endpoints,
+    bool &newRecord, bool &replayRecord,
     string &safeFunctions,
     string &tmpfolder,
     string &twintool, string &pin, string &twin,
@@ -199,6 +205,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     { 'a', "args", ArgParser::YES, "arguments for input binary file", false, false},
     { 'e', "analysis-endpoints", ArgParser::YES, "comma separated"
       " instruction addresses to start/end analysis", false, false},
+    { 'r', "record", ArgParser::YES, "(new|replay)", false, false},
     { 'S', "safe-functions", ArgParser::YES, "comma separated"
       " list of functions to be preserved in the twincode\n"
       "\t\teach function format: <func-name>@0x<hex-address>#(<args-no>"
@@ -222,6 +229,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     printError (progName, parser.error ());
     return ERROR_OCCURRED;
   }
+  newRecord = replayRecord = false;
   string verboseStr = "warning", logfileStr = "out";
   tmpfolder = "/tmp";
   for (int argind = 0; argind < parser.arguments (); ++argind) {
@@ -268,6 +276,16 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       break;
     case 'e':
       endpoints = parser.argument (argind);
+      break;
+    case 'r':
+      if (parser.argument (argind) == "new" && replayRecord == false) {
+        newRecord = true;
+      } else if (parser.argument (argind) == "replay" && newRecord == false) {
+        replayRecord = true;
+      } else {
+        printError (progName, "-r|--record requires (new|replay) argument!");
+        return ERROR_OCCURRED;
+      }
       break;
     case 'S':
       safeFunctions = parser.argument (argind);

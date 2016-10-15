@@ -104,6 +104,11 @@ void Twinner::setAnalysisEndpoints (string endpoints) {
   this->endpoints = endpoints;
 }
 
+void Twinner::setRecord (bool newRecord, bool replayRecord) {
+  this->newRecord = newRecord;
+  this->replayRecord = replayRecord;
+}
+
 void Twinner::setSafeFunctions (string safeFunctions) {
   this->safeFunctions = safeFunctions;
 }
@@ -156,7 +161,8 @@ bool Twinner::generateTwinBinary () {
   int i = 1;
   while (somePathsAreNotCovered) {
     Executer ex (i, pin, twintool, input, arguments,
-                 endpoints, safeFunctions, tmpfolder,
+                 endpoints, newRecord, replayRecord,
+                 safeFunctions, tmpfolder,
                  main, stackOffset, naive, overheads);
     edu::sharif::twinner::util::Logger::debug () << "Executing trace # " << i++ << '\n';
     // steps 1, 2, and 3
@@ -180,7 +186,8 @@ bool Twinner::generateTwinBinary () {
   symbols.clear ();
   {
     Executer ex (i, pin, twintool, input, arguments,
-                 endpoints, safeFunctions, tmpfolder,
+                 endpoints, newRecord, replayRecord,
+                 safeFunctions, tmpfolder,
                  main, stackOffset, naive, overheads);
     const std::map < std::pair < ADDRINT, int >, UINT64 > initialValues =
         obtainInitializedMemoryValues (ex);

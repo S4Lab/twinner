@@ -20,6 +20,8 @@
 #include <sstream>
 #include <fstream>
 #include <unistd.h>
+#include <algorithm>
+#include <sys/stat.h>
 
 #include "edu/sharif/twinner/trace/MarInfo.h"
 #include "edu/sharif/twinner/trace/Expression.h"
@@ -83,8 +85,8 @@ const char *Executer::MAIN_ARGS_COMMUNICATION_TEMP_FILE =
 Executer::Executer (int uniqueId,
     std::string pinLauncher, std::string twintool,
     std::string inputBinary, std::string _inputArguments,
-    std::string endpoints, std::string safeFunctions,
-    std::string _tmpfolder,
+    std::string endpoints, bool _newRecord, bool _replayRecord,
+    std::string safeFunctions, std::string _tmpfolder,
     bool main, std::string stackOffset, bool naive, bool _overheads) :
     tmpfolder (_tmpfolder),
     baseCommand (pinLauncher
@@ -105,8 +107,11 @@ Executer::Executer (int uniqueId,
     + (stackOffset != "" ? std::string (" -stack-offset ") + stackOffset : "")
     + (naive ? " -naive" : "")
     + " -- " + inputBinary),
+    inputBinaryHash (calculateHash (inputBinary)),
     signaled (false),
-    inputArguments (_inputArguments), overheads (_overheads) {
+    inputArguments (_inputArguments),
+    newRecord (_newRecord), replayRecord (_replayRecord),
+    overheads (_overheads) {
   if ((main && endpoints != "") || (naive && (main || endpoints != ""))) {
     edu::sharif::twinner::util::Logger::error ()
         << "The -main, -endpoints, and -naive are mutually exclusive.\n";
@@ -338,7 +343,18 @@ edu::sharif::twinner::trace::MarInfo *Executer::readMarInfo () const {
 edu::sharif::twinner::trace::Trace *
 Executer::executeSystemCommand (std::string command) {
   signaled = false;
+  const std::string argsHash = calculateStringHash (inputArguments);
+  const std::string symbolsHash =
+      calculateHash (tmpfolder + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE);
   unlinkCommunicationFiles ();
+  if (replayRecord) {
+    if (restoreExecutionResult (inputBinaryHash, argsHash, symbolsHash)) {
+      return edu::sharif::twinner::trace::Trace::loadFromFile
+          (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
+           tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE);
+    }
+    unlinkCommunicationFiles ();
+  }
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
   int ret = system (command.c_str ());
@@ -352,6 +368,9 @@ Executer::executeSystemCommand (std::string command) {
     edu::sharif::twinner::util::Logger::loquacious () << "signaled; "
         "signal was " << WTERMSIG (ret) << '\n';
     signaled = true;
+  }
+  if (newRecord) {
+    recordExecutionResult (inputBinaryHash, argsHash, symbolsHash);
   }
   return edu::sharif::twinner::trace::Trace::loadFromFile
       (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
@@ -411,7 +430,17 @@ void Executer::changeArguments () {
 
 map < std::pair < ADDRINT, int >, UINT64 >
 Executer::executeSingleTraceInInitialStateDetectionMode () const {
+  const std::string argsHash = calculateStringHash (inputArguments);
+  const std::string symbolsHash =
+      calculateHash (tmpfolder + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE);
   unlinkCommunicationFiles ();
+  if (replayRecord) {
+    if (restoreExecutionResult (inputBinaryHash, argsHash, symbolsHash)) {
+      return edu::sharif::twinner::trace::Trace::loadAddressToValueMapFromFile
+          (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
+    }
+    unlinkCommunicationFiles ();
+  }
   std::string command = baseCommand + " " + inputArguments;
   if (overheads) {
     command.erase (command.find (OVERHEAD_MEASUREMENT_OPTION),
@@ -426,6 +455,9 @@ Executer::executeSingleTraceInInitialStateDetectionMode () const {
       << "The system(...) call returns code: " << ret << '\n';
   if (ret != 0) {
     abort ();
+  }
+  if (newRecord) {
+    recordExecutionResult (inputBinaryHash, argsHash, symbolsHash);
   }
   return edu::sharif::twinner::trace::Trace::loadAddressToValueMapFromFile
       (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
@@ -445,6 +477,83 @@ void Executer::unlinkCommunicationFiles () const {
       abort ();
     }
   }
+}
+
+std::string Executer::calculateHash (std::string file) const {
+  FILE *fp = popen (("md5sum " + file).c_str (), "r");
+  if (fp == NULL) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error: Cannot execute the md5sum program.\n";
+    abort ();
+  }
+  char md5str[33];
+  if (fgets (md5str, sizeof (md5str), fp) == NULL) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error: Cannot read output of the md5sum program.\n";
+    abort ();
+  }
+  pclose (fp);
+  return std::string (md5str, 32);
+}
+
+std::string Executer::calculateStringHash (std::string str) const {
+  size_t pos = 0;
+  while ((pos = str.find ("'", pos)) != std::string::npos) {
+    str.replace (pos, 1, "'\\''");
+    pos += 4;
+  }
+  FILE *fp = popen (("echo '" + str + "' | md5sum").c_str (), "r");
+  if (fp == NULL) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error: Cannot execute the md5sum program.\n";
+    abort ();
+  }
+  char md5str[33];
+  if (fgets (md5str, sizeof (md5str), fp) == NULL) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error: Cannot read output of the md5sum program.\n";
+    abort ();
+  }
+  pclose (fp);
+  return std::string (md5str, 32);
+}
+
+int createDir (const char *path) {
+  if (access (path, F_OK) == 0)
+    return 0;
+  return mkdir (path, 0755);
+}
+
+void Executer::recordExecutionResult (std::string inputBinaryHash,
+    std::string argsHash, std::string symbolsHash) const {
+  if (createDir ((tmpfolder + "/twinner/record").c_str ()) != 0
+      || createDir ((tmpfolder + "/twinner/record/"
+                     + inputBinaryHash).c_str ()) != 0
+      || createDir ((tmpfolder + "/twinner/record/" + inputBinaryHash
+                     + "/" + argsHash).c_str ()) != 0
+      || createDir ((tmpfolder + "/twinner/record/" + inputBinaryHash
+                     + "/" + argsHash + "/" + symbolsHash).c_str ()) != 0
+      || system (("cp " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
+                  + " " + tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
+                  + " " + tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE
+                  + " " + tmpfolder + "/twinner/record/" + inputBinaryHash
+                  + "/" + argsHash + "/" + symbolsHash + "/").c_str ()) != 0) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error: Cannot copy the execution result files.\n";
+    abort ();
+  }
+}
+
+bool Executer::restoreExecutionResult (std::string inputBinaryHash,
+    std::string argsHash, std::string symbolsHash) const {
+  if (system (("cp " + tmpfolder + "/twinner/record/" + inputBinaryHash
+               + "/" + argsHash + "/" + symbolsHash + "/* "
+               + tmpfolder + "/twinner/").c_str ()) != 0) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error: Cannot restore the execution result files.\n";
+    return false;
+  }
+  return true;
 }
 
 }
