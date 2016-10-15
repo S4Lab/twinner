@@ -43,13 +43,14 @@ enum ArgumentsParsingStatus {
 };
 
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
+    string &etgpath,
     string &input, string &args, string &endpoints,
     string &safeFunctions,
     string &tmpfolder,
     string &twintool, string &pin, string &twin,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads);
-int run (string input, string args, string endpoints,
+int run (string etgpath, string input, string args, string endpoints,
     string safeFunctions, string tmpfolder,
     string twintool, string pin, string twin,
     bool main, string stackOffset, bool naive, bool measureOverheads);
@@ -64,12 +65,13 @@ int main (int argc, char *argv[]) {
 }
 
 int startTwinner (int argc, char *argv[]) {
+  string etgpath;
   string input, args, endpoints, safeFunctions, tmpfolder, twintool, pin, twin;
   bool justAnalyzeMainRoutine = false;
   string stackOffset;
   bool naive = false;
   bool measureOverheads = false;
-  switch (parseArguments (argc, argv,
+  switch (parseArguments (argc, argv, etgpath,
                           input, args, endpoints, safeFunctions,
                           tmpfolder, twintool, pin, twin,
                           justAnalyzeMainRoutine, stackOffset,
@@ -77,7 +79,9 @@ int startTwinner (int argc, char *argv[]) {
   case CONTINUE_NORMALLY:
     // checking mandatory arguments...
 
-    if (access (input.c_str (), R_OK) != 0) {
+    if (access (etgpath.c_str (), F_OK) == 0 && access (etgpath.c_str (), W_OK) != 0) {
+      printError (argv[0], "permission denied: can not write to etg output file!");
+    } else if (access (input.c_str (), R_OK) != 0) {
       printError (argv[0], "permission denied: can not read input binary file!");
     } else if (access (twintool.c_str (), X_OK) != 0) {
       printError (argv[0], "permission denied: can not execute twintool pintool!");
@@ -87,7 +91,8 @@ int startTwinner (int argc, char *argv[]) {
       printError (argv[0], "permission denied: can not write to output twin binary!");
     } else {
       // all files are OK...
-      return run (input, args, endpoints, safeFunctions,
+      return run (etgpath, input, args, endpoints,
+                  safeFunctions,
                   tmpfolder, twintool, pin, twin,
                   justAnalyzeMainRoutine, stackOffset, naive, measureOverheads);
     }
@@ -111,7 +116,9 @@ int startTwinner (int argc, char *argv[]) {
   }
 }
 
-int run (string input, string args, string endpoints, string safeFunctions,
+int run (string etgpath, string input, string args,
+    string endpoints,
+    string safeFunctions,
     string tmpfolder, string twintool, string pin, string twin,
     bool main, string stackOffset, bool naive, bool measureOverheads) {
   edu::sharif::twinner::util::Logger::info ()
@@ -127,6 +134,7 @@ int run (string input, string args, string endpoints, string safeFunctions,
       << "\nPin launcher: " << pin
       << "\nOutput twin file: " << twin << '\n';
   edu::sharif::twinner::engine::Twinner tw;
+  tw.setEtgPath (etgpath);
   tw.setInputBinaryPath (input);
   tw.setTwinToolPath (twintool);
   tw.setPinLauncherPath (pin);
@@ -169,6 +177,7 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
 }
 
 ArgumentsParsingStatus parseArguments (int argc, char *argv[],
+    string &etgpath,
     string &input, string &args, string &endpoints,
     string &safeFunctions,
     string &tmpfolder,
@@ -185,6 +194,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       " (default: out; twinner will write to out.log and twintool instances"
       " will write to out-<id>.log files)", false, false},
     { 'L', "license", ArgParser::NO, "output license information and exit", false, true},
+    { 'g', "generate-etg", ArgParser::YES, "path/name of the generated ETG .dot file", false, false},
     { 'i', "input", ArgParser::YES, "input obfuscated binary file", true, false},
     { 'a', "args", ArgParser::YES, "arguments for input binary file", false, false},
     { 'e', "analysis-endpoints", ArgParser::YES, "comma separated"
@@ -235,6 +245,9 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     case 'L':
       printLicense ();
       return EXIT_NORMALLY;
+    case 'g':
+      etgpath = parser.argument (argind);
+      break;
     case 'c':
       input = parser.argument (argind);
       if (++argind < parser.arguments ()) {

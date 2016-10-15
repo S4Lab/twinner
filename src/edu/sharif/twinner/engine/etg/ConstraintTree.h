@@ -13,6 +13,8 @@
 #ifndef CONSTRAINT_TREE_H
 #define CONSTRAINT_TREE_H
 
+#include "Vertex.h"
+
 #include <list>
 
 namespace edu {
@@ -45,6 +47,8 @@ public:
   void dumpTree () const;
 
   const TreeNode *getRoot () const;
+
+  Graph *getEtg () const;
 };
 
 }

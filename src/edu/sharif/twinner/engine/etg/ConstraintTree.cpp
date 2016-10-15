@@ -98,6 +98,28 @@ const TreeNode *ConstraintTree::getRoot () const {
   return root;
 }
 
+Graph *ConstraintTree::getEtg () const {
+  Graph *g = new Graph ();
+  std::list<const TreeNode *> nodes;
+  nodes.push_back (root);
+  while (!nodes.empty ()) {
+    const TreeNode *it = nodes.front ();
+    nodes.pop_front ();
+    const Vertex v (it == root ? 0 : it);
+    if (g->first.find (v) == g->first.end ()) {
+      g->first.insert (v);
+      const std::list < TreeNode * > children = it->getChildren ();
+      for (std::list < TreeNode * >::const_iterator tn = children.begin ();
+          tn != children.end (); ++tn) {
+        const Vertex u (*tn);
+        g->second.push_back (make_pair (v, u));
+        nodes.push_back (*tn);
+      }
+    }
+  }
+  return g;
+}
+
 }
 }
 }

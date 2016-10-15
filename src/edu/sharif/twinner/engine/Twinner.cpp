@@ -37,6 +37,7 @@
 #include "edu/sharif/twinner/engine/etg/ConstraintTree.h"
 #include "edu/sharif/twinner/engine/etg/TwinCodeEncoder.h"
 #include "edu/sharif/twinner/engine/etg/AddressAggregator.h"
+#include "edu/sharif/twinner/engine/etg/Vertex.h"
 
 using namespace std;
 
@@ -73,6 +74,10 @@ Twinner::Twinner () :
 Twinner::~Twinner () {
   delete ctree;
   edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->destroy ();
+}
+
+void Twinner::setEtgPath (string etgpath) {
+  this->etgpath = etgpath;
 }
 
 void Twinner::setInputBinaryPath (string input) {
@@ -181,6 +186,17 @@ bool Twinner::generateTwinBinary () {
         obtainInitializedMemoryValues (ex);
     codeTracesIntoTwinCode (initialValues);
   }
+  if (!etgpath.empty ()) {
+    std::ofstream out;
+    out.open (etgpath.c_str (), ios_base::out | ios_base::trunc);
+    if (!out.is_open ()) {
+      edu::sharif::twinner::util::Logger::error () << "Can not write ETG:"
+          " Error in open function: " << etgpath << '\n';
+      return false;
+    }
+    generateEtg (out);
+    out.close ();
+  }
   return true;
 }
 
@@ -286,6 +302,12 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
     }
   }
   return false;
+}
+
+void Twinner::generateEtg (std::ofstream &out) const {
+  edu::sharif::twinner::engine::etg::Graph *etg = ctree->getEtg ();
+  out << (*etg);
+  delete etg;
 }
 
 void Twinner::codeTracesIntoTwinCode (

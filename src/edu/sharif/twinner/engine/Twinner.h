@@ -42,6 +42,7 @@ class Executer;
 
 class Twinner {
 private:
+  std::string etgpath;
   std::string input;
   std::string twintool;
   std::string pin;
@@ -62,6 +63,7 @@ public:
   Twinner ();
   ~Twinner ();
 
+  void setEtgPath (std::string etgpath);
   void setInputBinaryPath (std::string input);
   void setTwinToolPath (std::string twintool);
   void setPinLauncherPath (std::string pin);
@@ -92,6 +94,8 @@ private:
       const std::map < std::pair < ADDRINT, int >, UINT64 > &initialValues);
   void codeInitialValuesIntoTwinCode (std::stringstream &out,
       const std::map < std::pair < ADDRINT, int >, UINT64 > &initialValues) const;
+
+  void generateEtg (std::ofstream &out) const;
 };
 
 }
