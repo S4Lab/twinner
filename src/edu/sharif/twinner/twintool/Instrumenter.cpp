@@ -1422,7 +1422,7 @@ void Instrumenter::syscallEntryPoint (THREADID threadIndex, CONTEXT *ctxt,
         " right before first syscall\n";
     saveMemoryContentsToFile (traceFilePath.c_str ());
     edu::sharif::twinner::util::Logger::debug () << "Done.\tExiting...\n";
-    exit (0); // think about probably acquired locks of application
+    PIN_ExitProcess (0); // think about probably acquired locks of application
   }
 }
 
@@ -1507,7 +1507,7 @@ void Instrumenter::enable () {
         " right before first syscall\n";
     saveMemoryContentsToFile (traceFilePath.c_str ());
     edu::sharif::twinner::util::Logger::debug () << "Done.\tExiting...\n";
-    exit (0); // think about probably acquired locks of application
+    PIN_ExitProcess (0); // think about probably acquired locks of application
   }
 }
 
