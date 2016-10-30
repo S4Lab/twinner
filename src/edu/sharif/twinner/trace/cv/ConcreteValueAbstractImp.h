@@ -285,6 +285,11 @@ public:
 
   virtual ConcreteValueAbstractImp<bits, ValueType> &operator<<= (const ConcreteValue &cv) {
     const UINT64 cvValue = cv.toUint64 ();
+    if (cvValue >= bits) {
+      cf = (cvValue == bits ? value & 0x1 : 0);
+      value = 0;
+      return *this; // CPU truncates cvValue; so it must be considered by caller
+    }
     cf = (value >> (bits - cvValue)) & 0x1;
     value <<= cvValue;
     return *this;
