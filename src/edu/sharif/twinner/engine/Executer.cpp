@@ -266,6 +266,20 @@ void aggregate_symbols (
   }
 }
 
+std::string Executer::escapeForShell (std::string str) const {
+  size_t pos = 0;
+  while ((pos = str.find ("'", pos)) != std::string::npos) {
+    str.replace (pos, 1, "'\\''");
+    pos += 4;
+  }
+  pos = 0;
+  while ((pos = str.find (" ", pos)) != std::string::npos) {
+    str.replace (pos, 1, "' '");
+    pos += 3;
+  }
+  return std::string ("'" + str + "'");
+}
+
 /**
  * Uses OS interface to run  twintool in an independent process. The execution
  * trace will be communicated with twintool through file interface.
@@ -281,7 +295,7 @@ Executer::executeSingleTraceInNormalMode () {
    *  to timeout execution and exit after a while. In this way, this code does not
    *  need to be changed at all.
    */
-  const std::string command = baseCommand + " " + inputArguments;
+  const std::string command = baseCommand + " " + escapeForShell (inputArguments);
   if (overheads) {
     std::string cmd = command;
     const std::string whiteSpace (strlen (OVERHEAD_MEASUREMENT_OPTION), ' ');
@@ -441,7 +455,7 @@ Executer::executeSingleTraceInInitialStateDetectionMode () const {
     }
     unlinkCommunicationFiles ();
   }
-  std::string command = baseCommand + " " + inputArguments;
+  std::string command = baseCommand + " " + escapeForShell (inputArguments);
   if (overheads) {
     command.erase (command.find (OVERHEAD_MEASUREMENT_OPTION),
                    strlen (OVERHEAD_MEASUREMENT_OPTION));
@@ -497,12 +511,7 @@ std::string Executer::calculateHash (std::string file) const {
 }
 
 std::string Executer::calculateStringHash (std::string str) const {
-  size_t pos = 0;
-  while ((pos = str.find ("'", pos)) != std::string::npos) {
-    str.replace (pos, 1, "'\\''");
-    pos += 4;
-  }
-  FILE *fp = popen (("echo '" + str + "' | md5sum").c_str (), "r");
+  FILE *fp = popen (("echo " + escapeForShell (str) + " | md5sum").c_str (), "r");
   if (fp == NULL) {
     edu::sharif::twinner::util::Logger::error ()
         << "Error: Cannot execute the md5sum program.\n";

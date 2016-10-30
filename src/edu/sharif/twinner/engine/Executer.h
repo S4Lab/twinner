@@ -130,6 +130,8 @@ private:
   std::set < ADDRINT > loadChangedAddressesFromFile (const char *path) const;
 
   void unlinkCommunicationFiles () const;
+
+  std::string escapeForShell (std::string str) const;
   std::string calculateHash (std::string file) const;
   std::string calculateStringHash (std::string str) const;
   void recordExecutionResult (std::string inputBinaryHash,
