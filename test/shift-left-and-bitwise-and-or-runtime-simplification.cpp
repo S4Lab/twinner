@@ -22,6 +22,7 @@ using namespace edu::sharif::twinner::util;
 void test1 ();
 void test2 ();
 void test3 ();
+void test4 ();
 
 int main (int argc, char *argv[]) {
   LogStream::init ("loquacious", "out-test-shift-left-and-bitwise-and-or");
@@ -29,6 +30,7 @@ int main (int argc, char *argv[]) {
   test1 ();
   test2 ();
   test3 ();
+  test4 ();
   LogStream::destroy ();
   return 0;
 }
@@ -110,6 +112,16 @@ void test3 () {
   exp->shiftToRight (0x20);
   exp->bitwiseAnd (0xffffffff);
   exp->shiftToLeft (0x20);
+  Logger::info () << "exp: " << exp << '\n';
+}
+
+void test4 () {
+  Logger::info () << "test 4: simplifying ((m402008_0_32 << 0x28) | 0x15) & 0xffff0015\n";
+  const Expression *m402008_0_32 = new ExpressionImp (0x402008, ConcreteValue32Bits (0x00400450), 0, true);
+  Expression *exp = m402008_0_32->clone ();
+  exp->shiftToLeft (0x28);
+  exp->bitwiseOr (0x15);
+  exp->bitwiseAnd (0xffff0015);
   Logger::info () << "exp: " << exp << '\n';
 }
 
