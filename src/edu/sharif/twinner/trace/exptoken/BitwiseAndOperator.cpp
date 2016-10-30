@@ -53,8 +53,6 @@ bool BitwiseAndOperator::isCommutable () const {
 }
 
 void BitwiseAndOperator::initializeSimplificationRules () {
-  simplificationRules.push_back
-      (SimplificationRule (Operator::BITWISE_AND, Operator::BITWISE_AND));
 }
 
 bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::Expression *exp,
@@ -102,6 +100,7 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
   if (secondOp->getIdentifier () == Operator::ADD
       || secondOp->getIdentifier () == Operator::MINUS
       || secondOp->getIdentifier () == Operator::BITWISE_OR
+      || secondOp->getIdentifier () == Operator::BITWISE_AND
       || secondOp->getIdentifier () == Operator::MULTIPLY
       || secondOp->getIdentifier () == Operator::SHIFT_LEFT
       || secondOp->getIdentifier () == Operator::SHIFT_RIGHT) {
@@ -117,6 +116,18 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
           return COMPLETED;
         }
         delete secondCv;
+      } else if (secondOp->getIdentifier () == Operator::BITWISE_AND) {
+        // exp == (...) & second
+        (*operand) &= second->getValue ();
+        if ((*operand) == second->getValue ()) {
+          delete operand;
+          return COMPLETED;
+        }
+        stack.pop_back (); // removes secondOp
+        stack.pop_back (); // removes second
+        delete secondOp;
+        delete second;
+        return RESTART_SIMPLIFICATION;
       } else if (secondOp->getIdentifier () == Operator::SHIFT_LEFT) {
         // exp == (...) << second
         if (second->getValue () >= numberOfBits (operand->clone ())) {
