@@ -175,6 +175,7 @@ private:
   bool isWithinInitialStateDetectionMode;
 
   bool disabled;
+  bool withinSafeFunc;
   int stackOffset;
   bool naive;
   ADDRINT start;
@@ -217,8 +218,10 @@ public:
   void disable ();
   void enable ();
 
-  void beforeSafeFunction (const edu::sharif::twinner::trace::FunctionInfo &fi,
+  void beforeSafeFunction (ADDRINT retAddress,
+      const edu::sharif::twinner::trace::FunctionInfo &fi,
       UINT32 insAssembly, const CONTEXT *context);
+  void afterSafeFunction (const CONTEXT *context);
   void afterSafeFunction (CONTEXT *context);
 
   void reportMainArguments (int argc, char **argv);
@@ -255,7 +258,7 @@ VOID instrumentSingleInst (INS ins, VOID *v);
 VOID imageIsLoaded (IMG img, VOID *v);
 
 VOID instrumentSafeFuncs (IMG img, VOID *v);
-VOID beforeSafeFunc (VOID *v, VOID *p, UINT32 insAssembly,
+VOID beforeSafeFunc (VOID *v, ADDRINT retAddress, VOID *p, UINT32 insAssembly,
     const CONTEXT *context);
 VOID afterSafeFunc (VOID *v, CONTEXT *context);
 

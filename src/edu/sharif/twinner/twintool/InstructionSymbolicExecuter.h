@@ -105,6 +105,9 @@ private:
 
   UINT64 numberOfExecutedInstructions; // used in measure mode
 
+  ADDRINT endOfSafeFuncRetAddress;
+  bool withinSafeFunc;
+
 public:
   InstructionSymbolicExecuter (Instrumenter *im,
       std::ifstream &symbolsFileInputStream, bool disabled, bool _measureMode);
@@ -126,8 +129,8 @@ private:
   void lazyLoad ();
 
 public:
-  void analysisRoutineBeforeCallingSafeFunction (const FunctionInfo &fi,
-      UINT32 insAssembly, const CONTEXT *context);
+  void analysisRoutineBeforeCallingSafeFunction (ADDRINT retAddress,
+      const FunctionInfo &fi, UINT32 insAssembly, const CONTEXT *context);
 
   void analysisRoutineSyscall (ADDRINT syscallNumber,
       ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3,
@@ -219,6 +222,7 @@ public:
   void analysisRoutineDstRegSrcAdg (AnalysisRoutine routine,
       REG dstReg, const ConcreteValue &dstRegVal,
       UINT32 insAssembly);
+  void analysisRoutineBeforeRet (REG reg);
   void analysisRoutineBeforeChangeOfReg (SuddenlyChangedRegAnalysisRoutine routine,
       REG reg,
       UINT32 insAssembly);
@@ -546,6 +550,8 @@ private:
    * symbolic value with its concrete value.
    */
   void callAnalysisRoutine (const CONTEXT *context, const ConcreteValue &rspRegVal);
+
+  void checkForEndOfSafeFunc (const CONTEXT *context, const ConcreteValue &ripRegVal);
 
   /**
    * RET instruction is executed and RSP is changed. This method will synchronize its

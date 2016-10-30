@@ -65,7 +65,8 @@ InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     memoryManager (edu::sharif::twinner::util::MemoryManager::getInstance ()),
     trackedReg (REG_INVALID_), operandSize (-1), hook (0),
     disabled (_disabled),
-    measureMode (_measureMode), numberOfExecutedInstructions (0) {
+    measureMode (_measureMode), numberOfExecutedInstructions (0),
+    endOfSafeFuncRetAddress (0), withinSafeFunc (false) {
 }
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (Instrumenter *_im,
@@ -75,7 +76,8 @@ InstructionSymbolicExecuter::InstructionSymbolicExecuter (Instrumenter *_im,
     memoryManager (lazyTrace->getMemoryManager ()),
     trackedReg (REG_INVALID_), operandSize (-1), hook (0),
     disabled (_disabled),
-    measureMode (false), numberOfExecutedInstructions (0) {
+    measureMode (false), numberOfExecutedInstructions (0),
+    endOfSafeFuncRetAddress (0), withinSafeFunc (false) {
 }
 
 edu::sharif::twinner::trace::Trace *InstructionSymbolicExecuter::getTrace () {
@@ -134,7 +136,8 @@ InstructionSymbolicExecuter::getTraceMemoryManager () const {
 }
 
 void InstructionSymbolicExecuter::analysisRoutineBeforeCallingSafeFunction (
-    const FunctionInfo &fi, UINT32 insAssembly, const CONTEXT *context) {
+    ADDRINT retAddress, const FunctionInfo &fi,
+    UINT32 insAssembly, const CONTEXT *context) {
   if (disabled) {
     return;
   }
@@ -151,6 +154,8 @@ void InstructionSymbolicExecuter::analysisRoutineBeforeCallingSafeFunction (
   logger << std::hex << "analysisRoutineBeforeCallingSafeFunction(INS: "
       << insAssemblyStr << "): before calling " << fi << '\n';
   registerSafeFunction (fi, context);
+  endOfSafeFuncRetAddress = retAddress;
+  withinSafeFunc = true;
   trace->printRegistersValues (logger);
 }
 
@@ -724,6 +729,15 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
                     ConstantExpressionValueProxy (dstRegVal, REG_Size (dstReg) * 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
+}
+
+void InstructionSymbolicExecuter::analysisRoutineBeforeRet (REG reg) {
+  if (withinSafeFunc) {
+    edu::sharif::twinner::util::Logger::debug ()
+        << "analysisRoutineBeforeRet\n";
+    trackedReg = reg;
+    hook = &InstructionSymbolicExecuter::checkForEndOfSafeFunc;
+  }
 }
 
 void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfReg (
@@ -2051,6 +2065,14 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::checkForEndOfSafeFunc (const CONTEXT *context,
+    const ConcreteValue &ripRegVal) {
+  if (endOfSafeFuncRetAddress == ripRegVal.toUint64 ()) {
+    im->afterSafeFunction (context);
+    withinSafeFunc = false;
+  }
+}
+
 void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
     const ConcreteValue &rspRegVal) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
@@ -2211,6 +2233,7 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
       getExpression (dst, trace);
   edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tshifting operation...";
+  // TODO: Check for large src shift amounts and truncate it if required
   if (dynamic_cast<const ConstantExpressionValueProxy *> (&src) != 0) {
     // src was an immediate value
     dstexp->shiftToLeft (srcexp->getLastConcreteValue ().clone ());
@@ -4186,6 +4209,13 @@ VOID analysisRoutineBeforeChangeOfReg (VOID *iseptr, UINT32 opcode,
       (ise->convertOpcodeToSuddenlyChangedRegAnalysisRoutine ((OPCODE) opcode),
        (REG) reg,
        insAssembly);
+  if (opcode == XED_ICLASS_RET_NEAR || opcode == XED_ICLASS_RET_FAR) {
+#ifdef TARGET_IA32E
+    ise->analysisRoutineBeforeRet (REG_RIP);
+#else
+    ise->analysisRoutineBeforeRet (REG_EIP);
+#endif
+  }
 }
 
 VOID analysisRoutineBeforeChangeOfRegWithArg (VOID *iseptr, UINT32 opcode,
@@ -4196,6 +4226,13 @@ VOID analysisRoutineBeforeChangeOfRegWithArg (VOID *iseptr, UINT32 opcode,
       (ise->convertOpcodeToSuddenlyChangedRegWithArgAnalysisRoutine ((OPCODE) opcode),
        (REG) reg, argImmediateValue,
        insAssembly);
+  if (opcode == XED_ICLASS_RET_NEAR || opcode == XED_ICLASS_RET_FAR) {
+#ifdef TARGET_IA32E
+    ise->analysisRoutineBeforeRet (REG_RIP);
+#else
+    ise->analysisRoutineBeforeRet (REG_EIP);
+#endif
+  }
 }
 
 VOID analysisRoutineTwoDstRegOneSrcReg (VOID *iseptr, UINT32 opcode,

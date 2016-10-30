@@ -64,6 +64,7 @@ Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     _disabled, measureMode)),
     isWithinInitialStateDetectionMode (false),
     disabled (_disabled || _naive),
+    withinSafeFunc (false),
     stackOffset (_stackOffset),
     naive (_naive),
     start (_start), end (_end),
@@ -81,6 +82,7 @@ Instrumenter::Instrumenter (
     candidateAddresses (_candidateAddresses),
     isWithinInitialStateDetectionMode (true),
     disabled (_disabled),
+    withinSafeFunc (false),
     stackOffset (_stackOffset),
     start (_start), end (_end),
     totalCountOfInstructions (0) {
@@ -96,6 +98,7 @@ Instrumenter::Instrumenter (const string &_traceFilePath,
     ise (new InstructionSymbolicExecuter (this, _disabled)),
     isWithinInitialStateDetectionMode (false),
     disabled (_disabled || _naive),
+    withinSafeFunc (false),
     stackOffset (_stackOffset),
     naive (_naive),
     start (_start), end (_end),
@@ -313,6 +316,7 @@ bool Instrumenter::instrumentSafeFunctions (INS ins, UINT32 insAssembly) const {
             " instrumenting call to the ``" << name << "'' safe routine\n";
         INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) beforeSafeFunc,
                         IARG_PTR, this,
+                        IARG_ADDRINT, INS_Address (ins) + INS_Size (ins),
                         IARG_PTR, &fi,
                         IARG_UINT32, insAssembly,
                         IARG_CONST_CONTEXT,
@@ -1511,20 +1515,35 @@ void Instrumenter::enable () {
   }
 }
 
-void Instrumenter::beforeSafeFunction (
+void Instrumenter::beforeSafeFunction (ADDRINT retAddress,
     const edu::sharif::twinner::trace::FunctionInfo &fi, UINT32 insAssembly,
     const CONTEXT *context) {
   edu::sharif::twinner::util::Logger::loquacious ()
       << "Instrumenter::beforeSafeFunction ()\n";
-  ise->analysisRoutineBeforeCallingSafeFunction (fi, insAssembly, context);
+  ise->analysisRoutineBeforeCallingSafeFunction
+      (retAddress, fi, insAssembly, context);
   disable ();
+  withinSafeFunc = true;
+}
+
+void Instrumenter::afterSafeFunction (const CONTEXT *context) {
+  if (!withinSafeFunc) {
+    return;
+  }
+  CONTEXT mutableContext;
+  PIN_SaveContext (context, &mutableContext);
+  afterSafeFunction (&mutableContext);
 }
 
 void Instrumenter::afterSafeFunction (CONTEXT *context) {
+  if (!withinSafeFunc) {
+    return;
+  }
   edu::sharif::twinner::util::Logger::loquacious ()
       << "Instrumenter::afterSafeFunction ()\n";
   enable ();
   ise->startNewTraceSegment (context);
+  withinSafeFunc = false;
 }
 
 void Instrumenter::reportMainArguments (int argc, char **argv) {
@@ -1657,12 +1676,12 @@ VOID instrumentSafeFuncs (IMG img, VOID *v) {
   im->instrumentSafeFunctions (img);
 }
 
-VOID beforeSafeFunc (VOID *v, VOID *p, UINT32 insAssembly,
+VOID beforeSafeFunc (VOID *v, ADDRINT retAddress, VOID *p, UINT32 insAssembly,
     const CONTEXT *context) {
   Instrumenter *im = (Instrumenter *) v;
   const edu::sharif::twinner::trace::FunctionInfo *fi =
       (const edu::sharif::twinner::trace::FunctionInfo *) p;
-  im->beforeSafeFunction (*fi, insAssembly, context);
+  im->beforeSafeFunction (retAddress, *fi, insAssembly, context);
 }
 
 VOID afterSafeFunc (VOID *v, CONTEXT *context) {
