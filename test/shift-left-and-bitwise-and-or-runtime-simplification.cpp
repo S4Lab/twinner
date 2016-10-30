@@ -23,6 +23,7 @@ void test1 ();
 void test2 ();
 void test3 ();
 void test4 ();
+void test5 ();
 
 int main (int argc, char *argv[]) {
   LogStream::init ("loquacious", "out-test-shift-left-and-bitwise-and-or");
@@ -31,6 +32,7 @@ int main (int argc, char *argv[]) {
   test2 ();
   test3 ();
   test4 ();
+  test5 ();
   LogStream::destroy ();
   return 0;
 }
@@ -122,6 +124,17 @@ void test4 () {
   exp->shiftToLeft (0x28);
   exp->bitwiseOr (0x15);
   exp->bitwiseAnd (0xffff0015);
+  Logger::info () << "exp: " << exp << '\n';
+}
+
+void test5 () {
+  Logger::info () << "test 5: simplifying (((m22cc80_0_32 << 0x8) | 0x3) & 0xffff) & 0xff\n";
+  const Expression *m22cc80_0_32 = new ExpressionImp (0x402008, ConcreteValue32Bits (0x00400450), 0, true);
+  Expression *exp = m22cc80_0_32->clone ();
+  exp->shiftToLeft (0x8);
+  exp->bitwiseOr (0x3);
+  exp->bitwiseAnd (0xffff);
+  exp->bitwiseAnd (0xff);
   Logger::info () << "exp: " << exp << '\n';
 }
 
