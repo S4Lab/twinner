@@ -139,16 +139,21 @@ Expression *ExecutionTraceSegment::setSymbolicExpressionByMemoryAddress (int siz
 void ExecutionTraceSegment::addPathConstraints (
     const std::list <edu::sharif::twinner::trace::Constraint *> &constraints,
     const edu::sharif::twinner::trace::Constraint *lastConstraint) {
+  std::list < Constraint * > effectiveConstraints;
   for (std::list <edu::sharif::twinner::trace::Constraint *>::const_iterator it =
       constraints.begin (); it != constraints.end (); ++it) {
     edu::sharif::twinner::trace::Constraint *c = *it;
     if (c->isTrivial () || (lastConstraint && (*lastConstraint) == (*c))) {
       delete c;
     } else {
-      pathConstraints.push_back (c);
+      effectiveConstraints.push_back (c);
       lastConstraint = c;
     }
   }
+  Snapshot *snapshot = snapshots.back ();
+  snapshot->addPathConstraints (effectiveConstraints);
+  Snapshot *nextSnapshot = Snapshot::instantiateNexSnapshot (*snapshot);
+  snapshots.push_back (nextSnapshot);
 }
 
 void ExecutionTraceSegment::saveToBinaryStream (std::ofstream &out) const {

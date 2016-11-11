@@ -48,6 +48,27 @@ public:
   virtual bool operator== (const ExpressionToken &token) const;
 
   ADDRINT getAddress () const;
+
+  /**
+   * Iterating on all most-high-level memory contents, i.e. those which do not
+   * need lazy loading and do not have an upper containing memory content
+   * which does not need lazy loading too, of the given memory contents maps,
+   * instantiates a new temporary symbol for them with the same concrete value,
+   * the requested segment and snapshot indices, and the same overwriting mode.
+   *
+   * @param memoryToExpressionMaps The map of mem exps to be converted to temp exps.
+   * @param segmentIndex The segment index of newly instantiated temp symbols.
+   * @param snapshotIndex The snapshot index of newly instantiated temp symbols.
+   * @return A map containing a temp exp for each most-high-level mem in the initial map.
+   */
+  static std::map < ADDRINT, Expression * > instantiateTemporarySymbols (
+      const std::map < ADDRINT, Expression * > * const *memoryToExpressionMaps,
+      int segmentIndex, int snapshotIndex);
+  static void instantiateTemporarySymbols (
+      std::map < ADDRINT, Expression * > &tempExpressions,
+      ADDRINT address, int size, int level,
+      const std::map < ADDRINT, Expression * > * const *memoryToExpressionMaps,
+      int segmentIndex, int snapshotIndex);
 };
 
 }

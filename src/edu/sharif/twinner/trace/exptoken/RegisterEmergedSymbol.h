@@ -112,6 +112,21 @@ public:
    */
   static void initializeSubRegisters (REG reg,
       Snapshot *snapshot, const Expression &expression);
+
+  /**
+   * Iterating on all full registers of the given registerToExpression map,
+   * instantiates a new temporary symbol for them with the same concrete value
+   * and requested segment and snapshot indices.
+   * ASSERT: All given expressions are in the non-overwriting mode.
+   *
+   * @param registerToExpression The map of reg exps to be converted to temp exps.
+   * @param segmentIndex The segment index of newly instantiated temp symbols.
+   * @param snapshotIndex The snapshot index of newly instantiated temp symbols.
+   * @return A map containing a temp exp for each full reg in the initial map.
+   */
+  static std::map < REG, Expression * > instantiateTemporarySymbols (
+      const std::map < REG, Expression * > &registerToExpression,
+      int segmentIndex, int snapshotIndex);
 };
 
 }

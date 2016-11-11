@@ -51,6 +51,8 @@ public:
       const std::map < ADDRINT, Expression * > &memMap);
   virtual ~Snapshot ();
 
+  static Snapshot *instantiateNexSnapshot (const Snapshot &previousSnapshot);
+
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
       StateSummary &state);

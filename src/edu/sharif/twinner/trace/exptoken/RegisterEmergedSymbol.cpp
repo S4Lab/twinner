@@ -13,7 +13,7 @@
 #include "RegisterEmergedSymbol.h"
 
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
-#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/ExpressionImp.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue32Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
@@ -544,6 +544,45 @@ void RegisterEmergedSymbol::initializeSubRegisters (REG reg,
     snapshot->setSymbolicExpressionByRegister
         (8, lowest8Bits, &expression)->truncate (8);
   }
+}
+
+std::map < REG, Expression * > RegisterEmergedSymbol::instantiateTemporarySymbols (
+    const std::map < REG, Expression * > &registerToExpression,
+    int segmentIndex, int snapshotIndex) {
+  const REG fullRegs[] = {
+#ifdef TARGET_IA32E
+    REG_RAX, REG_RBX, REG_RCX, REG_RDX,
+    REG_RDI, REG_RSI, REG_RSP, REG_RBP,
+#else
+    REG_EAX, REG_EBX, REG_ECX, REG_EDX,
+    REG_EDI, REG_ESI, REG_ESP, REG_EBP,
+#endif
+#ifdef TARGET_IA32E
+    REG_R8, REG_R9, REG_R10, REG_R11,
+    REG_R12, REG_R13, REG_R14, REG_R15,
+#endif
+    REG_XMM0, REG_XMM1, REG_XMM2, REG_XMM3,
+    REG_XMM4, REG_XMM5, REG_XMM6, REG_XMM7,
+#ifdef TARGET_IA32E
+    REG_XMM8, REG_XMM9, REG_XMM10, REG_XMM11,
+    REG_XMM12, REG_XMM13, REG_XMM14, REG_XMM15,
+#endif
+    REG_SEG_CS, REG_SEG_SS, REG_SEG_DS, REG_SEG_ES, REG_SEG_FS, REG_SEG_GS,
+    REG_INVALID_
+  };
+  std::map < REG, Expression * > tempExpressions;
+  for (int i = 0; fullRegs[i] != REG_INVALID_; ++i) {
+    std::map < REG, Expression * >::const_iterator it =
+        registerToExpression.find (fullRegs[i]);
+    if (it != registerToExpression.end ()) {
+      const Expression *exp = it->second;
+      Expression *tmpExp = new ExpressionImp
+          (fullRegs[i], exp->getLastConcreteValue (),
+           segmentIndex, snapshotIndex);
+      tempExpressions.insert (make_pair (fullRegs[i], tmpExp));
+    }
+  }
+  return tempExpressions;
 }
 
 }

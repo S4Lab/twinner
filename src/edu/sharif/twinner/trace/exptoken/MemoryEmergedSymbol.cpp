@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include "MemoryEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/ExpressionImp.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
@@ -118,6 +119,59 @@ bool MemoryEmergedSymbol::operator== (const ExpressionToken &token) const {
 
 ADDRINT MemoryEmergedSymbol::getAddress () const {
   return address;
+}
+
+std::map < ADDRINT, Expression * > MemoryEmergedSymbol::instantiateTemporarySymbols (
+    const std::map < ADDRINT, Expression * > * const *memoryToExpressionMaps,
+    int segmentIndex, int snapshotIndex) {
+  typedef std::map < ADDRINT, Expression * > AddrToExp;
+  AddrToExp tempExpressions;
+  int size = 16; // in bytes
+  for (AddrToExp::const_iterator it = memoryToExpressionMaps[0]->begin ();
+      it != memoryToExpressionMaps[0]->end (); ++it) {
+    const ADDRINT address = it->first;
+    const Expression *exp = it->second;
+    if (exp == 0) {
+      instantiateTemporarySymbols
+          (tempExpressions, address, size / 2, 1,
+           memoryToExpressionMaps, segmentIndex, snapshotIndex);
+      instantiateTemporarySymbols
+          (tempExpressions, address + size / 2, size / 2, 1,
+           memoryToExpressionMaps, segmentIndex, snapshotIndex);
+    } else {
+      Expression *tmpExp = new ExpressionImp
+          (address, exp->getLastConcreteValue (), segmentIndex,
+           exp->isOverwritingExpression (), snapshotIndex);
+      tempExpressions.insert (make_pair (address, tmpExp));
+    }
+  }
+  return tempExpressions;
+}
+
+void MemoryEmergedSymbol::instantiateTemporarySymbols (
+    std::map < ADDRINT, Expression * > &tempExpressions,
+    ADDRINT address, int size, int level,
+    const std::map < ADDRINT, Expression * > * const *memoryToExpressionMaps,
+    int segmentIndex, int snapshotIndex) {
+  std::map < ADDRINT, Expression * >::const_iterator it =
+      memoryToExpressionMaps[level]->find (address);
+  if (it == memoryToExpressionMaps[level]->end ()) {
+    return;
+  }
+  const Expression *exp = it->second;
+  if (exp == 0) {
+    instantiateTemporarySymbols
+        (tempExpressions, address, size / 2, level + 1,
+         memoryToExpressionMaps, segmentIndex, snapshotIndex);
+    instantiateTemporarySymbols
+        (tempExpressions, address + size / 2, size / 2, level + 1,
+         memoryToExpressionMaps, segmentIndex, snapshotIndex);
+  } else {
+    Expression *tmpExp = new ExpressionImp
+        (address, exp->getLastConcreteValue (), segmentIndex,
+         exp->isOverwritingExpression (), snapshotIndex);
+    tempExpressions.insert (make_pair (address, tmpExp));
+  }
 }
 
 }

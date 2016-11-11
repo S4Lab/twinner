@@ -130,6 +130,37 @@ Snapshot::~Snapshot () {
   }
 }
 
+Snapshot *Snapshot::instantiateNexSnapshot (const Snapshot &previousSnapshot) {
+  const int segmentIndex = previousSnapshot.getSegmentIndex ();
+  const int snapshotIndex = previousSnapshot.getSnapshotIndex () + 1;
+  /*
+   * This method is called after adding some new constraints to an existing
+   * execution trace segment to create a new snapshot based on
+   * the previousSnapshot registers/memory contents.
+   * As this is not the first snapshot of a segment, all registers are in
+   * the non-overwriting mode.
+   */
+  const std::map < REG, Expression * > &regMap =
+      edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol
+      ::instantiateTemporarySymbols
+      (previousSnapshot.registerToExpression, segmentIndex, snapshotIndex);
+
+  const std::map < ADDRINT, Expression * > * const memoryToExpressionMaps[] = {
+    &previousSnapshot.memoryAddressTo128BitsExpression,
+    &previousSnapshot.memoryAddressTo64BitsExpression,
+    &previousSnapshot.memoryAddressTo32BitsExpression,
+    &previousSnapshot.memoryAddressTo16BitsExpression,
+    &previousSnapshot.memoryAddressTo8BitsExpression,
+    NULL
+  };
+  const std::map < ADDRINT, Expression * > &memMap =
+      edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
+      ::instantiateTemporarySymbols
+      (memoryToExpressionMaps, segmentIndex, snapshotIndex);
+
+  return new Snapshot (segmentIndex, snapshotIndex, regMap, memMap);
+}
+
 void Snapshot::setOverwritingMemoryExpression (int size,
     ADDRINT memoryEa, const Expression *expression, bool isOverwriting) {
   Expression *exp = setSymbolicExpressionByMemoryAddress (size, memoryEa, expression);
