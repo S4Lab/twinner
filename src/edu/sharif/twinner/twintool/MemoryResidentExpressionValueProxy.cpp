@@ -209,7 +209,7 @@ MemoryResidentExpressionValueProxy::alignedMemoryRead (int size,
 
 edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::getExpression (
-    edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
+    edu::sharif::twinner::trace::Snapshot *snapshot,
     const edu::sharif::twinner::trace::cv::ConcreteValue &cv,
     edu::sharif::twinner::trace::StateSummary &state) const {
   if (!isMemoryEaAligned ()) {
@@ -219,7 +219,7 @@ MemoryResidentExpressionValueProxy::getExpression (
     abort ();
   } else {
     edu::sharif::twinner::trace::Expression *exp =
-        alignedMemoryRead (getSize (), segment, cv, state);
+        alignedMemoryRead (getSize (), snapshot, cv, state);
     if (exp) {
       return exp->clone ();
     }
@@ -229,52 +229,53 @@ MemoryResidentExpressionValueProxy::getExpression (
 
 edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::getExpression (
-    edu::sharif::twinner::trace::ExecutionTraceSegment *segment) const {
+    edu::sharif::twinner::trace::Snapshot *snapshot) const {
   if (!isMemoryEaAligned ()) {
     edu::sharif::twinner::util::Logger::error ()
         << "MemoryResidentExpressionValueProxy::getExpression (segment): "
         "This API is only for aligned memory access\n";
     abort ();
   } else {
-    return alignedMemoryRead (getSize (), segment)->clone ();
+    return alignedMemoryRead (getSize (), snapshot)->clone ();
   }
 }
 
 edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::alignedMemoryRead (int size,
-    edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
+    edu::sharif::twinner::trace::Snapshot *snapshot,
     const edu::sharif::twinner::trace::cv::ConcreteValue &cv,
     edu::sharif::twinner::trace::StateSummary &state) const {
   edu::sharif::twinner::trace::Expression *exp =
-      segment->tryToGetSymbolicExpressionByMemoryAddress
+      snapshot->tryToGetSymbolicExpressionByMemoryAddress
       (size, memoryEa, cv, state);
   if (exp) { // exp exists and its val matches with expected value
     return exp;
-  } // exp does not exist at all, so it's OK to create a new one
+  }
   if (state.isWrongState ()) {
     return 0;
   }
+  // exp does not exist at all, so it's OK to create a new one
   edu::sharif::twinner::trace::Expression *newExpression =
       new edu::sharif::twinner::trace::ExpressionImp
-      (memoryEa, cv, segment->getSegmentIndex ());
-  exp = segment->getSymbolicExpressionByMemoryAddress
+      (memoryEa, cv, snapshot->getSegmentIndex ());
+  exp = snapshot->getSymbolicExpressionByMemoryAddress
       (size, memoryEa, cv, newExpression, state);
   if (exp == 0) {
     return 0;
   }
   expCache.clear ();
-  propagateChangeDownwards (size, memoryEa, segment, *exp, false);
+  propagateChangeDownwards (size, memoryEa, snapshot, *exp, false);
   emptyExpressionCache ();
   return exp;
 }
 
 edu::sharif::twinner::trace::Expression *
 MemoryResidentExpressionValueProxy::alignedMemoryRead (int size,
-    edu::sharif::twinner::trace::ExecutionTraceSegment *segment) const {
+    edu::sharif::twinner::trace::Snapshot *snapshot) const {
   // ASSERT: size <= 64
   edu::sharif::twinner::trace::Expression *exp =
-      segment->tryToGetSymbolicExpressionByMemoryAddress (size, memoryEa);
-  if (exp) { // exp exists and its val matches with expected value
+      snapshot->tryToGetSymbolicExpressionByMemoryAddress (size, memoryEa);
+  if (exp) { // exp exists ...
     return exp;
   } // exp does not exist at all, so it's OK to create a new one
   UINT64 value;
@@ -288,13 +289,13 @@ MemoryResidentExpressionValueProxy::alignedMemoryRead (int size,
       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (value).clone (size);
   edu::sharif::twinner::trace::Expression *newExpression =
       new edu::sharif::twinner::trace::ExpressionImp
-      (memoryEa, *cv, segment->getSegmentIndex ());
+      (memoryEa, *cv, snapshot->getSegmentIndex ());
   delete cv;
 
-  exp = segment->getSymbolicExpressionByMemoryAddress
+  exp = snapshot->getSymbolicExpressionByMemoryAddress
       (size, memoryEa, newExpression);
   expCache.clear ();
-  propagateChangeDownwards (size, memoryEa, segment, *exp, false);
+  propagateChangeDownwards (size, memoryEa, snapshot, *exp, false);
   emptyExpressionCache ();
   return exp;
 }
@@ -546,7 +547,7 @@ MemoryResidentExpressionValueProxy::getNeighborExpression (int size,
 }
 namespace trace {
 
-Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me, int size,
+Expression *lazy_load_symbolic_expression (Snapshot *me, int size,
     std::map < ADDRINT, Expression * > &map, const ADDRINT key,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
     edu::sharif::twinner::trace::StateSummary &state) {
@@ -595,7 +596,7 @@ Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me, int size,
   return exp;
 }
 
-Expression *lazy_load_symbolic_expression (ExecutionTraceSegment *me, int size,
+Expression *lazy_load_symbolic_expression (Snapshot *me, int size,
     std::map < ADDRINT, Expression * > &map, const ADDRINT key) {
   const int halfSizeBytes = (size / 2) / 8;
   edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy leftProxy

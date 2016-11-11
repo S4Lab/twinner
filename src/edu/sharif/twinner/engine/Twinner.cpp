@@ -400,7 +400,7 @@ BOOL writeRegisterContent (CONTEXT *context,
 namespace trace {
 
 edu::sharif::twinner::trace::Expression *lazy_load_symbolic_expression (
-    edu::sharif::twinner::trace::ExecutionTraceSegment *me, int size,
+    edu::sharif::twinner::trace::Snapshot *me, int size,
     std::map < ADDRINT, edu::sharif::twinner::trace::Expression * > &map,
     const ADDRINT key,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
@@ -412,7 +412,7 @@ edu::sharif::twinner::trace::Expression *lazy_load_symbolic_expression (
 }
 
 edu::sharif::twinner::trace::Expression *lazy_load_symbolic_expression (
-    edu::sharif::twinner::trace::ExecutionTraceSegment *me, int size,
+    edu::sharif::twinner::trace::Snapshot *me, int size,
     std::map < ADDRINT, edu::sharif::twinner::trace::Expression * > &map,
     const ADDRINT key) {
   const char *msg = "The lazy_load_symbolic_expression(...) function is"

@@ -23,7 +23,7 @@ namespace twinner {
 namespace trace {
 
 class ExecutionState;
-class ExecutionTraceSegment;
+class Snapshot;
 
 namespace cv {
 
@@ -55,11 +55,11 @@ public:
   void checkForOverwritingMemory (
       edu::sharif::twinner::trace::Trace *trace) const;
   edu::sharif::twinner::trace::Expression *getExpression (
-      edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
+      edu::sharif::twinner::trace::Snapshot *snapshot,
       const edu::sharif::twinner::trace::cv::ConcreteValue &cv,
       edu::sharif::twinner::trace::StateSummary &state) const;
   edu::sharif::twinner::trace::Expression *getExpression (
-      edu::sharif::twinner::trace::ExecutionTraceSegment *segment) const;
+      edu::sharif::twinner::trace::Snapshot *snapshot) const;
 
   virtual edu::sharif::twinner::trace::Expression
   setExpressionWithoutChangeNotification (
@@ -104,11 +104,11 @@ private:
       const edu::sharif::twinner::trace::Expression *exp) const;
 
   edu::sharif::twinner::trace::Expression *alignedMemoryRead (int size,
-      edu::sharif::twinner::trace::ExecutionTraceSegment *segment,
+      edu::sharif::twinner::trace::Snapshot *snapshot,
       const edu::sharif::twinner::trace::cv::ConcreteValue &cv,
       edu::sharif::twinner::trace::StateSummary &state) const;
   edu::sharif::twinner::trace::Expression *alignedMemoryRead (int size,
-      edu::sharif::twinner::trace::ExecutionTraceSegment *segment) const;
+      edu::sharif::twinner::trace::Snapshot *snapshot) const;
 
   /// temporary cache of any used exp during change propagation in valueIsChanged ()
   typedef std::map < std::pair < ADDRINT, int >,

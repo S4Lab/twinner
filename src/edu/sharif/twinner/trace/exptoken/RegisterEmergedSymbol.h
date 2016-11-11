@@ -20,7 +20,7 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-class ExecutionTraceSegment;
+class Snapshot;
 class Expression;
 
 namespace exptoken {
@@ -107,11 +107,11 @@ public:
    * ASSERT: The given reg must be a full register: reg == REG_FullRegName (reg)
    *
    * @param reg The register which its sub-registers must be initialized.
-   * @param segment The segment which initialization should take place in it.
+   * @param snapshot The snapshot which initialization should take place in it.
    * @param expression The current value of register which should be cloned for subregs.
    */
   static void initializeSubRegisters (REG reg,
-      ExecutionTraceSegment *segment, const Expression &expression);
+      Snapshot *snapshot, const Expression &expression);
 };
 
 }

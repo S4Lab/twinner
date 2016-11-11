@@ -521,27 +521,27 @@ REG RegisterEmergedSymbol::getOverlappingRegisterByIndex (int external, int inte
 }
 
 void RegisterEmergedSymbol::initializeSubRegisters (REG reg,
-    ExecutionTraceSegment *segment, const Expression &expression) {
+    Snapshot *snapshot, const Expression &expression) {
   int regIndex = getRegisterIndex (reg);
   if (regIndex == -1) { // e.g. xmm registers
     return;
   }
 #ifdef TARGET_IA32E
-  segment->setSymbolicExpressionByRegister
+  snapshot->setSymbolicExpressionByRegister
       (32, getOverlappingRegisterByIndex (regIndex, 1), &expression)->truncate (32);
 #endif
-  segment->setSymbolicExpressionByRegister
+  snapshot->setSymbolicExpressionByRegister
       (16, getOverlappingRegisterByIndex (regIndex, 2), &expression)->truncate (16);
   if (getOverlappingRegisterByIndex (regIndex, 3) != REG_INVALID_) {
     edu::sharif::twinner::trace::Expression *temp = expression.clone (16);
     temp->shiftToRight (8);
-    segment->setSymbolicExpressionByRegister
+    snapshot->setSymbolicExpressionByRegister
         (8, getOverlappingRegisterByIndex (regIndex, 3), temp)->truncate (8);
     delete temp;
   }
   const REG lowest8Bits = getOverlappingRegisterByIndex (regIndex, 4);
   if (lowest8Bits != REG_INVALID_) {
-    segment->setSymbolicExpressionByRegister
+    snapshot->setSymbolicExpressionByRegister
         (8, lowest8Bits, &expression)->truncate (8);
   }
 }

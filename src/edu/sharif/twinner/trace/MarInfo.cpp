@@ -68,7 +68,7 @@ void MarInfo::simplifyTrace (Trace *trace) const {
   std::list < ExecutionTraceSegment * > &segments = trace->getTraceSegments ();
   for (std::list < ExecutionTraceSegment * >::const_reverse_iterator it =
       segments.rbegin (); it != segments.rend (); ++it) {
-    std::list < Constraint * > &constraints = (*it)->getPathConstraints ();
+    const std::list < Constraint * > &constraints = (*it)->getPathConstraints ();
     for (std::list < Constraint * >::const_iterator it2 = constraints.begin ();
         it2 != constraints.end (); ++it2) {
       Constraint *constraint = *it2;

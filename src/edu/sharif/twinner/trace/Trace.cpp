@@ -334,10 +334,6 @@ std::list < ExecutionTraceSegment * > &Trace::getTraceSegments () {
   return segments;
 }
 
-void Trace::abandonTrivialMemoryExpressions () {
-  getCurrentTraceSegment ()->abandonTrivialMemoryExpressions ();
-}
-
 void Trace::printRegistersValues (
     const edu::sharif::twinner::util::Logger &logger) const {
   int i = 0;
