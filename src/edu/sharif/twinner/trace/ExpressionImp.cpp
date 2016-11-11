@@ -20,6 +20,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "MarInfo.h"
+#include "Snapshot.h"
 
 namespace edu {
 namespace sharif {
@@ -33,7 +34,7 @@ ExpressionImp::ExpressionImp (const ExpressionImp &exp) :
 ExpressionImp::ExpressionImp (REG reg,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex) :
-    Expression (concreteValue.clone (), true) {
+    Expression (concreteValue.clone (), false) {
   if (concreteValue.getSize () < 64) {
     /*
      * The reg and concreteValue must always have the same precision but when the reg is

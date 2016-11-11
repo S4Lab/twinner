@@ -282,6 +282,7 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
                                      (record.concreteValueMsb, record.concreteValueLsb),
                                      index);
       }
+      exp->setOverwriting (true);
       edu::sharif::twinner::util::Logger::loquacious () << "loading symbol: "
           << REG (record.address) << " -> " << exp << '\n';
       std::pair < std::map < REG, Expression * >::iterator, bool > res =
