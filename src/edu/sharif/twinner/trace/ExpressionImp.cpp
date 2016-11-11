@@ -33,7 +33,7 @@ ExpressionImp::ExpressionImp (const ExpressionImp &exp) :
 
 ExpressionImp::ExpressionImp (REG reg,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
-    int generationIndex) :
+    int generationIndex, int snapshotIndex) :
     Expression (concreteValue.clone (), false) {
   if (concreteValue.getSize () < 64) {
     /*
@@ -46,20 +46,20 @@ ExpressionImp::ExpressionImp (REG reg,
      */
     const edu::sharif::twinner::trace::cv::ConcreteValue64Bits cv (concreteValue);
     stack.push_back (new edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol
-                     (reg, cv, generationIndex));
+                     (reg, cv, generationIndex, snapshotIndex));
   } else {
     stack.push_back (new edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol
-                     (reg, concreteValue, generationIndex));
+                     (reg, concreteValue, generationIndex, snapshotIndex));
   }
 }
 
 edu::sharif::twinner::trace::exptoken::ExpressionToken *
 ExpressionImp::instantiateMemorySymbol (ADDRINT memoryEa,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
-    int generationIndex, bool isOverwriting) const {
+    int generationIndex, bool isOverwriting, int snapshotIndex) const {
   if (isOverwriting) {
     return new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
-        (memoryEa, concreteValue, generationIndex);
+        (memoryEa, concreteValue, generationIndex, snapshotIndex);
   } else {
     const int size = concreteValue.getSize () / 8;
     UINT64 currentConcreteValue = 0;
@@ -73,7 +73,7 @@ ExpressionImp::instantiateMemorySymbol (ADDRINT memoryEa,
     if (edu::sharif::twinner::util::writeMemoryContent
         (memoryEa, (const UINT8 *) &currentConcreteValue, size)) {
       return new edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
-          (memoryEa, concreteValue, generationIndex);
+          (memoryEa, concreteValue, generationIndex, snapshotIndex);
     } else {
       edu::sharif::twinner::util::Logger::warning ()
           << "memory is not writable;"
@@ -85,7 +85,7 @@ ExpressionImp::instantiateMemorySymbol (ADDRINT memoryEa,
 
 ExpressionImp::ExpressionImp (ADDRINT memoryEa,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
-    int generationIndex, bool isOverwriting) :
+    int generationIndex, bool isOverwriting, int snapshotIndex) :
     Expression (concreteValue.clone (), isOverwriting) {
   if (!isOverwriting) {
     //    if (memoryEa < 0x7f0000000000ull) {
@@ -102,18 +102,19 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
     stack.push_back (instantiateMemorySymbol
                      (memoryEa + 8, // little endian
                       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getMsb ()),
-                      generationIndex, isOverwriting));
+                      generationIndex, isOverwriting, snapshotIndex));
     stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (64));
     stack.push_back (Operator::instantiateOperator (Operator::SHIFT_LEFT));
     stack.push_back
         (instantiateMemorySymbol
          (memoryEa,
           edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv->getLsb ()),
-          generationIndex, isOverwriting));
+          generationIndex, isOverwriting, snapshotIndex));
     stack.push_back (Operator::instantiateOperator (Operator::BITWISE_OR));
   } else {
     stack.push_back (instantiateMemorySymbol
-                     (memoryEa, concreteValue, generationIndex, isOverwriting));
+                     (memoryEa, concreteValue, generationIndex, isOverwriting,
+                      snapshotIndex));
   }
 }
 

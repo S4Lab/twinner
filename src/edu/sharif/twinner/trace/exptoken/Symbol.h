@@ -56,8 +56,15 @@ protected:
    */
   int generationIndex;
 
+  /**
+   * This index, starting from zero, indicates a temporary symbol which is used
+   * to track changes at intermediate snapshot points between syscall invocations.
+   */
+  int snapshotIndex;
+
+  /// Creates a temporary symbol iff snapshotIndex != -1
   Symbol (const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
-      int generationIndex);
+      int generationIndex, int snapshotIndex = -1);
   Symbol (const Symbol &s);
   Symbol ();
 

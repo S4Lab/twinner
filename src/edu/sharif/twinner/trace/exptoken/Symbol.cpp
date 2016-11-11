@@ -21,27 +21,31 @@ namespace trace {
 namespace exptoken {
 
 Symbol::Symbol (const edu::sharif::twinner::trace::cv::ConcreteValue &_concreteValue,
-    int _generationIndex) :
-    Operand (_concreteValue), generationIndex (_generationIndex) {
+    int _generationIndex, int _snapshotIndex) :
+    Operand (_concreteValue),
+    generationIndex (_generationIndex), snapshotIndex (_snapshotIndex) {
 }
 
 Symbol::Symbol (const Symbol &s) :
-    Operand (s), generationIndex (s.generationIndex) {
+    Operand (s),
+    generationIndex (s.generationIndex), snapshotIndex (s.snapshotIndex) {
 }
 
 Symbol::Symbol () :
-    Operand (), generationIndex (0) {
+    Operand (), generationIndex (0), snapshotIndex (-1) {
 }
 
 void Symbol::saveToBinaryStream (std::ofstream &out) const {
   concreteValue->saveToBinaryStream (out);
   out.write ((const char *) &generationIndex, sizeof (generationIndex));
+  out.write ((const char *) &snapshotIndex, sizeof (snapshotIndex));
 }
 
 void Symbol::loadFromBinaryStream (std::ifstream &in) {
   delete concreteValue;
   concreteValue = edu::sharif::twinner::trace::cv::ConcreteValue::loadFromBinaryStream (in);
   in.read ((char *) &generationIndex, sizeof (generationIndex));
+  in.read ((char *) &snapshotIndex, sizeof (snapshotIndex));
 }
 
 int Symbol::getGenerationIndex () const {

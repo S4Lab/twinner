@@ -30,9 +30,10 @@ private:
   MemoryEmergedSymbol (ADDRINT address);
 
 public:
+  /// Creates a temporary register symbol iff snapshotIndex != -1
   MemoryEmergedSymbol (ADDRINT address,
       const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
-      int generationIndex);
+      int generationIndex, int snapshotIndex = -1);
 
   virtual MemoryEmergedSymbol *clone () const;
   virtual std::pair < int, SymbolRecord > toSymbolRecord () const;

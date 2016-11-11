@@ -36,22 +36,24 @@ public:
   /**
    * Instantiates an expression containing a new (yet unused) symbol,
    * initiated from a register.
+   * A temporary symbol will be created iff the snapshotIndex is not -1.
    * ASSERT: The precision of concreteValue must match with precision of reg
    * ASSERT: reg == REG_FullRegName (reg)
    */
   ExpressionImp (REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
-      int generationIndex);
+      int generationIndex, int snapshotIndex = -1);
 
   /**
    * Instantiates an expression containing a new (yet unused) symbol,
    * initiated from a memory address.
+   * A temporary symbol will be created iff the snapshotIndex is not -1.
    * ASSERT: The precision of concreteValue must match with precision of memory location
    * ASSERT: memoryEa is aligned (based on size of the concrete value)
    */
   ExpressionImp (ADDRINT memoryEa,
       const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
-      int generationIndex, bool isOverwriting = false);
+      int generationIndex, bool isOverwriting = false, int snapshotIndex = -1);
 
   /**
    * Instantiates an expression containing the given symbol.
@@ -83,7 +85,7 @@ private:
   edu::sharif::twinner::trace::exptoken::ExpressionToken *
   instantiateMemorySymbol (ADDRINT memoryEa,
       const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
-      int generationIndex, bool isOverwriting) const;
+      int generationIndex, bool isOverwriting, int snapshotIndex) const;
 };
 
 }

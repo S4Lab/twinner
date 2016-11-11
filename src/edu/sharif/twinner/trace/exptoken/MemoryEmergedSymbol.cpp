@@ -36,8 +36,8 @@ MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT addr) :
 
 MemoryEmergedSymbol::MemoryEmergedSymbol (ADDRINT _address,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
-    int generationIndex) :
-    Symbol (concreteValue, generationIndex), address (_address) {
+    int generationIndex, int snapshotIndex) :
+    Symbol (concreteValue, generationIndex, snapshotIndex), address (_address) {
 }
 
 MemoryEmergedSymbol *MemoryEmergedSymbol::clone () const {
@@ -46,6 +46,7 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::clone () const {
 
 std::pair < int, SymbolRecord >
 MemoryEmergedSymbol::toSymbolRecord () const {
+  // ASSERT: Symbol is not temporary
   SymbolRecord record;
   record.address = address;
   record.type = SymbolType (1 << (concreteValue->getSize () / 8));
@@ -76,6 +77,7 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::loadFromBinaryStream (std::ifstream &i
 
 MemoryEmergedSymbol *MemoryEmergedSymbol::fromNameAndValue (const std::string &name,
     UINT32 v4, UINT32 v3, UINT32 v2, UINT32 v1) {
+  // ASSERT: Name is for a non-temporary symbol
   if (v4 != 0 || v3 != 0) {
     edu::sharif::twinner::util::Logger::error ()
         << "MemoryEmergedSymbol::fromNameAndValue (...): Illegal value:"
@@ -89,6 +91,7 @@ MemoryEmergedSymbol *MemoryEmergedSymbol::fromNameAndValue (const std::string &n
 
 MemoryEmergedSymbol *MemoryEmergedSymbol::fromNameAndValue (const std::string &name,
     const edu::sharif::twinner::trace::cv::ConcreteValue &value) {
+  // ASSERT: Name is for a non-temporary symbol
   std::stringstream ss (name);
   char dummy;
   ADDRINT address;
@@ -107,6 +110,9 @@ std::string MemoryEmergedSymbol::toString () const {
   std::stringstream ss;
   ss << 'm' << std::hex << address << '_' << generationIndex
       << '_' << std::dec << concreteValue->getSize ();
+  if (snapshotIndex != -1) {
+    ss << "_tmp_" << std::hex << snapshotIndex;
+  }
   return ss.str ();
 }
 
@@ -114,6 +120,8 @@ bool MemoryEmergedSymbol::operator== (const ExpressionToken &token) const {
   return dynamic_cast<const MemoryEmergedSymbol *> (&token)
       && static_cast<const MemoryEmergedSymbol *> (&token)->generationIndex ==
       generationIndex
+      && static_cast<const MemoryEmergedSymbol *> (&token)->snapshotIndex ==
+      snapshotIndex
       && static_cast<const MemoryEmergedSymbol *> (&token)->address == address;
 }
 

@@ -37,8 +37,8 @@ RegisterEmergedSymbol::RegisterEmergedSymbol (REG addr) :
 
 RegisterEmergedSymbol::RegisterEmergedSymbol (REG _address,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
-    int generationIndex) :
-    Symbol (concreteValue, generationIndex), address (_address) {
+    int generationIndex, int snapshotIndex) :
+    Symbol (concreteValue, generationIndex, snapshotIndex), address (_address) {
 }
 
 RegisterEmergedSymbol *RegisterEmergedSymbol::clone () const {
@@ -46,6 +46,7 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::clone () const {
 }
 
 std::pair < int, SymbolRecord > RegisterEmergedSymbol::toSymbolRecord () const {
+  // ASSERT: Symbol is not temporary
   SymbolRecord record;
   record.address = address;
 #ifdef TARGET_IA32E
@@ -101,6 +102,7 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::loadFromBinaryStream (std::ifstrea
 
 RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::string &name,
     UINT32 v4, UINT32 v3, UINT32 v2, UINT32 v1) {
+  // ASSERT: Name is for a non-temporary symbol
   const int separator = name.find ('_');
   const REG reg = getRegisterFromName (name.substr (0, separator));
   std::stringstream ss (name.substr (separator + 1));
@@ -139,6 +141,7 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::strin
 
 RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::string &name,
     const edu::sharif::twinner::trace::cv::ConcreteValue &value) {
+  // ASSERT: Name is for a non-temporary symbol
   const int separator = name.find ('_');
   const REG reg = getRegisterFromName (name.substr (0, separator));
   std::stringstream ss (name.substr (separator + 1));
@@ -150,6 +153,9 @@ RegisterEmergedSymbol *RegisterEmergedSymbol::fromNameAndValue (const std::strin
 std::string RegisterEmergedSymbol::toString () const {
   std::stringstream ss;
   ss << std::hex << getRegisterName () << '_' << generationIndex;
+  if (snapshotIndex != -1) {
+    ss << "_tmp_" << snapshotIndex;
+  }
   return ss.str ();
 }
 
@@ -157,6 +163,8 @@ bool RegisterEmergedSymbol::operator== (const ExpressionToken &token) const {
   return dynamic_cast<const RegisterEmergedSymbol *> (&token)
       && static_cast<const RegisterEmergedSymbol *> (&token)->generationIndex ==
       generationIndex
+      && static_cast<const RegisterEmergedSymbol *> (&token)->snapshotIndex ==
+      snapshotIndex
       && static_cast<const RegisterEmergedSymbol *> (&token)->address == address;
 }
 
