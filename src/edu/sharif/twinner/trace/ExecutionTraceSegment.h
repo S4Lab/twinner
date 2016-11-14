@@ -90,6 +90,7 @@ public:
   const std::map < ADDRINT, Expression * > &getMemoryAddressTo64BitsExpression () const;
   const std::map < ADDRINT, Expression * > &getMemoryAddressTo8BitsExpression () const;
   std::list < Constraint * > getPathConstraints () const;
+  const Constraint *getLastPathConstraint () const;
 
   void setTerminator (TraceSegmentTerminator *terminator);
   const TraceSegmentTerminator *getTerminator () const;

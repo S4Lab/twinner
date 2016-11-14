@@ -156,8 +156,8 @@ void Trace::addPathConstraints (
   for (std::list < ExecutionTraceSegment * >::iterator it =
       currentSegmentIterator; it != segments.end (); ++it) {
     ExecutionTraceSegment *segment = *it;
-    if (!segment->getPathConstraints ().empty ()) {
-      lastConstraint = segment->getPathConstraints ().back ();
+    lastConstraint = segment->getLastPathConstraint ();
+    if (lastConstraint) {
       break;
     }
   }

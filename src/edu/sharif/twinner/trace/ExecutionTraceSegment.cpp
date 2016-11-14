@@ -267,6 +267,19 @@ std::list < Constraint * > ExecutionTraceSegment::getPathConstraints () const {
   return allConstraints;
 }
 
+const Constraint *ExecutionTraceSegment::getLastPathConstraint () const {
+  std::list < Constraint * > allConstraints;
+  for (std::list < Snapshot * >::const_reverse_iterator it =
+      snapshots.rbegin (); it != snapshots.rend (); ++it) {
+    const Snapshot *snapshot = *it;
+    const std::list < Constraint * > &constraints = snapshot->getPathConstraints ();
+    if (!constraints.empty ()) {
+      return constraints.back ();
+    }
+  }
+  return 0;
+}
+
 void ExecutionTraceSegment::setTerminator (TraceSegmentTerminator *tst) {
   if (terminator) {
     edu::sharif::twinner::util::Logger::error ()
