@@ -12,16 +12,16 @@
 
 #include "Snapshot.h"
 
-#include "Expression.h"
 #include "Constraint.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 
 #include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
-#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/ExpressionImp.h"
 
-#include "cv/ConcreteValue64Bits.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
+
 #include "StateSummary.h"
 #include "TraceSegmentTerminator.h"
 #include "exptoken/MemoryEmergedSymbol.h"
@@ -653,6 +653,58 @@ int Snapshot::getSnapshotIndex () const {
   return snapshotIndex;
 }
 
+void Snapshot::addTemporaryExpressions (const Snapshot *sna,
+    REG fullReg, int size) {
+  std::map < REG, Expression * >::const_iterator it =
+      sna->registerToExpression.find (fullReg);
+  const Expression *exp = it->second;
+  Expression *tmpExp = new ExpressionImp
+      (fullReg, exp->getLastConcreteValue (), segmentIndex, snapshotIndex);
+  Expression *fullExp = setSymbolicExpressionByRegister (size, fullReg, tmpExp);
+  delete tmpExp;
+  edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol
+      ::initializeSubRegisters (fullReg, this, *fullExp);
+}
+
+void Snapshot::addTemporaryExpressions (const Snapshot *sna,
+    ADDRINT alignedAddress) {
+  const std::map < ADDRINT, Expression * > * const memoryToExpressionMaps[] = {
+    &sna->memoryAddressTo128BitsExpression,
+    &sna->memoryAddressTo64BitsExpression,
+    &sna->memoryAddressTo32BitsExpression,
+    &sna->memoryAddressTo16BitsExpression,
+    &sna->memoryAddressTo8BitsExpression,
+    NULL
+  };
+  addTemporaryExpressions (alignedAddress, 16, memoryToExpressionMaps, 0);
+}
+
+void Snapshot::addTemporaryExpressions (ADDRINT memoryEa, int size,
+    const std::map < ADDRINT, Expression * > * const *memoryToExpressionMaps,
+    int level) {
+  std::map < ADDRINT, Expression * >::const_iterator it =
+      memoryToExpressionMaps[level]->find (memoryEa);
+  if (it == memoryToExpressionMaps[level]->end ()) {
+    return;
+  }
+  Expression *exp = it->second;
+  if (exp == 0) {
+    addTemporaryExpressions (memoryEa, size / 2,
+                             memoryToExpressionMaps, level + 1);
+    addTemporaryExpressions (memoryEa + size / 2, size / 2,
+                             memoryToExpressionMaps, level + 1);
+  } else {
+    Expression *tmpExp = new ExpressionImp
+        (memoryEa, exp->getLastConcreteValue (),
+         segmentIndex, false, snapshotIndex);
+    setOverwritingMemoryExpression
+        (size, memoryEa, tmpExp, false);
+    initializeOverlappingMemoryLocationsDownwards (size, memoryEa, *tmpExp);
+    delete tmpExp; // setOverwritingMemoryExpression has cloned the tmpExp
+    initializeOverlappingMemoryLocationsUpwards (size, memoryEa);
+  }
+}
+
 template <typename ADDRESS>
 void Snapshot::loadMapFromBinaryStream (std::ifstream &in,
     const char *expectedMagicString, std::map < ADDRESS, Expression * > &map) {
@@ -759,8 +811,7 @@ Snapshot::getMemoryAddressTo8BitsExpression () const {
   return memoryAddressTo8BitsExpression;
 }
 
-const std::list < Constraint * > &
-Snapshot::getPathConstraints () const {
+const std::list < Constraint * > &Snapshot::getPathConstraints () const {
   return pathConstraints;
 }
 

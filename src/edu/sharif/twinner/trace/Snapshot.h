@@ -90,7 +90,16 @@ public:
   int getSegmentIndex () const;
   int getSnapshotIndex () const;
 
+  void addTemporaryExpressions (const Snapshot *sna,
+      REG fullReg, int size);
+  void addTemporaryExpressions (const Snapshot *sna,
+      ADDRINT alignedAddress);
+
 private:
+  void addTemporaryExpressions (ADDRINT memoryEa, int size,
+      const std::map < ADDRINT, Expression * > * const *memoryToExpressionMaps,
+      int level);
+
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
       int size, std::map < KEY, Expression * > &map, const KEY key,

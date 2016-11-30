@@ -294,6 +294,18 @@ const TraceSegmentTerminator *ExecutionTraceSegment::getTerminator () const {
   return terminator;
 }
 
+void ExecutionTraceSegment::addTemporaryExpressions (
+    const ExecutionTraceSegment *seg, REG fullReg, int size) {
+  Snapshot *snapshot = snapshots.back ();
+  snapshot->addTemporaryExpressions (seg->snapshots.back (), fullReg, size);
+}
+
+void ExecutionTraceSegment::addTemporaryExpressions (
+    const ExecutionTraceSegment *seg, ADDRINT alignedAddress) {
+  Snapshot *snapshot = snapshots.back ();
+  snapshot->addTemporaryExpressions (seg->snapshots.back (), alignedAddress);
+}
+
 }
 }
 }

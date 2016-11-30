@@ -96,6 +96,11 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
     ExecutionTraceSegment *seg = *it;
     Expression *exp = (seg->*method) (size, address, val, state);
     if (exp) {
+      if (it != currentSegmentIterator) {
+        ExecutionTraceSegment *currentSegment = *currentSegmentIterator;
+        addTemporaryExpressions (currentSegment, seg, address);
+        exp = (currentSegment->*method) (size, address, val, state);
+      }
       return exp;
     }
     if (state.isWrongState ()) {
@@ -110,6 +115,19 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
   return 0;
 }
 
+void TraceImp::addTemporaryExpressions (ExecutionTraceSegment *dst,
+    ExecutionTraceSegment *src, ADDRINT address) {
+  const ADDRINT alignedAddress = address - (address % 16);
+  dst->addTemporaryExpressions (src, alignedAddress);
+}
+
+void TraceImp::addTemporaryExpressions (ExecutionTraceSegment *dst,
+    ExecutionTraceSegment *src, REG address) {
+  const REG fullReg = REG_FullRegName (address);
+  const int size = REG_Size (fullReg) * 8;
+  dst->addTemporaryExpressions (src, fullReg, size);
+}
+
 template < typename T >
 Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T address,
     typename TryToGetSymbolicExpressionMethod < T >::
@@ -120,6 +138,11 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
     ExecutionTraceSegment *seg = *it;
     Expression *exp = (seg->*method) (size, address);
     if (exp) {
+      if (it != currentSegmentIterator) {
+        ExecutionTraceSegment *currentSegment = *currentSegmentIterator;
+        addTemporaryExpressions (currentSegment, seg, address);
+        exp = (currentSegment->*method) (size, address);
+      }
       return exp;
     }
   }
