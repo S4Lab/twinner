@@ -68,12 +68,16 @@ void MarInfo::simplifyTrace (Trace *trace) const {
   std::list < ExecutionTraceSegment * > &segments = trace->getTraceSegments ();
   for (std::list < ExecutionTraceSegment * >::const_reverse_iterator it =
       segments.rbegin (); it != segments.rend (); ++it) {
-    const std::list < Constraint * > &constraints = (*it)->getPathConstraints ();
-    for (std::list < Constraint * >::const_iterator it2 = constraints.begin ();
-        it2 != constraints.end (); ++it2) {
-      Constraint *constraint = *it2;
-      simplifyExpression (constraint->getMainExpression ());
-      simplifyExpression (constraint->getAuxExpression ());
+    const std::list < Snapshot * > &snapshots = (*it)->getSnapshots ();
+    for (std::list < Snapshot * >::const_iterator it2 = snapshots.begin ();
+        it2 != snapshots.end (); ++it2) {
+      const std::list < Constraint * > &constraints = (*it2)->getPathConstraints ();
+      for (std::list < Constraint * >::const_iterator it3 = constraints.begin ();
+          it3 != constraints.end (); ++it3) {
+        Constraint *constraint = *it3;
+        simplifyExpression (constraint->getMainExpression ());
+        simplifyExpression (constraint->getAuxExpression ());
+      }
     }
   }
 }

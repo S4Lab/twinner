@@ -92,6 +92,8 @@ public:
   std::list < Constraint * > getPathConstraints () const;
   const Constraint *getLastPathConstraint () const;
 
+  const std::list < Snapshot * > &getSnapshots () const;
+
   void setTerminator (TraceSegmentTerminator *terminator);
   const TraceSegmentTerminator *getTerminator () const;
 

@@ -280,6 +280,10 @@ const Constraint *ExecutionTraceSegment::getLastPathConstraint () const {
   return 0;
 }
 
+const std::list < Snapshot * > &ExecutionTraceSegment::getSnapshots () const {
+  return snapshots;
+}
+
 void ExecutionTraceSegment::setTerminator (TraceSegmentTerminator *tst) {
   if (terminator) {
     edu::sharif::twinner::util::Logger::error ()
