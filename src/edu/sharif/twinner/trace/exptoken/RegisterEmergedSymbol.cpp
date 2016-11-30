@@ -168,6 +168,24 @@ bool RegisterEmergedSymbol::operator== (const ExpressionToken &token) const {
       && static_cast<const RegisterEmergedSymbol *> (&token)->address == address;
 }
 
+bool RegisterEmergedSymbol::operator< (const Symbol &symbol) const {
+  if (getGenerationIndex () < symbol.getGenerationIndex ()
+      || (getGenerationIndex () == symbol.getGenerationIndex ()
+          && getSnapshotIndex () < symbol.getSnapshotIndex ())) {
+    return true;
+  }
+  if (getGenerationIndex () > symbol.getGenerationIndex ()
+      || getSnapshotIndex () > symbol.getSnapshotIndex ()) {
+    return false;
+  }
+  const RegisterEmergedSymbol *reg =
+      dynamic_cast<const RegisterEmergedSymbol *> (&symbol);
+  if (reg == 0) {
+    return false;
+  }
+  return address < reg->address;
+}
+
 const char *RegisterEmergedSymbol::getRegisterName () const {
 #ifdef TARGET_IA32E
   // ASSERT: address is a 16, 64, or 128 bits register

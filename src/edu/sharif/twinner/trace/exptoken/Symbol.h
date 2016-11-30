@@ -74,10 +74,13 @@ protected:
 
 public:
   int getGenerationIndex () const;
+  int getSnapshotIndex () const;
 
   virtual std::pair < int, SymbolRecord > toSymbolRecord () const = 0;
 
   virtual bool isConstant () const;
+
+  virtual bool operator< (const Symbol &symbol) const = 0;
 };
 
 }

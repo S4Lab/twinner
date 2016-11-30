@@ -149,6 +149,29 @@ bool NamedSymbol::operator== (const ExpressionToken &token) const {
       && static_cast<const NamedSymbol *> (&token)->constant == constant;
 }
 
+bool NamedSymbol::operator< (const Symbol &symbol) const {
+  if (getGenerationIndex () < symbol.getGenerationIndex ()
+      || (getGenerationIndex () == symbol.getGenerationIndex ()
+          && getSnapshotIndex () < symbol.getSnapshotIndex ())) {
+    return true;
+  }
+  if (getGenerationIndex () > symbol.getGenerationIndex ()
+      || getSnapshotIndex () > symbol.getSnapshotIndex ()) {
+    return false;
+  }
+  const NamedSymbol *named = dynamic_cast<const NamedSymbol *> (&symbol);
+  if (named == 0) {
+    return true;
+  }
+  if (constant && !named->constant) {
+    return true;
+  }
+  if (!constant && named->constant) {
+    return false;
+  }
+  return technicalName < named->technicalName;
+}
+
 bool NamedSymbol::isConstant () const {
   return constant;
 }

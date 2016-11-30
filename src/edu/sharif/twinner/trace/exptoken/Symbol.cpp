@@ -52,6 +52,10 @@ int Symbol::getGenerationIndex () const {
   return generationIndex;
 }
 
+int Symbol::getSnapshotIndex () const {
+  return snapshotIndex;
+}
+
 bool Symbol::isConstant () const {
   return false;
 }

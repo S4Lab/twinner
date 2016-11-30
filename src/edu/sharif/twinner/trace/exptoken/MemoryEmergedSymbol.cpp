@@ -13,6 +13,9 @@
 #include <sstream>
 
 #include "MemoryEmergedSymbol.h"
+
+#include "RegisterEmergedSymbol.h"
+
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
@@ -123,6 +126,27 @@ bool MemoryEmergedSymbol::operator== (const ExpressionToken &token) const {
       && static_cast<const MemoryEmergedSymbol *> (&token)->snapshotIndex ==
       snapshotIndex
       && static_cast<const MemoryEmergedSymbol *> (&token)->address == address;
+}
+
+bool MemoryEmergedSymbol::operator< (const Symbol &symbol) const {
+  if (getGenerationIndex () < symbol.getGenerationIndex ()
+      || (getGenerationIndex () == symbol.getGenerationIndex ()
+          && getSnapshotIndex () < symbol.getSnapshotIndex ())) {
+    return true;
+  }
+  if (getGenerationIndex () > symbol.getGenerationIndex ()
+      || getSnapshotIndex () > symbol.getSnapshotIndex ()) {
+    return false;
+  }
+  if (dynamic_cast<const RegisterEmergedSymbol *> (&symbol)) {
+    return true;
+  }
+  const MemoryEmergedSymbol *mem =
+      dynamic_cast<const MemoryEmergedSymbol *> (&symbol);
+  if (mem == 0) {
+    return false;
+  }
+  return address < mem->address;
 }
 
 ADDRINT MemoryEmergedSymbol::getAddress () const {

@@ -52,6 +52,7 @@ public:
 
   virtual std::string toString () const;
   virtual bool operator== (const ExpressionToken &token) const;
+  virtual bool operator< (const Symbol &symbol) const;
 
 private:
   const char *getRegisterName () const;

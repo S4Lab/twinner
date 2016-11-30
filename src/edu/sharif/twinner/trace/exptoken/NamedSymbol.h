@@ -44,6 +44,7 @@ public:
   virtual std::string toString () const;
   virtual std::string getTechnicalName () const;
   virtual bool operator== (const ExpressionToken &token) const;
+  virtual bool operator< (const Symbol &symbol) const;
 
   virtual bool isConstant () const;
 
