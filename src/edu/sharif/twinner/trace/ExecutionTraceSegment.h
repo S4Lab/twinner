@@ -14,7 +14,6 @@
 #define EXECUTION_TRACE_SEGMENT_H
 
 #include "ExecutionState.h"
-#include "Snapshot.h"
 
 namespace edu {
 namespace sharif {
@@ -22,6 +21,7 @@ namespace twinner {
 namespace trace {
 
 class TraceSegmentTerminator;
+class Snapshot;
 
 class ExecutionTraceSegment : public ExecutionState {
 private:

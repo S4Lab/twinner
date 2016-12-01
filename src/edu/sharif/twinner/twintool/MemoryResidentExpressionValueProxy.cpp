@@ -13,6 +13,7 @@
 #include "MemoryResidentExpressionValueProxy.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
+#include "edu/sharif/twinner/trace/Snapshot.h"
 #include "edu/sharif/twinner/trace/StateSummary.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"

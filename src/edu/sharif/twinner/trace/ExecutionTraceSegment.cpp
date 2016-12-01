@@ -14,6 +14,9 @@
 
 #include "Expression.h"
 #include "Constraint.h"
+#include "Snapshot.h"
+#include "StateSummary.h"
+#include "TraceSegmentTerminator.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
@@ -21,9 +24,7 @@
 #include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 
-#include "cv/ConcreteValue64Bits.h"
-#include "StateSummary.h"
-#include "TraceSegmentTerminator.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 
 #include <utility>
 #include <stdexcept>

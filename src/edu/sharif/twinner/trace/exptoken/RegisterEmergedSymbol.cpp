@@ -14,6 +14,7 @@
 
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
+#include "edu/sharif/twinner/trace/Snapshot.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue32Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
