@@ -19,12 +19,11 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-SymbolRef::SymbolRef (
-    const edu::sharif::twinner::trace::exptoken::Symbol *_symbol) :
+SymbolRef::SymbolRef (ConstSymbol *_symbol) :
     symbol (*_symbol) {
 }
 
-SymbolRef::operator const edu::sharif::twinner::trace::exptoken::Symbol &() {
+SymbolRef::operator ConstSymbol &() const {
   return symbol;
 }
 

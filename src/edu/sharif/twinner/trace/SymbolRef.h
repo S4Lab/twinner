@@ -23,13 +23,16 @@ class Symbol;
 }
 
 class SymbolRef {
+public:
+  typedef const edu::sharif::twinner::trace::exptoken::Symbol ConstSymbol;
+
 private:
-  const edu::sharif::twinner::trace::exptoken::Symbol &symbol;
+  ConstSymbol &symbol;
 
 public:
-  SymbolRef (const edu::sharif::twinner::trace::exptoken::Symbol *symbol);
+  SymbolRef (ConstSymbol *symbol);
 
-  operator const edu::sharif::twinner::trace::exptoken::Symbol &();
+  operator ConstSymbol &() const;
   bool operator== (const SymbolRef &sr) const;
   bool operator< (const SymbolRef &sr) const;
 };
