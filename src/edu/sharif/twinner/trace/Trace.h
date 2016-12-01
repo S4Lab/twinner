@@ -18,6 +18,7 @@
 #include "Snapshot.h"
 
 #include <list>
+#include <set>
 #include <map>
 
 namespace edu {
@@ -29,6 +30,7 @@ class MemoryManager;
 }
 namespace trace {
 
+class SymbolRef;
 class Syscall;
 class ExecutionTraceSegment;
 class TraceSegmentTerminator;
@@ -213,6 +215,11 @@ public:
 
   edu::sharif::twinner::util::MemoryManager *getMemoryManager ();
   const edu::sharif::twinner::util::MemoryManager *getMemoryManager () const;
+  void markCriticalAddresses ();
+
+private:
+  std::set<SymbolRef> aggregateTemporarySymbols (
+      const std::list<const Expression *> &exps) const;
 };
 
 }

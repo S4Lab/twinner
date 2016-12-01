@@ -291,6 +291,8 @@ void Twinner::addExecutionTrace (edu::sharif::twinner::trace::Trace *trace) {
   edu::sharif::twinner::util::Logger log = edu::sharif::twinner::util::Logger::debug ();
   log << "Adding execution trace:\n";
   trace->printCompleteState (log);
+  log << "Marking critical addresses in trace...\n";
+  trace->markCriticalAddresses ();
   traces.push_back (trace);
   ctree->addConstraints (trace);
   log << "Done.\n";

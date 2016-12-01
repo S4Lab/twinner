@@ -80,6 +80,8 @@ public:
 
   virtual bool isConstant () const;
 
+  bool isTemporary () const;
+
   virtual bool operator< (const Symbol &symbol) const = 0;
 };
 

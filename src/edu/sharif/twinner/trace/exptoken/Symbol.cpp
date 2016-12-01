@@ -60,6 +60,10 @@ bool Symbol::isConstant () const {
   return false;
 }
 
+bool Symbol::isTemporary () const {
+  return snapshotIndex != -1;
+}
+
 }
 }
 }
