@@ -818,6 +818,100 @@ std::list < Constraint * > &Snapshot::getPathConstraints () {
   return pathConstraints;
 }
 
+std::list<const Expression *> Snapshot::getCriticalExpressions (
+    snapshot_reverse_iterator snaIt) const {
+  std::list<const Expression *> criticalExpressions;
+  for (std::list < Constraint * >::const_iterator it = pathConstraints.begin ();
+      it != pathConstraints.end (); ++it) {
+    const Constraint *c = *it;
+    criticalExpressions.push_back (c->getMainExpression ());
+    if (c->getAuxExpression ()) {
+      criticalExpressions.push_back (c->getAuxExpression ());
+    }
+  }
+  for (std::set<SymbolRef>::const_iterator it = criticalSymbols.begin ();
+      it != criticalSymbols.end (); ++it) {
+    const edu::sharif::twinner::trace::exptoken::Symbol &symbol = *it;
+    const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
+        dynamic_cast<const edu::sharif::twinner::trace::exptoken
+        ::RegisterEmergedSymbol *> (&symbol);
+    const Expression *exp;
+    if (reg) {
+      exp = resolveRegister (snaIt, reg->getAddress ());
+    } else {
+      const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *mem =
+          dynamic_cast<const edu::sharif::twinner::trace::exptoken
+          ::MemoryEmergedSymbol *> (&symbol);
+      if (mem) {
+        exp = resolveMemory
+            (snaIt, mem->getValue ().getSize (), mem->getAddress ());
+      } else {
+        edu::sharif::twinner::util::Logger::error ()
+            << "Snapshot::getCriticalExpressions ():"
+            " symbol is neither reg nor mem\n";
+        abort ();
+      }
+    }
+    criticalExpressions.push_back (exp);
+  }
+  return criticalExpressions;
+}
+
+void Snapshot::addCriticalSymbols (const std::set<SymbolRef> &symbols) {
+  criticalSymbols.insert (symbols.begin (), symbols.end ());
+}
+
+const std::set<SymbolRef> &Snapshot::getCriticalSymbols () const {
+  return criticalSymbols;
+}
+
+const Expression *Snapshot::resolveMemory (snapshot_reverse_iterator snaIt,
+    int sizeInBits, ADDRINT address) const {
+  const std::map < ADDRINT, Expression * > *memToExp;
+  switch (sizeInBits) {
+  case 128:
+    memToExp = &memoryAddressTo128BitsExpression;
+    break;
+  case 64:
+    memToExp = &memoryAddressTo64BitsExpression;
+    break;
+  case 32:
+    memToExp = &memoryAddressTo32BitsExpression;
+    break;
+  case 16:
+    memToExp = &memoryAddressTo16BitsExpression;
+    break;
+  case 8:
+    memToExp = &memoryAddressTo8BitsExpression;
+    break;
+  default:
+    edu::sharif::twinner::util::Logger::error () <<
+        "Snapshot::resolveMemory (snaIt, sizeInBits=" << std::dec << sizeInBits
+        << ", address=0x" << std::hex << address
+        << "): Memory size is not supported\n";
+    abort ();
+  }
+  std::map < ADDRINT, Expression * >::const_iterator it =
+      memToExp->find (address);
+  if (it != memToExp->end ()) {
+    return it->second;
+  }
+  Snapshot &previousSnapshot = *(--snaIt);
+  return previousSnapshot.resolveMemory (snaIt, sizeInBits, address);
+}
+
+const Expression *Snapshot::resolveRegister (snapshot_reverse_iterator snaIt,
+    REG address) const {
+  std::map < REG, Expression * >::const_iterator it =
+      registerToExpression.find (address);
+  if (it != registerToExpression.end ()) {
+    return it->second;
+  }
+  Snapshot &previousSnapshot = *(--snaIt);
+  return previousSnapshot.resolveRegister (snaIt, address);
+}
+
+
 }
 }
 }

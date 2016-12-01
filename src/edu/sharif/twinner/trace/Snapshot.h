@@ -15,10 +15,13 @@
 
 #include "ExecutionState.h"
 #include "Constraint.h"
+#include "SymbolRef.h"
+#include "SnapshotIterator.h"
 
 #include "edu/sharif/twinner/trace/syscall/Syscall.h"
 
 #include <map>
+#include <set>
 
 namespace edu {
 namespace sharif {
@@ -26,6 +29,10 @@ namespace twinner {
 namespace trace {
 
 class Snapshot : public ExecutionState {
+public:
+  typedef SnapshotIterator snapshot_iterator;
+  typedef std::reverse_iterator<snapshot_iterator> snapshot_reverse_iterator;
+
 private:
   std::map < REG, Expression * > registerToExpression;
   /// The ADDRINT must be aligned
@@ -38,6 +45,8 @@ private:
 
   int segmentIndex;
   int snapshotIndex;
+
+  std::set<SymbolRef> criticalSymbols;
 
   Snapshot (int segmentIndex, int snapshotIndex,
       const std::map < REG, Expression * > &regi,
@@ -150,6 +159,37 @@ public:
   const std::list < Constraint * > &getPathConstraints () const;
   std::list < Constraint * > &getPathConstraints ();
 
+  /**
+   * Gets all expressions which are critical in this snapshot including all
+   * main/aux expressions of its constraints and those expressions which are
+   * kept in memory/register addresses who have been marked by calls to the
+   * addCriticalSymbols method previously.
+   *
+   * @param it The snapshot iterator pointing to this snapshot.
+   * @return A list of all critical expressions.
+   */
+  std::list<const Expression *> getCriticalExpressions (
+      snapshot_reverse_iterator snaIt) const;
+
+  /**
+   * Adds given criticalSymbols set of memory/register temporary symbols to
+   * the critical symbols set of this snapshot. These symbols indicate register
+   * and memory addresses which at the end of this snapshot will contain the
+   * critical expressions of this snapshot.
+   * By default, constraints of each snapshot are assumed to be critical too.
+   *
+   * @param criticalSymbols New temporary symbols to be assumed critical.
+   */
+  void addCriticalSymbols (const std::set<SymbolRef> &criticalSymbols);
+
+  /**
+   * Gets all critical symbols which are added using the addCriticalSymbols
+   * method so far.
+   *
+   * @return All register/memory critical symbols of this snapshot.
+   */
+  const std::set<SymbolRef> &getCriticalSymbols () const;
+
 private:
   void initializeOverlappingMemoryLocationsDownwards (int size,
       ADDRINT memoryEa, const Expression &changedExp,
@@ -157,6 +197,11 @@ private:
   void initializeOverlappingMemoryLocationsUpwards (int size, ADDRINT memoryEa);
   void setOverwritingMemoryExpression (int size,
       ADDRINT memoryEa, const Expression *expression, bool isOverwriting);
+
+  const Expression *resolveMemory (snapshot_reverse_iterator snaIt,
+      int sizeInBits, ADDRINT address) const;
+  const Expression *resolveRegister (snapshot_reverse_iterator snaIt,
+      REG address) const;
 };
 
 }
