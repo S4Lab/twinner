@@ -15,6 +15,8 @@
 
 #include "ExecutionState.h"
 
+#include "Snapshot.h"
+
 #include <list>
 #include <map>
 
@@ -176,6 +178,11 @@ public:
 
   const std::list < ExecutionTraceSegment * > &getTraceSegments () const;
   std::list < ExecutionTraceSegment * > &getTraceSegments ();
+
+  Snapshot::snapshot_iterator begin () const;
+  Snapshot::snapshot_iterator end () const;
+  Snapshot::snapshot_reverse_iterator rbegin () const;
+  Snapshot::snapshot_reverse_iterator rend () const;
 
 private:
   void saveToBinaryStream (std::ofstream &out) const;

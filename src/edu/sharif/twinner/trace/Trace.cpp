@@ -29,6 +29,7 @@
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 #include "edu/sharif/twinner/trace/syscall/Syscall.h"
+#include "SnapshotIterator.h"
 
 namespace edu {
 namespace sharif {
@@ -332,6 +333,22 @@ const std::list < ExecutionTraceSegment * > &Trace::getTraceSegments () const {
 
 std::list < ExecutionTraceSegment * > &Trace::getTraceSegments () {
   return segments;
+}
+
+Snapshot::snapshot_iterator Trace::begin () const {
+  return Snapshot::snapshot_iterator (segments).begin ();
+}
+
+Snapshot::snapshot_iterator Trace::end () const {
+  return Snapshot::snapshot_iterator (segments).end ();
+}
+
+Snapshot::snapshot_reverse_iterator Trace::rbegin () const {
+  return Snapshot::snapshot_reverse_iterator (end ());
+}
+
+Snapshot::snapshot_reverse_iterator Trace::rend () const {
+  return Snapshot::snapshot_reverse_iterator (begin ());
 }
 
 void Trace::printRegistersValues (
