@@ -216,6 +216,7 @@ public:
   edu::sharif::twinner::util::MemoryManager *getMemoryManager ();
   const edu::sharif::twinner::util::MemoryManager *getMemoryManager () const;
   void markCriticalAddresses ();
+  void replaceTemporarySymbols ();
 
 private:
   std::set<SymbolRef> aggregateTemporarySymbols (

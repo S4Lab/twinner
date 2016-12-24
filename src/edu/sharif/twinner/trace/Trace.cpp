@@ -442,6 +442,18 @@ std::set<SymbolRef> Trace::aggregateTemporarySymbols (
   return temporarySymbols;
 }
 
+void Trace::replaceTemporarySymbols () {
+  // Iterating from the beginning of the trace forwards
+  Snapshot *previousSnapshot = 0;
+  for (Snapshot::snapshot_iterator it = begin (); it != end (); ++it) {
+    Snapshot &currentSnapshot = *it;
+    if (previousSnapshot) {
+      currentSnapshot.replaceTemporarySymbols (previousSnapshot);
+    }
+    previousSnapshot = &currentSnapshot;
+  }
+}
+
 
 }
 }

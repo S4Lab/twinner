@@ -68,6 +68,9 @@ protected:
   Symbol (const Symbol &s);
   Symbol ();
 
+public:
+  virtual Symbol *clone () const = 0;
+
 protected:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   void loadFromBinaryStream (std::ifstream &in);

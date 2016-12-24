@@ -21,6 +21,7 @@
 #include "edu/sharif/twinner/util/iterationtools.h"
 
 #include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/Constant.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
@@ -816,6 +817,98 @@ const std::list < Constraint * > &Snapshot::getPathConstraints () const {
 
 std::list < Constraint * > &Snapshot::getPathConstraints () {
   return pathConstraints;
+}
+
+void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot) {
+  replaceTemporarySymbols (previousSnapshot, registerToExpression);
+  replaceTemporarySymbols (previousSnapshot, memoryAddressTo128BitsExpression);
+  replaceTemporarySymbols (previousSnapshot, memoryAddressTo64BitsExpression);
+  replaceTemporarySymbols (previousSnapshot, memoryAddressTo32BitsExpression);
+  replaceTemporarySymbols (previousSnapshot, memoryAddressTo16BitsExpression);
+  replaceTemporarySymbols (previousSnapshot, memoryAddressTo8BitsExpression);
+  replaceTemporarySymbols (previousSnapshot, pathConstraints);
+}
+
+template<typename KEY>
+void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
+    std::map < KEY, Expression * > &expressions) {
+  typedef typename std::map < KEY, Expression * >::const_iterator Iterator;
+  for (Iterator it = expressions.begin (); it != expressions.end (); ++it) {
+    replaceTemporarySymbols (previousSnapshot, it->second);
+  }
+}
+
+void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
+    std::list < Constraint * > &constraints) {
+  typedef std::list < Constraint * >::const_iterator Iterator;
+  for (Iterator it = constraints.begin (); it != constraints.end (); ++it) {
+    Constraint *c = *it;
+    replaceTemporarySymbols (previousSnapshot, c->getMainExpression ());
+    if (c->getAuxExpression ()) {
+      replaceTemporarySymbols (previousSnapshot, c->getAuxExpression ());
+    }
+  }
+}
+
+void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
+    Expression *exp) {
+  Expression::Stack::const_iterator it = exp->getStack ().end ();
+  Expression *newExp = replaceTemporarySymbols (previousSnapshot, --it);
+  (*exp) = (*newExp);
+  delete newExp;
+}
+
+Expression *Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
+    Expression::Stack::const_iterator &it) {
+  const edu::sharif::twinner::trace::exptoken::ExpressionToken *token = *it--;
+  const edu::sharif::twinner::trace::exptoken::Operator *op =
+      dynamic_cast<const edu::sharif::twinner::trace::exptoken::Operator *> (token);
+  if (op) {
+    Expression *right = replaceTemporarySymbols (previousSnapshot, it);
+    Expression *left = replaceTemporarySymbols (previousSnapshot, it);
+    left->binaryOperation (op->clone (), right);
+    delete right;
+    return left;
+  } else {
+    const edu::sharif::twinner::trace::exptoken::Constant *cte =
+        dynamic_cast<const edu::sharif::twinner::trace::exptoken::Constant *> (token);
+    if (cte) {
+      return new ExpressionImp (cte->getValue ());
+    } else {
+      const edu::sharif::twinner::trace::exptoken::Symbol *sym =
+          static_cast<const edu::sharif::twinner::trace::exptoken::Symbol *> (token);
+      if (!sym->isTemporary ()) {
+        return new ExpressionImp (sym->clone ());
+      } else {
+        return replaceTemporarySymbols (previousSnapshot, sym);
+      }
+    }
+  }
+}
+
+Expression *Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
+    const edu::sharif::twinner::trace::exptoken::Symbol *tempSymbol) {
+  const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
+      dynamic_cast<const edu::sharif::twinner::trace::exptoken
+      ::RegisterEmergedSymbol *> (tempSymbol);
+  const Expression *exp;
+  if (reg) {
+    exp = previousSnapshot->resolveRegister (reg->getAddress ());
+  } else {
+    const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *mem =
+        dynamic_cast<const edu::sharif::twinner::trace::exptoken
+        ::MemoryEmergedSymbol *> (tempSymbol);
+    if (mem) {
+      exp = previousSnapshot->resolveMemory
+          (mem->getValue ().getSize (), mem->getAddress ());
+    } else {
+      edu::sharif::twinner::util::Logger::error ()
+          << "Snapshot::replaceTemporarySymbols ():"
+          " symbol is neither reg nor mem\n";
+      abort ();
+    }
+  }
+  return exp->clone ();
 }
 
 std::list<const Expression *> Snapshot::getCriticalExpressions () const {

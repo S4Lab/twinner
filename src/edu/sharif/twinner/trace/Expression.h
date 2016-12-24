@@ -116,6 +116,7 @@ public:
 protected:
   void unaryOperation (Operator *op, const Expression *exp);
 
+public:
   /**
    * The op operator is assumed to be owned by this expression object.
    * But exp will be kept untouched and its inner expression tokens will be cloned.
@@ -127,6 +128,7 @@ protected:
    */
   void binaryOperation (Operator *op, const Expression *exp);
 
+protected:
   /**
    * Same as `binaryOperation (Operator *op, const Expression *exp)` but tries to
    * simplify the concrete operand and apply it directly. If it isn't possible, it

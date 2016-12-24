@@ -293,6 +293,8 @@ void Twinner::addExecutionTrace (edu::sharif::twinner::trace::Trace *trace) {
   trace->printCompleteState (log);
   log << "Marking critical addresses in trace...\n";
   trace->markCriticalAddresses ();
+  log << "Replacing temporary symbols in trace...\n";
+  trace->replaceTemporarySymbols ();
   traces.push_back (trace);
   ctree->addConstraints (trace);
   log << "Done.\n";

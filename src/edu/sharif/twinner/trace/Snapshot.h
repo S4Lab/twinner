@@ -27,6 +27,10 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace exptoken {
+
+class ExpressionToken;
+}
 
 class Snapshot : public ExecutionState {
 public:
@@ -160,6 +164,21 @@ public:
   std::list < Constraint * > &getPathConstraints ();
 
   /**
+   * Register/Memory/Constraint expressions of this snapshot may only depend
+   * on the temporary symbols which are indexed for exactly this snapshot
+   * and/or on the non-temporary symbols. Since all temporary symbols of this
+   * snapshot are equal with the final expressions which are kept in the
+   * previous snapshot, all expressions of this snapshot can be updated to
+   * depend just on non-temporary symbols given the previous snapshot and
+   * assuming that the previous snapshot expressions have already been updated
+   * to only depend on the non-temporary symbols.
+   * This method performs that specific replacement.
+   *
+   * @param previousSnapshot The previous snapshot.
+   */
+  void replaceTemporarySymbols (const Snapshot *previousSnapshot);
+
+  /**
    * Gets all expressions which are critical in this snapshot including all
    * main/aux expressions of its constraints and those expressions which are
    * kept in memory/register addresses who have been marked by calls to the
@@ -198,6 +217,19 @@ private:
 
   const Expression *resolveMemory (int sizeInBits, ADDRINT address) const;
   const Expression *resolveRegister (REG address) const;
+
+  template<typename KEY>
+  void replaceTemporarySymbols (const Snapshot *previousSnapshot,
+      std::map < KEY, Expression * > &expressions);
+  void replaceTemporarySymbols (const Snapshot *previousSnapshot,
+      std::list < Constraint * > &constraints);
+  void replaceTemporarySymbols (const Snapshot *previousSnapshot,
+      Expression *exp);
+  Expression *replaceTemporarySymbols (const Snapshot *previousSnapshot,
+      std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >
+      ::const_iterator &it);
+  Expression *replaceTemporarySymbols (const Snapshot *previousSnapshot,
+      const edu::sharif::twinner::trace::exptoken::Symbol *tempSymbol);
 };
 
 }
