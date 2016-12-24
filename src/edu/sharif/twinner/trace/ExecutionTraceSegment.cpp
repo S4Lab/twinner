@@ -301,14 +301,24 @@ const TraceSegmentTerminator *ExecutionTraceSegment::getTerminator () const {
 
 void ExecutionTraceSegment::addTemporaryExpressions (
     const ExecutionTraceSegment *seg, REG fullReg, int size) {
-  Snapshot *snapshot = snapshots.back ();
-  snapshot->addTemporaryExpressions (seg->snapshots.back (), fullReg, size);
+  Snapshot *src = seg->snapshots.back ();
+  for (std::list < Snapshot * >::iterator it = snapshots.begin ();
+      it != snapshots.end (); ++it) {
+    Snapshot *dst = *it;
+    dst->addTemporaryExpressions (src, fullReg, size);
+    src = dst;
+  }
 }
 
 void ExecutionTraceSegment::addTemporaryExpressions (
     const ExecutionTraceSegment *seg, ADDRINT alignedAddress) {
-  Snapshot *snapshot = snapshots.back ();
-  snapshot->addTemporaryExpressions (seg->snapshots.back (), alignedAddress);
+  Snapshot *src = seg->snapshots.back ();
+  for (std::list < Snapshot * >::iterator it = snapshots.begin ();
+      it != snapshots.end (); ++it) {
+    Snapshot *dst = *it;
+    dst->addTemporaryExpressions (src, alignedAddress);
+    src = dst;
+  }
 }
 
 }

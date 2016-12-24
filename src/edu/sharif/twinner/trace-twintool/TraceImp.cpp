@@ -98,7 +98,7 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
     if (exp) {
       if (it != currentSegmentIterator) {
         ExecutionTraceSegment *currentSegment = *currentSegmentIterator;
-        addTemporaryExpressions (currentSegment, seg, address);
+        addTemporaryExpressions (it, currentSegmentIterator, address);
         exp = (currentSegment->*method) (size, address, val, state);
       }
       return exp;
@@ -115,17 +115,41 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
   return 0;
 }
 
-void TraceImp::addTemporaryExpressions (ExecutionTraceSegment *dst,
-    ExecutionTraceSegment *src, ADDRINT address) {
+void TraceImp::addTemporaryExpressions (
+    std::list < ExecutionTraceSegment * >::iterator begin,
+    std::list < ExecutionTraceSegment * >::iterator end,
+    ADDRINT address) {
   const ADDRINT alignedAddress = address - (address % 16);
-  dst->addTemporaryExpressions (src, alignedAddress);
+  ExecutionTraceSegment *src = 0;
+  for (std::list < ExecutionTraceSegment * >::iterator it = begin;
+      it != end;) {
+    if (src == 0) {
+      src = *it;
+    }
+    ++it;
+    ExecutionTraceSegment *dst = *it;
+    dst->addTemporaryExpressions (src, alignedAddress);
+    src = dst;
+  }
 }
 
-void TraceImp::addTemporaryExpressions (ExecutionTraceSegment *dst,
-    ExecutionTraceSegment *src, REG address) {
+void TraceImp::addTemporaryExpressions (
+    std::list < ExecutionTraceSegment * >::iterator begin,
+    std::list < ExecutionTraceSegment * >::iterator end,
+    REG address) {
   const REG fullReg = REG_FullRegName (address);
   const int size = REG_Size (fullReg) * 8;
-  dst->addTemporaryExpressions (src, fullReg, size);
+  ExecutionTraceSegment *src = 0;
+  for (std::list < ExecutionTraceSegment * >::iterator it = begin;
+      it != end;) {
+    if (src == 0) {
+      src = *it;
+    }
+    ++it;
+    ExecutionTraceSegment *dst = *it;
+    dst->addTemporaryExpressions (src, fullReg, size);
+    src = dst;
+  }
 }
 
 template < typename T >
@@ -140,7 +164,7 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
     if (exp) {
       if (it != currentSegmentIterator) {
         ExecutionTraceSegment *currentSegment = *currentSegmentIterator;
-        addTemporaryExpressions (currentSegment, seg, address);
+        addTemporaryExpressions (it, currentSegmentIterator, address);
         exp = (currentSegment->*method) (size, address);
       }
       return exp;

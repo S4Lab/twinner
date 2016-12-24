@@ -140,10 +140,14 @@ private:
   Expression *instantiateExpression (ADDRINT addr,
       const edu::sharif::twinner::trace::cv::ConcreteValue &val, int index);
 
-  void addTemporaryExpressions (ExecutionTraceSegment *dst,
-      ExecutionTraceSegment *src, ADDRINT address);
-  void addTemporaryExpressions (ExecutionTraceSegment *dst,
-      ExecutionTraceSegment *src, REG address);
+  void addTemporaryExpressions (
+      std::list < ExecutionTraceSegment * >::iterator begin,
+      std::list < ExecutionTraceSegment * >::iterator end,
+      ADDRINT address);
+  void addTemporaryExpressions (
+      std::list < ExecutionTraceSegment * >::iterator begin,
+      std::list < ExecutionTraceSegment * >::iterator end,
+      REG address);
 };
 
 }
