@@ -418,7 +418,7 @@ void Trace::markCriticalAddresses () {
     Snapshot &currentSnapshot = *it;
     currentSnapshot.addCriticalSymbols (criticalSymbols);
     std::list<const Expression *> criticalExpressions =
-        currentSnapshot.getCriticalExpressions (it);
+        currentSnapshot.getCriticalExpressions ();
     criticalSymbols = aggregateTemporarySymbols (criticalExpressions);
   }
 }

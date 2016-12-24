@@ -165,11 +165,9 @@ public:
    * kept in memory/register addresses who have been marked by calls to the
    * addCriticalSymbols method previously.
    *
-   * @param it The snapshot iterator pointing to this snapshot.
    * @return A list of all critical expressions.
    */
-  std::list<const Expression *> getCriticalExpressions (
-      snapshot_reverse_iterator snaIt) const;
+  std::list<const Expression *> getCriticalExpressions () const;
 
   /**
    * Adds given criticalSymbols set of memory/register temporary symbols to
@@ -198,10 +196,8 @@ private:
   void setOverwritingMemoryExpression (int size,
       ADDRINT memoryEa, const Expression *expression, bool isOverwriting);
 
-  const Expression *resolveMemory (snapshot_reverse_iterator snaIt,
-      int sizeInBits, ADDRINT address) const;
-  const Expression *resolveRegister (snapshot_reverse_iterator snaIt,
-      REG address) const;
+  const Expression *resolveMemory (int sizeInBits, ADDRINT address) const;
+  const Expression *resolveRegister (REG address) const;
 };
 
 }

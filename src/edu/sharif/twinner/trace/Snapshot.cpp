@@ -818,8 +818,7 @@ std::list < Constraint * > &Snapshot::getPathConstraints () {
   return pathConstraints;
 }
 
-std::list<const Expression *> Snapshot::getCriticalExpressions (
-    snapshot_reverse_iterator snaIt) const {
+std::list<const Expression *> Snapshot::getCriticalExpressions () const {
   std::list<const Expression *> criticalExpressions;
   for (std::list < Constraint * >::const_iterator it = pathConstraints.begin ();
       it != pathConstraints.end (); ++it) {
@@ -837,14 +836,13 @@ std::list<const Expression *> Snapshot::getCriticalExpressions (
         ::RegisterEmergedSymbol *> (&symbol);
     const Expression *exp;
     if (reg) {
-      exp = resolveRegister (snaIt, reg->getAddress ());
+      exp = resolveRegister (reg->getAddress ());
     } else {
       const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *mem =
           dynamic_cast<const edu::sharif::twinner::trace::exptoken
           ::MemoryEmergedSymbol *> (&symbol);
       if (mem) {
-        exp = resolveMemory
-            (snaIt, mem->getValue ().getSize (), mem->getAddress ());
+        exp = resolveMemory (mem->getValue ().getSize (), mem->getAddress ());
       } else {
         edu::sharif::twinner::util::Logger::error ()
             << "Snapshot::getCriticalExpressions ():"
@@ -865,8 +863,7 @@ const std::set<SymbolRef> &Snapshot::getCriticalSymbols () const {
   return criticalSymbols;
 }
 
-const Expression *Snapshot::resolveMemory (snapshot_reverse_iterator snaIt,
-    int sizeInBits, ADDRINT address) const {
+const Expression *Snapshot::resolveMemory (int sizeInBits, ADDRINT address) const {
   const std::map < ADDRINT, Expression * > *memToExp;
   switch (sizeInBits) {
   case 128:
@@ -886,7 +883,7 @@ const Expression *Snapshot::resolveMemory (snapshot_reverse_iterator snaIt,
     break;
   default:
     edu::sharif::twinner::util::Logger::error () <<
-        "Snapshot::resolveMemory (snaIt, sizeInBits=" << std::dec << sizeInBits
+        "Snapshot::resolveMemory (sizeInBits=" << std::dec << sizeInBits
         << ", address=0x" << std::hex << address
         << "): Memory size is not supported\n";
     abort ();
@@ -896,19 +893,16 @@ const Expression *Snapshot::resolveMemory (snapshot_reverse_iterator snaIt,
   if (it != memToExp->end ()) {
     return it->second;
   }
-  Snapshot &previousSnapshot = *(--snaIt);
-  return previousSnapshot.resolveMemory (snaIt, sizeInBits, address);
+  return 0;
 }
 
-const Expression *Snapshot::resolveRegister (snapshot_reverse_iterator snaIt,
-    REG address) const {
+const Expression *Snapshot::resolveRegister (REG address) const {
   std::map < REG, Expression * >::const_iterator it =
       registerToExpression.find (address);
   if (it != registerToExpression.end ()) {
     return it->second;
   }
-  Snapshot &previousSnapshot = *(--snaIt);
-  return previousSnapshot.resolveRegister (snaIt, address);
+  return 0;
 }
 
 
