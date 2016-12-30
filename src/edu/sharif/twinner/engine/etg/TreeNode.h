@@ -41,6 +41,7 @@ private:
   const edu::sharif::twinner::trace::Constraint *constraint;
   const edu::sharif::twinner::util::MemoryManager *memoryManager;
 
+  const edu::sharif::twinner::trace::Snapshot *snapshot;
   const edu::sharif::twinner::trace::ExecutionTraceSegment *segment;
 
 public:
@@ -89,6 +90,8 @@ public:
   void dumpSubTree (edu::sharif::twinner::util::Logger &logger) const;
 
   bool hasAnyChild () const;
+  void mergeCriticalAddresses (
+      const edu::sharif::twinner::trace::Snapshot *snapshot);
   void registerCorrespondingSegment (
       const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
   const edu::sharif::twinner::trace::ExecutionTraceSegment *getSegment () const;

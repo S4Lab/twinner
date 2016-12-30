@@ -51,22 +51,33 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
   for (std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * >
       ::const_reverse_iterator it = segments.rbegin (); it != segments.rend (); ++it) {
     const edu::sharif::twinner::trace::ExecutionTraceSegment *segment = *it;
-    const std::list < edu::sharif::twinner::trace::Constraint * > &constraints =
-        segment->getPathConstraints ();
-    TreeNode const *pre = node;
-    for (std::list < edu::sharif::twinner::trace::Constraint * >
-        ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
-      const edu::sharif::twinner::trace::Constraint *constraint = *it2;
-      TreeNode *next = node->addConstraint
-          (constraint, trace->getMemoryManager (), (depth <= 10));
-      if (next != node) {
-        node = next;
-        depth++;
+    const std::list < edu::sharif::twinner::trace::Snapshot * > &snapshots =
+        segment->getSnapshots ();
+    TreeNode const *preSegment = node;
+    for (std::list < edu::sharif::twinner::trace::Snapshot * >
+        ::const_iterator it = snapshots.begin (); it != snapshots.end (); ++it) {
+      const edu::sharif::twinner::trace::Snapshot *snapshot = *it;
+      const std::list < edu::sharif::twinner::trace::Constraint * > &constraints =
+          snapshot->getPathConstraints ();
+      TreeNode const *preSnapshot = node;
+      for (std::list < edu::sharif::twinner::trace::Constraint * >
+          ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
+        const edu::sharif::twinner::trace::Constraint *constraint = *it2;
+        TreeNode *next = node->addConstraint
+            (constraint, trace->getMemoryManager (), (depth <= 10));
+        if (next != node) {
+          node = next;
+          depth++;
+        }
+      }
+      if (node != preSnapshot) {
+        node->mergeCriticalAddresses (snapshot);
       }
     }
-    if (node == pre) { // Each segment must have at least one constraint
+    if (node == preSegment) { // Each segment must have at least one constraint
       node = node->addConstraint
           (alwaysTrue, trace->getMemoryManager (), false);
+      node->mergeCriticalAddresses (snapshots.back ());
     }
     node->registerCorrespondingSegment (segment);
   }

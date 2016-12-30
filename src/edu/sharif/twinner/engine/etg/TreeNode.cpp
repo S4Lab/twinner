@@ -35,6 +35,7 @@ TreeNode::TreeNode (TreeNode *p, const edu::sharif::twinner::trace::Constraint *
     const edu::sharif::twinner::util::MemoryManager *m) :
     debugId (++lastDebugId),
     parent (p), constraint (c), memoryManager (m),
+    snapshot (0),
     segment (0) {
   if (p) {
     p->children.push_back (this);
@@ -165,6 +166,15 @@ void TreeNode::dumpSubTree (edu::sharif::twinner::util::Logger &logger) const {
 
 bool TreeNode::hasAnyChild () const {
   return !children.empty ();
+}
+
+void TreeNode::mergeCriticalAddresses (
+    const edu::sharif::twinner::trace::Snapshot *sna) {
+  if (snapshot == 0) {
+    snapshot = sna;
+    return;
+  }
+  snapshot->addCriticalSymbols (sna->getCriticalSymbols ());
 }
 
 void TreeNode::registerCorrespondingSegment (
