@@ -179,7 +179,7 @@ void Trace::terminateTraceSegment (TraceSegmentTerminator *tst) {
 
 void Trace::initializeNewTraceSegment (CONTEXT *context) const {
   const ExecutionTraceSegment *segment = *currentSegmentIterator;
-  const std::map < REG, Expression * > &map = segment->getRegisterToExpression ();
+  const std::map < REG, Expression * > &map = segment->getFirstRegisterToExpression ();
   for (std::map < REG, Expression * >::const_iterator it = map.begin ();
       it != map.end (); ++it) {
     const REG reg = it->first;

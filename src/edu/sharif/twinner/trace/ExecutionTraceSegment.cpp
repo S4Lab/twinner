@@ -239,6 +239,11 @@ void ExecutionTraceSegment::printCompleteState (
 }
 
 const std::map < REG, Expression * > &
+ExecutionTraceSegment::getFirstRegisterToExpression () const {
+  return snapshots.front ()->getRegisterToExpression ();
+}
+
+const std::map < REG, Expression * > &
 ExecutionTraceSegment::getRegisterToExpression () const {
   edu::sharif::twinner::util::Logger::error () << "Not implemented yet\n";
   abort ();
