@@ -95,8 +95,14 @@ public:
   void registerCorrespondingSegment (
       const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
   const edu::sharif::twinner::trace::ExecutionTraceSegment *getSegment () const;
+  const edu::sharif::twinner::trace::Snapshot *getSnapshot () const;
+
   const std::list < TreeNode * > &getChildren () const;
+  void replaceChild (TreeNode *oldChild, TreeNode *newChild);
   const edu::sharif::twinner::trace::Constraint *getConstraint () const;
+  TreeNode *getParent ();
+  const TreeNode *getParent () const;
+
 
 private:
   TreeNode *addConstraint (TreeNode *parent,

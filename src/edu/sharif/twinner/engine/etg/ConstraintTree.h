@@ -16,6 +16,7 @@
 #include "Vertex.h"
 
 #include <list>
+#include <map>
 
 namespace edu {
 namespace sharif {
@@ -35,6 +36,7 @@ private:
   TreeNode *root;
   TreeNode *iterator;
   const edu::sharif::twinner::trace::Constraint * const alwaysTrue;
+  std::multimap<uint32_t, TreeNode *> lastInstructionToTreeNodes;
 
 public:
   ConstraintTree ();
@@ -49,6 +51,24 @@ public:
   const TreeNode *getRoot () const;
 
   Graph *getEtg () const;
+
+private:
+  void mergePath (TreeNode *node);
+  bool tryToMergePath (TreeNode *node, TreeNode *target) const;
+
+  typedef std::pair<TreeNode *, TreeNode *> NodePair;
+  NodePair findUpperMostMergePoint (NodePair current) const;
+
+  enum MergeResult {
+    HAS_NO_SNAPSHOT,
+    HAS_NON_CONFORMING_SNAPSHOT,
+    MERGED,
+  };
+  MergeResult tryToMergePath (const NodePair lowerBound,
+      NodePair &upperBound) const;
+
+  bool areNodesMergable (const TreeNode *first, const TreeNode *second) const;
+  void mergePath (TreeNode *node, TreeNode *target) const;
 };
 
 }

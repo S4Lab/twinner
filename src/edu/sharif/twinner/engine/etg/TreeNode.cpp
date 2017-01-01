@@ -188,13 +188,30 @@ TreeNode::getSegment () const {
   return segment;
 }
 
+const edu::sharif::twinner::trace::Snapshot *TreeNode::getSnapshot () const {
+  return snapshot;
+}
+
 const std::list < TreeNode * > &TreeNode::getChildren () const {
   return children;
+}
+
+void TreeNode::replaceChild (TreeNode *oldChild, TreeNode *newChild) {
+  children.remove (oldChild);
+  children.push_back (newChild);
 }
 
 const edu::sharif::twinner::trace::Constraint *
 TreeNode::getConstraint () const {
   return constraint;
+}
+
+TreeNode *TreeNode::getParent () {
+  return parent;
+}
+
+const TreeNode *TreeNode::getParent () const {
+  return parent;
 }
 
 }

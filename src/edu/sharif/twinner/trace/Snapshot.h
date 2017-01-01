@@ -207,6 +207,21 @@ public:
    */
   const std::set<SymbolRef> &getCriticalSymbols () const;
 
+  /**
+   * Checks whether this snapshot conforms with the given sna snapshot in the
+   * symbolic expressions which are marked as critical in the given sna.
+   * It is not important that which addresses are marked as critical in this
+   * snapshot. It is just important for this snapshot to have the same
+   * expressions as the sna has in those addresses which are critical in
+   * the given snapshot.
+   *
+   * @param sna The main snapshot which this snapshot is being checked with it.
+   * @return true iff all memory/register addresses which are marked as critical
+   * ones in the sna Snapshot, contain exactly the same expressions in both
+   * snapshots.
+   */
+  bool satisfiesMemoryRegisterCriticalExpressions (const Snapshot *sna) const;
+
 private:
   void initializeOverlappingMemoryLocationsDownwards (int size,
       ADDRINT memoryEa, const Expression &changedExp,

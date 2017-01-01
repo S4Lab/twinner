@@ -956,6 +956,11 @@ const std::set<SymbolRef> &Snapshot::getCriticalSymbols () const {
   return criticalSymbols;
 }
 
+bool Snapshot::satisfiesMemoryRegisterCriticalExpressions (
+    const Snapshot *sna) const {
+  return false;
+}
+
 const Expression *Snapshot::resolveMemory (int sizeInBits, ADDRINT address) const {
   const std::map < ADDRINT, Expression * > *memToExp;
   switch (sizeInBits) {

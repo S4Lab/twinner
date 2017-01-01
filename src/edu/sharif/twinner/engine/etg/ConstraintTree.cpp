@@ -40,6 +40,7 @@ ConstraintTree::ConstraintTree () :
 ConstraintTree::~ConstraintTree () {
   delete root;
   delete alwaysTrue;
+  lastInstructionToTreeNodes.clear ();
 }
 
 void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *trace) {
@@ -81,7 +82,121 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
     }
     node->registerCorrespondingSegment (segment);
   }
+  mergePath (node);
   iterator = root;
+}
+
+void ConstraintTree::mergePath (TreeNode *node) {
+  const uint32_t lastInstruction =
+      node->getConstraint ()->getCausingInstructionIdentifier ();
+  typedef std::multimap<uint32_t, TreeNode *>::const_iterator iterator;
+  std::pair<iterator, iterator> range =
+      lastInstructionToTreeNodes.equal_range (lastInstruction);
+  for (iterator it = range.first; it != range.second; ++it) {
+    TreeNode *mergePoint = it->second;
+    if (tryToMergePath (node, mergePoint)) {
+      return;
+    }
+  }
+  lastInstructionToTreeNodes.insert (make_pair (lastInstruction, node));
+}
+
+bool ConstraintTree::tryToMergePath (TreeNode *node, TreeNode *target) const {
+  if (!areNodesMergable (node, target)) {
+    return false;
+  }
+  const NodePair lowerBound = make_pair (node, target);
+  NodePair upperBound = findUpperMostMergePoint (lowerBound);
+  return tryToMergePath (lowerBound, upperBound) == MERGED;
+}
+
+ConstraintTree::MergeResult ConstraintTree::tryToMergePath (
+    const NodePair lowerBound, NodePair &upperBound) const {
+  const edu::sharif::twinner::trace::Snapshot *snaSource =
+      lowerBound.first->getSnapshot ();
+  const edu::sharif::twinner::trace::Snapshot *snaTarget =
+      lowerBound.second->getSnapshot ();
+  if (lowerBound.first != upperBound.first) {
+    MergeResult result = tryToMergePath
+        (make_pair (lowerBound.first->getParent (),
+                    lowerBound.second->getParent ()), upperBound);
+    switch (result) {
+    case HAS_NO_SNAPSHOT:
+      if (snaSource && snaTarget) {
+        if (snaSource->satisfiesMemoryRegisterCriticalExpressions (snaTarget)) {
+          mergePath (upperBound.first, upperBound.second);
+          return MERGED;
+        } else {
+          return HAS_NON_CONFORMING_SNAPSHOT;
+        }
+      } else if (snaSource == 0 && snaTarget == 0) {
+        return HAS_NO_SNAPSHOT;
+      }
+      return HAS_NON_CONFORMING_SNAPSHOT;
+
+    case HAS_NON_CONFORMING_SNAPSHOT:
+      if (snaSource && snaTarget) {
+        if (snaSource->satisfiesMemoryRegisterCriticalExpressions (snaTarget)) {
+          mergePath (lowerBound.first, lowerBound.second);
+          return MERGED;
+        } else {
+          return HAS_NON_CONFORMING_SNAPSHOT;
+        }
+      } else if (snaSource == 0 && snaTarget == 0) {
+        upperBound = lowerBound;
+        return HAS_NO_SNAPSHOT;
+      }
+      return HAS_NON_CONFORMING_SNAPSHOT;
+
+    case MERGED:
+      return MERGED;
+
+    default:
+      edu::sharif::twinner::util::Logger::error ()
+          << "ConstraintTree::tryToMergePath (): Unknown MergeResult\n";
+      abort ();
+    }
+  } else {
+    if (snaSource && snaTarget) {
+      if (snaSource->satisfiesMemoryRegisterCriticalExpressions (snaTarget)) {
+        mergePath (lowerBound.first, lowerBound.second);
+        return MERGED;
+      } else {
+        return HAS_NON_CONFORMING_SNAPSHOT;
+      }
+    } else if (snaSource == 0 && snaTarget == 0) {
+      return HAS_NO_SNAPSHOT;
+    }
+    return HAS_NON_CONFORMING_SNAPSHOT;
+  }
+}
+
+void ConstraintTree::mergePath (TreeNode *node, TreeNode *target) const {
+  TreeNode *parent = node->getParent ();
+  parent->replaceChild (node, target);
+  delete node;
+}
+
+ConstraintTree::NodePair ConstraintTree::findUpperMostMergePoint (
+    NodePair current) const {
+  TreeNode *parentNode = current.first->getParent ();
+  TreeNode *parentTarget = current.second->getParent ();
+  while (areNodesMergable (parentNode, parentTarget)) {
+    current.first = parentNode;
+    current.second = parentTarget;
+    parentNode = parentNode->getParent ();
+    parentTarget = parentTarget->getParent ();
+  }
+  return current;
+}
+
+bool ConstraintTree::areNodesMergable (const TreeNode *first,
+    const TreeNode *second) const {
+  // ASSERT: first != second (otherwise `first` would not be inserted)
+  return first && second
+      && first->getConstraint ()->getCausingInstructionIdentifier ()
+      == second->getConstraint ()->getCausingInstructionIdentifier ()
+      && (*first->getConstraint ()) == (*second->getConstraint ());
 }
 
 bool ConstraintTree::getNextConstraintsList (
