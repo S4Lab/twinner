@@ -15,6 +15,7 @@
 #include "TreeNode.h"
 
 #include "edu/sharif/twinner/trace/Constraint.h"
+#include "edu/sharif/twinner/trace/Snapshot.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 
 #include "edu/sharif/twinner/engine/smt/SmtSolver.h"
@@ -169,7 +170,7 @@ bool TreeNode::hasAnyChild () const {
 }
 
 void TreeNode::mergeCriticalAddresses (
-    const edu::sharif::twinner::trace::Snapshot *sna) {
+    edu::sharif::twinner::trace::Snapshot *sna) {
   if (snapshot == 0) {
     snapshot = sna;
     return;

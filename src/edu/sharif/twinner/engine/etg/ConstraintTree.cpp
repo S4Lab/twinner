@@ -56,7 +56,7 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
     TreeNode const *preSegment = node;
     for (std::list < edu::sharif::twinner::trace::Snapshot * >
         ::const_iterator it = snapshots.begin (); it != snapshots.end (); ++it) {
-      const edu::sharif::twinner::trace::Snapshot *snapshot = *it;
+      edu::sharif::twinner::trace::Snapshot *snapshot = *it;
       const std::list < edu::sharif::twinner::trace::Constraint * > &constraints =
           snapshot->getPathConstraints ();
       TreeNode const *preSnapshot = node;
