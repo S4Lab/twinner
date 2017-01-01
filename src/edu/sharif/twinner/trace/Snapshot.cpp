@@ -924,28 +924,31 @@ std::list<const Expression *> Snapshot::getCriticalExpressions () const {
   for (std::set<SymbolRef>::const_iterator it = criticalSymbols.begin ();
       it != criticalSymbols.end (); ++it) {
     const edu::sharif::twinner::trace::exptoken::Symbol &symbol = *it;
-    const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
-        dynamic_cast<const edu::sharif::twinner::trace::exptoken
-        ::RegisterEmergedSymbol *> (&symbol);
-    const Expression *exp;
-    if (reg) {
-      exp = resolveRegister (reg->getAddress ());
-    } else {
-      const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *mem =
-          dynamic_cast<const edu::sharif::twinner::trace::exptoken
-          ::MemoryEmergedSymbol *> (&symbol);
-      if (mem) {
-        exp = resolveMemory (mem->getValue ().getSize (), mem->getAddress ());
-      } else {
-        edu::sharif::twinner::util::Logger::error ()
-            << "Snapshot::getCriticalExpressions ():"
-            " symbol is neither reg nor mem\n";
-        abort ();
-      }
-    }
+    const Expression *exp = resolveExpression (symbol);
     criticalExpressions.push_back (exp);
   }
   return criticalExpressions;
+}
+
+const Expression *Snapshot::resolveExpression (
+    const edu::sharif::twinner::trace::exptoken::Symbol &symbol) const {
+  const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
+      dynamic_cast<const edu::sharif::twinner::trace::exptoken
+      ::RegisterEmergedSymbol *> (&symbol);
+  if (reg) {
+    return resolveRegister (reg->getAddress ());
+  } else {
+    const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *mem =
+        dynamic_cast<const edu::sharif::twinner::trace::exptoken
+        ::MemoryEmergedSymbol *> (&symbol);
+    if (mem) {
+      return resolveMemory (mem->getValue ().getSize (), mem->getAddress ());
+    } else {
+      edu::sharif::twinner::util::Logger::error ()
+          << "Snapshot::resolveExpression (): symbol is neither reg nor mem\n";
+      abort ();
+    }
+  }
 }
 
 void Snapshot::addCriticalSymbols (const std::set<SymbolRef> &symbols) {
@@ -958,7 +961,17 @@ const std::set<SymbolRef> &Snapshot::getCriticalSymbols () const {
 
 bool Snapshot::satisfiesMemoryRegisterCriticalExpressions (
     const Snapshot *sna) const {
-  return false;
+  for (std::set<SymbolRef>::const_iterator it = sna->criticalSymbols.begin ();
+      it != sna->criticalSymbols.end (); ++it) {
+    const edu::sharif::twinner::trace::exptoken::Symbol &symbol = *it;
+    const Expression *ourExp = resolveExpression (symbol);
+    const Expression *targetExp = sna->resolveExpression (symbol);
+    const bool expressionsAreTheSame = (*ourExp) == (*targetExp);
+    if (!expressionsAreTheSame) {
+      return false;
+    }
+  }
+  return true;
 }
 
 const Expression *Snapshot::resolveMemory (int sizeInBits, ADDRINT address) const {

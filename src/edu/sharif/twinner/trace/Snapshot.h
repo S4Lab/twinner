@@ -223,6 +223,8 @@ public:
   bool satisfiesMemoryRegisterCriticalExpressions (const Snapshot *sna) const;
 
 private:
+  const Expression *resolveExpression (
+      const edu::sharif::twinner::trace::exptoken::Symbol &symbol) const;
   void initializeOverlappingMemoryLocationsDownwards (int size,
       ADDRINT memoryEa, const Expression &changedExp,
       int shiftAmount = 0);
