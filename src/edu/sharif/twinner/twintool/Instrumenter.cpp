@@ -1471,12 +1471,20 @@ void read_memory_content_and_add_it_to_map (
 
 void Instrumenter::aboutToExit (INT32 code) {
   printInstructionsStatisticsInfo ();
+  saveAll ();
+  edu::sharif::twinner::util::LogStream::destroy ();
+}
+
+void Instrumenter::saveAll () {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::debug ();
   logger << "Saving trace info...";
   if (ise->getTrace ()->saveToFile
       (traceFilePath.c_str (), disassemblyFilePath.c_str ())) {
     logger << "Done.\n";
+    if (marFilePath.empty ()) {
+      return;
+    }
     logger << "Saving MarInfo...";
     std::ofstream out;
     out.open (marFilePath.c_str (),
@@ -1493,7 +1501,6 @@ void Instrumenter::aboutToExit (INT32 code) {
   } else {
     logger << "Failed.\n";
   }
-  edu::sharif::twinner::util::LogStream::destroy ();
 }
 
 void Instrumenter::disable () {
@@ -1589,6 +1596,7 @@ void Instrumenter::instrumentImage (IMG img) {
       edu::sharif::twinner::util::Logger::debug ();
   log << "Instrumenter::instrumentImage (img)\n";
   int state = 0;
+  const bool shouldSaveMainArgs = !marFilePath.empty ();
   if (start != end) {
     for (SEC section = IMG_SecHead (img);
         SEC_Valid (section); section = SEC_Next (section)) {
@@ -1602,11 +1610,13 @@ void Instrumenter::instrumentImage (IMG img) {
             INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) startAnalysis,
                             IARG_PTR, this,
                             IARG_END);
-            INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
-                            IARG_PTR, this,
-                            IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
-                            IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
-                            IARG_END);
+            if (shouldSaveMainArgs) {
+              INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
+                              IARG_PTR, this,
+                              IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
+                              IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
+                              IARG_END);
+            }
             INS_InsertCall (ins, IPOINT_BEFORE,
                             (AFUNPTR) analysisRoutineInitializeRegisters,
                             IARG_PTR, ise,
@@ -1641,11 +1651,13 @@ void Instrumenter::instrumentImage (IMG img) {
       RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) startAnalysis,
                       IARG_PTR, this,
                       IARG_END);
-      RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
-                      IARG_PTR, this,
-                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
-                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
-                      IARG_END);
+      if (shouldSaveMainArgs) {
+        RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
+                        IARG_PTR, this,
+                        IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
+                        IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
+                        IARG_END);
+      }
       RTN_InsertCall (mainRoutine, IPOINT_BEFORE,
                       (AFUNPTR) analysisRoutineInitializeRegisters,
                       IARG_PTR, ise,

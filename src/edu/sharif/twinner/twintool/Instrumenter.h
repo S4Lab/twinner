@@ -227,6 +227,8 @@ public:
   void reportMainArguments (int argc, char **argv);
 
 private:
+  void saveAll ();
+
   void initialize ();
   template<int size>
   void initialize (InstructionModel model, const OPCODE opcodes[]);
