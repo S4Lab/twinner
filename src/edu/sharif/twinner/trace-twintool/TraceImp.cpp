@@ -126,7 +126,7 @@ void TraceImp::addTemporaryExpressions (
     if (src == 0) {
       src = *it;
     }
-    ++it;
+    --it;
     ExecutionTraceSegment *dst = *it;
     dst->addTemporaryExpressions (src, alignedAddress);
     src = dst;
@@ -145,7 +145,7 @@ void TraceImp::addTemporaryExpressions (
     if (src == 0) {
       src = *it;
     }
-    ++it;
+    --it;
     ExecutionTraceSegment *dst = *it;
     dst->addTemporaryExpressions (src, fullReg, size);
     src = dst;
