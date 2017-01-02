@@ -676,7 +676,7 @@ void Snapshot::addTemporaryExpressions (const Snapshot *sna,
     &sna->memoryAddressTo8BitsExpression,
     NULL
   };
-  addTemporaryExpressions (alignedAddress, 16, memoryToExpressionMaps, 0);
+  addTemporaryExpressions (alignedAddress, 16 * 8, memoryToExpressionMaps, 0);
 }
 
 void Snapshot::addTemporaryExpressions (ADDRINT memoryEa, int size,
@@ -691,7 +691,7 @@ void Snapshot::addTemporaryExpressions (ADDRINT memoryEa, int size,
   if (exp == 0) {
     addTemporaryExpressions (memoryEa, size / 2,
                              memoryToExpressionMaps, level + 1);
-    addTemporaryExpressions (memoryEa + size / 2, size / 2,
+    addTemporaryExpressions (memoryEa + size / 16, size / 2,
                              memoryToExpressionMaps, level + 1);
   } else {
     Expression *tmpExp = new ExpressionImp
