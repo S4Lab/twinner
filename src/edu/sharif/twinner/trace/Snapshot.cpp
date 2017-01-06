@@ -57,16 +57,23 @@ Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
 
 Snapshot::Snapshot (int _segmentIndex, int _snapshotIndex,
     const std::map < REG, Expression * > &regi,
-    const std::map < ADDRINT, Expression * > &memo,
+    const std::map < ADDRINT, Expression * > &memo128,
+    const std::map < ADDRINT, Expression * > &memo64,
+    const std::map < ADDRINT, Expression * > &memo32,
+    const std::map < ADDRINT, Expression * > &memo16,
+    const std::map < ADDRINT, Expression * > &memo8,
     const std::list < Constraint * > &cnrt) :
-    registerToExpression (regi), memoryAddressTo64BitsExpression (memo),
+    registerToExpression (regi),
+    memoryAddressTo128BitsExpression (memo128),
+    memoryAddressTo64BitsExpression (memo64),
+    memoryAddressTo32BitsExpression (memo32),
+    memoryAddressTo16BitsExpression (memo16),
+    memoryAddressTo8BitsExpression (memo8),
     pathConstraints (cnrt),
     segmentIndex (_segmentIndex), snapshotIndex (_snapshotIndex) {
   /*
    * This constructor is called by Twinner to reacquire registers/memory/constraints
    * info and use them to build its behavioral model.
-   * So other (128/32 bits) memory addresses won't be addressed and are not required to
-   * be initialized at this time.
    */
 }
 
@@ -588,10 +595,19 @@ void Snapshot::saveToBinaryStream (std::ofstream &out) const {
   out.write (reinterpret_cast<const char *> (&snapshotIndex), sizeof (snapshotIndex));
 
   saveMapToBinaryStream (out, "REG", registerToExpression);
+  saveNonNullExpressions (out, memoryAddressTo128BitsExpression);
+  saveNonNullExpressions (out, memoryAddressTo64BitsExpression);
+  saveNonNullExpressions (out, memoryAddressTo32BitsExpression);
+  saveNonNullExpressions (out, memoryAddressTo16BitsExpression);
+  saveNonNullExpressions (out, memoryAddressTo8BitsExpression);
+  saveListToBinaryStream (out, "CON", pathConstraints);
+}
+
+void Snapshot::saveNonNullExpressions (std::ofstream &out,
+    const std::map < ADDRINT, Expression * > &memToExp) const {
   std::map < ADDRINT, Expression * > memory;
   for (std::map < ADDRINT, Expression * >::const_iterator it =
-      memoryAddressTo64BitsExpression.begin ();
-      it != memoryAddressTo64BitsExpression.end (); ++it) {
+      memToExp.begin (); it != memToExp.end (); ++it) {
     ADDRINT address = it->first;
     Expression *exp = it->second;
     if (exp) {
@@ -599,7 +615,6 @@ void Snapshot::saveToBinaryStream (std::ofstream &out) const {
     }
   }
   saveMapToBinaryStream (out, "MEM", memory);
-  saveListToBinaryStream (out, "CON", pathConstraints);
 }
 
 template <typename ADDRESS>
@@ -636,13 +651,18 @@ Snapshot *Snapshot::loadFromBinaryStream (std::ifstream &in) {
   std::map < REG, Expression * > regi;
   // The memo only contains 64-bits memory symbols (+ 128/64-bits reg symbols of course)
   // Also the precision of ADDRINT is 64-bits (both memory cells and formulas are 64-bits)
-  std::map < ADDRINT, Expression * > memo;
+  std::map < ADDRINT, Expression * > memo128, memo64, memo32, memo16, memo8;
   std::list < Constraint * > cnrt;
   loadMapFromBinaryStream (in, "REG", regi);
-  loadMapFromBinaryStream (in, "MEM", memo);
+  loadMapFromBinaryStream (in, "MEM", memo128);
+  loadMapFromBinaryStream (in, "MEM", memo64);
+  loadMapFromBinaryStream (in, "MEM", memo32);
+  loadMapFromBinaryStream (in, "MEM", memo16);
+  loadMapFromBinaryStream (in, "MEM", memo8);
   loadListFromBinaryStream (in, "CON", cnrt);
 
-  return new Snapshot (segmentIndex, snapshotIndex, regi, memo, cnrt);
+  return new Snapshot (segmentIndex, snapshotIndex, regi,
+                       memo128, memo64, memo32, memo16, memo8, cnrt);
 }
 
 int Snapshot::getSegmentIndex () const {

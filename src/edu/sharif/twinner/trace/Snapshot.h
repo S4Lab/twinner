@@ -54,7 +54,11 @@ private:
 
   Snapshot (int segmentIndex, int snapshotIndex,
       const std::map < REG, Expression * > &regi,
-      const std::map < ADDRINT, Expression * > &memo,
+      const std::map < ADDRINT, Expression * > &memo128,
+      const std::map < ADDRINT, Expression * > &memo64,
+      const std::map < ADDRINT, Expression * > &memo32,
+      const std::map < ADDRINT, Expression * > &memo16,
+      const std::map < ADDRINT, Expression * > &memo8,
       const std::list < Constraint * > &cnrt);
 
 public:
@@ -138,6 +142,8 @@ private:
   void setExpression (std::map < KEY, Expression * > &map,
       const KEY key, Expression *exp);
 
+  void saveNonNullExpressions (std::ofstream &out,
+      const std::map < ADDRINT, Expression * > &memToExp) const;
   template <typename ADDRESS>
   void saveMapToBinaryStream (std::ofstream &out,
       const char *magicString, const std::map < ADDRESS, Expression * > &map) const;
