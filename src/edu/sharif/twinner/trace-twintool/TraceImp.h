@@ -141,13 +141,13 @@ private:
       const edu::sharif::twinner::trace::cv::ConcreteValue &val, int index);
 
   void addTemporaryExpressions (
-      std::list < ExecutionTraceSegment * >::iterator begin,
-      std::list < ExecutionTraceSegment * >::iterator end,
-      ADDRINT address);
+      std::list < ExecutionTraceSegment * >::iterator past,
+      std::list < ExecutionTraceSegment * >::iterator now,
+      ADDRINT address, int size);
   void addTemporaryExpressions (
-      std::list < ExecutionTraceSegment * >::iterator begin,
-      std::list < ExecutionTraceSegment * >::iterator end,
-      REG address);
+      std::list < ExecutionTraceSegment * >::iterator past,
+      std::list < ExecutionTraceSegment * >::iterator now,
+      REG address, int size);
 };
 
 }

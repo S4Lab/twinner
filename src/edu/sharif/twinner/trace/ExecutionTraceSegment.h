@@ -101,7 +101,7 @@ public:
   void addTemporaryExpressions (const ExecutionTraceSegment *seg,
       REG fullReg, int size);
   void addTemporaryExpressions (const ExecutionTraceSegment *seg,
-      ADDRINT alignedAddress);
+      ADDRINT address, int size);
 };
 
 }

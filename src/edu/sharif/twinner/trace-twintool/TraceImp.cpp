@@ -98,7 +98,7 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
     if (exp) {
       if (it != currentSegmentIterator) {
         ExecutionTraceSegment *currentSegment = *currentSegmentIterator;
-        addTemporaryExpressions (it, currentSegmentIterator, address);
+        addTemporaryExpressions (it, currentSegmentIterator, address, size);
         exp = (currentSegment->*method) (size, address, val, state);
       }
       return exp;
@@ -116,32 +116,33 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
 }
 
 void TraceImp::addTemporaryExpressions (
-    std::list < ExecutionTraceSegment * >::iterator begin,
-    std::list < ExecutionTraceSegment * >::iterator end,
-    ADDRINT address) {
-  const ADDRINT alignedAddress = address - (address % 16);
+    std::list < ExecutionTraceSegment * >::iterator past,
+    std::list < ExecutionTraceSegment * >::iterator now,
+    ADDRINT address, int size) {
   ExecutionTraceSegment *src = 0;
-  for (std::list < ExecutionTraceSegment * >::iterator it = begin;
-      it != end;) {
+  for (std::list < ExecutionTraceSegment * >::iterator it = past;
+      it != now;) {
     if (src == 0) {
       src = *it;
     }
     --it;
     ExecutionTraceSegment *dst = *it;
-    dst->addTemporaryExpressions (src, alignedAddress);
+    dst->addTemporaryExpressions (src, address, size);
     src = dst;
   }
 }
 
 void TraceImp::addTemporaryExpressions (
-    std::list < ExecutionTraceSegment * >::iterator begin,
-    std::list < ExecutionTraceSegment * >::iterator end,
-    REG address) {
+    std::list < ExecutionTraceSegment * >::iterator past,
+    std::list < ExecutionTraceSegment * >::iterator now,
+    REG address, int size) {
   const REG fullReg = REG_FullRegName (address);
-  const int size = REG_Size (fullReg) * 8;
+  if (fullReg != address) {
+    size = REG_Size (address) * 8;
+  }
   ExecutionTraceSegment *src = 0;
-  for (std::list < ExecutionTraceSegment * >::iterator it = begin;
-      it != end;) {
+  for (std::list < ExecutionTraceSegment * >::iterator it = past;
+      it != now;) {
     if (src == 0) {
       src = *it;
     }
@@ -164,7 +165,7 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
     if (exp) {
       if (it != currentSegmentIterator) {
         ExecutionTraceSegment *currentSegment = *currentSegmentIterator;
-        addTemporaryExpressions (it, currentSegmentIterator, address);
+        addTemporaryExpressions (it, currentSegmentIterator, address, size);
         exp = (currentSegment->*method) (size, address);
       }
       return exp;

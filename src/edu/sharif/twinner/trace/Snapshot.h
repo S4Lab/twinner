@@ -106,7 +106,7 @@ public:
   void addTemporaryExpressions (const Snapshot *sna,
       REG fullReg, int size);
   void addTemporaryExpressions (const Snapshot *sna,
-      ADDRINT alignedAddress);
+      ADDRINT address, int size);
 
 private:
   void addTemporaryExpressions (ADDRINT memoryEa, int size,

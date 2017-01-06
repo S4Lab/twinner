@@ -667,7 +667,7 @@ void Snapshot::addTemporaryExpressions (const Snapshot *sna,
 }
 
 void Snapshot::addTemporaryExpressions (const Snapshot *sna,
-    ADDRINT alignedAddress) {
+    ADDRINT address, int size) {
   const std::map < ADDRINT, Expression * > * const memoryToExpressionMaps[] = {
     &sna->memoryAddressTo128BitsExpression,
     &sna->memoryAddressTo64BitsExpression,
@@ -676,7 +676,30 @@ void Snapshot::addTemporaryExpressions (const Snapshot *sna,
     &sna->memoryAddressTo8BitsExpression,
     NULL
   };
-  addTemporaryExpressions (alignedAddress, 16 * 8, memoryToExpressionMaps, 0);
+  int level;
+  switch (size) {
+  case 128:
+    level = 0;
+    break;
+  case 64:
+    level = 1;
+    break;
+  case 32:
+    level = 2;
+    break;
+  case 16:
+    level = 3;
+    break;
+  case 8:
+    level = 4;
+    break;
+  default:
+    edu::sharif::twinner::util::Logger::error ()
+        << "Snapshot::addTemporaryExpressions (): size=" << size
+        << "is not supported\n";
+    abort ();
+  }
+  addTemporaryExpressions (address, size, memoryToExpressionMaps, level);
 }
 
 void Snapshot::addTemporaryExpressions (ADDRINT memoryEa, int size,

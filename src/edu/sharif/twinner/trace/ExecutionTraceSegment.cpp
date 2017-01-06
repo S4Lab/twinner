@@ -316,12 +316,12 @@ void ExecutionTraceSegment::addTemporaryExpressions (
 }
 
 void ExecutionTraceSegment::addTemporaryExpressions (
-    const ExecutionTraceSegment *seg, ADDRINT alignedAddress) {
+    const ExecutionTraceSegment *seg, ADDRINT address, int size) {
   Snapshot *src = seg->snapshots.back ();
   for (std::list < Snapshot * >::iterator it = snapshots.begin ();
       it != snapshots.end (); ++it) {
     Snapshot *dst = *it;
-    dst->addTemporaryExpressions (src, alignedAddress);
+    dst->addTemporaryExpressions (src, address, size);
     src = dst;
   }
 }
