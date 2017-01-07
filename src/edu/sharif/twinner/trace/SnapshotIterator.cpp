@@ -84,7 +84,8 @@ Snapshot *SnapshotIterator::operator-> () {
 }
 
 bool SnapshotIterator::operator== (const SnapshotIterator &it) const {
-  return segIt == it.segIt && snaIt == it.snaIt;
+  return segIt == it.segIt
+      && (segIt == segments.rend () || snaIt == it.snaIt);
 }
 
 bool SnapshotIterator::operator!= (const SnapshotIterator &it) const {
