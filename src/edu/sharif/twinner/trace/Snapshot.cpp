@@ -907,11 +907,43 @@ Expression *Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
   const edu::sharif::twinner::trace::exptoken::Operator *op =
       dynamic_cast<const edu::sharif::twinner::trace::exptoken::Operator *> (token);
   if (op) {
-    Expression *right = replaceTemporarySymbols (previousSnapshot, it);
-    Expression *left = replaceTemporarySymbols (previousSnapshot, it);
-    left->binaryOperation (op->clone (), right);
-    delete right;
-    return left;
+    switch (op->getType ()) {
+    case edu::sharif::twinner::trace::exptoken::Operator::SignExtension:
+    {
+      Expression *target = replaceTemporarySymbols (previousSnapshot, it);
+      Expression *source = replaceTemporarySymbols (previousSnapshot, it);
+      Expression *mainExp = replaceTemporarySymbols (previousSnapshot, it);
+      Expression *sourceExp =
+          mainExp->clone (source->getLastConcreteValue ().toUint64 ());
+      delete source;
+      delete mainExp;
+      Expression *signExtendedExp =
+          sourceExp->signExtended (target->getLastConcreteValue ().toUint64 ());
+      delete target;
+      delete sourceExp;
+      return signExtendedExp;
+    }
+    case edu::sharif::twinner::trace::exptoken::Operator::Unary:
+    {
+      Expression *mainExp = replaceTemporarySymbols (previousSnapshot, it);
+      // The only supported unary operation is bitwise negation
+      mainExp->bitwiseNegate ();
+      return mainExp;
+    }
+    case edu::sharif::twinner::trace::exptoken::Operator::FunctionalBinary:
+    case edu::sharif::twinner::trace::exptoken::Operator::Binary:
+    {
+      Expression *right = replaceTemporarySymbols (previousSnapshot, it);
+      Expression *left = replaceTemporarySymbols (previousSnapshot, it);
+      left->binaryOperation (op->clone (), right);
+      delete right;
+      return left;
+    }
+    default:
+      edu::sharif::twinner::util::Logger::error ()
+          << "Snapshot::replaceTemporarySymbols (): Unknown operator type\n";
+      abort ();
+    }
   } else {
     const edu::sharif::twinner::trace::exptoken::Constant *cte =
         dynamic_cast<const edu::sharif::twinner::trace::exptoken::Constant *> (token);
