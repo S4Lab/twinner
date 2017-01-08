@@ -996,7 +996,7 @@ std::list<const Expression *> Snapshot::getCriticalExpressions () const {
       criticalExpressions.push_back (c->getAuxExpression ());
     }
   }
-  for (std::set<SymbolRef>::const_iterator it = criticalSymbols.begin ();
+  for (std::set<SymbolRepresentation>::const_iterator it = criticalSymbols.begin ();
       it != criticalSymbols.end (); ++it) {
     const Expression *exp = it->resolve (this);
     criticalExpressions.push_back (exp);
@@ -1004,17 +1004,17 @@ std::list<const Expression *> Snapshot::getCriticalExpressions () const {
   return criticalExpressions;
 }
 
-void Snapshot::addCriticalSymbols (const std::set<SymbolRef> &symbols) {
+void Snapshot::addCriticalSymbols (const std::set<SymbolRepresentation> &symbols) {
   criticalSymbols.insert (symbols.begin (), symbols.end ());
 }
 
-const std::set<SymbolRef> &Snapshot::getCriticalSymbols () const {
+const std::set<SymbolRepresentation> &Snapshot::getCriticalSymbols () const {
   return criticalSymbols;
 }
 
 bool Snapshot::satisfiesMemoryRegisterCriticalExpressions (
     const Snapshot *sna) const {
-  for (std::set<SymbolRef>::const_iterator it = sna->criticalSymbols.begin ();
+  for (std::set<SymbolRepresentation>::const_iterator it = sna->criticalSymbols.begin ();
       it != sna->criticalSymbols.end (); ++it) {
     const Expression *ourExp = it->resolve (this);
     const Expression *targetExp = it->resolve (sna);

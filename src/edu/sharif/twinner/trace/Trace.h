@@ -30,7 +30,7 @@ class MemoryManager;
 }
 namespace trace {
 
-class SymbolRef;
+class SymbolRepresentation;
 class Syscall;
 class ExecutionTraceSegment;
 class TraceSegmentTerminator;
@@ -219,7 +219,7 @@ public:
   void replaceTemporarySymbols ();
 
 private:
-  std::set<SymbolRef> aggregateTemporarySymbols (
+  std::set<SymbolRepresentation> aggregateTemporarySymbols (
       const std::list<const Expression *> &exps) const;
 };
 

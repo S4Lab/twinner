@@ -10,7 +10,7 @@
  * This file is part of Twinner project.
  */
 
-#include "SymbolRef.h"
+#include "SymbolRepresentation.h"
 
 #include "Snapshot.h"
 
@@ -24,7 +24,7 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-SymbolRef::SymbolRef (const edu::sharif::twinner::trace::exptoken::Symbol *sym) :
+SymbolRepresentation::SymbolRepresentation (const edu::sharif::twinner::trace::exptoken::Symbol *sym) :
     generationIndex (sym->getGenerationIndex ()),
     snapshotIndex (sym->getSnapshotIndex ()) {
   const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
@@ -43,13 +43,13 @@ SymbolRef::SymbolRef (const edu::sharif::twinner::trace::exptoken::Symbol *sym) 
       memSize = mem->getValue ().getSize ();
     } else {
       edu::sharif::twinner::util::Logger::error ()
-          << "SymbolRef::SymbolRef (): symbol is neither reg nor mem\n";
+          << "SymbolRepresentation constructor: symbol should be reg or mem\n";
       abort ();
     }
   }
 }
 
-const Expression *SymbolRef::resolve (const Snapshot *sna) const {
+const Expression *SymbolRepresentation::resolve (const Snapshot *sna) const {
   if (isReg) {
     return sna->resolveRegister (regAddress);
   } else {
@@ -57,7 +57,7 @@ const Expression *SymbolRef::resolve (const Snapshot *sna) const {
   }
 }
 
-bool SymbolRef::operator== (const SymbolRef &sr) const {
+bool SymbolRepresentation::operator== (const SymbolRepresentation &sr) const {
   return isReg == sr.isReg
       && generationIndex == sr.generationIndex
       && snapshotIndex == sr.snapshotIndex
@@ -65,7 +65,7 @@ bool SymbolRef::operator== (const SymbolRef &sr) const {
           || (!isReg && memAddress == sr.memAddress && memSize == sr.memSize));
 }
 
-bool SymbolRef::operator< (const SymbolRef &sr) const {
+bool SymbolRepresentation::operator< (const SymbolRepresentation &sr) const {
   if (generationIndex < sr.generationIndex
       || (generationIndex == sr.generationIndex
           && snapshotIndex < sr.snapshotIndex)) {

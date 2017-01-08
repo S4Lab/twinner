@@ -20,7 +20,7 @@
 #include "Expression.h"
 #include "Constraint.h"
 #include "ExecutionTraceSegment.h"
-#include "SymbolRef.h"
+#include "SymbolRepresentation.h"
 
 #include "edu/sharif/twinner/trace/exptoken/Symbol.h"
 
@@ -412,7 +412,7 @@ const edu::sharif::twinner::util::MemoryManager *Trace::getMemoryManager () cons
 
 void Trace::markCriticalAddresses () {
   // Iterating from the end of the trace backwards
-  std::set<SymbolRef> criticalSymbols;
+  std::set<SymbolRepresentation> criticalSymbols;
   for (Snapshot::snapshot_reverse_iterator it = rbegin ();
       it != rend (); ++it) {
     Snapshot &currentSnapshot = *it;
@@ -423,9 +423,9 @@ void Trace::markCriticalAddresses () {
   }
 }
 
-std::set<SymbolRef> Trace::aggregateTemporarySymbols (
+std::set<SymbolRepresentation> Trace::aggregateTemporarySymbols (
     const std::list<const Expression *> &exps) const {
-  std::set<SymbolRef> temporarySymbols;
+  std::set<SymbolRepresentation> temporarySymbols;
   for (std::list<const Expression *>::const_iterator it = exps.begin ();
       it != exps.end (); ++it) {
     const Expression *exp = *it;
@@ -435,7 +435,7 @@ std::set<SymbolRef> Trace::aggregateTemporarySymbols (
       const edu::sharif::twinner::trace::exptoken::Symbol *symbol =
           dynamic_cast<edu::sharif::twinner::trace::exptoken::Symbol *> (*it2);
       if (symbol && symbol->isTemporary ()) {
-        temporarySymbols.insert (SymbolRef (symbol));
+        temporarySymbols.insert (SymbolRepresentation (symbol));
       }
     }
   }

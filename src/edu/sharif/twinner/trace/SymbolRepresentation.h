@@ -27,7 +27,7 @@ class Symbol;
 class Snapshot;
 class Expression;
 
-class SymbolRef {
+class SymbolRepresentation {
 private:
   int generationIndex;
   int snapshotIndex;
@@ -37,11 +37,11 @@ private:
   int memSize;
 
 public:
-  SymbolRef (const edu::sharif::twinner::trace::exptoken::Symbol *symbol);
+  SymbolRepresentation (const edu::sharif::twinner::trace::exptoken::Symbol *symbol);
 
   const Expression *resolve (const Snapshot *sna) const;
-  bool operator== (const SymbolRef &sr) const;
-  bool operator< (const SymbolRef &sr) const;
+  bool operator== (const SymbolRepresentation &sr) const;
+  bool operator< (const SymbolRepresentation &sr) const;
 };
 
 }
@@ -49,4 +49,4 @@ public:
 }
 }
 
-#endif /* SymbolRef.h */
+#endif /* SymbolRepresentation.h */

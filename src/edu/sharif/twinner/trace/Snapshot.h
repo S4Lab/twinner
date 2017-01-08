@@ -15,7 +15,7 @@
 
 #include "ExecutionState.h"
 #include "Constraint.h"
-#include "SymbolRef.h"
+#include "SymbolRepresentation.h"
 #include "SnapshotIterator.h"
 
 #include "edu/sharif/twinner/trace/syscall/Syscall.h"
@@ -50,7 +50,7 @@ private:
   int segmentIndex;
   int snapshotIndex;
 
-  std::set<SymbolRef> criticalSymbols;
+  std::set<SymbolRepresentation> criticalSymbols;
 
   Snapshot (int segmentIndex, int snapshotIndex,
       const std::map < REG, Expression * > &regi,
@@ -203,7 +203,7 @@ public:
    *
    * @param criticalSymbols New temporary symbols to be assumed critical.
    */
-  void addCriticalSymbols (const std::set<SymbolRef> &criticalSymbols);
+  void addCriticalSymbols (const std::set<SymbolRepresentation> &criticalSymbols);
 
   /**
    * Gets all critical symbols which are added using the addCriticalSymbols
@@ -211,7 +211,7 @@ public:
    *
    * @return All register/memory critical symbols of this snapshot.
    */
-  const std::set<SymbolRef> &getCriticalSymbols () const;
+  const std::set<SymbolRepresentation> &getCriticalSymbols () const;
 
   /**
    * Checks whether this snapshot conforms with the given sna snapshot in the
