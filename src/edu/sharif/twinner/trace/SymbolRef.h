@@ -13,6 +13,8 @@
 #ifndef SYMBOL_REF_H
 #define SYMBOL_REF_H
 
+#include "edu/sharif/twinner/pin-wrapper.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -22,17 +24,22 @@ namespace exptoken {
 class Symbol;
 }
 
+class Snapshot;
+class Expression;
+
 class SymbolRef {
-public:
-  typedef const edu::sharif::twinner::trace::exptoken::Symbol ConstSymbol;
-
 private:
-  ConstSymbol &symbol;
+  int generationIndex;
+  int snapshotIndex;
+  bool isReg; // otherwise, it is Mem
+  REG regAddress;
+  ADDRINT memAddress;
+  int memSize;
 
 public:
-  SymbolRef (ConstSymbol *symbol);
+  SymbolRef (const edu::sharif::twinner::trace::exptoken::Symbol *symbol);
 
-  operator ConstSymbol &() const;
+  const Expression *resolve (const Snapshot *sna) const;
   bool operator== (const SymbolRef &sr) const;
   bool operator< (const SymbolRef &sr) const;
 };

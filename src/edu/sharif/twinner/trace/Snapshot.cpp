@@ -15,12 +15,12 @@
 #include "Constraint.h"
 #include "StateSummary.h"
 #include "TraceSegmentTerminator.h"
-#include "exptoken/MemoryEmergedSymbol.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 
 #include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
+#include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/exptoken/Constant.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 
@@ -998,32 +998,10 @@ std::list<const Expression *> Snapshot::getCriticalExpressions () const {
   }
   for (std::set<SymbolRef>::const_iterator it = criticalSymbols.begin ();
       it != criticalSymbols.end (); ++it) {
-    const edu::sharif::twinner::trace::exptoken::Symbol &symbol = *it;
-    const Expression *exp = resolveExpression (symbol);
+    const Expression *exp = it->resolve (this);
     criticalExpressions.push_back (exp);
   }
   return criticalExpressions;
-}
-
-const Expression *Snapshot::resolveExpression (
-    const edu::sharif::twinner::trace::exptoken::Symbol &symbol) const {
-  const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
-      dynamic_cast<const edu::sharif::twinner::trace::exptoken
-      ::RegisterEmergedSymbol *> (&symbol);
-  if (reg) {
-    return resolveRegister (reg->getAddress ());
-  } else {
-    const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *mem =
-        dynamic_cast<const edu::sharif::twinner::trace::exptoken
-        ::MemoryEmergedSymbol *> (&symbol);
-    if (mem) {
-      return resolveMemory (mem->getValue ().getSize (), mem->getAddress ());
-    } else {
-      edu::sharif::twinner::util::Logger::error ()
-          << "Snapshot::resolveExpression (): symbol is neither reg nor mem\n";
-      abort ();
-    }
-  }
 }
 
 void Snapshot::addCriticalSymbols (const std::set<SymbolRef> &symbols) {
@@ -1038,11 +1016,9 @@ bool Snapshot::satisfiesMemoryRegisterCriticalExpressions (
     const Snapshot *sna) const {
   for (std::set<SymbolRef>::const_iterator it = sna->criticalSymbols.begin ();
       it != sna->criticalSymbols.end (); ++it) {
-    const edu::sharif::twinner::trace::exptoken::Symbol &symbol = *it;
-    const Expression *ourExp = resolveExpression (symbol);
-    const Expression *targetExp = sna->resolveExpression (symbol);
-    const bool expressionsAreTheSame = (*ourExp) == (*targetExp);
-    if (!expressionsAreTheSame) {
+    const Expression *ourExp = it->resolve (this);
+    const Expression *targetExp = it->resolve (sna);
+    if (!(ourExp && targetExp && (*ourExp) == (*targetExp))) {
       return false;
     }
   }

@@ -228,18 +228,16 @@ public:
    */
   bool satisfiesMemoryRegisterCriticalExpressions (const Snapshot *sna) const;
 
+  const Expression *resolveMemory (int sizeInBits, ADDRINT address) const;
+  const Expression *resolveRegister (REG address) const;
+
 private:
-  const Expression *resolveExpression (
-      const edu::sharif::twinner::trace::exptoken::Symbol &symbol) const;
   void initializeOverlappingMemoryLocationsDownwards (int size,
       ADDRINT memoryEa, const Expression &changedExp,
       int shiftAmount = 0);
   void initializeOverlappingMemoryLocationsUpwards (int size, ADDRINT memoryEa);
   void setOverwritingMemoryExpression (int size,
       ADDRINT memoryEa, const Expression *expression, bool isOverwriting);
-
-  const Expression *resolveMemory (int sizeInBits, ADDRINT address) const;
-  const Expression *resolveRegister (REG address) const;
 
   template<typename KEY>
   void replaceTemporarySymbols (const Snapshot *previousSnapshot,
