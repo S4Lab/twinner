@@ -67,13 +67,10 @@ void find_intersection (
 
 Twinner::Twinner () :
     ctree (new edu::sharif::twinner::engine::etg::ConstraintTree ()) {
-  edu::sharif::twinner::engine::smt::SmtSolver::init
-      (new edu::sharif::twinner::engine::smt::Cvc4SmtSolver ());
 }
 
 Twinner::~Twinner () {
   delete ctree;
-  edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->destroy ();
 }
 
 void Twinner::setEtgPath (string etgpath) {

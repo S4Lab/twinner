@@ -22,6 +22,7 @@
 #include "edu/sharif/twinner/engine/Twinner.h"
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/engine/etg/ConstraintTree.h"
+#include "edu/sharif/twinner/engine/smt/Cvc4SmtSolver.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/LogStream.h"
@@ -51,6 +52,15 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &twintool, string &pin, string &twin,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads);
+ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
+    string &etgpath,
+    string &input, string &args, string &endpoints,
+    bool &newRecord, bool &replayRecord,
+    string &safeFunctions, string &verboseStr, string &logfileStr,
+    string &tmpfolder,
+    string &twintool, string &pin, string &twin,
+    bool &justAnalyzeMainRoutine, string &stackOffset,
+    bool &naive, bool &measureOverheads);
 int run (string etgpath, string input, string args, string endpoints,
     bool newRecord, bool replayRecord,
     string safeFunctions, string tmpfolder,
@@ -62,6 +72,7 @@ int startTwinner (int argc, char *argv[]);
 
 int main (int argc, char *argv[]) {
   int res = startTwinner (argc, argv);
+  edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->destroy ();
   edu::sharif::twinner::util::LogStream::destroy ();
   return res;
 }
@@ -177,6 +188,8 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
   trace->printCompleteState (edu::sharif::twinner::util::Logger::info ());
 
   edu::sharif::twinner::engine::etg::ConstraintTree ct;
+  trace->markCriticalAddresses ();
+  trace->replaceTemporarySymbols ();
   ct.addConstraints (trace);
   return 0;
 }
@@ -190,8 +203,36 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &twintool, string &pin, string &twin,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads) {
+  string verboseStr = "warning", logfileStr = "out";
   char *progName = argv[0];
+  const ArgumentsParsingStatus status =
+      parseArguments (progName, argc, argv, etgpath,
+                      input, args, endpoints, newRecord, replayRecord,
+                      safeFunctions, verboseStr, logfileStr,
+                      tmpfolder, twintool, pin, twin,
+                      justAnalyzeMainRoutine, stackOffset,
+                      naive, measureOverheads);
+  if (status != ERROR_OCCURRED) {
+    if (!edu::sharif::twinner::util::LogStream::init
+        (verboseStr, logfileStr)) {
+      printError (progName, "undefined verboseness level: " + verboseStr);
+      return ERROR_OCCURRED;
+    }
+    edu::sharif::twinner::engine::smt::SmtSolver::init
+        (new edu::sharif::twinner::engine::smt::Cvc4SmtSolver ());
+  }
+  return status;
+}
 
+ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
+    string &etgpath,
+    string &input, string &args, string &endpoints,
+    bool &newRecord, bool &replayRecord,
+    string &safeFunctions, string &verboseStr, string &logfileStr,
+    string &tmpfolder,
+    string &twintool, string &pin, string &twin,
+    bool &justAnalyzeMainRoutine, string &stackOffset,
+    bool &naive, bool &measureOverheads) {
   const ArgParser::Option options[] = {
     { 'h', "help", ArgParser::NO, "display this help message and exit", false, true},
     { 'V', "version", ArgParser::NO, "output version number string and exit", false, true},
@@ -230,7 +271,6 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     return ERROR_OCCURRED;
   }
   newRecord = replayRecord = false;
-  string verboseStr = "warning", logfileStr = "out";
   tmpfolder = "/tmp";
   for (int argind = 0; argind < parser.arguments (); ++argind) {
     const int code = parser.code (argind);
@@ -318,11 +358,6 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       printError (progName, "Can not parse arguments!");
       return ERROR_OCCURRED;
     }
-  }
-  if (!edu::sharif::twinner::util::LogStream::init
-      (verboseStr, logfileStr)) {
-    printError (progName, "undefined verboseness level: " + verboseStr);
-    return ERROR_OCCURRED;
   }
   return CONTINUE_NORMALLY;
 }
