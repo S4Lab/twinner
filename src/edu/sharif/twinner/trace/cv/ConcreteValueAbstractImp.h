@@ -307,6 +307,13 @@ public:
     (*this) >>= cv;
     if (signBit) {
       const UINT64 cvValue = cv.toUint64 ();
+      if (cvValue > bits) {
+        cf = 1;
+      }
+      if (cvValue >= bits) {
+        value = ValueType (-1);
+        return *this;
+      }
       ValueType mask = 1;
       mask <<= cvValue;
       mask -= 1;
