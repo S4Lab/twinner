@@ -93,11 +93,7 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
     if (mask) {
       // exp: Z [&|] mask
       edu::sharif::twinner::trace::cv::ConcreteValue *cv = mask->getValue ().clone ();
-      if ((*operand) >= cv->getSize ()) {
-        (*cv) = 0;
-      } else {
-        (*cv) >>= (*operand);
-      }
+      (*cv) >>= (*operand);
       stack.pop_back (); // removes op
       stack.pop_back (); // removes mask
       exp->shiftToRight (operand);

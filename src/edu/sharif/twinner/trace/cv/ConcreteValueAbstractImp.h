@@ -276,10 +276,16 @@ public:
     const UINT64 cvValue = cv.toUint64 ();
     if (cvValue == 1) {
       cf = value & 0x1;
+    } else if (cvValue > bits) {
+      cf = 0;
     } else {
       cf = (value >> (cvValue - 1)) & 0x1;
     }
-    value >>= cvValue;
+    if (cvValue >= bits) {
+      value = 0; // CPU truncates cvValue; so it must be considered by caller
+    } else {
+      value >>= cvValue;
+    }
     return *this;
   }
 
