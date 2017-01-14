@@ -144,7 +144,7 @@ void ExecutionTraceSegment::addPathConstraints (
   for (std::list <edu::sharif::twinner::trace::Constraint *>::const_iterator it =
       constraints.begin (); it != constraints.end (); ++it) {
     edu::sharif::twinner::trace::Constraint *c = *it;
-    if (c->isTrivial () || (lastConstraint && (*lastConstraint) == (*c))) {
+    if (c->isTrivial (false) || (lastConstraint && (*lastConstraint) == (*c))) {
       delete c;
     } else {
       effectiveConstraints.push_back (c);
@@ -189,7 +189,6 @@ ExecutionTraceSegment *ExecutionTraceSegment::loadFromBinaryStream (std::ifstrea
 
   TraceSegmentTerminator *terminator =
       TraceSegmentTerminator::loadFromBinaryStream (in);
-
   return new ExecutionTraceSegment (segmentIndex, snas, terminator);
 }
 

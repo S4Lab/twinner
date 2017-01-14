@@ -511,12 +511,13 @@ public:
 
   void operator() (edu::sharif::twinner::trace::Expression *&exp,
                    edu::sharif::twinner::trace::Expression *&operand) const {
-    if (!exp->isTrivial () || !exp->getLastConcreteValue ().isZero ()) {
+    if (!exp->isTrivial (true) || !exp->getLastConcreteValue ().isZero ()) {
       edu::sharif::twinner::trace::Expression *length =
           new edu::sharif::twinner::trace::ExpressionImp (bitLength);
       exp->shiftToLeft (length);
       delete length;
-      if (!operand->isTrivial () || !operand->getLastConcreteValue ().isZero ()) {
+      if (!operand->isTrivial (true)
+          || !operand->getLastConcreteValue ().isZero ()) {
         exp->bitwiseOr (operand);
       }
     } else {

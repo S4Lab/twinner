@@ -194,7 +194,7 @@ bool TwinCodeEncoder::simplifyConstraints (std::stringstream &ss,
       ::const_reverse_iterator it = simplifiedConstraints.rbegin ();
       it != simplifiedConstraints.rend (); ++it) {
     ConstConstraintPtr simplifiedConstraint = *it;
-    if (simplifiedConstraint->isTrivial ()) {
+    if (simplifiedConstraint->isTrivial (false)) {
       delete simplifiedConstraint;
       continue;
     }

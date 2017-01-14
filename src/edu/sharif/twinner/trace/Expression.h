@@ -28,6 +28,7 @@ namespace trace {
 namespace cv {
 
 class ConcreteValue;
+class ConcreteValue128Bits;
 }
 
 class Expression : public Savable {
@@ -395,9 +396,11 @@ public:
 
   bool operator== (const Expression &exp) const;
 
-  bool isTrivial () const;
+  bool isTrivial (bool requiresValidConcreteValue) const;
 
 private:
+  edu::sharif::twinner::trace::cv::ConcreteValue128Bits
+  calculateConcreteValue (Stack::const_iterator &it, bool &overflow) const;
   std::pair<Stack::const_iterator, Stack::const_iterator> compareTo (
       const Expression &exp) const;
 };

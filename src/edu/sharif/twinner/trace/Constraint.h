@@ -126,7 +126,7 @@ public:
 
   bool operator== (const Constraint &constraint) const;
 
-  bool isTrivial () const;
+  bool isTrivial (bool requiresValidConcreteValue) const;
 
   static Constraint *instantiateBelowConstraint (bool &below,
       const Expression *mainExp, const Expression *auxExp, uint32_t instruction);

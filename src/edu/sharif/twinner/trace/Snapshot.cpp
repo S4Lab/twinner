@@ -790,7 +790,7 @@ void Snapshot::abandonTrivialMemoryExpressions () {
   for (std::map < ADDRINT, Expression * >::const_iterator it =
       memoryAddressTo128BitsExpression.begin ();
       it != memoryAddressTo128BitsExpression.end (); ++it) {
-    if (it->second->isTrivial ()) {
+    if (it->second->isTrivial (false)) {
       trivialAddresses.insert (it->first);
     }
   }

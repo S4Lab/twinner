@@ -207,8 +207,9 @@ bool Constraint::operator== (const Constraint &constraint) const {
           || (auxExp != 0 && constraint.auxExp != 0 && (*auxExp) == (*constraint.auxExp)));
 }
 
-bool Constraint::isTrivial () const {
-  return mainExp->isTrivial () && (auxExp == 0 || auxExp->isTrivial ());
+bool Constraint::isTrivial (bool requiresValidConcreteValue) const {
+  return mainExp->isTrivial (requiresValidConcreteValue)
+      && (auxExp == 0 || auxExp->isTrivial (requiresValidConcreteValue));
 }
 
 Constraint *Constraint::instantiateBelowConstraint (bool &below,
