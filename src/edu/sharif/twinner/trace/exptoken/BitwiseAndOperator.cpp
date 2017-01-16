@@ -144,11 +144,27 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
         // exp == X [<<>>] second
         stack.pop_back (); // removes secondOp
         stack.pop_back (); // removes second
-        if (secondOp->getIdentifier () == Operator::SHIFT_LEFT
-            || second->getValue () <=
-            operand->getSize () - numberOfBits (operand->clone ())) {
+        int size = -1;
+        if (secondOp->getIdentifier () == Operator::SHIFT_LEFT) {
+          size = operand->getSize ();
+        } else if (second->getValue () <= 128) {
+          const int minimumRequiredSize = second->getValue ().toUint64 ()
+              + numberOfBits (operand->clone ());
+          if (minimumRequiredSize <= 8) {
+            size = edu::sharif::twinner::util::max (8, operand->getSize ());
+          } else if (minimumRequiredSize <= 16) {
+            size = edu::sharif::twinner::util::max (16, operand->getSize ());
+          } else if (minimumRequiredSize <= 32) {
+            size = edu::sharif::twinner::util::max (32, operand->getSize ());
+          } else if (minimumRequiredSize <= 64) {
+            size = edu::sharif::twinner::util::max (64, operand->getSize ());
+          } else if (minimumRequiredSize <= 128) {
+            size = edu::sharif::twinner::util::max (128, operand->getSize ());
+          }
+        }
+        if (size > 0) {
           edu::sharif::twinner::trace::cv::ConcreteValue *operandCopy =
-              operand->clone ();
+              operand->clone (size);
           Operator *negOp = secondOp->instantiateNegatedOperator ();
           negOp->apply (*operandCopy, second->getValue ());
           delete negOp;
