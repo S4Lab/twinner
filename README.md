@@ -14,7 +14,7 @@ Use make files.
 Run Twinner binary with --help for details.
 
 ## License
-    Copyright © 2013-2016 Behnam Momeni
+    Copyright © 2013-2017 Behnam Momeni
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
