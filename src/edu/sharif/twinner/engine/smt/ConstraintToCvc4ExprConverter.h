@@ -92,6 +92,7 @@ public:
       const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals);
 
 private:
+  friend class ConvertToCvc4ExprVisitor;
   void addConstraint (Expr constraint);
 
   template <typename Combiner>
@@ -127,18 +128,8 @@ private:
   Expr convertExpressionToCvc4Expr (bool &ok,
       std::map<std::string, Expr> &symbols,
       const edu::sharif::twinner::trace::Expression *exp);
-  Expr convertExpressionToCvc4Expr (bool &ok,
-      std::map<std::string, Expr> &symbols,
-      std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >::const_iterator &top);
   edu::sharif::twinner::trace::Expression *convertCvc4ExprToExpression (Expr &exp,
       const std::map<std::string, const edu::sharif::twinner::trace::cv::ConcreteValue *> &vals);
-
-  UINT64 extractConstantUint64 (bool &ok,
-      std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >::const_iterator &top);
-  Expr signExtendCvc4Expr (Expr &operand, UINT64 source, UINT64 target);
-
-  Kind convertOperatorIdentifierToCvc4Kind (
-      edu::sharif::twinner::trace::exptoken::Operator::OperatorIdentifier oi);
 };
 
 }

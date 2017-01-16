@@ -893,97 +893,93 @@ void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
   }
 }
 
-void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
-    Expression *exp) {
-  Expression::Stack::const_iterator it = exp->getStack ().end ();
-  Expression *newExp = replaceTemporarySymbols (previousSnapshot, --it);
-  (*exp) = (*newExp);
-  delete newExp;
-}
+class ReplaceTemporarySymbolsVisitor :
+public edu::sharif::twinner::trace::exptoken::ExpressionVisitor<Expression *> {
+private:
+  const Snapshot *previousSnapshot;
 
-Expression *Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
-    Expression::Stack::const_iterator &it) {
-  const edu::sharif::twinner::trace::exptoken::ExpressionToken *token = *it--;
-  const edu::sharif::twinner::trace::exptoken::Operator *op =
-      dynamic_cast<const edu::sharif::twinner::trace::exptoken::Operator *> (token);
-  if (op) {
-    switch (op->getType ()) {
-    case edu::sharif::twinner::trace::exptoken::Operator::SignExtension:
-    {
-      Expression *target = replaceTemporarySymbols (previousSnapshot, it);
-      Expression *source = replaceTemporarySymbols (previousSnapshot, it);
-      Expression *mainExp = replaceTemporarySymbols (previousSnapshot, it);
-      Expression *sourceExp =
-          mainExp->clone (source->getLastConcreteValue ().toUint64 ());
-      delete source;
-      delete mainExp;
-      Expression *signExtendedExp =
-          sourceExp->signExtended (target->getLastConcreteValue ().toUint64 ());
-      delete target;
-      delete sourceExp;
-      return signExtendedExp;
-    }
-    case edu::sharif::twinner::trace::exptoken::Operator::Unary:
-    {
-      Expression *mainExp = replaceTemporarySymbols (previousSnapshot, it);
-      // The only supported unary operation is bitwise negation
-      mainExp->bitwiseNegate ();
-      return mainExp;
-    }
-    case edu::sharif::twinner::trace::exptoken::Operator::FunctionalBinary:
-    case edu::sharif::twinner::trace::exptoken::Operator::Binary:
-    {
-      Expression *right = replaceTemporarySymbols (previousSnapshot, it);
-      Expression *left = replaceTemporarySymbols (previousSnapshot, it);
-      left->binaryOperation (op->clone (), right);
-      delete right;
-      return left;
-    }
-    default:
-      edu::sharif::twinner::util::Logger::error ()
-          << "Snapshot::replaceTemporarySymbols (): Unknown operator type\n";
-      abort ();
-    }
-  } else {
+public:
+
+  ReplaceTemporarySymbolsVisitor (const Snapshot *_previousSnapshot) :
+      previousSnapshot (_previousSnapshot) {
+  }
+
+  virtual ResultType visitSignExtension (const Expression::Operator *op,
+      ResultType &mainExp, ResultType &source, ResultType &target) {
+    Expression *sourceExp =
+        mainExp->clone (source->getLastConcreteValue ().toUint64 ());
+    delete source;
+    delete mainExp;
+    Expression *signExtendedExp =
+        sourceExp->signExtended (target->getLastConcreteValue ().toUint64 ());
+    delete target;
+    delete sourceExp;
+    return signExtendedExp;
+  }
+
+  virtual ResultType visitFunctionalBinary (const Expression::Operator *op,
+      ResultType &left, ResultType &right) {
+    return visitBinary (op, left, right);
+  }
+
+  virtual ResultType visitBinary (const Expression::Operator *op,
+      ResultType &left, ResultType &right) {
+    left->binaryOperation (op->clone (), right);
+    delete right;
+    return left;
+  }
+
+  virtual ResultType visitUnary (const Expression::Operator *op,
+      ResultType &mainExp) {
+    // The only supported unary operation is bitwise negation
+    mainExp->bitwiseNegate ();
+    return mainExp;
+  }
+
+  virtual ResultType visitOperand (
+      const edu::sharif::twinner::trace::exptoken::Operand *operand) {
     const edu::sharif::twinner::trace::exptoken::Constant *cte =
-        dynamic_cast<const edu::sharif::twinner::trace::exptoken::Constant *> (token);
+        dynamic_cast<const edu::sharif::twinner::trace::exptoken::Constant *> (operand);
     if (cte) {
       return new ExpressionImp (cte->getValue ());
     } else {
       const edu::sharif::twinner::trace::exptoken::Symbol *sym =
-          static_cast<const edu::sharif::twinner::trace::exptoken::Symbol *> (token);
+          static_cast<const edu::sharif::twinner::trace::exptoken::Symbol *> (operand);
       if (!sym->isTemporary ()) {
         return new ExpressionImp (sym->clone ());
       } else {
-        return replaceTemporarySymbols (previousSnapshot, sym);
+        const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
+            dynamic_cast<const edu::sharif::twinner::trace::exptoken
+            ::RegisterEmergedSymbol *> (sym);
+        const Expression *exp;
+        if (reg) {
+          exp = previousSnapshot->resolveRegister (reg->getAddress ());
+        } else {
+          const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *mem =
+              dynamic_cast<const edu::sharif::twinner::trace::exptoken
+              ::MemoryEmergedSymbol *> (sym);
+          if (mem) {
+            exp = previousSnapshot->resolveMemory
+                (mem->getValue ().getSize (), mem->getAddress ());
+          } else {
+            edu::sharif::twinner::util::Logger::error ()
+                << "ReplaceTemporarySymbolsVisitor::visitOperand ():"
+                " symbol is neither reg nor mem\n";
+            abort ();
+          }
+        }
+        return exp->clone ();
       }
     }
   }
-}
+};
 
-Expression *Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
-    const edu::sharif::twinner::trace::exptoken::Symbol *tempSymbol) {
-  const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
-      dynamic_cast<const edu::sharif::twinner::trace::exptoken
-      ::RegisterEmergedSymbol *> (tempSymbol);
-  const Expression *exp;
-  if (reg) {
-    exp = previousSnapshot->resolveRegister (reg->getAddress ());
-  } else {
-    const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *mem =
-        dynamic_cast<const edu::sharif::twinner::trace::exptoken
-        ::MemoryEmergedSymbol *> (tempSymbol);
-    if (mem) {
-      exp = previousSnapshot->resolveMemory
-          (mem->getValue ().getSize (), mem->getAddress ());
-    } else {
-      edu::sharif::twinner::util::Logger::error ()
-          << "Snapshot::replaceTemporarySymbols ():"
-          " symbol is neither reg nor mem\n";
-      abort ();
-    }
-  }
-  return exp->clone ();
+void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
+    Expression *exp) {
+  ReplaceTemporarySymbolsVisitor visitor (previousSnapshot);
+  Expression *newExp = exp->visit (visitor);
+  (*exp) = (*newExp);
+  delete newExp;
 }
 
 std::list<const Expression *> Snapshot::getCriticalExpressions () const {

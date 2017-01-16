@@ -331,126 +331,195 @@ ConstraintToCvc4ExprConverter::exprVsExprKindToComparisonType (Kind kind) const 
   }
 }
 
-Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
-    bool &ok, std::map<std::string, Expr> &symbols,
-    const edu::sharif::twinner::trace::Expression *exp) {
-  const std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * > &stack =
-      exp->getStack ();
-  std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >::const_iterator top =
-      stack.end ();
-  return convertExpressionToCvc4Expr (ok, symbols, --top);
-}
+class ConvertToCvc4ExprVisitor :
+public edu::sharif::twinner::trace::exptoken::ExpressionVisitor<Expr> {
+private:
+  bool &ok;
+  std::map<std::string, Expr> &symbols;
+  ConstraintToCvc4ExprConverter *super;
 
-Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
-    bool &ok, std::map<std::string, Expr> &symbols,
-    std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >::const_iterator &top) {
-  ok = true;
-  const edu::sharif::twinner::trace::exptoken::ExpressionToken *token = *top;
-  const edu::sharif::twinner::trace::exptoken::Operator *op =
-      dynamic_cast<const edu::sharif::twinner::trace::exptoken::Operator *> (token);
-  if (op) {
-    switch (op->getType ()) {
-    case edu::sharif::twinner::trace::exptoken::Operator::SignExtension:
-    {
-      const UINT64 target = extractConstantUint64 (ok, --top);
-      if (!ok) {
-        return Expr ();
-      }
-      const UINT64 source = extractConstantUint64 (ok, --top);
-      if (!ok) {
-        return Expr ();
-      }
-      Expr operand = convertExpressionToCvc4Expr (ok, symbols, --top);
-      if (!ok) {
-        return Expr ();
-      }
-      return signExtendCvc4Expr (operand, source, target);
-    }
-    case edu::sharif::twinner::trace::exptoken::Operator::Unary:
-    {
-      Expr operand = convertExpressionToCvc4Expr (ok, symbols, --top);
-      if (!ok) {
-        return Expr ();
-      }
-      const Kind k = convertOperatorIdentifierToCvc4Kind (op->getIdentifier ());
-      if (k == kind::UNDEFINED_KIND) {
-        ok = false;
-        return Expr ();
-      }
-      return em.mkExpr (k, operand);
-    }
-    case edu::sharif::twinner::trace::exptoken::Operator::Binary:
-    case edu::sharif::twinner::trace::exptoken::Operator::FunctionalBinary:
-    {
-      Expr rightOperand = convertExpressionToCvc4Expr (ok, symbols, --top);
-      if (!ok) {
-        return Expr ();
-      }
-      Expr leftOperand = convertExpressionToCvc4Expr (ok, symbols, --top);
-      if (!ok) {
-        return Expr ();
-      }
-      const edu::sharif::twinner::trace::exptoken::Operator::OperatorIdentifier opid =
-          op->getIdentifier ();
-      if (opid == edu::sharif::twinner::trace::exptoken::Operator::REMAINDER
-          || opid == edu::sharif::twinner::trace::exptoken::Operator::DIVIDE) {
-        // Adding (divisor!=zero) constraint
-        addConstraint (em.mkExpr (kind::DISTINCT, rightOperand, zero));
-      }
-      const Kind k = convertOperatorIdentifierToCvc4Kind (opid);
-      if (k == kind::UNDEFINED_KIND) {
-        ok = false;
-        return Expr ();
-      }
-      return em.mkExpr (k, leftOperand, rightOperand);
-    }
-    default:
-      edu::sharif::twinner::util::Logger::error () << "Unknown operator type\n";
+public:
+
+  ConvertToCvc4ExprVisitor (bool &_ok, std::map<std::string, Expr> &_symbols,
+      ConstraintToCvc4ExprConverter *_super) :
+      ok (_ok), symbols (_symbols), super (_super) {
+  }
+
+  virtual Expr visitSignExtension (
+      const edu::sharif::twinner::trace::exptoken::Operator *op,
+      Expr &main, Expr &source, Expr &target) {
+    if (!ok || !source.isConst () || !target.isConst ()) {
       ok = false;
       return Expr ();
     }
-
-  } else {
-    const edu::sharif::twinner::trace::exptoken::Operand *operandToken =
-        static_cast<const edu::sharif::twinner::trace::exptoken::Operand *> (token);
-    if (!operandToken->isConstant ()) {
-      const edu::sharif::twinner::trace::exptoken::Symbol *symbolToken =
-          static_cast<const edu::sharif::twinner::trace::exptoken::Symbol *> (token);
-      const std::string name = symbolToken->getTechnicalName ();
-      std::map<std::string, Expr>::const_iterator it = symbols.find (name);
-      if (it != symbols.end ()) {
-        return it->second;
-      } else {
-        Expr sym = em.mkVar (name, type);
-        if (limitSymbols) {
-          const int size = symbolToken->getValue ().getSize ();
-          if (size < 128) {
-            addConstraint
-                (em.mkExpr (kind::BITVECTOR_ULT, sym, maxLimits.at (size)));
-          }
-        }
-        symbols.insert (std::make_pair (name, sym));
-        return sym;
-      }
-
+    const Integer maxVal (128);
+    const Integer &sourceVal = source.getConst <BitVector> ().getValue ();
+    const Integer &targetVal = target.getConst <BitVector> ().getValue ();
+    if (sourceVal > maxVal || targetVal > maxVal) {
+      ok = false;
+      return Expr ();
+    }
+    const UINT32 sv = sourceVal.getUnsignedLong ();
+    const UINT32 tv = targetVal.getUnsignedLong ();
+    // TODO: Change BV-types instead of truncating expressions and eliminate below EXTRACT
+    const Expr srcExp =
+        super->em.mkExpr (kind::BITVECTOR_EXTRACT,
+                          super->em.mkConst (BitVectorExtract (sv - 1, 0)),
+                          main);
+    const Expr singExtended =
+        super->em.mkExpr (kind::BITVECTOR_SIGN_EXTEND,
+                          super->em.mkConst (BitVectorSignExtend (tv - sv)),
+                          srcExp);
+    if (tv == 128) {
+      return singExtended;
     } else {
-      const edu::sharif::twinner::trace::cv::ConcreteValue &value =
-          operandToken->getValue ();
-      std::string valstr = value.toHexString ();
-      std::map<std::string, Expr>::const_iterator it = constants.find (valstr);
-      if (it != constants.end ()) {
-        return it->second;
-      } else {
-        edu::sharif::twinner::util::Logger logger =
-            edu::sharif::twinner::util::Logger::loquacious ();
-        logger << "Creating CVC4 Integer from hex string: " << valstr;
-        Expr cc = em.mkConst (BitVector (128, Integer (valstr, 16)));
-        logger << " ... done.\n";
-        constants.insert (std::make_pair (valstr, cc));
-        return cc;
-      }
+      return super->em.mkExpr
+          (kind::BITVECTOR_ZERO_EXTEND,
+           super->em.mkConst (BitVectorZeroExtend (128 - tv)),
+           singExtended);
     }
   }
+
+  virtual Expr visitFunctionalBinary (
+      const edu::sharif::twinner::trace::exptoken::Operator *op,
+      Expr &left, Expr &right) {
+    return visitBinary (op, left, right);
+  }
+
+  virtual Expr visitBinary (
+      const edu::sharif::twinner::trace::exptoken::Operator *op,
+      Expr &left, Expr &right) {
+    if (!ok) {
+      return Expr ();
+    }
+    const edu::sharif::twinner::trace::exptoken::Operator::OperatorIdentifier opid =
+        op->getIdentifier ();
+    if (opid == edu::sharif::twinner::trace::exptoken::Operator::REMAINDER
+        || opid == edu::sharif::twinner::trace::exptoken::Operator::DIVIDE) {
+      // Adding (divisor!=zero) constraint
+      super->addConstraint
+          (super->em.mkExpr (kind::DISTINCT, right, super->zero));
+    }
+    const Kind k = convertOperatorIdentifierToCvc4Kind (opid);
+    if (k == kind::UNDEFINED_KIND) {
+      ok = false;
+      return Expr ();
+    }
+    return super->em.mkExpr (k, left, right);
+  }
+
+  virtual Expr visitUnary (
+      const edu::sharif::twinner::trace::exptoken::Operator *op,
+      Expr &main) {
+    if (!ok) {
+      return Expr ();
+    }
+    const Kind k = convertOperatorIdentifierToCvc4Kind (op->getIdentifier ());
+    if (k == kind::UNDEFINED_KIND) {
+      ok = false;
+      return Expr ();
+    }
+    return super->em.mkExpr (k, main);
+  }
+
+  virtual Expr visitOperand (
+      const edu::sharif::twinner::trace::exptoken::Operand *operand) {
+    if (operand->isConstant ()) {
+      return visitConstant (operand);
+    } else {
+      return visitSymbol (operand);
+    }
+  }
+
+  Expr visitSymbol (
+      const edu::sharif::twinner::trace::exptoken::Operand *operand) {
+    const edu::sharif::twinner::trace::exptoken::Symbol *symbolToken =
+        static_cast<const edu::sharif::twinner::trace::exptoken::Symbol *> (operand);
+    const std::string name = symbolToken->getTechnicalName ();
+    std::map<std::string, Expr>::const_iterator it = symbols.find (name);
+    if (it != symbols.end ()) {
+      return it->second;
+    } else {
+      Expr sym = super->em.mkVar (name, super->type);
+      if (super->limitSymbols) {
+        const int size = symbolToken->getValue ().getSize ();
+        if (size < 128) {
+          super->addConstraint
+              (super->em.mkExpr
+               (kind::BITVECTOR_ULT, sym, super->maxLimits.at (size)));
+        }
+      }
+      symbols.insert (std::make_pair (name, sym));
+      return sym;
+    }
+  }
+
+  Expr visitConstant (
+      const edu::sharif::twinner::trace::exptoken::Operand *operand) {
+    const edu::sharif::twinner::trace::cv::ConcreteValue &value =
+        operand->getValue ();
+    std::string valstr = value.toHexString ();
+    std::map<std::string, Expr>::const_iterator it =
+        super->constants.find (valstr);
+    if (it != super->constants.end ()) {
+      return it->second;
+    } else {
+      edu::sharif::twinner::util::Logger logger =
+          edu::sharif::twinner::util::Logger::loquacious ();
+      logger << "Creating CVC4 Integer from hex string: " << valstr;
+      Expr cc = super->em.mkConst (BitVector (128, Integer (valstr, 16)));
+      logger << " ... done.\n";
+      super->constants.insert (std::make_pair (valstr, cc));
+      return cc;
+    }
+  }
+
+private:
+
+  Kind convertOperatorIdentifierToCvc4Kind (
+      edu::sharif::twinner::trace::exptoken::Operator::OperatorIdentifier oi) {
+    switch (oi) {
+    case edu::sharif::twinner::trace::exptoken::Operator::ADD:
+      return kind::BITVECTOR_PLUS;
+    case edu::sharif::twinner::trace::exptoken::Operator::MINUS:
+      return kind::BITVECTOR_SUB;
+    case edu::sharif::twinner::trace::exptoken::Operator::MULTIPLY:
+      return kind::BITVECTOR_MULT;
+    case edu::sharif::twinner::trace::exptoken::Operator::DIVIDE:
+      return kind::BITVECTOR_UDIV;
+    case edu::sharif::twinner::trace::exptoken::Operator::REMAINDER:
+      return kind::BITVECTOR_UREM_TOTAL;
+    case edu::sharif::twinner::trace::exptoken::Operator::BITWISE_NEGATE:
+      return kind::BITVECTOR_NOT;
+    case edu::sharif::twinner::trace::exptoken::Operator::XOR:
+      return kind::BITVECTOR_XOR;
+    case edu::sharif::twinner::trace::exptoken::Operator::BITWISE_AND:
+      return kind::BITVECTOR_AND;
+    case edu::sharif::twinner::trace::exptoken::Operator::BITWISE_OR:
+      return kind::BITVECTOR_OR;
+    case edu::sharif::twinner::trace::exptoken::Operator::SHIFT_LEFT:
+      return kind::BITVECTOR_SHL;
+    case edu::sharif::twinner::trace::exptoken::Operator::SHIFT_RIGHT:
+      return kind::BITVECTOR_LSHR;
+    case edu::sharif::twinner::trace::exptoken::Operator::ARITHMETIC_SHIFT_RIGHT:
+      return kind::BITVECTOR_ASHR;
+    case edu::sharif::twinner::trace::exptoken::Operator::ROTATE_RIGHT:
+      return kind::BITVECTOR_ROTATE_RIGHT;
+    default:
+      edu::sharif::twinner::util::Logger::error ()
+          << "ConstraintToCvc4ExprConverter::convertOperatorIdentifierToCvc4Kind"
+          " (...): Unknown Operator Identifier\n";
+      return kind::UNDEFINED_KIND;
+    }
+  }
+};
+
+Expr ConstraintToCvc4ExprConverter::convertExpressionToCvc4Expr (
+    bool &ok, std::map<std::string, Expr> &symbols,
+    const edu::sharif::twinner::trace::Expression *exp) {
+  ok = true;
+  ConvertToCvc4ExprVisitor visitor (ok, symbols, this);
+  return exp->visit (visitor);
 }
 
 namespace {
@@ -777,77 +846,6 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp,
   return 0;
 }
 
-UINT64 ConstraintToCvc4ExprConverter::extractConstantUint64 (bool &ok,
-    std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >::const_iterator &top) {
-  const edu::sharif::twinner::trace::exptoken::ExpressionToken *token = *top;
-  if (dynamic_cast<const edu::sharif::twinner::trace::exptoken::Constant *> (token)) {
-    const edu::sharif::twinner::trace::exptoken::Constant *constantToken =
-        static_cast<const edu::sharif::twinner::trace::exptoken::Constant *> (token);
-    const edu::sharif::twinner::trace::cv::ConcreteValue &value =
-        constantToken->getValue ();
-    return value.toUint64 ();
-  } else {
-    ok = false;
-    edu::sharif::twinner::util::Logger::error ()
-        << "No constant UINT64 found\n";
-    return 0;
-  }
-}
-
-Expr ConstraintToCvc4ExprConverter::signExtendCvc4Expr (Expr &operand,
-    UINT64 source, UINT64 target) {
-  // TODO: Change BV-types instead of truncating expressions and eliminate below EXTRACT
-  Expr srcExp = em.mkExpr (kind::BITVECTOR_EXTRACT,
-                           em.mkConst (BitVectorExtract (source - 1, 0)),
-                           operand);
-  Expr singExtended = em.mkExpr (kind::BITVECTOR_SIGN_EXTEND,
-                                 em.mkConst (BitVectorSignExtend (target - source)),
-                                 srcExp);
-  if (target == 128) {
-    return singExtended;
-  } else {
-    return em.mkExpr (kind::BITVECTOR_ZERO_EXTEND,
-                      em.mkConst (BitVectorZeroExtend (128 - target)),
-                      singExtended);
-  }
-}
-
-Kind ConstraintToCvc4ExprConverter::convertOperatorIdentifierToCvc4Kind (
-    edu::sharif::twinner::trace::exptoken::Operator::OperatorIdentifier oi) {
-  switch (oi) {
-  case edu::sharif::twinner::trace::exptoken::Operator::ADD:
-    return kind::BITVECTOR_PLUS;
-  case edu::sharif::twinner::trace::exptoken::Operator::MINUS:
-    return kind::BITVECTOR_SUB;
-  case edu::sharif::twinner::trace::exptoken::Operator::MULTIPLY:
-    return kind::BITVECTOR_MULT;
-  case edu::sharif::twinner::trace::exptoken::Operator::DIVIDE:
-    return kind::BITVECTOR_UDIV;
-  case edu::sharif::twinner::trace::exptoken::Operator::REMAINDER:
-    return kind::BITVECTOR_UREM_TOTAL;
-  case edu::sharif::twinner::trace::exptoken::Operator::BITWISE_NEGATE:
-    return kind::BITVECTOR_NOT;
-  case edu::sharif::twinner::trace::exptoken::Operator::XOR:
-    return kind::BITVECTOR_XOR;
-  case edu::sharif::twinner::trace::exptoken::Operator::BITWISE_AND:
-    return kind::BITVECTOR_AND;
-  case edu::sharif::twinner::trace::exptoken::Operator::BITWISE_OR:
-    return kind::BITVECTOR_OR;
-  case edu::sharif::twinner::trace::exptoken::Operator::SHIFT_LEFT:
-    return kind::BITVECTOR_SHL;
-  case edu::sharif::twinner::trace::exptoken::Operator::SHIFT_RIGHT:
-    return kind::BITVECTOR_LSHR;
-  case edu::sharif::twinner::trace::exptoken::Operator::ARITHMETIC_SHIFT_RIGHT:
-    return kind::BITVECTOR_ASHR;
-  case edu::sharif::twinner::trace::exptoken::Operator::ROTATE_RIGHT:
-    return kind::BITVECTOR_ROTATE_RIGHT;
-  default:
-    edu::sharif::twinner::util::Logger::error ()
-        << "ConstraintToCvc4ExprConverter::convertOperatorIdentifierToCvc4Kind"
-        " (...): Unknown Operator Identifier\n";
-    return kind::UNDEFINED_KIND;
-  }
-}
 
 }
 }

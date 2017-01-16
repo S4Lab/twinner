@@ -18,6 +18,7 @@
 #include "ExecutionState.h"
 
 #include "edu/sharif/twinner/trace/exptoken/Operator.h"
+#include "edu/sharif/twinner/trace/exptoken/ExpressionVisitor.h"
 
 #include <list>
 
@@ -112,7 +113,58 @@ public:
   bool isOverwritingExpression () const;
 
   std::string toString () const;
-  void convertToInfixExpression (Stack &st, std::stringstream &ss) const;
+
+  template <typename Result>
+  Result visit (edu::sharif::twinner::trace::exptoken
+      ::ExpressionVisitor<Result> &visitor) const {
+    Stack::const_iterator it = getStack ().end ();
+    return visit (visitor, --it);
+  }
+
+private:
+
+  template <typename Result>
+  Result visit (edu::sharif::twinner::trace::exptoken
+      ::ExpressionVisitor<Result> &visitor, Stack::const_iterator &it) const {
+    const edu::sharif::twinner::trace::exptoken::ExpressionToken *token = *it--;
+    const Operator *op = dynamic_cast<const Operator *> (token);
+    if (op) {
+      switch (op->getType ()) {
+        case Operator::SignExtension:
+        {
+          Result target = visit (visitor, it);
+          Result source = visit (visitor, it);
+          Result main = visit (visitor, it);
+          return visitor.visitSignExtension (op, main, source, target);
+        }
+        case Operator::Unary:
+        {
+          Result main = visit (visitor, it);
+          return visitor.visitUnary (op, main);
+        }
+        case Operator::FunctionalBinary:
+        {
+          Result right = visit (visitor, it);
+          Result left = visit (visitor, it);
+          return visitor.visitFunctionalBinary (op, left, right);
+        }
+        case Operator::Binary:
+        {
+          Result right = visit (visitor, it);
+          Result left = visit (visitor, it);
+          return visitor.visitBinary (op, left, right);
+        }
+        default:
+          edu::sharif::twinner::util::Logger::error ()
+              << "Expression::visit (): Unknown operator type\n";
+          abort ();
+      }
+    } else {
+      const edu::sharif::twinner::trace::exptoken::Operand *operand =
+          static_cast<const edu::sharif::twinner::trace::exptoken::Operand *> (token);
+      return visitor.visitOperand (operand);
+    }
+  }
 
 protected:
   void unaryOperation (Operator *op, const Expression *exp);
@@ -399,8 +451,7 @@ public:
   bool isTrivial (bool requiresValidConcreteValue) const;
 
 private:
-  edu::sharif::twinner::trace::cv::ConcreteValue128Bits
-  calculateConcreteValue (Stack::const_iterator &it, bool &overflow) const;
+  bool makeConcreteValueValid () const;
   std::pair<Stack::const_iterator, Stack::const_iterator> compareTo (
       const Expression &exp) const;
 };

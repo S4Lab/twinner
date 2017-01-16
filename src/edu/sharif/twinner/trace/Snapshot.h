@@ -246,11 +246,6 @@ private:
       std::list < Constraint * > &constraints);
   void replaceTemporarySymbols (const Snapshot *previousSnapshot,
       Expression *exp);
-  Expression *replaceTemporarySymbols (const Snapshot *previousSnapshot,
-      std::list < edu::sharif::twinner::trace::exptoken::ExpressionToken * >
-      ::const_iterator &it);
-  Expression *replaceTemporarySymbols (const Snapshot *previousSnapshot,
-      const edu::sharif::twinner::trace::exptoken::Symbol *tempSymbol);
 };
 
 }

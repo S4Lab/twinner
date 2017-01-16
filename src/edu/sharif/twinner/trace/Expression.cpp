@@ -116,59 +116,56 @@ bool Expression::isOverwritingExpression () const {
   return isOverwriting;
 }
 
+class ConvertToInfixExpressionStringVisitor :
+public edu::sharif::twinner::trace::exptoken::ExpressionVisitor<std::string> {
+public:
+
+  virtual std::string visitSignExtension (const Expression::Operator *op,
+      std::string &main, std::string &source, std::string &target) {
+    std::stringstream ss;
+    ss << op->toString () << '_' << target << '_' << source << " ("
+        << main << ')';
+    return ss.str ();
+  }
+
+  virtual std::string visitFunctionalBinary (const Expression::Operator *op,
+      std::string &left, std::string &right) {
+    std::stringstream ss;
+    ss << op->toString () /*function name*/ << " (" << left << ", "
+        << right << ')';
+    return ss.str ();
+  }
+
+  virtual std::string visitBinary (const Expression::Operator *op,
+      std::string &left, std::string &right) {
+    std::stringstream ss;
+    ss << '(' << left << ' ' << op->toString () << ' ' << right << ')';
+    return ss.str ();
+  }
+
+  virtual std::string visitUnary (const Expression::Operator *op,
+      std::string &main) {
+    std::stringstream ss;
+    ss << op->toString () << main;
+    return ss.str ();
+  }
+
+  virtual std::string visitOperand (
+      const edu::sharif::twinner::trace::exptoken::Operand *operand) {
+    return operand->getTechnicalName ();
+  }
+};
+
 std::string Expression::toString () const {
   std::stringstream ss;
   if (isTrivial (true)) {
     ss << *lastConcreteValue;
   } else {
-    Stack st = Stack (stack);
-    convertToInfixExpression (st, ss);
-    ss << " /*" << *lastConcreteValue << "*/";
+    ConvertToInfixExpressionStringVisitor visitor;
+    std::string str = visit (visitor);
+    ss << str << " /*" << *lastConcreteValue << "*/";
   }
   return ss.str ();
-}
-
-void Expression::convertToInfixExpression (Stack &st, std::stringstream &ss) const {
-  const edu::sharif::twinner::trace::exptoken::ExpressionToken *token = st.back ();
-  st.pop_back ();
-  const Operator *op = dynamic_cast<const Operator *> (token);
-  if (op) {
-    std::stringstream operand;
-    switch (op->getType ()) {
-    case Operator::SignExtension:
-      ss << op->toString () << '_';
-      convertToInfixExpression (st, ss); // target size
-      ss << '_';
-      convertToInfixExpression (st, ss); // source size
-      ss << " (";
-      convertToInfixExpression (st, ss); // main operand (to be sign extended)
-      ss << ')';
-      break;
-    case Operator::Unary:
-      convertToInfixExpression (st, operand);
-      ss << op->toString () << operand.str ();
-      break;
-    case Operator::FunctionalBinary:
-      convertToInfixExpression (st, operand); // right operand
-      ss << op->toString () /*function name*/ << " (";
-      convertToInfixExpression (st, ss); // left operand
-      ss << ", " << operand.str () << ')';
-      break;
-    case Operator::Binary:
-      convertToInfixExpression (st, operand); // right operand
-      ss << '(';
-      convertToInfixExpression (st, ss); // left operand
-      ss << ' ' << op->toString () << ' ' << operand.str () << ')';
-      break;
-    default:
-      edu::sharif::twinner::util::Logger::error () << "Unknown operator type\n";
-      break;
-    }
-  } else if (token) {
-    ss << token->getTechnicalName (); // single operand
-  } else {
-    edu::sharif::twinner::util::Logger::error () << "Missing expression token\n";
-  }
 }
 
 void Expression::unaryOperation (Operator *op, const Expression *exp) {
@@ -503,80 +500,83 @@ bool Expression::isTrivial (bool requiresValidConcreteValue) const {
       }
     }
   }
-  if (requiresValidConcreteValue) {
-    Stack::const_iterator it = stack.end ();
-    bool overflow = false;
-    edu::sharif::twinner::trace::cv::ConcreteValue128Bits cv =
-        calculateConcreteValue (--it, overflow);
-    if (overflow) {
-      return false;
-    }
-    (*lastConcreteValue) = cv;
-    return cv == (*lastConcreteValue);
-  }
-  return true;
+  return !requiresValidConcreteValue || makeConcreteValueValid ();
 }
 
-edu::sharif::twinner::trace::cv::ConcreteValue128Bits
-Expression::calculateConcreteValue (Stack::const_iterator &it,
-    bool &overflow) const {
-  const edu::sharif::twinner::trace::exptoken::ExpressionToken *token = *it--;
-  const edu::sharif::twinner::trace::exptoken::Operator *op =
-      dynamic_cast<const edu::sharif::twinner::trace::exptoken::Operator *> (token);
-  if (op) {
-    switch (op->getType ()) {
-    case edu::sharif::twinner::trace::exptoken::Operator::SignExtension:
-    {
-      edu::sharif::twinner::trace::cv::ConcreteValue128Bits target =
-          calculateConcreteValue (it, overflow);
-      edu::sharif::twinner::trace::cv::ConcreteValue128Bits source =
-          calculateConcreteValue (it, overflow);
-      edu::sharif::twinner::trace::cv::ConcreteValue128Bits mainCv =
-          calculateConcreteValue (it, overflow);
-      edu::sharif::twinner::trace::cv::ConcreteValue *sourceCv =
-          mainCv.clone (source.toUint64 ());
-      edu::sharif::twinner::trace::cv::ConcreteValue *signExtendedCv =
-          sourceCv->signExtended (target.toUint64 ());
-      delete sourceCv;
-      edu::sharif::twinner::trace::cv::ConcreteValue128Bits cv =
-          *signExtendedCv;
-      delete signExtendedCv;
-      return cv;
-    }
-    case edu::sharif::twinner::trace::exptoken::Operator::Unary:
-    {
-      edu::sharif::twinner::trace::cv::ConcreteValue128Bits cv =
-          calculateConcreteValue (it, overflow);
-      // The only supported unary operation is bitwise negation
-      edu::sharif::twinner::trace::cv::ConcreteValue *negated =
-          cv.bitwiseNegated ();
-      cv = *negated;
-      delete negated;
-      return cv;
-    }
-    case edu::sharif::twinner::trace::exptoken::Operator::FunctionalBinary:
-    case edu::sharif::twinner::trace::exptoken::Operator::Binary:
-    {
-      edu::sharif::twinner::trace::cv::ConcreteValue128Bits right =
-          calculateConcreteValue (it, overflow);
-      edu::sharif::twinner::trace::cv::ConcreteValue128Bits left =
-          calculateConcreteValue (it, overflow);
-      overflow = overflow || op->apply (left, right);
-      return left;
-    }
-    default:
-      edu::sharif::twinner::util::Logger::error ()
-          << "Expression::calculateConcreteValue (): Unknown operator type\n";
-      abort ();
-    }
-  } else {
-    const edu::sharif::twinner::trace::exptoken::Operand *operand =
-        static_cast<const edu::sharif::twinner::trace::exptoken::Operand *> (token);
+class CalculateConcreteValueVisitor :
+public edu::sharif::twinner::trace::exptoken::ExpressionVisitor
+<edu::sharif::twinner::trace::cv::ConcreteValue128Bits> {
+private:
+  bool overflow;
+
+public:
+
+  CalculateConcreteValueVisitor () :
+      overflow (false) {
+  }
+
+  virtual ResultType visitSignExtension (
+      const edu::sharif::twinner::trace::exptoken::Operator *op,
+      ResultType &mainCv,
+      ResultType &source,
+      ResultType &target) {
+    edu::sharif::twinner::trace::cv::ConcreteValue *sourceCv =
+        mainCv.clone (source.toUint64 ());
+    edu::sharif::twinner::trace::cv::ConcreteValue *signExtendedCv =
+        sourceCv->signExtended (target.toUint64 ());
+    delete sourceCv;
+    edu::sharif::twinner::trace::cv::ConcreteValue128Bits cv =
+        *signExtendedCv;
+    delete signExtendedCv;
+    return cv;
+  }
+
+  virtual ResultType visitFunctionalBinary (
+      const edu::sharif::twinner::trace::exptoken::Operator *op,
+      ResultType &left, ResultType &right) {
+    return visitBinary (op, left, right);
+  }
+
+  virtual ResultType visitBinary (
+      const edu::sharif::twinner::trace::exptoken::Operator *op,
+      ResultType &left, ResultType &right) {
+    overflow = overflow || op->apply (left, right);
+    return left;
+  }
+
+  virtual ResultType visitUnary (
+      const edu::sharif::twinner::trace::exptoken::Operator *op,
+      ResultType &cv) {
+    // The only supported unary operation is bitwise negation
+    edu::sharif::twinner::trace::cv::ConcreteValue *negated =
+        cv.bitwiseNegated ();
+    cv = *negated;
+    delete negated;
+    return cv;
+
+  }
+
+  virtual ResultType visitOperand (
+      const edu::sharif::twinner::trace::exptoken::Operand *operand) {
     // ASSERT: operand is constant
     edu::sharif::twinner::trace::cv::ConcreteValue128Bits cv =
         operand->getValue ();
     return cv;
   }
+
+  bool hasOverflow () const {
+    return overflow;
+  }
+};
+
+bool Expression::makeConcreteValueValid () const {
+  CalculateConcreteValueVisitor visitor;
+  edu::sharif::twinner::trace::cv::ConcreteValue128Bits cv = visit (visitor);
+  if (visitor.hasOverflow ()) {
+    return false;
+  }
+  (*lastConcreteValue) = cv;
+  return cv == (*lastConcreteValue);
 }
 
 
