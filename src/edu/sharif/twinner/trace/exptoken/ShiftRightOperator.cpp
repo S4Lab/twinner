@@ -15,7 +15,7 @@
 #include "Constant.h"
 #include "Symbol.h"
 
-#include "edu/sharif/twinner/trace/Expression.h"
+#include "edu/sharif/twinner/trace/ExpressionImp.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 
@@ -55,6 +55,18 @@ bool ShiftRightOperator::apply (edu::sharif::twinner::trace::Expression *exp,
   if (operand->isZero ()) {
     delete operand;
     return true;
+  }
+  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
+  if (stack.size () == 1) {
+    edu::sharif::twinner::trace::exptoken::Symbol *sym = dynamic_cast
+        <edu::sharif::twinner::trace::exptoken::Symbol *> (stack.back ());
+    if (sym) {
+      if ((*operand) >= sym->getValue ().getSize ()) {
+        (*exp) = edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
+        delete operand;
+        return true;
+      }
+    }
   }
   return Operator::apply (exp, operand);
 }
