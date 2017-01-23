@@ -13,6 +13,7 @@
 #include "ShiftRightOperator.h"
 
 #include "Constant.h"
+#include "Symbol.h"
 
 #include "edu/sharif/twinner/trace/Expression.h"
 
@@ -105,6 +106,10 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
       delete op;
       delete mask;
       return COMPLETED;
+    } else if (propagateDeepSimplificationToSubExpressions
+        (exp, *operand, exp->getLastConcreteValue ().getSize ())) {
+      delete operand;
+      return COMPLETED;
     }
   } else if (op->getIdentifier () == Operator::ADD) {
     Constant *second = dynamic_cast<Constant *> (*--it);
@@ -167,6 +172,47 @@ Operator::SimplificationStatus ShiftRightOperator::deepSimplify (
     }
   }
   return CAN_NOT_SIMPLIFY;
+}
+
+bool ShiftRightOperator::propagateDeepSimplificationToSubExpressions (
+    edu::sharif::twinner::trace::Expression *exp,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &operand,
+    int bitsize) {
+  edu::sharif::twinner::trace::Expression *tmpExp = exp->clone (bitsize);
+  std::list < ExpressionToken * > &stack = tmpExp->getStack ();
+  std::list < ExpressionToken * >::iterator it = stack.end ();
+  Operator *op = static_cast<Operator *> (*--it);
+  std::list < ExpressionToken * >::iterator rightOperand = findNextOperand (it);
+  edu::sharif::twinner::trace::Expression rightExp (rightOperand, it, bitsize);
+  edu::sharif::twinner::trace::Expression leftExp
+      (stack.begin (), rightOperand, bitsize);
+  stack.clear ();
+  bool isBeneficial =
+      propagateDeepSimplificationToSubExpression (&rightExp, operand)
+      | propagateDeepSimplificationToSubExpression (&leftExp, operand);
+  if (isBeneficial) {
+    std::list < ExpressionToken * > &leftStack = leftExp.getStack ();
+    std::list < ExpressionToken * > &rightStack = rightExp.getStack ();
+    stack.insert (stack.end (), leftStack.begin (), leftStack.end ());
+    leftStack.clear ();
+    stack.insert (stack.end (), rightStack.begin (), rightStack.end ());
+    rightStack.clear ();
+    stack.push_back (op);
+    (*exp) = (*tmpExp);
+  } else {
+    delete op;
+  }
+  delete tmpExp;
+  return isBeneficial;
+}
+
+bool ShiftRightOperator::propagateDeepSimplificationToSubExpression (
+    edu::sharif::twinner::trace::Expression *exp,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &operand) {
+  const int preSize = exp->getStack ().size ();
+  exp->shiftToRight (operand.clone ());
+  const int newSize = exp->getStack ().size ();
+  return preSize >= newSize;
 }
 
 std::string ShiftRightOperator::toString () const {

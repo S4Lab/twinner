@@ -30,7 +30,7 @@ private:
   MemoryEmergedSymbol (ADDRINT address);
 
 public:
-  /// Creates a temporary register symbol iff snapshotIndex != -1
+  /// Creates a temporary memory symbol iff snapshotIndex != -1
   MemoryEmergedSymbol (ADDRINT address,
       const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
       int generationIndex, int snapshotIndex = -1);

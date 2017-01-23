@@ -22,7 +22,6 @@ namespace trace {
 namespace exptoken {
 
 class ShiftRightOperator : public Operator {
-
 public:
   ShiftRightOperator ();
   ShiftRightOperator (const ShiftRightOperator &ao);
@@ -44,6 +43,13 @@ private:
   void initializeSimplificationRules ();
   bool areBitsDisjoint (const edu::sharif::twinner::trace::cv::ConcreteValue &first,
       const edu::sharif::twinner::trace::cv::ConcreteValue &second) const;
+  bool propagateDeepSimplificationToSubExpressions (
+      edu::sharif::twinner::trace::Expression *exp,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &operand,
+      int bitsize);
+  bool propagateDeepSimplificationToSubExpression (
+      edu::sharif::twinner::trace::Expression *exp,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &operand);
 
 protected:
   virtual SimplificationStatus deepSimplify (edu::sharif::twinner::trace::Expression *exp,
@@ -56,4 +62,4 @@ protected:
 }
 }
 
-#endif	/* ShiftRightOperator.h */
+#endif /* ShiftRightOperator.h */
