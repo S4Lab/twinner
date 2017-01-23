@@ -89,7 +89,8 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
     Expression (concreteValue.clone (), isOverwriting) {
   if (!isOverwriting) {
     //    if (memoryEa < 0x7f0000000000ull) {
-    if (memoryEa < ADDRINT (MarInfo::getInitialArgv ())) { // FIXME: Generalize this code
+    const ADDRINT argv = ADDRINT (MarInfo::getInitialArgv ());
+    if (memoryEa < ((argv >> 12) << 12)) { // FIXME: Generalize this code
       // this temporary code assumes that everything out of stack (including heap) is constant
       stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (concreteValue));
       return;
