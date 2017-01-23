@@ -176,6 +176,15 @@ protected:
    */
   virtual SimplificationStatus deepSimplify (edu::sharif::twinner::trace::Expression *exp,
       edu::sharif::twinner::trace::cv::ConcreteValue *operand);
+
+  /**
+   * Finds an iterator pointing to the first exp token of next operand.
+   *
+   * @param it An iterator pointing to the right exclusive search boundry.
+   * @return An iterator pointing to the left/first token of next operand.
+   */
+  std::list < ExpressionToken * >::iterator findNextOperand (
+      std::list < ExpressionToken * >::iterator it) const;
 };
 
 }

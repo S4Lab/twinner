@@ -338,28 +338,6 @@ bool BitwiseAndOperator::propagateDeepSimplificationToSubExpression (
   return false;
 }
 
-std::list < ExpressionToken * >::iterator BitwiseAndOperator::findNextOperand (
-    std::list < ExpressionToken * >::iterator it) {
-  Operator *op = dynamic_cast<Operator *> (*--it);
-  if (op) {
-    switch (op->getType ()) {
-    case edu::sharif::twinner::trace::exptoken::Operator::SignExtension:
-      it = findNextOperand (it);
-    case edu::sharif::twinner::trace::exptoken::Operator::Binary:
-    case edu::sharif::twinner::trace::exptoken::Operator::FunctionalBinary:
-      it = findNextOperand (it);
-    case edu::sharif::twinner::trace::exptoken::Operator::Unary:
-      it = findNextOperand (it);
-      break;
-    default:
-      edu::sharif::twinner::util::Logger::error () << "Unknown operator type\n";
-      abort ();
-      break;
-    }
-  }
-  return it;
-}
-
 bool BitwiseAndOperator::isTruncatingMask (
     edu::sharif::twinner::trace::cv::ConcreteValue *cv) const {
   const unsigned int s = cv->getSize ();

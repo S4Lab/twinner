@@ -251,6 +251,28 @@ bool Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
   //return dst.getCarryBit ();
 }
 
+std::list < ExpressionToken * >::iterator Operator::findNextOperand (
+    std::list < ExpressionToken * >::iterator it) const {
+  Operator *op = dynamic_cast<Operator *> (*--it);
+  if (op) {
+    switch (op->getType ()) {
+    case SignExtension:
+      it = findNextOperand (it);
+    case Binary:
+    case FunctionalBinary:
+      it = findNextOperand (it);
+    case Unary:
+      it = findNextOperand (it);
+      break;
+    default:
+      edu::sharif::twinner::util::Logger::error () << "Unknown operator type\n";
+      abort ();
+      break;
+    }
+  }
+  return it;
+}
+
 std::string Operator::toString () const {
   switch (oi) {
   case BITWISE_NEGATE:

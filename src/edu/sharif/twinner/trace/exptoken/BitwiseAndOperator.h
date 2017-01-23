@@ -53,8 +53,6 @@ private:
   bool propagateDeepSimplificationToSubExpression (
       edu::sharif::twinner::trace::Expression *exp,
       const edu::sharif::twinner::trace::cv::ConcreteValue &operand);
-  std::list < ExpressionToken * >::iterator findNextOperand (
-      std::list < ExpressionToken * >::iterator it);
 
   bool isTruncatingMask (edu::sharif::twinner::trace::cv::ConcreteValue *cv) const;
   int numberOfBits (edu::sharif::twinner::trace::cv::ConcreteValue *cv) const;
