@@ -8,6 +8,7 @@
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue32Bits.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue16Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue8Bits.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
@@ -24,6 +25,7 @@ void test2 ();
 void test3 ();
 void test4 ();
 void test5 ();
+void test6 ();
 
 int main (int argc, char *argv[]) {
   LogStream::init ("loquacious", "out-test-shift-left-and-bitwise-and-or");
@@ -33,6 +35,7 @@ int main (int argc, char *argv[]) {
   test3 ();
   test4 ();
   test5 ();
+  test6 ();
   LogStream::destroy ();
   return 0;
 }
@@ -135,6 +138,20 @@ void test5 () {
   exp->bitwiseOr (0x3);
   exp->bitwiseAnd (0xffff);
   exp->bitwiseAnd (0xff);
+  Logger::info () << "exp: " << exp << '\n';
+}
+
+void test6 () {
+  Logger::info () << "test 6: simplifying (((((m22cbde_0_8 | 0x100)) & 0xff) | 0x200) | m22cbdc_0_16) & 0xffffffff\n";
+  const Expression *m22cbde_0_8 = new ExpressionImp (0x22cbde, ConcreteValue8Bits (0x15), 0, true);
+  Expression *exp = m22cbde_0_8->clone ();
+  exp->bitwiseOr (0x100);
+  exp->bitwiseAnd (0xff);
+  exp->bitwiseOr (0x200);
+  const Expression *m22cbdc_0_16 = new ExpressionImp (0x22cbdc, ConcreteValue16Bits (0x2345), 0, true);
+  Expression *exp2 = m22cbdc_0_16->clone ();
+  exp->bitwiseOr (exp2);
+  exp->bitwiseAnd (UINT64 (0xffffffff));
   Logger::info () << "exp: " << exp << '\n';
 }
 
