@@ -90,10 +90,8 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
   std::list < ExpressionToken * >::iterator it = stack.end ();
   Operator *secondOp = static_cast<Operator *> (*--it);
   if (secondOp->getIdentifier () == Operator::BITWISE_OR) {
-    if (propagateDeepSimplificationToSubExpressions
-        (stack, *operand, exp->getLastConcreteValue ().getSize ())) {
-      return RESTART_SIMPLIFICATION;
-    }
+    propagateDeepSimplificationToSubExpressions
+        (stack, *operand, exp->getLastConcreteValue ().getSize ());
     it = stack.end ();
     secondOp = static_cast<Operator *> (*--it);
   }
@@ -283,7 +281,7 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
   return CAN_NOT_SIMPLIFY;
 }
 
-bool BitwiseAndOperator::propagateDeepSimplificationToSubExpressions (
+void BitwiseAndOperator::propagateDeepSimplificationToSubExpressions (
     std::list < ExpressionToken * > &stack,
     const edu::sharif::twinner::trace::cv::ConcreteValue &operand,
     int bitsize) {
@@ -294,48 +292,47 @@ bool BitwiseAndOperator::propagateDeepSimplificationToSubExpressions (
   edu::sharif::twinner::trace::Expression leftExp
       (stack.begin (), rightOperand, bitsize);
   stack.clear ();
-  bool needsRestart =
-      propagateDeepSimplificationToSubExpression (&rightExp, operand)
-      || propagateDeepSimplificationToSubExpression (&leftExp, operand);
-  std::list < ExpressionToken * > &leftStack = leftExp.getStack ();
-  std::list < ExpressionToken * > &rightStack = rightExp.getStack ();
-  stack.insert (stack.end (), leftStack.begin (), leftStack.end ());
-  leftStack.clear ();
-  stack.insert (stack.end (), rightStack.begin (), rightStack.end ());
-  rightStack.clear ();
-  stack.push_back (op);
-  return needsRestart || (stack.size () < 3);
+  propagateDeepSimplificationToSubExpression (leftExp, operand);
+  propagateDeepSimplificationToSubExpression (rightExp, operand);
+  leftExp.binaryOperation (op, &rightExp);
+  std::list < ExpressionToken * > &tempStack = leftExp.getStack ();
+  stack.insert (stack.end (), tempStack.begin (), tempStack.end ());
+  tempStack.clear ();
+}
+
+void BitwiseAndOperator::propagateDeepSimplificationToSubExpression (
+    edu::sharif::twinner::trace::Expression &exp,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &operand) {
+  edu::sharif::twinner::trace::Expression *tempExp = exp.clone ();
+  if (propagateDeepSimplificationToSubExpression (tempExp, operand)) {
+    exp = (*tempExp);
+  }
+  delete tempExp;
 }
 
 bool BitwiseAndOperator::propagateDeepSimplificationToSubExpression (
     edu::sharif::twinner::trace::Expression *exp,
     const edu::sharif::twinner::trace::cv::ConcreteValue &operand) {
+  const int preSize = exp->getStack ().size ();
+  edu::sharif::twinner::trace::cv::ConcreteValue *operandCopy =
+      operand.clone ();
+  exp->bitwiseAnd (operandCopy);
   std::list < ExpressionToken * > &stack = exp->getStack ();
   if (stack.size () > 2) {
-    edu::sharif::twinner::trace::cv::ConcreteValue *operandCopy =
-        operand.clone ();
     std::list < ExpressionToken * >::iterator it = stack.end ();
     const Operator *op = static_cast<Operator *> (*--it);
     if (op->getIdentifier () == Operator::BITWISE_AND) {
       Constant *mask = dynamic_cast<Constant *> (*--it);
-      if (mask) {
-        (*operandCopy) &= mask->getValue ();
-        if (operandCopy->isZero ()) {
-          delete operandCopy;
-          (*exp) = edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
-        } else {
-          mask->setValue (operandCopy);
-        }
-        return false;
+      if (mask && mask->getValue () == operand) {
+        stack.pop_back (); // op
+        stack.pop_back (); // mask
+        delete op;
+        delete mask;
       }
     }
-    const SimplificationStatus status = deepSimplify (exp, operandCopy);
-    if (status != COMPLETED) {
-      delete operandCopy;
-    }
-    return status == RESTART_SIMPLIFICATION;
   }
-  return false;
+  const int newSize = exp->getStack ().size ();
+  return preSize >= newSize;
 }
 
 bool BitwiseAndOperator::isTruncatingMask (

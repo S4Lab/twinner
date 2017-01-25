@@ -46,10 +46,13 @@ protected:
 private:
   void initializeSimplificationRules ();
 
-  bool propagateDeepSimplificationToSubExpressions (
+  void propagateDeepSimplificationToSubExpressions (
       std::list < ExpressionToken * > &stack,
       const edu::sharif::twinner::trace::cv::ConcreteValue &operand,
       int bitsize);
+  void propagateDeepSimplificationToSubExpression (
+      edu::sharif::twinner::trace::Expression &exp,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &operand);
   bool propagateDeepSimplificationToSubExpression (
       edu::sharif::twinner::trace::Expression *exp,
       const edu::sharif::twinner::trace::cv::ConcreteValue &operand);
