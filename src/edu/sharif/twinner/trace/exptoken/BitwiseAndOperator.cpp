@@ -100,7 +100,9 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
   std::list < ExpressionToken * > &stack = exp->getStack ();
   std::list < ExpressionToken * >::iterator it = stack.end ();
   Operator *secondOp = static_cast<Operator *> (*--it);
-  if (secondOp->getIdentifier () == Operator::BITWISE_OR) {
+  if (secondOp->getIdentifier () == Operator::BITWISE_OR
+      || (secondOp->getIdentifier () == Operator::ADD
+          && isTruncatingMask (operand->clone ()))) {
     propagateDeepSimplificationToSubExpressions
         (stack, *operand, exp->getLastConcreteValue ().getSize ());
     it = stack.end ();
@@ -348,20 +350,17 @@ bool BitwiseAndOperator::propagateDeepSimplificationToSubExpression (
 
 bool BitwiseAndOperator::isTruncatingMask (
     edu::sharif::twinner::trace::cv::ConcreteValue *cv) const {
+  bool isTruncating = true;
   const unsigned int s = cv->getSize ();
   for (UINT64 i = 0; i < s; ++i) {
     if ((cv->toUint64 () & 0x1) == 0) {
-      if (cv->isZero ()) {
-        break;
-      } else {
-        delete cv;
-        return false;
-      }
+      isTruncating = cv->isZero ();
+      break;
     }
     (*cv) >>= 1;
   }
   delete cv;
-  return true;
+  return isTruncating;
 }
 
 int BitwiseAndOperator::numberOfBits (
