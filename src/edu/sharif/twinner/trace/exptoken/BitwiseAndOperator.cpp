@@ -66,9 +66,20 @@ bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::Expression *exp,
   if (stack.size () == 1) {
     const Symbol *symbol = dynamic_cast<Symbol *> (stack.back ());
     if (symbol) {
-      const int bitSize = symbol->getValue ().getSize ();
-      if (isTruncatingMask (operand->clone ())
-          && numberOfBits (operand->clone ()) >= bitSize) {
+      edu::sharif::twinner::trace::cv::ConcreteValue *mask =
+          symbol->getValue ().clone ();
+      (*mask) = 0;
+      (*mask) -= 1;
+      (*mask) &= (*operand);
+      if (mask->isZero ()) {
+        delete mask;
+        delete operand;
+        (*exp) = edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
+        return true;
+      }
+      (*mask) += 1;
+      if (mask->isZero ()) {
+        delete mask;
         delete operand;
         return true;
       }
