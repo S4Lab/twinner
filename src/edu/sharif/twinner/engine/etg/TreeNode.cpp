@@ -199,6 +199,7 @@ const std::list < TreeNode * > &TreeNode::getChildren () const {
 void TreeNode::replaceChild (TreeNode *oldChild, TreeNode *newChild) {
   children.remove (oldChild);
   children.push_back (newChild);
+  newChild->parent = this;
 }
 
 const edu::sharif::twinner::trace::Constraint *
