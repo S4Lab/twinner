@@ -94,6 +94,12 @@ void ConstraintTree::mergePath (TreeNode *node) {
       lastInstructionToTreeNodes.equal_range (lastInstruction);
   for (iterator it = range.first; it != range.second; ++it) {
     TreeNode *mergePoint = it->second;
+    if (node == mergePoint) {
+      return;
+    }
+  }
+  for (iterator it = range.first; it != range.second; ++it) {
+    TreeNode *mergePoint = it->second;
     if (tryToMergePath (node, mergePoint)) {
       return;
     }
