@@ -36,8 +36,8 @@ class TreeNode {
 private:
   const int debugId; // FIXME: Remove this field when debug is not required
 
-  TreeNode *parent;
   // front of list: left-most | back of list: right-most
+  std::list < TreeNode * > parents;
   std::list < TreeNode * > children;
   const edu::sharif::twinner::trace::Constraint *constraint;
   const edu::sharif::twinner::util::MemoryManager *memoryManager;
@@ -78,7 +78,7 @@ public:
    * Upon visiting leafs, a negated constraint (if not exist currently) is instantiated
    * and added to the tree and the target next node. If the negated node existed,
    * continues DFS and negation to find next node.
-   * Constraints are remove upon moving upward and added upon moving downward.
+   * Constraints are removed upon moving upward and added upon moving downward.
    * If it isn't possible to instantiate a negated node (reaching the root node), null is
    * returned.
    * @param clist Constraints which are in correspondence to root-to-returned-node path.
@@ -100,9 +100,9 @@ public:
   const std::list < TreeNode * > &getChildren () const;
   void replaceChild (TreeNode *oldChild, TreeNode *newChild);
   const edu::sharif::twinner::trace::Constraint *getConstraint () const;
-  TreeNode *getParent ();
-  const TreeNode *getParent () const;
 
+  TreeNode *getRightMostParent ();
+  const std::list < TreeNode * > &getParents () const;
 
 private:
   TreeNode *addConstraint (TreeNode *parent,

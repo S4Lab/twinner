@@ -35,11 +35,12 @@ static int lastDebugId = 0;
 TreeNode::TreeNode (TreeNode *p, const edu::sharif::twinner::trace::Constraint *c,
     const edu::sharif::twinner::util::MemoryManager *m) :
     debugId (++lastDebugId),
-    parent (p), constraint (c), memoryManager (m),
+    constraint (c), memoryManager (m),
     snapshot (0),
     segment (0) {
   if (p) {
     p->children.push_back (this);
+    parents.push_back (p);
   }
 }
 
@@ -111,9 +112,9 @@ TreeNode *TreeNode::getRightMostDeepestGrandChild (
 
 TreeNode *TreeNode::getNextNode (
     std::list < const edu::sharif::twinner::trace::Constraint * > &clist) {
-  TreeNode *node = parent;
+  TreeNode *node = getRightMostParent ();
   while (node && node->children.size () > 1) {
-    node = node->parent;
+    node = node->getRightMostParent ();
     clist.pop_back ();
   }
   if (!node) {
@@ -199,7 +200,7 @@ const std::list < TreeNode * > &TreeNode::getChildren () const {
 void TreeNode::replaceChild (TreeNode *oldChild, TreeNode *newChild) {
   children.remove (oldChild);
   children.push_back (newChild);
-  newChild->parent = this;
+  newChild->parents.push_back (this);
 }
 
 const edu::sharif::twinner::trace::Constraint *
@@ -207,12 +208,12 @@ TreeNode::getConstraint () const {
   return constraint;
 }
 
-TreeNode *TreeNode::getParent () {
-  return parent;
+TreeNode *TreeNode::getRightMostParent () {
+  return parents.empty () ? 0 : parents.back ();
 }
 
-const TreeNode *TreeNode::getParent () const {
-  return parent;
+const std::list < TreeNode * > &TreeNode::getParents () const {
+  return parents;
 }
 
 }

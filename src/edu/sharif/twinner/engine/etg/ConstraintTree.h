@@ -57,7 +57,6 @@ private:
   bool tryToMergePath (TreeNode *node, TreeNode *target) const;
 
   typedef std::pair<TreeNode *, TreeNode *> NodePair;
-  NodePair findUpperMostMergePoint (NodePair current) const;
 
   enum MergeResult {
     HAS_NO_SNAPSHOT,
@@ -66,6 +65,8 @@ private:
   };
   MergeResult tryToMergePath (const NodePair lowerBound,
       NodePair &upperBound) const;
+  MergeResult checkSnapshotsSatisfiability (const NodePair lowerBound,
+      NodePair upperBound) const;
 
   bool areNodesMergable (const TreeNode *first, const TreeNode *second) const;
   void mergePath (TreeNode *node, TreeNode *target) const;
