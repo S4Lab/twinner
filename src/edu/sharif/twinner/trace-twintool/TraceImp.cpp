@@ -138,7 +138,7 @@ void TraceImp::addTemporaryExpressions (
     REG address, int size) {
   const REG fullReg = REG_FullRegName (address);
   if (fullReg != address) {
-    size = REG_Size (address) * 8;
+    size = REG_Size (fullReg) * 8;
   }
   ExecutionTraceSegment *src = 0;
   for (std::list < ExecutionTraceSegment * >::iterator it = past;
