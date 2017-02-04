@@ -246,6 +246,13 @@ private:
       std::list < Constraint * > &constraints);
   void replaceTemporarySymbols (const Snapshot *previousSnapshot,
       Expression *exp);
+
+  Expression *lazyLoad (int size,
+      std::map < ADDRINT, Expression * > &map, const ADDRINT key,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
+      edu::sharif::twinner::trace::StateSummary &state);
+  Expression *lazyLoad (int size,
+      std::map < ADDRINT, Expression * > &map, const ADDRINT key);
 };
 
 }

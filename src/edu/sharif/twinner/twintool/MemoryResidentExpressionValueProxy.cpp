@@ -548,7 +548,7 @@ MemoryResidentExpressionValueProxy::getNeighborExpression (int size,
 }
 namespace trace {
 
-Expression *lazy_load_symbolic_expression (Snapshot *me, int size,
+Expression *Snapshot::lazyLoad (int size,
     std::map < ADDRINT, Expression * > &map, const ADDRINT key,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
     edu::sharif::twinner::trace::StateSummary &state) {
@@ -567,11 +567,11 @@ Expression *lazy_load_symbolic_expression (Snapshot *me, int size,
       (key, halfSizeBytes);
   edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy rightProxy
       (key + halfSizeBytes, halfSizeBytes);
-  Expression *leftExp = leftProxy.getExpression (me, *lsb, state);
+  Expression *leftExp = leftProxy.getExpression (this, *lsb, state);
   if (state.isWrongState ()) {
     return 0;
   }
-  Expression *rightExp = rightProxy.getExpression (me, *msb, state);
+  Expression *rightExp = rightProxy.getExpression (this, *msb, state);
   if (state.isWrongState ()) {
     return 0;
   }
@@ -597,15 +597,15 @@ Expression *lazy_load_symbolic_expression (Snapshot *me, int size,
   return exp;
 }
 
-Expression *lazy_load_symbolic_expression (Snapshot *me, int size,
+Expression *Snapshot::lazyLoad (int size,
     std::map < ADDRINT, Expression * > &map, const ADDRINT key) {
   const int halfSizeBytes = (size / 2) / 8;
   edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy leftProxy
       (key, halfSizeBytes);
   edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy rightProxy
       (key + halfSizeBytes, halfSizeBytes);
-  Expression *leftExp = leftProxy.getExpression (me);
-  Expression *rightExp = rightProxy.getExpression (me);
+  Expression *leftExp = leftProxy.getExpression (this);
+  Expression *rightExp = rightProxy.getExpression (this);
   {
     Expression *tmp = rightExp->clone (size);
     delete rightExp;

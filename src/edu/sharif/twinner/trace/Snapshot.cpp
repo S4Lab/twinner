@@ -296,13 +296,6 @@ void check_concrete_value_for_possible_state_mismatch (Expression *exp,
     ADDRINT address, const edu::sharif::twinner::trace::cv::ConcreteValue &val,
     StateSummary &state);
 
-Expression *lazy_load_symbolic_expression (Snapshot *me,
-    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
-    edu::sharif::twinner::trace::StateSummary &state);
-Expression *lazy_load_symbolic_expression (Snapshot *me,
-    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key);
-
 template < >
 Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
     int size, std::map < REG, Expression * > &map, const REG key,
@@ -335,8 +328,7 @@ Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
   } else {
     Expression *exp = it->second;
     if (exp == NULL) { // expression is lazy-loaded && KEY == ADDRINT
-      return lazy_load_symbolic_expression
-          (this, size, map, key, concreteVal, state);
+      return lazyLoad (size, map, key, concreteVal, state);
     }
     check_concrete_value_for_possible_state_mismatch
         (exp, key, concreteVal, state);
@@ -383,7 +375,7 @@ Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
   } else {
     Expression *exp = it->second;
     if (exp == NULL) { // expression is lazy-loaded
-      return lazy_load_symbolic_expression (this, size, map, key);
+      return lazyLoad (size, map, key);
     }
     return exp;
   }
