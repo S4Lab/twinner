@@ -17,6 +17,7 @@
 #include "Constraint.h"
 #include "SymbolRepresentation.h"
 #include "SnapshotIterator.h"
+#include "TimedTrace.h"
 
 #include "edu/sharif/twinner/trace/syscall/Syscall.h"
 
@@ -50,6 +51,8 @@ private:
   int segmentIndex;
   int snapshotIndex;
 
+  TimedTrace timedTrace;
+
   std::set<SymbolRepresentation> criticalSymbols;
 
   Snapshot (int segmentIndex, int snapshotIndex,
@@ -69,6 +72,8 @@ public:
   virtual ~Snapshot ();
 
   static Snapshot *instantiateNexSnapshot (const Snapshot &previousSnapshot);
+
+  void setTimedTrace (TimedTrace timedTrace);
 
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &regval,

@@ -63,6 +63,12 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
   delete terminator;
 }
 
+void ExecutionTraceSegment::setTimedTrace (TimedTrace _timedTrace) {
+  timedTrace = _timedTrace;
+  Snapshot *snapshot = snapshots.back ();
+  snapshot->setTimedTrace (timedTrace);
+}
+
 Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByRegister (int size,
     REG reg, const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
     StateSummary &state) {
@@ -154,7 +160,7 @@ void ExecutionTraceSegment::addPathConstraints (
   Snapshot *snapshot = snapshots.back ();
   snapshot->addPathConstraints (effectiveConstraints);
   Snapshot *nextSnapshot = Snapshot::instantiateNexSnapshot (*snapshot);
-  snapshots.push_back (nextSnapshot);
+  addNewSnapshot (nextSnapshot);
 }
 
 void ExecutionTraceSegment::saveToBinaryStream (std::ofstream &out) const {
@@ -323,6 +329,11 @@ void ExecutionTraceSegment::addTemporaryExpressions (
     dst->addTemporaryExpressions (src, address, size);
     src = dst;
   }
+}
+
+void ExecutionTraceSegment::addNewSnapshot (Snapshot *snapshot) {
+  snapshots.push_back (snapshot);
+  snapshot->setTimedTrace (timedTrace);
 }
 
 }

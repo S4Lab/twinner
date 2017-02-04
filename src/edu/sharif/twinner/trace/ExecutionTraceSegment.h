@@ -15,6 +15,8 @@
 
 #include "ExecutionState.h"
 
+#include "TimedTrace.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -30,6 +32,8 @@ private:
 
   int segmentIndex;
 
+  TimedTrace timedTrace;
+
   ExecutionTraceSegment (int index,
       const std::list < Snapshot * > &snas,
       TraceSegmentTerminator *terminator);
@@ -40,6 +44,8 @@ public:
       const std::map < REG, Expression * > &regMap,
       const std::map < ADDRINT, Expression * > &memMap);
   virtual ~ExecutionTraceSegment ();
+
+  void setTimedTrace (TimedTrace timedTrace);
 
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
@@ -102,6 +108,9 @@ public:
       REG fullReg, int size);
   void addTemporaryExpressions (const ExecutionTraceSegment *seg,
       ADDRINT address, int size);
+
+private:
+  void addNewSnapshot (Snapshot *snapshot);
 };
 
 }

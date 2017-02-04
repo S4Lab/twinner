@@ -271,6 +271,9 @@ public:
   void markCriticalAddresses ();
   void replaceTemporarySymbols ();
 
+protected:
+  void addNewSegment (ExecutionTraceSegment *segment);
+
 private:
   std::set<SymbolRepresentation> aggregateTemporarySymbols (
       const std::list<const Expression *> &exps) const;

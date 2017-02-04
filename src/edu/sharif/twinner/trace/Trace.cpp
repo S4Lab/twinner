@@ -52,11 +52,15 @@ Trace::Trace (const std::list < ExecutionTraceSegment * > &list,
   }
   current = TimedTrace (this, currentSegmentIterator);
   currentSegmentIndex = 0;
+  for (std::list < ExecutionTraceSegment * >::iterator it = segments.begin ();
+      it != segments.end (); ++it) {
+    (*it)->setTimedTrace (TimedTrace (this, it));
+  }
 }
 
 Trace::Trace () :
     memoryManager (edu::sharif::twinner::util::MemoryManager::getInstance ()) {
-  segments.push_front (new ExecutionTraceSegment (0));
+  addNewSegment (new ExecutionTraceSegment (0));
   current = TimedTrace (this, segments.begin ());
   currentSegmentIndex = 0;
 }
@@ -254,7 +258,7 @@ void Trace::terminateTraceSegment (TraceSegmentTerminator *tst) {
   (*currentSegmentIterator)->setTerminator (tst);
   currentSegmentIndex++;
   if (currentSegmentIterator == segments.begin ()) {
-    segments.push_front (new ExecutionTraceSegment (currentSegmentIndex));
+    addNewSegment (new ExecutionTraceSegment (currentSegmentIndex));
   }
   currentSegmentIterator--;
   current = TimedTrace (this, currentSegmentIterator);
@@ -533,6 +537,11 @@ void Trace::markCriticalAddresses () {
         currentSnapshot.getCriticalExpressions ();
     criticalSymbols = aggregateTemporarySymbols (criticalExpressions);
   }
+}
+
+void Trace::addNewSegment (ExecutionTraceSegment *segment) {
+  segments.push_front (segment);
+  segment->setTimedTrace (TimedTrace (this, segments.begin ()));
 }
 
 std::set<SymbolRepresentation> Trace::aggregateTemporarySymbols (

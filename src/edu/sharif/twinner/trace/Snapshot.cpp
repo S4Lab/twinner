@@ -150,6 +150,10 @@ Snapshot *Snapshot::instantiateNexSnapshot (const Snapshot &previousSnapshot) {
   return new Snapshot (segmentIndex, snapshotIndex, regMap, memMap);
 }
 
+void Snapshot::setTimedTrace (TimedTrace _timedTrace) {
+  timedTrace = _timedTrace;
+}
+
 void Snapshot::setOverwritingMemoryExpression (int size,
     ADDRINT memoryEa, const Expression *expression, bool isOverwriting) {
   Expression *exp = setSymbolicExpressionByMemoryAddress (size, memoryEa, expression);

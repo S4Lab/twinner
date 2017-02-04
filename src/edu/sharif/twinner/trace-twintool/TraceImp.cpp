@@ -309,7 +309,7 @@ void TraceImp::loadInitializedSymbolsFromBinaryStream (std::stringstream &in) {
   in.read ((char *) &s, sizeof (s));
   int index = 0;
   if (s == 0) {
-    segments.push_front (new ExecutionTraceSegment (index));
+    addNewSegment (new ExecutionTraceSegment (index));
   }
 
   repeat (s) {
@@ -318,9 +318,9 @@ void TraceImp::loadInitializedSymbolsFromBinaryStream (std::stringstream &in) {
     ExecutionTraceSegment *segment =
         loadSingleSegmentSymbolsRecordsFromBinaryStream (segmentIndex, in);
     while (index < segmentIndex) {
-      segments.push_front (new ExecutionTraceSegment (index++));
+      addNewSegment (new ExecutionTraceSegment (index++));
     }
-    segments.push_front (segment);
+    addNewSegment (segment);
     ++index;
   }
 }
