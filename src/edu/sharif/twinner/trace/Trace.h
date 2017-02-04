@@ -16,6 +16,7 @@
 #include "ExecutionState.h"
 
 #include "Snapshot.h"
+#include "TimedTrace.h"
 
 #include <list>
 #include <set>
@@ -49,8 +50,9 @@ protected:
    * is representing the current execution state.
    * The past is segments.last() -> current
    * Future is current -> segments.front()
+   * The current iterator is wrapped in a TimedTrace object.
    */
-  std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator;
+  TimedTrace current;
 
   /**
    * This index indicates current generation starting from zero. This should not be
@@ -95,11 +97,17 @@ public:
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
       StateSummary &state);
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+      StateSummary &state,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   /**
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg);
+  virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   /**
    * Searches backwards to find queried values.
@@ -109,12 +117,20 @@ public:
       ADDRINT memoryEa,
       const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
       StateSummary &state);
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+      StateSummary &state,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   /**
    * Searches backwards to find queried values.
    */
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa);
+  virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   /**
    * The getter searches segments backwards to find queried value.
@@ -123,20 +139,33 @@ public:
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
       Expression *newExpression, StateSummary &state);
+  virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
+      Expression *newExpression, StateSummary &state,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   /**
    * The getter searches segments backwards to find queried value.
    */
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       Expression *newExpression = 0);
+  virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
+      Expression *newExpression,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   /**
    * The getter searches segments backwards to find queried value.
    * ASSERT: The precision of memval must match with precision of memoryEa location
    */
-  virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
+  virtual Expression *getSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa,
       const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
       Expression *newExpression, StateSummary &state);
+  virtual Expression *getSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &memval,
+      Expression *newExpression, StateSummary &state,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   bool doesLastGetterCallNeedPropagation () const;
 
@@ -145,6 +174,9 @@ public:
    */
   virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
       Expression *newExpression = 0);
+  virtual Expression *getSymbolicExpressionByMemoryAddress (int size, ADDRINT memoryEa,
+      Expression *newExpression,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   /**
    * The setter, uses most recent trace segment for setting the new value.
@@ -152,6 +184,9 @@ public:
    */
   virtual Expression *setSymbolicExpressionByRegister (int regsize, REG reg,
       const Expression *exp);
+  virtual Expression *setSymbolicExpressionByRegister (int regsize, REG reg,
+      const Expression *exp,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   /**
    * The setter, uses most recent trace segment for setting the new value.
@@ -159,6 +194,10 @@ public:
    */
   virtual Expression *setSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa, const Expression *exp);
+  virtual Expression *setSymbolicExpressionByMemoryAddress (int size,
+      ADDRINT memoryEa,
+      const Expression *exp,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   /**
    * The constraint will be added to the most recent trace segment.
@@ -166,6 +205,10 @@ public:
   virtual void addPathConstraints (
       const std::list <edu::sharif::twinner::trace::Constraint *> &c,
       const edu::sharif::twinner::trace::Constraint *lastConstraint = 0);
+  virtual void addPathConstraints (
+      const std::list <edu::sharif::twinner::trace::Constraint *> &c,
+      const edu::sharif::twinner::trace::Constraint *lastConstraint,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   void terminateTraceSegment (TraceSegmentTerminator *tst);
   void initializeNewTraceSegment (CONTEXT *context) const;
@@ -186,8 +229,9 @@ public:
   Snapshot::snapshot_reverse_iterator rbegin () const;
   Snapshot::snapshot_reverse_iterator rend () const;
 
+  virtual void saveToBinaryStream (std::ofstream &out) const;
+
 private:
-  void saveToBinaryStream (std::ofstream &out) const;
   static Trace *loadFromBinaryStream (std::ifstream &in, const char *memoryPath);
   static void saveAddressToValueMapToBinaryStream (
       const std::map < std::pair < ADDRINT, int >, UINT64 > &map,
@@ -195,21 +239,30 @@ private:
   static std::map < std::pair < ADDRINT, int >, UINT64 >
   loadAddressToValueMapFromBinaryStream (std::ifstream &in);
 
-protected:
-
-  inline ExecutionTraceSegment *getCurrentTraceSegment () const {
-    return *currentSegmentIterator;
-  }
-
 public:
   virtual void printRegistersValues (
       const edu::sharif::twinner::util::Logger &logger) const;
+  virtual void printRegistersValues (
+      const edu::sharif::twinner::util::Logger &logger,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator) const;
+
   virtual void printMemoryAddressesValues (
       const edu::sharif::twinner::util::Logger &logger) const;
+  virtual void printMemoryAddressesValues (
+      const edu::sharif::twinner::util::Logger &logger,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator) const;
+
   virtual void printPathConstraints (
       const edu::sharif::twinner::util::Logger &logger) const;
+  virtual void printPathConstraints (
+      const edu::sharif::twinner::util::Logger &logger,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator) const;
+
   virtual void printCompleteState (
       const edu::sharif::twinner::util::Logger &logger) const;
+  virtual void printCompleteState (
+      const edu::sharif::twinner::util::Logger &logger,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator) const;
 
   int getCurrentSegmentIndex () const;
 
