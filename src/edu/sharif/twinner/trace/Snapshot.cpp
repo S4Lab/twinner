@@ -37,24 +37,6 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
-template < >
-Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
-    int size, std::map < REG, Expression * > &map, const REG key,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
-    StateSummary &state);
-template < >
-Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
-    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
-    StateSummary &state);
-
-template < >
-Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
-    int size, std::map < REG, Expression * > &map, const REG key);
-template < >
-Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
-    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key);
-
 Snapshot::Snapshot (int _segmentIndex, int _snapshotIndex,
     const std::map < REG, Expression * > &regi,
     const std::map < ADDRINT, Expression * > &memo128,
@@ -296,33 +278,12 @@ void check_concrete_value_for_possible_state_mismatch (Expression *exp,
     ADDRINT address, const edu::sharif::twinner::trace::cv::ConcreteValue &val,
     StateSummary &state);
 
-template < >
+template < typename KEY >
 Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
-    int size, std::map < REG, Expression * > &map, const REG key,
+    int size, std::map < KEY, Expression * > &map, const KEY key,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
     StateSummary &state) {
-  typedef REG KEY;
-  std::map < KEY, Expression * >::const_iterator it = map.find (key);
-  if (it == map.end ()) { // not found!
-    return 0;
-  } else {
-    Expression *exp = it->second;
-    check_concrete_value_for_possible_state_mismatch
-        (exp, key, concreteVal, state);
-    if (state.isWrongState ()) {
-      return 0;
-    }
-    return exp;
-  }
-}
-
-template < >
-Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
-    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key,
-    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
-    StateSummary &state) {
-  typedef ADDRINT KEY;
-  std::map < KEY, Expression * >::const_iterator it = map.find (key);
+  typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
@@ -353,23 +314,10 @@ void check_concrete_value_for_possible_state_mismatch (Expression *exp,
   exp->checkConcreteValueMemory (memoryEa, val, state);
 }
 
-template < >
+template < typename KEY >
 Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
-    int size, std::map < REG, Expression * > &map, const REG key) {
-  typedef REG KEY;
-  std::map < KEY, Expression * >::const_iterator it = map.find (key);
-  if (it == map.end ()) { // not found!
-    return 0;
-  } else {
-    return it->second;
-  }
-}
-
-template < >
-Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
-    int size, std::map < ADDRINT, Expression * > &map, const ADDRINT key) {
-  typedef ADDRINT KEY;
-  std::map < KEY, Expression * >::const_iterator it = map.find (key);
+    int size, std::map < KEY, Expression * > &map, const KEY key) {
+  typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
   if (it == map.end ()) { // not found!
     return 0;
   } else {
@@ -1055,6 +1003,23 @@ const Expression *Snapshot::resolveRegister (REG address) const {
   return 0;
 }
 
+Expression *Snapshot::lazyLoad (int size,
+    std::map < REG, Expression * > &map, const REG key,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
+    edu::sharif::twinner::trace::StateSummary &state) {
+  const char *msg = "The Snapshot::lazyLoad(...) method is"
+      " not defined for REG case.\n";
+  edu::sharif::twinner::util::Logger::error () << msg;
+  abort ();
+}
+
+Expression *Snapshot::lazyLoad (int size,
+    std::map < REG, Expression * > &map, const REG key) {
+  const char *msg = "The Snapshot::lazyLoad(...) method is"
+      " not defined for REG case.\n";
+  edu::sharif::twinner::util::Logger::error () << msg;
+  abort ();
+}
 
 }
 }

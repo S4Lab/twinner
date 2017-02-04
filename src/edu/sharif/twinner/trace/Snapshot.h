@@ -253,6 +253,13 @@ private:
       edu::sharif::twinner::trace::StateSummary &state);
   Expression *lazyLoad (int size,
       std::map < ADDRINT, Expression * > &map, const ADDRINT key);
+
+  Expression *lazyLoad (int size,
+      std::map < REG, Expression * > &map, const REG key,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,
+      edu::sharif::twinner::trace::StateSummary &state);
+  Expression *lazyLoad (int size,
+      std::map < REG, Expression * > &map, const REG key);
 };
 
 }
