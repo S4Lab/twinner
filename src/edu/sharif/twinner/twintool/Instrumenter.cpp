@@ -19,6 +19,7 @@
 #include "xed-iclass-enum.h"
 
 #include "InstructionSymbolicExecuter.h"
+#include "MemoryResidentExpressionValueProxy.h"
 
 #include "edu/sharif/twinner/trace/MarInfo.h"
 
@@ -621,14 +622,14 @@ inline void Instrumenter::checkForInitialState (INS ins) const {
   firstTime = false;
 }
 
-void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE op,
-    INS ins, UINT32 insAssembly) const {
+void Instrumenter::instrumentSingleInstruction (InstructionModel model,
+    OPCODE op, INS ins, UINT32 insAssembly) const {
   checkForInitialState (ins);
   INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineRunHooks,
                   IARG_PTR, ise,
                   IARG_CONST_CONTEXT,
                   IARG_END);
-  instrumentMemoryRegisterCorrespondence (ins, insAssembly);
+  instrumentMemoryRegisterCorrespondence (model, op, ins, insAssembly);
   switch (model) {
   case SYSCALL_INS_MODEL:
   {
@@ -1302,21 +1303,24 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model, OPCODE o
   }
 }
 
-void Instrumenter::instrumentMemoryRegisterCorrespondence (INS ins,
-    UINT32 insAssembly) const {
+void Instrumenter::instrumentMemoryRegisterCorrespondence (
+    InstructionModel model, OPCODE op, INS ins, UINT32 insAssembly) const {
   const UINT32 countOfOperands = INS_OperandCount (ins);
   for (UINT32 i = 0; i < countOfOperands; ++i) {
     if (INS_OperandIsMemory (ins, i)) {
       REG baseReg = INS_OperandMemoryBaseReg (ins, i);
-      if (baseReg != REG_INVALID ()
-#ifdef TARGET_IA32E
-          && (baseReg == REG_RBP || baseReg == REG_RAX)
-#else
-          && (baseReg == REG_EBP || baseReg == REG_EAX)
-#endif
-          ) {
-        // TODO: generalize above register check
+      if (baseReg != REG_INVALID ()) {
         ADDRDELTA displacement = INS_OperandMemoryDisplacement (ins, i);
+        if (model == DST_RSP_SRC_CALL
+            || model == DST_STK_SRC_IMPLICIT
+            || model == DST_STK_SRC_REG
+            || model == DST_STK_SRC_IMD
+            || model == DST_STK_SRC_MEM) {
+          if (op != XED_ICLASS_RET_NEAR
+              && op != XED_ICLASS_RET_FAR) {
+            displacement = -STACK_OPERATION_UNIT_SIZE;
+          }
+        }
         REG indexReg = INS_OperandMemoryIndexReg (ins, i);
         if (indexReg != REG_INVALID ()) {
           UINT32 scale = INS_OperandMemoryScale (ins, i);

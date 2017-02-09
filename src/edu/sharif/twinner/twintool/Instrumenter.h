@@ -244,8 +244,8 @@ private:
   inline void checkForInitialState (INS ins) const;
   void instrumentSingleInstruction (InstructionModel model, OPCODE op, INS ins,
       UINT32 insAssembly) const;
-  void instrumentMemoryRegisterCorrespondence (INS ins,
-      UINT32 insAssembly) const;
+  void instrumentMemoryRegisterCorrespondence (InstructionModel model,
+      OPCODE op, INS ins, UINT32 insAssembly) const;
   void instrumentRepPrefix (OPCODE op, INS ins, UINT32 insAssembly) const;
 
   void printDebugInformation (INS ins, const char *insAssembly) const;
