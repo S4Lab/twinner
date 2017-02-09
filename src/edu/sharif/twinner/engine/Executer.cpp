@@ -383,7 +383,7 @@ Executer::executeSystemCommand (std::string command) {
         "signal was " << WTERMSIG (ret) << '\n';
     signaled = true;
   }
-  if (newRecord) {
+  if (newRecord || replayRecord) {
     recordExecutionResult (inputBinaryHash, argsHash, symbolsHash);
   }
   return edu::sharif::twinner::trace::Trace::loadFromFile
