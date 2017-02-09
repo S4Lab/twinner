@@ -24,6 +24,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
+#include "edu/sharif/twinner/util/MemoryManager.h"
 
 namespace edu {
 namespace sharif {
@@ -175,9 +176,42 @@ bool ConstraintTree::areNodesMergable (const TreeNode *first,
     const TreeNode *second) const {
   // ASSERT: first != second (otherwise `first` would not be inserted)
   return first && second
-      && first->getConstraint ()->getCausingInstructionIdentifier ()
-      == second->getConstraint ()->getCausingInstructionIdentifier ()
+      && areInstructionsTheSame (first, second)
       && (*first->getConstraint ()) == (*second->getConstraint ());
+}
+
+bool ConstraintTree::areInstructionsTheSame (const TreeNode *first,
+    const TreeNode *second) const {
+  /* TODO: Support self changing instructions as described below
+   * At each snapshot point, accumulate the concrete/symbolic values which
+   * are stored (at that exact moment) at all locations which are going to
+   * be executed during all possible executions paths which are located in
+   * the subgraph started at that snapshot point. This information can be
+   * acquired (for example) by a two pass execution in which the first run
+   * finds out which instruction locations will be executed and the second
+   * run reads those interesting addresses at the snapshot point.
+   * If all such interesting instruction values (concrete/symbolic) match
+   * between two given snapshots, then they will perform the same changes on the
+   * equal past instruction values and although instructions can be modified
+   * on the fly, they will be the same between the following snapshot points.
+   * Then this method should check for the equality of all such values starting
+   * from the first/second subgraphs.
+   * Note: The performance can be increased in the above scenario by calculating
+   * and storing a hash of the above values instead of comparing them in a one
+   * by one basis if the possibility of collision is acceptable.
+   */
+  const uint32_t firstInsId =
+      first->getConstraint ()->getCausingInstructionIdentifier ();
+  const uint32_t secondInsId =
+      second->getConstraint ()->getCausingInstructionIdentifier ();
+  if (firstInsId == 0 && secondInsId == 0) { // both are tautologies
+    return true;
+  }
+  const char *firstIns =
+      first->getMemoryManager ()->getPointerToAllocatedMemory (firstInsId);
+  const char *secondIns =
+      second->getMemoryManager ()->getPointerToAllocatedMemory (secondInsId);
+  return firstIns && secondIns && strcmp (firstIns, secondIns) == 0;
 }
 
 bool ConstraintTree::getNextConstraintsList (

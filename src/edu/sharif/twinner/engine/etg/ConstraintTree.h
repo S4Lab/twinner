@@ -69,6 +69,8 @@ private:
       NodePair upperBound) const;
 
   bool areNodesMergable (const TreeNode *first, const TreeNode *second) const;
+  bool areInstructionsTheSame (const TreeNode *first,
+      const TreeNode *second) const;
   void mergePath (TreeNode *node, TreeNode *target) const;
 };
 

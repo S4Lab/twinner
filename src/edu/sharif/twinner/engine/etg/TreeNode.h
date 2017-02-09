@@ -87,6 +87,8 @@ public:
   TreeNode *getNextNode (
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
 
+  const edu::sharif::twinner::util::MemoryManager *getMemoryManager () const;
+
   void dumpConstraints (edu::sharif::twinner::util::Logger &logger) const;
   void dumpSubTree (edu::sharif::twinner::util::Logger &logger) const;
 

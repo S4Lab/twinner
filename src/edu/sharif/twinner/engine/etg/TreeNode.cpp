@@ -128,6 +128,10 @@ TreeNode *TreeNode::getNextNode (
   return n;
 }
 
+const edu::sharif::twinner::util::MemoryManager *TreeNode::getMemoryManager () const {
+  return memoryManager;
+}
+
 void TreeNode::dumpConstraints (edu::sharif::twinner::util::Logger &logger) const {
   if (constraint) {
     logger << debugId << " -> " << constraint << '\n';
