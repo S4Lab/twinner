@@ -105,6 +105,9 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
           && isTruncatingMask (operand->clone ()))) {
     propagateDeepSimplificationToSubExpressions
         (stack, *operand, exp->getLastConcreteValue ().getSize ());
+    if (stack.size () < 3) {
+      return CAN_NOT_SIMPLIFY;
+    }
     it = stack.end ();
     secondOp = static_cast<Operator *> (*--it);
   }
