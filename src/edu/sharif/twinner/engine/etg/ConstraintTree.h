@@ -16,7 +16,6 @@
 #include "Vertex.h"
 
 #include <list>
-#include <map>
 
 namespace edu {
 namespace sharif {
@@ -34,9 +33,9 @@ class TreeNode;
 class ConstraintTree {
 private:
   TreeNode *root;
+  TreeNode *tail;
   TreeNode *iterator;
   const edu::sharif::twinner::trace::Constraint * const alwaysTrue;
-  std::multimap<uint32_t, TreeNode *> lastInstructionToTreeNodes;
 
 public:
   ConstraintTree ();
@@ -57,20 +56,9 @@ private:
   bool tryToMergePath (TreeNode *node, TreeNode *target) const;
 
   typedef std::pair<TreeNode *, TreeNode *> NodePair;
+  bool tryToMergePath (const NodePair lowerBound) const;
+  bool checkSnapshotsSatisfiability (const NodePair lowerBound) const;
 
-  enum MergeResult {
-    HAS_NO_SNAPSHOT,
-    HAS_NON_CONFORMING_SNAPSHOT,
-    MERGED,
-  };
-  MergeResult tryToMergePath (const NodePair lowerBound,
-      NodePair &upperBound) const;
-  MergeResult checkSnapshotsSatisfiability (const NodePair lowerBound,
-      NodePair upperBound) const;
-
-  bool areNodesMergable (const TreeNode *first, const TreeNode *second) const;
-  bool areInstructionsTheSame (const TreeNode *first,
-      const TreeNode *second) const;
   void mergePath (TreeNode *node, TreeNode *target) const;
 };
 

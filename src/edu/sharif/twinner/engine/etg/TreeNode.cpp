@@ -13,6 +13,7 @@
 #include "edu/sharif/twinner/pin-wrapper.h"
 
 #include "TreeNode.h"
+#include "ConstraintEdge.h"
 
 #include "edu/sharif/twinner/trace/Constraint.h"
 #include "edu/sharif/twinner/trace/Snapshot.h"
@@ -24,6 +25,8 @@
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
 
+#include <sstream>
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -32,27 +35,57 @@ namespace etg {
 
 static int lastDebugId = 0;
 
-TreeNode::TreeNode (TreeNode *p, const edu::sharif::twinner::trace::Constraint *c,
-    const edu::sharif::twinner::util::MemoryManager *m) :
+TreeNode::TreeNode () :
     debugId (++lastDebugId),
-    constraint (c), memoryManager (m),
+    insId (0),
+    memoryManager (0),
+    snapshot (0),
+    segment (0) {
+}
+
+TreeNode::TreeNode (ConstraintEdge *p) :
+    debugId (++lastDebugId),
+    insId (0),
+    memoryManager (0),
     snapshot (0),
     segment (0) {
   if (p) {
-    p->children.push_back (this);
     parents.push_back (p);
   }
 }
 
-void delete_tree_node (TreeNode * const &node);
+void delete_edge (ConstraintEdge * const &edge);
 
 TreeNode::~TreeNode () {
-  edu::sharif::twinner::util::foreach (children, delete_tree_node);
+  edu::sharif::twinner::util::foreach (children, delete_edge);
   children.clear ();
 }
 
-void delete_tree_node (TreeNode * const &node) {
-  delete node;
+void delete_edge (ConstraintEdge * const &edge) {
+  delete edge;
+}
+
+void TreeNode::registerInstructionIdIfRequired (
+    const edu::sharif::twinner::trace::Constraint *c,
+    const edu::sharif::twinner::util::MemoryManager *m) {
+  if (insId) {
+    const uint32_t firstInsId = insId;
+    const uint32_t secondInsId = c->getCausingInstructionIdentifier ();
+    const char *firstIns =
+        memoryManager->getPointerToAllocatedMemory (firstInsId);
+    const char *secondIns = m->getPointerToAllocatedMemory (secondInsId);
+    if (!firstIns || !secondIns || strcmp (firstIns, secondIns) != 0) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "TreeNode::registerInstructionIdIfRequired (): "
+          "inconsistent ins-id values [old-ins-id=" << std::dec << insId
+          << ", new-ins-id=" << c->getCausingInstructionIdentifier ()
+          << "]\n";
+      abort ();
+    }
+  } else {
+    insId = c->getCausingInstructionIdentifier ();
+    memoryManager = m;
+  }
 }
 
 TreeNode *TreeNode::addConstraint (
@@ -66,39 +99,69 @@ TreeNode *TreeNode::addConstraint (
   }
   edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
       ->assertConstraint (c);
-  for (TreeNode *n = this; true; n = n->children.back ()) {
-    if (n->children.empty ()) {
-      return addConstraint (n, c, m, performValidityCheck);
-    } else if ((*n->children.back ()->constraint) != (*c)) {
+  TreeNode *node = this;
+  unsigned int depth = 0;
+  for (;;) {
+    if (node->children.empty ()) {
+      return addConstraint (node, depth, c, m, performValidityCheck);
+    }
+    ConstraintEdge *e = node->children.back ();
+    if ((*e->getConstraint ()) != (*c)) {
       if (edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
-          ->checkValidity (n->children.back ()->constraint)) {
+          ->checkValidity (e->getConstraint ())) {
+        node = e->getChild ();
+        edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+            ->popLastAssertion ();
+        edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+            ->assertConstraint (e->getConstraint ());
+        ++depth;
+        edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+            ->assertConstraint (c);
         continue;
       }
-      return addConstraint (n, c, m, performValidityCheck);
+      return addConstraint (node, depth, c, m, performValidityCheck);
     }
-    return n->children.back ();
+    if (depth > 0) {
+
+      repeat (depth + 1) {
+        edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+            ->popLastAssertion ();
+      }
+      edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+          ->assertConstraint (c);
+    }
+    return e->getChild ();
   }
 }
 
-TreeNode *TreeNode::addConstraint (TreeNode *parent,
+TreeNode *TreeNode::addConstraint (
+    TreeNode *parent,
+    unsigned int depth,
     const edu::sharif::twinner::trace::Constraint *c,
     const edu::sharif::twinner::util::MemoryManager *m,
     bool performValidityCheck) {
-  if (performValidityCheck && parent != this) {
+  if (depth > 0) {
     edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
         ->popLastAssertion ();
-    edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
-        ->assertConstraint (parent->constraint);
-    if (edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+    if (performValidityCheck
+        && edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
         ->checkValidity (c)) {
       return parent;
     }
-    edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
-        ->popLastAssertion ();
+
+    repeat (depth) {
+      edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
+          ->popLastAssertion ();
+    }
     edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
         ->assertConstraint (c);
   }
-  return new TreeNode (parent, c, m);
+  parent->registerInstructionIdIfRequired (c, m);
+  ConstraintEdge *edge = new ConstraintEdge (parent, c);
+  parent->children.push_back (edge);
+  TreeNode *node = new TreeNode (edge);
+  edge->setChild (node);
+  return node;
 }
 
 TreeNode *TreeNode::getRightMostDeepestGrandChild (
@@ -106,24 +169,31 @@ TreeNode *TreeNode::getRightMostDeepestGrandChild (
   if (children.empty ()) {
     return this;
   }
-  clist.push_back (children.back ()->constraint);
-  return children.back ()->getRightMostDeepestGrandChild (clist);
+  ConstraintEdge *edge = children.back ();
+  clist.push_back (edge->getConstraint ());
+  return edge->getChild ()->getRightMostDeepestGrandChild (clist);
 }
 
 TreeNode *TreeNode::getNextNode (
     std::list < const edu::sharif::twinner::trace::Constraint * > &clist) {
-  TreeNode *node = getRightMostParent ();
-  while (node && node->children.size () > 1) {
-    node = node->getRightMostParent ();
-    clist.pop_back ();
-  }
-  if (!node) {
+  if (parents.empty ()) {
     return 0;
+  }
+  TreeNode *node = getRightMostParent ()->getParent ();
+  while (node->children.size () > 1) {
+    if (node->parents.empty ()) {
+      return 0;
+    }
+    node = node->getRightMostParent ()->getParent ();
+    clist.pop_back ();
   }
   const edu::sharif::twinner::trace::Constraint *negatedConstraint =
       clist.back ()->instantiateNegatedConstraint ();
   clist.pop_back ();
-  TreeNode *n = new TreeNode (node, negatedConstraint, memoryManager);
+  ConstraintEdge *edge = new ConstraintEdge (node, negatedConstraint);
+  node->children.push_back (edge);
+  TreeNode *n = new TreeNode (edge);
+  edge->setChild (n);
   clist.push_back (negatedConstraint);
   return n;
 }
@@ -132,41 +202,26 @@ const edu::sharif::twinner::util::MemoryManager *TreeNode::getMemoryManager () c
   return memoryManager;
 }
 
-void TreeNode::dumpConstraints (edu::sharif::twinner::util::Logger &logger) const {
-  if (constraint) {
-    logger << debugId << " -> " << constraint << '\n';
-  }
-  for (std::list < TreeNode * >::const_iterator it = children.begin ();
+void TreeNode::dumpConstraints (
+    edu::sharif::twinner::util::Logger &logger) const {
+  for (std::list < ConstraintEdge * >::const_iterator it = children.begin ();
       it != children.end (); ++it) {
-    const TreeNode *node = *it;
-    node->dumpConstraints (logger);
+    const ConstraintEdge *edge = *it;
+    edge->dumpConstraints (logger);
   }
 }
 
-void TreeNode::dumpSubTree (edu::sharif::twinner::util::Logger &logger) const {
-  logger << "Node(" << debugId;
-  if (constraint) {
-    const uint32_t ins = constraint->getCausingInstructionIdentifier ();
-    if (ins) {
-      logger << "<" << ins << ">; " << memoryManager->getPointerToAllocatedMemory (ins);
-    }
+void TreeNode::dumpSubTree (edu::sharif::twinner::util::Logger &logger,
+    unsigned int pad) const {
+
+  repeat (pad) {
+    logger << "  ";
   }
-  logger << "): ";
-  bool first = true;
-  for (std::list < TreeNode * >::const_iterator it = children.begin ();
+  logger << "Node(" << debugId << "{" << toString () << "}) -> \n";
+  for (std::list < ConstraintEdge * >::const_iterator it = children.begin ();
       it != children.end (); ++it) {
-    const TreeNode *node = *it;
-    if (!first) {
-      logger << ", ";
-    }
-    logger << node->debugId;
-    first = false;
-  }
-  logger << '\n';
-  for (std::list < TreeNode * >::const_iterator it = children.begin ();
-      it != children.end (); ++it) {
-    const TreeNode *node = *it;
-    node->dumpSubTree (logger);
+    const ConstraintEdge *edge = *it;
+    edge->dumpSubTree (logger, pad + 1);
   }
 }
 
@@ -197,28 +252,62 @@ const edu::sharif::twinner::trace::Snapshot *TreeNode::getSnapshot () const {
   return snapshot;
 }
 
-const std::list < TreeNode * > &TreeNode::getChildren () const {
+const std::list < ConstraintEdge * > &TreeNode::getChildren () const {
   return children;
 }
 
-void TreeNode::replaceChild (TreeNode *oldChild, TreeNode *newChild) {
-  children.remove (oldChild);
-  children.push_back (newChild);
-  newChild->parents.push_back (this);
+void TreeNode::addParent (ConstraintEdge *newParent) {
+  parents.push_back (newParent);
 }
 
-const edu::sharif::twinner::trace::Constraint *
-TreeNode::getConstraint () const {
-  return constraint;
+bool TreeNode::areInstructionsTheSame (const TreeNode *tn) const {
+  /* TODO: Support self changing instructions as described below
+   * At each snapshot point, accumulate the concrete/symbolic values which
+   * are stored (at that exact moment) at all locations which are going to
+   * be executed during all possible executions paths which are located in
+   * the subgraph started at that snapshot point. This information can be
+   * acquired (for example) by a two pass execution in which the first run
+   * finds out which instruction locations will be executed and the second
+   * run reads those interesting addresses at the snapshot point.
+   * If all such interesting instruction values (concrete/symbolic) match
+   * between two given snapshots, then they will perform the same changes on the
+   * equal past instruction values and although instructions can be modified
+   * on the fly, they will be the same between the following snapshot points.
+   * Then this method should check for the equality of all such values starting
+   * from the first/second subgraphs.
+   * Note: The performance can be increased in the above scenario by calculating
+   * and storing a hash of the above values instead of comparing them in a one
+   * by one basis if the possibility of collision is acceptable.
+   */
+  const uint32_t firstInsId = insId;
+  const uint32_t secondInsId = tn->insId;
+  if (firstInsId == 0 && secondInsId == 0) { // both are tautologies
+    return true;
+  }
+  const char *firstIns =
+      memoryManager->getPointerToAllocatedMemory (firstInsId);
+  const char *secondIns =
+      tn->memoryManager->getPointerToAllocatedMemory (secondInsId);
+  return firstIns && secondIns && strcmp (firstIns, secondIns) == 0;
 }
 
-TreeNode *TreeNode::getRightMostParent () {
+ConstraintEdge *TreeNode::getRightMostParent () {
   return parents.empty () ? 0 : parents.back ();
 }
 
-const std::list < TreeNode * > &TreeNode::getParents () const {
+const std::list < ConstraintEdge * > &TreeNode::getParents () const {
   return parents;
 }
+
+std::string TreeNode::toString () const {
+  std::stringstream ss;
+  ss << insId;
+  if (insId) {
+    ss << "; " << memoryManager->getPointerToAllocatedMemory (insId);
+  }
+  return ss.str ();
+}
+
 
 }
 }

@@ -30,6 +30,7 @@
 
 #include "TreeNode.h"
 #include "AddressAggregator.h"
+#include "ConstraintEdge.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -147,19 +148,21 @@ void TwinCodeEncoder::declareMemorySymbols (
   }
 }
 
-bool TwinCodeEncoder::encodeConstraintAndChildren (ConstTreeNode *node,
+bool TwinCodeEncoder::encodeConstraintAndChildren (ConstraintEdge *edge,
     int depth, int index, bool bypassConstraint) {
   std::list < ConstConstraintPtr > constraints;
+  ConstTreeNode *node = edge->getChild ();
   while (!(node->getSegment ()) && node->getChildren ().size () == 1) {
     if (bypassConstraint) {
       bypassConstraint = false;
     } else {
-      constraints.push_back (node->getConstraint ());
+      constraints.push_back (edge->getConstraint ());
     }
-    node = node->getChildren ().front ();
+    edge = node->getChildren ().front ();
+    node = edge->getChild ();
   }
   if (!bypassConstraint) {
-    constraints.push_back (node->getConstraint ());
+    constraints.push_back (edge->getConstraint ());
   }
   const bool constraintIsEncoded = encodeConstraint (constraints, depth);
   const TraceSegment *segment = node->getSegment ();
@@ -379,7 +382,7 @@ void TwinCodeEncoder::codeRegisterChanges (const TraceSegment *segment,
 
 void TwinCodeEncoder::encodeChildren (ConstTreeNode *node,
     int depth, int index) {
-  const std::list < TreeNode * > &children = node->getChildren ();
+  const std::list < ConstraintEdge * > &children = node->getChildren ();
   switch (children.size ()) {
   case 1:
     encodeConstraintAndChildren (children.front (), depth, index);

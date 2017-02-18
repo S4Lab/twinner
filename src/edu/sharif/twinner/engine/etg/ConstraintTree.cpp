@@ -25,6 +25,7 @@
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
+#include "ConstraintEdge.h"
 
 namespace edu {
 namespace sharif {
@@ -33,7 +34,9 @@ namespace engine {
 namespace etg {
 
 ConstraintTree::ConstraintTree () :
-    root (new TreeNode ()), iterator (root),
+    root (new TreeNode ()),
+    tail (0),
+    iterator (root),
     alwaysTrue (edu::sharif::twinner::trace::Constraint
     ::instantiateTautology (true)) {
 }
@@ -41,7 +44,6 @@ ConstraintTree::ConstraintTree () :
 ConstraintTree::~ConstraintTree () {
   delete root;
   delete alwaysTrue;
-  lastInstructionToTreeNodes.clear ();
 }
 
 void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *trace) {
@@ -88,130 +90,71 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
 }
 
 void ConstraintTree::mergePath (TreeNode *node) {
-  const uint32_t lastInstruction =
-      node->getConstraint ()->getCausingInstructionIdentifier ();
-  typedef std::multimap<uint32_t, TreeNode *>::const_iterator iterator;
-  std::pair<iterator, iterator> range =
-      lastInstructionToTreeNodes.equal_range (lastInstruction);
-  for (iterator it = range.first; it != range.second; ++it) {
-    TreeNode *mergePoint = it->second;
-    if (node == mergePoint) {
-      return;
-    }
+  if (!tail || tail == node) {
+    tail = node;
+    return;
   }
-  for (iterator it = range.first; it != range.second; ++it) {
-    TreeNode *mergePoint = it->second;
-    if (tryToMergePath (node, mergePoint)) {
-      return;
-    }
+  if (tryToMergePath (node, tail)) {
+    return;
   }
-  lastInstructionToTreeNodes.insert (make_pair (lastInstruction, node));
+  edu::sharif::twinner::util::Logger::error ()
+      << "ConstraintTree::mergePath (): Cannot merge node with the tail!\n";
+  abort ();
 }
 
 bool ConstraintTree::tryToMergePath (TreeNode *node, TreeNode *target) const {
-  if (!areNodesMergable (node, target)) {
+  if (!node->areInstructionsTheSame (target)) {
     return false;
   }
-  const NodePair lowerBound = make_pair (node, target);
-  NodePair upperBound;
-  return tryToMergePath (lowerBound, upperBound) == MERGED;
+  return tryToMergePath (make_pair (node, target));
 }
 
-ConstraintTree::MergeResult ConstraintTree::tryToMergePath (
-    const NodePair lowerBound, NodePair &upperBound) const {
-  TreeNode *sourceParent = lowerBound.first->getRightMostParent ();
+bool ConstraintTree::tryToMergePath (const NodePair lowerBound) const {
+  ConstraintEdge *sourceParentEdge = lowerBound.first->getRightMostParent ();
+  TreeNode *sourceParent = sourceParentEdge ? sourceParentEdge->getParent () : 0;
   if (sourceParent == 0
       || sourceParent->getChildren ().size () > 1
       || sourceParent->getParents ().size () > 1) {
-    upperBound = lowerBound;
-    return checkSnapshotsSatisfiability (lowerBound, upperBound);
+    return checkSnapshotsSatisfiability (lowerBound);
   }
-  const std::list < TreeNode * > &targetParents = lowerBound.second->getParents ();
-  NodePair lastSetUpperBound = lowerBound;
-  for (std::list < TreeNode * >::const_iterator it = targetParents.begin ();
+  const std::list < ConstraintEdge * > &targetParents =
+      lowerBound.second->getParents ();
+  for (std::list < ConstraintEdge * >::const_iterator it = targetParents.begin ();
       it != targetParents.end (); ++it) {
-    TreeNode *targetParent = *it;
-    if (!areNodesMergable (sourceParent, targetParent)) {
+    ConstraintEdge *targetParentEdge = *it;
+    TreeNode *targetParent = targetParentEdge->getParent ();
+    if (!sourceParent->areInstructionsTheSame (targetParent)
+        || !sourceParentEdge->areConstraintsTheSame (targetParentEdge)) {
       continue;
     }
-    MergeResult result = tryToMergePath
-        (make_pair (sourceParent, targetParent), upperBound);
-    if (result == MERGED) {
-      return MERGED;
-    } else if (result == HAS_NO_SNAPSHOT) {
-      lastSetUpperBound = upperBound;
+    if (tryToMergePath (make_pair (sourceParent, targetParent))) {
+      return true;
     }
   }
-  upperBound = lastSetUpperBound;
-  return checkSnapshotsSatisfiability (lowerBound, upperBound);
+  return checkSnapshotsSatisfiability (lowerBound);
 }
 
-ConstraintTree::MergeResult ConstraintTree::checkSnapshotsSatisfiability (
-    const NodePair lowerBound, NodePair upperBound) const {
+bool ConstraintTree::checkSnapshotsSatisfiability (
+    const NodePair lowerBound) const {
   const edu::sharif::twinner::trace::Snapshot *snaSource =
       lowerBound.first->getSnapshot ();
   const edu::sharif::twinner::trace::Snapshot *snaTarget =
       lowerBound.second->getSnapshot ();
   if (snaSource && snaTarget) {
     if (snaSource->satisfiesMemoryRegisterCriticalExpressions (snaTarget)) {
-      mergePath (upperBound.first, upperBound.second);
-      return MERGED;
-    } else {
-      return HAS_NON_CONFORMING_SNAPSHOT;
+      mergePath (lowerBound.first, lowerBound.second);
+      return true;
     }
-  } else if (snaSource == 0 && snaTarget == 0) {
-    return HAS_NO_SNAPSHOT;
   }
-  return HAS_NON_CONFORMING_SNAPSHOT;
+  return false;
 }
 
 void ConstraintTree::mergePath (TreeNode *node, TreeNode *target) const {
   // ASSERT: node has just one parent
-  TreeNode *parent = node->getRightMostParent ();
-  parent->replaceChild (node, target);
+  ConstraintEdge *parent = node->getRightMostParent ();
+  target->addParent (parent);
+  parent->setChild (target);
   delete node;
-}
-
-bool ConstraintTree::areNodesMergable (const TreeNode *first,
-    const TreeNode *second) const {
-  // ASSERT: first != second (otherwise `first` would not be inserted)
-  return first && second
-      && areInstructionsTheSame (first, second)
-      && (*first->getConstraint ()) == (*second->getConstraint ());
-}
-
-bool ConstraintTree::areInstructionsTheSame (const TreeNode *first,
-    const TreeNode *second) const {
-  /* TODO: Support self changing instructions as described below
-   * At each snapshot point, accumulate the concrete/symbolic values which
-   * are stored (at that exact moment) at all locations which are going to
-   * be executed during all possible executions paths which are located in
-   * the subgraph started at that snapshot point. This information can be
-   * acquired (for example) by a two pass execution in which the first run
-   * finds out which instruction locations will be executed and the second
-   * run reads those interesting addresses at the snapshot point.
-   * If all such interesting instruction values (concrete/symbolic) match
-   * between two given snapshots, then they will perform the same changes on the
-   * equal past instruction values and although instructions can be modified
-   * on the fly, they will be the same between the following snapshot points.
-   * Then this method should check for the equality of all such values starting
-   * from the first/second subgraphs.
-   * Note: The performance can be increased in the above scenario by calculating
-   * and storing a hash of the above values instead of comparing them in a one
-   * by one basis if the possibility of collision is acceptable.
-   */
-  const uint32_t firstInsId =
-      first->getConstraint ()->getCausingInstructionIdentifier ();
-  const uint32_t secondInsId =
-      second->getConstraint ()->getCausingInstructionIdentifier ();
-  if (firstInsId == 0 && secondInsId == 0) { // both are tautologies
-    return true;
-  }
-  const char *firstIns =
-      first->getMemoryManager ()->getPointerToAllocatedMemory (firstInsId);
-  const char *secondIns =
-      second->getMemoryManager ()->getPointerToAllocatedMemory (secondInsId);
-  return firstIns && secondIns && strcmp (firstIns, secondIns) == 0;
 }
 
 bool ConstraintTree::getNextConstraintsList (
@@ -249,12 +192,13 @@ Graph *ConstraintTree::getEtg () const {
     const Vertex v (it == root ? 0 : it);
     if (g->first.find (v) == g->first.end ()) {
       g->first.insert (v);
-      const std::list < TreeNode * > children = it->getChildren ();
-      for (std::list < TreeNode * >::const_iterator tn = children.begin ();
-          tn != children.end (); ++tn) {
-        const Vertex u (*tn);
+      const std::list < ConstraintEdge * > children = it->getChildren ();
+      for (std::list < ConstraintEdge * >::const_iterator edge =
+          children.begin (); edge != children.end (); ++edge) {
+        TreeNode *tn = (*edge)->getChild ();
+        const Vertex u (tn);
         g->second.push_back (make_pair (v, u));
-        nodes.push_back (*tn);
+        nodes.push_back (tn);
       }
     }
   }

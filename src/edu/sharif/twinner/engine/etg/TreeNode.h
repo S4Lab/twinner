@@ -14,6 +14,7 @@
 #define TREE_NODE_H
 
 #include <list>
+#include <string>
 
 namespace edu {
 namespace sharif {
@@ -32,22 +33,25 @@ class ExecutionTraceSegment;
 namespace engine {
 namespace etg {
 
+class ConstraintEdge;
+
 class TreeNode {
 private:
-  const int debugId; // FIXME: Remove this field when debug is not required
+  const int debugId;
 
   // front of list: left-most | back of list: right-most
-  std::list < TreeNode * > parents;
-  std::list < TreeNode * > children;
-  const edu::sharif::twinner::trace::Constraint *constraint;
+  std::list < ConstraintEdge * > parents;
+  std::list < ConstraintEdge * > children;
+
+  uint32_t insId;
   const edu::sharif::twinner::util::MemoryManager *memoryManager;
 
   edu::sharif::twinner::trace::Snapshot *snapshot;
   const edu::sharif::twinner::trace::ExecutionTraceSegment *segment;
 
 public:
-  TreeNode (TreeNode *parent = 0, const edu::sharif::twinner::trace::Constraint *c = 0,
-      const edu::sharif::twinner::util::MemoryManager *m = 0);
+  TreeNode ();
+  TreeNode (ConstraintEdge *parent);
   ~TreeNode ();
 
   /**
@@ -90,7 +94,8 @@ public:
   const edu::sharif::twinner::util::MemoryManager *getMemoryManager () const;
 
   void dumpConstraints (edu::sharif::twinner::util::Logger &logger) const;
-  void dumpSubTree (edu::sharif::twinner::util::Logger &logger) const;
+  void dumpSubTree (edu::sharif::twinner::util::Logger &logger,
+      unsigned int pad = 0) const;
 
   bool hasAnyChild () const;
   void mergeCriticalAddresses (edu::sharif::twinner::trace::Snapshot *snapshot);
@@ -99,15 +104,21 @@ public:
   const edu::sharif::twinner::trace::ExecutionTraceSegment *getSegment () const;
   const edu::sharif::twinner::trace::Snapshot *getSnapshot () const;
 
-  const std::list < TreeNode * > &getChildren () const;
-  void replaceChild (TreeNode *oldChild, TreeNode *newChild);
-  const edu::sharif::twinner::trace::Constraint *getConstraint () const;
+  const std::list < ConstraintEdge * > &getChildren () const;
+  void addParent (ConstraintEdge *newParent);
+  bool areInstructionsTheSame (const TreeNode *tn) const;
 
-  TreeNode *getRightMostParent ();
-  const std::list < TreeNode * > &getParents () const;
+  ConstraintEdge *getRightMostParent ();
+  const std::list < ConstraintEdge * > &getParents () const;
+
+  std::string toString () const;
 
 private:
+  void registerInstructionIdIfRequired (
+      const edu::sharif::twinner::trace::Constraint *c,
+      const edu::sharif::twinner::util::MemoryManager *m);
   TreeNode *addConstraint (TreeNode *parent,
+      unsigned int depth,
       const edu::sharif::twinner::trace::Constraint *c,
       const edu::sharif::twinner::util::MemoryManager *m,
       bool performValidityCheck);

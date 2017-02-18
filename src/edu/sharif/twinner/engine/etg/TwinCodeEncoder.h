@@ -40,6 +40,7 @@ namespace engine {
 namespace etg {
 
 class TreeNode;
+class ConstraintEdge;
 class Variable;
 
 class TwinCodeEncoder {
@@ -96,7 +97,7 @@ private:
   /**
    * @return true iff the subgraph is encoded under an if-construct
    */
-  bool encodeConstraintAndChildren (ConstTreeNode *node, int depth, int index,
+  bool encodeConstraintAndChildren (ConstraintEdge *edge, int depth, int index,
       bool bypassConstraint = false);
 
   /**
