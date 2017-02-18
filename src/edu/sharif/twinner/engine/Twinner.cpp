@@ -34,7 +34,7 @@
 #include "edu/sharif/twinner/engine/smt/SmtSolver.h"
 #include "edu/sharif/twinner/engine/smt/Cvc4SmtSolver.h"
 
-#include "edu/sharif/twinner/engine/etg/ConstraintTree.h"
+#include "edu/sharif/twinner/engine/etg/ExecutionTraceGraph.h"
 #include "edu/sharif/twinner/engine/etg/TwinCodeEncoder.h"
 #include "edu/sharif/twinner/engine/etg/AddressAggregator.h"
 #include "edu/sharif/twinner/engine/etg/Vertex.h"
@@ -66,11 +66,11 @@ void find_intersection (
     const std::pair < ADDRINT, int > &address, const UINT64 &content);
 
 Twinner::Twinner () :
-    ctree (new edu::sharif::twinner::engine::etg::ConstraintTree ()) {
+    etg (new edu::sharif::twinner::engine::etg::ExecutionTraceGraph ()) {
 }
 
 Twinner::~Twinner () {
-  delete ctree;
+  delete etg;
 }
 
 void Twinner::setEtgPath (string etgpath) {
@@ -293,7 +293,7 @@ void Twinner::addExecutionTrace (edu::sharif::twinner::trace::Trace *trace) {
   log << "Replacing temporary symbols in trace...\n";
   trace->replaceTemporarySymbols ();
   traces.push_back (trace);
-  ctree->addConstraints (trace);
+  etg->addConstraints (trace);
   log << "Done.\n";
 }
 
@@ -301,8 +301,8 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
     set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols) {
   //TODO: Refactor these codes out of this class (to a search strategy class)
   std::list < const edu::sharif::twinner::trace::Constraint * > clist;
-  ctree->dumpTree ();
-  while (ctree->getNextConstraintsList (clist)) {
+  etg->dumpTree ();
+  while (etg->getNextConstraintsList (clist)) {
     const bool ok = edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
         ->solveConstraints (clist, symbols);
     if (ok) {
@@ -313,9 +313,9 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
 }
 
 void Twinner::generateEtg (std::ofstream &out) const {
-  edu::sharif::twinner::engine::etg::Graph *etg = ctree->getEtg ();
-  out << (*etg);
-  delete etg;
+  edu::sharif::twinner::engine::etg::Graph *graph = etg->getEtg ();
+  out << (*graph);
+  delete graph;
 }
 
 void Twinner::codeTracesIntoTwinCode (
@@ -329,7 +329,7 @@ void Twinner::codeTracesIntoTwinCode (
     throw std::runtime_error ("Error in saving twincode in file");
   }
   edu::sharif::twinner::engine::etg::TwinCodeEncoder
-      (traces, initialValues, ctree->getRoot ()).encodeToFile (fileout);
+      (traces, initialValues, etg->getRoot ()).encodeToFile (fileout);
   fileout.close ();
 }
 

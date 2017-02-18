@@ -27,26 +27,26 @@ class Constraint;
 namespace engine {
 namespace etg {
 
-class TreeNode;
+class InstructionNode;
 
 class ConstraintEdge {
 private:
   const int debugId;
 
   const edu::sharif::twinner::trace::Constraint *constraint;
-  TreeNode *parent;
-  TreeNode *child;
+  InstructionNode *parent;
+  InstructionNode *child;
 
 public:
-  ConstraintEdge (TreeNode *p,
+  ConstraintEdge (InstructionNode *p,
       const edu::sharif::twinner::trace::Constraint *c);
   virtual ~ConstraintEdge ();
 
-  void setChild (TreeNode *node);
+  void setChild (InstructionNode *node);
 
   const edu::sharif::twinner::trace::Constraint *getConstraint () const;
-  TreeNode *getChild ();
-  TreeNode *getParent ();
+  InstructionNode *getChild ();
+  InstructionNode *getParent ();
 
   bool areConstraintsTheSame (const ConstraintEdge *edge) const;
 

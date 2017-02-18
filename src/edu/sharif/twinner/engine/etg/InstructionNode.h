@@ -10,8 +10,8 @@
  * This file is part of Twinner project.
  */
 
-#ifndef TREE_NODE_H
-#define TREE_NODE_H
+#ifndef INSTRUCTION_NODE_H
+#define INSTRUCTION_NODE_H
 
 #include <list>
 #include <string>
@@ -35,7 +35,7 @@ namespace etg {
 
 class ConstraintEdge;
 
-class TreeNode {
+class InstructionNode {
 private:
   const int debugId;
 
@@ -50,9 +50,9 @@ private:
   const edu::sharif::twinner::trace::ExecutionTraceSegment *segment;
 
 public:
-  TreeNode ();
-  TreeNode (ConstraintEdge *parent);
-  ~TreeNode ();
+  InstructionNode ();
+  InstructionNode (ConstraintEdge *parent);
+  ~InstructionNode ();
 
   /**
    * Adds constraint as right-most child of this node and returns the newly instantiated
@@ -64,7 +64,7 @@ public:
    *
    * @return The node (possibly newly instantiated) which is responsible for constraint.
    */
-  TreeNode *addConstraint (const edu::sharif::twinner::trace::Constraint *constraint,
+  InstructionNode *addConstraint (const edu::sharif::twinner::trace::Constraint *constraint,
       const edu::sharif::twinner::util::MemoryManager *memoryManager,
       bool performValidityCheck);
 
@@ -74,7 +74,7 @@ public:
    * @param clist List of constraints which are visited during the requested traversal.
    * @return A pointer to the right-most and deepest grandchild of this node.
    */
-  TreeNode *getRightMostDeepestGrandChild (
+  InstructionNode *getRightMostDeepestGrandChild (
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
 
   /**
@@ -88,7 +88,7 @@ public:
    * @param clist Constraints which are in correspondence to root-to-returned-node path.
    * @return The next node which should be visited or null if there was no such node.
    */
-  TreeNode *getNextNode (
+  InstructionNode *getNextNode (
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
 
   const edu::sharif::twinner::util::MemoryManager *getMemoryManager () const;
@@ -106,7 +106,7 @@ public:
 
   const std::list < ConstraintEdge * > &getChildren () const;
   void addParent (ConstraintEdge *newParent);
-  bool areInstructionsTheSame (const TreeNode *tn) const;
+  bool areInstructionsTheSame (const InstructionNode *tn) const;
 
   ConstraintEdge *getRightMostParent ();
   const std::list < ConstraintEdge * > &getParents () const;
@@ -117,7 +117,7 @@ private:
   void registerInstructionIdIfRequired (
       const edu::sharif::twinner::trace::Constraint *c,
       const edu::sharif::twinner::util::MemoryManager *m);
-  TreeNode *addConstraint (TreeNode *parent,
+  InstructionNode *addConstraint (InstructionNode *parent,
       unsigned int depth,
       const edu::sharif::twinner::trace::Constraint *c,
       const edu::sharif::twinner::util::MemoryManager *m,
@@ -130,4 +130,4 @@ private:
 }
 }
 
-#endif /* TreeNode.h*/
+#endif /* InstructionNode.h */

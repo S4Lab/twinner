@@ -12,7 +12,7 @@
 
 #include "ConstraintEdge.h"
 
-#include "TreeNode.h"
+#include "InstructionNode.h"
 
 #include "edu/sharif/twinner/trace/Constraint.h"
 
@@ -26,7 +26,7 @@ namespace etg {
 
 static int lastDebugId = 0;
 
-ConstraintEdge::ConstraintEdge (TreeNode *p,
+ConstraintEdge::ConstraintEdge (InstructionNode *p,
     const edu::sharif::twinner::trace::Constraint *c) :
     debugId (++lastDebugId),
     constraint (c),
@@ -38,7 +38,7 @@ ConstraintEdge::~ConstraintEdge () {
   delete child;
 }
 
-void ConstraintEdge::setChild (TreeNode *node) {
+void ConstraintEdge::setChild (InstructionNode *node) {
   child = node;
 }
 
@@ -47,11 +47,11 @@ ConstraintEdge::getConstraint () const {
   return constraint;
 }
 
-TreeNode *ConstraintEdge::getChild () {
+InstructionNode *ConstraintEdge::getChild () {
   return child;
 }
 
-TreeNode *ConstraintEdge::getParent () {
+InstructionNode *ConstraintEdge::getParent () {
   return parent;
 }
 

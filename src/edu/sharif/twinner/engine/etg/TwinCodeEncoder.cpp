@@ -28,7 +28,7 @@
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 
-#include "TreeNode.h"
+#include "InstructionNode.h"
 #include "AddressAggregator.h"
 #include "ConstraintEdge.h"
 
@@ -63,7 +63,7 @@ struct Variable {
 
 TwinCodeEncoder::TwinCodeEncoder (const std::list < ConstTrace * > &traces,
     const std::map < AddrToSize, Value > &_initialValues,
-    ConstTreeNode *_root) :
+    ConstInsNode *_root) :
     conditionIndex (0),
     initialValues (_initialValues), root (_root) {
   AddressAggregator (traces, addressToSize).gatherSymbolsAddressToSize ();
@@ -151,7 +151,7 @@ void TwinCodeEncoder::declareMemorySymbols (
 bool TwinCodeEncoder::encodeConstraintAndChildren (ConstraintEdge *edge,
     int depth, int index, bool bypassConstraint) {
   std::list < ConstConstraintPtr > constraints;
-  ConstTreeNode *node = edge->getChild ();
+  ConstInsNode *node = edge->getChild ();
   while (!(node->getSegment ()) && node->getChildren ().size () == 1) {
     if (bypassConstraint) {
       bypassConstraint = false;
@@ -380,7 +380,7 @@ void TwinCodeEncoder::codeRegisterChanges (const TraceSegment *segment,
   }
 }
 
-void TwinCodeEncoder::encodeChildren (ConstTreeNode *node,
+void TwinCodeEncoder::encodeChildren (ConstInsNode *node,
     int depth, int index) {
   const std::list < ConstraintEdge * > &children = node->getChildren ();
   switch (children.size ()) {

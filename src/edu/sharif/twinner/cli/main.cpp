@@ -21,7 +21,7 @@
 
 #include "edu/sharif/twinner/engine/Twinner.h"
 #include "edu/sharif/twinner/trace/Trace.h"
-#include "edu/sharif/twinner/engine/etg/ConstraintTree.h"
+#include "edu/sharif/twinner/engine/etg/ExecutionTraceGraph.h"
 #include "edu/sharif/twinner/engine/smt/Cvc4SmtSolver.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
@@ -187,7 +187,7 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
   }
   trace->printCompleteState (edu::sharif::twinner::util::Logger::info ());
 
-  edu::sharif::twinner::engine::etg::ConstraintTree ct;
+  edu::sharif::twinner::engine::etg::ExecutionTraceGraph ct;
   trace->markCriticalAddresses ();
   trace->replaceTemporarySymbols ();
   ct.addConstraints (trace);

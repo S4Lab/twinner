@@ -10,8 +10,8 @@
  * This file is part of Twinner project.
  */
 
-#ifndef CONSTRAINT_TREE_H
-#define CONSTRAINT_TREE_H
+#ifndef EXECUTION_TRACE_GRAPH_H
+#define EXECUTION_TRACE_GRAPH_H
 
 #include "Vertex.h"
 
@@ -28,18 +28,18 @@ class Constraint;
 namespace engine {
 namespace etg {
 
-class TreeNode;
+class InstructionNode;
 
-class ConstraintTree {
+class ExecutionTraceGraph {
 private:
-  TreeNode *root;
-  TreeNode *tail;
-  TreeNode *iterator;
+  InstructionNode *root;
+  InstructionNode *tail;
+  InstructionNode *iterator;
   const edu::sharif::twinner::trace::Constraint * const alwaysTrue;
 
 public:
-  ConstraintTree ();
-  ~ConstraintTree ();
+  ExecutionTraceGraph ();
+  ~ExecutionTraceGraph ();
 
   void addConstraints (const edu::sharif::twinner::trace::Trace *trace);
   bool getNextConstraintsList (
@@ -47,19 +47,19 @@ public:
 
   void dumpTree () const;
 
-  const TreeNode *getRoot () const;
+  const InstructionNode *getRoot () const;
 
   Graph *getEtg () const;
 
 private:
-  void mergePath (TreeNode *node);
-  bool tryToMergePath (TreeNode *node, TreeNode *target) const;
+  void mergePath (InstructionNode *node);
+  bool tryToMergePath (InstructionNode *node, InstructionNode *target) const;
 
-  typedef std::pair<TreeNode *, TreeNode *> NodePair;
+  typedef std::pair<InstructionNode *, InstructionNode *> NodePair;
   bool tryToMergePath (const NodePair lowerBound) const;
   bool checkSnapshotsSatisfiability (const NodePair lowerBound) const;
 
-  void mergePath (TreeNode *node, TreeNode *target) const;
+  void mergePath (InstructionNode *node, InstructionNode *target) const;
 };
 
 }
@@ -68,4 +68,4 @@ private:
 }
 }
 
-#endif /* ConstraintTree.h*/
+#endif /* ExecutionTraceGraph.h */

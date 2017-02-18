@@ -12,9 +12,9 @@
 
 #include "edu/sharif/twinner/pin-wrapper.h"
 
-#include "ConstraintTree.h"
+#include "ExecutionTraceGraph.h"
 
-#include "TreeNode.h"
+#include "InstructionNode.h"
 
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
@@ -33,22 +33,22 @@ namespace twinner {
 namespace engine {
 namespace etg {
 
-ConstraintTree::ConstraintTree () :
-    root (new TreeNode ()),
+ExecutionTraceGraph::ExecutionTraceGraph () :
+    root (new InstructionNode ()),
     tail (0),
     iterator (root),
     alwaysTrue (edu::sharif::twinner::trace::Constraint
     ::instantiateTautology (true)) {
 }
 
-ConstraintTree::~ConstraintTree () {
+ExecutionTraceGraph::~ExecutionTraceGraph () {
   delete root;
   delete alwaysTrue;
 }
 
-void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *trace) {
+void ExecutionTraceGraph::addConstraints (const edu::sharif::twinner::trace::Trace *trace) {
   edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->clearState ();
-  TreeNode *node = root;
+  InstructionNode *node = root;
   int depth = 0;
   const std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * > &segments =
       trace->getTraceSegments ();
@@ -57,17 +57,17 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
     const edu::sharif::twinner::trace::ExecutionTraceSegment *segment = *it;
     const std::list < edu::sharif::twinner::trace::Snapshot * > &snapshots =
         segment->getSnapshots ();
-    TreeNode const *preSegment = node;
+    InstructionNode const *preSegment = node;
     for (std::list < edu::sharif::twinner::trace::Snapshot * >
         ::const_iterator it = snapshots.begin (); it != snapshots.end (); ++it) {
       edu::sharif::twinner::trace::Snapshot *snapshot = *it;
       const std::list < edu::sharif::twinner::trace::Constraint * > &constraints =
           snapshot->getPathConstraints ();
-      TreeNode const *preSnapshot = node;
+      InstructionNode const *preSnapshot = node;
       for (std::list < edu::sharif::twinner::trace::Constraint * >
           ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
         const edu::sharif::twinner::trace::Constraint *constraint = *it2;
-        TreeNode *next = node->addConstraint
+        InstructionNode *next = node->addConstraint
             (constraint, trace->getMemoryManager (), (depth <= 10));
         if (next != node) {
           node = next;
@@ -89,7 +89,7 @@ void ConstraintTree::addConstraints (const edu::sharif::twinner::trace::Trace *t
   iterator = root;
 }
 
-void ConstraintTree::mergePath (TreeNode *node) {
+void ExecutionTraceGraph::mergePath (InstructionNode *node) {
   if (!tail || tail == node) {
     tail = node;
     return;
@@ -102,16 +102,16 @@ void ConstraintTree::mergePath (TreeNode *node) {
   abort ();
 }
 
-bool ConstraintTree::tryToMergePath (TreeNode *node, TreeNode *target) const {
+bool ExecutionTraceGraph::tryToMergePath (InstructionNode *node, InstructionNode *target) const {
   if (!node->areInstructionsTheSame (target)) {
     return false;
   }
   return tryToMergePath (make_pair (node, target));
 }
 
-bool ConstraintTree::tryToMergePath (const NodePair lowerBound) const {
+bool ExecutionTraceGraph::tryToMergePath (const NodePair lowerBound) const {
   ConstraintEdge *sourceParentEdge = lowerBound.first->getRightMostParent ();
-  TreeNode *sourceParent = sourceParentEdge ? sourceParentEdge->getParent () : 0;
+  InstructionNode *sourceParent = sourceParentEdge ? sourceParentEdge->getParent () : 0;
   if (sourceParent == 0
       || sourceParent->getChildren ().size () > 1
       || sourceParent->getParents ().size () > 1) {
@@ -122,7 +122,7 @@ bool ConstraintTree::tryToMergePath (const NodePair lowerBound) const {
   for (std::list < ConstraintEdge * >::const_iterator it = targetParents.begin ();
       it != targetParents.end (); ++it) {
     ConstraintEdge *targetParentEdge = *it;
-    TreeNode *targetParent = targetParentEdge->getParent ();
+    InstructionNode *targetParent = targetParentEdge->getParent ();
     if (!sourceParent->areInstructionsTheSame (targetParent)
         || !sourceParentEdge->areConstraintsTheSame (targetParentEdge)) {
       continue;
@@ -134,7 +134,7 @@ bool ConstraintTree::tryToMergePath (const NodePair lowerBound) const {
   return checkSnapshotsSatisfiability (lowerBound);
 }
 
-bool ConstraintTree::checkSnapshotsSatisfiability (
+bool ExecutionTraceGraph::checkSnapshotsSatisfiability (
     const NodePair lowerBound) const {
   const edu::sharif::twinner::trace::Snapshot *snaSource =
       lowerBound.first->getSnapshot ();
@@ -149,7 +149,7 @@ bool ConstraintTree::checkSnapshotsSatisfiability (
   return false;
 }
 
-void ConstraintTree::mergePath (TreeNode *node, TreeNode *target) const {
+void ExecutionTraceGraph::mergePath (InstructionNode *node, InstructionNode *target) const {
   // ASSERT: node has just one parent
   ConstraintEdge *parent = node->getRightMostParent ();
   target->addParent (parent);
@@ -157,7 +157,7 @@ void ConstraintTree::mergePath (TreeNode *node, TreeNode *target) const {
   delete node;
 }
 
-bool ConstraintTree::getNextConstraintsList (
+bool ExecutionTraceGraph::getNextConstraintsList (
     std::list < const edu::sharif::twinner::trace::Constraint * > &clist) {
   //PRE-CONDITION: clist is in sync with iterator
   if (iterator == root) {
@@ -171,23 +171,23 @@ bool ConstraintTree::getNextConstraintsList (
   return true;
 }
 
-void ConstraintTree::dumpTree () const {
+void ExecutionTraceGraph::dumpTree () const {
   edu::sharif::twinner::util::Logger logger =
       edu::sharif::twinner::util::Logger::debug ();
   root->dumpConstraints (logger);
   root->dumpSubTree (logger);
 }
 
-const TreeNode *ConstraintTree::getRoot () const {
+const InstructionNode *ExecutionTraceGraph::getRoot () const {
   return root;
 }
 
-Graph *ConstraintTree::getEtg () const {
+Graph *ExecutionTraceGraph::getEtg () const {
   Graph *g = new Graph ();
-  std::list<const TreeNode *> nodes;
+  std::list<const InstructionNode *> nodes;
   nodes.push_back (root);
   while (!nodes.empty ()) {
-    const TreeNode *it = nodes.front ();
+    const InstructionNode *it = nodes.front ();
     nodes.pop_front ();
     const Vertex v (it == root ? 0 : it);
     if (g->first.find (v) == g->first.end ()) {
@@ -195,7 +195,7 @@ Graph *ConstraintTree::getEtg () const {
       const std::list < ConstraintEdge * > children = it->getChildren ();
       for (std::list < ConstraintEdge * >::const_iterator edge =
           children.begin (); edge != children.end (); ++edge) {
-        TreeNode *tn = (*edge)->getChild ();
+        InstructionNode *tn = (*edge)->getChild ();
         const Vertex u (tn);
         g->second.push_back (make_pair (v, u));
         nodes.push_back (tn);

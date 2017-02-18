@@ -35,7 +35,7 @@ class Symbol;
 namespace engine {
 namespace etg {
 
-class ConstraintTree;
+class ExecutionTraceGraph;
 }
 
 class Executer;
@@ -59,7 +59,7 @@ private:
   bool overheads; // run twintool twice for each trace and measure CPU/Memory overheads
 
   std::list < const edu::sharif::twinner::trace::Trace * > traces;
-  edu::sharif::twinner::engine::etg::ConstraintTree *ctree;
+  edu::sharif::twinner::engine::etg::ExecutionTraceGraph *etg;
 
 public:
   Twinner ();

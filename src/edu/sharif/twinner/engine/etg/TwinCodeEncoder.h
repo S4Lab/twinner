@@ -39,7 +39,7 @@ class MemoryEmergedSymbol;
 namespace engine {
 namespace etg {
 
-class TreeNode;
+class InstructionNode;
 class ConstraintEdge;
 class Variable;
 
@@ -68,7 +68,7 @@ public:
   typedef Token * const &TokenPtr;
   typedef uint64_t Value;
   typedef edu::sharif::twinner::util::IndentedStringStream IndentedStream;
-  typedef const TreeNode ConstTreeNode;
+  typedef const InstructionNode ConstInsNode;
 
 private:
   IndentedStream out;
@@ -78,11 +78,11 @@ private:
 
   std::map < Index, std::set < AddrToSize > > addressToSize;
   const std::map < AddrToSize, Value > &initialValues;
-  ConstTreeNode *root;
+  ConstInsNode *root;
 
 public:
   TwinCodeEncoder (const std::list < ConstTrace * > &traces,
-      const std::map < AddrToSize, Value > &initialValues, ConstTreeNode *root);
+      const std::map < AddrToSize, Value > &initialValues, ConstInsNode *root);
 
   void encodeToFile (std::ofstream &fileout);
 
@@ -107,7 +107,7 @@ private:
       int depth);
   void encodeTransformations (const TraceSegment *segment,
       int depth, int index);
-  void encodeChildren (ConstTreeNode *node, int depth, int index);
+  void encodeChildren (ConstInsNode *node, int depth, int index);
 
   void codeMemoryChanges (const Address &memoryEa, ExpressionPtr exp);
   void codeRegisterChanges (const TraceSegment *segment, int index);
