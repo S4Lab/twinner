@@ -75,21 +75,26 @@ void Flags::setFlags (
   }
 }
 
+void append (std::list <edu::sharif::twinner::trace::Constraint *> &list,
+    std::list <edu::sharif::twinner::trace::Constraint *> tempList) {
+  list.splice (list.end (), tempList);
+}
+
 std::list <edu::sharif::twinner::trace::Constraint *>
 Flags::getFlagsExpression (uint32_t &flags, uint32_t instruction) const {
   // TODO: Set undefined bits based on their concrete state
   std::list <edu::sharif::twinner::trace::Constraint *> list;
   bool overflow = (flags >> 11) & 0x1;
-  list.splice (list.end (), instantiateConstraintForOverflowCase (overflow, instruction));
+  append (list, instantiateConstraintForOverflowCase (overflow, instruction));
   bool direction = getDirectionFlag ();
   bool sign = (flags >> 7) & 0x1;
-  list.splice (list.end (), instantiateConstraintForSignCase (sign, instruction));
+  append (list, instantiateConstraintForSignCase (sign, instruction));
   bool zero = (flags >> 6) & 0x1;
-  list.splice (list.end (), instantiateConstraintForZeroCase (zero, instruction));
+  append (list, instantiateConstraintForZeroCase (zero, instruction));
   bool parity = (flags >> 2) & 0x1;
-  list.splice (list.end (), instantiateConstraintForParityCase (parity, instruction));
+  append (list, instantiateConstraintForParityCase (parity, instruction));
   bool carry = flags & 0x1;
-  list.splice (list.end (), instantiateConstraintForCarryCase (carry, instruction));
+  append (list, instantiateConstraintForCarryCase (carry, instruction));
   flags = ((overflow ? 1u : 0) << 11) | ((direction ? 1u : 0) << 10)
       | (1u << 9) | ((sign ? 1u : 0) << 7) | ((zero ? 1u : 0) << 6)
       | ((parity ? 1u : 0) << 2) | (1u << 1) | (carry ? 1u : 0);

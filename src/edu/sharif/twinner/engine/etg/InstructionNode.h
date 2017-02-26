@@ -15,6 +15,7 @@
 
 #include <list>
 #include <string>
+#include <stdint.h>
 
 namespace edu {
 namespace sharif {
