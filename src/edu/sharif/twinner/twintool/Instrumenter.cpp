@@ -160,8 +160,6 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_NOP, NOP_INS_MODELS));
   managedInstructions.insert // Some jumps change RSP (probably PIN is hiding some of instructions)
       (make_pair (XED_ICLASS_JMP, JMP_INS_MODELS));
-  managedInstructions.insert // ignoring syscall as it is handled by callback routines
-      (make_pair (XED_ICLASS_SYSCALL, NOP_INS_MODELS));
   INITIALIZE (SYSCALL_INS_MODEL,
               XED_ICLASS_SYSCALL, XED_ICLASS_SYSENTER);
   INITIALIZE (JMP_CC_INS_MODELS,
@@ -384,8 +382,9 @@ bool Instrumenter::instrumentSingleInstruction (INS ins) {
       } else {
         edu::sharif::twinner::util::Logger::error ()
             << "Instrumenter::instrumentSingleInstruction (...):"
-            " UnExpected instruction model (expectedModels = "
-            << int (expectedModels) << ", model = " << int (model) << ")\n";
+            " Unexpected instruction model"
+            " (expectedModels = " << expectedModels
+            << ", actualModel = " << model << ")\n";
         return false;
       }
     }
