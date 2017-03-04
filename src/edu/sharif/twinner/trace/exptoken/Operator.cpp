@@ -188,20 +188,23 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
   }
   exp->setLastConcreteValue (finalCv);
   if (lastConstant) {
-    const int size = edu::sharif::twinner::util::max
-        (exp->getLastConcreteValue ().getSize (),
-         lastConstant->getValue ().getSize (),
-         operand->getSize ());
-    edu::sharif::twinner::trace::cv::ConcreteValue *cv =
-        lastConstant->getValue ().clone (size);
+    edu::sharif::twinner::trace::cv::ConcreteValue *cv;
     bool overflow;
     bool alternatingNegatableOperators = false; // e.g. Z + x - y or Z >> x << y
     if (sop) {
+      const int size = edu::sharif::twinner::util::max
+          (exp->getLastConcreteValue ().getSize (),
+           lastConstant->getValue ().getSize (),
+           operand->getSize ());
+      cv = lastConstant->getValue ().clone (size);
       overflow = sop->apply (*cv, *operand);
       alternatingNegatableOperators = (sop->getIdentifier () == Operator::MINUS);
       delete sop;
     } else {
-      overflow = lop->apply (*cv, *operand);
+      cv = lastConstant->getValue ().clone
+          (exp->getLastConcreteValue ().getSize ());
+      overflow = lastConstant->getValue () != (*cv)
+          || lop->apply (*cv, *operand);
     }
     if (overflow) {
       if (alternatingNegatableOperators) {
