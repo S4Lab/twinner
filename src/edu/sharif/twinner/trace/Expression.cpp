@@ -157,14 +157,19 @@ public:
 };
 
 std::string Expression::toString () const {
-  std::stringstream ss;
   if (isTrivial (true)) {
+    std::stringstream ss;
     ss << *lastConcreteValue;
-  } else {
-    ConvertToInfixExpressionStringVisitor visitor;
-    std::string str = visit (visitor);
-    ss << str << " /*" << *lastConcreteValue << "*/";
+    return ss.str ();
   }
+  return toDetailedString ();
+}
+
+std::string Expression::toDetailedString () const {
+  std::stringstream ss;
+  ConvertToInfixExpressionStringVisitor visitor;
+  std::string str = visit (visitor);
+  ss << str << " /*" << *lastConcreteValue << "*/";
   return ss.str ();
 }
 
