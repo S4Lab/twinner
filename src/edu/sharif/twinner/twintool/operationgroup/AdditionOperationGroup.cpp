@@ -102,29 +102,35 @@ AdditionOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrEqu
 std::list <OperationGroup::ConstraintPtr>
 AdditionOperationGroup::instantiateConstraintForBelowCase (bool &below,
     uint32_t instruction) const {
-  std::list <OperationGroup::ConstraintPtr> list =
-      instantiateConstraintForBelowOrEqualCase (below, instruction);
-  if (below) {
-    bool zero;
-    std::list <OperationGroup::ConstraintPtr> l2 =
-        instantiateConstraintForZeroCase (zero, instruction);
-    list.insert (list.end (), l2.begin (), l2.end ());
-    below = below && !zero;
+  std::list <OperationGroup::ConstraintPtr> list;
+  bool zero;
+  list.push_back (OperationGroup::Constraint::instantiateEqualConstraint
+                  (zero, exp[1], instruction));
+  if (zero) {
+    below = false;
+    return list;
   }
+  const int precision = exp[0]->getLastConcreteValue ().getSize ();
+  OperationGroup::ExpressionPtr negativeOfRightExp =
+      exp[1]->twosComplement (precision);
+  list.push_back (OperationGroup::Constraint::instantiateBelowConstraint
+                  (below, exp[0], negativeOfRightExp, instruction));
+  delete negativeOfRightExp;
+  below = !below;
   return list;
 }
 
 std::list <OperationGroup::ConstraintPtr>
 AdditionOperationGroup::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
     uint32_t instruction) const {
-  const int precision = exp[0]->getLastConcreteValue ().getSize ();
-  std::list <OperationGroup::ConstraintPtr> list;
-  OperationGroup::ExpressionPtr negativeOfRightExp =
-      exp[1]->twosComplement (precision);
-  list.push_back (OperationGroup::Constraint::instantiateBelowConstraint
-                  (belowOrEqual, exp[0], negativeOfRightExp, instruction));
-  delete negativeOfRightExp;
-  belowOrEqual = !belowOrEqual;
+  std::list <OperationGroup::ConstraintPtr> list =
+      instantiateConstraintForBelowCase (belowOrEqual, instruction);
+  if (belowOrEqual) {
+    return list;
+  }
+  std::list <OperationGroup::ConstraintPtr> l2 =
+      instantiateConstraintForZeroCase (belowOrEqual, instruction);
+  list.insert (list.end (), l2.begin (), l2.end ());
   return list;
 }
 
