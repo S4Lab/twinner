@@ -318,34 +318,48 @@ ConcreteValue128Bits &ConcreteValue128Bits::operator*= (const ConcreteValue &mul
 
   const ResultCarry c43 (a4 * b3);
   const ResultCarry c34 (a3 * b4);
-  const ResultCarry d3 (c43.result + c34.result + d4.carry);
+  const ResultCarry d3 (c43.result + c34.result
+                        + d4.carry);
 
   const ResultCarry c24 (a2 * b4);
   const ResultCarry c33 (a3 * b3);
   const ResultCarry c42 (a4 * b2);
-  const ResultCarry d2 (c42.result + c33.result + c24.result + d3.carry);
+  const ResultCarry d2 (c42.result + c33.result + c24.result
+                        + c43.carry + c34.carry
+                        + d3.carry);
 
   const ResultCarry c14 (a1 * b4);
   const ResultCarry c23 (a2 * b3);
   const ResultCarry c32 (a3 * b2);
   const ResultCarry c41 (a4 * b1);
-  const ResultCarry d1 (c41.result + c32.result + c23.result + c14.result + d2.carry);
+  const ResultCarry d1 (c41.result + c32.result + c23.result + c14.result
+                        + c42.carry + c33.carry + c24.carry
+                        + d2.carry);
 
   const ResultCarry c13 (a1 * b3);
   const ResultCarry c22 (a2 * b2);
   const ResultCarry c31 (a3 * b1);
-  const ResultCarry d0 (c31.result + c22.result + c13.result + d1.carry);
+  const ResultCarry d0 (c31.result + c22.result + c13.result
+                        + c41.carry + c32.carry + c23.carry + c14.carry
+                        + d1.carry);
 
   const ResultCarry c12 (a1 * b2);
   const ResultCarry c21 (a2 * b1);
-  const ResultCarry dm1 (c21.result + c12.result + d0.carry);
+  const ResultCarry dm1 (c21.result + c12.result
+                         + c31.carry + c22.carry + c13.carry
+                         + d0.carry);
 
   const ResultCarry c11 (a1 * b1);
-  const ResultCarry dm2 (c11.result + dm1.carry);
+  const ResultCarry dm2 (c11.result
+                         + c21.carry + c12.carry
+                         + dm1.carry);
+
+  const ResultCarry dm3 (c11.carry
+                         + dm2.carry);
   //d0 and other terms are overflowed and ignored
   lsb = (d3.result << 32) | d4.result;
   msb = (d1.result << 32) | d2.result;
-  cf = (d0 || dm1 || dm2);
+  cf = (d0 || dm1 || dm2 || dm3);
   return *this;
 }
 
