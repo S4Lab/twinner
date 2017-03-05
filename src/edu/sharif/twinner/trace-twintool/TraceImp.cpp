@@ -121,6 +121,8 @@ Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T addr
         (*currentSegmentIterator)->printRegistersValues
             (edu::sharif::twinner::util::Logger::loquacious ());
         UnexpectedChange::adoptStateSummary (state, address);
+      } else {
+        state.setChangeAsExpected ();
       }
       break;
     }

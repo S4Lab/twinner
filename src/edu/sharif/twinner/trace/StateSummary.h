@@ -72,6 +72,13 @@ public:
     unexpectedChange = true;
   }
 
+  void setChangeAsExpected (
+      const std::string _msg = "Execution state differ from what we expected "
+      "(probably, user space memory is changed by a syscall).") {
+    msg = _msg;
+    unexpectedChange = false;
+  }
+
   bool isUnexpectedChangeState () const {
     return unexpectedChange;
   }
