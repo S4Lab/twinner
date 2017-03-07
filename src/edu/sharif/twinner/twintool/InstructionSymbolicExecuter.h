@@ -536,6 +536,11 @@ private:
   void joAnalysisRoutine (bool branchTaken);
 
   /**
+   * JP jumps if PF=1 which means that corresponding expression was < 0
+   */
+  void jpAnalysisRoutine (bool branchTaken);
+
+  /**
    * JS jumps if SF=1 which means that corresponding expression was < 0
    */
   void jsAnalysisRoutine (bool branchTaken);
