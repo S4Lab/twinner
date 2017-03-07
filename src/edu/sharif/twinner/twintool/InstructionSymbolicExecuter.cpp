@@ -2226,11 +2226,14 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "shlAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
+  edu::sharif::twinner::trace::Expression *srcexp =
       getExpression (src, trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
   const edu::sharif::twinner::trace::Expression *dstexpOrig =
       getExpression (dst, trace);
+  const int mask =
+      dstexpOrig->getLastConcreteValue ().getSize () > 32 ? 0x3f : 0x1f;
+  srcexp->bitwiseAnd (mask);
   edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tshifting operation...";
   // TODO: Check for large src shift amounts and truncate it if required
