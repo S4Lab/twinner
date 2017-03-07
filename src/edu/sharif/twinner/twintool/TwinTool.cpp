@@ -71,7 +71,7 @@ KNOB < string > safeFunctions (KNOB_MODE_WRITEONCE, "pintool", "safe-functions",
     "comma separated functions to be preserved");
 
 KNOB < string > mainArgsReportingOutputFilePath (KNOB_MODE_WRITEONCE,
-    "pintool", "mar", "/tmp/twinner/main-args-reporting.dat",
+    "pintool", "mar", "",
     "specify file path for saving main() arguments information"
     " (in -main and -endpoints modes");
 
