@@ -232,11 +232,11 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     }
     logger << '\n';
   }
-  if (justAnalyzeMainRoutine || start != end) {
+  if (justAnalyzeMainRoutine) {
     if (mainArgsReportingFilePath.empty ()) {
-      printError ("In the --main and --endpoints modes,"
+      printError ("In the -main mode,"
                   " main() arguments information must be saved somewhere."
-                  " Use --mar to specify the path!");
+                  " Use -mar to specify the path!");
       return false;
     }
     if (access (mainArgsReportingFilePath.c_str (), F_OK) == 0
@@ -245,6 +245,8 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
                   + mainArgsReportingFilePath);
       return false;
     }
+  }
+  if (start != end) {
     justAnalyzeMainRoutine = true;
   }
   const int stackOffsetValue = stackOffset.Value ();
