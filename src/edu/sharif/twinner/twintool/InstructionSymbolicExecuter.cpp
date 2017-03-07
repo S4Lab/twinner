@@ -3554,6 +3554,7 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_MOV:
   case XED_ICLASS_MOVZX:
   case XED_ICLASS_MOVD:
+  case XED_ICLASS_MOVQ:
   case XED_ICLASS_MOVAPS:
   case XED_ICLASS_MOVDQU:
   case XED_ICLASS_MOVDQA:
