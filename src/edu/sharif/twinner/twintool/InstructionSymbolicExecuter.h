@@ -824,6 +824,11 @@ private:
   void setoAnalysisRoutine (const MutableExpressionValueProxy &opr);
 
   /**
+   * SETNP sets opr to 1 iff PF=0 (and sets it to 0 otherwise).
+   */
+  void setnpAnalysisRoutine (const MutableExpressionValueProxy &opr);
+
+  /**
    * SETNS sets opr to 1 iff SF=0 (and sets it to 0 otherwise).
    */
   void setnsAnalysisRoutine (const MutableExpressionValueProxy &opr);
