@@ -848,17 +848,34 @@ public:
       previousSnapshot (_previousSnapshot) {
   }
 
-  virtual ResultType visitSignExtension (const Expression::Operator *op,
-      ResultType &mainExp, ResultType &source, ResultType &target) {
-    Expression *sourceExp =
-        mainExp->clone (source->getLastConcreteValue ().toUint64 ());
-    delete source;
-    delete mainExp;
-    Expression *signExtendedExp =
-        sourceExp->signExtended (target->getLastConcreteValue ().toUint64 ());
-    delete target;
-    delete sourceExp;
-    return signExtendedExp;
+  virtual ResultType visitTrinary (const Expression::Operator *op,
+      ResultType &left, ResultType &mid, ResultType &right) {
+    if (!mid->isTrivial (true) || !right->isTrivial (true)) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "ReplaceTemporarySymbolsVisitor::visitTrinary ():"
+          " mid/right operators are not concrete\n";
+      abort ();
+    }
+    {
+      int size;
+      if (op->getIdentifier () == Expression::Operator::SIGN_EXTEND) {
+        size = right->getLastConcreteValue ().toUint64 ();
+      } else {
+        size = mid->getLastConcreteValue ().toUint64 ();
+      }
+      Expression *exp = left->clone (size);
+      delete left;
+      left = exp;
+    }
+    Expression::Operator *opc = op->clone ();
+    if (opc->apply (left,
+                    mid->getLastConcreteValue ().clone (),
+                    right->getLastConcreteValue ().clone ())) {
+      delete opc;
+    }
+    delete mid;
+    delete right;
+    return left;
   }
 
   virtual ResultType visitFunctionalBinary (const Expression::Operator *op,

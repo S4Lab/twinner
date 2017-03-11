@@ -120,11 +120,16 @@ class ConvertToInfixExpressionStringVisitor :
 public edu::sharif::twinner::trace::exptoken::ExpressionVisitor<std::string> {
 public:
 
-  virtual std::string visitSignExtension (const Expression::Operator *op,
-      std::string &main, std::string &source, std::string &target) {
+  virtual std::string visitTrinary (const Expression::Operator *op,
+      std::string &left, std::string &mid, std::string &right) {
     std::stringstream ss;
-    ss << op->toString () << '_' << target << '_' << source << " ("
-        << main << ')';
+    if (op->getIdentifier () == Expression::Operator::SIGN_EXTEND) {
+      ss << op->toString () << '_' << right /* target */
+          << '_' << mid /* source */ << " (" << left << ')';
+    } else {
+      ss << op->toString () /*function name*/ << '_' << mid /* size */
+          << " (" << left << ", " << right /* amount */ << ')';
+    }
     return ss.str ();
   }
 
@@ -520,20 +525,13 @@ public:
       overflow (false) {
   }
 
-  virtual ResultType visitSignExtension (
+  virtual ResultType visitTrinary (
       const edu::sharif::twinner::trace::exptoken::Operator *op,
-      ResultType &mainCv,
-      ResultType &source,
-      ResultType &target) {
-    edu::sharif::twinner::trace::cv::ConcreteValue *sourceCv =
-        mainCv.clone (source.toUint64 ());
-    edu::sharif::twinner::trace::cv::ConcreteValue *signExtendedCv =
-        sourceCv->signExtended (target.toUint64 ());
-    delete sourceCv;
-    edu::sharif::twinner::trace::cv::ConcreteValue128Bits cv =
-        *signExtendedCv;
-    delete signExtendedCv;
-    return cv;
+      ResultType &left,
+      ResultType &mid,
+      ResultType &right) {
+    overflow = overflow || op->apply (left, mid, right);
+    return left;
   }
 
   virtual ResultType visitFunctionalBinary (

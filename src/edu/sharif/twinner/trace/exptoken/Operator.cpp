@@ -33,6 +33,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/max.h"
+#include "SignExtendOperator.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -96,6 +97,8 @@ Operator *Operator::instantiateOperator (OperatorIdentifier oi) {
     return new ShiftLeftOperator ();
   case SHIFT_RIGHT:
     return new ShiftRightOperator ();
+  case SIGN_EXTEND:
+    return new SignExtendOperator ();
   case ARITHMETIC_SHIFT_RIGHT:
     return new ArithmeticShiftRightOperator ();
   case ROTATE_RIGHT:
@@ -239,6 +242,37 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
   return false;
 }
 
+bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
+    edu::sharif::twinner::trace::cv::ConcreteValue *middleOperand,
+    edu::sharif::twinner::trace::cv::ConcreteValue *rightOperand) {
+  edu::sharif::twinner::trace::cv::ConcreteValue *finalCv =
+      exp->getLastConcreteValue ().clone ();
+  apply (*finalCv, *middleOperand, *rightOperand);
+  exp->setLastConcreteValue (finalCv);
+  edu::sharif::twinner::trace::Expression::Stack &stack = exp->getStack ();
+  if (!stack.empty () && dynamic_cast<Constant *> (stack.back ())) {
+    Constant *lastConstant = static_cast<Constant *> (stack.back ());
+    edu::sharif::twinner::trace::cv::ConcreteValue *cv =
+        lastConstant->getValue ().clone (finalCv->getSize ());
+    const bool overflow = lastConstant->getValue () != (*cv)
+        || apply (*cv, *middleOperand, *rightOperand);
+    if (overflow) {
+      delete cv;
+      cv = 0;
+    }
+    if (cv) {
+      delete middleOperand;
+      delete rightOperand;
+      lastConstant->setValue (cv);
+      return true;
+    }
+  }
+  stack.push_back (new Constant (middleOperand));
+  stack.push_back (new Constant (rightOperand));
+  stack.push_back (this);
+  return false;
+}
+
 Operator::SimplificationStatus Operator::deepSimplify (
     edu::sharif::twinner::trace::Expression *exp,
     edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
@@ -254,12 +288,23 @@ bool Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
   //return dst.getCarryBit ();
 }
 
+bool Operator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &mid,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
+  edu::sharif::twinner::util::Logger::error ()
+      << "Operator::apply(ConcreteValue &,"
+      " const ConcreteValue &, const ConcreteValue &):"
+      " Unknown OperatorIdentifier: " << std::dec << oi << '\n';
+  abort ();
+  //return dst.getCarryBit ();
+}
+
 std::list < ExpressionToken * >::iterator Operator::findNextOperand (
     std::list < ExpressionToken * >::iterator it) const {
   Operator *op = dynamic_cast<Operator *> (*--it);
   if (op) {
     switch (op->getType ()) {
-    case SignExtension:
+    case Trinary:
       it = findNextOperand (it);
     case Binary:
     case FunctionalBinary:
@@ -280,8 +325,6 @@ std::string Operator::toString () const {
   switch (oi) {
   case BITWISE_NEGATE:
     return "~";
-  case SIGN_EXTEND:
-    return "signExtend";
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Operator::toString(...): Non-handled operator identifier: "
@@ -291,14 +334,14 @@ std::string Operator::toString () const {
 }
 
 Operator::OperatorType Operator::getType () const {
-  if (oi == SIGN_EXTEND) {
-    return SignExtension;
-  } else if (oi < MAX_UNARY_OPERATOR_IDENTIFIER) {
+  if (oi < MAX_UNARY_OPERATOR_IDENTIFIER) {
     return Unary;
   } else if (oi < MAX_BINARY_OPERATOR_IDENTIFIER) {
     return Binary;
-  } else {
+  } else if (oi < MAX_FUNCTIONAL_BINARY_OPERATOR_IDENTIFIER) {
     return FunctionalBinary;
+  } else {
+    return Trinary;
   }
 }
 

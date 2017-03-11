@@ -33,7 +33,6 @@ class Operator : public ExpressionToken {
 public:
 
   enum OperatorIdentifier {
-    SIGN_EXTEND,
     BITWISE_NEGATE,
 
     MAX_UNARY_OPERATOR_IDENTIFIER,
@@ -51,13 +50,17 @@ public:
     SHIFT_RIGHT,
     ARITHMETIC_SHIFT_RIGHT,
     ROTATE_RIGHT, ROTATE_LEFT,
+
+    MAX_FUNCTIONAL_BINARY_OPERATOR_IDENTIFIER,
+
+    SIGN_EXTEND,
   };
 
   enum OperatorType {
-    SignExtension,
     Unary,
     Binary,
-    FunctionalBinary
+    FunctionalBinary,
+    Trinary,
   };
 
 protected:
@@ -128,6 +131,10 @@ public:
   virtual bool apply (edu::sharif::twinner::trace::Expression *exp,
       edu::sharif::twinner::trace::cv::ConcreteValue *cv);
 
+  virtual bool apply (edu::sharif::twinner::trace::Expression *exp,
+      edu::sharif::twinner::trace::cv::ConcreteValue *middle,
+      edu::sharif::twinner::trace::cv::ConcreteValue *right);
+
   /**
    * Applies this operator on given concrete values. The dst will be updated to indicate
    * value of `dst <this> src`.
@@ -137,6 +144,10 @@ public:
    * @return true if and only if there is an unsigned overflow in the operation.
    */
   virtual bool apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &src) const;
+
+  virtual bool apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &mid,
       const edu::sharif::twinner::trace::cv::ConcreteValue &src) const;
 
   virtual std::string toString () const;

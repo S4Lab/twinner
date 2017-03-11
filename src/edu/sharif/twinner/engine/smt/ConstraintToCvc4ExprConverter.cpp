@@ -345,7 +345,7 @@ public:
       ok (_ok), symbols (_symbols), super (_super) {
   }
 
-  virtual Expr visitSignExtension (
+  virtual Expr visitTrinary (
       const edu::sharif::twinner::trace::exptoken::Operator *op,
       Expr &main, Expr &source, Expr &target) {
     if (!ok || !source.isConst () || !target.isConst ()) {
@@ -366,17 +366,30 @@ public:
         super->em.mkExpr (kind::BITVECTOR_EXTRACT,
                           super->em.mkConst (BitVectorExtract (sv - 1, 0)),
                           main);
-    const Expr singExtended =
-        super->em.mkExpr (kind::BITVECTOR_SIGN_EXTEND,
-                          super->em.mkConst (BitVectorSignExtend (tv - sv)),
-                          srcExp);
-    if (tv == 128) {
-      return singExtended;
+    Expr res;
+    int size;
+    if (op->getIdentifier ()
+        == edu::sharif::twinner::trace::exptoken::Operator::SIGN_EXTEND) {
+      res = super->em.mkExpr (kind::BITVECTOR_SIGN_EXTEND,
+                              super->em.mkConst (BitVectorSignExtend (tv - sv)),
+                              srcExp);
+      size = tv;
+    } else {
+      const Kind k = convertOperatorIdentifierToCvc4Kind (op->getIdentifier ());
+      if (k == kind::UNDEFINED_KIND) {
+        ok = false;
+        return Expr ();
+      }
+      res = super->em.mkExpr (k, srcExp, target);
+      size = sv;
+    }
+    if (size == 128) {
+      return res;
     } else {
       return super->em.mkExpr
           (kind::BITVECTOR_ZERO_EXTEND,
-           super->em.mkConst (BitVectorZeroExtend (128 - tv)),
-           singExtended);
+           super->em.mkConst (BitVectorZeroExtend (128 - size)),
+           res);
     }
   }
 

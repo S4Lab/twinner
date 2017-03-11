@@ -131,12 +131,12 @@ private:
     const Operator *op = dynamic_cast<const Operator *> (token);
     if (op) {
       switch (op->getType ()) {
-        case Operator::SignExtension:
+        case Operator::Trinary:
         {
-          Result target = visit (visitor, it);
-          Result source = visit (visitor, it);
-          Result main = visit (visitor, it);
-          return visitor.visitSignExtension (op, main, source, target);
+          Result right = visit (visitor, it);
+          Result middle = visit (visitor, it);
+          Result left = visit (visitor, it);
+          return visitor.visitTrinary (op, left, middle, right);
         }
         case Operator::Unary:
         {

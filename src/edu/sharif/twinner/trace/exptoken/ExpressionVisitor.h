@@ -35,8 +35,8 @@ public:
   virtual ~ExpressionVisitor () {
   }
 
-  virtual ResultType visitSignExtension (const Operator *op,
-      ResultType &main, ResultType &source, ResultType &target) = 0;
+  virtual ResultType visitTrinary (const Operator *op,
+      ResultType &left, ResultType &middle, ResultType &right) = 0;
   virtual ResultType visitFunctionalBinary (const Operator *op,
       ResultType &left, ResultType &right) = 0;
   virtual ResultType visitBinary (const Operator *op,
