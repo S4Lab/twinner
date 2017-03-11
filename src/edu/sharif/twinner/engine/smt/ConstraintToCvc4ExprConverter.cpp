@@ -518,6 +518,8 @@ private:
       return kind::BITVECTOR_ASHR;
     case edu::sharif::twinner::trace::exptoken::Operator::ROTATE_RIGHT:
       return kind::BITVECTOR_ROTATE_RIGHT;
+    case edu::sharif::twinner::trace::exptoken::Operator::ROTATE_LEFT:
+      return kind::BITVECTOR_ROTATE_LEFT;
     default:
       edu::sharif::twinner::util::Logger::error ()
           << "ConstraintToCvc4ExprConverter::convertOperatorIdentifierToCvc4Kind"
