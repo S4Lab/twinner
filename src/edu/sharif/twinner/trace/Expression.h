@@ -203,6 +203,47 @@ protected:
    */
   void binaryOperation (Operator *op, UINT64 cv);
 
+  /**
+   * The op operator is assumed to be owned by this expression object.
+   * But exp will be kept untouched and its inner expression tokens will
+   * be cloned. The exp may or may not be the same as this object.
+   * If exp is a trivial expression, this method tries to simplify and apply
+   * it directly.
+   * This method is similar to binaryOperation but it uses the size of this
+   * expression as an implicit operand.
+   *
+   * @param op The owned operator which mediates between this and the exp
+   * expression objects. The size of this is assumed as an implicit operand.
+   * @param exp The given constant expression which its clone should be applied by op.
+   */
+  void trinaryOperation (Operator *op, const Expression *exp);
+
+  /**
+   * Same as `trinaryOperation (Operator *op, const Expression *exp)` but tries
+   * to simplify the concrete operand and apply it directly.
+   * If it isn't possible, it applies the operation without simplification.
+   * The cv is assumed to be owned by this expression object.
+   * This method is similar to binaryOperation but it uses the size of this
+   * expression as an implicit operand.
+   *
+   * @param op The owned operator which mediates between this and cv objects.
+   * The size of this is assumed as an implicit operand.
+   * @param cv The owned concrete value which should be applied by op.
+   */
+  void trinaryOperation (Operator *op, edu::sharif::twinner::trace::cv::ConcreteValue *cv);
+
+  /**
+   * Same as `trinaryOperation (Operator *op, ConcreteValue *cv)` method.
+   * It converts given cv to ConcreteValue and calls the main
+   * trinaryOperation method.
+   * This method is similar to binaryOperation but it uses the size of this
+   * expression as an implicit operand.
+   *
+   * @param op The owned operator which mediates between this and cv.
+   * @param cv The value that should be converted to ConcreteValue to be used.
+   */
+  void trinaryOperation (Operator *op, UINT64 cv);
+
 private:
   bool checkForTrivialExpression (Operator *op, const Expression *exp);
   bool checkForCancelingOperation (Operator *op, const Expression *exp);
@@ -240,7 +281,8 @@ public:
    */
   template <typename ValueOrExp>
   void arithmeticShiftToRight (ValueOrExp operand) {
-    binaryOperation (Operator::instantiateOperator (Operator::ARITHMETIC_SHIFT_RIGHT),
+    trinaryOperation
+        (Operator::instantiateOperator (Operator::ARITHMETIC_SHIFT_RIGHT),
         operand);
   }
 
@@ -265,7 +307,8 @@ public:
    */
   template <typename ValueOrExp>
   void rotateToRight (ValueOrExp operand) {
-    binaryOperation (Operator::instantiateOperator (Operator::ROTATE_RIGHT), operand);
+    trinaryOperation
+        (Operator::instantiateOperator (Operator::ROTATE_RIGHT), operand);
   }
 
   /**
@@ -277,7 +320,8 @@ public:
    */
   template <typename ValueOrExp>
   void rotateToLeft (ValueOrExp operand) {
-    binaryOperation (Operator::instantiateOperator (Operator::ROTATE_LEFT), operand);
+    trinaryOperation
+        (Operator::instantiateOperator (Operator::ROTATE_LEFT), operand);
   }
 
   /**

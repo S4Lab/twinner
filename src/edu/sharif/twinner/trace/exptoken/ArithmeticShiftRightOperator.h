@@ -22,7 +22,6 @@ namespace trace {
 namespace exptoken {
 
 class ArithmeticShiftRightOperator : public Operator {
-
 public:
   ArithmeticShiftRightOperator ();
   ArithmeticShiftRightOperator (const ArithmeticShiftRightOperator &ao);
@@ -32,7 +31,12 @@ public:
 
   virtual bool doesSupportSimplification () const;
   virtual bool isCommutable () const;
+  virtual bool apply (edu::sharif::twinner::trace::Expression *exp,
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv);
   virtual bool apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &src) const;
+  virtual bool apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &mid,
       const edu::sharif::twinner::trace::cv::ConcreteValue &src) const;
 
   virtual std::string toString () const;
@@ -45,4 +49,4 @@ public:
 }
 }
 
-#endif	/* ArithmeticShiftRight.h */
+#endif /* ArithmeticShiftRight.h */

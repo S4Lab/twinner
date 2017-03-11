@@ -329,6 +329,38 @@ void Expression::binaryOperation (Operator *op, UINT64 cv) {
   binaryOperation (op, new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv));
 }
 
+void Expression::trinaryOperation (Operator *op, const Expression *exp) {
+  if (!(checkForTrivialExpression (op, exp)
+        || checkForCancelingOperation (op, exp)
+        || checkForNonTrivialAddition (op, exp))) {
+    const UINT64 mySize = lastConcreteValue->getSize ();
+    stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (mySize));
+    /**
+     * It's possible that this object and given constant expression object be
+     * the same. In that case changing this object while searching the given
+     * expression can change the constant expression unexpectedly.
+     * To avoid such situations, it's required to take a non-constant clone
+     * of the given constant expression atomically before applying any change
+     * to this object.
+     */
+    Expression *copy = exp->clone ();
+    stack.insert (stack.end (), copy->stack.begin (), copy->stack.end ());
+    copy->stack.clear ();
+    delete copy;
+    stack.push_back (op);
+    op->apply (*lastConcreteValue, *(exp->lastConcreteValue));
+  }
+}
+
+void Expression::trinaryOperation (Operator *op,
+    edu::sharif::twinner::trace::cv::ConcreteValue *cv) {
+  binaryOperation (op, cv); // op is aware of the implicit size operand
+}
+
+void Expression::trinaryOperation (Operator *op, UINT64 cv) {
+  trinaryOperation (op, new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv));
+}
+
 void Expression::truncate (int bits) {
   //TODO: Detect when truncation has no effect (value is already truncated) and ignore it
   edu::sharif::twinner::trace::cv::ConcreteValue *mask;

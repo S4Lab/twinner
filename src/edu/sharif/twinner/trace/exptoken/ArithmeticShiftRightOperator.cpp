@@ -16,7 +16,7 @@
 
 #include "edu/sharif/twinner/trace/Expression.h"
 
-#include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 
 namespace edu {
 namespace sharif {
@@ -47,10 +47,34 @@ bool ArithmeticShiftRightOperator::isCommutable () const {
   return false;
 }
 
+bool ArithmeticShiftRightOperator::apply (
+    edu::sharif::twinner::trace::Expression *exp,
+    edu::sharif::twinner::trace::cv::ConcreteValue *operand) {
+  return Operator::apply
+      (exp,
+       new edu::sharif::twinner::trace::cv::ConcreteValue64Bits
+       (exp->getLastConcreteValue ().getSize ()),
+       operand);
+}
+
 bool ArithmeticShiftRightOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
   dst.arithmeticShiftToRight (src);
   return dst.getCarryBit ();
+}
+
+bool ArithmeticShiftRightOperator::apply (
+    edu::sharif::twinner::trace::cv::ConcreteValue &dst,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &mid,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
+  edu::sharif::twinner::trace::cv::ConcreteValue *cv =
+      dst.clone (mid.toUint64 ());
+  bool overflow = (*cv) != dst;
+  apply (*cv, src);
+  dst = *cv;
+  overflow = overflow || ((*cv) != dst);
+  delete cv;
+  return overflow;
 }
 
 std::string ArithmeticShiftRightOperator::toString () const {
