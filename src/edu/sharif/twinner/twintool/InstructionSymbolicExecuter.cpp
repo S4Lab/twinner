@@ -4032,6 +4032,19 @@ VOID analysisRoutineDstLargeRegSrcMem (VOID *iseptr, UINT32 opcode,
        insAssembly);
 }
 
+VOID analysisRoutineDstLargeRegSrcImd (VOID *iseptr, UINT32 opcode,
+    UINT32 dstReg, const PIN_REGISTER *dstRegVal,
+    ADDRINT srcImmediateValue,
+    UINT32 insAssembly) {
+  InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
+  ise->analysisRoutineDstRegSrcImd
+      (ise->convertOpcodeToAnalysisRoutine ((OPCODE) opcode),
+       (REG) dstReg,
+       edu::sharif::twinner::trace::cv::ConcreteValue128Bits (*dstRegVal),
+       edu::sharif::twinner::trace::cv::ConcreteValue64Bits (srcImmediateValue),
+       insAssembly);
+}
+
 VOID analysisRoutineDstLargeRegSrcMemAuxImd (VOID *iseptr, UINT32 opcode,
     UINT32 dstReg, const PIN_REGISTER *dstRegVal,
     ADDRINT srcMemoryEa, UINT32 memReadBytes,

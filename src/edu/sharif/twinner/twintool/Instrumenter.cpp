@@ -575,7 +575,12 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModelForNormalInstruc
     }
 
   } else if (destIsReg && sourceIsImmed) {
-    return DST_REG_SRC_IMD;
+    const bool destRegIsXmm = REG_is_xmm (INS_OperandReg (ins, 0));
+    if (destRegIsXmm) {
+      return DST_LARGE_REG_SRC_IMD;
+    } else {
+      return DST_REG_SRC_IMD;
+    }
 
   } else if (destIsMem && sourceIsReg) {
     const bool sourceRegIsXmm = REG_is_xmm (INS_OperandReg (ins, 1));
@@ -760,6 +765,17 @@ void Instrumenter::instrumentSingleInstruction (InstructionModel model,
                     IARG_PTR, ise, IARG_UINT32, op,
                     IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
                     IARG_MEMORYOP_EA, 0, IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32, insAssembly,
+                    IARG_END);
+    break;
+  }
+  case DST_LARGE_REG_SRC_IMD:
+  {
+    REG dstreg = INS_OperandReg (ins, 0);
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) analysisRoutineDstLargeRegSrcImd,
+                    IARG_PTR, ise, IARG_UINT32, op,
+                    IARG_UINT32, dstreg, IARG_REG_CONST_REFERENCE, dstreg,
+                    IARG_ADDRINT, ADDRINT (INS_OperandImmediate (ins, 1)),
                     IARG_UINT32, insAssembly,
                     IARG_END);
     break;
