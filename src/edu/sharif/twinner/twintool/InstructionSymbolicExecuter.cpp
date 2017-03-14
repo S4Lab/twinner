@@ -2665,6 +2665,47 @@ void InstructionSymbolicExecuter::pminubAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::psubbAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "psubbAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  const edu::sharif::twinner::trace::Expression *srcexp =
+      getExpression (src, trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexp =
+      getExpression (dst, trace);
+  const int size = dst.getSize ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "\tsubtracting byte-by-byte...";
+  edu::sharif::twinner::trace::Expression *res = 0;
+  const int bytesNumber = size / 8;
+  ConcreteValue *mask = dstexp->getLastConcreteValue ().clone ();
+  (*mask) = 0xFF;
+  for (int i = 0; i < bytesNumber; ++i) {
+    edu::sharif::twinner::trace::Expression *nextDstByte = dstexp->clone (size);
+    edu::sharif::twinner::trace::Expression *nextSrcByte = srcexp->clone (size);
+    nextDstByte->bitwiseAnd (mask->clone ());
+    nextSrcByte->bitwiseAnd (mask->clone ());
+    nextDstByte->minus (nextSrcByte);
+    delete nextSrcByte;
+    nextDstByte->bitwiseAnd (mask->clone ());
+    if (res == 0) {
+      res = nextDstByte;
+    } else {
+      res->bitwiseOr (nextDstByte);
+      delete nextDstByte;
+    }
+    (*mask) <<= 8;
+  }
+  delete mask;
+  setExpression (dst, trace, res);
+  delete srcexp;
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::punpcklbwAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
@@ -3689,6 +3730,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine;
   case XED_ICLASS_PMINUB:
     return &InstructionSymbolicExecuter::pminubAnalysisRoutine;
+  case XED_ICLASS_PSUBB:
+    return &InstructionSymbolicExecuter::psubbAnalysisRoutine;
   case XED_ICLASS_PUNPCKLBW:
     return &InstructionSymbolicExecuter::punpcklbwAnalysisRoutine;
   case XED_ICLASS_PUNPCKLWD:

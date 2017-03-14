@@ -690,6 +690,14 @@ private:
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
 
   /**
+   * PSUBB is a packed subtract instruction which subtracts src individual bytes
+   * from dst individual bytes and stores the results in dst bytes.
+   * Overflows are not reported in EFLAGS.
+   */
+  void psubbAnalysisRoutine (
+      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+
+  /**
    * PUNPCKLBW is a packed operation which "unpacks" low-data from src-dst and interleaves
    * them and put the result in the dst.
    *  -- byte to word

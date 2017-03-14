@@ -214,6 +214,7 @@ void Instrumenter::initialize () {
               XED_ICLASS_PMINUB, // packed min of unsigned bytes
               XED_ICLASS_POR);
   INITIALIZE (DST_LARGE_REG_SRC_EITHER_LARGE_REG_OR_MEM,
+              XED_ICLASS_PSUBB,
               XED_ICLASS_PUNPCKLBW, // unpack low data
               XED_ICLASS_PUNPCKLWD);
   managedInstructions.insert
