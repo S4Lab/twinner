@@ -363,6 +363,13 @@ private:
       const MutableExpressionValueProxy &src);
 
   /**
+   * MOVHPD moves 64-bits from mem src to high packed double-precision
+   * (the upper 64-bits) of dst xmm reg or vice versa.
+   */
+  void movhpdAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * MOV has 5 models
    * r <- r/m/i
    * m <- r/i
