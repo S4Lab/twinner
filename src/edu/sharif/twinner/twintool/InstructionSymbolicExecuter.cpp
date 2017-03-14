@@ -1467,6 +1467,40 @@ void InstructionSymbolicExecuter::xaddAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::movlpdAnalysisRoutine (
+    const MutableExpressionValueProxy &dst,
+    const ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "movlpdAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  edu::sharif::twinner::trace::Expression *srcexp =
+      getExpression (src, trace);
+  const int size = dst.getSize ();
+  edu::sharif::twinner::trace::Expression *res;
+  if (size == 128) {
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tmoving 64-bits from src to low 64-bits of dst..."
+        << "\tgetting dst exp...";
+    edu::sharif::twinner::trace::Expression *dstexp =
+        getExpression (dst, trace);
+    ConcreteValue *mask =
+        new edu::sharif::twinner::trace::cv::ConcreteValue128Bits (-1, 0);
+    dstexp->bitwiseAnd (mask);
+    res = srcexp->clone (128);
+    res->bitwiseOr (dstexp);
+    delete dstexp;
+  } else {
+    edu::sharif::twinner::util::Logger::loquacious ()
+        << "\tmoving low 64-bits of src to low 64-bits of dst...";
+    srcexp->truncate (64);
+    res = srcexp->clone (64);
+  }
+  delete srcexp;
+  setExpression (dst, trace, res);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::movhpdAnalysisRoutine (
     const MutableExpressionValueProxy &dst,
     const ExpressionValueProxy &src) {
@@ -3707,6 +3741,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_MOVDQA:
   case XED_ICLASS_MOVSD_XMM:
     return &InstructionSymbolicExecuter::movAnalysisRoutine;
+  case XED_ICLASS_MOVLPD:
+    return &InstructionSymbolicExecuter::movlpdAnalysisRoutine;
   case XED_ICLASS_MOVHPD:
     return &InstructionSymbolicExecuter::movhpdAnalysisRoutine;
   case XED_ICLASS_IMUL:

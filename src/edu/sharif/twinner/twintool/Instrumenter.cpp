@@ -140,6 +140,7 @@ void Instrumenter::initialize () {
   managedInstructions.insert // xmm <- r/m  OR  r/m <- xmm
       (std::make_pair (XED_ICLASS_MOVD, DST_LARGE_REG_SRC_EITHER_REG_OR_MEM_OR_VICE_VERSA));
   INITIALIZE (DST_LARGE_REG_SRC_MEM_OR_VICE_VERSA,
+              XED_ICLASS_MOVLPD,
               XED_ICLASS_MOVHPD);
   INITIALIZE (CMOV_INS_MODELS,
               XED_ICLASS_CMOVB, XED_ICLASS_CMOVBE, XED_ICLASS_CMOVL,
