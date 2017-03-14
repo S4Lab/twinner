@@ -584,6 +584,13 @@ private:
       bool executing, bool repEqual);
 
   /**
+   * PSLLDQ is packed shift to left logically for double quadword
+   * which shifts dst to left as many bytes as indicated by src.
+   */
+  void pslldqAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src);
+
+  /**
    * SHL shifts dst to left as much as indicated by src.
    */
   void shlAnalysisRoutine (const MutableExpressionValueProxy &dst,
