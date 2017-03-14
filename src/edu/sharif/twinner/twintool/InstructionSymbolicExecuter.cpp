@@ -2255,7 +2255,6 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
   srcexp->bitwiseAnd (mask);
   edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tshifting operation...";
-  // TODO: Check for large src shift amounts and truncate it if required
   if (dynamic_cast<const ConstantExpressionValueProxy *> (&src) != 0) {
     // src was an immediate value
     dstexp->shiftToLeft (srcexp->getLastConcreteValue ().clone ());
