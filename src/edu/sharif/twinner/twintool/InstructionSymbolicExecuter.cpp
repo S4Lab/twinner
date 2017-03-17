@@ -3781,6 +3781,7 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::rorAnalysisRoutine;
   case XED_ICLASS_ROL:
     return &InstructionSymbolicExecuter::rolAnalysisRoutine;
+  case XED_ICLASS_PAND:
   case XED_ICLASS_AND:
     return &InstructionSymbolicExecuter::andAnalysisRoutine;
   case XED_ICLASS_OR:
