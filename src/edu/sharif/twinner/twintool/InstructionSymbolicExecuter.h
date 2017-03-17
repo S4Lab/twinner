@@ -331,6 +331,14 @@ private:
       const ExpressionValueProxy &src, const MutableExpressionValueProxy &aux);
 
   /**
+   * PALIGNR is packed align right. The dst and src are first concatenated
+   * and then shifted to right as many bytes as indicated in the shift argument
+   * and then stored in the dst reg.
+   */
+  void palignrAnalysisRoutine (const MutableExpressionValueProxy &dst,
+      const ExpressionValueProxy &src, const ExpressionValueProxy &shift);
+
+  /**
    * PSHUFD is packed shuffle for double words. The 8-bits order argument is consisted
    * of 4 parts of 2-bits index numbers. Each index indicates that which double word
    * from the src operand should be placed in the next double word place of the dst.

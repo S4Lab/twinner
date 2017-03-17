@@ -1348,6 +1348,33 @@ void InstructionSymbolicExecuter::cmpxchgAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::palignrAnalysisRoutine (
+    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
+    const ExpressionValueProxy &shift) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "palignrAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  edu::sharif::twinner::trace::Expression *srcexp =
+      getExpression (src, trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp =
+      getExpression (dst, trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting shift imd...";
+  const edu::sharif::twinner::trace::Expression *shiftexp =
+      getExpression (shift, trace);
+  const int bits = shiftexp->getLastConcreteValue ().toUint64 () * 8;
+  delete shiftexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tshifting...";
+  srcexp->shiftToRight (bits);
+  dstexp->shiftToLeft (dst.getSize () - bits);
+  srcexp->bitwiseOr (dstexp);
+  delete dstexp;
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  setExpression (dst, trace, srcexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::pshufdAnalysisRoutine (
     const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
     const ExpressionValueProxy &order) {
@@ -3940,6 +3967,8 @@ InstructionSymbolicExecuter::convertOpcodeToDoubleSourcesAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_IMUL:
     return &InstructionSymbolicExecuter::imulAnalysisRoutine;
+  case XED_ICLASS_PALIGNR:
+    return &InstructionSymbolicExecuter::palignrAnalysisRoutine;
   case XED_ICLASS_PSHUFD:
     return &InstructionSymbolicExecuter::pshufdAnalysisRoutine;
   case XED_ICLASS_SHLD:
