@@ -696,6 +696,15 @@ private:
       const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
 
   /**
+   * PCMPGTB is a packed compare greater-than check which works byte-wise.
+   * The src and dst are compared together byte-by-byte and those dst bytes
+   * which are/aren't greater-than src will be filed with 1 (0xFF) / 0 (0x00) in
+   * the dst reg.
+   */
+  void pcmpgtbAnalysisRoutine (
+      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+
+  /**
    * PMINUB is a packed minimum finding for unsigned bytes.
    * Packed unsigned bytes which are stored in dst and src wil be compared to find their
    * minimum values. Minimum values will be stored in the dst.

@@ -215,6 +215,7 @@ void Instrumenter::initialize () {
               XED_ICLASS_POR);
   INITIALIZE (DST_LARGE_REG_SRC_EITHER_LARGE_REG_OR_MEM,
               XED_ICLASS_PCMPEQB, // packed compare byte
+              XED_ICLASS_PCMPGTB,
               XED_ICLASS_PXOR,
               XED_ICLASS_PAND,
               XED_ICLASS_PSUBB,
