@@ -83,6 +83,21 @@ bool BitwiseAndOperator::apply (edu::sharif::twinner::trace::Expression *exp,
         delete operand;
         return true;
       }
+    } else {
+      edu::sharif::twinner::trace::cv::ConcreteValue *cv =
+          operand->clone (exp->getLastConcreteValue ().getSize ());
+      const bool expIsNotMoreLimitedThanOperand = (*cv) == (*operand);
+      delete cv;
+      if (expIsNotMoreLimitedThanOperand) {
+        Constant *lastConstant = static_cast<Constant *> (stack.back ());
+        cv = lastConstant->getValue ().clone
+            (exp->getLastConcreteValue ().getSize ());
+        (*cv) &= (*operand);
+        delete operand;
+        lastConstant->setValue (cv->clone ());
+        exp->setLastConcreteValue (cv);
+        return true;
+      }
     }
   }
   return Operator::apply (exp, operand);
