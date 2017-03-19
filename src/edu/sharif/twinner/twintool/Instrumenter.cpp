@@ -63,6 +63,8 @@ Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, symbolsFileInStream,
     _disabled, measureMode)),
+    isStartInstructionInstrumented (false),
+    isEndInstructionInstrumented (false),
     isWithinInitialStateDetectionMode (false),
     disabled (_disabled || _naive),
     withinSafeFunc (false),
@@ -80,6 +82,8 @@ Instrumenter::Instrumenter (
     bool _disabled, int _stackOffset, ADDRINT _start, ADDRINT _end) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, _disabled)),
+    isStartInstructionInstrumented (false),
+    isEndInstructionInstrumented (false),
     candidateAddresses (_candidateAddresses),
     isWithinInitialStateDetectionMode (true),
     disabled (_disabled),
@@ -97,6 +101,8 @@ Instrumenter::Instrumenter (const string &_traceFilePath,
     bool _naive) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     ise (new InstructionSymbolicExecuter (this, _disabled)),
+    isStartInstructionInstrumented (false),
+    isEndInstructionInstrumented (false),
     isWithinInitialStateDetectionMode (false),
     disabled (_disabled || _naive),
     withinSafeFunc (false),
@@ -344,8 +350,10 @@ void Instrumenter::setMainArgsReportingFilePath (const std::string &_marFilePath
 }
 
 bool Instrumenter::instrumentSingleInstruction (INS ins) {
+  const ADDRINT addr = INS_Address (ins);
+  instrumentEndpointInstruction (ins, addr);
   std::stringstream ss;
-  ss << INS_Disassemble (ins) << " @" << std::hex << INS_Address (ins);
+  ss << INS_Disassemble (ins) << " @" << std::hex << addr;
   const std::string insAssemblyStr = ss.str ();
   const int size = insAssemblyStr.length () + 1;
   UINT32 allocatedIndex;
@@ -1623,53 +1631,39 @@ OPCODE Instrumenter::convertConditionalMoveToJumpOpcode (OPCODE cmovcc) const {
   }
 }
 
+void Instrumenter::instrumentEndpointInstruction (INS ins, const ADDRINT addr) {
+  const bool shouldSaveMainArgs = !marFilePath.empty ();
+  if (!isStartInstructionInstrumented && addr == start) {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) startAnalysis,
+                    IARG_PTR, this,
+                    IARG_END);
+    if (shouldSaveMainArgs) {
+      INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
+                      IARG_PTR, this,
+                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
+                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
+                      IARG_END);
+    }
+    INS_InsertCall (ins, IPOINT_BEFORE,
+                    (AFUNPTR) analysisRoutineInitializeRegisters,
+                    IARG_PTR, ise,
+                    IARG_CONTEXT,
+                    IARG_END);
+    isStartInstructionInstrumented = true;
+  } else if (!isEndInstructionInstrumented && addr == end) {
+    INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) terminateAnalysis,
+                    IARG_PTR, this,
+                    IARG_END);
+    isEndInstructionInstrumented = true;
+  }
+}
+
 void Instrumenter::instrumentImage (IMG img) {
   edu::sharif::twinner::util::Logger log =
       edu::sharif::twinner::util::Logger::debug ();
   log << "Instrumenter::instrumentImage (img)\n";
-  int state = 0;
   const bool shouldSaveMainArgs = !marFilePath.empty ();
-  if (start != end) {
-    for (SEC section = IMG_SecHead (img);
-        SEC_Valid (section); section = SEC_Next (section)) {
-      for (RTN routine = SEC_RtnHead (section);
-          RTN_Valid (routine); routine = RTN_Next (routine)) {
-        RTN_Open (routine);
-        for (INS ins = RTN_InsHead (routine);
-            INS_Valid (ins); ins = INS_Next (ins)) {
-          const ADDRINT addr = INS_Address (ins);
-          if (addr == start) {
-            INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) startAnalysis,
-                            IARG_PTR, this,
-                            IARG_END);
-            if (shouldSaveMainArgs) {
-              INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
-                              IARG_PTR, this,
-                              IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
-                              IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
-                              IARG_END);
-            }
-            INS_InsertCall (ins, IPOINT_BEFORE,
-                            (AFUNPTR) analysisRoutineInitializeRegisters,
-                            IARG_PTR, ise,
-                            IARG_CONTEXT,
-                            IARG_END);
-            ++state;
-          } else if (addr == end) {
-            INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) terminateAnalysis,
-                            IARG_PTR, this,
-                            IARG_END);
-            ++state;
-          }
-          if (state == 2) {
-            RTN_Close (routine);
-            return;
-          }
-        }
-        RTN_Close (routine);
-      }
-    }
-  } else {
+  if (start == end) {
     RTN mainRoutine = RTN_FindByName (img, MAIN_ROUTINE_NAME);
     if (RTN_Valid (mainRoutine)) {
       log << " routine: " MAIN_ROUTINE_NAME "\n";

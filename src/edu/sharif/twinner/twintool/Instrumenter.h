@@ -174,6 +174,9 @@ private:
 
   InstructionSymbolicExecuter *ise;
 
+  bool isStartInstructionInstrumented;
+  bool isEndInstructionInstrumented;
+
   const std::set < std::pair < ADDRINT, int > > candidateAddresses;
   bool isWithinInitialStateDetectionMode;
 
@@ -257,6 +260,8 @@ private:
   int totalCountOfInstructions;
 
   OPCODE convertConditionalMoveToJumpOpcode (OPCODE cmovcc) const;
+
+  void instrumentEndpointInstruction (INS ins, const ADDRINT addr);
 };
 
 VOID instrumentSingleInst (INS ins, VOID *v);
