@@ -150,8 +150,32 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
           return COMPLETED;
         }
       }
-      if (stack.size () <= 4) {
+      switch (stack.size ()) {
+      case 3: // exp == first <secondOp> second
+      {
+        Constant *first = dynamic_cast<Constant *> (*--it);
+        if (first) {
+          const edu::sharif::twinner::trace::cv::ConcreteValue *secondCv =
+              second->getValue ().clone
+              (edu::sharif::twinner::util::max
+               (second->getValue ().getSize (), operand->getSize ()));
+          edu::sharif::twinner::trace::cv::ConcreteValue *firstCv =
+              first->getValue ().clone
+              (edu::sharif::twinner::util::max
+               (first->getValue ().getSize (), operand->getSize ()));
+          // bitwise-and cancels any possible overflow
+          secondOp->apply (*firstCv, *secondCv);
+          delete secondCv;
+          (*firstCv) &= (*operand);
+          delete operand;
+          (*exp) = edu::sharif::twinner::trace::ExpressionImp (firstCv);
+          return COMPLETED;
+        }
+      }
+      case 4:
         return CAN_NOT_SIMPLIFY;
+      default: // >= 5
+        break;
       }
       if (secondOp->getIdentifier () == Operator::SHIFT_LEFT
           || secondOp->getIdentifier () == Operator::SHIFT_RIGHT) {
