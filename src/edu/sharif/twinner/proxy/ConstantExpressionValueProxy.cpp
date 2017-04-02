@@ -19,7 +19,7 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
+namespace proxy {
 
 ConstantExpressionValueProxy::ConstantExpressionValueProxy (
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue, int _size) :

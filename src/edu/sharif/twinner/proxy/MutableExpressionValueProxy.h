@@ -20,7 +20,7 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
+namespace proxy {
 
 /**
  * @interface An interface which describes mutable expression value proxies. These

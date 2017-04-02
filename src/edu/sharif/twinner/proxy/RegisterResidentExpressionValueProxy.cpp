@@ -25,7 +25,7 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
+namespace proxy {
 
 RegisterResidentExpressionValueProxy::RegisterResidentExpressionValueProxy (REG _reg,
     const ConcreteValue &_regVal) :

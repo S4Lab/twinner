@@ -41,35 +41,42 @@ namespace cv {
 class ConcreteValue;
 }
 }
+namespace proxy {
+
+class ExpressionValueProxy;
+class MutableExpressionValueProxy;
+}
 namespace twintool {
 
 class Instrumenter;
-class ExpressionValueProxy;
-class MutableExpressionValueProxy;
 
 class InstructionSymbolicExecuter {
 private:
   typedef edu::sharif::twinner::trace::cv::ConcreteValue ConcreteValue;
 
   typedef void (InstructionSymbolicExecuter::*AnalysisRoutine) (
-      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
   typedef void (InstructionSymbolicExecuter::*MutableSourceAnalysisRoutine) (
-      const MutableExpressionValueProxy &dst, const MutableExpressionValueProxy &src);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &src);
   typedef void (InstructionSymbolicExecuter::*AuxOperandHavingAnalysisRoutine) (
-      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
-      const MutableExpressionValueProxy &aux);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &aux);
   typedef void (InstructionSymbolicExecuter::*DoubleDestinationsAnalysisRoutine) (
-      const MutableExpressionValueProxy &leftDst,
-      const MutableExpressionValueProxy &rightDst,
-      const ExpressionValueProxy &src);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &leftDst,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rightDst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
   typedef void (InstructionSymbolicExecuter::*DoubleSourcesAnalysisRoutine) (
-      const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &leftSrc, const ExpressionValueProxy &rightSrc);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &leftSrc,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &rightSrc);
   typedef void (InstructionSymbolicExecuter::*OneToThreeOperandsAnalysisRoutine) (
-      const MutableExpressionValueProxy &dstOne,
-      const MutableExpressionValueProxy &dstTwo,
-      const MutableExpressionValueProxy &dstThree,
-      const ExpressionValueProxy &srcOne);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstOne,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstTwo,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstThree,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &srcOne);
   typedef void (InstructionSymbolicExecuter::*ConditionalBranchAnalysisRoutine) (
       bool branchTaken);
   typedef void (InstructionSymbolicExecuter::*Hook) (const CONTEXT *context,
@@ -81,7 +88,7 @@ private:
   typedef void (InstructionSymbolicExecuter::*OperandLessAnalysisRoutine) (
       const CONTEXT *context);
   typedef void (InstructionSymbolicExecuter::*SingleOperandAnalysisRoutine) (
-      const MutableExpressionValueProxy &opr);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   typedef edu::sharif::twinner::trace::FunctionInfo FunctionInfo;
 
@@ -281,9 +288,10 @@ public:
 
 private:
   edu::sharif::twinner::trace::Expression *getExpression (
-      const ExpressionValueProxy &proxy,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &proxy,
       edu::sharif::twinner::trace::Trace *trace) const;
-  void setExpression (const MutableExpressionValueProxy &dst,
+  void setExpression (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
       edu::sharif::twinner::trace::Trace *trace,
       edu::sharif::twinner::trace::Expression *exp,
       bool shouldDeleteExp = true) const;
@@ -311,14 +319,16 @@ private:
   /**
    * CMOVBE (Conditional Move) moves src to dst iff (CF=1 || ZF=1).
    */
-  void cmovbeAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void cmovbeAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * CMOVNBE (Conditional Move) moves src to dst iff (CF=0 && ZF=0).
    */
-  void cmovnbeAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void cmovnbeAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * accumulator := RAX | EAX | AX | AL
@@ -327,24 +337,30 @@ private:
    * else
    *  accumulator <- dst
    */
-  void cmpxchgAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src, const MutableExpressionValueProxy &aux);
+  void cmpxchgAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &aux);
 
   /**
    * PALIGNR is packed align right. The dst and src are first concatenated
    * and then shifted to right as many bytes as indicated in the shift argument
    * and then stored in the dst reg.
    */
-  void palignrAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src, const ExpressionValueProxy &shift);
+  void palignrAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &shift);
 
   /**
    * PSHUFD is packed shuffle for double words. The 8-bits order argument is consisted
    * of 4 parts of 2-bits index numbers. Each index indicates that which double word
    * from the src operand should be placed in the next double word place of the dst.
    */
-  void pshufdAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src, const ExpressionValueProxy &order);
+  void pshufdAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &order);
 
   /**
    * SHLD shifts (dst,src) to left as much as (shift) and stores it in (dst).
@@ -352,146 +368,168 @@ private:
    * are filled with the shifted (src) instead of zero.
    * The last bit which goes out of (dst) is stored in CF.
    */
-  void shldAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src, const MutableExpressionValueProxy &bits);
-  void shldAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src, const ExpressionValueProxy &shift);
+  void shldAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &bits);
+  void shldAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &shift);
 
   /**
    * XCHG instruction exchanges values of dst (r/m) and src (r) atomically
    */
-  void xchgAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const MutableExpressionValueProxy &src);
+  void xchgAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &src);
 
   /**
    * XADD instruction exchanges values of dst (r/m) and src (r) and
    * loads sum of two operands in the dst atomically
    */
-  void xaddAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const MutableExpressionValueProxy &src);
+  void xaddAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &src);
 
   /**
    * MOVLPD moves 64-bits from mem src to low packed double-precision
    * (the lower 64-bits) of dst xmm reg or vice versa.
    */
-  void movlpdAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void movlpdAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * MOVHPD moves 64-bits from mem src to high packed double-precision
    * (the upper 64-bits) of dst xmm reg or vice versa.
    */
-  void movhpdAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void movhpdAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * MOV has 5 models
    * r <- r/m/i
    * m <- r/i
    */
-  void movAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void movAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * MOV with Sign extension
    * r <- sign-extend (r/m)
    */
-  void movsxAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void movsxAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * Sign extends the (src) into (dst:src). That is, fills (dst) with
    * the sign bit of the (src).
    */
-  void cdqAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void cdqAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * MOV String to String reads from [rsi]/srcMem and moves to [rdi]/dstMem and
    * increments/decrements rdi/rsi registers
    */
-  void movsAnalysisRoutine (const MutableExpressionValueProxy &rdi,
-      const MutableExpressionValueProxy &rsi,
-      const MutableExpressionValueProxy &dstMem,
-      const ExpressionValueProxy &srcMem);
+  void movsAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rdi,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsi,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstMem,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &srcMem);
 
   /**
    * CMPSB / CMPSW / CMPSD / CMPSQ compare string with 1/2/4/8 bytes sizes.
    * Operands are read from [rsi]/srcMem and [rdi]/dstMem and
    * increments/decrements rdi/rsi registers.
    */
-  void cmpsAnalysisRoutine (const MutableExpressionValueProxy &rdi,
-      const MutableExpressionValueProxy &rsi,
-      const MutableExpressionValueProxy &dstMem,
-      const ExpressionValueProxy &srcMem);
+  void cmpsAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rdi,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsi,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstMem,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &srcMem);
 
   /**
    * PUSHFD pushes FLAGS onto stack.
    */
-  void pushfdAnalysisRoutine (const MutableExpressionValueProxy &stack,
-      const ExpressionValueProxy &flags,
-      const MutableExpressionValueProxy &rsp);
+  void pushfdAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &stack,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &flags,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsp);
 
   /**
    * PUSH has 3 models
    * m <- r/m/i
    */
-  void pushAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src,
-      const MutableExpressionValueProxy &aux);
+  void pushAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &aux);
 
   /**
    * POP has 2 models
    * r/m <- m
    */
-  void popAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src,
-      const MutableExpressionValueProxy &aux);
+  void popAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &aux);
 
   /**
    * LODSD is load string double word
    * eax/dst-reg <- [rsi]
    */
-  void lodsdAnalysisRoutine (const MutableExpressionValueProxy &dstReg,
-      const ExpressionValueProxy &srcMem,
-      const MutableExpressionValueProxy &rsi);
+  void lodsdAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstReg,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &srcMem,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsi);
 
   /**
    * ADD has 5 models
    * r += r/m/i
    * m += r/i
    */
-  void addAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void addAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * ADC has 5 models. It is Add with carry.
    * r += r/m/i
    * m += r/i
    */
-  void adcAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void adcAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * SUB has 5 models
    * r -= r/m/i
    * m -= r/i
    */
-  void subAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void subAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * SBB is subtract with borrow
    * dst = dst - (src + CF) where CF is the carry of the previous operation
    */
-  void sbbAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void sbbAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * CMP is same as SUB else of not modifying dst operand's value
    */
-  void cmpAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void cmpAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * LEA loads an address into a register. This analysis routine is called after execution
@@ -499,8 +537,9 @@ private:
    * value of register has been changed by the instruction and we must synch its symbolic
    * value (as a constant value) now.
    */
-  void leaAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void leaAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * JNZ jumps if ZF=0 which means that corresponding expression was not zero
@@ -602,86 +641,99 @@ private:
    */
   void jmpAnalysisRoutine (const CONTEXT *context, const ConcreteValue &rspRegVal);
 
-  void repAnalysisRoutine (const MutableExpressionValueProxy &dst,
+  void repAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
       bool executing, bool repEqual);
 
   /**
    * PSLLDQ is packed shift to left logically for double quadword
    * which shifts dst to left as many bytes as indicated by src.
    */
-  void pslldqAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void pslldqAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * SHL shifts dst to left as much as indicated by src.
    */
-  void shlAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void shlAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * SHR shifts dst to right as much as indicated by src.
    */
-  void shrAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void shrAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * SAR arithmetic shifts dst to right as much as indicated by src (signed division).
    */
-  void sarAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void sarAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * ROR rotates right the dst as much as indicated by src.
    * Also the LSB of src (which will be moved to the new MSB) will be set in CF.
    */
-  void rorAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void rorAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * ROL rotates left the dst as much as indicated by src.
    * Also the MSB of src (which will be moved to the new LSB) will be set in CF.
    */
-  void rolAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void rolAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * AND bitwise ands dst with src as its mask.
    */
-  void andAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void andAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * OR bitwise ores dst with src as its complement.
    */
-  void orAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void orAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * XOR calculates exclusive or of dst with src.
    */
-  void xorAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void xorAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * TEST performs AND between arguments, temporarily, and sets ZF, SF, and PF based
    * on result. Also CF and OF are set to zero. AF is undefined.
    */
-  void testAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void testAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * BT is bit test instruction. It finds the bitoffset-th bit from the bitstring and
    * set it as the CF.
    */
-  void btAnalysisRoutine (const MutableExpressionValueProxy &bitstring,
-      const ExpressionValueProxy &bitoffset);
+  void btAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &bitstring,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &bitoffset);
 
   /**
    * BTR is bit test and reset instruction. It acts like BT and also
    * resets the selected bit to zero.
    */
-  void btrAnalysisRoutine (const MutableExpressionValueProxy &bitstring,
-      const ExpressionValueProxy &bitoffset);
+  void btrAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &bitstring,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &bitoffset);
 
   /**
    * PMOVMSKB is a packed-move instruction which moves the mask-byte of
@@ -691,8 +743,9 @@ private:
    * Remaining bits in left-side of the dst reg will be filled with zero.
    * TODO: Currently only 128-bit XMM registers are supported which should be expanded with proxy objects
    */
-  void pmovmskbAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void pmovmskbAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * PCMPEQB is a packed compare equality check which works byte-wise.
@@ -701,7 +754,8 @@ private:
    * the dst reg.
    */
   void pcmpeqbAnalysisRoutine (
-      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * PCMPGTB is a packed compare greater-than check which works byte-wise.
@@ -710,7 +764,8 @@ private:
    * the dst reg.
    */
   void pcmpgtbAnalysisRoutine (
-      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * PMINUB is a packed minimum finding for unsigned bytes.
@@ -718,7 +773,8 @@ private:
    * minimum values. Minimum values will be stored in the dst.
    */
   void pminubAnalysisRoutine (
-      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * PSUBB is a packed subtract instruction which subtracts src individual bytes
@@ -726,7 +782,8 @@ private:
    * Overflows are not reported in EFLAGS.
    */
   void psubbAnalysisRoutine (
-      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * PUNPCKLBW is a packed operation which "unpacks" low-data from src-dst and interleaves
@@ -734,7 +791,8 @@ private:
    *  -- byte to word
    */
   void punpcklbwAnalysisRoutine (
-      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * PUNPCKLWD is a packed operation which "unpacks" low-data from src-dst and interleaves
@@ -742,15 +800,17 @@ private:
    *  -- word to double-word
    */
   void punpcklwdAnalysisRoutine (
-      const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * BSF is bit scan forward instruction which searches for the least significant 1 bit
    * in the src and sets its index in the dst. The index is placed as a constant in dst
    * and a constraint is added to indicate that the noted bit was set.
    */
-  void bsfAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void bsfAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * DIV unsigned divide left-right regs by src reg putting quotient in right, remainder
@@ -759,9 +819,10 @@ private:
    * Instead, it registers a hook to adjust concrete values and propagate to overlapping
    * registers at the beginning of next executed instruction.
    */
-  void divAnalysisRoutine (const MutableExpressionValueProxy &leftDst,
-      const MutableExpressionValueProxy &rightDst,
-      const ExpressionValueProxy &src);
+  void divAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &leftDst,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rightDst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * IDIV signed divide the left-right regs by src reg/mem and puts the
@@ -772,9 +833,10 @@ private:
    * propagates to overlapping registers at the beginning of
    * next executed instruction.
    */
-  void idivAnalysisRoutine (const MutableExpressionValueProxy &leftDst,
-      const MutableExpressionValueProxy &rightDst,
-      const ExpressionValueProxy &src);
+  void idivAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &leftDst,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rightDst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * MUL unsigned multiply right reg by src and puts result in left-right regs.
@@ -783,56 +845,64 @@ private:
    * Instead, it registers a hook to adjust concrete values and propagate to overlapping
    * registers at the beginning of next executed instruction.
    */
-  void mulAnalysisRoutine (const MutableExpressionValueProxy &leftDst,
-      const MutableExpressionValueProxy &rightDst,
-      const ExpressionValueProxy &src);
+  void mulAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &leftDst,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rightDst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * IMUL is signed multiply and has three models.
    * This method implements the one operand model.
    */
-  void imulAnalysisRoutine (const MutableExpressionValueProxy &leftDst,
-      const MutableExpressionValueProxy &rightDst,
-      const ExpressionValueProxy &src);
+  void imulAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &leftDst,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rightDst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * IMUL is signed multiply and has three models.
    * This method implements the two operands model.
    */
-  void imulAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src);
+  void imulAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
    * IMUL is signed multiply and has three models.
    * This method implements the three operands model.
    */
-  void imulAnalysisRoutine (const MutableExpressionValueProxy &dst,
-      const ExpressionValueProxy &src, const ExpressionValueProxy &imd);
+  void imulAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &imd);
 
   /**
    * SCAS instruction compares AL/AX/EAX/RAX (the dstReg) and a given srcMem value
    * which is pointed to by the DI/EDI/RDI (the srcReg) and sets the EFLAGS based on
    * the comparison result.
    */
-  void scasAnalysisRoutine (const MutableExpressionValueProxy &dstReg,
-      const MutableExpressionValueProxy &srcReg,
-      const ExpressionValueProxy &srcMem);
+  void scasAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstReg,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &srcReg,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &srcMem);
 
   /**
    * Store String stores the srcReg into dstMem==[rdi] location and moves rdi accordingly.
    */
-  void stosAnalysisRoutine (const MutableExpressionValueProxy &dstMem,
-      const MutableExpressionValueProxy &rdireg,
-      const ExpressionValueProxy &srcReg);
+  void stosAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstMem,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rdireg,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &srcReg);
 
   /**
    * LEAVE instruction:
    *   spReg <- fpReg
    *   fpReg <- pop-from-stack
    */
-  void leaveAnalysisRoutine (const MutableExpressionValueProxy &fpReg,
-      const MutableExpressionValueProxy &spReg,
-      const ExpressionValueProxy &srcMem);
+  void leaveAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &fpReg,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &spReg,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &srcMem);
 
   /**
    * This hook adjusts concrete values of division/multiplication operands
@@ -859,104 +929,126 @@ private:
   /**
    * INC increments the opr reg/mem operand.
    */
-  void incAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void incAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * DEC decrements the opr reg/mem operand.
    */
-  void decAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void decAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * NEG two's complements the opr (which is reg or mem).
    */
-  void negAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void negAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETO sets opr to 1 iff OF=1 (and sets it to 0 otherwise).
    */
-  void setoAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setoAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETNP sets opr to 1 iff PF=0 (and sets it to 0 otherwise).
    */
-  void setnpAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setnpAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETNS sets opr to 1 iff SF=0 (and sets it to 0 otherwise).
    */
-  void setnsAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setnsAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETNZ sets opr to 1 iff ZF=0 (and sets it to 0 otherwise).
    */
-  void setnzAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setnzAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETZ sets opr to 1 iff ZF=1 (and sets it to 0 otherwise).
    */
-  void setzAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setzAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETLE sets opr to 1 iff ZF=1 or SF != OF (and sets it to 0 otherwise).
    */
-  void setleAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setleAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETNLE sets opr to 1 iff ZF=0 and SF == OF (and sets it to 0 otherwise).
    */
-  void setnleAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setnleAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETL sets opr to 1 iff SF != OF (and sets it to 0 otherwise).
    */
-  void setlAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setlAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETNL sets opr to 1 iff SF == OF (and sets it to 0 otherwise).
    */
-  void setnlAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setnlAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETB sets opr to 1 iff CF=1 (and sets it to 0 otherwise).
    */
-  void setbAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setbAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETBE sets opr to 1 iff ZF=1 or CF=1 (and sets it to 0 otherwise).
    */
-  void setbeAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setbeAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETNBE sets opr to 1 iff ZF=0 and CF=0 (and sets it to 0 otherwise).
    */
-  void setnbeAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setnbeAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * SETNB sets opr to 1 iff CF=0 (and sets it to 0 otherwise).
    */
-  void setnbAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void setnbAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
    * NOT one's complements the opr.
    * opr <- NOT(opr)
    */
-  void notAnalysisRoutine (const MutableExpressionValueProxy &opr);
+  void notAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   void adjustRsiRdiRegisters (int size,
-      const MutableExpressionValueProxy &rdi, const MutableExpressionValueProxy &rsi);
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rdi,
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsi);
 
   /**
    * memoryEa must be equal to baseReg + displacement
    */
   void memoryRegisterCorrespondenceAnalysisRoutine (
-      const ExpressionValueProxy &baseReg, ADDRDELTA displacement, ADDRINT memoryEa);
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &baseReg,
+      ADDRDELTA displacement,
+      ADDRINT memoryEa);
 
   /**
    * memoryEa must be equal to baseReg + displacement + indexReg*scale
    */
   void memoryIndexedRegisterCorrespondenceAnalysisRoutine (
-      const ExpressionValueProxy &baseReg, ADDRDELTA displacement,
-      const ExpressionValueProxy &indexReg, UINT32 scale,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &baseReg,
+      ADDRDELTA displacement,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &indexReg,
+      UINT32 scale,
       ADDRINT memoryEa);
 
 public:

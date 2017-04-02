@@ -17,7 +17,7 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
+namespace proxy {
 
 void MutableExpressionValueProxy::setExpression (
     edu::sharif::twinner::trace::Trace *trace,

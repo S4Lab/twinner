@@ -14,9 +14,10 @@
 
 
 #include "Instrumenter.h"
-#include "RegisterResidentExpressionValueProxy.h"
-#include "MemoryResidentExpressionValueProxy.h"
-#include "ConstantExpressionValueProxy.h"
+
+#include "edu/sharif/twinner/proxy/RegisterResidentExpressionValueProxy.h"
+#include "edu/sharif/twinner/proxy/MemoryResidentExpressionValueProxy.h"
+#include "edu/sharif/twinner/proxy/ConstantExpressionValueProxy.h"
 
 #include "edu/sharif/twinner/operationgroup/DummyOperationGroup.h"
 #include "edu/sharif/twinner/operationgroup/SubtractOperationGroup.h"
@@ -54,6 +55,12 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace twintool {
+
+#ifdef TARGET_IA32E
+static const int STACK_OPERATION_UNIT_SIZE = 8; // bytes
+#else
+static const int STACK_OPERATION_UNIT_SIZE = 4; // bytes
+#endif
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     Instrumenter *_im,
@@ -209,8 +216,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcReg (AnalysisRoutine r
   logger << "analysisRoutineDstRegSrcReg(INS: "
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -236,8 +243,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMutableReg (
   logger << "analysisRoutineDstRegSrcMutableReg(INS: "
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -265,9 +272,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxReg (
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src reg: " << REG_StringShort (srcReg)
       << ", aux reg: " << REG_StringShort (auxReg) << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
-                    RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -295,9 +302,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcRegAuxImd (
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src reg: " << REG_StringShort (srcReg)
       << ", aux imd: 0x" << auxImmediateValue << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
-                    ConstantExpressionValueProxy (auxImmediateValue, 64));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
+                    edu::sharif::twinner::proxy::ConstantExpressionValueProxy (auxImmediateValue, 64));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -323,8 +330,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMem (AnalysisRoutine r
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-                    MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+                    edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -353,9 +360,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMemAuxReg (
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << ", aux reg: " << REG_StringShort (auxReg) << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-                    MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes),
-                    RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+                    edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -383,9 +390,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcMemAuxImd (
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << ", aux imd: 0x" << auxImmediateValue << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-                    MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes),
-                    ConstantExpressionValueProxy (auxImmediateValue, 8));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+                    edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes),
+                    edu::sharif::twinner::proxy::ConstantExpressionValueProxy (auxImmediateValue, 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -410,8 +417,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImd (AnalysisRoutine r
   logger << std::hex << "analysisRoutineDstRegSrcImd(INS: "
       << insAssemblyStr << "): dst reg: " << REG_StringShort (dstReg)
       << ", src imd: 0x" << srcImmediateValue << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-                    ConstantExpressionValueProxy (srcImmediateValue, REG_Size (dstReg) * 8));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+                    edu::sharif::twinner::proxy::ConstantExpressionValueProxy (srcImmediateValue, REG_Size (dstReg) * 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -437,8 +444,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcReg (AnalysisRoutine r
   logger << std::hex << "analysisRoutineDstMemSrcReg(INS: "
       << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -465,8 +472,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMutableReg (
   logger << std::hex << "analysisRoutineDstMemSrcMutableReg(INS: "
       << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -495,9 +502,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcRegAuxReg (
       << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src reg: " << REG_StringShort (srcReg)
       << ", aux reg: " << REG_StringShort (auxReg) << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
-                    RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -526,9 +533,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcRegAuxImd (
       << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src reg: " << REG_StringShort (srcReg)
       << ", aux imd: " << auxImmediateValue << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
-                    ConstantExpressionValueProxy (auxImmediateValue, memReadBytes * 8));
+  (this->*routine) (edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (srcReg, srcRegVal),
+                    edu::sharif::twinner::proxy::ConstantExpressionValueProxy (auxImmediateValue, memReadBytes * 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -570,8 +577,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
   }
   logger << std::hex << ": dst mem addr: 0x" << dstMemoryEa
       << ", src imd: 0x" << srcImmediateValue << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-                    ConstantExpressionValueProxy (srcImmediateValue, memReadBytes * 8));
+  (this->*routine) (edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+                    edu::sharif::twinner::proxy::ConstantExpressionValueProxy (srcImmediateValue, memReadBytes * 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -616,9 +623,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImdAuxReg (
   logger << std::hex << ": dst mem addr: 0x" << dstMemoryEa
       << ", src imd: 0x" << srcImmediateValue
       << ", aux reg: " << REG_StringShort (auxReg) << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-                    ConstantExpressionValueProxy (srcImmediateValue, memReadBytes * 8),
-                    RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+                    edu::sharif::twinner::proxy::ConstantExpressionValueProxy (srcImmediateValue, memReadBytes * 8),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -644,8 +651,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMem (AnalysisRoutine r
       << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, (int) memReadBytes),
-                    MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
+  (this->*routine) (edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (dstMemoryEa, (int) memReadBytes),
+                    edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -674,9 +681,9 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcMemAuxReg (
       << insAssemblyStr << "): dst mem addr: 0x" << dstMemoryEa
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << ", aux reg: " << REG_StringShort (auxReg) << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, (int) memReadBytes),
-                    MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes),
-                    RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (dstMemoryEa, (int) memReadBytes),
+                    edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (auxReg, auxRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -725,8 +732,8 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcAdg (AnalysisRoutine r
       << insAssemblyStr << ") [AFTER execution of instruction]: dst reg: "
       << REG_StringShort (dstReg) << ", dst reg value: 0x"
       << dstRegVal << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-                    ConstantExpressionValueProxy (dstRegVal, REG_Size (dstReg) * 8));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+                    edu::sharif::twinner::proxy::ConstantExpressionValueProxy (dstRegVal, REG_Size (dstReg) * 8));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -818,9 +825,9 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcReg (
       << insAssemblyStr << "): left dst reg: " << REG_StringShort (dstLeftReg)
       << ", right dst reg: " << REG_StringShort (dstRightReg)
       << ", src reg: " << REG_StringShort (srcReg) << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
-                    RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
-                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -849,9 +856,9 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcMem (
       << ", right dst reg: " << REG_StringShort (dstRightReg)
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
-                    RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
-                    MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
+                    edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -880,9 +887,9 @@ void InstructionSymbolicExecuter::analysisRoutineTwoRegOneMem (
       << ", right dst reg: " << REG_StringShort (dstRightReg)
       << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
-                    RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
-                    MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
+                    edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -911,9 +918,9 @@ void InstructionSymbolicExecuter::analysisRoutineOneMemTwoReg (
       << ", dst reg: " << REG_StringShort (dstReg)
       << ", src reg: " << REG_StringShort (srcReg)
       << ", mem read bytes: 0x" << memReadBytes << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-                    RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
-                    RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstReg, dstRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (srcReg, srcRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -942,10 +949,10 @@ void InstructionSymbolicExecuter::analysisRoutineTwoRegTwoMem (
       << ", right dst reg: " << REG_StringShort (dstRightReg)
       << ", dst mem addr: 0x" << dstMemoryEa << ", src mem addr: 0x" << srcMemoryEa
       << ", mem read bytes: 0x" << memReadBytes << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
-                    RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
-                    MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
-                    MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
+                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
+                    edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (dstMemoryEa, memReadBytes),
+                    edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -993,7 +1000,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstRegSrcImplicit (
       edu::sharif::twinner::util::Logger::loquacious ();
   logger << "analysisRoutineDstRegSrcImplicit(INS: "
       << insAssemblyStr << "): reg operand: " << REG_StringShort (dstReg) << '\n';
-  (this->*routine) (RegisterResidentExpressionValueProxy (dstReg, dstRegVal));
+  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstReg, dstRegVal));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -1018,7 +1025,7 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImplicit (
   logger << std::hex << "analysisRoutineDstMemSrcImplicit(INS: "
       << insAssemblyStr << "): src mem addr: 0x" << srcMemoryEa
       << ", mem read bytes: 0x" << memReadBytes << '\n';
-  (this->*routine) (MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
+  (this->*routine) (edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (srcMemoryEa, (int) memReadBytes));
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
 }
@@ -1054,7 +1061,7 @@ void InstructionSymbolicExecuter::analysisRoutineRepEqualOrRepNotEqualPrefix (RE
       << insAssemblyStr << "): rep reg: " << REG_StringShort (repReg)
       << ", executing: " << executing
       << ", rep equal: " << repEqual << '\n';
-  repAnalysisRoutine (RegisterResidentExpressionValueProxy (repReg, repRegVal),
+  repAnalysisRoutine (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (repReg, repRegVal),
                       executing, repEqual);
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
@@ -1081,7 +1088,7 @@ void InstructionSymbolicExecuter::analysisRoutineMemoryRegisterCorrespondence (
       << ", displacement: " << std::dec << displacement
       << ", mem addr: 0x" << std::hex << memoryEa << '\n';
   memoryRegisterCorrespondenceAnalysisRoutine
-      (RegisterResidentExpressionValueProxy (baseReg, baseRegVal),
+      (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (baseReg, baseRegVal),
        displacement, memoryEa);
 }
 
@@ -1109,8 +1116,8 @@ void InstructionSymbolicExecuter::analysisRoutineMemoryIndexedRegisterCorrespond
       << ", scale: " << std::dec << scale
       << ", mem addr: 0x" << std::hex << memoryEa << '\n';
   memoryIndexedRegisterCorrespondenceAnalysisRoutine
-      (RegisterResidentExpressionValueProxy (baseReg, baseRegVal), displacement,
-       RegisterResidentExpressionValueProxy (indexReg, indexRegVal), scale,
+      (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (baseReg, baseRegVal), displacement,
+       edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (indexReg, indexRegVal), scale,
        memoryEa);
 }
 
@@ -1127,12 +1134,13 @@ void InstructionSymbolicExecuter::analysisRoutinePrefetchMem (
       << "analysisRoutinePrefetchMem(...): mem addr: 0x"
       << std::hex << memoryEa << ", mem read bytes: 0x" << memReadBytes
       << '\n';
-  MemoryResidentExpressionValueProxy memory (memoryEa, memReadBytes);
+  edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy memory (memoryEa, memReadBytes);
   memory.checkForOverwritingMemory (trace);
 }
 
 edu::sharif::twinner::trace::Expression *
-InstructionSymbolicExecuter::getExpression (const ExpressionValueProxy &proxy,
+InstructionSymbolicExecuter::getExpression (
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &proxy,
     edu::sharif::twinner::trace::Trace *trace) const {
   edu::sharif::twinner::trace::StateSummary state;
   edu::sharif::twinner::trace::Expression *exp =
@@ -1145,7 +1153,7 @@ InstructionSymbolicExecuter::getExpression (const ExpressionValueProxy &proxy,
 }
 
 void InstructionSymbolicExecuter::setExpression (
-    const MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
     edu::sharif::twinner::trace::Trace *trace,
     edu::sharif::twinner::trace::Expression *exp, bool shouldDeleteExp) const {
   edu::sharif::twinner::trace::StateSummary state;
@@ -1288,7 +1296,8 @@ void InstructionSymbolicExecuter::syscallAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "cmovbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -1308,7 +1317,8 @@ void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::cmovnbeAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "cmovnbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -1328,8 +1338,9 @@ void InstructionSymbolicExecuter::cmovnbeAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::cmpxchgAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
-    const MutableExpressionValueProxy &aux) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &aux) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "cmpxchgAnalysisRoutine(...)\n"
       << "\tcomparison part...";
@@ -1349,8 +1360,9 @@ void InstructionSymbolicExecuter::cmpxchgAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::palignrAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
-    const ExpressionValueProxy &shift) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &shift) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "palignrAnalysisRoutine(...)\n"
@@ -1376,8 +1388,9 @@ void InstructionSymbolicExecuter::palignrAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::pshufdAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
-    const ExpressionValueProxy &order) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &order) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pshufdAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1416,15 +1429,17 @@ void InstructionSymbolicExecuter::pshufdAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::shldAnalysisRoutine (
-    const MutableExpressionValueProxy &dst,
-    const ExpressionValueProxy &src, const MutableExpressionValueProxy &bits) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &bits) {
   shldAnalysisRoutine
-      (dst, src, static_cast<const ExpressionValueProxy &> (bits));
+      (dst, src, static_cast<const edu::sharif::twinner::proxy::ExpressionValueProxy &> (bits));
 }
 
 void InstructionSymbolicExecuter::shldAnalysisRoutine (
-    const MutableExpressionValueProxy &dst,
-    const ExpressionValueProxy &src, const ExpressionValueProxy &shift) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &shift) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "shldAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1463,7 +1478,8 @@ void InstructionSymbolicExecuter::shldAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::xchgAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const MutableExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "xchgAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1479,7 +1495,8 @@ void InstructionSymbolicExecuter::xchgAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::xaddAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const MutableExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "xaddAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1495,8 +1512,8 @@ void InstructionSymbolicExecuter::xaddAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::movlpdAnalysisRoutine (
-    const MutableExpressionValueProxy &dst,
-    const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "movlpdAnalysisRoutine(...)\n"
@@ -1529,8 +1546,8 @@ void InstructionSymbolicExecuter::movlpdAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::movhpdAnalysisRoutine (
-    const MutableExpressionValueProxy &dst,
-    const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "movhpdAnalysisRoutine(...)\n"
@@ -1562,7 +1579,8 @@ void InstructionSymbolicExecuter::movhpdAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::movAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "movAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1574,7 +1592,8 @@ void InstructionSymbolicExecuter::movAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::movsxAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "movsxAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1589,7 +1608,8 @@ void InstructionSymbolicExecuter::movsxAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::cdqAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "cdqAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1620,8 +1640,10 @@ void InstructionSymbolicExecuter::cdqAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::movsAnalysisRoutine (
-    const MutableExpressionValueProxy &rdi, const MutableExpressionValueProxy &rsi,
-    const MutableExpressionValueProxy &dstMem, const ExpressionValueProxy &srcMem) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rdi,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsi,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstMem,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &srcMem) {
   edu::sharif::twinner::util::Logger::loquacious () << "movsAnalysisRoutine(...)\n";
   movAnalysisRoutine (dstMem, srcMem);
   const int size = dstMem.getSize () / 8;
@@ -1630,8 +1652,10 @@ void InstructionSymbolicExecuter::movsAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::cmpsAnalysisRoutine (
-    const MutableExpressionValueProxy &rdi, const MutableExpressionValueProxy &rsi,
-    const MutableExpressionValueProxy &dstMem, const ExpressionValueProxy &srcMem) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rdi,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsi,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstMem,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &srcMem) {
   edu::sharif::twinner::util::Logger::loquacious () << "cmpsAnalysisRoutine(...)\n";
   cmpAnalysisRoutine (dstMem, srcMem);
   const int size = dstMem.getSize () / 8;
@@ -1640,7 +1664,8 @@ void InstructionSymbolicExecuter::cmpsAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::adjustRsiRdiRegisters (int size,
-    const MutableExpressionValueProxy &rdi, const MutableExpressionValueProxy &rsi) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rdi,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsi) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tadjusting rsi/rdi values...";
   edu::sharif::twinner::trace::Expression *rdiexp = getExpression (rdi, trace);
@@ -1661,8 +1686,9 @@ void InstructionSymbolicExecuter::adjustRsiRdiRegisters (int size,
 }
 
 void InstructionSymbolicExecuter::pushfdAnalysisRoutine (
-    const MutableExpressionValueProxy &stack, const ExpressionValueProxy &flags,
-    const MutableExpressionValueProxy &rsp) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &stack,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &flags,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsp) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pushfdAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1684,8 +1710,9 @@ void InstructionSymbolicExecuter::pushfdAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::pushAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
-    const MutableExpressionValueProxy &rsp) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsp) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pushAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1701,8 +1728,9 @@ void InstructionSymbolicExecuter::pushAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::popAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src,
-    const MutableExpressionValueProxy &rsp) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsp) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "popAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1718,8 +1746,9 @@ void InstructionSymbolicExecuter::popAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::lodsdAnalysisRoutine (
-    const MutableExpressionValueProxy &dstReg, const ExpressionValueProxy &srcMem,
-    const MutableExpressionValueProxy &rsi) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstReg,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &srcMem,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rsi) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "lodsdAnalysisRoutine(...)\n";
   movAnalysisRoutine (dstReg, srcMem);
@@ -1738,7 +1767,8 @@ void InstructionSymbolicExecuter::lodsdAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::addAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "addAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1758,7 +1788,8 @@ void InstructionSymbolicExecuter::addAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::adcAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "adcAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1781,7 +1812,8 @@ void InstructionSymbolicExecuter::adcAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::subAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "subAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1801,7 +1833,8 @@ void InstructionSymbolicExecuter::subAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::sbbAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "sbbAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1827,7 +1860,8 @@ void InstructionSymbolicExecuter::sbbAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::cmpAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "cmpAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -1844,7 +1878,8 @@ void InstructionSymbolicExecuter::cmpAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::leaAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "leaAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2147,8 +2182,8 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
       if ((*cv) == STACK_OPERATION_UNIT_SIZE) {
         edu::sharif::twinner::util::Logger::loquacious ()
             << "\tupdating stack (pushing the ret address)...";
-        MemoryResidentExpressionValueProxy stack (rspRegVal.toUint64 (),
-                                                  STACK_OPERATION_UNIT_SIZE);
+        edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy stack
+            (rspRegVal.toUint64 (), STACK_OPERATION_UNIT_SIZE);
         edu::sharif::twinner::trace::StateSummary state;
         edu::sharif::twinner::trace::Expression *exp =
             stack.getExpression (trace, state);
@@ -2306,7 +2341,8 @@ void InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
 }
 
 void InstructionSymbolicExecuter::repAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, bool executing, bool repEqual) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    bool executing, bool repEqual) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "repAnalysisRoutine(...)\n"
       << "\tgetting dst (rep) reg exp...";
@@ -2335,8 +2371,8 @@ void InstructionSymbolicExecuter::repAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::pslldqAnalysisRoutine (
-    const MutableExpressionValueProxy &dst,
-    const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "pslldqAnalysisRoutine(...)\n"
@@ -2348,7 +2384,7 @@ void InstructionSymbolicExecuter::pslldqAnalysisRoutine (
       getExpression (dst, trace);
   edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tshifting operation...";
-  if (dynamic_cast<const ConstantExpressionValueProxy *> (&src) == 0) {
+  if (dynamic_cast<const edu::sharif::twinner::proxy::ConstantExpressionValueProxy *> (&src) == 0) {
     edu::sharif::twinner::util::Logger::error ()
         << "\tthe PSLLDQ src is not an immediate value!";
     abort ();
@@ -2368,7 +2404,8 @@ void InstructionSymbolicExecuter::pslldqAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::shlAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "shlAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2382,7 +2419,7 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
   srcexp->bitwiseAnd (mask);
   edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tshifting operation...";
-  if (dynamic_cast<const ConstantExpressionValueProxy *> (&src) != 0) {
+  if (dynamic_cast<const edu::sharif::twinner::proxy::ConstantExpressionValueProxy *> (&src) != 0) {
     // src was an immediate value
     dstexp->shiftToLeft (srcexp->getLastConcreteValue ().clone ());
   } else {
@@ -2400,7 +2437,8 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::shrAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "shrAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2423,7 +2461,8 @@ void InstructionSymbolicExecuter::shrAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::sarAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "sarAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2463,7 +2502,8 @@ void InstructionSymbolicExecuter::sarAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::rorAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "rorAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2484,7 +2524,8 @@ void InstructionSymbolicExecuter::rorAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::rolAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "rolAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2506,7 +2547,8 @@ void InstructionSymbolicExecuter::rolAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::andAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "andAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2527,7 +2569,8 @@ void InstructionSymbolicExecuter::andAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::orAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "orAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2548,7 +2591,8 @@ void InstructionSymbolicExecuter::orAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::xorAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "xorAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2569,7 +2613,8 @@ void InstructionSymbolicExecuter::xorAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::testAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "testAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2590,7 +2635,8 @@ void InstructionSymbolicExecuter::testAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::btAnalysisRoutine (
-    const MutableExpressionValueProxy &bitstring, const ExpressionValueProxy &offset) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &bitstring,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &offset) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "btAnalysisRoutine(...)\n"
       << "\tgetting offset exp...";
@@ -2610,7 +2656,8 @@ void InstructionSymbolicExecuter::btAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::btrAnalysisRoutine (
-    const MutableExpressionValueProxy &bitstring, const ExpressionValueProxy &offset) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &bitstring,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &offset) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "btrAnalysisRoutine(...)\n"
       << "\tgetting offset exp...";
@@ -2640,7 +2687,8 @@ void InstructionSymbolicExecuter::btrAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pmovmskbAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2650,7 +2698,7 @@ void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
   edu::sharif::twinner::trace::Expression *maskbyte =
       new edu::sharif::twinner::trace::ExpressionImp (); // zero-filled
   // src is a reg and is mutable
-  const int size = static_cast<const MutableExpressionValueProxy &> (src).getSize ();
+  const int size = static_cast<const edu::sharif::twinner::proxy::MutableExpressionValueProxy &> (src).getSize ();
   for (int i = 7, loc = 0; i < size; i += 8) {
     edu::sharif::twinner::trace::Expression *ithBit = srcexp->clone ();
     ithBit->shiftToRight (i - loc); // it is (i+1)-th bit in 1-counting mode
@@ -2666,7 +2714,8 @@ void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pcmpeqbAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2714,7 +2763,8 @@ void InstructionSymbolicExecuter::pcmpeqbAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::pcmpgtbAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "pcmpgtbAnalysisRoutine(...)\n"
@@ -2760,7 +2810,8 @@ void InstructionSymbolicExecuter::pcmpgtbAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::pminubAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "pminubAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2806,7 +2857,8 @@ void InstructionSymbolicExecuter::pminubAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::psubbAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "psubbAnalysisRoutine(...)\n"
@@ -2847,7 +2899,8 @@ void InstructionSymbolicExecuter::psubbAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::punpcklbwAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "punpcklbwAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2887,7 +2940,8 @@ void InstructionSymbolicExecuter::punpcklbwAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::punpcklwdAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "punpcklwdAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2927,7 +2981,8 @@ void InstructionSymbolicExecuter::punpcklwdAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::bsfAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "bsfAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -2968,9 +3023,9 @@ void InstructionSymbolicExecuter::bsfAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::divAnalysisRoutine (
-    const MutableExpressionValueProxy &leftDst,
-    const MutableExpressionValueProxy &rightDst,
-    const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &leftDst,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rightDst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "divAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -3009,9 +3064,9 @@ void InstructionSymbolicExecuter::divAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::idivAnalysisRoutine (
-    const MutableExpressionValueProxy &leftDst,
-    const MutableExpressionValueProxy &rightDst,
-    const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &leftDst,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rightDst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "idivAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -3098,13 +3153,14 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
   if (osval == 8) { // AX == AH:AL
     leftExp->shiftToLeft (8);
     leftExp->bitwiseOr (rightExp);
-    const MutableExpressionValueProxy &ax = RegisterResidentExpressionValueProxy (REG_AX);
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &ax =
+        edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (REG_AX);
     setExpression (ax, trace, leftExp, false); // this deletes unused expressions by itself
   } else {
-    const MutableExpressionValueProxy &left =
-        RegisterResidentExpressionValueProxy (leftReg, *leftVal);
-    const MutableExpressionValueProxy &right =
-        RegisterResidentExpressionValueProxy (rightReg, *rightVal);
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &left =
+        edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (leftReg, *leftVal);
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &right =
+        edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (rightReg, *rightVal);
     edu::sharif::twinner::trace::StateSummary state;
     left.valueIsChanged (trace, *leftExp, state);
     if (state.isWrongState ()) {
@@ -3122,9 +3178,9 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
 }
 
 void InstructionSymbolicExecuter::mulAnalysisRoutine (
-    const MutableExpressionValueProxy &leftDst,
-    const MutableExpressionValueProxy &rightDst,
-    const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &leftDst,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rightDst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "mulAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
@@ -3157,9 +3213,9 @@ void InstructionSymbolicExecuter::mulAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::imulAnalysisRoutine (
-    const MutableExpressionValueProxy &leftDst,
-    const MutableExpressionValueProxy &rightDst,
-    const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &leftDst,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rightDst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   operandSize = leftDst.getSize ();
   const int doubleSize = operandSize * 2;
@@ -3206,7 +3262,8 @@ void InstructionSymbolicExecuter::imulAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::imulAnalysisRoutine (
-    const MutableExpressionValueProxy &dst, const ExpressionValueProxy &src) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "imulAnalysisRoutine(...): "
       "two-operands-mode\n"
@@ -3226,8 +3283,9 @@ void InstructionSymbolicExecuter::imulAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::imulAnalysisRoutine (
-    const MutableExpressionValueProxy &dst,
-    const ExpressionValueProxy &src, const ExpressionValueProxy &imd) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &imd) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "imulAnalysisRoutine(...): "
       "three-operands-mode\n"
@@ -3245,9 +3303,9 @@ void InstructionSymbolicExecuter::imulAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::scasAnalysisRoutine (
-    const MutableExpressionValueProxy &dstReg,
-    const MutableExpressionValueProxy &srcReg,
-    const ExpressionValueProxy &srcMem) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstReg,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &srcReg,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &srcMem) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "scasAnalysisRoutine(...)\n";
   cmpAnalysisRoutine (dstReg, srcMem); // comparing AL/AX/EAX/RAX with memory
@@ -3271,8 +3329,9 @@ void InstructionSymbolicExecuter::scasAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::stosAnalysisRoutine (
-    const MutableExpressionValueProxy &dstMem, const MutableExpressionValueProxy &rdireg,
-    const ExpressionValueProxy &srcReg) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dstMem,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &rdireg,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &srcReg) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "stosAnalysisRoutine(...)\n";
   movAnalysisRoutine (dstMem, srcReg);
@@ -3293,9 +3352,9 @@ void InstructionSymbolicExecuter::stosAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::leaveAnalysisRoutine (
-    const MutableExpressionValueProxy &fpReg,
-    const MutableExpressionValueProxy &spReg,
-    const ExpressionValueProxy &srcMem) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &fpReg,
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &spReg,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &srcMem) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "leaveAnalysisRoutine(...)\n"
       << "\tgetting frame pointer (to be set in stack pointer)...";
@@ -3328,10 +3387,10 @@ void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) 
   edu::sharif::twinner::trace::Expression *eaxNewExp =
       new edu::sharif::twinner::trace::ExpressionImp (eaxVal);
 
-  const MutableExpressionValueProxy &edx =
-      RegisterResidentExpressionValueProxy (REG_EDX, *edxVal);
-  const MutableExpressionValueProxy &eax =
-      RegisterResidentExpressionValueProxy (REG_EAX, *eaxVal);
+  const edu::sharif::twinner::proxy::MutableExpressionValueProxy &edx =
+      edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (REG_EDX, *edxVal);
+  const edu::sharif::twinner::proxy::MutableExpressionValueProxy &eax =
+      edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (REG_EAX, *eaxVal);
   setExpression (edx, trace, edxNewExp);
   setExpression (eax, trace, eaxNewExp);
 }
@@ -3371,14 +3430,14 @@ void InstructionSymbolicExecuter::cpuidAnalysisRoutine (const CONTEXT *context) 
   edu::sharif::twinner::trace::Expression *edxNewExp =
       new edu::sharif::twinner::trace::ExpressionImp (edxVal);
 
-  const MutableExpressionValueProxy &eax =
-      RegisterResidentExpressionValueProxy (REG_EAX, *eaxVal);
-  const MutableExpressionValueProxy &ebx =
-      RegisterResidentExpressionValueProxy (REG_EBX, *ebxVal);
-  const MutableExpressionValueProxy &ecx =
-      RegisterResidentExpressionValueProxy (REG_ECX, *ecxVal);
-  const MutableExpressionValueProxy &edx =
-      RegisterResidentExpressionValueProxy (REG_EDX, *edxVal);
+  const edu::sharif::twinner::proxy::MutableExpressionValueProxy &eax =
+      edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (REG_EAX, *eaxVal);
+  const edu::sharif::twinner::proxy::MutableExpressionValueProxy &ebx =
+      edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (REG_EBX, *ebxVal);
+  const edu::sharif::twinner::proxy::MutableExpressionValueProxy &ecx =
+      edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (REG_ECX, *ecxVal);
+  const edu::sharif::twinner::proxy::MutableExpressionValueProxy &edx =
+      edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (REG_EDX, *edxVal);
   setExpression (eax, trace, eaxNewExp);
   setExpression (ebx, trace, ebxNewExp);
   setExpression (ecx, trace, ecxNewExp);
@@ -3386,7 +3445,7 @@ void InstructionSymbolicExecuter::cpuidAnalysisRoutine (const CONTEXT *context) 
 }
 
 void InstructionSymbolicExecuter::incAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "incAnalysisRoutine(...)\n"
       << "\tgetting dst exp...";
@@ -3405,7 +3464,7 @@ void InstructionSymbolicExecuter::incAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::decAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "decAnalysisRoutine(...)\n"
       << "\tgetting dst exp...";
@@ -3424,7 +3483,7 @@ void InstructionSymbolicExecuter::decAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::negAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "negAnalysisRoutine(...)\n"
       << "\tgetting dst exp...";
@@ -3440,7 +3499,7 @@ void InstructionSymbolicExecuter::negAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setoAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "setoAnalysisRoutine(...)\n"
@@ -3462,7 +3521,7 @@ void InstructionSymbolicExecuter::setoAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setnpAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setnpAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -3483,7 +3542,7 @@ void InstructionSymbolicExecuter::setnpAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setnsAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setnsAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -3504,7 +3563,7 @@ void InstructionSymbolicExecuter::setnsAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setnzAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setnzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -3525,7 +3584,7 @@ void InstructionSymbolicExecuter::setnzAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setzAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setzAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -3546,7 +3605,7 @@ void InstructionSymbolicExecuter::setzAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setleAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setleAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -3568,7 +3627,7 @@ void InstructionSymbolicExecuter::setleAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setnleAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setnleAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -3590,7 +3649,7 @@ void InstructionSymbolicExecuter::setnleAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setlAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setlAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -3611,7 +3670,7 @@ void InstructionSymbolicExecuter::setlAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setbeAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -3633,7 +3692,7 @@ void InstructionSymbolicExecuter::setbeAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setnbeAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setnbeAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -3655,7 +3714,7 @@ void InstructionSymbolicExecuter::setnbeAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setbAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setbAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -3676,7 +3735,7 @@ void InstructionSymbolicExecuter::setbAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setnlAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "setnlAnalysisRoutine(...)\n"
@@ -3698,7 +3757,7 @@ void InstructionSymbolicExecuter::setnlAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::setnbAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "setnbAnalysisRoutine(...)\n"
       << "\tinstantiating constraint...";
@@ -3720,7 +3779,7 @@ void InstructionSymbolicExecuter::setnbAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::notAnalysisRoutine (
-    const MutableExpressionValueProxy &opr) {
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "notAnalysisRoutine(...)\n"
       << "\tgetting dst exp...";
@@ -3733,7 +3792,8 @@ void InstructionSymbolicExecuter::notAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::memoryRegisterCorrespondenceAnalysisRoutine (
-    const ExpressionValueProxy &baseReg, ADDRDELTA displacement,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &baseReg,
+    ADDRDELTA displacement,
     ADDRINT memoryEa) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
@@ -3763,8 +3823,10 @@ void InstructionSymbolicExecuter::memoryRegisterCorrespondenceAnalysisRoutine (
 }
 
 void InstructionSymbolicExecuter::memoryIndexedRegisterCorrespondenceAnalysisRoutine (
-    const ExpressionValueProxy &baseReg, ADDRDELTA displacement,
-    const ExpressionValueProxy &indexReg, UINT32 scale,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &baseReg,
+    ADDRDELTA displacement,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &indexReg,
+    UINT32 scale,
     ADDRINT memoryEa) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()

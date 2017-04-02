@@ -27,7 +27,7 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
+namespace proxy {
 
 /*
  * FIXME: After `Abandoning trivial/concrete memory expressions` commit, concrete
@@ -544,9 +544,9 @@ Expression *Snapshot::lazyLoad (int size,
     msb = tmp;
   }
   const int halfSizeBytes = (size / 2) / 8;
-  edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy leftProxy
+  edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy leftProxy
       (key, halfSizeBytes);
-  edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy rightProxy
+  edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy rightProxy
       (key + halfSizeBytes, halfSizeBytes);
   Expression *leftExp = leftProxy.getExpression (timedTrace, *lsb, state);
   if (state.isWrongState ()) {
@@ -581,9 +581,9 @@ Expression *Snapshot::lazyLoad (int size,
 Expression *Snapshot::lazyLoad (int size,
     std::map < ADDRINT, Expression * > &map, const ADDRINT key) {
   const int halfSizeBytes = (size / 2) / 8;
-  edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy leftProxy
+  edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy leftProxy
       (key, halfSizeBytes);
-  edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy rightProxy
+  edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy rightProxy
       (key + halfSizeBytes, halfSizeBytes);
   Expression *leftExp = leftProxy.getExpression (timedTrace);
   Expression *rightExp = rightProxy.getExpression (timedTrace);

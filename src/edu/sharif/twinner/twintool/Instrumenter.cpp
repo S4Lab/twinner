@@ -19,7 +19,6 @@
 #include "xed-iclass-enum.h"
 
 #include "InstructionSymbolicExecuter.h"
-#include "MemoryResidentExpressionValueProxy.h"
 
 #include "edu/sharif/twinner/trace/MarInfo.h"
 
@@ -48,6 +47,12 @@ using namespace instructionmodels;
 #define MAIN_ROUTINE_NAME "__main"
 #else
 #error "Unsupported OS"
+#endif
+
+#ifdef TARGET_IA32E
+static const int STACK_OPERATION_UNIT_SIZE = 8; // bytes
+#else
+static const int STACK_OPERATION_UNIT_SIZE = 4; // bytes
 #endif
 
 inline void read_memory_content_and_add_it_to_map (

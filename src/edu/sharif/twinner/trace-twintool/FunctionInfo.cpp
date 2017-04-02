@@ -15,8 +15,8 @@
 #include <sstream>
 #include <stdlib.h>
 
-#include "edu/sharif/twinner/twintool/RegisterResidentExpressionValueProxy.h"
-#include "edu/sharif/twinner/twintool/MemoryResidentExpressionValueProxy.h"
+#include "edu/sharif/twinner/proxy/RegisterResidentExpressionValueProxy.h"
+#include "edu/sharif/twinner/proxy/MemoryResidentExpressionValueProxy.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 
@@ -30,6 +30,12 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+
+#ifdef TARGET_IA32E
+static const int STACK_OPERATION_UNIT_SIZE = 8; // bytes
+#else
+static const int STACK_OPERATION_UNIT_SIZE = 4; // bytes
+#endif
 
 FunctionInfo::FunctionInfo (std::string encodedInfo) {
   const std::string::size_type atsign = encodedInfo.find ("@");
@@ -132,13 +138,11 @@ Expression *FunctionInfo::getArgument (int i, Trace *trace,
     };
     return getArgument (regs[i], trace, context);
   }
-  const int offset = (i - 6)
-      * edu::sharif::twinner::twintool::STACK_OPERATION_UNIT_SIZE;
+  const int offset = (i - 6) * STACK_OPERATION_UNIT_SIZE;
   const ADDRINT topOfStack = PIN_GetContextReg (context, REG_RSP);
 #elif defined(TARGET_IA32)
   // args are in the stack respectively (first argument is pushed last)
-  const int offset = i
-      * edu::sharif::twinner::twintool::STACK_OPERATION_UNIT_SIZE;
+  const int offset = i * STACK_OPERATION_UNIT_SIZE;
   const ADDRINT topOfStack = PIN_GetContextReg (context, REG_ESP);
 #else
 #error "Unsupported architecture and/or OS"
@@ -149,7 +153,7 @@ Expression *FunctionInfo::getArgument (int i, Trace *trace,
 
 Expression *FunctionInfo::getArgument (REG reg, Trace *trace,
     const CONTEXT *context) const {
-  edu::sharif::twinner::twintool::RegisterResidentExpressionValueProxy proxy
+  edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy proxy
       (reg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits
        (PIN_GetContextReg (context, reg)));
   edu::sharif::twinner::trace::StateSummary state;
@@ -165,9 +169,8 @@ Expression *FunctionInfo::getArgument (REG reg, Trace *trace,
 
 Expression *FunctionInfo::getArgument (int offset, ADDRINT topOfStack,
     Trace *trace, const CONTEXT *context) const {
-  edu::sharif::twinner::twintool::MemoryResidentExpressionValueProxy proxy
-      (topOfStack + offset,
-       edu::sharif::twinner::twintool::STACK_OPERATION_UNIT_SIZE);
+  edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy proxy
+      (topOfStack + offset, STACK_OPERATION_UNIT_SIZE);
   edu::sharif::twinner::trace::StateSummary state;
   edu::sharif::twinner::trace::Expression *exp =
       proxy.getExpression (trace, state);

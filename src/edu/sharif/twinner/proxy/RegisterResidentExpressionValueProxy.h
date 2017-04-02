@@ -24,7 +24,7 @@ namespace cv {
 class ConcreteValue;
 }
 }
-namespace twintool {
+namespace proxy {
 
 class RegisterResidentExpressionValueProxy : public MutableExpressionValueProxy {
 private:

@@ -27,7 +27,7 @@ namespace cv {
 class ConcreteValue;
 }
 }
-namespace twintool {
+namespace proxy {
 
 /**
  * @interface An interface which allows an expression value to be read.
@@ -38,7 +38,7 @@ namespace twintool {
  */
 class ExpressionValueProxy {
 private:
-  ExpressionValueProxy (const ExpressionValueProxy &evp); /// disable copy-constructor
+  ExpressionValueProxy (const edu::sharif::twinner::proxy::ExpressionValueProxy &evp); /// disable copy-constructor
 
 protected:
 
