@@ -10,20 +10,23 @@
  * This file is part of Twinner project.
  */
 
-#ifndef SUBTRACT_OPERATION_GROUP_H
-#define SUBTRACT_OPERATION_GROUP_H
+#ifndef DUMMY_OPERATION_GROUP_H
+#define DUMMY_OPERATION_GROUP_H
 
 #include "OperationGroup.h"
+#include <string>
 
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
 namespace operationgroup {
 
-class SubtractOperationGroup : public NaryOperationGroup<2> {
+class DummyOperationGroup : public NaryOperationGroup<0> {
+private:
+  const std::string name;
+
 public:
-  SubtractOperationGroup (ConstExpressionPtr mainExp, ConstExpressionPtr auxExp);
+  DummyOperationGroup (const char *name);
 
   virtual ExpressionPtr getCarryExpression () const;
 
@@ -51,6 +54,5 @@ public:
 }
 }
 }
-}
 
-#endif /* SubtractOperationGroup.h */
+#endif /* DummyOperationGroup.h */

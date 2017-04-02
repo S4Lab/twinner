@@ -18,13 +18,13 @@
 #include "MemoryResidentExpressionValueProxy.h"
 #include "ConstantExpressionValueProxy.h"
 
-#include "edu/sharif/twinner/twintool/operationgroup/DummyOperationGroup.h"
-#include "edu/sharif/twinner/twintool/operationgroup/SubtractOperationGroup.h"
-#include "edu/sharif/twinner/twintool/operationgroup/AdditionOperationGroup.h"
-#include "edu/sharif/twinner/twintool/operationgroup/AddWithCarryOperationGroup.h"
-#include "edu/sharif/twinner/twintool/operationgroup/BitwiseAndOperationGroup.h"
-#include "edu/sharif/twinner/twintool/operationgroup/ShiftArithmeticRightOperationGroup.h"
-#include "edu/sharif/twinner/twintool/operationgroup/ShiftRightOperationGroup.h"
+#include "edu/sharif/twinner/operationgroup/DummyOperationGroup.h"
+#include "edu/sharif/twinner/operationgroup/SubtractOperationGroup.h"
+#include "edu/sharif/twinner/operationgroup/AdditionOperationGroup.h"
+#include "edu/sharif/twinner/operationgroup/AddWithCarryOperationGroup.h"
+#include "edu/sharif/twinner/operationgroup/BitwiseAndOperationGroup.h"
+#include "edu/sharif/twinner/operationgroup/ShiftArithmeticRightOperationGroup.h"
+#include "edu/sharif/twinner/operationgroup/ShiftRightOperationGroup.h"
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
@@ -1457,7 +1457,7 @@ void InstructionSymbolicExecuter::shldAnalysisRoutine (
   setExpression (dst, trace, dstexp);
   delete dstexpOrig;
   delete shiftexp;
-  eflags.setFlags (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
+  eflags.setFlags (new edu::sharif::twinner::operationgroup::DummyOperationGroup
                    ("ShiftLeftOperationGroup"));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -1752,7 +1752,7 @@ void InstructionSymbolicExecuter::addAnalysisRoutine (
   dstexp->add (srcexp);
   setExpression (dst, trace, dstexp);
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::AdditionOperationGroup
+      (new edu::sharif::twinner::operationgroup::AdditionOperationGroup
        (dstexpOrig, srcexp));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -1775,7 +1775,7 @@ void InstructionSymbolicExecuter::adcAnalysisRoutine (
   exp->add (dstexp);
   setExpression (dst, trace, exp);
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::AddWithCarryOperationGroup
+      (new edu::sharif::twinner::operationgroup::AddWithCarryOperationGroup
        (dstexp, srcexp, carryexp));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -1795,7 +1795,7 @@ void InstructionSymbolicExecuter::subAnalysisRoutine (
   dstexp->minus (srcexp);
   setExpression (dst, trace, dstexp);
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::SubtractOperationGroup
+      (new edu::sharif::twinner::operationgroup::SubtractOperationGroup
        (dstexpOrig, srcexp));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -1821,7 +1821,7 @@ void InstructionSymbolicExecuter::sbbAnalysisRoutine (
   delete srcexp;
   delete carryexp;
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
+      (new edu::sharif::twinner::operationgroup::DummyOperationGroup
        ("SubtractWithBorrowOperationGroup"));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -1838,7 +1838,7 @@ void InstructionSymbolicExecuter::cmpAnalysisRoutine (
       getExpression (dst, trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting EFLAGS...";
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::SubtractOperationGroup
+      (new edu::sharif::twinner::operationgroup::SubtractOperationGroup
        (dstexp, srcexp));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -2362,7 +2362,7 @@ void InstructionSymbolicExecuter::pslldqAnalysisRoutine (
   setExpression (dst, trace, dstexp);
   delete dstexpOrig;
   delete srcexp;
-  eflags.setFlags (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
+  eflags.setFlags (new edu::sharif::twinner::operationgroup::DummyOperationGroup
                    ("ShiftLeftOperationGroup"));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -2394,7 +2394,7 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
   setExpression (dst, trace, dstexp);
   delete dstexpOrig;
   delete srcexp;
-  eflags.setFlags (new edu::sharif::twinner::twintool::operationgroup::DummyOperationGroup
+  eflags.setFlags (new edu::sharif::twinner::operationgroup::DummyOperationGroup
                    ("ShiftLeftOperationGroup"));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -2417,7 +2417,7 @@ void InstructionSymbolicExecuter::shrAnalysisRoutine (
   dstexp->shiftToRight (srcexp);
   setExpression (dst, trace, dstexp);
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::ShiftRightOperationGroup
+      (new edu::sharif::twinner::operationgroup::ShiftRightOperationGroup
        (dstexpOrig, srcexp));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -2457,7 +2457,7 @@ void InstructionSymbolicExecuter::sarAnalysisRoutine (
     }
   }
   setExpression (dst, trace, dstexp);
-  eflags.setFlags (new edu::sharif::twinner::twintool::operationgroup
+  eflags.setFlags (new edu::sharif::twinner::operationgroup
                    ::ShiftArithmeticRightOperationGroup (dstexpOrig, srcexp));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -2519,7 +2519,7 @@ void InstructionSymbolicExecuter::andAnalysisRoutine (
   delete srcexp;
   setExpression (dst, trace, dstexp, false);
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::BitwiseAndOperationGroup
+      (new edu::sharif::twinner::operationgroup::BitwiseAndOperationGroup
        (dstexp));
   eflags.setOverflowFlag (false);
   eflags.setCarryFlag (false);
@@ -2540,7 +2540,7 @@ void InstructionSymbolicExecuter::orAnalysisRoutine (
   delete srcexp;
   setExpression (dst, trace, dstexp, false);
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::BitwiseAndOperationGroup
+      (new edu::sharif::twinner::operationgroup::BitwiseAndOperationGroup
        (dstexp));
   eflags.setOverflowFlag (false);
   eflags.setCarryFlag (false);
@@ -2561,7 +2561,7 @@ void InstructionSymbolicExecuter::xorAnalysisRoutine (
   delete srcexp;
   setExpression (dst, trace, dstexp, false);
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::BitwiseAndOperationGroup
+      (new edu::sharif::twinner::operationgroup::BitwiseAndOperationGroup
        (dstexp));
   eflags.setOverflowFlag (false);
   eflags.setCarryFlag (false);
@@ -2582,7 +2582,7 @@ void InstructionSymbolicExecuter::testAnalysisRoutine (
   delete srcexp;
   edu::sharif::twinner::util::Logger::loquacious () << "\tsetting EFLAGS...";
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::BitwiseAndOperationGroup
+      (new edu::sharif::twinner::operationgroup::BitwiseAndOperationGroup
        (dstexp));
   eflags.setOverflowFlag (false);
   eflags.setCarryFlag (false);
@@ -3399,7 +3399,7 @@ void InstructionSymbolicExecuter::incAnalysisRoutine (
   const edu::sharif::twinner::trace::Expression *one =
       new edu::sharif::twinner::trace::ExpressionImp (UINT64 (1));
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::AdditionOperationGroup
+      (new edu::sharif::twinner::operationgroup::AdditionOperationGroup
        (dstexpOrig, one));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -3418,7 +3418,7 @@ void InstructionSymbolicExecuter::decAnalysisRoutine (
   const edu::sharif::twinner::trace::Expression *one =
       new edu::sharif::twinner::trace::ExpressionImp (UINT64 (1));
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::SubtractOperationGroup
+      (new edu::sharif::twinner::operationgroup::SubtractOperationGroup
        (dstexpOrig, one));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
@@ -3434,7 +3434,7 @@ void InstructionSymbolicExecuter::negAnalysisRoutine (
   edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->twosComplement ();
   setExpression (opr, trace, dstexp);
   eflags.setFlags
-      (new edu::sharif::twinner::twintool::operationgroup::SubtractOperationGroup
+      (new edu::sharif::twinner::operationgroup::SubtractOperationGroup
        (new edu::sharif::twinner::trace::ExpressionImp (UINT64 (0)), dstexpOrig));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }

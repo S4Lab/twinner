@@ -20,7 +20,6 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
 namespace operationgroup {
 
 DummyOperationGroup::DummyOperationGroup (const char *_name) :
@@ -113,7 +112,6 @@ OperationGroup::ExpressionPtr DummyOperationGroup::getOperationResult () const {
   abort ();
 }
 
-}
 }
 }
 }

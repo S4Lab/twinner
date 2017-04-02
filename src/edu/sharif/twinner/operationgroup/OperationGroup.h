@@ -26,7 +26,6 @@ namespace trace {
 class Constraint;
 class Expression;
 }
-namespace twintool {
 namespace operationgroup {
 
 class OperationGroup {
@@ -116,7 +115,6 @@ public:
   }
 };
 
-}
 }
 }
 }

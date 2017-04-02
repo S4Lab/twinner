@@ -19,7 +19,6 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
 namespace operationgroup {
 
 BitwiseAndOperationGroup::BitwiseAndOperationGroup (ConstExpressionPtr mainExp) :
@@ -111,7 +110,6 @@ OperationGroup::ExpressionPtr BitwiseAndOperationGroup::getOperationResult () co
   return exp[0]->clone ();
 }
 
-}
 }
 }
 }

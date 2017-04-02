@@ -10,7 +10,7 @@
  * This file is part of Twinner project.
  */
 
-#include "ShiftArithmeticRightOperationGroup.h"
+#include "ShiftRightOperationGroup.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
@@ -20,40 +20,39 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
 namespace operationgroup {
 
-ShiftArithmeticRightOperationGroup::ShiftArithmeticRightOperationGroup (
+ShiftRightOperationGroup::ShiftRightOperationGroup (
     ConstExpressionPtr mainExp, ConstExpressionPtr auxExp) :
     NaryOperationGroup (mainExp, auxExp) {
 }
 
 OperationGroup::ExpressionPtr
-ShiftArithmeticRightOperationGroup::getCarryExpression () const {
+ShiftRightOperationGroup::getCarryExpression () const {
   ExpressionPtr dstexp = exp[0]->clone ();
   ExpressionPtr shiftBits = exp[1]->clone ();
   shiftBits->minus (1);
-  dstexp->arithmeticShiftToRight (shiftBits);
+  dstexp->shiftToRight (shiftBits);
   delete shiftBits;
   dstexp->bitwiseAnd (0x1);
   return dstexp;
 }
 
 std::list <OperationGroup::ConstraintPtr>
-ShiftArithmeticRightOperationGroup::instantiateConstraintForOverflowCase (
+ShiftRightOperationGroup::instantiateConstraintForOverflowCase (
     bool &overflow, uint32_t instruction) const {
-  edu::sharif::twinner::util::Logger::error () <<
-      "ShiftArithmeticRightOperationGroup::instantiateConstraintForOverflowCase"
+  edu::sharif::twinner::util::Logger::error ()
+      << "ShiftRightOperationGroup::instantiateConstraintForOverflowCase"
       " (...): Not yet implemented\n";
   abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
-ShiftArithmeticRightOperationGroup::instantiateConstraintForZeroCase (bool &zero,
+ShiftRightOperationGroup::instantiateConstraintForZeroCase (bool &zero,
     uint32_t instruction) const {
   std::list <OperationGroup::ConstraintPtr> list;
   ExpressionPtr dstexp = exp[0]->clone ();
-  dstexp->arithmeticShiftToRight (exp[1]);
+  dstexp->shiftToRight (exp[1]);
   list.push_back (OperationGroup::Constraint::instantiateEqualConstraint
                   (zero, dstexp, instruction));
   delete dstexp;
@@ -61,25 +60,25 @@ ShiftArithmeticRightOperationGroup::instantiateConstraintForZeroCase (bool &zero
 }
 
 std::list <OperationGroup::ConstraintPtr>
-ShiftArithmeticRightOperationGroup::instantiateConstraintForLessCase (bool &less,
+ShiftRightOperationGroup::instantiateConstraintForLessCase (bool &less,
     uint32_t instruction) const {
   edu::sharif::twinner::util::Logger::error ()
-      << "ShiftArithmeticRightOperationGroup"
+      << "ShiftRightOperationGroup"
       "::instantiateConstraintForLessCase (...): Not implemented yet.\n";
   abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
-ShiftArithmeticRightOperationGroup::instantiateConstraintForLessOrEqualCase (
+ShiftRightOperationGroup::instantiateConstraintForLessOrEqualCase (
     bool &lessOrEqual, uint32_t instruction) const {
   edu::sharif::twinner::util::Logger::error ()
-      << "ShiftArithmeticRightOperationGroup"
+      << "ShiftRightOperationGroup"
       "::instantiateConstraintForLessOrEqualCase (...): Not implemented yet.\n";
   abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
-ShiftArithmeticRightOperationGroup::instantiateConstraintForBelowCase (bool &below,
+ShiftRightOperationGroup::instantiateConstraintForBelowCase (bool &below,
     uint32_t instruction) const {
   ConstExpressionPtr carry = getCarryExpression ();
   std::list <OperationGroup::ConstraintPtr> list;
@@ -91,21 +90,21 @@ ShiftArithmeticRightOperationGroup::instantiateConstraintForBelowCase (bool &bel
 }
 
 std::list <OperationGroup::ConstraintPtr>
-ShiftArithmeticRightOperationGroup::instantiateConstraintForBelowOrEqualCase (
+ShiftRightOperationGroup::instantiateConstraintForBelowOrEqualCase (
     bool &belowOrEqual, uint32_t instruction) const {
   edu::sharif::twinner::util::Logger::error ()
-      << "ShiftArithmeticRightOperationGroup"
+      << "ShiftRightOperationGroup"
       "::instantiateConstraintForBelowOrEqualCase (...):"
       " Not implemented yet.\n";
   abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
-ShiftArithmeticRightOperationGroup::operationResultIsLessOrEqualWithZero (
+ShiftRightOperationGroup::operationResultIsLessOrEqualWithZero (
     bool &lessOrEqual, uint32_t instruction) const {
   std::list <OperationGroup::ConstraintPtr> list;
   edu::sharif::twinner::trace::Expression *dstexp = exp[0]->clone ();
-  dstexp->arithmeticShiftToRight (exp[1]);
+  dstexp->shiftToRight (exp[1]);
   list.push_back (OperationGroup::Constraint::instantiateLessOrEqualConstraint
                   (lessOrEqual, dstexp, instruction));
   delete dstexp;
@@ -113,24 +112,23 @@ ShiftArithmeticRightOperationGroup::operationResultIsLessOrEqualWithZero (
 }
 
 std::list <OperationGroup::ConstraintPtr>
-ShiftArithmeticRightOperationGroup::operationResultIsLessThanZero (bool &less,
+ShiftRightOperationGroup::operationResultIsLessThanZero (bool &less,
     uint32_t instruction) const {
   std::list <OperationGroup::ConstraintPtr> list;
   edu::sharif::twinner::trace::Expression *dstexp = exp[0]->clone ();
-  dstexp->arithmeticShiftToRight (exp[1]);
+  dstexp->shiftToRight (exp[1]);
   list.push_back (OperationGroup::Constraint::instantiateLessConstraint
                   (less, dstexp, instruction));
   delete dstexp;
   return list;
 }
 
-OperationGroup::ExpressionPtr ShiftArithmeticRightOperationGroup::getOperationResult () const {
+OperationGroup::ExpressionPtr ShiftRightOperationGroup::getOperationResult () const {
   edu::sharif::twinner::trace::Expression *dstexp = exp[0]->clone ();
-  dstexp->arithmeticShiftToRight (exp[1]);
+  dstexp->shiftToRight (exp[1]);
   return dstexp;
 }
 
-}
 }
 }
 }

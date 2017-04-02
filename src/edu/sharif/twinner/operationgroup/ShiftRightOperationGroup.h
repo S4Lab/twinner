@@ -10,20 +10,20 @@
  * This file is part of Twinner project.
  */
 
-#ifndef BITWISE_AND_OPERATION_GROUP_H
-#define BITWISE_AND_OPERATION_GROUP_H
+#ifndef SHIFT_RIGHT_OPERATION_GROUP_H
+#define SHIFT_RIGHT_OPERATION_GROUP_H
 
 #include "OperationGroup.h"
 
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
 namespace operationgroup {
 
-class BitwiseAndOperationGroup : public NaryOperationGroup<1> {
+class ShiftRightOperationGroup : public NaryOperationGroup<2> {
 public:
-  BitwiseAndOperationGroup (ConstExpressionPtr mainExp);
+  ShiftRightOperationGroup (ConstExpressionPtr mainExp,
+      ConstExpressionPtr auxExp);
 
   virtual ExpressionPtr getCarryExpression () const;
 
@@ -42,16 +42,14 @@ public:
 
   virtual std::list <ConstraintPtr> operationResultIsLessOrEqualWithZero (
       bool &lessOrEqual, uint32_t instruction) const;
-  virtual std::list <ConstraintPtr> operationResultIsLessThanZero (bool &lessOrEqual,
+  virtual std::list <ConstraintPtr> operationResultIsLessThanZero (bool &less,
       uint32_t instruction) const;
   virtual ExpressionPtr getOperationResult () const;
 };
 
-
-}
 }
 }
 }
 }
 
-#endif /* BitwiseAndOperationGroup.h */
+#endif /* ShiftRightOperationGroup.h */

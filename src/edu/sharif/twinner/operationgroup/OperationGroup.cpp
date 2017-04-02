@@ -15,7 +15,6 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
 namespace operationgroup {
 
 OperationGroup::OperationGroup () {
@@ -24,7 +23,6 @@ OperationGroup::OperationGroup () {
 OperationGroup::~OperationGroup () {
 }
 
-}
 }
 }
 }

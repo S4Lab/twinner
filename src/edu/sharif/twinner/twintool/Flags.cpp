@@ -14,7 +14,7 @@
 
 #include "Flags.h"
 
-#include "edu/sharif/twinner/twintool/operationgroup/OperationGroup.h"
+#include "edu/sharif/twinner/operationgroup/OperationGroup.h"
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
@@ -65,7 +65,7 @@ edu::sharif::twinner::trace::Expression *Flags::getCarryFlag () const {
 }
 
 void Flags::setFlags (
-    const edu::sharif::twinner::twintool::operationgroup::OperationGroup *operation) {
+    const edu::sharif::twinner::operationgroup::OperationGroup *operation) {
   delete op;
   op = operation;
   of = sf = zf = pf = cf = DEFAULT_FSTATE;

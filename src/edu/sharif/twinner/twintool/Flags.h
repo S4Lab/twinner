@@ -24,11 +24,11 @@ namespace trace {
 class Expression;
 class Constraint;
 }
-namespace twintool {
 namespace operationgroup {
 
 class OperationGroup;
 }
+namespace twintool {
 
 class Flags {
 public:
@@ -42,7 +42,7 @@ public:
   };
 
 private:
-  const edu::sharif::twinner::twintool::operationgroup::OperationGroup *op;
+  const edu::sharif::twinner::operationgroup::OperationGroup *op;
 
   FlagState of; // overflow flag
   FlagState df; // direction flag
@@ -82,7 +82,7 @@ public:
    * @param operation The operation group which must be performed to set flags.
    */
   void setFlags (
-      const edu::sharif::twinner::twintool::operationgroup::OperationGroup *operation);
+      const edu::sharif::twinner::operationgroup::OperationGroup *operation);
 
   /**
    * Fills the output parameter flags with the EFLAGS/RFLAGS register content

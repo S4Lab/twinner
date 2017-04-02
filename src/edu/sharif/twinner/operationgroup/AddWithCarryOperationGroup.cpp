@@ -10,7 +10,7 @@
  * This file is part of Twinner project.
  */
 
-#include "SubtractOperationGroup.h"
+#include "AddWithCarryOperationGroup.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
@@ -20,25 +20,25 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
 namespace operationgroup {
 
-SubtractOperationGroup::SubtractOperationGroup (ConstExpressionPtr mainExp,
-    ConstExpressionPtr auxExp) :
-    NaryOperationGroup (mainExp, auxExp) {
+AddWithCarryOperationGroup::AddWithCarryOperationGroup (ConstExpressionPtr mainExp,
+    ConstExpressionPtr auxExp, ConstExpressionPtr carryExp) :
+    NaryOperationGroup (mainExp, auxExp, carryExp) {
 }
 
-OperationGroup::ExpressionPtr SubtractOperationGroup::getCarryExpression () const {
+OperationGroup::ExpressionPtr AddWithCarryOperationGroup::getCarryExpression () const {
   const int size = exp[0]->getLastConcreteValue ().getSize ();
   if (size > 64) {
     edu::sharif::twinner::util::Logger::error ()
-        << "SubtractOperationGroup::getCarryExpression ()"
+        << "AddWithCarryOperationGroup::getCarryExpression ()"
         " [size=" << std::dec << size << "]:"
         " Too large bit-length for expression\n";
     abort ();
   }
   OperationGroup::ExpressionPtr doublePrecision = exp[0]->clone (size * 2);
-  doublePrecision->minus (exp[1]);
+  doublePrecision->add (exp[1]);
+  doublePrecision->add (exp[2]);
   doublePrecision->shiftToRight (size);
   OperationGroup::ExpressionPtr truncexp = doublePrecision->clone (size);
   delete doublePrecision;
@@ -47,65 +47,85 @@ OperationGroup::ExpressionPtr SubtractOperationGroup::getCarryExpression () cons
 }
 
 std::list <OperationGroup::ConstraintPtr>
-SubtractOperationGroup::instantiateConstraintForOverflowCase (
+AddWithCarryOperationGroup::instantiateConstraintForOverflowCase (
     bool &overflow, uint32_t instruction) const {
   edu::sharif::twinner::util::Logger::error ()
-      << "SubtractOperationGroup::instantiateConstraintForOverflowCase"
+      << "AddWithCarryOperationGroup::instantiateConstraintForOverflowCase"
       " (...): Not yet implemented\n";
   abort ();
 }
 
 std::list <OperationGroup::ConstraintPtr>
-SubtractOperationGroup::instantiateConstraintForZeroCase (bool &zero,
+AddWithCarryOperationGroup::instantiateConstraintForZeroCase (bool &zero,
     uint32_t instruction) const {
   std::list <OperationGroup::ConstraintPtr> list;
+  OperationGroup::ExpressionPtr negativeOfRightExp = exp[1]->twosComplement ();
+  negativeOfRightExp->minus (exp[2]);
   list.push_back (OperationGroup::Constraint::instantiateEqualConstraint
-                  (zero, exp[0], exp[1], instruction));
+                  (zero, exp[0], negativeOfRightExp, instruction));
+  delete negativeOfRightExp;
   return list;
 }
 
 std::list <OperationGroup::ConstraintPtr>
-SubtractOperationGroup::instantiateConstraintForLessCase (bool &less,
+AddWithCarryOperationGroup::instantiateConstraintForLessCase (bool &less,
     uint32_t instruction) const {
   std::list <OperationGroup::ConstraintPtr> list;
+  OperationGroup::ExpressionPtr negativeOfRightExp = exp[1]->twosComplement ();
+  negativeOfRightExp->minus (exp[2]);
   list.push_back (OperationGroup::Constraint::instantiateLessConstraint
-                  (less, exp[0], exp[1], instruction));
+                  (less, exp[0], negativeOfRightExp, instruction));
+  delete negativeOfRightExp;
   return list;
 }
 
 std::list <OperationGroup::ConstraintPtr>
-SubtractOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
+AddWithCarryOperationGroup::instantiateConstraintForLessOrEqualCase (bool &lessOrEqual,
     uint32_t instruction) const {
   std::list <OperationGroup::ConstraintPtr> list;
+  OperationGroup::ExpressionPtr negativeOfRightExp = exp[1]->twosComplement ();
+  negativeOfRightExp->minus (exp[2]);
   list.push_back (OperationGroup::Constraint::instantiateLessOrEqualConstraint
-                  (lessOrEqual, exp[0], exp[1], instruction));
+                  (lessOrEqual, exp[0], negativeOfRightExp, instruction));
+  delete negativeOfRightExp;
   return list;
 }
 
 std::list <OperationGroup::ConstraintPtr>
-SubtractOperationGroup::instantiateConstraintForBelowCase (bool &below,
+AddWithCarryOperationGroup::instantiateConstraintForBelowCase (bool &below,
+    uint32_t instruction) const {
+  std::list <OperationGroup::ConstraintPtr> list =
+      instantiateConstraintForBelowOrEqualCase (below, instruction);
+  if (below) {
+    bool zero;
+    std::list <OperationGroup::ConstraintPtr> l2 =
+        instantiateConstraintForZeroCase (zero, instruction);
+    list.insert (list.end (), l2.begin (), l2.end ());
+    below = below && !zero;
+  }
+  return list;
+}
+
+std::list <OperationGroup::ConstraintPtr>
+AddWithCarryOperationGroup::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
     uint32_t instruction) const {
   std::list <OperationGroup::ConstraintPtr> list;
+  OperationGroup::ExpressionPtr negativeOfRightExp = exp[1]->twosComplement ();
+  negativeOfRightExp->minus (exp[2]);
   list.push_back (OperationGroup::Constraint::instantiateBelowConstraint
-                  (below, exp[0], exp[1], instruction));
+                  (belowOrEqual, exp[0], negativeOfRightExp, instruction));
+  delete negativeOfRightExp;
+  belowOrEqual = !belowOrEqual;
   return list;
 }
 
 std::list <OperationGroup::ConstraintPtr>
-SubtractOperationGroup::instantiateConstraintForBelowOrEqualCase (bool &belowOrEqual,
-    uint32_t instruction) const {
-  std::list <OperationGroup::ConstraintPtr> list;
-  list.push_back (OperationGroup::Constraint::instantiateBelowOrEqualConstraint
-                  (belowOrEqual, exp[0], exp[1], instruction));
-  return list;
-}
-
-std::list <OperationGroup::ConstraintPtr>
-SubtractOperationGroup::operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
+AddWithCarryOperationGroup::operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
     uint32_t instruction) const {
   std::list <OperationGroup::ConstraintPtr> list;
   OperationGroup::ExpressionPtr mainExp = exp[0]->clone ();
-  mainExp->minus (exp[1]);
+  mainExp->add (exp[1]);
+  mainExp->add (exp[2]);
   list.push_back (OperationGroup::Constraint::instantiateLessOrEqualConstraint
                   (lessOrEqual, mainExp, instruction));
   delete mainExp;
@@ -113,24 +133,25 @@ SubtractOperationGroup::operationResultIsLessOrEqualWithZero (bool &lessOrEqual,
 }
 
 std::list <OperationGroup::ConstraintPtr>
-SubtractOperationGroup::operationResultIsLessThanZero (bool &lessOrEqual,
+AddWithCarryOperationGroup::operationResultIsLessThanZero (bool &less,
     uint32_t instruction) const {
   std::list <OperationGroup::ConstraintPtr> list;
   OperationGroup::ExpressionPtr mainExp = exp[0]->clone ();
-  mainExp->minus (exp[1]);
+  mainExp->add (exp[1]);
+  mainExp->add (exp[2]);
   list.push_back (OperationGroup::Constraint::instantiateLessConstraint
-                  (lessOrEqual, mainExp, instruction));
+                  (less, mainExp, instruction));
   delete mainExp;
   return list;
 }
 
-OperationGroup::ExpressionPtr SubtractOperationGroup::getOperationResult () const {
+OperationGroup::ExpressionPtr AddWithCarryOperationGroup::getOperationResult () const {
   OperationGroup::ExpressionPtr mainExp = exp[0]->clone ();
-  mainExp->minus (exp[1]);
+  mainExp->add (exp[1]);
+  mainExp->add (exp[2]);
   return mainExp;
 }
 
-}
 }
 }
 }
