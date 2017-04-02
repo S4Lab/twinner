@@ -27,8 +27,6 @@ class Constraint;
 namespace operationgroup {
 
 class OperationGroup;
-}
-namespace twintool {
 
 class Flags {
 public:

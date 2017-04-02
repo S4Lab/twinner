@@ -15,7 +15,7 @@
 
 #include "edu/sharif/twinner/pin-wrapper.h"
 
-#include "Flags.h"
+#include "edu/sharif/twinner/operationgroup/Flags.h"
 
 #include <sstream>
 
@@ -89,7 +89,7 @@ private:
   std::stringstream bufferForTraceLazyLoad;
   edu::sharif::twinner::trace::Trace *lazyTrace;
   edu::sharif::twinner::util::MemoryManager *memoryManager;
-  Flags eflags;
+  edu::sharif::twinner::operationgroup::Flags eflags;
 
   REG trackedReg;
   int operandSize;

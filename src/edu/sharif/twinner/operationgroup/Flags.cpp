@@ -25,7 +25,7 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
-namespace twintool {
+namespace operationgroup {
 
 Flags::Flags () :
     op (0),
