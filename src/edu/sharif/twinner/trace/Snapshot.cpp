@@ -621,6 +621,9 @@ void Snapshot::addTemporaryExpressions (const Snapshot *sna,
     REG fullReg, int size) {
   std::map < REG, Expression * >::const_iterator it =
       sna->registerToExpression.find (fullReg);
+  if (it == sna->registerToExpression.end ()) {
+    return;
+  }
   const Expression *exp = it->second;
   Expression *tmpExp = new ExpressionImp
       (fullReg, exp->getLastConcreteValue (), segmentIndex, snapshotIndex);
