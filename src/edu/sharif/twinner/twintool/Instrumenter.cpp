@@ -239,6 +239,7 @@ void Instrumenter::initialize () {
               XED_ICLASS_MOVQ);
   INITIALIZE (MOV_INS_WITH_LARGE_REG_INS_MODELS,
               XED_ICLASS_MOVSD_XMM,
+              XED_ICLASS_MOVSS,
               XED_ICLASS_MOVAPS, XED_ICLASS_MOVDQU, XED_ICLASS_MOVDQA);
   managedInstructions.insert
       (make_pair (XED_ICLASS_LDDQU, DST_LARGE_REG_SRC_MEM));
