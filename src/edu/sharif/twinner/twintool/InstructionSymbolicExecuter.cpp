@@ -26,6 +26,7 @@
 #include "edu/sharif/twinner/operationgroup/BitwiseAndOperationGroup.h"
 #include "edu/sharif/twinner/operationgroup/ShiftArithmeticRightOperationGroup.h"
 #include "edu/sharif/twinner/operationgroup/ShiftRightOperationGroup.h"
+#include "edu/sharif/twinner/operationgroup/ShiftLeftOperationGroup.h"
 
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
@@ -1473,7 +1474,7 @@ void InstructionSymbolicExecuter::shldAnalysisRoutine (
   delete dstexpOrig;
   delete shiftexp;
   eflags.setFlags (new edu::sharif::twinner::operationgroup::DummyOperationGroup
-                   ("ShiftLeftOperationGroup"));
+                   ("ShiftDoubleLeftOperationGroup"));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -2396,7 +2397,7 @@ void InstructionSymbolicExecuter::pslldqAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious ()
       << "pslldqAnalysisRoutine(...)\n"
       << "\tgetting src exp...";
-  const edu::sharif::twinner::trace::Expression *srcexp =
+  edu::sharif::twinner::trace::Expression *srcexp =
       getExpression (src, trace);
   edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
   const edu::sharif::twinner::trace::Expression *dstexpOrig =
@@ -2408,17 +2409,16 @@ void InstructionSymbolicExecuter::pslldqAnalysisRoutine (
         << "\tthe PSLLDQ src is not an immediate value!";
     abort ();
   }
+  srcexp->multiply (8); // convert byte to bits
   edu::sharif::twinner::trace::cv::ConcreteValue *cv =
       srcexp->getLastConcreteValue ().clone ();
-  (*cv) *= 8; // convert byte to bits
   dstexp->shiftToLeft (cv);
   // truncate bits which are shifted left, outside of dst boundaries
   dst.truncate (dstexp);
   setExpression (dst, trace, dstexp);
-  delete dstexpOrig;
-  delete srcexp;
-  eflags.setFlags (new edu::sharif::twinner::operationgroup::DummyOperationGroup
-                   ("ShiftLeftOperationGroup"));
+  eflags.setFlags
+      (new edu::sharif::twinner::operationgroup::ShiftLeftOperationGroup
+       (dstexpOrig, srcexp));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
@@ -2448,10 +2448,9 @@ void InstructionSymbolicExecuter::shlAnalysisRoutine (
   // truncate bits which are shifted left, outside of dst boundaries
   dst.truncate (dstexp);
   setExpression (dst, trace, dstexp);
-  delete dstexpOrig;
-  delete srcexp;
-  eflags.setFlags (new edu::sharif::twinner::operationgroup::DummyOperationGroup
-                   ("ShiftLeftOperationGroup"));
+  eflags.setFlags
+      (new edu::sharif::twinner::operationgroup::ShiftLeftOperationGroup
+       (dstexpOrig, srcexp));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
