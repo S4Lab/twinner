@@ -1734,14 +1734,14 @@ VOID afterSafeFunc (VOID *v, CONTEXT *context) {
 }
 
 VOID startAnalysis (VOID *v) {
-  edu::sharif::twinner::util::Logger::loquacious ()
+  edu::sharif::twinner::util::Logger::info ()
       << "********** startAnalysis(...) **********\n";
   Instrumenter *im = (Instrumenter *) v;
   im->enable ();
 }
 
 VOID reportMainArgs (VOID *v, ADDRINT *arg0, ADDRINT *arg1) {
-  edu::sharif::twinner::util::Logger::loquacious ()
+  edu::sharif::twinner::util::Logger::info ()
       << "reportMainArgs (...) function is called\n";
   Instrumenter *im = (Instrumenter *) v;
   int argc = *reinterpret_cast<int *> (arg0);
@@ -1771,14 +1771,14 @@ VOID applicationIsAboutToExit (INT32 code, VOID * v) {
     return;
   }
   called = true;
-  edu::sharif::twinner::util::Logger::loquacious ()
+  edu::sharif::twinner::util::Logger::info ()
       << "********** applicationIsAboutToExit(...) **********\n";
   Instrumenter *im = (Instrumenter *) v;
   im->aboutToExit (code);
 }
 
 VOID terminateAnalysis (VOID *imptr) {
-  edu::sharif::twinner::util::Logger::loquacious ()
+  edu::sharif::twinner::util::Logger::info ()
       << "********** terminateAnalysis(...) **********\n";
   Instrumenter *im = (Instrumenter *) imptr;
   im->disable ();
