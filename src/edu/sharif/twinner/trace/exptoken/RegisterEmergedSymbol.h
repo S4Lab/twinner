@@ -54,10 +54,11 @@ public:
   virtual bool operator== (const ExpressionToken &token) const;
   virtual bool operator< (const Symbol &symbol) const;
 
+  static bool is128BitsRegister (REG reg);
+
 private:
   const char *getRegisterName () const;
   static REG getRegisterFromName (const std::string &name);
-  static bool is128BitsRegister (REG reg);
 
 public:
 

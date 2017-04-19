@@ -87,6 +87,9 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
       << &changedExp << ")\n";
   const int regIndex = Reg::getRegisterIndex (REG_FullRegName (reg));
   if (regIndex == -1) {
+    if (Reg::is128BitsRegister (reg)) { // there is no subregister at all
+      return;
+    }
     edu::sharif::twinner::util::Logger::warning ()
         << "RegisterResidentExpressionValueProxy::valueIsChanged (...):"
         " Unhandled register: " << REG_StringShort (reg) << '\n';
