@@ -2122,6 +2122,25 @@ void InstructionSymbolicExecuter::jpAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::jnpAnalysisRoutine (bool branchTaken) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious () << "jnpAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  bool parity;
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
+      eflags.instantiateConstraintForParityCase (parity, disassembledInstruction);
+  if (parity == branchTaken) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "InstructionSymbolicExecuter::jnpAnalysisRoutine"
+        " (branchTaken=" << branchTaken << "):"
+        "JNP branching and last known EFLAGS state do not match\n";
+    abort ();
+  }
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraints (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::jsAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jsAnalysisRoutine(...)\n"
@@ -4090,6 +4109,8 @@ InstructionSymbolicExecuter::convertOpcodeToConditionalBranchAnalysisRoutine (
     return &InstructionSymbolicExecuter::joAnalysisRoutine;
   case XED_ICLASS_JP:
     return &InstructionSymbolicExecuter::jpAnalysisRoutine;
+  case XED_ICLASS_JNP:
+    return &InstructionSymbolicExecuter::jnpAnalysisRoutine;
   case XED_ICLASS_JS:
     return &InstructionSymbolicExecuter::jsAnalysisRoutine;
   case XED_ICLASS_JNS:

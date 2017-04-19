@@ -597,9 +597,14 @@ private:
   void joAnalysisRoutine (bool branchTaken);
 
   /**
-   * JP jumps if PF=1 which means that corresponding expression was < 0
+   * JP jumps if PF=1 (even parity)
    */
   void jpAnalysisRoutine (bool branchTaken);
+
+  /**
+   * JNP jumps if PF=0 (odd parity)
+   */
+  void jnpAnalysisRoutine (bool branchTaken);
 
   /**
    * JS jumps if SF=1 which means that corresponding expression was < 0
