@@ -350,14 +350,13 @@ std::set < std::pair < ADDRINT, int > > TwinTool::readSetOfAddressesFromBinarySt
 
 template < typename T >
 INT32 TwinTool::printError (const T &msg) const {
-  edu::sharif::twinner::util::Logger::error () << "TwinTool: " << msg << '\n';
+  cerr << "TwinTool: " << msg << '\n';
   return -2;
 }
 
 INT32 TwinTool::printUsage () const {
-  edu::sharif::twinner::util::Logger::error ()
-      << "This tool is not intended to be ran manually. Run it using \"Twinner\" application!\n\n"
-
+  cerr << "This tool is not intended to be ran manually."
+      " Run it using \"Twinner\" application!\n\n"
       << KNOB_BASE::StringKnobSummary () << '\n';
 
   return -1;
