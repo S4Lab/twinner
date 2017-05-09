@@ -3538,6 +3538,27 @@ void InstructionSymbolicExecuter::setoAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::setpAnalysisRoutine (
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious () << "setpAnalysisRoutine(...)\n"
+      << "\tinstantiating constraint...";
+  bool parity;
+  std::list <edu::sharif::twinner::trace::Constraint *> cc =
+      eflags.instantiateConstraintForParityCase (parity, disassembledInstruction);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
+  trace->addPathConstraints (cc);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting dst exp...";
+  edu::sharif::twinner::trace::Expression *dstexp;
+  if (parity) {
+    dstexp = new edu::sharif::twinner::trace::ExpressionImp (UINT64 (1));
+  } else { // shouldSetToZero
+    dstexp = new edu::sharif::twinner::trace::ExpressionImp (UINT64 (0));
+  }
+  setExpression (opr, trace, dstexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::setnpAnalysisRoutine (
     const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
@@ -4185,6 +4206,8 @@ InstructionSymbolicExecuter::convertOpcodeToSingleOperandAnalysisRoutine (
     return &InstructionSymbolicExecuter::negAnalysisRoutine;
   case XED_ICLASS_SETO:
     return &InstructionSymbolicExecuter::setoAnalysisRoutine;
+  case XED_ICLASS_SETP:
+    return &InstructionSymbolicExecuter::setpAnalysisRoutine;
   case XED_ICLASS_SETNP:
     return &InstructionSymbolicExecuter::setnpAnalysisRoutine;
   case XED_ICLASS_SETNS:

@@ -956,6 +956,12 @@ private:
       const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
+   * SETP sets opr to 1 iff PF=1 (and sets it to 0 otherwise).
+   */
+  void setpAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
+
+  /**
    * SETNP sets opr to 1 iff PF=0 (and sets it to 0 otherwise).
    */
   void setnpAnalysisRoutine (
