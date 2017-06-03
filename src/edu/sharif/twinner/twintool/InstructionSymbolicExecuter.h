@@ -317,20 +317,6 @@ private:
       edu::sharif::twinner::trace::syscall::Syscall const &syscall);
 
   /**
-   * CMOVBE (Conditional Move) moves src to dst iff (CF=1 || ZF=1).
-   */
-  void cmovbeAnalysisRoutine (
-      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
-      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
-
-  /**
-   * CMOVNBE (Conditional Move) moves src to dst iff (CF=0 && ZF=0).
-   */
-  void cmovnbeAnalysisRoutine (
-      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
-      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
-
-  /**
    * accumulator := RAX | EAX | AX | AL
    * if (dst == accumulator)
    *  dst <- src

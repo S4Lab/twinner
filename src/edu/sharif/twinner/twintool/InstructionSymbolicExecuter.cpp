@@ -1296,48 +1296,6 @@ void InstructionSymbolicExecuter::syscallAnalysisRoutine (
   }
 }
 
-void InstructionSymbolicExecuter::cmovbeAnalysisRoutine (
-    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
-    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
-  edu::sharif::twinner::trace::Trace *trace = getTrace ();
-  edu::sharif::twinner::util::Logger::loquacious () << "cmovbeAnalysisRoutine(...)\n"
-      << "\tinstantiating constraint...";
-  bool belowOrEqual;
-  std::list <edu::sharif::twinner::trace::Constraint *> cc =
-      eflags.instantiateConstraintForBelowOrEqualCase
-      (belowOrEqual, disassembledInstruction);
-  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraints (cc);
-  if (belowOrEqual) {
-    edu::sharif::twinner::util::Logger::loquacious () << "\texecuting the actual move...";
-    movAnalysisRoutine (dst, src);
-  } else {
-    edu::sharif::twinner::util::Logger::loquacious () << "\tignoring the move...";
-  }
-  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
-}
-
-void InstructionSymbolicExecuter::cmovnbeAnalysisRoutine (
-    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
-    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
-  edu::sharif::twinner::trace::Trace *trace = getTrace ();
-  edu::sharif::twinner::util::Logger::loquacious () << "cmovnbeAnalysisRoutine(...)\n"
-      << "\tinstantiating constraint...";
-  bool belowOrEqual;
-  std::list <edu::sharif::twinner::trace::Constraint *> cc =
-      eflags.instantiateConstraintForBelowOrEqualCase
-      (belowOrEqual, disassembledInstruction);
-  edu::sharif::twinner::util::Logger::loquacious () << "\tadding constraint...";
-  trace->addPathConstraints (cc);
-  if (!belowOrEqual) {
-    edu::sharif::twinner::util::Logger::loquacious () << "\texecuting the actual move...";
-    movAnalysisRoutine (dst, src);
-  } else {
-    edu::sharif::twinner::util::Logger::loquacious () << "\tignoring the move...";
-  }
-  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
-}
-
 void InstructionSymbolicExecuter::cmpxchgAnalysisRoutine (
     const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
     const edu::sharif::twinner::proxy::ExpressionValueProxy &src,
@@ -3915,6 +3873,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_MOVDQA:
   case XED_ICLASS_MOVSD_XMM:
   case XED_ICLASS_MOVSS:
+  case XED_ICLASS_CMOVBE:
+  case XED_ICLASS_CMOVNBE:
     return &InstructionSymbolicExecuter::movAnalysisRoutine;
   case XED_ICLASS_MOVLPD:
     return &InstructionSymbolicExecuter::movlpdAnalysisRoutine;
@@ -3928,10 +3888,6 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::movsxAnalysisRoutine;
   case XED_ICLASS_CDQ:
     return &InstructionSymbolicExecuter::cdqAnalysisRoutine;
-  case XED_ICLASS_CMOVBE:
-    return &InstructionSymbolicExecuter::cmovbeAnalysisRoutine;
-  case XED_ICLASS_CMOVNBE:
-    return &InstructionSymbolicExecuter::cmovnbeAnalysisRoutine;
   case XED_ICLASS_ADD:
     return &InstructionSymbolicExecuter::addAnalysisRoutine;
   case XED_ICLASS_ADC:
