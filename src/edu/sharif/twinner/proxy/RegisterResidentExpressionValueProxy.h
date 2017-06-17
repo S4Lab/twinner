@@ -65,7 +65,7 @@ public:
 private:
   void putExpressionInLeastSignificantBitsOfRegister (
       edu::sharif::twinner::trace::Trace *trace, int rsize, REG r, int bits,
-      const edu::sharif::twinner::trace::Expression &exp) const;
+      const edu::sharif::twinner::trace::Expression *exp) const;
 };
 
 }

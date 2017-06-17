@@ -71,11 +71,11 @@ RegisterResidentExpressionValueProxy::setExpressionWithoutChangeNotification (
 
 void RegisterResidentExpressionValueProxy::putExpressionInLeastSignificantBitsOfRegister (
     edu::sharif::twinner::trace::Trace *trace, int rsize, REG r, int bits,
-    const edu::sharif::twinner::trace::Expression &exp) const {
+    const edu::sharif::twinner::trace::Expression *exp) const {
   edu::sharif::twinner::trace::Expression *dst =
       trace->getSymbolicExpressionByRegister (rsize, r);
   dst->makeLeastSignificantBitsZero (bits);
-  dst->bitwiseOr (&exp);
+  dst->bitwiseOr (exp);
 }
 
 void RegisterResidentExpressionValueProxy::valueIsChanged (
@@ -107,12 +107,12 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
 #endif
   case Reg::REG_8_BITS_UPPER_HALF_TYPE:
   {
+    temp = changedExp.clone (16);
+    temp->shiftToLeft (8);
     edu::sharif::twinner::trace::Expression *reg16 =
         trace->getSymbolicExpressionByRegister
         (16, Reg::getOverlappingRegisterByIndex (regIndex, 2));
     reg16->truncate (8);
-    temp = changedExp.clone (16);
-    temp->shiftToLeft (8);
     reg16->bitwiseOr (temp);
     delete temp;
     constReg16 = reg16;
@@ -149,22 +149,26 @@ void RegisterResidentExpressionValueProxy::valueIsChanged (
       break;
     }
   case Reg::REG_8_BITS_UPPER_HALF_TYPE:
+    temp = constReg16->clone (16);
 #ifdef TARGET_IA32E
     putExpressionInLeastSignificantBitsOfRegister
-        (trace, 64, Reg::getOverlappingRegisterByIndex (regIndex, 0), 16, *constReg16);
+        (trace, 64, Reg::getOverlappingRegisterByIndex (regIndex, 0), 16, temp);
 #endif
     putExpressionInLeastSignificantBitsOfRegister
-        (trace, 32, Reg::getOverlappingRegisterByIndex (regIndex, 1), 16, *constReg16);
+        (trace, 32, Reg::getOverlappingRegisterByIndex (regIndex, 1), 16, temp);
+    delete temp;
     break;
   case Reg::REG_8_BITS_LOWER_HALF_TYPE:
+    temp = changedExp.clone (8);
 #ifdef TARGET_IA32E
     putExpressionInLeastSignificantBitsOfRegister
-        (trace, 64, Reg::getOverlappingRegisterByIndex (regIndex, 0), 8, changedExp);
+        (trace, 64, Reg::getOverlappingRegisterByIndex (regIndex, 0), 8, temp);
 #endif
     putExpressionInLeastSignificantBitsOfRegister
-        (trace, 32, Reg::getOverlappingRegisterByIndex (regIndex, 1), 8, changedExp);
+        (trace, 32, Reg::getOverlappingRegisterByIndex (regIndex, 1), 8, temp);
     putExpressionInLeastSignificantBitsOfRegister
-        (trace, 16, Reg::getOverlappingRegisterByIndex (regIndex, 2), 8, changedExp);
+        (trace, 16, Reg::getOverlappingRegisterByIndex (regIndex, 2), 8, temp);
+    delete temp;
     break;
   }
 }
