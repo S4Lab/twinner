@@ -838,37 +838,6 @@ void InstructionSymbolicExecuter::analysisRoutineTwoDstRegOneSrcMem (
   trace->printRegistersValues (logger);
 }
 
-void InstructionSymbolicExecuter::analysisRoutineTwoRegOneMem (
-    DoubleDestinationsAnalysisRoutine routine,
-    REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
-    REG dstRightReg, const ConcreteValue &dstRightRegVal,
-    ADDRINT srcMemoryEa, UINT32 memReadBytes,
-    UINT32 insAssembly) {
-  if (disabled) {
-    return;
-  }
-  disassembledInstruction = insAssembly;
-  if (measureMode) {
-    numberOfExecutedInstructions++;
-    return;
-  }
-  edu::sharif::twinner::trace::Trace *trace = getTrace ();
-  const char *insAssemblyStr =
-      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
-  edu::sharif::twinner::util::Logger logger =
-      edu::sharif::twinner::util::Logger::loquacious ();
-  logger << "analysisRoutineTwoRegOneMem(INS: "
-      << insAssemblyStr << "): left dst reg: " << REG_StringShort (dstLeftReg)
-      << ", right dst reg: " << REG_StringShort (dstRightReg)
-      << ", src mem addr: 0x" << srcMemoryEa << ", mem read bytes: 0x" << memReadBytes
-      << '\n';
-  (this->*routine) (edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstLeftReg, dstLeftRegVal),
-                    edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy (dstRightReg, dstRightRegVal),
-                    edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy (srcMemoryEa, memReadBytes));
-  logger << "Registers:\n";
-  trace->printRegistersValues (logger);
-}
-
 void InstructionSymbolicExecuter::analysisRoutineOneMemTwoReg (
     DoubleDestinationsAnalysisRoutine routine,
     ADDRINT dstMemoryEa,
@@ -4625,7 +4594,7 @@ VOID analysisRoutineStrOpRegMem (VOID *iseptr, UINT32 opcode,
     UINT32 srcReg, ADDRINT srcRegVal,
     UINT32 insAssembly) {
   InstructionSymbolicExecuter *ise = (InstructionSymbolicExecuter *) iseptr;
-  ise->analysisRoutineTwoRegOneMem
+  ise->analysisRoutineTwoDstRegOneSrcMem
       (ise->convertOpcodeToDoubleDestinationsAnalysisRoutine ((OPCODE) opcode),
        (REG) dstReg,
        edu::sharif::twinner::trace::cv::ConcreteValue64Bits (dstRegVal),

@@ -247,11 +247,6 @@ public:
       REG dstRightReg, const ConcreteValue &dstRightRegVal,
       ADDRINT srcMemoryEa, UINT32 memReadBytes,
       UINT32 insAssembly);
-  void analysisRoutineTwoRegOneMem (DoubleDestinationsAnalysisRoutine routine,
-      REG dstLeftReg, const ConcreteValue &dstLeftRegVal,
-      REG dstRightReg, const ConcreteValue &dstRightRegVal,
-      ADDRINT srcMemoryEa, UINT32 memReadBytes,
-      UINT32 insAssembly);
   void analysisRoutineOneMemTwoReg (DoubleDestinationsAnalysisRoutine routine,
       ADDRINT dstMemoryEa,
       REG dstReg, const ConcreteValue &dstRegVal,
