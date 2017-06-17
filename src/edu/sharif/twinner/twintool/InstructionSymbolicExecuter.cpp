@@ -562,19 +562,6 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImd (AnalysisRoutine r
   if (insAssemblyStr) {
     logger << "analysisRoutineDstMemSrcImd(INS: "
         << insAssemblyStr << ")";
-  } else {
-    // FIXME: This else-part is unreachable code
-    disassembledInstruction = 0;
-    logger << "analysisRoutineDstMemSrcImd()";
-  }
-  const UINT32 maxReadSizeInBytes = srcImmediateValue.getSize () / 8;
-  if (memReadBytes > maxReadSizeInBytes) {
-    // FIXME: This then-part is unreachable code
-    edu::sharif::twinner::util::Logger::warning () << std::hex
-        << "memReadBytes was 0x" << memReadBytes << " which is larger than size of "
-        "srcImmediateValue (which is just 0x" << maxReadSizeInBytes << " bytes)"
-        "; lowering the memReadBytes to 0x" << maxReadSizeInBytes << " bytes.\n";
-    memReadBytes = maxReadSizeInBytes;
   }
   logger << std::hex << ": dst mem addr: 0x" << dstMemoryEa
       << ", src imd: 0x" << srcImmediateValue << '\n';
@@ -607,19 +594,6 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImdAuxReg (
   if (insAssemblyStr) {
     logger << "analysisRoutineDstMemSrcImdAuxReg(INS: "
         << insAssemblyStr << ")";
-  } else {
-    // FIXME: This else-part is unreachable code
-    disassembledInstruction = 0;
-    logger << "analysisRoutineDstMemSrcImdAuxReg()";
-  }
-  const UINT32 maxReadSizeInBytes = srcImmediateValue.getSize () / 8;
-  if (memReadBytes > maxReadSizeInBytes) {
-    // FIXME: This then-part is unreachable code
-    edu::sharif::twinner::util::Logger::warning () << std::hex
-        << "memReadBytes was 0x" << memReadBytes << " which is larger than size of "
-        "srcImmediateValue (which is just 0x" << maxReadSizeInBytes << " bytes)"
-        "; lowering the memReadBytes to 0x" << maxReadSizeInBytes << " bytes.\n";
-    memReadBytes = maxReadSizeInBytes;
   }
   logger << std::hex << ": dst mem addr: 0x" << dstMemoryEa
       << ", src imd: 0x" << srcImmediateValue
@@ -2448,29 +2422,8 @@ void InstructionSymbolicExecuter::sarAnalysisRoutine (
   const edu::sharif::twinner::trace::Expression *dstexpOrig =
       getExpression (dst, trace);
   edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
-  const int size = dst.getSize ();
   edu::sharif::twinner::util::Logger::loquacious () << "\tshifting operation...";
   dstexp->arithmeticShiftToRight (srcexp);
-  {//TODO: Remove following code when all sizes have their own concrete value imps.
-    const ConcreteValue &srcval = srcexp->getLastConcreteValue ();
-    const ConcreteValue &dstval = dstexp->getLastConcreteValue ();
-    ConcreteValue *tmp = dstval.clone ();
-    ConcreteValue *sizeval = srcval.twosComplement ();
-    (*sizeval) += size - 1;
-    (*tmp) >>= (*sizeval);
-    if ((*tmp) == 1) {
-      (*tmp) <<= srcval;
-      (*tmp) -= 1;
-      (*sizeval) += 1;
-      (*tmp) <<= (*sizeval);
-      delete sizeval;
-      (*tmp) |= dstval;
-      dstexp->setLastConcreteValue (tmp);
-    } else {
-      delete sizeval;
-      delete tmp;
-    }
-  }
   setExpression (dst, trace, dstexp);
   eflags.setFlags (new edu::sharif::twinner::operationgroup
                    ::ShiftArithmeticRightOperationGroup (dstexpOrig, srcexp));
