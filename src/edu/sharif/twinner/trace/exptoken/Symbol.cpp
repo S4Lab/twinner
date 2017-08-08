@@ -64,6 +64,11 @@ bool Symbol::isTemporary () const {
   return snapshotIndex != -1;
 }
 
+bool operator< (const SymbolRecord &first, const SymbolRecord &second) {
+  return first.type < second.type
+      || (first.type == second.type && first.address < second.address);
+}
+
 }
 }
 }

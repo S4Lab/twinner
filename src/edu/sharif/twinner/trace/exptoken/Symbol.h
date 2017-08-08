@@ -40,6 +40,8 @@ struct SymbolRecord {
   UINT64 concreteValueMsb;
 };
 
+bool operator< (const SymbolRecord &first, const SymbolRecord &second);
+
 /**
  * @abstract
  */
