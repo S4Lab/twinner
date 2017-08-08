@@ -294,7 +294,6 @@ void Instrumenter::registerInstrumentationRoutines () {
     if (!disabled) {
       PIN_InitSymbols ();
     }
-    IMG_AddInstrumentFunction ((IMAGECALLBACK) instrumentSafeFuncs, this);
   }
   //TODO: Consider instrumenting at higher granularity for more performance
   INS_AddInstrumentFunction (instrumentSingleInst, this);
@@ -303,26 +302,6 @@ void Instrumenter::registerInstrumentationRoutines () {
   PIN_AddSyscallExitFunction (syscallIsReturned, this);
 
   PIN_AddFiniFunction (applicationIsAboutToExit, this);
-}
-
-void Instrumenter::instrumentSafeFunctions (IMG img) {
-  for (std::vector<edu::sharif::twinner::trace::FunctionInfo>
-      ::const_iterator it = safeFunctionsInfo.begin ();
-      it != safeFunctionsInfo.end (); ++it) {
-    const std::string name = it->getName ();
-    RTN safeRoutine = RTN_FindByName (img, name.c_str ());
-    if (RTN_Valid (safeRoutine)) {
-      edu::sharif::twinner::util::Logger::debug ()
-          << "Instrumenter::instrumentSafeFunctions (img):"
-          " instrumenting ret from the ``" << name << "'' safe routine\n";
-      RTN_Open (safeRoutine);
-      RTN_InsertCall (safeRoutine, IPOINT_AFTER, (AFUNPTR) afterSafeFunc,
-                      IARG_PTR, this,
-                      IARG_CONTEXT,
-                      IARG_END);
-      RTN_Close (safeRoutine);
-    }
-  }
 }
 
 bool Instrumenter::instrumentSafeFunctions (INS ins, UINT32 insAssembly) const {
@@ -1716,22 +1695,12 @@ VOID imageIsLoaded (IMG img, VOID *v) {
   im->instrumentImage (img);
 }
 
-VOID instrumentSafeFuncs (IMG img, VOID *v) {
-  Instrumenter *im = (Instrumenter *) v;
-  im->instrumentSafeFunctions (img);
-}
-
 VOID beforeSafeFunc (VOID *v, ADDRINT retAddress, VOID *p, UINT32 insAssembly,
     const CONTEXT *context) {
   Instrumenter *im = (Instrumenter *) v;
   const edu::sharif::twinner::trace::FunctionInfo *fi =
       (const edu::sharif::twinner::trace::FunctionInfo *) p;
   im->beforeSafeFunction (retAddress, *fi, insAssembly, context);
-}
-
-VOID afterSafeFunc (VOID *v, CONTEXT *context) {
-  Instrumenter *im = (Instrumenter *) v;
-  im->afterSafeFunction (context);
 }
 
 VOID startAnalysis (VOID *v) {

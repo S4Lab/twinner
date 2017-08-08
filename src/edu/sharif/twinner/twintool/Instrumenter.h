@@ -212,7 +212,6 @@ public:
 
   void setMainArgsReportingFilePath (const std::string &marFilePath);
   void instrumentImage (IMG img);
-  void instrumentSafeFunctions (IMG img);
   bool instrumentSafeFunctions (INS ins, UINT32 insAssembly) const;
 
   bool instrumentSingleInstruction (INS ins);
@@ -267,10 +266,8 @@ private:
 VOID instrumentSingleInst (INS ins, VOID *v);
 VOID imageIsLoaded (IMG img, VOID *v);
 
-VOID instrumentSafeFuncs (IMG img, VOID *v);
 VOID beforeSafeFunc (VOID *v, ADDRINT retAddress, VOID *p, UINT32 insAssembly,
     const CONTEXT *context);
-VOID afterSafeFunc (VOID *v, CONTEXT *context);
 
 VOID startAnalysis (VOID *v);
 VOID reportMainArgs (VOID *v, ADDRINT *arg0, ADDRINT *arg1);
