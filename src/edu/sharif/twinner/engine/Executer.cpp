@@ -60,10 +60,10 @@ bool executeAndMeasure (std::string command, Measurement &m);
 inline void save_address (std::ofstream &out,
     const std::pair < ADDRINT, int > &address);
 inline void add_symbol_to_map (
-    std::map < int, std::list < edu::sharif::twinner::trace::exptoken::SymbolRecord > > &records,
+    std::map < int, std::set < edu::sharif::twinner::trace::exptoken::SymbolRecord > > &records,
     const edu::sharif::twinner::trace::exptoken::Symbol * const &symbol);
 inline void save_records_list (std::ofstream &out, const int &segmentIndex,
-    const std::list < edu::sharif::twinner::trace::exptoken::SymbolRecord > &recordsList);
+    const std::set < edu::sharif::twinner::trace::exptoken::SymbolRecord > &recordsList);
 inline void save_record (std::ofstream &out,
     const edu::sharif::twinner::trace::exptoken::SymbolRecord &record);
 
@@ -151,7 +151,7 @@ void save_address (std::ofstream &out, const std::pair < ADDRINT, int > &address
 
 void Executer::setSymbolsValues (
     const std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols) const {
-  std::map < int, std::list < Record > > records;
+  std::map < int, std::set < Record > > records;
   edu::sharif::twinner::util::foreach (symbols, &add_symbol_to_map, records);
 
   if (!saveSymbolRecordsToFile (NORMAL_MODE, records)) {
@@ -163,15 +163,15 @@ void Executer::setSymbolsValues (
 }
 
 void add_symbol_to_map (
-    std::map < int, std::list < edu::sharif::twinner::trace::exptoken::SymbolRecord > > &records,
+    std::map < int, std::set < edu::sharif::twinner::trace::exptoken::SymbolRecord > > &records,
     const edu::sharif::twinner::trace::exptoken::Symbol * const &symbol) {
   std::pair < int, edu::sharif::twinner::trace::exptoken::SymbolRecord > pair =
       symbol->toSymbolRecord ();
-  records[pair.first].push_back (pair.second);
+  records[pair.first].insert (pair.second);
 }
 
 bool Executer::saveSymbolRecordsToFile (ExecutionMode mode,
-    std::map < int, std::list < Record > > records) const {
+    std::map < int, std::set < Record > > records) const {
   std::ofstream out;
   out.open ((tmpfolder + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE).c_str (),
             ios_base::out | ios_base::trunc | ios_base::binary);
@@ -188,20 +188,20 @@ bool Executer::saveSymbolRecordsToFile (ExecutionMode mode,
 }
 
 void Executer::saveSymbolRecordsToBinaryStream (std::ofstream &out,
-    ExecutionMode mode, std::map < int, std::list < Record > > records) const {
+    ExecutionMode mode, std::map < int, std::set < Record > > records) const {
   out.write ("SYM", 3);
   out.write ((const char *) &mode, sizeof (ExecutionMode));
 
-  std::map < int, std::list < Record > >::size_type s = records.size ();
+  std::map < int, std::set < Record > >::size_type s = records.size ();
   out.write ((const char *) &s, sizeof (s));
 
   edu::sharif::twinner::util::foreach (records, &save_records_list, out);
 }
 
 void save_records_list (std::ofstream &out, const int &segmentIndex,
-    const std::list < edu::sharif::twinner::trace::exptoken::SymbolRecord > &recordsList) {
+    const std::set < edu::sharif::twinner::trace::exptoken::SymbolRecord > &recordsList) {
   out.write ((const char *) &segmentIndex, sizeof (segmentIndex));
-  std::list < edu::sharif::twinner::trace::exptoken::SymbolRecord >::size_type s =
+  std::set < edu::sharif::twinner::trace::exptoken::SymbolRecord >::size_type s =
       recordsList.size ();
   out.write ((const char *) &s, sizeof (s));
   edu::sharif::twinner::util::foreach (recordsList, &save_record, out);

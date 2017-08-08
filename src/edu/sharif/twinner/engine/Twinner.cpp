@@ -165,12 +165,12 @@ bool Twinner::generateTwinBinary () {
     // steps 1, 2, and 3
     ex.setSymbolsValues (symbols);
     edu::sharif::twinner::trace::Trace *trace = ex.executeSingleTraceInNormalMode ();
+    edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
+    symbols.clear ();
     if (trace == 0 || ex.isLastExecutionSignaled ()) {
       // TODO: encode the abortion scenario in the twincode
       break;
     }
-    edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
-    symbols.clear ();
     if (main) {
       addExecutionTrace (trace, ex.readMarInfo ());
     } else {
