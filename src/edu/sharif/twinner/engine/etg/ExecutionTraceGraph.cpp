@@ -49,6 +49,7 @@ ExecutionTraceGraph::~ExecutionTraceGraph () {
 void ExecutionTraceGraph::addConstraints (const edu::sharif::twinner::trace::Trace *trace) {
   edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->clearState ();
   InstructionNode *node = root;
+  ConstraintEdge *edge = 0;
   int depth = 0;
   const std::list < edu::sharif::twinner::trace::ExecutionTraceSegment * > &segments =
       trace->getTraceSegments ();
@@ -68,7 +69,7 @@ void ExecutionTraceGraph::addConstraints (const edu::sharif::twinner::trace::Tra
           ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
         const edu::sharif::twinner::trace::Constraint *constraint = *it2;
         InstructionNode *next = node->addConstraint
-            (constraint, trace->getMemoryManager (), (depth <= 10));
+            (constraint, trace->getMemoryManager (), (depth <= 10), edge);
         if (next != node) {
           node = next;
           depth++;
@@ -80,10 +81,10 @@ void ExecutionTraceGraph::addConstraints (const edu::sharif::twinner::trace::Tra
     }
     if (node == preSegment) { // Each segment must have at least one constraint
       node = node->addConstraint
-          (alwaysTrue, trace->getMemoryManager (), false);
+          (alwaysTrue, trace->getMemoryManager (), false, edge);
       node->mergeCriticalAddresses (snapshots.back ());
     }
-    node->registerCorrespondingSegment (segment);
+    edge->registerCorrespondingSegment (segment);
   }
   mergePath (node);
   iterator = root;

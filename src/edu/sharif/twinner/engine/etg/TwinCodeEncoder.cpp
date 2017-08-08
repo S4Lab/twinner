@@ -152,7 +152,7 @@ bool TwinCodeEncoder::encodeConstraintAndChildren (ConstraintEdge *edge,
     int depth, int index, bool bypassConstraint) {
   std::list < ConstConstraintPtr > constraints;
   ConstInsNode *node = edge->getChild ();
-  while (!(node->getSegment ()) && node->getChildren ().size () == 1) {
+  while (!(edge->getSegment ()) && node->getChildren ().size () == 1) {
     if (bypassConstraint) {
       bypassConstraint = false;
     } else {
@@ -165,7 +165,7 @@ bool TwinCodeEncoder::encodeConstraintAndChildren (ConstraintEdge *edge,
     constraints.push_back (edge->getConstraint ());
   }
   const bool constraintIsEncoded = encodeConstraint (constraints, depth);
-  const TraceSegment *segment = node->getSegment ();
+  const TraceSegment *segment = edge->getSegment ();
   if (segment) {
     encodeTransformations (segment, depth + 1, index++);
   }

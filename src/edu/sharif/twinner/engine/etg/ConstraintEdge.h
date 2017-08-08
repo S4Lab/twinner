@@ -23,6 +23,7 @@ class Logger;
 namespace trace {
 
 class Constraint;
+class ExecutionTraceSegment;
 }
 namespace engine {
 namespace etg {
@@ -34,6 +35,7 @@ private:
   const int debugId;
 
   const edu::sharif::twinner::trace::Constraint *constraint;
+  const edu::sharif::twinner::trace::ExecutionTraceSegment *segment;
   InstructionNode *parent;
   InstructionNode *child;
 
@@ -43,8 +45,11 @@ public:
   virtual ~ConstraintEdge ();
 
   void setChild (InstructionNode *node);
+  void registerCorrespondingSegment (
+      const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
 
   const edu::sharif::twinner::trace::Constraint *getConstraint () const;
+  const edu::sharif::twinner::trace::ExecutionTraceSegment *getSegment () const;
   InstructionNode *getChild ();
   InstructionNode *getParent ();
 

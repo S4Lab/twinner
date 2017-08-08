@@ -30,6 +30,7 @@ ConstraintEdge::ConstraintEdge (InstructionNode *p,
     const edu::sharif::twinner::trace::Constraint *c) :
     debugId (++lastDebugId),
     constraint (c),
+    segment (0),
     parent (p),
     child (0) {
 }
@@ -42,9 +43,19 @@ void ConstraintEdge::setChild (InstructionNode *node) {
   child = node;
 }
 
+void ConstraintEdge::registerCorrespondingSegment (
+    const edu::sharif::twinner::trace::ExecutionTraceSegment *_segment) {
+  segment = _segment;
+}
+
 const edu::sharif::twinner::trace::Constraint *
 ConstraintEdge::getConstraint () const {
   return constraint;
+}
+
+const edu::sharif::twinner::trace::ExecutionTraceSegment *
+ConstraintEdge::getSegment () const {
+  return segment;
 }
 
 InstructionNode *ConstraintEdge::getChild () {

@@ -48,7 +48,6 @@ private:
   const edu::sharif::twinner::util::MemoryManager *memoryManager;
 
   edu::sharif::twinner::trace::Snapshot *snapshot;
-  const edu::sharif::twinner::trace::ExecutionTraceSegment *segment;
 
 public:
   InstructionNode ();
@@ -67,7 +66,8 @@ public:
    */
   InstructionNode *addConstraint (const edu::sharif::twinner::trace::Constraint *constraint,
       const edu::sharif::twinner::util::MemoryManager *memoryManager,
-      bool performValidityCheck);
+      bool performValidityCheck,
+      ConstraintEdge *&parentEdge);
 
   /**
    * Moves downward, traversing right-most children until a leaf is visited. During this
@@ -100,9 +100,6 @@ public:
 
   bool hasAnyChild () const;
   void mergeCriticalAddresses (edu::sharif::twinner::trace::Snapshot *snapshot);
-  void registerCorrespondingSegment (
-      const edu::sharif::twinner::trace::ExecutionTraceSegment *segment);
-  const edu::sharif::twinner::trace::ExecutionTraceSegment *getSegment () const;
   const edu::sharif::twinner::trace::Snapshot *getSnapshot () const;
 
   const std::list < ConstraintEdge * > &getChildren () const;
@@ -122,7 +119,8 @@ private:
       unsigned int depth,
       const edu::sharif::twinner::trace::Constraint *c,
       const edu::sharif::twinner::util::MemoryManager *m,
-      bool performValidityCheck);
+      bool performValidityCheck,
+      ConstraintEdge *&parentEdge);
 };
 
 }

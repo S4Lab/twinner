@@ -39,16 +39,14 @@ InstructionNode::InstructionNode () :
     debugId (++lastDebugId),
     insId (0),
     memoryManager (0),
-    snapshot (0),
-    segment (0) {
+    snapshot (0) {
 }
 
 InstructionNode::InstructionNode (ConstraintEdge *p) :
     debugId (++lastDebugId),
     insId (0),
     memoryManager (0),
-    snapshot (0),
-    segment (0) {
+    snapshot (0) {
   if (p) {
     parents.push_back (p);
   }
@@ -91,7 +89,8 @@ void InstructionNode::registerInstructionIdIfRequired (
 InstructionNode *InstructionNode::addConstraint (
     const edu::sharif::twinner::trace::Constraint *c,
     const edu::sharif::twinner::util::MemoryManager *m,
-    bool performValidityCheck) {
+    bool performValidityCheck,
+    ConstraintEdge *&parentEdge) {
   if (performValidityCheck &&
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
       ->checkValidity (c)) {
@@ -103,12 +102,13 @@ InstructionNode *InstructionNode::addConstraint (
   unsigned int depth = 0;
   for (;;) {
     if (node->children.empty ()) {
-      return addConstraint (node, depth, c, m, performValidityCheck);
+      return addConstraint (node, depth, c, m, performValidityCheck, parentEdge);
     }
     ConstraintEdge *e = node->children.back ();
     if ((*e->getConstraint ()) != (*c)) {
       if (edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
           ->checkValidity (e->getConstraint ())) {
+        parentEdge = e;
         node = e->getChild ();
         edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
             ->popLastAssertion ();
@@ -119,7 +119,7 @@ InstructionNode *InstructionNode::addConstraint (
             ->assertConstraint (c);
         continue;
       }
-      return addConstraint (node, depth, c, m, performValidityCheck);
+      return addConstraint (node, depth, c, m, performValidityCheck, parentEdge);
     }
     if (depth > 0) {
 
@@ -130,6 +130,7 @@ InstructionNode *InstructionNode::addConstraint (
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
           ->assertConstraint (c);
     }
+    parentEdge = e;
     return e->getChild ();
   }
 }
@@ -139,7 +140,8 @@ InstructionNode *InstructionNode::addConstraint (
     unsigned int depth,
     const edu::sharif::twinner::trace::Constraint *c,
     const edu::sharif::twinner::util::MemoryManager *m,
-    bool performValidityCheck) {
+    bool performValidityCheck,
+    ConstraintEdge *&parentEdge) {
   if (depth > 0) {
     edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
         ->popLastAssertion ();
@@ -161,6 +163,7 @@ InstructionNode *InstructionNode::addConstraint (
   parent->children.push_back (edge);
   InstructionNode *node = new InstructionNode (edge);
   edge->setChild (node);
+  parentEdge = edge;
   return node;
 }
 
@@ -236,16 +239,6 @@ void InstructionNode::mergeCriticalAddresses (
     return;
   }
   snapshot->addCriticalSymbols (sna->getCriticalSymbols ());
-}
-
-void InstructionNode::registerCorrespondingSegment (
-    const edu::sharif::twinner::trace::ExecutionTraceSegment *_segment) {
-  segment = _segment;
-}
-
-const edu::sharif::twinner::trace::ExecutionTraceSegment *
-InstructionNode::getSegment () const {
-  return segment;
 }
 
 const edu::sharif::twinner::trace::Snapshot *InstructionNode::getSnapshot () const {
