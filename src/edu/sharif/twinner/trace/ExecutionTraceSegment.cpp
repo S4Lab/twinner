@@ -248,16 +248,28 @@ ExecutionTraceSegment::getFirstRegisterToExpression () const {
   return snapshots.front ()->getRegisterToExpression ();
 }
 
-const std::map < REG, Expression * > &
-ExecutionTraceSegment::getRegisterToExpression () const {
-  edu::sharif::twinner::util::Logger::error () << "Not implemented yet\n";
-  abort ();
+std::map < REG, Expression * > ExecutionTraceSegment::getRegisterToExpression () const {
+  std::map < REG, Expression * > allRegToExpressions;
+  for (std::list < Snapshot * >::const_iterator it = snapshots.begin ();
+      it != snapshots.end (); ++it) {
+    const Snapshot *snapshot = *it;
+    const std::map < REG, Expression * > &regToExpression =
+        snapshot->getRegisterToExpression ();
+    allRegToExpressions.insert (regToExpression.begin (), regToExpression.end ());
+  }
+  return allRegToExpressions;
 }
 
-const std::map < ADDRINT, Expression * > &
-ExecutionTraceSegment::getMemoryAddressTo64BitsExpression () const {
-  edu::sharif::twinner::util::Logger::error () << "Not implemented yet\n";
-  abort ();
+std::map < ADDRINT, Expression * > ExecutionTraceSegment::getMemoryAddressTo64BitsExpression () const {
+  std::map < ADDRINT, Expression * > allMemToExpressions;
+  for (std::list < Snapshot * >::const_iterator it = snapshots.begin ();
+      it != snapshots.end (); ++it) {
+    const Snapshot *snapshot = *it;
+    const std::map < ADDRINT, Expression * > &memToExpression =
+        snapshot->getMemoryAddressTo64BitsExpression ();
+    allMemToExpressions.insert (memToExpression.begin (), memToExpression.end ());
+  }
+  return allMemToExpressions;
 }
 
 const std::map < ADDRINT, Expression * > &

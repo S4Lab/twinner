@@ -93,8 +93,8 @@ public:
       const edu::sharif::twinner::util::Logger &logger) const;
 
   const std::map < REG, Expression * > &getFirstRegisterToExpression () const;
-  const std::map < REG, Expression * > &getRegisterToExpression () const;
-  const std::map < ADDRINT, Expression * > &getMemoryAddressTo64BitsExpression () const;
+  std::map < REG, Expression * > getRegisterToExpression () const;
+  std::map < ADDRINT, Expression * > getMemoryAddressTo64BitsExpression () const;
   const std::map < ADDRINT, Expression * > &getMemoryAddressTo8BitsExpression () const;
   std::list < Constraint * > getPathConstraints () const;
   const Constraint *getLastPathConstraint () const;
