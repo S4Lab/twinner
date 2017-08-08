@@ -382,9 +382,13 @@ Executer::executeSystemCommand (std::string command) {
     edu::sharif::twinner::util::Logger::loquacious () << "signaled; "
         "signal was " << WTERMSIG (ret) << '\n';
     signaled = true;
+    return 0;
   }
   if (newRecord || replayRecord) {
-    recordExecutionResult (inputBinaryHash, argsHash, symbolsHash);
+    if (!recordExecutionResult (inputBinaryHash, argsHash, symbolsHash)) {
+      signaled = true;
+      return 0;
+    }
   }
   return edu::sharif::twinner::trace::Trace::loadFromFile
       (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
@@ -471,7 +475,9 @@ Executer::executeSingleTraceInInitialStateDetectionMode () const {
     abort ();
   }
   if (newRecord) {
-    recordExecutionResult (inputBinaryHash, argsHash, symbolsHash);
+    if (!recordExecutionResult (inputBinaryHash, argsHash, symbolsHash)) {
+      abort ();
+    }
   }
   return edu::sharif::twinner::trace::Trace::loadAddressToValueMapFromFile
       (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
@@ -533,7 +539,7 @@ int createDir (const char *path) {
   return mkdir (path, 0755);
 }
 
-void Executer::recordExecutionResult (std::string inputBinaryHash,
+bool Executer::recordExecutionResult (std::string inputBinaryHash,
     std::string argsHash, std::string symbolsHash) const {
   if (createDir ((tmpfolder + "/twinner/record").c_str ()) != 0
       || createDir ((tmpfolder + "/twinner/record/"
@@ -541,16 +547,21 @@ void Executer::recordExecutionResult (std::string inputBinaryHash,
       || createDir ((tmpfolder + "/twinner/record/" + inputBinaryHash
                      + "/" + argsHash).c_str ()) != 0
       || createDir ((tmpfolder + "/twinner/record/" + inputBinaryHash
-                     + "/" + argsHash + "/" + symbolsHash).c_str ()) != 0
-      || system (("cp " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
-                  + " " + tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
-                  + " " + tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE
-                  + " " + tmpfolder + "/twinner/record/" + inputBinaryHash
-                  + "/" + argsHash + "/" + symbolsHash + "/").c_str ()) != 0) {
+                     + "/" + argsHash + "/" + symbolsHash).c_str ()) != 0) {
     edu::sharif::twinner::util::Logger::error ()
-        << "Error: Cannot copy the execution result files.\n";
+        << "Error: Cannot create record destination folders.\n";
     abort ();
   }
+  if (system (("cp " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
+               + " " + tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
+               + " " + tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE
+               + " " + tmpfolder + "/twinner/record/" + inputBinaryHash
+               + "/" + argsHash + "/" + symbolsHash + "/").c_str ()) != 0) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error: Cannot copy the execution result files.\n";
+    return false;
+  }
+  return true;
 }
 
 bool Executer::restoreExecutionResult (std::string inputBinaryHash,

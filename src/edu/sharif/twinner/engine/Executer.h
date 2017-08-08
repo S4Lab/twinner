@@ -134,7 +134,7 @@ private:
   std::string escapeForShell (std::string str) const;
   std::string calculateHash (std::string file) const;
   std::string calculateStringHash (std::string str) const;
-  void recordExecutionResult (std::string inputBinaryHash,
+  bool recordExecutionResult (std::string inputBinaryHash,
       std::string argsHash, std::string symbolsHash) const;
   bool restoreExecutionResult (std::string inputBinaryHash,
       std::string argsHash, std::string symbolsHash) const;
