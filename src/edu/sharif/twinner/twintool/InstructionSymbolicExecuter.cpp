@@ -184,13 +184,13 @@ void InstructionSymbolicExecuter::analysisRoutineSyscall (ADDRINT syscallNumber,
     UINT32 insAssembly) {
   // we should report syscalls even while the ise is disabled
   disassembledInstruction = insAssembly;
-  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  //  edu::sharif::twinner::trace::Trace *trace = getTrace ();
   if (measureMode) {
     numberOfExecutedInstructions++;
     return;
   }
   const char *insAssemblyStr =
-      trace->getMemoryManager ()->getPointerToAllocatedMemory (insAssembly);
+      memoryManager->getPointerToAllocatedMemory (insAssembly);
 #ifdef TARGET_IS_32BITS_WINDOWS7_SP1
   edu::sharif::twinner::trace::syscall::Syscall const &syscall =
       edu::sharif::twinner::trace::syscall::X86Windows7Sp1Syscall
