@@ -134,6 +134,8 @@ public:
 
 private:
   void lazyLoad ();
+  void setHook (Hook _hook, REG reg);
+  void setHook (HookWithArg _hook, REG reg, ADDRINT _arg);
 
 public:
   void analysisRoutineBeforeCallingSafeFunction (ADDRINT retAddress,

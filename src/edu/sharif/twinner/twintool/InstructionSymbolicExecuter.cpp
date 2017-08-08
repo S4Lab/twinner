@@ -106,6 +106,17 @@ void InstructionSymbolicExecuter::lazyLoad () {
   }
 }
 
+void InstructionSymbolicExecuter::setHook (Hook _hook, REG reg) {
+  hook = _hook;
+  trackedReg = reg;
+}
+
+void InstructionSymbolicExecuter::setHook (HookWithArg _hook, REG reg, ADDRINT _arg) {
+  hookWithArg = _hook;
+  trackedReg = reg;
+  arg = _arg;
+}
+
 void InstructionSymbolicExecuter::disable () {
   disabled = true;
 }
@@ -717,8 +728,7 @@ void InstructionSymbolicExecuter::analysisRoutineBeforeRet (REG reg) {
   if (withinSafeFunc) {
     edu::sharif::twinner::util::Logger::debug ()
         << "analysisRoutineBeforeRet\n";
-    trackedReg = reg;
-    hook = &InstructionSymbolicExecuter::checkForEndOfSafeFunc;
+    setHook (&InstructionSymbolicExecuter::checkForEndOfSafeFunc, reg);
   }
 }
 
@@ -742,8 +752,7 @@ void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfReg (
   logger << "analysisRoutineBeforeChangeOfReg(INS: "
       << insAssemblyStr << ")\n"
       "\tregistering register to be tracked...";
-  trackedReg = reg;
-  hook = routine;
+  setHook (routine, reg);
   logger << "done\n";
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
@@ -769,9 +778,7 @@ void InstructionSymbolicExecuter::analysisRoutineBeforeChangeOfRegWithArg (
   logger << "analysisRoutineBeforeChangeOfRegWithArg(INS: "
       << insAssemblyStr << ")\n"
       "\tregistering register to be tracked...";
-  trackedReg = reg;
-  arg = argImmediateValue;
-  hookWithArg = routine;
+  setHook (routine, reg, argImmediateValue);
   logger << "done\n";
   logger << "Registers:\n";
   trace->printRegistersValues (logger);
