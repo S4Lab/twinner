@@ -29,6 +29,8 @@ public:
   template <typename Clazz> struct MemberVisitor {
     typedef void (Clazz::*ItemVisitor) (const Value &item);
     typedef void (Clazz::*PairVisitor) (const Key &key, const Value &value);
+    typedef void (Clazz::*PairVisitorWithAux) (Aux &aux,
+        const Key &key, const Value &value);
   };
   typedef void (*ItemVisitor) (const Value &item);
   typedef void (*ItemVisitorWithAux) (Aux &aux, const Value &item);
@@ -104,6 +106,18 @@ public:
       visitor (aux, key, value);
     }
   }
+
+  template <typename Clazz>
+  static inline void iterate (const MapType &map,
+      typename MemberVisitor<Clazz>::PairVisitorWithAux visitor,
+      Clazz *obj, Aux &aux) {
+    for (typename MapType::const_iterator it = map.begin ();
+        it != map.end (); ++it) {
+      const Key &key = it->first;
+      const Value &value = it->second;
+      (obj->*visitor) (aux, key, value);
+    }
+  }
 };
 
 #define repeat(N) \
@@ -148,6 +162,16 @@ void foreach (const std::map < Key, Value > &map,
     ::template MemberVisitor<Clazz>::PairVisitor visitor, Clazz *obj) {
   edu::sharif::twinner::util::ForEach < Key, Value >
       ::iterate (map, visitor, obj);
+}
+
+template < typename Key, typename Value, typename Clazz, typename Aux >
+void foreach (const std::map < Key, Value > &map,
+    typename edu::sharif::twinner::util::ForEach < Key, Value, Aux >
+    ::template MemberVisitor<Clazz>::PairVisitorWithAux visitor,
+    Clazz *obj,
+    Aux &aux) {
+  edu::sharif::twinner::util::ForEach < Key, Value, Aux >
+      ::iterate (map, visitor, obj, aux);
 }
 
 template < typename Value >
