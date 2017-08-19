@@ -141,6 +141,10 @@ FunctionInvocation *FunctionInvocation::loadFromBinaryStream (
   return new FunctionInvocation (nameStr, args, types, firstArgumentAsString);
 }
 
+const std::list<Expression *> &FunctionInvocation::getArgumentExpressions () const {
+  return args;
+}
+
 void FunctionInvocation::encodeString (std::stringstream &ss, std::string str) const {
   ss << '"';
   for (std::string::const_iterator it = str.begin (); it != str.end (); ++it) {

@@ -14,18 +14,34 @@
 
 #include <set>
 
+#include "edu/sharif/twinner/util/Logger.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace engine {
 namespace etg {
 namespace encoder {
+namespace {
+
+int lastFunctionIndex = 0;
+}
 
 FunctionEncoder::FunctionEncoder (const AddrToSizeMap &addressToSize) :
-    NodeEncoder (addressToSize) {
+    NodeEncoder (addressToSize),
+    functionIndex (++lastFunctionIndex),
+    firstVisit (true) {
 }
 
 FunctionEncoder::~FunctionEncoder () {
+}
+
+void FunctionEncoder::finalizeInitialization () {
+}
+
+void FunctionEncoder::encode (IndentedStream &body, IndentedStream &preamble,
+    int index, bool inMain) {
+  NodeEncoder::encode (body, preamble, index, inMain);
 }
 
 

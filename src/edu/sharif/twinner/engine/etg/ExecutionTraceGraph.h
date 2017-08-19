@@ -47,7 +47,7 @@ public:
 
   void dumpTree () const;
 
-  const InstructionNode *getRoot () const;
+  InstructionNode *getRoot () const;
 
   Graph *getEtg () const;
 

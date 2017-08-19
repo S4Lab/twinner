@@ -28,11 +28,73 @@ class ConstraintEdge;
 namespace encoder {
 
 class ConstraintEncoder : public Encoder {
+private:
+  const int conditionIndex;
+  const TraceSegment *segment;
+
+  std::set< Variable > typesAndNames;
+  bool mustConstraintBeEncoded;
+  std::string constraintString;
+
+  std::set< Variable > oldVariablesUsedBySegment;
+  std::set< Variable > newVariablesCreatedInSegment;
+
+  NodeEncoder *child;
+
 public:
   ConstraintEncoder (edu::sharif::twinner::engine::etg::ConstraintEdge *edge,
       const AddrToSizeMap &addressToSize,
       bool bypassConstraint);
   virtual ~ConstraintEncoder ();
+
+  void initializeSecondPass ();
+  std::set< Variable > getAggregatedVariables () const;
+
+  /**
+   * @return true iff the subgraph is encoded under an if-construct
+   */
+  virtual bool encode (IndentedStream &body, IndentedStream &preamble,
+      int index, bool inMain);
+
+private:
+  void gatherOldVariablesOfSegment ();
+
+  template <typename Address>
+  void gatherOldVariablesOfSegment (const Address &key, ExpressionPtr exp) {
+    extractTypesAndNames (oldVariablesUsedBySegment, exp);
+  }
+
+  void gatherOldVariablesOfSegment (ExpressionPtr exp) {
+    extractTypesAndNames (oldVariablesUsedBySegment, exp);
+  }
+
+  void gatherNewVariablesOfSegment ();
+  void gatherNewRegisterVariablesOfSegment (int index);
+  void gatherNewMemoryVariablesOfSegment (
+      const std::set < AddrToSize > &addrToSize, int index);
+
+  void encodeTransformations (IndentedStream &body,
+      IndentedStream &preamble, const TraceSegment *segment, int index);
+
+  void codeRegisterChanges (IndentedStream &body, const TraceSegment *segment);
+  void codeMemoryChanges (IndentedStream &body,
+      const Address &memoryEa, ExpressionPtr exp);
+
+  /**
+   * @return true iff the constraint is encoded using an if-construct
+   */
+  bool encodeConstraint (IndentedStream &body, IndentedStream &preamble,
+      bool inMain);
+
+  bool simplifyConstraints (std::list < ConstConstraintPtr > constraints,
+      std::stringstream &ss);
+
+  std::string replaceAll (std::string str,
+      std::string part, std::string substitute) const;
+  void extractTypesAndNames (std::set< Variable > &typesAndNames,
+      ConstConstraintPtr simplifiedConstraint) const;
+  void extractTypesAndNames (std::set< Variable > &typesAndNames,
+      ConstExpressionPtr exp) const;
 };
 
 }

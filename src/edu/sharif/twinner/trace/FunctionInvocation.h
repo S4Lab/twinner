@@ -49,6 +49,8 @@ public:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static FunctionInvocation *loadFromBinaryStream (std::ifstream &in);
 
+  const std::list<Expression *> &getArgumentExpressions () const;
+
 private:
   void encodeString (std::stringstream &ss, std::string str) const;
 };

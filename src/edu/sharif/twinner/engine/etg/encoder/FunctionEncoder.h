@@ -23,9 +23,19 @@ namespace etg {
 namespace encoder {
 
 class FunctionEncoder : public NodeEncoder {
+private:
+  const int functionIndex;
+
+  bool firstVisit;
+
 public:
   FunctionEncoder (const AddrToSizeMap &addressToSize);
   virtual ~FunctionEncoder ();
+
+  virtual void finalizeInitialization ();
+
+  virtual void encode (IndentedStream &body, IndentedStream &preamble,
+      int index, bool inMain);
 };
 
 }

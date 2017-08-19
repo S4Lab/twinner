@@ -19,6 +19,12 @@
 #include <map>
 #include <set>
 
+#ifdef TARGET_IA32E
+#define VAR_TYPE "UINT64"
+#else
+#define VAR_TYPE "UINT32"
+#endif
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -37,6 +43,17 @@ namespace encoder {
 
 class Encoder {
 protected:
+  typedef edu::sharif::twinner::trace::Expression Expression;
+  typedef Expression * const &ExpressionPtr;
+  typedef const Expression *ConstExpressionPtr;
+  typedef edu::sharif::twinner::trace::ExecutionTraceSegment TraceSegment;
+  typedef TraceSegment * const &TraceSegmentPtr;
+  typedef edu::sharif::twinner::util::IndentedStringStream IndentedStream;
+  typedef edu::sharif::twinner::trace::Constraint Constraint;
+  typedef Constraint * const &ConstraintPtr;
+  typedef const Constraint *ConstConstraintPtr;
+  typedef edu::sharif::twinner::engine::etg::InstructionNode InsNode;
+
   typedef int Size;
   typedef int Index;
   typedef uint64_t Value;
@@ -60,6 +77,11 @@ protected:
 
 public:
   virtual ~Encoder ();
+
+protected:
+  void declareMemorySymbols (IndentedStream &body,
+      const std::set < AddrToSize > &addrToSize, int index);
+  void declareRegisterSymbols (IndentedStream &body, int index);
 };
 
 }

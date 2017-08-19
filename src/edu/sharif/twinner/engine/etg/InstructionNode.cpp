@@ -319,6 +319,7 @@ InstructionNode::getEncoder (const edu::sharif::twinner::engine::etg::encoder
     encoder = new edu::sharif::twinner::engine::etg::encoder
         ::NodeEncoder (addressToSize);
   }
+  encoder->initializeFirstPass (this);
   return encoder;
 }
 

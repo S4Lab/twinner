@@ -179,7 +179,7 @@ void ExecutionTraceGraph::dumpTree () const {
   root->dumpSubTree (logger);
 }
 
-const InstructionNode *ExecutionTraceGraph::getRoot () const {
+InstructionNode *ExecutionTraceGraph::getRoot () const {
   return root;
 }
 
