@@ -25,6 +25,8 @@
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
 
+#include "edu/sharif/twinner/engine/etg/encoder/FunctionEncoder.h"
+
 #include <sstream>
 
 namespace edu {
@@ -39,6 +41,7 @@ InstructionNode::InstructionNode () :
     debugId (++lastDebugId),
     insId (0),
     memoryManager (0),
+    encoder (0),
     snapshot (0) {
 }
 
@@ -46,6 +49,7 @@ InstructionNode::InstructionNode (ConstraintEdge *p) :
     debugId (++lastDebugId),
     insId (0),
     memoryManager (0),
+    encoder (0),
     snapshot (0) {
   if (p) {
     parents.push_back (p);
@@ -57,6 +61,7 @@ void delete_edge (ConstraintEdge * const &edge);
 InstructionNode::~InstructionNode () {
   edu::sharif::twinner::util::foreach (children, delete_edge);
   children.clear ();
+  delete encoder;
 }
 
 void delete_edge (ConstraintEdge * const &edge) {
@@ -299,6 +304,22 @@ std::string InstructionNode::toString () const {
     ss << "; " << memoryManager->getPointerToAllocatedMemory (insId);
   }
   return ss.str ();
+}
+
+edu::sharif::twinner::engine::etg::encoder::NodeEncoder *
+InstructionNode::getEncoder (const edu::sharif::twinner::engine::etg::encoder
+    ::Encoder::AddrToSizeMap &addressToSize) {
+  if (encoder) {
+    return encoder;
+  }
+  if (getParents ().size () > 1) {
+    encoder = new edu::sharif::twinner::engine::etg::encoder
+        ::FunctionEncoder (addressToSize);
+  } else {
+    encoder = new edu::sharif::twinner::engine::etg::encoder
+        ::NodeEncoder (addressToSize);
+  }
+  return encoder;
 }
 
 

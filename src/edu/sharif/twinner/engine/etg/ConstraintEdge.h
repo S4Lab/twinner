@@ -13,6 +13,8 @@
 #ifndef CONSTRAINT_EDGE_H
 #define CONSTRAINT_EDGE_H
 
+#include "edu/sharif/twinner/engine/etg/encoder/ConstraintEncoder.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -36,6 +38,9 @@ private:
 
   const edu::sharif::twinner::trace::Constraint *constraint;
   const edu::sharif::twinner::trace::ExecutionTraceSegment *segment;
+
+  edu::sharif::twinner::engine::etg::encoder::ConstraintEncoder *encoder;
+
   InstructionNode *parent;
   InstructionNode *child;
 
@@ -52,6 +57,10 @@ public:
   const edu::sharif::twinner::trace::ExecutionTraceSegment *getSegment () const;
   InstructionNode *getChild ();
   InstructionNode *getParent ();
+
+  edu::sharif::twinner::engine::etg::encoder::ConstraintEncoder *getEncoder (
+      const edu::sharif::twinner::engine::etg::encoder
+      ::Encoder::AddrToSizeMap &addressToSize, bool bypassConstraint);
 
   bool areConstraintsTheSame (const ConstraintEdge *edge) const;
 

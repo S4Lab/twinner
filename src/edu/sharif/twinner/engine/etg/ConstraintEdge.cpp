@@ -31,12 +31,14 @@ ConstraintEdge::ConstraintEdge (InstructionNode *p,
     debugId (++lastDebugId),
     constraint (c),
     segment (0),
+    encoder (0),
     parent (p),
     child (0) {
 }
 
 ConstraintEdge::~ConstraintEdge () {
   delete child;
+  delete encoder;
 }
 
 void ConstraintEdge::setChild (InstructionNode *node) {
@@ -64,6 +66,17 @@ InstructionNode *ConstraintEdge::getChild () {
 
 InstructionNode *ConstraintEdge::getParent () {
   return parent;
+}
+
+edu::sharif::twinner::engine::etg::encoder::ConstraintEncoder *
+ConstraintEdge::getEncoder (const edu::sharif::twinner::engine::etg::encoder
+    ::Encoder::AddrToSizeMap &addressToSize, bool bypassConstraint) {
+  if (encoder) {
+    return encoder;
+  }
+  encoder = new edu::sharif::twinner::engine::etg::encoder
+      ::ConstraintEncoder (this, addressToSize, bypassConstraint);
+  return encoder;
 }
 
 bool ConstraintEdge::areConstraintsTheSame (const ConstraintEdge *edge) const {

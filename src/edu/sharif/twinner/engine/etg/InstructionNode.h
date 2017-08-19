@@ -17,6 +17,8 @@
 #include <string>
 #include <stdint.h>
 
+#include "edu/sharif/twinner/engine/etg/encoder/Encoder.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -33,6 +35,10 @@ class ExecutionTraceSegment;
 }
 namespace engine {
 namespace etg {
+namespace encoder {
+
+class NodeEncoder;
+}
 
 class ConstraintEdge;
 
@@ -46,6 +52,8 @@ private:
 
   uint32_t insId;
   const edu::sharif::twinner::util::MemoryManager *memoryManager;
+
+  edu::sharif::twinner::engine::etg::encoder::NodeEncoder *encoder;
 
   edu::sharif::twinner::trace::Snapshot *snapshot;
 
@@ -110,6 +118,10 @@ public:
   const std::list < ConstraintEdge * > &getParents () const;
 
   std::string toString () const;
+
+  edu::sharif::twinner::engine::etg::encoder::NodeEncoder *getEncoder (
+      const edu::sharif::twinner::engine::etg::encoder
+      ::Encoder::AddrToSizeMap &addressToSize);
 
 private:
   void registerInstructionIdIfRequired (
