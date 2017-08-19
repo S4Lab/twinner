@@ -249,9 +249,11 @@ private:
       std::map < KEY, Expression * > &expressions);
   void replaceTemporarySymbols (const Snapshot *previousSnapshot,
       std::list < Constraint * > &constraints);
-  void replaceTemporarySymbols (const Snapshot *previousSnapshot,
-      Expression *exp);
 
+public:
+  void replaceTemporarySymbols (Expression *exp) const;
+
+private:
   Expression *lazyLoad (int size,
       std::map < ADDRINT, Expression * > &map, const ADDRINT key,
       const edu::sharif::twinner::trace::cv::ConcreteValue &concreteVal,

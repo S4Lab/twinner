@@ -21,6 +21,8 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+class Snapshot;
+
 class TraceSegmentTerminator : public Savable {
 protected:
   TraceSegmentTerminator ();
@@ -32,6 +34,7 @@ public:
 
   virtual std::string getCallingLine () const = 0;
   virtual std::string toString () const = 0;
+  virtual void replaceTemporarySymbols (const Snapshot *lastSnapshot) = 0;
 };
 
 }

@@ -34,6 +34,7 @@ public:
 
   virtual std::string getCallingLine () const;
   virtual std::string toString () const;
+  virtual void replaceTemporarySymbols (const Snapshot *lastSnapshot);
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static SyscallInvocation *loadFromBinaryStream (std::ifstream &in);

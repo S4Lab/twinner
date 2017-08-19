@@ -824,7 +824,7 @@ void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
     std::map < KEY, Expression * > &expressions) {
   typedef typename std::map < KEY, Expression * >::const_iterator Iterator;
   for (Iterator it = expressions.begin (); it != expressions.end (); ++it) {
-    replaceTemporarySymbols (previousSnapshot, it->second);
+    previousSnapshot->replaceTemporarySymbols (it->second);
   }
 }
 
@@ -833,9 +833,9 @@ void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
   typedef std::list < Constraint * >::const_iterator Iterator;
   for (Iterator it = constraints.begin (); it != constraints.end (); ++it) {
     Constraint *c = *it;
-    replaceTemporarySymbols (previousSnapshot, c->getMainExpression ());
+    previousSnapshot->replaceTemporarySymbols (c->getMainExpression ());
     if (c->getAuxExpression ()) {
-      replaceTemporarySymbols (previousSnapshot, c->getAuxExpression ());
+      previousSnapshot->replaceTemporarySymbols (c->getAuxExpression ());
     }
   }
 }
@@ -938,9 +938,8 @@ public:
   }
 };
 
-void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
-    Expression *exp) {
-  ReplaceTemporarySymbolsVisitor visitor (previousSnapshot);
+void Snapshot::replaceTemporarySymbols (Expression *exp) const {
+  ReplaceTemporarySymbolsVisitor visitor (this);
   Expression *newExp = exp->visit (visitor);
   (*exp) = (*newExp);
   delete newExp;

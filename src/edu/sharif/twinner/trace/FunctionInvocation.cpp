@@ -14,6 +14,7 @@
 
 #include "Savable.h"
 #include "Expression.h"
+#include "Snapshot.h"
 
 #include <sstream>
 
@@ -72,6 +73,13 @@ std::string FunctionInvocation::getCallingLine () const {
 
 std::string FunctionInvocation::toString () const {
   return "FunctionInvocation (calling-line=" + getCallingLine () + ")";
+}
+
+void FunctionInvocation::replaceTemporarySymbols (const Snapshot *lastSnapshot) {
+  for (std::list<Expression *>::iterator it = args.begin ();
+      it != args.end (); ++it) {
+    lastSnapshot->replaceTemporarySymbols (*it);
+  }
 }
 
 void FunctionInvocation::saveToBinaryStream (std::ofstream &out) const {

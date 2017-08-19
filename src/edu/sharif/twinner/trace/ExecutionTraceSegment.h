@@ -103,6 +103,7 @@ public:
 
   void setTerminator (TraceSegmentTerminator *terminator);
   const TraceSegmentTerminator *getTerminator () const;
+  void replaceTemporarySymbolsInSegmentTerminator ();
 
   void addTemporaryExpressions (const ExecutionTraceSegment *seg,
       REG fullReg, int size);

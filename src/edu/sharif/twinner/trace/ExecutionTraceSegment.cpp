@@ -321,6 +321,12 @@ const TraceSegmentTerminator *ExecutionTraceSegment::getTerminator () const {
   return terminator;
 }
 
+void ExecutionTraceSegment::replaceTemporarySymbolsInSegmentTerminator () {
+  if (terminator) {
+    terminator->replaceTemporarySymbols (snapshots.back ());
+  }
+}
+
 void ExecutionTraceSegment::addTemporaryExpressions (
     const ExecutionTraceSegment *seg, REG fullReg, int size) {
   Snapshot *src = seg->snapshots.back ();

@@ -38,6 +38,10 @@ std::string SyscallInvocation::toString () const {
   return "SyscallInvocation ()";
 }
 
+void SyscallInvocation::replaceTemporarySymbols (const Snapshot *lastSnapshot) {
+  // argument (i.e. regs struct) has no temporary symbol
+}
+
 void SyscallInvocation::saveToBinaryStream (std::ofstream &out) const {
   const char *terminatorMagicString = "SYS";
   out.write (terminatorMagicString, 3);

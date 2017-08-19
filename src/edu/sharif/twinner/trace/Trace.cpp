@@ -573,6 +573,11 @@ void Trace::replaceTemporarySymbols () {
     }
     previousSnapshot = &currentSnapshot;
   }
+  for (std::list < ExecutionTraceSegment * >::const_reverse_iterator it =
+      segments.rbegin (); it != segments.rend (); ++it) {
+    ExecutionTraceSegment *segment = *it;
+    segment->replaceTemporarySymbolsInSegmentTerminator ();
+  }
 }
 
 
