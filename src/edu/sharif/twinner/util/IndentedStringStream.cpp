@@ -19,24 +19,18 @@ namespace sharif {
 namespace twinner {
 namespace util {
 
-IndentedStringStream::IndentedStringStream (int _depth) :
+IndentedStringStream::IndentedStringStream () :
     depth (0), indentation ("") {
-  setDepth (_depth);
 }
 
-void IndentedStringStream::setDepth (int _depth) {
-  if (_depth > depth) {
-    const unsigned int diff = _depth - depth;
-    std::stringstream ss;
+void IndentedStringStream::incrementDepth () {
+  indentation += '\t';
+  ++depth;
+}
 
-    repeat (diff) {
-      ss << '\t';
-    }
-    indentation += ss.str ();
-  } else if (_depth < depth) {
-    indentation = indentation.substr (0, _depth);
-  }
-  depth = _depth;
+void IndentedStringStream::decrementDepth () {
+  indentation.erase (0, 1);
+  --depth;
 }
 
 IndentedStringStream &IndentedStringStream::indented () {

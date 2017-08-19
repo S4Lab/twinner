@@ -26,9 +26,11 @@ private:
   std::string indentation;
 
 public:
-  IndentedStringStream (int depth = 0);
+  IndentedStringStream ();
 
-  void setDepth (int depth);
+  void incrementDepth ();
+  void decrementDepth ();
+
   IndentedStringStream &indented ();
 };
 
