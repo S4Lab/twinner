@@ -37,11 +37,51 @@ FunctionEncoder::~FunctionEncoder () {
 }
 
 void FunctionEncoder::finalizeInitialization () {
+  std::stringstream functionName;
+  functionName << "func_" << functionIndex;
+  std::stringstream typedArguments, argumentsFromMain, argumentsFromFunc;
+  for (std::set< Variable >::const_iterator it = aggregatedVariables.begin ();
+      it != aggregatedVariables.end (); ++it) {
+    typedArguments << ", " << it->type << ' ' << it->technicalName;
+    argumentsFromMain << ", " << VAR_TYPE " (" << it->name << ")";
+    argumentsFromFunc << ", " << it->technicalName;
+  }
+  std::stringstream signature;
+  signature << "int " << functionName.str ()
+      << " (struct RegistersSet &regs" << typedArguments.str () << ")";
+  functionSignatureLine = signature.str ();
+
+  std::stringstream invocationFromMain;
+  invocationFromMain << functionName.str ()
+      << " (regs" << argumentsFromMain.str () << ")";
+  functionInvocationLineFromMain = invocationFromMain.str ();
+
+  std::stringstream invocationFromFunc;
+  invocationFromMain << functionName.str ()
+      << " (regs" << argumentsFromFunc.str () << ")";
+  functionInvocationLineFromFunc = invocationFromFunc.str ();
 }
 
 void FunctionEncoder::encode (IndentedStream &body, IndentedStream &preamble,
     int index, bool inMain) {
-  NodeEncoder::encode (body, preamble, index, inMain);
+  if (firstVisit) {
+    firstVisit = false;
+
+    preamble << functionSignatureLine << ";\n";
+
+    IndentedStream funcBody;
+    funcBody.incrementDepth ();
+    NodeEncoder::encode (funcBody, preamble, index, false);
+
+    preamble << functionSignatureLine << " {\n";
+    preamble << funcBody.str ();
+    preamble << "}\n";
+  }
+  if (inMain) {
+    body.indented () << functionInvocationLineFromMain << ";\n";
+  } else {
+    body.indented () << functionInvocationLineFromFunc << ";\n";
+  }
 }
 
 

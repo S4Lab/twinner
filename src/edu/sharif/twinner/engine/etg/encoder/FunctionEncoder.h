@@ -28,6 +28,10 @@ private:
 
   bool firstVisit;
 
+  std::string functionInvocationLineFromMain;
+  std::string functionInvocationLineFromFunc;
+  std::string functionSignatureLine;
+
 public:
   FunctionEncoder (const AddrToSizeMap &addressToSize);
   virtual ~FunctionEncoder ();
