@@ -83,14 +83,15 @@ const char *Executer::MAIN_ARGS_COMMUNICATION_TEMP_FILE =
     "/twinner/main-args-reporting.dat";
 
 Executer::Executer (int uniqueId,
-    std::string pinLauncher, std::string twintool,
+    std::string pinLauncher, std::string pinMemoryRange,
+    std::string twintool,
     std::string inputBinary, std::string _inputArguments,
     std::string endpoints, bool _newRecord, bool _replayRecord,
     std::string safeFunctions, std::string _tmpfolder,
     bool main, std::string stackOffset, bool naive, bool _overheads) :
     tmpfolder (_tmpfolder),
     baseCommand (pinLauncher
-    + " -pin_memory_range 0x40000000:0x60000000"
+    + " -pin_memory_range " + pinMemoryRange
     + " -t " + twintool
     + " -symbols " + tmpfolder + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE
     + " -trace " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE

@@ -46,6 +46,7 @@ private:
   std::string input;
   std::string twintool;
   std::string pin;
+  std::string pinMemoryRange;
   std::string twin;
   std::string arguments;
   std::string endpoints;
@@ -69,6 +70,7 @@ public:
   void setInputBinaryPath (std::string input);
   void setTwinToolPath (std::string twintool);
   void setPinLauncherPath (std::string pin);
+  void setPinMemoryRange (std::string pinMemoryRange);
   void setTwinBinaryPath (std::string twin);
   void setInputBinaryArguments (std::string arguments);
   void setAnalysisEndpoints (std::string endpoints);

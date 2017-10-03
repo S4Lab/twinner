@@ -89,7 +89,9 @@ private:
   const bool overheads;
 
 public:
-  Executer (int uniqueId, std::string pinLauncher, std::string twintool,
+  Executer (int uniqueId,
+      std::string pinLauncher, std::string pinMemoryRange,
+      std::string twintool,
       std::string inputBinary, std::string inputArguments,
       std::string endpoints, bool newRecord, bool replayRecord,
       std::string safeFunctions, std::string tmpfolder,

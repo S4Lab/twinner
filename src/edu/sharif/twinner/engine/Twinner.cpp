@@ -89,6 +89,10 @@ void Twinner::setPinLauncherPath (string pin) {
   this->pin = pin;
 }
 
+void Twinner::setPinMemoryRange (string pinMemoryRange) {
+  this->pinMemoryRange = pinMemoryRange;
+}
+
 void Twinner::setTwinBinaryPath (string twin) {
   this->twin = twin;
 }
@@ -157,7 +161,7 @@ bool Twinner::generateTwinBinary () {
   bool somePathsAreNotCovered = true;
   int i = 1;
   while (somePathsAreNotCovered) {
-    Executer ex (i, pin, twintool, input, arguments,
+    Executer ex (i, pin, pinMemoryRange, twintool, input, arguments,
                  endpoints, newRecord, replayRecord,
                  safeFunctions, tmpfolder,
                  main, stackOffset, naive, overheads);
@@ -182,7 +186,7 @@ bool Twinner::generateTwinBinary () {
   edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
   symbols.clear ();
   {
-    Executer ex (i, pin, twintool, input, arguments,
+    Executer ex (i, pin, pinMemoryRange, twintool, input, arguments,
                  endpoints, newRecord, replayRecord,
                  safeFunctions, tmpfolder,
                  main, stackOffset, naive, overheads);
