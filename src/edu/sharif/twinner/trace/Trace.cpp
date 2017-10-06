@@ -45,13 +45,8 @@ inline void write_map_entry (std::ofstream &out,
 Trace::Trace (const std::list < ExecutionTraceSegment * > &list,
     edu::sharif::twinner::util::MemoryManager *_memoryManager) :
     segments (list), memoryManager (_memoryManager) {
-  std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator =
-      segments.end ();
-  if (currentSegmentIterator != segments.begin ()) {
-    currentSegmentIterator--;
-  }
-  current = TimedTrace (this, currentSegmentIterator);
-  currentSegmentIndex = 0;
+  current = TimedTrace (this, segments.begin ());
+  currentSegmentIndex = segments.size () - 1;
   for (std::list < ExecutionTraceSegment * >::iterator it = segments.begin ();
       it != segments.end (); ++it) {
     (*it)->setTimedTrace (TimedTrace (this, it));
