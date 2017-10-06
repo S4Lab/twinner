@@ -94,7 +94,9 @@ void MarInfo::simplifyExpression (Expression *exp) const {
     if (dynamic_cast<edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *> (token)) {
       edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
           static_cast<edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *> (token);
-      if (reg->getAddress () == REG_RSI && reg->getGenerationIndex () == 0) {
+      if (reg->getAddress () == REG_RSI
+          && reg->getGenerationIndex () == 0
+          && reg->getSnapshotIndex () == 0) {
         token = new edu::sharif::twinner::trace::exptoken::NamedSymbol
             ("argv", "n_c_argv", true,
              edu::sharif::twinner::trace::cv::ConcreteValue64Bits
