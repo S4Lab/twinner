@@ -119,6 +119,35 @@ Snapshot::~Snapshot () {
   }
 }
 
+Snapshot *Snapshot::clone () const {
+  std::map < REG, Expression * > clonedRegisterToExpression;
+  for (std::map < REG, Expression * >::const_iterator it =
+      registerToExpression.begin (); it != registerToExpression.end (); ++it) {
+    clonedRegisterToExpression.insert
+        (make_pair (it->first, it->second->clone ()));
+  }
+  std::map < ADDRINT, Expression * > clonedMemToExp[5];
+  const std::map < ADDRINT, Expression * > *memToExp[]
+      = {&memoryAddressTo128BitsExpression, &memoryAddressTo64BitsExpression,
+    &memoryAddressTo32BitsExpression, &memoryAddressTo16BitsExpression,
+    &memoryAddressTo8BitsExpression, 0};
+  for (int i = 0; memToExp[i]; ++i) {
+    for (std::map < ADDRINT, Expression * >::const_iterator it =
+        memToExp[i]->begin (); it != memToExp[i]->end (); ++it) {
+      clonedMemToExp[i].insert (make_pair (it->first, it->second->clone ()));
+    }
+  }
+  std::list < Constraint * > clonedPathConstraints;
+  for (std::list < Constraint * >::const_iterator it = pathConstraints.begin ();
+      it != pathConstraints.end (); ++it) {
+    clonedPathConstraints.push_back ((*it)->clone ());
+  }
+  return new Snapshot (segmentIndex, snapshotIndex, clonedRegisterToExpression,
+                       clonedMemToExp[0], clonedMemToExp[1],
+                       clonedMemToExp[2], clonedMemToExp[3],
+                       clonedMemToExp[4], clonedPathConstraints);
+}
+
 Snapshot *Snapshot::instantiateNexSnapshot (const Snapshot &previousSnapshot) {
   const int segmentIndex = previousSnapshot.getSegmentIndex ();
   const int snapshotIndex = previousSnapshot.getSnapshotIndex () + 1;

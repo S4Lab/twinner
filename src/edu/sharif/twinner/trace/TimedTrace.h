@@ -33,6 +33,8 @@ public:
   TimedTrace (Trace *trace, std::list < ExecutionTraceSegment * >::iterator it);
   virtual ~TimedTrace ();
 
+  virtual TimedTrace *clone () const;
+
   std::list < ExecutionTraceSegment * >::iterator getSegmentIterator () const {
     return it;
   }

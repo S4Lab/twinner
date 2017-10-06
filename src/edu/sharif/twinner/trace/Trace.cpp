@@ -60,11 +60,29 @@ Trace::Trace () :
   currentSegmentIndex = 0;
 }
 
+Trace::Trace (const Trace &trace) :
+    memoryManager (trace.memoryManager) {
+  for (std::list < ExecutionTraceSegment * >::const_iterator it =
+      trace.segments.begin (); it != trace.segments.end (); ++it) {
+    segments.push_back ((*it)->clone ());
+  }
+  current = TimedTrace (this, segments.begin ());
+  currentSegmentIndex = segments.size () - 1;
+  for (std::list < ExecutionTraceSegment * >::iterator it = segments.begin ();
+      it != segments.end (); ++it) {
+    (*it)->setTimedTrace (TimedTrace (this, it));
+  }
+}
+
 Trace::~Trace () {
   while (!segments.empty ()) {
     delete segments.front ();
     segments.pop_front ();
   }
+}
+
+Trace *Trace::clone () const {
+  return new Trace (*this);
 }
 
 Expression *Trace::tryToGetSymbolicExpressionByRegister (int size, REG reg,

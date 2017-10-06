@@ -71,6 +71,8 @@ public:
       const std::map < ADDRINT, Expression * > &memMap);
   virtual ~Snapshot ();
 
+  virtual Snapshot *clone () const;
+
   static Snapshot *instantiateNexSnapshot (const Snapshot &previousSnapshot);
 
   void setTimedTrace (TimedTrace timedTrace);

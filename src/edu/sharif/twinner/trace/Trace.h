@@ -82,13 +82,17 @@ protected:
   Trace (int) {
   }
 
+  Trace ();
+  Trace (const Trace &trace);
+
 private:
   Trace (const std::list < ExecutionTraceSegment * > &list,
       edu::sharif::twinner::util::MemoryManager *memoryManager);
 
 public:
-  Trace ();
   virtual ~Trace ();
+
+  virtual Trace *clone () const;
 
   /**
    * Searches backwards to find queried values.

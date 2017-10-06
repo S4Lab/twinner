@@ -30,6 +30,22 @@ TimedTrace::TimedTrace (Trace *_trace,
 TimedTrace::~TimedTrace () {
 }
 
+TimedTrace *TimedTrace::clone () const {
+  Trace *clonedTrace = trace->clone ();
+  std::list < ExecutionTraceSegment * > &segments = trace->getTraceSegments ();
+  std::list < ExecutionTraceSegment * > &clonedSegments =
+      clonedTrace->getTraceSegments ();
+  for (std::list < ExecutionTraceSegment * >::iterator oit = segments.begin (),
+      cit = clonedSegments.begin (); oit != segments.end (); ++oit, ++cit) {
+    if (it == oit) {
+      return new TimedTrace (clonedTrace, cit);
+    }
+  }
+  edu::sharif::twinner::util::Logger::error () << "TimedTrace::clone ():"
+      " cannot find a matching iterator in segments list\n";
+  abort ();
+}
+
 Expression *TimedTrace::tryToGetSymbolicExpressionByRegister (int size,
     REG reg,
     const edu::sharif::twinner::trace::cv::ConcreteValue &regval,

@@ -46,6 +46,10 @@ FunctionInvocation::FunctionInvocation (std::string _name,
 FunctionInvocation::~FunctionInvocation () {
 }
 
+FunctionInvocation *FunctionInvocation::clone () const {
+  return new FunctionInvocation (name, args, types, firstArgumentAsString);
+}
+
 std::string FunctionInvocation::getCallingLine () const {
   std::stringstream ss;
   ss << name << " (";

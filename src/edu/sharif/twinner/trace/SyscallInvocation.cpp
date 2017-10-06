@@ -25,6 +25,10 @@ SyscallInvocation::SyscallInvocation (
 SyscallInvocation::~SyscallInvocation () {
 }
 
+SyscallInvocation *SyscallInvocation::clone () const {
+  return new SyscallInvocation (syscall);
+}
+
 edu::sharif::twinner::trace::syscall::Syscall
 SyscallInvocation::getSyscall () const {
   return syscall;

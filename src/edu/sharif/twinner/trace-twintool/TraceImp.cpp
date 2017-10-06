@@ -56,7 +56,15 @@ TraceImp::TraceImp (std::stringstream &symbolsInputStream,
   currentSegmentIndex = 0;
 }
 
+TraceImp::TraceImp (const TraceImp &trace) :
+    Trace (trace) {
+}
+
 TraceImp::~TraceImp () {
+}
+
+TraceImp *TraceImp::clone () const {
+  return new TraceImp (*this);
 }
 
 Expression *TraceImp::tryToGetSymbolicExpressionByRegister (int size, REG reg,

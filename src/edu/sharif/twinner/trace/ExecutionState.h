@@ -54,6 +54,13 @@ public:
   }
 
   /**
+   * Clones the execution state.
+   *
+   * @return a cloned and independent execution state based on this state.
+   */
+  virtual ExecutionState *clone () const = 0;
+
+  /**
    * The getter returns current value stored in one register.
    * Ownership of returned expression is kept and caller should clone it if required.
    * Returned expression can be changed if desired.

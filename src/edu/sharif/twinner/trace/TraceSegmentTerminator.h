@@ -30,6 +30,8 @@ protected:
 public:
   virtual ~TraceSegmentTerminator ();
 
+  virtual TraceSegmentTerminator *clone () const = 0;
+
   static TraceSegmentTerminator *loadFromBinaryStream (std::ifstream &in);
 
   virtual std::string getCallingLine () const = 0;

@@ -63,6 +63,18 @@ ExecutionTraceSegment::~ExecutionTraceSegment () {
   delete terminator;
 }
 
+ExecutionTraceSegment *ExecutionTraceSegment::clone () const {
+  std::list < Snapshot * > clonedSnapshots;
+  for (std::list < Snapshot * >::const_iterator it = snapshots.begin ();
+      it != snapshots.end (); ++it) {
+    clonedSnapshots.push_back ((*it)->clone ());
+  }
+  TraceSegmentTerminator *_terminator = terminator ? terminator->clone () : 0;
+  ExecutionTraceSegment *res = new ExecutionTraceSegment (segmentIndex, clonedSnapshots,
+                                                          _terminator);
+  return res;
+}
+
 void ExecutionTraceSegment::setTimedTrace (TimedTrace _timedTrace) {
   timedTrace = _timedTrace;
   Snapshot *snapshot = snapshots.back ();

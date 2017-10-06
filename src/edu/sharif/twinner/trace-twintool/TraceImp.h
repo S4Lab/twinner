@@ -25,7 +25,14 @@ public:
   TraceImp ();
   TraceImp (std::stringstream &symbolsFileInputStream,
       edu::sharif::twinner::util::MemoryManager *_memoryManager);
+
+private:
+  TraceImp (const TraceImp &trace);
+
+public:
   virtual ~TraceImp ();
+
+  virtual TraceImp *clone () const;
 
   /**
    * Searches backwards to find queried values.

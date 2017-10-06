@@ -30,6 +30,8 @@ public:
   SyscallInvocation (edu::sharif::twinner::trace::syscall::Syscall syscall);
   virtual ~SyscallInvocation ();
 
+  virtual SyscallInvocation *clone () const;
+
   edu::sharif::twinner::trace::syscall::Syscall getSyscall () const;
 
   virtual std::string getCallingLine () const;

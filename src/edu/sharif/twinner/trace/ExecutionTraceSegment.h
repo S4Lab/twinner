@@ -45,6 +45,8 @@ public:
       const std::map < ADDRINT, Expression * > &memMap);
   virtual ~ExecutionTraceSegment ();
 
+  virtual ExecutionTraceSegment *clone () const;
+
   void setTimedTrace (TimedTrace timedTrace);
 
   virtual Expression *tryToGetSymbolicExpressionByRegister (int size, REG reg,
