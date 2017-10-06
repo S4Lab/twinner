@@ -1331,7 +1331,13 @@ void Instrumenter::instrumentMemoryRegisterCorrespondence (
   for (UINT32 i = 0; i < countOfOperands; ++i) {
     if (INS_OperandIsMemory (ins, i)) {
       REG baseReg = INS_OperandMemoryBaseReg (ins, i);
-      if (baseReg != REG_INVALID ()) {
+      if (baseReg != REG_INVALID ()
+#ifdef TARGET_IA32E
+          && baseReg != REG_RIP
+#else
+          && baseReg != REG_EIP
+#endif
+          ) {
         ADDRDELTA displacement = INS_OperandMemoryDisplacement (ins, i);
         if (model == DST_RSP_SRC_CALL
             || model == DST_STK_SRC_IMPLICIT
