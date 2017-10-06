@@ -499,12 +499,12 @@ void Trace::printCompleteState (
 void Trace::printCompleteState (
     const edu::sharif::twinner::util::Logger &logger,
     std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator) const {
-  int i = 0;
+  int i = currentSegmentIndex;
   for (std::list < ExecutionTraceSegment * >::const_iterator it =
       currentSegmentIterator;
       it != segments.end (); ++it) {
     const ExecutionTraceSegment *seg = *it;
-    logger << "Segment #" << i++ << ":\n";
+    logger << "Segment #" << i-- << ":\n";
     seg->printCompleteState (logger);
   }
 }
