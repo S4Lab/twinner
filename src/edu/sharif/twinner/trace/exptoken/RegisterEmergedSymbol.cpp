@@ -212,6 +212,8 @@ const char *RegisterEmergedSymbol::getRegisterName () const {
     return "rsp";
   case REG_RBP:
     return "rbp";
+  case REG_RIP:
+    return "rip";
 #else
   case REG_EAX:
     return "eax";
@@ -229,6 +231,8 @@ const char *RegisterEmergedSymbol::getRegisterName () const {
     return "esp";
   case REG_EBP:
     return "ebp";
+  case REG_EIP:
+    return "eip";
 #endif
 #ifdef TARGET_IA32E
   case REG_R8:
@@ -304,6 +308,8 @@ const char *RegisterEmergedSymbol::getRegisterName () const {
         "32 bits "
 #endif
         "or 128 bits (XMM series) registers\n";
+    edu::sharif::twinner::util::Logger::error ()
+        << "Address: " << address << '\n';
     abort ();
   }
 }
@@ -580,9 +586,11 @@ std::map < REG, Expression * > RegisterEmergedSymbol::instantiateTemporarySymbol
 #ifdef TARGET_IA32E
     REG_RAX, REG_RBX, REG_RCX, REG_RDX,
     REG_RDI, REG_RSI, REG_RSP, REG_RBP,
+    REG_RIP,
 #else
     REG_EAX, REG_EBX, REG_ECX, REG_EDX,
     REG_EDI, REG_ESI, REG_ESP, REG_EBP,
+    REG_EIP,
 #endif
 #ifdef TARGET_IA32E
     REG_R8, REG_R9, REG_R10, REG_R11,
