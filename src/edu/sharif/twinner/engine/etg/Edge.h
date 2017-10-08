@@ -29,9 +29,10 @@ class Edge {
 private:
   Vertex src;
   Vertex dst;
+  std::string constraint;
 
 public:
-  Edge (Vertex src, Vertex dst);
+  Edge (Vertex src, Vertex dst, std::string constraint);
 
   friend std::ostream &operator<< (std::ostream &out, const Edge &v);
 };

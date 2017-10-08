@@ -215,9 +215,10 @@ Graph *ExecutionTraceGraph::getEtg () const {
       const std::list < ConstraintEdge * > children = it->getChildren ();
       for (std::list < ConstraintEdge * >::const_iterator edge =
           children.begin (); edge != children.end (); ++edge) {
-        InstructionNode *tn = (*edge)->getChild ();
+        ConstraintEdge *ce = *edge;
+        InstructionNode *tn = ce->getChild ();
         const Vertex u (tn);
-        g->second.push_back (make_pair (v, u));
+        g->second.push_back (Edge (v, u, ce->getConstraint ()->toString ()));
         nodes.push_back (tn);
       }
     }

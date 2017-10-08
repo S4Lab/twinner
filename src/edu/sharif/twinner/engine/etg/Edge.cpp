@@ -18,12 +18,13 @@ namespace twinner {
 namespace engine {
 namespace etg {
 
-Edge::Edge (Vertex _src, Vertex _dst) :
-    src (_src), dst (_dst) {
+Edge::Edge (Vertex _src, Vertex _dst, std::string _constraint) :
+    src (_src), dst (_dst), constraint (_constraint) {
 }
 
 std::ostream &operator<< (std::ostream &out, const Edge &e) {
-  return out << e.src.getName () << " -> " << e.dst.getName () << ';';
+  return out << e.src.getName () << " -> " << e.dst.getName ()
+      << " [label = \"" << e.constraint << "\"];";
 }
 
 }
