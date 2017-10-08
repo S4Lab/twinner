@@ -134,6 +134,24 @@ bool SymbolRepresentation::operator< (const SymbolRepresentation &sr) const {
   }
 }
 
+std::string SymbolRepresentation::toString () const {
+  std::stringstream ss;
+  if (isReg) {
+    ss << "Type=Reg, Addr=" << regAddress;
+  } else {
+    ss << "Type=Mem, Addr=0x" << std::hex << memAddress
+        << ", Size=" << std::dec << memSize;
+    if (cv) {
+      ss << ", Mask=0x" << std::hex << cv;
+    } else {
+      ss << ", No Mask";
+    }
+  }
+  ss << std::hex << ", SegmentIndex=0x" << generationIndex
+      << ", SnapshotIndex=0x" << snapshotIndex;
+  return ss.str ();
+}
+
 
 }
 }

@@ -14,6 +14,7 @@
 
 #include "Logger.h"
 
+#include "edu/sharif/twinner/trace/SymbolRepresentation.h"
 #include "edu/sharif/twinner/trace/Expression.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 
@@ -79,6 +80,11 @@ Logger Logger::debug () {
 Logger Logger::loquacious () {
   return Logger (internal::LOQUACIOUS_VERBOSENESS,
                  "LOQUACIOUS", internal::LOQUACIOUS_COLOR);
+}
+
+const Logger &Logger::operator<<
+(const edu::sharif::twinner::trace::SymbolRepresentation &sym) const {
+  return (*this) << "SymbolRepresentation(" << sym.toString () << ')';
 }
 
 const Logger &Logger::operator<<

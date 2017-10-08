@@ -27,6 +27,7 @@ namespace sharif {
 namespace twinner {
 namespace trace {
 
+class SymbolRepresentation;
 class Expression;
 class Constraint;
 
@@ -79,6 +80,7 @@ public:
   template <typename VALUE>
   const Logger &operator<< (const std::list < VALUE > &list) const;
 
+  const Logger &operator<< (const edu::sharif::twinner::trace::SymbolRepresentation &sym) const;
   const Logger &operator<< (const edu::sharif::twinner::trace::Expression *exp) const;
   const Logger &operator<< (const edu::sharif::twinner::trace::Constraint *c) const;
   const Logger &operator<< (

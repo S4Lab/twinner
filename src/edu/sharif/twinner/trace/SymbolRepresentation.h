@@ -54,6 +54,8 @@ public:
   Expression *resolve (const Snapshot *sna) const;
   bool operator== (const SymbolRepresentation &sr) const;
   bool operator< (const SymbolRepresentation &sr) const;
+
+  std::string toString () const;
 };
 
 }
