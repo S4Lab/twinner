@@ -241,7 +241,7 @@ Expression *Trace::setSymbolicExpressionByMemoryAddress (int size, ADDRINT memor
 void Trace::addPathConstraints (
     const std::list <edu::sharif::twinner::trace::Constraint *> &c,
     const edu::sharif::twinner::trace::Constraint *lastConstraint) {
-  return current.addPathConstraints (c, lastConstraint);
+  current.addPathConstraints (c, lastConstraint);
 }
 
 void Trace::addPathConstraints (
@@ -511,7 +511,7 @@ void Trace::printPathConstraints (
 
 void Trace::printCompleteState (
     const edu::sharif::twinner::util::Logger &logger) const {
-  return current.printCompleteState (logger);
+  current.printCompleteState (logger);
 }
 
 void Trace::printCompleteState (

@@ -117,31 +117,31 @@ Expression *TimedTrace::setSymbolicExpressionByMemoryAddress (int size,
 void TimedTrace::addPathConstraints (
     const std::list <edu::sharif::twinner::trace::Constraint *> &c,
     const edu::sharif::twinner::trace::Constraint *lastConstraint) {
-  return trace->addPathConstraints (c, lastConstraint, it);
+  trace->addPathConstraints (c, lastConstraint, it);
 }
 
 void TimedTrace::printRegistersValues (
     const edu::sharif::twinner::util::Logger &logger) const {
-  return trace->printRegistersValues (logger, it);
+  trace->printRegistersValues (logger, it);
 }
 
 void TimedTrace::printMemoryAddressesValues (
     const edu::sharif::twinner::util::Logger &logger) const {
-  return trace->printMemoryAddressesValues (logger, it);
+  trace->printMemoryAddressesValues (logger, it);
 }
 
 void TimedTrace::printPathConstraints (
     const edu::sharif::twinner::util::Logger &logger) const {
-  return trace->printPathConstraints (logger, it);
+  trace->printPathConstraints (logger, it);
 }
 
 void TimedTrace::printCompleteState (
     const edu::sharif::twinner::util::Logger &logger) const {
-  return trace->printCompleteState (logger, it);
+  trace->printCompleteState (logger, it);
 }
 
 void TimedTrace::saveToBinaryStream (std::ofstream &out) const {
-  return trace->saveToBinaryStream (out);
+  trace->saveToBinaryStream (out);
 }
 
 }
