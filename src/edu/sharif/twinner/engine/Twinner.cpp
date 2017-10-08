@@ -97,6 +97,10 @@ void Twinner::setTwinBinaryPath (string twin) {
   this->twin = twin;
 }
 
+void Twinner::setMaxTraces (int maxTraces) {
+  this->maxTraces = maxTraces;
+}
+
 void Twinner::setInputBinaryArguments (string arguments) {
   this->arguments = arguments;
 }
@@ -160,7 +164,7 @@ bool Twinner::generateTwinBinary () {
   set < const edu::sharif::twinner::trace::exptoken::Symbol * > symbols;
   bool somePathsAreNotCovered = true;
   int i = 1;
-  while (somePathsAreNotCovered) {
+  while (somePathsAreNotCovered && i <= maxTraces) {
     Executer ex (i, pin, pinMemoryRange, twintool, input, arguments,
                  endpoints, newRecord, replayRecord,
                  safeFunctions, tmpfolder,

@@ -52,6 +52,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &twintool,
     string &pin, string &pinMemoryRange,
     string &twin,
+    int &maxTraces,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads);
 ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
@@ -63,6 +64,7 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
     string &twintool,
     string &pin, string &pinMemoryRange,
     string &twin,
+    int &maxTraces,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads);
 int run (string etgpath, string input, string args, string endpoints,
@@ -71,6 +73,7 @@ int run (string etgpath, string input, string args, string endpoints,
     string twintool,
     string pin, string pinMemoryRange,
     string twin,
+    int maxTraces,
     bool main, string stackOffset, bool naive, bool measureOverheads);
 int checkTraceFile (string traceFilePath, string memoryFilePath);
 
@@ -90,6 +93,7 @@ int startTwinner (int argc, char *argv[]) {
       tmpfolder, twintool,
       pin, pinMemoryRange,
       twin;
+  int maxTraces;
   bool justAnalyzeMainRoutine = false;
   bool newRecord, replayRecord;
   string stackOffset;
@@ -101,6 +105,7 @@ int startTwinner (int argc, char *argv[]) {
                           tmpfolder, twintool,
                           pin, pinMemoryRange,
                           twin,
+                          maxTraces,
                           justAnalyzeMainRoutine, stackOffset,
                           naive, measureOverheads)) {
   case CONTINUE_NORMALLY:
@@ -121,6 +126,7 @@ int startTwinner (int argc, char *argv[]) {
       return run (etgpath, input, args, endpoints, newRecord, replayRecord,
                   safeFunctions,
                   tmpfolder, twintool, pin, pinMemoryRange, twin,
+                  maxTraces,
                   justAnalyzeMainRoutine, stackOffset, naive, measureOverheads);
     }
     return -2;
@@ -149,6 +155,7 @@ int run (string etgpath, string input, string args,
     string tmpfolder, string twintool,
     string pin, string pinMemoryRange,
     string twin,
+    int maxTraces,
     bool main, string stackOffset, bool naive, bool measureOverheads) {
   edu::sharif::twinner::util::Logger::info ()
       << "[verboseness level: "
@@ -161,6 +168,7 @@ int run (string etgpath, string input, string args,
       << "Temp folder: " << tmpfolder << '\n'
       << "TwinTool pintool: " << twintool
       << "\nPin launcher: " << pin
+      << "\nMaximum Number of Examined Traces: " << maxTraces
       << "\nPin memory range: " << pinMemoryRange
       << "\nOutput twin file: " << twin << '\n';
   edu::sharif::twinner::engine::Twinner tw;
@@ -170,6 +178,7 @@ int run (string etgpath, string input, string args,
   tw.setPinLauncherPath (pin);
   tw.setPinMemoryRange (pinMemoryRange);
   tw.setTwinBinaryPath (twin);
+  tw.setMaxTraces (maxTraces);
   tw.setInputBinaryArguments (args);
   tw.setAnalysisEndpoints (endpoints);
   tw.setRecord (newRecord, replayRecord);
@@ -223,6 +232,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &twintool,
     string &pin, string &pinMemoryRange,
     string &twin,
+    int &maxTraces,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads) {
   string verboseStr = "warning", logfileStr = "out";
@@ -232,6 +242,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
                       input, args, endpoints, newRecord, replayRecord,
                       safeFunctions, verboseStr, logfileStr,
                       tmpfolder, twintool, pin, pinMemoryRange, twin,
+                      maxTraces,
                       justAnalyzeMainRoutine, stackOffset,
                       naive, measureOverheads);
   if (status != ERROR_OCCURRED) {
@@ -255,6 +266,7 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
     string &twintool,
     string &pin, string &pinMemoryRange,
     string &twin,
+    int &maxTraces,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads) {
   const ArgParser::Option options[] = {
@@ -278,6 +290,8 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
       false, false},
     { 'n', "naive", ArgParser::NO,
       "do not instrument; just print instructions", false, false},
+    { 'N', "number-of-traces", ArgParser::YES, "Maximum number of traces to be examined"
+      " (default: 100)", false, false},
     { 't', "tool", ArgParser::YES, "twintool executable/library file", true, false},
     { 'T', "tmpfolder", ArgParser::YES, "tmp folder (default: /tmp)", false, false},
     { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true, false},
@@ -299,6 +313,7 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
   newRecord = replayRecord = false;
   tmpfolder = "/tmp";
   pinMemoryRange = "0x400000000:0x600000000";
+  maxTraces = 100;
   for (int argind = 0; argind < parser.arguments (); ++argind) {
     const int code = parser.code (argind);
     if (!code) { // no more options
@@ -360,6 +375,13 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
     case 'n':
       naive = true;
       break;
+    case 'N':
+    {
+      std::stringstream ss;
+      ss << parser.argument (argind);
+      ss >> maxTraces;
+      break;
+    }
     case 't':
       twintool = parser.argument (argind);
       break;

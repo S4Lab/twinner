@@ -50,6 +50,7 @@ private:
   std::string twin;
   std::string arguments;
   std::string endpoints;
+  int maxTraces;
   bool newRecord;
   bool replayRecord;
   std::string safeFunctions;
@@ -72,6 +73,7 @@ public:
   void setPinLauncherPath (std::string pin);
   void setPinMemoryRange (std::string pinMemoryRange);
   void setTwinBinaryPath (std::string twin);
+  void setMaxTraces (int maxTraces);
   void setInputBinaryArguments (std::string arguments);
   void setAnalysisEndpoints (std::string endpoints);
   void setRecord (bool newRecord, bool replayRecord);
