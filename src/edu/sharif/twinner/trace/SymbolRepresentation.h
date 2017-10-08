@@ -19,6 +19,10 @@ namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
+namespace cv {
+
+class ConcreteValue;
+}
 namespace exptoken {
 
 class Symbol;
@@ -35,9 +39,14 @@ private:
   REG regAddress;
   ADDRINT memAddress;
   int memSize;
+  UINT64 cv;
 
 public:
-  SymbolRepresentation (const edu::sharif::twinner::trace::exptoken::Symbol *symbol);
+  SymbolRepresentation (
+      const edu::sharif::twinner::trace::exptoken::Symbol *symbol);
+  SymbolRepresentation (
+      const edu::sharif::twinner::trace::exptoken::Symbol *symbol,
+      const edu::sharif::twinner::trace::cv::ConcreteValue &cv);
 
   /**
    * Caller takes ownership of the returned expression.

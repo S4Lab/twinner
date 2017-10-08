@@ -12,21 +12,26 @@
 
 #include "SymbolRepresentation.h"
 
+#include <sstream>
+
 #include "Snapshot.h"
 
 #include "edu/sharif/twinner/trace/exptoken/RegisterEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
+#include "Expression.h"
 
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
 
-SymbolRepresentation::SymbolRepresentation (const edu::sharif::twinner::trace::exptoken::Symbol *sym) :
+SymbolRepresentation::SymbolRepresentation (
+    const edu::sharif::twinner::trace::exptoken::Symbol *sym) :
     generationIndex (sym->getGenerationIndex ()),
-    snapshotIndex (sym->getSnapshotIndex ()) {
+    snapshotIndex (sym->getSnapshotIndex ()),
+    cv (0) {
   const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
       dynamic_cast<const edu::sharif::twinner::trace::exptoken
       ::RegisterEmergedSymbol *> (sym);
@@ -49,12 +54,49 @@ SymbolRepresentation::SymbolRepresentation (const edu::sharif::twinner::trace::e
   }
 }
 
+SymbolRepresentation::SymbolRepresentation (
+    const edu::sharif::twinner::trace::exptoken::Symbol *sym,
+    const edu::sharif::twinner::trace::cv::ConcreteValue &_cv) :
+    generationIndex (sym->getGenerationIndex ()),
+    snapshotIndex (sym->getSnapshotIndex ()),
+    cv (_cv.toUint64 ()) {
+  const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
+      dynamic_cast<const edu::sharif::twinner::trace::exptoken
+      ::RegisterEmergedSymbol *> (sym);
+  if (reg) {
+    isReg = true;
+    regAddress = reg->getAddress ();
+  } else {
+    const edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol *mem =
+        dynamic_cast<const edu::sharif::twinner::trace::exptoken
+        ::MemoryEmergedSymbol *> (sym);
+    if (mem) {
+      isReg = false;
+      memAddress = mem->getAddress ();
+      memSize = mem->getValue ().getSize ();
+      if (memSize > 64) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "SymbolRepresentation constructor:"
+            " memory size is larger than 64 bits\n";
+        abort ();
+      }
+    } else {
+      edu::sharif::twinner::util::Logger::error ()
+          << "SymbolRepresentation constructor: symbol should be reg or mem\n";
+      abort ();
+    }
+  }
+}
+
 Expression *SymbolRepresentation::resolve (const Snapshot *sna) const {
   Expression *exp;
   if (isReg) {
     exp = sna->resolveRegister (regAddress);
   } else {
     exp = sna->resolveMemory (memSize, memAddress);
+    if (exp && cv) {
+      exp->bitwiseAnd (cv);
+    }
   }
   return exp;
 }
@@ -64,7 +106,10 @@ bool SymbolRepresentation::operator== (const SymbolRepresentation &sr) const {
       && generationIndex == sr.generationIndex
       && snapshotIndex == sr.snapshotIndex
       && ((isReg && regAddress == sr.regAddress)
-          || (!isReg && memAddress == sr.memAddress && memSize == sr.memSize));
+          || (!isReg
+              && memAddress == sr.memAddress
+              && memSize == sr.memSize
+              && cv == sr.cv));
 }
 
 bool SymbolRepresentation::operator< (const SymbolRepresentation &sr) const {
@@ -83,7 +128,9 @@ bool SymbolRepresentation::operator< (const SymbolRepresentation &sr) const {
   } else {
     return sr.isReg
         || memAddress < sr.memAddress
-        || (memAddress == sr.memAddress && memSize < sr.memSize);
+        || (memAddress == sr.memAddress && memSize < sr.memSize)
+        || (memAddress == sr.memAddress && memSize == sr.memSize
+            && cv < sr.cv);
   }
 }
 

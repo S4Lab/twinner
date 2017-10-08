@@ -33,6 +33,8 @@
 #include "edu/sharif/twinner/trace/cv/ConcreteValue.h"
 #include "edu/sharif/twinner/trace/syscall/Syscall.h"
 #include "SnapshotIterator.h"
+#include "exptoken/Constant.h"
+#include "exptoken/BitwiseAndOperator.h"
 
 namespace edu {
 namespace sharif {
@@ -580,6 +582,24 @@ std::set<SymbolRepresentation> Trace::aggregateTemporarySymbols (
       const edu::sharif::twinner::trace::exptoken::Symbol *symbol =
           dynamic_cast<edu::sharif::twinner::trace::exptoken::Symbol *> (*it2);
       if (symbol && symbol->isTemporary ()) {
+        Expression::Stack::const_iterator it3 = it2;
+        if (++it3 != stack.end ()) {
+          const edu::sharif::twinner::trace::exptoken::Constant *mask =
+              dynamic_cast<edu::sharif::twinner::trace::exptoken
+              ::Constant *> (*it3);
+          if (mask) {
+            if (++it3 != stack.end ()) {
+              const edu::sharif::twinner::trace::exptoken::BitwiseAndOperator *op =
+                  dynamic_cast<edu::sharif::twinner::trace::exptoken
+                  ::BitwiseAndOperator *> (*it3);
+              if (op) {
+                temporarySymbols.insert
+                    (SymbolRepresentation (symbol, mask->getValue ()));
+                continue;
+              }
+            }
+          }
+        }
         temporarySymbols.insert (SymbolRepresentation (symbol));
       }
     }
