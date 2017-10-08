@@ -983,10 +983,17 @@ void Snapshot::replaceTemporarySymbols (Expression *exp) const {
 }
 
 std::list< std::pair< const Expression *, bool > >
-Snapshot::getCriticalExpressions () const {
+Snapshot::getCriticalExpressions (
+    std::list < int > constraintIndices) const {
   std::list < std::pair < const Expression *, bool> > criticalExpressions;
+  int constraintIndex = 0;
   for (std::list < Constraint * >::const_iterator it = pathConstraints.begin ();
-      it != pathConstraints.end (); ++it) {
+      !constraintIndices.empty () && it != pathConstraints.end ();
+      ++it, ++constraintIndex) {
+    if (constraintIndices.front () != constraintIndex) {
+      continue;
+    }
+    constraintIndices.pop_front ();
     const Constraint *c = *it;
     criticalExpressions.push_back (make_pair (c->getMainExpression (), false));
     if (c->getAuxExpression ()) {

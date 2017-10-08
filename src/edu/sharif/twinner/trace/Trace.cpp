@@ -539,15 +539,19 @@ const edu::sharif::twinner::util::MemoryManager *Trace::getMemoryManager () cons
   return memoryManager;
 }
 
-void Trace::markCriticalAddresses () {
+void Trace::markCriticalAddresses (Trace *relativeTrace,
+    const std::map < Snapshot *, std::list < int > > &effectiveConstraints) {
   // Iterating from the end of the trace backwards
   std::set<SymbolRepresentation> criticalSymbols;
-  for (Snapshot::snapshot_reverse_iterator it = rbegin ();
-      it != rend (); ++it) {
+  for (Snapshot::snapshot_reverse_iterator it = rbegin (),
+      it2 = relativeTrace->rbegin (); it != rend (); ++it, ++it2) {
     Snapshot &currentSnapshot = *it;
+    Snapshot &relativeSnapshot = *it2;
     currentSnapshot.addCriticalSymbols (criticalSymbols);
+    relativeSnapshot.addCriticalSymbols (criticalSymbols);
     std::list < std::pair < const Expression *, bool > > criticalExpressions =
-        currentSnapshot.getCriticalExpressions ();
+        relativeSnapshot.getCriticalExpressions
+        (effectiveConstraints.find (&currentSnapshot)->second);
     criticalSymbols = aggregateTemporarySymbols (criticalExpressions);
     for (std::list < std::pair < const Expression *, bool > >
         ::const_iterator it3 = criticalExpressions.begin ();

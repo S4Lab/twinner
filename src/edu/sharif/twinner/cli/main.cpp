@@ -204,9 +204,13 @@ int checkTraceFile (string traceFilePath, string memoryFilePath) {
   trace->printCompleteState (edu::sharif::twinner::util::Logger::info ());
 
   edu::sharif::twinner::engine::etg::ExecutionTraceGraph ct;
-  trace->markCriticalAddresses ();
+  edu::sharif::twinner::trace::Trace *relativeTrace = trace->clone ();
   trace->replaceTemporarySymbols ();
-  ct.addConstraints (trace);
+  edu::sharif::twinner::engine::etg::TraceCriticalAddressInfo info =
+      ct.addConstraints (trace);
+  trace->markCriticalAddresses (relativeTrace, info.effectiveConstraints);
+  delete relativeTrace;
+  ct.mergePath (info.nodeSnapshotPairs);
   return 0;
 }
 

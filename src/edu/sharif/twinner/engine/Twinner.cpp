@@ -294,12 +294,17 @@ void Twinner::addExecutionTrace (edu::sharif::twinner::trace::Trace *trace) {
   edu::sharif::twinner::util::Logger log = edu::sharif::twinner::util::Logger::debug ();
   log << "Adding execution trace:\n";
   trace->printCompleteState (log);
-  log << "Marking critical addresses in trace...\n";
-  trace->markCriticalAddresses ();
+  edu::sharif::twinner::trace::Trace *relativeTrace = trace->clone ();
   log << "Replacing temporary symbols in trace...\n";
   trace->replaceTemporarySymbols ();
   traces.push_back (trace);
-  etg->addConstraints (trace);
+  edu::sharif::twinner::engine::etg::TraceCriticalAddressInfo info =
+      etg->addConstraints (trace);
+  log << "Marking critical addresses in trace...\n";
+  trace->markCriticalAddresses (relativeTrace, info.effectiveConstraints);
+  delete relativeTrace;
+  log << "Merging the new path...\n";
+  etg->mergePath (info.nodeSnapshotPairs);
   log << "Done.\n";
 }
 

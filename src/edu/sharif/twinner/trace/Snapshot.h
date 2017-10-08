@@ -199,9 +199,11 @@ public:
    * Each returned expression is paired with an ownership flag which is true
    * if and only if the caller should take its ownership.
    *
+   * @param constraintIndices The list of indices of effective constraints.
    * @return A list of all critical expressions, paired with their ownership.
    */
-  std::list< std::pair< const Expression *, bool > > getCriticalExpressions () const;
+  std::list< std::pair< const Expression *, bool > > getCriticalExpressions (
+      std::list < int > constraintIndices) const;
 
   /**
    * Adds given criticalSymbols set of memory/register temporary symbols to

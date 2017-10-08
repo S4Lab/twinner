@@ -270,7 +270,8 @@ public:
 
   edu::sharif::twinner::util::MemoryManager *getMemoryManager ();
   const edu::sharif::twinner::util::MemoryManager *getMemoryManager () const;
-  void markCriticalAddresses ();
+  void markCriticalAddresses (Trace *relativeTrace,
+      const std::map < Snapshot *, std::list < int > > &effectiveConstraints);
   void replaceTemporarySymbols ();
 
 protected:

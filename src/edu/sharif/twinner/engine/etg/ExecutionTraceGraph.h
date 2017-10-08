@@ -16,6 +16,7 @@
 #include "Vertex.h"
 
 #include <list>
+#include <map>
 
 namespace edu {
 namespace sharif {
@@ -23,12 +24,23 @@ namespace twinner {
 namespace trace {
 
 class Trace;
+class Snapshot;
 class Constraint;
 }
 namespace engine {
 namespace etg {
 
 class InstructionNode;
+
+struct TraceCriticalAddressInfo {
+  typedef edu::sharif::twinner::trace::Snapshot * SnapshotPtr;
+  typedef std::pair < InstructionNode *, SnapshotPtr > NodeSnapshotPair;
+  typedef int ConstraintIndex;
+  typedef std::list < ConstraintIndex > ConstraintIndices;
+
+  std::list < NodeSnapshotPair > nodeSnapshotPairs;
+  std::map < SnapshotPtr, ConstraintIndices > effectiveConstraints;
+};
 
 class ExecutionTraceGraph {
 private:
@@ -41,7 +53,11 @@ public:
   ExecutionTraceGraph ();
   ~ExecutionTraceGraph ();
 
-  void addConstraints (const edu::sharif::twinner::trace::Trace *trace);
+  TraceCriticalAddressInfo addConstraints (
+      const edu::sharif::twinner::trace::Trace *trace);
+  void mergePath (
+      const std::list < TraceCriticalAddressInfo::NodeSnapshotPair > &pairs);
+
   bool getNextConstraintsList (
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
 

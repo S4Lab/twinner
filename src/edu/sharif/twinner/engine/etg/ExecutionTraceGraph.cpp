@@ -46,7 +46,9 @@ ExecutionTraceGraph::~ExecutionTraceGraph () {
   delete alwaysTrue;
 }
 
-void ExecutionTraceGraph::addConstraints (const edu::sharif::twinner::trace::Trace *trace) {
+TraceCriticalAddressInfo ExecutionTraceGraph::addConstraints (
+    const edu::sharif::twinner::trace::Trace *trace) {
+  TraceCriticalAddressInfo info;
   edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->clearState ();
   InstructionNode *node = root;
   ConstraintEdge *edge = 0;
@@ -64,6 +66,8 @@ void ExecutionTraceGraph::addConstraints (const edu::sharif::twinner::trace::Tra
       edu::sharif::twinner::trace::Snapshot *snapshot = *it;
       const std::list < edu::sharif::twinner::trace::Constraint * > &constraints =
           snapshot->getPathConstraints ();
+      TraceCriticalAddressInfo::ConstraintIndices constraintsIndices;
+      TraceCriticalAddressInfo::ConstraintIndex constraintIndex = 0;
       InstructionNode const *preSnapshot = node;
       for (std::list < edu::sharif::twinner::trace::Constraint * >
           ::const_iterator it2 = constraints.begin (); it2 != constraints.end (); ++it2) {
@@ -71,20 +75,35 @@ void ExecutionTraceGraph::addConstraints (const edu::sharif::twinner::trace::Tra
         InstructionNode *next = node->addConstraint
             (constraint, trace->getMemoryManager (), (depth <= 10), edge);
         if (next != node) {
+          constraintsIndices.push_back (constraintIndex);
           node = next;
           depth++;
         }
+        constraintIndex++;
       }
+      info.effectiveConstraints.insert (make_pair (snapshot, constraintsIndices));
       if (node != preSnapshot) {
-        node->mergeCriticalAddresses (snapshot);
+        info.nodeSnapshotPairs.push_back (make_pair (node, snapshot));
       }
     }
     if (node == preSegment) { // Each segment must have at least one constraint
       node = node->addConstraint
           (alwaysTrue, trace->getMemoryManager (), false, edge);
-      node->mergeCriticalAddresses (snapshots.back ());
+      info.nodeSnapshotPairs.push_back (make_pair (node, snapshots.back ()));
     }
     edge->registerCorrespondingSegment (segment);
+  }
+  return info;
+}
+
+void ExecutionTraceGraph::mergePath (
+    const std::list < TraceCriticalAddressInfo::NodeSnapshotPair > &pairs) {
+  InstructionNode *node = 0;
+  for (std::list < TraceCriticalAddressInfo::NodeSnapshotPair >
+      ::const_iterator it = pairs.begin (); it != pairs.end (); ++it) {
+    node = it->first;
+    edu::sharif::twinner::trace::Snapshot *snapshot = it->second;
+    node->mergeCriticalAddresses (snapshot);
   }
   mergePath (node);
   iterator = root;
