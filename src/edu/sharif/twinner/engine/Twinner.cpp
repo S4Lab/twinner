@@ -174,14 +174,16 @@ bool Twinner::generateTwinBinary () {
     if (trace == 0 || ex.isLastExecutionSignaled ()) {
       // TODO: encode the abortion scenario in the twincode
       break;
-    }
-    if (main) {
-      addExecutionTrace (trace, ex.readMarInfo ());
     } else {
-      addExecutionTrace (trace);
+      if (main) {
+        addExecutionTrace (trace, ex.readMarInfo ());
+      } else {
+        addExecutionTrace (trace);
+      }
     }
     // symbols will be filled with newly instantiated objects and should be deleted...
     somePathsAreNotCovered = calculateSymbolsValuesForCoveringNextPath (symbols);
+    etg->dumpTree ();
   }
   edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
   symbols.clear ();

@@ -239,6 +239,8 @@ public:
   const Expression *resolveRegister (REG address) const;
 
 private:
+  bool areExpressionsEquivalent (const Expression &first,
+      const Expression &second) const;
   void initializeOverlappingMemoryLocationsDownwards (int size,
       ADDRINT memoryEa, const Expression &changedExp,
       int shiftAmount = 0);

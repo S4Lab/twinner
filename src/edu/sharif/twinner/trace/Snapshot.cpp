@@ -189,6 +189,14 @@ void Snapshot::setOverwritingMemoryExpression (int size,
   exp->setOverwriting (isOverwriting);
 }
 
+bool Snapshot::areExpressionsEquivalent (const Expression &first,
+    const Expression &second) const {
+  if (first == second) {
+    return true;
+  }
+  return false;
+}
+
 void Snapshot::initializeOverlappingMemoryLocationsDownwards (int size,
     ADDRINT memoryEa, const Expression &expression, int shiftAmount) {
   size /= 2;
@@ -1006,7 +1014,10 @@ bool Snapshot::satisfiesMemoryRegisterCriticalExpressions (
       it != sna->criticalSymbols.end (); ++it) {
     const Expression *ourExp = it->resolve (this);
     const Expression *targetExp = it->resolve (sna);
-    if (!(ourExp && targetExp && (*ourExp) == (*targetExp))) {
+    const bool match = ourExp
+        && targetExp
+        && areExpressionsEquivalent (*ourExp, *targetExp);
+    if (!match) {
       return false;
     }
   }

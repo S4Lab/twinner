@@ -225,7 +225,7 @@ void InstructionNode::dumpSubTree (edu::sharif::twinner::util::Logger &logger,
   repeat (pad) {
     logger << "  ";
   }
-  logger << "Node(" << debugId << "{" << toString () << "}) -> \n";
+  logger << "Node(" << toString () << ") -> \n";
   for (std::list < ConstraintEdge * >::const_iterator it = children.begin ();
       it != children.end (); ++it) {
     const ConstraintEdge *edge = *it;
@@ -299,10 +299,11 @@ const std::list < ConstraintEdge * > &InstructionNode::getParents () const {
 
 std::string InstructionNode::toString () const {
   std::stringstream ss;
-  ss << insId;
+  ss << std::hex << debugId << "{" << insId;
   if (insId) {
     ss << "; " << memoryManager->getPointerToAllocatedMemory (insId);
   }
+  ss << "}";
   return ss.str ();
 }
 
