@@ -386,7 +386,7 @@ Executer::executeSystemCommand (std::string command) {
     return 0;
   }
   if (newRecord || replayRecord) {
-    if (!recordExecutionResult (inputBinaryHash, argsHash, symbolsHash)) {
+    if (!recordExecutionResult (inputBinaryHash, argsHash, symbolsHash, true)) {
       signaled = true;
       return 0;
     }
@@ -476,7 +476,7 @@ Executer::executeSingleTraceInInitialStateDetectionMode () const {
     abort ();
   }
   if (newRecord) {
-    if (!recordExecutionResult (inputBinaryHash, argsHash, symbolsHash)) {
+    if (!recordExecutionResult (inputBinaryHash, argsHash, symbolsHash, false)) {
       abort ();
     }
   }
@@ -541,7 +541,7 @@ int createDir (const char *path) {
 }
 
 bool Executer::recordExecutionResult (std::string inputBinaryHash,
-    std::string argsHash, std::string symbolsHash) const {
+    std::string argsHash, std::string symbolsHash, bool complete) const {
   if (createDir ((tmpfolder + "/twinner/record").c_str ()) != 0
       || createDir ((tmpfolder + "/twinner/record/"
                      + inputBinaryHash).c_str ()) != 0
@@ -553,14 +553,24 @@ bool Executer::recordExecutionResult (std::string inputBinaryHash,
         << "Error: Cannot create record destination folders.\n";
     abort ();
   }
-  if (system (("cp " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
-               + " " + tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
-               + " " + tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE
-               + " " + tmpfolder + "/twinner/record/" + inputBinaryHash
-               + "/" + argsHash + "/" + symbolsHash + "/").c_str ()) != 0) {
-    edu::sharif::twinner::util::Logger::error ()
-        << "Error: Cannot copy the execution result files.\n";
-    return false;
+  if (complete) {
+    if (system (("cp " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
+                 + " " + tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
+                 + " " + tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE
+                 + " " + tmpfolder + "/twinner/record/" + inputBinaryHash
+                 + "/" + argsHash + "/" + symbolsHash + "/").c_str ()) != 0) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "Error: Cannot copy the execution result files.\n";
+      return false;
+    }
+  } else {
+    if (system (("cp " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
+                 + " " + tmpfolder + "/twinner/record/" + inputBinaryHash
+                 + "/" + argsHash + "/" + symbolsHash + "/").c_str ()) != 0) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "Error: Cannot copy the execution trace file.\n";
+      return false;
+    }
   }
   return true;
 }

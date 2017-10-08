@@ -137,7 +137,7 @@ private:
   std::string calculateHash (std::string file) const;
   std::string calculateStringHash (std::string str) const;
   bool recordExecutionResult (std::string inputBinaryHash,
-      std::string argsHash, std::string symbolsHash) const;
+      std::string argsHash, std::string symbolsHash, bool complete) const;
   bool restoreExecutionResult (std::string inputBinaryHash,
       std::string argsHash, std::string symbolsHash) const;
 };
