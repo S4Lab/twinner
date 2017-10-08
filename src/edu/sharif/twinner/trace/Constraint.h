@@ -110,6 +110,7 @@ public:
   Constraint *clone () const;
 
   std::string toString () const;
+  std::string toCompactString () const;
 
   const Expression *getMainExpression () const;
   Expression *getMainExpression ();
@@ -155,6 +156,9 @@ public:
       const Expression *mainExp, uint32_t instruction);
 
   static Constraint *instantiateTautology (bool valid);
+
+private:
+  std::string getComparisonOperatorString () const;
 };
 
 }

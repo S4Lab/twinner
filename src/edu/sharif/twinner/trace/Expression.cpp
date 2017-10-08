@@ -170,12 +170,26 @@ std::string Expression::toString () const {
   return toDetailedString ();
 }
 
+std::string Expression::toCompactString () const {
+  if (isTrivial (true)) {
+    std::stringstream ss;
+    ss << *lastConcreteValue;
+    return ss.str ();
+  }
+  return toDetailedCompactString ();
+}
+
 std::string Expression::toDetailedString () const {
   std::stringstream ss;
   ConvertToInfixExpressionStringVisitor visitor;
   std::string str = visit (visitor);
   ss << str << " /*" << *lastConcreteValue << "*/";
   return ss.str ();
+}
+
+std::string Expression::toDetailedCompactString () const {
+  ConvertToInfixExpressionStringVisitor visitor;
+  return visit (visitor);
 }
 
 void Expression::unaryOperation (Operator *op, const Expression *exp) {

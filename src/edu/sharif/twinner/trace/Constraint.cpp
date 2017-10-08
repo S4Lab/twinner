@@ -94,38 +94,7 @@ std::string Constraint::toString () const {
   } else {
     ss << "/*signed {*/" << mainExp->toString () << "/*}*/";
   }
-  switch (type) {
-  case NON_POSITIVE:
-  case BELOW_OR_EQUAL:
-  case LESS_OR_EQUAL:
-    ss << " <= ";
-    break;
-  case NON_NEGATIVE:
-  case ABOVE_OR_EQUAL:
-  case GREATER_OR_EQUAL:
-    ss << " >= ";
-    break;
-  case POSITIVE:
-  case ABOVE:
-  case GREATER:
-    ss << " > ";
-    break;
-  case NEGATIVE:
-  case BELOW:
-  case LESS:
-    ss << " < ";
-    break;
-  case ZERO:
-  case EQUAL:
-    ss << " == ";
-    break;
-  case NON_ZERO:
-  case NON_EQUAL:
-    ss << " != ";
-    break;
-  default:
-    return "Unknown comparison type";
-  }
+  ss << getComparisonOperatorString ();
   if (type < MAXIMUM_SINGLE_OPERAND_CODED_CONSTRAINT) {
     ss << "0";
   } else if (type < MAXIMUM_UNSIGNED_TWO_OPERANDS_CODED_CONSTRAINT) {
@@ -134,6 +103,47 @@ std::string Constraint::toString () const {
     ss << "/*signed {*/" << auxExp->toString () << "/*}*/";
   }
   return ss.str ();
+}
+
+std::string Constraint::toCompactString () const {
+  std::stringstream ss;
+  ss << mainExp->toCompactString ();
+  ss << "\n\t" << getComparisonOperatorString ();
+  if (type < MAXIMUM_SINGLE_OPERAND_CODED_CONSTRAINT) {
+    ss << "0";
+  } else {
+    ss << auxExp->toCompactString ();
+  }
+  return ss.str ();
+}
+
+std::string Constraint::getComparisonOperatorString () const {
+  switch (type) {
+  case NON_POSITIVE:
+  case BELOW_OR_EQUAL:
+  case LESS_OR_EQUAL:
+    return " <= ";
+  case NON_NEGATIVE:
+  case ABOVE_OR_EQUAL:
+  case GREATER_OR_EQUAL:
+    return " >= ";
+  case POSITIVE:
+  case ABOVE:
+  case GREATER:
+    return " > ";
+  case NEGATIVE:
+  case BELOW:
+  case LESS:
+    return " < ";
+  case ZERO:
+  case EQUAL:
+    return " == ";
+  case NON_ZERO:
+  case NON_EQUAL:
+    return " != ";
+  default:
+    return "Unknown comparison type";
+  }
 }
 
 const Expression *Constraint::getMainExpression () const {

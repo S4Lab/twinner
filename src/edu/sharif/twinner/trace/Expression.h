@@ -113,7 +113,9 @@ public:
   bool isOverwritingExpression () const;
 
   std::string toString () const;
+  std::string toCompactString () const;
   std::string toDetailedString () const;
+  std::string toDetailedCompactString () const;
 
   template <typename Result>
   Result visit (edu::sharif::twinner::trace::exptoken

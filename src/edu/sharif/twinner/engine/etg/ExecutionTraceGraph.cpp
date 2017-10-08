@@ -236,12 +236,14 @@ Graph *ExecutionTraceGraph::getEtg () const {
           if (term) {
             const Vertex z (term, term->toString ());
             g->first.insert (z);
-            g->second.push_back (Edge (v, z, ce->getConstraint ()->toString ()));
+            g->second.push_back
+                (Edge (v, z, ce->getConstraint ()->toCompactString ()));
             g->second.push_back (Edge (z, u, ""));
             continue;
           }
         }
-        g->second.push_back (Edge (v, u, ce->getConstraint ()->toString ()));
+        g->second.push_back
+            (Edge (v, u, ce->getConstraint ()->toCompactString ()));
       }
     }
   }
