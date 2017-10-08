@@ -19,6 +19,9 @@ TWIN_TARGETS := simple-condition-test \
 
 all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
 
+input%.out: input%.c
+	g++ --std=c++11 $< -o $@
+
 runtime-simplification.out: runtime-simplification.s
 	gcc runtime-simplification.s -o runtime-simplification.out
 

@@ -14,6 +14,9 @@ all: $(TARGETS:=.cfg.png)
 %.cfg.png: %.cfg.dot
 	nice dot -o $@ -Tpng $<
 
+%.etg.png: %.etg.dot
+	nice dot -o $@ -Tpng $<
+
 %.cfg.dot: %.ll
 	opt -dot-cfg $< >/dev/null
 	# use other opt passes to optimise the graph
