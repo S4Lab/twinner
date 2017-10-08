@@ -37,7 +37,7 @@
 #include "edu/sharif/twinner/engine/etg/ExecutionTraceGraph.h"
 #include "edu/sharif/twinner/engine/etg/TwinCodeEncoder.h"
 #include "edu/sharif/twinner/engine/etg/AddressAggregator.h"
-#include "edu/sharif/twinner/engine/etg/Vertex.h"
+#include "edu/sharif/twinner/engine/etg/Graph.h"
 
 using namespace std;
 

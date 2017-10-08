@@ -10,13 +10,10 @@
  * This file is part of Twinner project.
  */
 
-#ifndef ETG_VERTEX_H
-#define ETG_VERTEX_H
+#ifndef ETG_GRAPH_H
+#define ETG_GRAPH_H
 
-#include <utility>
-#include <list>
-#include <set>
-#include <iostream>
+#include "Edge.h"
 
 namespace edu {
 namespace sharif {
@@ -24,22 +21,9 @@ namespace twinner {
 namespace engine {
 namespace etg {
 
-class Vertex;
+typedef std::pair<VertexSet, EdgeList> Graph;
 
-typedef std::set<Vertex> VertexSet;
-
-class Vertex {
-private:
-  const void *index;
-
-public:
-  Vertex (const void *index);
-
-  std::string getName () const;
-  friend std::ostream &operator<< (std::ostream &out, const Vertex &v);
-
-  bool operator< (const Vertex &v) const;
-};
+std::ostream &operator<< (std::ostream &out, const Graph &g);
 
 }
 }
@@ -47,4 +31,4 @@ public:
 }
 }
 
-#endif /* Vertex.h */
+#endif /* Graph.h */

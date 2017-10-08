@@ -13,7 +13,7 @@
 #ifndef EXECUTION_TRACE_GRAPH_H
 #define EXECUTION_TRACE_GRAPH_H
 
-#include "Vertex.h"
+#include "Graph.h"
 
 #include <list>
 #include <map>
