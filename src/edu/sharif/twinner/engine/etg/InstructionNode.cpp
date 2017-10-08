@@ -78,6 +78,10 @@ void delete_edge (ConstraintEdge * const &edge) {
   delete edge;
 }
 
+bool InstructionNode::hasAnyRegisteredInstructionId () const {
+  return insId;
+}
+
 void InstructionNode::registerInstructionIdIfRequired (
     const edu::sharif::twinner::trace::Constraint *c,
     const edu::sharif::twinner::util::MemoryManager *m) {

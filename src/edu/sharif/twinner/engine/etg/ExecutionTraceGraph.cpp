@@ -218,7 +218,7 @@ Graph *ExecutionTraceGraph::getEtg () const {
     const Vertex v (it == root ? 0 : it, it->isAborted ());
     if (g->first.find (v) == g->first.end ()) {
       g->first.insert (v);
-      if (it->isAborted ()) {
+      if (it->isAborted () || !it->hasAnyRegisteredInstructionId ()) {
         continue;
       }
       const std::list < ConstraintEdge * > children = it->getChildren ();

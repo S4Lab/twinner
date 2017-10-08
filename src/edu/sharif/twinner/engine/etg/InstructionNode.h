@@ -127,6 +127,8 @@ public:
       const edu::sharif::twinner::engine::etg::encoder
       ::Encoder::AddrToSizeMap &addressToSize);
 
+  bool hasAnyRegisteredInstructionId () const;
+
 private:
   void registerInstructionIdIfRequired (
       const edu::sharif::twinner::trace::Constraint *c,
