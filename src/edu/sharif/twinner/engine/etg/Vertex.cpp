@@ -27,6 +27,16 @@ Vertex::Vertex (const void *_index) :
   label = ss.str ();
 }
 
+Vertex::Vertex (const void *_index, bool aborted) :
+    index (_index) {
+  std::stringstream ss;
+  ss << index;
+  if (aborted) {
+    ss << "; Aborted";
+  }
+  label = ss.str ();
+}
+
 Vertex::Vertex (const void *_index, std::string _label) :
     index (_index), label (_label) {
   for (std::string::size_type pos = label.find ('"'); pos != std::string::npos;

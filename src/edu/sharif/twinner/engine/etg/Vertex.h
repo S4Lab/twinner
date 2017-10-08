@@ -35,6 +35,7 @@ private:
 
 public:
   Vertex (const void *index);
+  Vertex (const void *index, bool aborted);
   Vertex (const void *index, std::string label);
 
   std::string getName () const;

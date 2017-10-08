@@ -51,6 +51,7 @@ private:
   std::list < ConstraintEdge * > children;
 
   uint32_t insId;
+  bool aborted;
   const edu::sharif::twinner::util::MemoryManager *memoryManager;
 
   edu::sharif::twinner::engine::etg::encoder::NodeEncoder *encoder;
@@ -61,6 +62,9 @@ public:
   InstructionNode ();
   InstructionNode (ConstraintEdge *parent);
   ~InstructionNode ();
+
+  void markAsAborted ();
+  bool isAborted () const;
 
   /**
    * Adds constraint as right-most child of this node and returns the newly instantiated

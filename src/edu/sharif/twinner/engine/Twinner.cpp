@@ -172,8 +172,7 @@ bool Twinner::generateTwinBinary () {
     edu::sharif::twinner::util::foreach (symbols, &delete_symbol);
     symbols.clear ();
     if (trace == 0 || ex.isLastExecutionSignaled ()) {
-      // TODO: encode the abortion scenario in the twincode
-      break;
+      etg->markAbortedExecution ();
     } else {
       if (main) {
         addExecutionTrace (trace, ex.readMarInfo ());

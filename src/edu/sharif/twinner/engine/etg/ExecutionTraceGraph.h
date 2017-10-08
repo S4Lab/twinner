@@ -58,6 +58,7 @@ public:
   void mergePath (
       const std::list < TraceCriticalAddressInfo::NodeSnapshotPair > &pairs);
 
+  void markAbortedExecution ();
   bool getNextConstraintsList (
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
 

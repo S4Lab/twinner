@@ -178,6 +178,11 @@ void ExecutionTraceGraph::mergePath (InstructionNode *node, InstructionNode *tar
   delete node;
 }
 
+void ExecutionTraceGraph::markAbortedExecution () {
+  iterator->markAsAborted ();
+  iterator = root;
+}
+
 bool ExecutionTraceGraph::getNextConstraintsList (
     std::list < const edu::sharif::twinner::trace::Constraint * > &clist) {
   //PRE-CONDITION: clist is in sync with iterator
@@ -210,9 +215,12 @@ Graph *ExecutionTraceGraph::getEtg () const {
   while (!nodes.empty ()) {
     const InstructionNode *it = nodes.front ();
     nodes.pop_front ();
-    const Vertex v (it == root ? 0 : it);
+    const Vertex v (it == root ? 0 : it, it->isAborted ());
     if (g->first.find (v) == g->first.end ()) {
       g->first.insert (v);
+      if (it->isAborted ()) {
+        continue;
+      }
       const std::list < ConstraintEdge * > children = it->getChildren ();
       for (std::list < ConstraintEdge * >::const_iterator edge =
           children.begin (); edge != children.end (); ++edge) {

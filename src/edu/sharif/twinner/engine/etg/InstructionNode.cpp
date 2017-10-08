@@ -40,6 +40,7 @@ static int lastDebugId = 0;
 InstructionNode::InstructionNode () :
     debugId (++lastDebugId),
     insId (0),
+    aborted (false),
     memoryManager (0),
     encoder (0),
     snapshot (0) {
@@ -48,6 +49,7 @@ InstructionNode::InstructionNode () :
 InstructionNode::InstructionNode (ConstraintEdge *p) :
     debugId (++lastDebugId),
     insId (0),
+    aborted (false),
     memoryManager (0),
     encoder (0),
     snapshot (0) {
@@ -62,6 +64,14 @@ InstructionNode::~InstructionNode () {
   edu::sharif::twinner::util::foreach (children, delete_edge);
   children.clear ();
   delete encoder;
+}
+
+void InstructionNode::markAsAborted () {
+  aborted = true;
+}
+
+bool InstructionNode::isAborted () const {
+  return aborted;
 }
 
 void delete_edge (ConstraintEdge * const &edge) {
