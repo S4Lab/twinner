@@ -196,10 +196,12 @@ public:
    * main/aux expressions of its constraints and those expressions which are
    * kept in memory/register addresses who have been marked by calls to the
    * addCriticalSymbols method previously.
+   * Each returned expression is paired with an ownership flag which is true
+   * if and only if the caller should take its ownership.
    *
-   * @return A list of all critical expressions.
+   * @return A list of all critical expressions, paired with their ownership.
    */
-  std::list<const Expression *> getCriticalExpressions () const;
+  std::list< std::pair< const Expression *, bool > > getCriticalExpressions () const;
 
   /**
    * Adds given criticalSymbols set of memory/register temporary symbols to
@@ -235,8 +237,12 @@ public:
    */
   bool satisfiesMemoryRegisterCriticalExpressions (const Snapshot *sna) const;
 
-  const Expression *resolveMemory (int sizeInBits, ADDRINT address) const;
-  const Expression *resolveRegister (REG address) const;
+  /**
+   * Returns a clone of the expression which is stored at the requested
+   * address in this snapshot.
+   */
+  Expression *resolveMemory (int sizeInBits, ADDRINT address) const;
+  Expression *resolveRegister (REG address) const;
 
 private:
   bool areExpressionsEquivalent (const Expression &first,

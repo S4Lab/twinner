@@ -546,9 +546,16 @@ void Trace::markCriticalAddresses () {
       it != rend (); ++it) {
     Snapshot &currentSnapshot = *it;
     currentSnapshot.addCriticalSymbols (criticalSymbols);
-    std::list<const Expression *> criticalExpressions =
+    std::list < std::pair < const Expression *, bool > > criticalExpressions =
         currentSnapshot.getCriticalExpressions ();
     criticalSymbols = aggregateTemporarySymbols (criticalExpressions);
+    for (std::list < std::pair < const Expression *, bool > >
+        ::const_iterator it3 = criticalExpressions.begin ();
+        it3 != criticalExpressions.end (); ++it3) {
+      if (it3->second) {
+        delete it3->first;
+      }
+    }
   }
 }
 
@@ -558,11 +565,11 @@ void Trace::addNewSegment (ExecutionTraceSegment *segment) {
 }
 
 std::set<SymbolRepresentation> Trace::aggregateTemporarySymbols (
-    const std::list<const Expression *> &exps) const {
+    const std::list < std::pair < const Expression *, bool > > &exps) const {
   std::set<SymbolRepresentation> temporarySymbols;
-  for (std::list<const Expression *>::const_iterator it = exps.begin ();
-      it != exps.end (); ++it) {
-    const Expression *exp = *it;
+  for (std::list < std::pair < const Expression *, bool > >::const_iterator it =
+      exps.begin (); it != exps.end (); ++it) {
+    const Expression *exp = it->first;
     const Expression::Stack &stack = exp->getStack ();
     for (Expression::Stack::const_iterator it2 = stack.begin ();
         it2 != stack.end (); ++it2) {

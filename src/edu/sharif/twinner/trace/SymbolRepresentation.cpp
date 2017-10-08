@@ -49,12 +49,14 @@ SymbolRepresentation::SymbolRepresentation (const edu::sharif::twinner::trace::e
   }
 }
 
-const Expression *SymbolRepresentation::resolve (const Snapshot *sna) const {
+Expression *SymbolRepresentation::resolve (const Snapshot *sna) const {
+  Expression *exp;
   if (isReg) {
-    return sna->resolveRegister (regAddress);
+    exp = sna->resolveRegister (regAddress);
   } else {
-    return sna->resolveMemory (memSize, memAddress);
+    exp = sna->resolveMemory (memSize, memAddress);
   }
+  return exp;
 }
 
 bool SymbolRepresentation::operator== (const SymbolRepresentation &sr) const {

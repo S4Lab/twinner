@@ -952,7 +952,7 @@ public:
         const edu::sharif::twinner::trace::exptoken::RegisterEmergedSymbol *reg =
             dynamic_cast<const edu::sharif::twinner::trace::exptoken
             ::RegisterEmergedSymbol *> (sym);
-        const Expression *exp;
+        Expression *exp;
         if (reg) {
           exp = previousSnapshot->resolveRegister (reg->getAddress ());
         } else {
@@ -969,7 +969,7 @@ public:
             abort ();
           }
         }
-        return exp->clone ();
+        return exp;
       }
     }
   }
@@ -982,20 +982,21 @@ void Snapshot::replaceTemporarySymbols (Expression *exp) const {
   delete newExp;
 }
 
-std::list<const Expression *> Snapshot::getCriticalExpressions () const {
-  std::list<const Expression *> criticalExpressions;
+std::list< std::pair< const Expression *, bool > >
+Snapshot::getCriticalExpressions () const {
+  std::list < std::pair < const Expression *, bool> > criticalExpressions;
   for (std::list < Constraint * >::const_iterator it = pathConstraints.begin ();
       it != pathConstraints.end (); ++it) {
     const Constraint *c = *it;
-    criticalExpressions.push_back (c->getMainExpression ());
+    criticalExpressions.push_back (make_pair (c->getMainExpression (), false));
     if (c->getAuxExpression ()) {
-      criticalExpressions.push_back (c->getAuxExpression ());
+      criticalExpressions.push_back (make_pair (c->getAuxExpression (), false));
     }
   }
   for (std::set<SymbolRepresentation>::const_iterator it = criticalSymbols.begin ();
       it != criticalSymbols.end (); ++it) {
-    const Expression *exp = it->resolve (this);
-    criticalExpressions.push_back (exp);
+    Expression *exp = it->resolve (this);
+    criticalExpressions.push_back (make_pair (exp, true));
   }
   return criticalExpressions;
 }
@@ -1012,11 +1013,13 @@ bool Snapshot::satisfiesMemoryRegisterCriticalExpressions (
     const Snapshot *sna) const {
   for (std::set<SymbolRepresentation>::const_iterator it = sna->criticalSymbols.begin ();
       it != sna->criticalSymbols.end (); ++it) {
-    const Expression *ourExp = it->resolve (this);
-    const Expression *targetExp = it->resolve (sna);
+    Expression *ourExp = it->resolve (this);
+    Expression *targetExp = it->resolve (sna);
     const bool match = ourExp
         && targetExp
         && areExpressionsEquivalent (*ourExp, *targetExp);
+    delete ourExp;
+    delete targetExp;
     if (!match) {
       return false;
     }
@@ -1024,7 +1027,7 @@ bool Snapshot::satisfiesMemoryRegisterCriticalExpressions (
   return true;
 }
 
-const Expression *Snapshot::resolveMemory (int sizeInBits, ADDRINT address) const {
+Expression *Snapshot::resolveMemory (int sizeInBits, ADDRINT address) const {
   const std::map < ADDRINT, Expression * > *memToExp;
   switch (sizeInBits) {
   case 128:
@@ -1052,17 +1055,24 @@ const Expression *Snapshot::resolveMemory (int sizeInBits, ADDRINT address) cons
   std::map < ADDRINT, Expression * >::const_iterator it =
       memToExp->find (address);
   if (it != memToExp->end ()) {
-    return it->second;
+    return it->second->clone ();
   }
+  edu::sharif::twinner::util::Logger::error () <<
+      "Snapshot::resolveMemory (sizeInBits=" << std::dec << sizeInBits
+      << ", address=0x" << std::hex << address
+      << "): No expression is found\n";
   return 0;
 }
 
-const Expression *Snapshot::resolveRegister (REG address) const {
+Expression *Snapshot::resolveRegister (REG address) const {
   std::map < REG, Expression * >::const_iterator it =
       registerToExpression.find (address);
   if (it != registerToExpression.end ()) {
-    return it->second;
+    return it->second->clone ();
   }
+  edu::sharif::twinner::util::Logger::error () <<
+      "Snapshot::resolveRegister (address=" << address
+      << "): No expression is found\n";
   return 0;
 }
 

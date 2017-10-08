@@ -207,11 +207,9 @@ public:
    * The constraint will be added to the most recent trace segment.
    */
   virtual void addPathConstraints (
-      const std::list <edu::sharif::twinner::trace::Constraint *> &c,
-      const edu::sharif::twinner::trace::Constraint *lastConstraint = 0);
+      const std::list <Constraint *> &c, const Constraint *lastConstraint = 0);
   virtual void addPathConstraints (
-      const std::list <edu::sharif::twinner::trace::Constraint *> &c,
-      const edu::sharif::twinner::trace::Constraint *lastConstraint,
+      const std::list <Constraint *> &c, const Constraint *lastConstraint,
       std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   void terminateTraceSegment (TraceSegmentTerminator *tst);
@@ -280,7 +278,7 @@ protected:
 
 private:
   std::set<SymbolRepresentation> aggregateTemporarySymbols (
-      const std::list<const Expression *> &exps) const;
+      const std::list < std::pair < const Expression *, bool > > &exps) const;
 };
 
 }

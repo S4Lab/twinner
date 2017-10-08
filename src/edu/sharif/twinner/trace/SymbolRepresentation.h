@@ -39,7 +39,10 @@ private:
 public:
   SymbolRepresentation (const edu::sharif::twinner::trace::exptoken::Symbol *symbol);
 
-  const Expression *resolve (const Snapshot *sna) const;
+  /**
+   * Caller takes ownership of the returned expression.
+   */
+  Expression *resolve (const Snapshot *sna) const;
   bool operator== (const SymbolRepresentation &sr) const;
   bool operator< (const SymbolRepresentation &sr) const;
 };
