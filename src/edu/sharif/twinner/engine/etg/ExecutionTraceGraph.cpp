@@ -18,6 +18,7 @@
 
 #include "edu/sharif/twinner/trace/Trace.h"
 #include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
+#include "edu/sharif/twinner/trace/TraceSegmentTerminator.h"
 #include "edu/sharif/twinner/trace/Constraint.h"
 
 #include "edu/sharif/twinner/engine/smt/SmtSolver.h"
@@ -217,9 +218,22 @@ Graph *ExecutionTraceGraph::getEtg () const {
           children.begin (); edge != children.end (); ++edge) {
         ConstraintEdge *ce = *edge;
         InstructionNode *tn = ce->getChild ();
-        const Vertex u (tn);
-        g->second.push_back (Edge (v, u, ce->getConstraint ()->toString ()));
         nodes.push_back (tn);
+        const Vertex u (tn);
+        const edu::sharif::twinner::trace::ExecutionTraceSegment *segment =
+            ce->getSegment ();
+        if (segment) {
+          const edu::sharif::twinner::trace::TraceSegmentTerminator *term =
+              segment->getTerminator ();
+          if (term) {
+            const Vertex z (term, term->toString ());
+            g->first.insert (z);
+            g->second.push_back (Edge (v, z, ce->getConstraint ()->toString ()));
+            g->second.push_back (Edge (z, u, ""));
+            continue;
+          }
+        }
+        g->second.push_back (Edge (v, u, ce->getConstraint ()->toString ()));
       }
     }
   }

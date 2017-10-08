@@ -31,9 +31,11 @@ typedef std::set<Vertex> VertexSet;
 class Vertex {
 private:
   const void *index;
+  std::string label;
 
 public:
   Vertex (const void *index);
+  Vertex (const void *index, std::string label);
 
   std::string getName () const;
   friend std::ostream &operator<< (std::ostream &out, const Vertex &v);
