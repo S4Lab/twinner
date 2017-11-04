@@ -121,12 +121,13 @@ void ConstraintEncoder::gatherOldVariablesOfSegment () {
        &ConstraintEncoder::gatherOldVariablesOfSegment, this);
   if (dynamic_cast<const edu::sharif::twinner::trace
       ::FunctionInvocation *> (segment->getTerminator ())) {
-    const std::list<Expression *> &args =
+    const std::list<ConstExpressionPtr> argumentExpressions =
         static_cast<const edu::sharif::twinner::trace
         ::FunctionInvocation *> (segment->getTerminator ())
         ->getArgumentExpressions ();
     edu::sharif::twinner::util::foreach
-        (args, &ConstraintEncoder::gatherOldVariablesOfSegment, this);
+        (argumentExpressions,
+         &ConstraintEncoder::gatherOldVariablesOfSegment, this);
   }
 }
 

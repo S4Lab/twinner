@@ -34,6 +34,8 @@
 #include "edu/sharif/twinner/trace/SyscallInvocation.h"
 #include "edu/sharif/twinner/trace/FunctionInvocation.h"
 
+#include "edu/sharif/twinner/trace-twintool/FunctionArgumentInfoImp.h"
+
 #include "edu/sharif/twinner/trace/syscall/Syscall.h"
 #ifdef TARGET_IS_32BITS_WINDOWS7_SP1
 #include "edu/sharif/twinner/trace/syscall/X86Windows7Sp1Syscall.h"
@@ -1170,17 +1172,15 @@ InstructionSymbolicExecuter::instantiateFunctionInvocation (
     const FunctionInfo &fi, edu::sharif::twinner::trace::Trace *trace,
     const CONTEXT *context) const {
   std::string name = fi.getName ();
-  std::list<edu::sharif::twinner::trace::Expression *> args;
+  std::list<edu::sharif::twinner::trace::FunctionArgumentInfo *> args;
   if (!fi.isAutoArgs ()) {
     const int argsNo = fi.getArgsNo ();
     for (int i = 0; i < argsNo; ++i) {
       args.push_back (fi.getArgument (i, trace, context));
     }
     return new edu::sharif::twinner::trace::FunctionInvocation
-        (name, args, fi.getTypes ());
+        (name, args);
   }
-  std::string firstArgumentAsString;
-  std::list<std::string> types;
   if (name == "printf") {
     /*
      * Assuming that printf arguments are marked by simple %d, %s, etc.
@@ -1188,52 +1188,33 @@ InstructionSymbolicExecuter::instantiateFunctionInvocation (
      * causes wrong number of arguments to be guessed here.
      */
     // TODO: Support all cases of the printf format string
-    edu::sharif::twinner::trace::Expression *formatString =
-        fi.getArgument (0, trace, context);
-    args.push_back (formatString);
-    types.push_back ("const char *");
-    const ADDRINT formatStringPointer =
-        formatString->getLastConcreteValue ().toUint64 ();
-    if (!edu::sharif::twinner::util::readStringFromMemory
-        (firstArgumentAsString, formatStringPointer)) {
-      edu::sharif::twinner::util::Logger::warning ()
-          << "first argument of the ``printf'' cannot be read as a C string";
+    args.push_back (edu::sharif::twinner::trace::FunctionArgumentInfoImp
+                    ("const char *", true).resolve (0, trace, context));
+    std::string formatString = args.back ()->getResolvedString ();
+    if (formatString == "") {
       return new edu::sharif::twinner::trace::FunctionInvocation
-          (name, args, types);
+          (name, args);
     }
     int argsNo = 0; // extra args after the format string
-    for (int i = 0, len = firstArgumentAsString.length (); i < len; ++i) {
-      if (firstArgumentAsString[i] == '%') {
-        if (i + 1 < len && firstArgumentAsString[i + 1] == '%') {
+    for (int i = 0, len = formatString.length (); i < len; ++i) {
+      if (formatString[i] == '%') {
+        if (i + 1 < len && formatString[i + 1] == '%') {
           ++i;
           continue;
         }
         ++argsNo;
-        types.push_back ("UINT64");
+        args.push_back (edu::sharif::twinner::trace::FunctionArgumentInfoImp
+                        ("UINT64", false).resolve (argsNo, trace, context));
       }
     }
-    for (int i = 0; i < argsNo; ++i) {
-      args.push_back (fi.getArgument (i + 1, trace, context));
-    }
     return new edu::sharif::twinner::trace::FunctionInvocation
-        (name, args, types, firstArgumentAsString);
+        (name, args);
 
   } else if (name == "puts") {
-    edu::sharif::twinner::trace::Expression *stringArg =
-        fi.getArgument (0, trace, context);
-    args.push_back (stringArg);
-    types.push_back ("const char *");
-    const ADDRINT formatStringPointer =
-        stringArg->getLastConcreteValue ().toUint64 ();
-    if (!edu::sharif::twinner::util::readStringFromMemory
-        (firstArgumentAsString, formatStringPointer)) {
-      edu::sharif::twinner::util::Logger::warning ()
-          << "first argument of the ``puts'' cannot be read as a C string";
-      return new edu::sharif::twinner::trace::FunctionInvocation
-          (name, args, types);
-    }
+    args.push_back (edu::sharif::twinner::trace::FunctionArgumentInfoImp
+                    ("const char *", true).resolve (0, trace, context));
     return new edu::sharif::twinner::trace::FunctionInvocation
-        (name, args, types, firstArgumentAsString);
+        (name, args);
 
   } else {
     edu::sharif::twinner::util::Logger::warning () << "argsNo=auto but "

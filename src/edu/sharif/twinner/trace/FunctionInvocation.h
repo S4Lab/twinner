@@ -26,21 +26,17 @@ namespace twinner {
 namespace trace {
 
 class Expression;
+class FunctionArgumentInfo;
 
 class FunctionInvocation : public TraceSegmentTerminator {
 private:
   std::string name;
-  std::list<Expression *> args;
-  std::list<std::string> types;
-  std::string firstArgumentAsString;
+  std::list<FunctionArgumentInfo *> args;
 
 public:
   FunctionInvocation (std::string name);
   FunctionInvocation (std::string name,
-      const std::list<Expression *> &args, const std::list<std::string> &types);
-  FunctionInvocation (std::string name,
-      const std::list<Expression *> &args, const std::list<std::string> &types,
-      std::string firstArgumentAsString);
+      const std::list<FunctionArgumentInfo *> &args);
   virtual ~FunctionInvocation ();
 
   virtual FunctionInvocation *clone () const;
@@ -52,10 +48,7 @@ public:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static FunctionInvocation *loadFromBinaryStream (std::ifstream &in);
 
-  const std::list<Expression *> &getArgumentExpressions () const;
-
-private:
-  void encodeString (std::stringstream &ss, std::string str) const;
+  std::list<const Expression *> getArgumentExpressions () const;
 };
 
 }

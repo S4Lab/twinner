@@ -15,9 +15,6 @@
 #include <sstream>
 #include <stdlib.h>
 
-#include "edu/sharif/twinner/proxy/RegisterResidentExpressionValueProxy.h"
-#include "edu/sharif/twinner/proxy/MemoryResidentExpressionValueProxy.h"
-
 #include "edu/sharif/twinner/util/Logger.h"
 
 #include "edu/sharif/twinner/trace/Expression.h"
@@ -25,17 +22,12 @@
 #include "edu/sharif/twinner/trace/StateSummary.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
+#include "FunctionArgumentInfoImp.h"
 
 namespace edu {
 namespace sharif {
 namespace twinner {
 namespace trace {
-
-#ifdef TARGET_IA32E
-static const int STACK_OPERATION_UNIT_SIZE = 8; // bytes
-#else
-static const int STACK_OPERATION_UNIT_SIZE = 4; // bytes
-#endif
 
 FunctionInfo::FunctionInfo (std::string encodedInfo) {
   const std::string::size_type atsign = encodedInfo.find ("@");
@@ -88,7 +80,7 @@ FunctionInfo::FunctionInfo (std::string encodedInfo) {
         " argument types are required in the non-auto mode."
         " Expected format: <func-name>@0x<hex-address>"
         "#(<args-no>{arg1type!arg2type!...!argntype}|auto)\n"
-        "Example 1: test@0x400400#2{int!const int *}\n"
+        "Example 1: test@0x400400#2{int!const char *^s}\n"
         "Example 2: test@0x400400#0{}\n";
     abort ();
   }
@@ -114,71 +106,58 @@ FunctionInfo::FunctionInfo (std::string encodedInfo) {
           " empty argument type is given.\n";
       abort ();
     }
-    types.push_back (typesStr.substr (last, separator - last));
+    const std::string typeStr = typesStr.substr (last, separator - last);
+    const std::string::size_type specifierSign = typeStr.find ("^");
+    if (specifierSign != std::string::npos) {
+      if (typeStr.substr (specifierSign + 1) == "s") {
+        const std::string typeStrWithoutSpecifier =
+            typeStr.substr (0, specifierSign);
+        arguments.push_back
+            (new FunctionArgumentInfoImp (typeStrWithoutSpecifier, true));
+      } else {
+        edu::sharif::twinner::util::Logger::error ()
+            << "FunctionInfo::FunctionInfo (encodedInfo=" << encodedInfo << "):"
+            " unsupported type specifier. Supported type specifiers which"
+            "should be separated by ^ character from the type string are:\n"
+            "\t- s: string resolution is requested\n";
+        abort ();
+      }
+    } else {
+      arguments.push_back (new FunctionArgumentInfoImp (typeStr, false));
+    }
   }
-  if (unsigned (argsNo) != types.size ()) {
+  if (unsigned (argsNo) != arguments.size ()) {
     edu::sharif::twinner::util::Logger::error ()
         << "FunctionInfo::FunctionInfo (encodedInfo=" << encodedInfo << "):"
         " the number of args (" << std::dec << argsNo << ") does not match"
-        " with the number of given types (" << types.size () << ")\n";
+        " with the number of given types (" << arguments.size () << ")\n";
     abort ();
+  }
+}
+
+FunctionInfo::FunctionInfo (const FunctionInfo &fi) :
+    name (fi.name),
+    address (fi.address),
+    argsNo (fi.argsNo),
+    autoArgs (fi.autoArgs) {
+  for (std::vector<FunctionArgumentInfo *>::const_iterator it =
+      fi.arguments.begin (); it != fi.arguments.end (); ++it) {
+    const FunctionArgumentInfo *fai = *it;
+    arguments.push_back (fai->clone ());
   }
 }
 
 FunctionInfo::~FunctionInfo () {
+  for (std::vector<FunctionArgumentInfo *>::const_iterator it =
+      arguments.begin (); it != arguments.end (); ++it) {
+    delete *it;
+  }
+  arguments.clear ();
 }
 
-Expression *FunctionInfo::getArgument (int i, Trace *trace,
+FunctionArgumentInfo *FunctionInfo::getArgument (int i, Trace *trace,
     const CONTEXT *context) const {
-#if defined(TARGET_IA32E) && defined(TARGET_LINUX)
-  // args are in RDI, RSI, RDX, RCX, R8, R9, and in the stack respectively
-  if (i < 6) {
-    const REG regs[] = {
-      REG_RDI, REG_RSI, REG_RDX, REG_RCX, REG_R8, REG_R9
-    };
-    return getArgument (regs[i], trace, context);
-  }
-  const int offset = (i - 6) * STACK_OPERATION_UNIT_SIZE;
-  const ADDRINT topOfStack = PIN_GetContextReg (context, REG_RSP);
-#elif defined(TARGET_IA32)
-  // args are in the stack respectively (first argument is pushed last)
-  const int offset = i * STACK_OPERATION_UNIT_SIZE;
-  const ADDRINT topOfStack = PIN_GetContextReg (context, REG_ESP);
-#else
-#error "Unsupported architecture and/or OS"
-#endif
-  return getArgument (offset, topOfStack, trace, context);
-}
-#ifdef TARGET_IA32E
-
-Expression *FunctionInfo::getArgument (REG reg, Trace *trace,
-    const CONTEXT *context) const {
-  edu::sharif::twinner::proxy::RegisterResidentExpressionValueProxy proxy
-      (reg, edu::sharif::twinner::trace::cv::ConcreteValue64Bits
-       (PIN_GetContextReg (context, reg)));
-  edu::sharif::twinner::trace::StateSummary state;
-  edu::sharif::twinner::trace::Expression *exp =
-      proxy.getExpression (trace, state);
-  if (state.isWrongState ()) {
-    edu::sharif::twinner::util::Logger::error () << state.getMessage () << '\n';
-    abort ();
-  }
-  return exp;
-}
-#endif
-
-Expression *FunctionInfo::getArgument (int offset, ADDRINT topOfStack,
-    Trace *trace, const CONTEXT *context) const {
-  edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy proxy
-      (topOfStack + offset, STACK_OPERATION_UNIT_SIZE);
-  edu::sharif::twinner::trace::StateSummary state;
-  edu::sharif::twinner::trace::Expression *exp =
-      proxy.getExpression (trace, state);
-  if (state.isWrongState ()) {
-    edu::sharif::twinner::util::Logger::error () << state.getMessage () << '\n';
-    abort ();
-  }
-  return exp;
+  return arguments.at (i)->resolve (i, trace, context);
 }
 
 bool FunctionInfo::isAutoArgs () const {
@@ -187,10 +166,6 @@ bool FunctionInfo::isAutoArgs () const {
 
 int FunctionInfo::getArgsNo () const {
   return argsNo;
-}
-
-const std::list<std::string> &FunctionInfo::getTypes () const {
-  return types;
 }
 
 ADDRINT FunctionInfo::getAddress () const {
@@ -210,14 +185,15 @@ const edu::sharif::twinner::util::Logger &operator<<
   } else {
     log << ", args=" << fi.getArgsNo () << '{';
     bool first = true;
-    for (std::list<std::string>::const_iterator it = fi.getTypes ().begin ();
-        it != fi.getTypes ().end (); ++it) {
+    for (std::vector<FunctionArgumentInfo *>::const_iterator it =
+        fi.arguments.begin (); it != fi.arguments.end (); ++it) {
+      const FunctionArgumentInfo *fai = *it;
       if (first) {
         first = false;
       } else {
         log << '!';
       }
-      log << (*it);
+      log << fai;
     }
     return log << "})";
   }

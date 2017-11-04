@@ -13,6 +13,8 @@
 #ifndef FUNCTION_INFO_H
 #define FUNCTION_INFO_H
 
+#include "edu/sharif/twinner/trace/FunctionArgumentInfo.h"
+
 #include <string>
 #include <list>
 
@@ -35,11 +37,12 @@ private:
   std::string name;
   ADDRINT address;
   int argsNo;
-  std::list<std::string> types;
+  std::vector<FunctionArgumentInfo *> arguments;
   bool autoArgs;
 
 public:
   FunctionInfo (std::string encodedInfo);
+  FunctionInfo (const FunctionInfo &fi);
   virtual ~FunctionInfo ();
 
   /**
@@ -55,24 +58,18 @@ public:
    * @param context The context of the program in the caller site.
    * @return A new symbolic expression describing the requested argument.
    */
-  Expression *getArgument (int i, Trace *trace, const CONTEXT *context) const;
+  FunctionArgumentInfo *getArgument (int i, Trace *trace,
+      const CONTEXT *context) const;
 
   bool isAutoArgs () const;
   int getArgsNo () const;
-  const std::list<std::string> &getTypes () const;
   ADDRINT getAddress () const;
   std::string getName () const;
 
 private:
-#ifdef TARGET_IA32E
-  Expression *getArgument (REG reg, Trace *trace, const CONTEXT *context) const;
-#endif
-  Expression *getArgument (int offset, ADDRINT topOfStack, Trace *trace,
-      const CONTEXT *context) const;
+  friend const edu::sharif::twinner::util::Logger &operator<< (
+      const edu::sharif::twinner::util::Logger &log, const FunctionInfo &fi);
 };
-
-const edu::sharif::twinner::util::Logger &operator<< (
-    const edu::sharif::twinner::util::Logger &log, const FunctionInfo &fi);
 
 }
 }

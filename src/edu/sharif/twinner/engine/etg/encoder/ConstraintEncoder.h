@@ -64,7 +64,7 @@ private:
     extractTypesAndNames (oldVariablesUsedBySegment, exp);
   }
 
-  void gatherOldVariablesOfSegment (ExpressionPtr exp) {
+  void gatherOldVariablesOfSegment (const ConstExpressionPtr &exp) {
     extractTypesAndNames (oldVariablesUsedBySegment, exp);
   }
 
