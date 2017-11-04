@@ -1,0 +1,44 @@
+digraph "Execution Trace Graph" {
+	label="Execution Trace Graph";
+
+	Node0 [label = "0"];
+	Node0x6efd40 [label = "FunctionInvocation (calling-line=puts (/*\"unknown option!\"*/ (const char *) 0x4006c0);)"];
+	Node0x794480 [label = "0x794480"];
+	Node0x7aa8d0 [label = "0x7aa8d0"];
+	Node0x7b1af0 [label = "0x7b1af0"];
+	Node0x7b1bf0 [label = "0x7b1bf0"];
+	Node0x7b1d50 [label = "0x7b1d50"];
+	Node0x8c2d90 [label = "FunctionInvocation (calling-line=puts (/*\"correct option/value pair is given!\"*/ (const char *) 0x4006e8);)"];
+	Node0x93e2a0 [label = "0x93e2a0"];
+	Node0x1323ba0 [label = "FunctionInvocation (calling-line=puts (/*\"Usage: program <command codes>\"*/ (const char *) 0x400698);)"];
+	Node0x16ad560 [label = "FunctionInvocation (calling-line=strcmp (/*\"--wrongopt\"*/ (const char *) m7fffffffe330_0_64 /*0x7fffffffe564*/, /*\"--option\"*/ (const char *) 0x4006b7);)"];
+	Node0x1702920 [label = "0x1702920; Aborted"];
+	Node0x175ece0 [label = "FunctionInvocation (calling-line=puts (/*\"invalid value!\"*/ (const char *) 0x4006d9);)"];
+	Node0x1825e10 [label = "FunctionInvocation (calling-line=strcmp (/*\"wrongvalue\"*/ (const char *) m7fffffffe338_1_64 /*0x7fffffffe56f*/, /*\"optvalue\"*/ (const char *) 0x4006d0);)"];
+	Node0 -> Node0x7b1d50 [label = "((rsp_0 - 0x7fffffffe248) & 0xffffffffffffffff)
+	 == 0"];
+	Node0 -> Node0x794480 [label = "((rsp_0 - 0x7fffffffe248) & 0xffffffffffffffff)
+	 != 0"];
+	Node0x7b1d50 -> Node0x7b1af0 [label = "signExtend_0x80_0x20 ((rdi_0 & 0xffffffff))
+	 > UINT128 (0x0, 0x0, 0x0, 0x2)"];
+	Node0x7b1d50 -> Node0x1323ba0 [label = "signExtend_0x80_0x20 ((rdi_0 & 0xffffffff))
+	 <= UINT128 (0x0, 0x0, 0x0, 0x2)"];
+	Node0x1323ba0 -> Node0x93e2a0 [label = ""];
+	Node0x7b1af0 -> Node0x16ad560 [label = "((rsi_0 - 0x7fffffffe328) & 0xffffffffffffffff)
+	 == 0"];
+	Node0x16ad560 -> Node0x7b1bf0 [label = ""];
+	Node0x7b1af0 -> Node0x1702920 [label = "((rsi_0 - 0x7fffffffe328) & 0xffffffffffffffff)
+	 != 0"];
+	Node0x7b1bf0 -> Node0x6efd40 [label = "((rax_1 & 0xffffffff) & (rax_1 & 0xffffffff))
+	 != 0"];
+	Node0x6efd40 -> Node0x93e2a0 [label = ""];
+	Node0x7b1bf0 -> Node0x1825e10 [label = "((rax_1 & 0xffffffff) & (rax_1 & 0xffffffff))
+	 == 0"];
+	Node0x1825e10 -> Node0x7aa8d0 [label = ""];
+	Node0x7aa8d0 -> Node0x175ece0 [label = "((rax_2 & 0xffffffff) & (rax_2 & 0xffffffff))
+	 != 0"];
+	Node0x175ece0 -> Node0x93e2a0 [label = ""];
+	Node0x7aa8d0 -> Node0x8c2d90 [label = "((rax_2 & 0xffffffff) & (rax_2 & 0xffffffff))
+	 == 0"];
+	Node0x8c2d90 -> Node0x93e2a0 [label = ""];
+}

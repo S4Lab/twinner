@@ -19,6 +19,9 @@ TWIN_TARGETS := simple-condition-test \
 
 all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
 
+input%.twin.out: input%.twin.c
+	g++ -std=c++11 -g $(INCLUDEPATH) $< -o $@
+
 input%.out: input%.c
 	g++ --std=c++11 $< -o $@
 

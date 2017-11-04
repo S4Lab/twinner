@@ -16,6 +16,7 @@
 #include <inttypes.h>
 #include <stdexcept>
 #include <stdio.h>
+#include <string.h>
 
 typedef uint8_t UINT8;
 typedef uint16_t UINT16;
