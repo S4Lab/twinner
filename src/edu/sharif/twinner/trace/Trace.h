@@ -213,7 +213,11 @@ public:
       std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   void terminateTraceSegment (TraceSegmentTerminator *tst);
-  void initializeNewTraceSegment (CONTEXT *context) const;
+
+  /**
+   * @return true if and only if a register value is modified in the context.
+   */
+  bool initializeNewTraceSegment (CONTEXT *context) const;
 
   bool saveToFile (const char *path, const char *memoryPath) const;
   static Trace *loadFromFile (std::string path, std::string memoryPath);

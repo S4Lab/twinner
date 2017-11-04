@@ -175,7 +175,6 @@ Snapshot *Snapshot::instantiateNexSnapshot (const Snapshot &previousSnapshot) {
       edu::sharif::twinner::trace::exptoken::MemoryEmergedSymbol
       ::instantiateTemporarySymbols
       (memoryToExpressionMaps, segmentIndex, snapshotIndex);
-
   return new Snapshot (segmentIndex, snapshotIndex, regMap, memMap);
 }
 

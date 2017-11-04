@@ -279,7 +279,8 @@ void Trace::terminateTraceSegment (TraceSegmentTerminator *tst) {
   current = TimedTrace (this, currentSegmentIterator);
 }
 
-void Trace::initializeNewTraceSegment (CONTEXT *context) const {
+bool Trace::initializeNewTraceSegment (CONTEXT *context) const {
+  bool isContextModified = false;
   std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator =
       current.getSegmentIterator ();
   const ExecutionTraceSegment *segment = *currentSegmentIterator;
@@ -296,8 +297,10 @@ void Trace::initializeNewTraceSegment (CONTEXT *context) const {
         abort ();
       }
       exp->setOverwriting (false);
+      isContextModified = true;
     }
   }
+  return isContextModified;
 }
 
 bool Trace::saveToFile (const char *path, const char *memoryPath) const {

@@ -1565,24 +1565,25 @@ void Instrumenter::beforeSafeFunction (ADDRINT retAddress,
   withinSafeFunc = true;
 }
 
-void Instrumenter::afterSafeFunction (const CONTEXT *context) {
+bool Instrumenter::afterSafeFunction (const CONTEXT *context,
+    CONTEXT &mutableContext) {
   if (!withinSafeFunc) {
-    return;
+    return false;
   }
-  CONTEXT mutableContext;
   PIN_SaveContext (context, &mutableContext);
-  afterSafeFunction (&mutableContext);
+  return afterSafeFunction (&mutableContext);
 }
 
-void Instrumenter::afterSafeFunction (CONTEXT *context) {
+bool Instrumenter::afterSafeFunction (CONTEXT *context) {
   if (!withinSafeFunc) {
-    return;
+    return false;
   }
   edu::sharif::twinner::util::Logger::loquacious ()
       << "Instrumenter::afterSafeFunction ()\n";
   enable ();
-  ise->startNewTraceSegment (context);
+  const bool isContextModified = ise->startNewTraceSegment (context);
   withinSafeFunc = false;
+  return isContextModified;
 }
 
 void Instrumenter::reportMainArguments (int argc, char **argv) {

@@ -79,8 +79,8 @@ private:
       const edu::sharif::twinner::proxy::ExpressionValueProxy &srcOne);
   typedef void (InstructionSymbolicExecuter::*ConditionalBranchAnalysisRoutine) (
       bool branchTaken);
-  typedef void (InstructionSymbolicExecuter::*Hook) (const CONTEXT *context,
-      const ConcreteValue &value);
+  typedef bool (InstructionSymbolicExecuter::*Hook) (const CONTEXT *context,
+      const ConcreteValue &value, CONTEXT &newContext);
   typedef Hook SuddenlyChangedRegAnalysisRoutine;
   typedef void (InstructionSymbolicExecuter::*HookWithArg) (
       const CONTEXT *context, const ConcreteValue &value, ADDRINT arg);
@@ -128,7 +128,7 @@ public:
 
   void syscallInvoked (const CONTEXT *context,
       edu::sharif::twinner::trace::syscall::Syscall s);
-  void startNewTraceSegment (CONTEXT *context) const;
+  bool startNewTraceSegment (CONTEXT *context) const;
 
   edu::sharif::twinner::util::MemoryManager *getTraceMemoryManager () const;
 
@@ -295,8 +295,14 @@ private:
 
   /**
    * Run hooks from last instruction (if any) and reset them afterwards.
+   * If the execution should be continued at another context (e.g. registers
+   * are modified), the newContext struct will be filled with related register
+   * values.
+   *
+   * @param newContext The context struct to be filled with new register values.
+   * @return true if and only if the newContext is filled with new values.
    */
-  void runHooks (const CONTEXT *context);
+  bool runHooks (const CONTEXT *context, CONTEXT &newContext);
 
   /**
    * Register the safe function as a segment terminator in the trace
@@ -603,15 +609,18 @@ private:
    * CALL instruction is executed and RSP is changed. This method will synchronize its
    * symbolic value with its concrete value.
    */
-  void callAnalysisRoutine (const CONTEXT *context, const ConcreteValue &rspRegVal);
+  bool callAnalysisRoutine (const CONTEXT *context,
+      const ConcreteValue &rspRegVal, CONTEXT &newContext);
 
-  void checkForEndOfSafeFunc (const CONTEXT *context, const ConcreteValue &ripRegVal);
+  bool checkForEndOfSafeFunc (const CONTEXT *context,
+      const ConcreteValue &ripRegVal, CONTEXT &newContext);
 
   /**
    * RET instruction is executed and RSP is changed. This method will synchronize its
    * symbolic value with its concrete value.
    */
-  void retAnalysisRoutine (const CONTEXT *context, const ConcreteValue &rspRegVal);
+  bool retAnalysisRoutine (const CONTEXT *context,
+      const ConcreteValue &rspRegVal, CONTEXT &newContext);
 
   /**
    * RET arg instruction is executed and RSP is changed.
@@ -627,7 +636,8 @@ private:
    * So JMP may change value of RSP without any notice.
    * This hook is for maintaining the value of RSP.
    */
-  void jmpAnalysisRoutine (const CONTEXT *context, const ConcreteValue &rspRegVal);
+  bool jmpAnalysisRoutine (const CONTEXT *context,
+      const ConcreteValue &rspRegVal, CONTEXT &newContext);
 
   void repAnalysisRoutine (
       const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
@@ -896,8 +906,8 @@ private:
    * This hook adjusts concrete values of division/multiplication operands
    * and also propagates their values to overlapping registers.
    */
-  void adjustDivisionMultiplicationOperands (const CONTEXT *context,
-      const ConcreteValue &operandSize);
+  bool adjustDivisionMultiplicationOperands (const CONTEXT *context,
+      const ConcreteValue &operandSize, CONTEXT &newContext);
 
   /**
    * read time-stamp counter and put it in EDX:EAX

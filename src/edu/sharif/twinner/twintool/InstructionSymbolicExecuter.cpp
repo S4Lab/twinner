@@ -127,7 +127,8 @@ void InstructionSymbolicExecuter::enable () {
 
 void InstructionSymbolicExecuter::syscallInvoked (const CONTEXT *context,
     edu::sharif::twinner::trace::syscall::Syscall s) {
-  runHooks (context);
+  CONTEXT newContext;
+  runHooks (context, newContext);
   if (disabled) {
     return;
   }
@@ -138,15 +139,15 @@ void InstructionSymbolicExecuter::syscallInvoked (const CONTEXT *context,
   }
 }
 
-void InstructionSymbolicExecuter::startNewTraceSegment (
+bool InstructionSymbolicExecuter::startNewTraceSegment (
     CONTEXT *context) const {
   if (disabled) {
     edu::sharif::twinner::util::Logger::warning ()
         << "startNewTraceSegment is called while the ISE is disabled\n";
-    return;
+    return false;
   }
   const edu::sharif::twinner::trace::Trace *trace = getTrace ();
-  trace->initializeNewTraceSegment (context);
+  return trace->initializeNewTraceSegment (context);
 }
 
 edu::sharif::twinner::util::MemoryManager *
@@ -982,7 +983,10 @@ void InstructionSymbolicExecuter::analysisRoutineDstMemSrcImplicit (
 }
 
 void InstructionSymbolicExecuter::analysisRoutineRunHooks (const CONTEXT *context) {
-  runHooks (context);
+  CONTEXT newContext;
+  if (runHooks (context, newContext)) {
+    PIN_ExecuteAt (&newContext); // never returns
+  }
 }
 
 void InstructionSymbolicExecuter::analysisRoutineInitializeRegisters (
@@ -1121,7 +1125,9 @@ void InstructionSymbolicExecuter::setExpression (
   }
 }
 
-void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
+bool InstructionSymbolicExecuter::runHooks (const CONTEXT *context,
+    CONTEXT &newContext) {
+  bool isContextModified = false;
   if (trackedReg != REG_INVALID_) {
     ConcreteValue *value =
         edu::sharif::twinner::util::readRegisterContent (context, trackedReg);
@@ -1129,7 +1135,7 @@ void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
       Hook hfunc = hook;
       trackedReg = REG_INVALID_;
       hook = 0;
-      (this->*hfunc) (context, *value);
+      isContextModified = (this->*hfunc) (context, *value, newContext);
     } else {
       HookWithArg hfunc = hookWithArg;
       trackedReg = REG_INVALID_;
@@ -1143,8 +1149,9 @@ void InstructionSymbolicExecuter::runHooks (const CONTEXT *context) {
     Hook hfunc = hook;
     operandSize = -1;
     hook = 0;
-    (this->*hfunc) (context, os);
+    isContextModified = (this->*hfunc) (context, os, newContext);
   }
+  return isContextModified;
 }
 
 void InstructionSymbolicExecuter::registerSafeFunction (const FunctionInfo &fi,
@@ -2088,8 +2095,8 @@ void InstructionSymbolicExecuter::jnsAnalysisRoutine (bool branchTaken) {
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
-void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
-    const ConcreteValue &rspRegVal) {
+bool InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
+    const ConcreteValue &rspRegVal, CONTEXT &newContext) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "callAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
@@ -2139,18 +2146,21 @@ void InstructionSymbolicExecuter::callAnalysisRoutine (const CONTEXT *context,
     }
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+  return false;
 }
 
-void InstructionSymbolicExecuter::checkForEndOfSafeFunc (const CONTEXT *context,
-    const ConcreteValue &ripRegVal) {
+bool InstructionSymbolicExecuter::checkForEndOfSafeFunc (const CONTEXT *context,
+    const ConcreteValue &ripRegVal, CONTEXT &newContext) {
+  bool isContextModified = false;
   if (endOfSafeFuncRetAddress == ripRegVal.toUint64 ()) {
-    im->afterSafeFunction (context);
+    isContextModified = im->afterSafeFunction (context, newContext);
     withinSafeFunc = false;
   }
+  return isContextModified;
 }
 
-void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
-    const ConcreteValue &rspRegVal) {
+bool InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
+    const ConcreteValue &rspRegVal, CONTEXT &newContext) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "retAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
@@ -2187,6 +2197,7 @@ void InstructionSymbolicExecuter::retAnalysisRoutine (const CONTEXT *context,
     }
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+  return false;
 }
 
 void InstructionSymbolicExecuter::retWithArgAnalysisRoutine (
@@ -2231,8 +2242,8 @@ void InstructionSymbolicExecuter::retWithArgAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
-void InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
-    const ConcreteValue &rspRegVal) {
+bool InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
+    const ConcreteValue &rspRegVal, CONTEXT &newContext) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious () << "jmpAnalysisRoutine(...)\n"
       << "\tgetting rsp reg exp...";
@@ -2266,6 +2277,7 @@ void InstructionSymbolicExecuter::jmpAnalysisRoutine (const CONTEXT *context,
     }
   }
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+  return false;
 }
 
 void InstructionSymbolicExecuter::repAnalysisRoutine (
@@ -3010,8 +3022,9 @@ void InstructionSymbolicExecuter::idivAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
-void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
-    const CONTEXT *context, const ConcreteValue &operandSize) {
+bool InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
+    const CONTEXT *context, const ConcreteValue &operandSize,
+    CONTEXT &newContext) {
   edu::sharif::twinner::trace::Trace *trace = getTrace ();
   edu::sharif::twinner::util::Logger::loquacious ()
       << "adjustDivisionMultiplicationOperands(...) hook...";
@@ -3080,6 +3093,7 @@ void InstructionSymbolicExecuter::adjustDivisionMultiplicationOperands (
   }
   edu::sharif::twinner::util::Logger::loquacious ()
       << "\toverlapping registers are updated.\n";
+  return false;
 }
 
 void InstructionSymbolicExecuter::mulAnalysisRoutine (

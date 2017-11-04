@@ -226,8 +226,8 @@ public:
   void beforeSafeFunction (ADDRINT retAddress,
       const edu::sharif::twinner::trace::FunctionInfo &fi,
       UINT32 insAssembly, const CONTEXT *context);
-  void afterSafeFunction (const CONTEXT *context);
-  void afterSafeFunction (CONTEXT *context);
+  bool afterSafeFunction (const CONTEXT *context, CONTEXT &mutableContext);
+  bool afterSafeFunction (CONTEXT *context);
 
   void reportMainArguments (int argc, char **argv);
 
