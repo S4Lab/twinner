@@ -87,7 +87,7 @@ ExpressionImp::ExpressionImp (ADDRINT memoryEa,
     const edu::sharif::twinner::trace::cv::ConcreteValue &concreteValue,
     int generationIndex, bool isOverwriting, int snapshotIndex) :
     Expression (concreteValue.clone (), isOverwriting) {
-  if (!isOverwriting) {
+  if (!isOverwriting && snapshotIndex == -1) {
     //    if (memoryEa < 0x7f0000000000ull) {
     const ADDRINT argv = ADDRINT (MarInfo::getInitialArgv ());
     if (memoryEa < ((argv >> 12) << 12)) { // FIXME: Generalize this code
