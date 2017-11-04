@@ -55,6 +55,7 @@ FunctionInvocation *FunctionInvocation::clone () const {
 
 std::string FunctionInvocation::getCallingLine () const {
   std::stringstream ss;
+  ss << "regs.rax = ";
   ss << name << " (";
   bool first = true;
   for (std::list<FunctionArgumentInfo *>::const_iterator it = args.begin ();
