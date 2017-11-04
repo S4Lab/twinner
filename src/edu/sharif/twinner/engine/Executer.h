@@ -21,6 +21,10 @@
 namespace edu {
 namespace sharif {
 namespace twinner {
+namespace util {
+
+class Logger;
+}
 namespace trace {
 
 class Trace;
@@ -132,6 +136,8 @@ private:
   std::set < ADDRINT > loadChangedAddressesFromFile (const char *path) const;
 
   void unlinkCommunicationFiles () const;
+
+  void printReturnValue (edu::sharif::twinner::util::Logger &log, int ret) const;
 
   std::string escapeForShell (std::string str) const;
   std::string calculateHash (std::string file) const;

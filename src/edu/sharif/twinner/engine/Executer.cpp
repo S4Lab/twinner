@@ -377,8 +377,10 @@ Executer::executeSystemCommand (std::string command) {
       << "Executer::executeSystemCommand ('" << command << "'): "
       << "The system(...) call returns code: " << ret << '\n';
   if (WIFEXITED (ret)) {
-    edu::sharif::twinner::util::Logger::loquacious () << "normally exited; "
-        "return value was " << WEXITSTATUS (ret) << '\n';
+    edu::sharif::twinner::util::Logger log =
+        edu::sharif::twinner::util::Logger::loquacious ();
+    log << "normally exited; ";
+    printReturnValue (log, WEXITSTATUS (ret));
   } else if (WIFSIGNALED (ret)) {
     edu::sharif::twinner::util::Logger::loquacious () << "signaled; "
         "signal was " << WTERMSIG (ret) << '\n';
@@ -413,14 +415,22 @@ Executer::executeSystemCommand (std::string command, Measurement &measurement) {
       << "Executer::executeSystemCommand ('" << command << "', measurement): "
       << "The system(...) call returns code: " << ret << '\n';
   if (WIFEXITED (ret)) {
-    edu::sharif::twinner::util::Logger::loquacious () << "normally exited; "
-        "return value was " << WEXITSTATUS (ret) << '\n';
+    edu::sharif::twinner::util::Logger log =
+        edu::sharif::twinner::util::Logger::loquacious ();
+    log << "normally exited; ";
+    printReturnValue (log, WEXITSTATUS (ret));
   } else if (WIFSIGNALED (ret)) {
     edu::sharif::twinner::util::Logger::loquacious () << "signaled; "
         "signal was " << WTERMSIG (ret) << '\n';
     signaled = true;
   }
   return trace;
+}
+
+void Executer::printReturnValue (edu::sharif::twinner::util::Logger &log,
+    int ret) const {
+  log << "return value was " << std::dec << ret
+      << " (char signed: " << int (char (ret)) << ")\n";
 }
 
 void Executer::changeArguments () {
