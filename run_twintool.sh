@@ -1,3 +1,3 @@
-cmd="../../../pin.sh -pin_memory_range 0x400000000:0x600000000 -t ./obj-intel64/TwinTool.so -symbols ./tmp/twinner/symbols.dat -trace ./tmp/twinner/trace.dat -memory ./tmp/twinner/memory.dat -verbose $@ -logfilename out-input1-vo-twintool -main -mar ./tmp/twinner/main-args-reporting.dat -safe-functions 'puts@0x400410#auto' -- ./obj-intel64/input1.vo.out 475"
+cmd="../../../pin.sh -pin_memory_range 0x400000000:0x600000000 -t ./obj-intel64/TwinTool.so -symbols ./tmp/twinner/symbols.dat -trace ./tmp/twinner/trace.dat -memory ./tmp/twinner/memory.dat -verbose $@ -logfilename out-input2-twintool -main -mar ./tmp/twinner/main-args-reporting.dat -safe-functions 'puts@0x400450#auto,strcmp@0x400470#2{const char *^s!const char *^s}' -- ./obj-intel64/input2.out --wrongopt wrongvalue"
 echo "Running \"$cmd\""
 sudo su sandbox -c "$cmd"
