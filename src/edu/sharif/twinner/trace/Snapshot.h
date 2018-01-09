@@ -33,6 +33,8 @@ namespace exptoken {
 class ExpressionToken;
 }
 
+class MarInfo;
+
 class Snapshot : public ExecutionState {
 public:
   typedef SnapshotIterator snapshot_iterator;
@@ -191,6 +193,8 @@ public:
    */
   void replaceTemporarySymbols (const Snapshot *previousSnapshot);
 
+  void simplify (const MarInfo *mar);
+
   /**
    * Gets all expressions which are critical in this snapshot including all
    * main/aux expressions of its constraints and those expressions which are
@@ -261,6 +265,10 @@ private:
       std::map < KEY, Expression * > &expressions);
   void replaceTemporarySymbols (const Snapshot *previousSnapshot,
       std::list < Constraint * > &constraints);
+
+  template<typename KEY>
+  void simplify (const MarInfo *mar,
+      std::map < KEY, Expression * > &expressions);
 
 public:
   void replaceTemporarySymbols (Expression *exp) const;

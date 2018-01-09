@@ -856,6 +856,31 @@ void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot) {
   replaceTemporarySymbols (previousSnapshot, pathConstraints);
 }
 
+void Snapshot::simplify (const MarInfo *mar) {
+  simplify (mar, registerToExpression);
+  simplify (mar, memoryAddressTo128BitsExpression);
+  simplify (mar, memoryAddressTo64BitsExpression);
+  simplify (mar, memoryAddressTo32BitsExpression);
+  simplify (mar, memoryAddressTo16BitsExpression);
+  simplify (mar, memoryAddressTo8BitsExpression);
+  const std::list < Constraint * > &constraints = pathConstraints;
+  for (std::list < Constraint * >::const_iterator it3 = constraints.begin ();
+      it3 != constraints.end (); ++it3) {
+    Constraint *constraint = *it3;
+    mar->simplifyExpression (constraint->getMainExpression ());
+    mar->simplifyExpression (constraint->getAuxExpression ());
+  }
+}
+
+template<typename KEY>
+void Snapshot::simplify (const MarInfo *mar,
+    std::map < KEY, Expression * > &expressions) {
+  typedef typename std::map < KEY, Expression * >::const_iterator Iterator;
+  for (Iterator it = expressions.begin (); it != expressions.end (); ++it) {
+    mar->simplifyExpression (it->second);
+  }
+}
+
 template<typename KEY>
 void Snapshot::replaceTemporarySymbols (const Snapshot *previousSnapshot,
     std::map < KEY, Expression * > &expressions) {

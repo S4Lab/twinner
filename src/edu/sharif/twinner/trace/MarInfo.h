@@ -44,6 +44,7 @@ public:
 
   bool isConsistent () const;
   void simplifyTrace (Trace *trace) const;
+  void simplifyExpression (Expression *exp) const;
 
   void saveToFile (const char *path) const;
   virtual void saveToBinaryStream (std::ofstream &out) const;
@@ -53,7 +54,6 @@ public:
   static void **getInitialArgv ();
 
 private:
-  void simplifyExpression (Expression *exp) const;
   static MarInfo *loadFromBinaryStream (std::ifstream &in);
 };
 
