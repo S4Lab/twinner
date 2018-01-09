@@ -3,7 +3,7 @@
 Twinner is a deobfuscation and unpacking framework.
 It inspects executable binaries, instruments them using the PIN Intel framework for binary instrumentation, analyzes executed assembly instructions through a concolic execution, models the behavior of the program as a set of symbolic expressions and constraints, and recodes it as twincode, a compilable C program with simplified logic.
 The framework allows automatic deobfuscation of the virtualization obfuscated binaries on 64bit Linux and 32bit Windows.
-The latest version is 0.27.0 and is a work in progress, so if you are not familiar with the context, you should wait for the v1.0.0 release. Otherwise, have happy hacking :) There is no regular release schedule and every version is released when it is ready.
+The latest version is 0.28.0 and is a work in progress, so if you are not familiar with the context, you should wait for the v1.0.0 release. Otherwise, have happy hacking :) There is no regular release schedule and every version is released when it is ready.
 
 ## Installation
 
@@ -14,7 +14,7 @@ Use make files.
 Run Twinner binary with --help for details.
 
 ## License
-    Copyright © 2013-2017 Behnam Momeni
+    Copyright © 2013-2018 Behnam Momeni
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

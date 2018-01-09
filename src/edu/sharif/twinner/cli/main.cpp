@@ -1,7 +1,7 @@
 //                   In the name of GOD
 /*
  * Twinner: An unpacker which utilizes concolic execution.
- * Copyright © 2013-2017 Behnam Momeni
+ * Copyright © 2013-2018 Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
  * See the COPYING file distributed with this work for information
@@ -32,7 +32,7 @@ using namespace std;
 
 using namespace edu::sharif::twinner::cli;
 
-const char *VERSION_NUMBER = "0.27.0";
+const char *VERSION_NUMBER = "0.28.0";
 
 void printError (string progName, string errorMessage);
 void printVersion ();
@@ -431,7 +431,7 @@ void printVersion () {
 
 void printHelp (string progName, const ArgParser::Option options[]) {
   cout << "Twinner: A Deobfuscator and unpacker which utilizes concolic execution." << endl;
-  cout << "Copyright © 2013-2017 Behnam Momeni" << endl;
+  cout << "Copyright © 2013-2018 Behnam Momeni" << endl;
   cout << endl;
   cout << "Usage: " << progName << " [options]" << endl;
   cout << "Options:" << endl;
@@ -455,7 +455,7 @@ void printHelp (string progName, const ArgParser::Option options[]) {
 
 void printLicense () {
   cout << "Twinner: A Deobfuscator and unpacker which utilizes concolic execution." << endl;
-  cout << "Copyright © 2013-2017 Behnam Momeni" << endl;
+  cout << "Copyright © 2013-2018 Behnam Momeni" << endl;
   cout << endl;
   cout << "Not implemented yet!!!! See COPYING file instead." << endl;
 }
