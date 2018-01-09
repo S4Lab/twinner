@@ -37,6 +37,12 @@ public:
   virtual std::string getCallingLine () const = 0;
   virtual std::string toString () const = 0;
   virtual void replaceTemporarySymbols (const Snapshot *lastSnapshot) = 0;
+
+  virtual bool operator== (const TraceSegmentTerminator &t) const = 0;
+
+  virtual bool operator!= (const TraceSegmentTerminator &t) const {
+    return !((*this) == t);
+  }
 };
 
 }

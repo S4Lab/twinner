@@ -37,6 +37,7 @@ public:
   virtual std::string getCallingLine () const;
   virtual std::string toString () const;
   virtual void replaceTemporarySymbols (const Snapshot *lastSnapshot);
+  virtual bool operator== (const TraceSegmentTerminator &t) const;
 
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static SyscallInvocation *loadFromBinaryStream (std::ifstream &in);

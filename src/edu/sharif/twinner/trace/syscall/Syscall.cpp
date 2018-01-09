@@ -94,6 +94,17 @@ ADDRINT Syscall::getExitCodeArgument () const {
   return 0;
 }
 
+bool Syscall::operator== (const Syscall &s) const {
+  return standard == s.standard
+      && syscallNumber == s.syscallNumber
+      && arg0 == s.arg0
+      && arg1 == s.arg1
+      && arg2 == s.arg2
+      && arg3 == s.arg3
+      && arg4 == s.arg4
+      && arg5 == s.arg5;
+}
+
 const Syscall::SyscallInformation *Syscall::begin () const {
   return 0;
 }

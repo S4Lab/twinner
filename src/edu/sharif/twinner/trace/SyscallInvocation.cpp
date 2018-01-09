@@ -46,6 +46,14 @@ void SyscallInvocation::replaceTemporarySymbols (const Snapshot *lastSnapshot) {
   // argument (i.e. regs struct) has no temporary symbol
 }
 
+bool SyscallInvocation::operator== (const TraceSegmentTerminator &t) const {
+  if (!dynamic_cast<const SyscallInvocation *> (&t)) {
+    return false;
+  }
+  const SyscallInvocation &si = static_cast<const SyscallInvocation &> (t);
+  return syscall == si.syscall;
+}
+
 void SyscallInvocation::saveToBinaryStream (std::ofstream &out) const {
   const char *terminatorMagicString = "SYS";
   out.write (terminatorMagicString, 3);

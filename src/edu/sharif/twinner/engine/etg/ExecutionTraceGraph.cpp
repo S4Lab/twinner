@@ -145,7 +145,7 @@ bool ExecutionTraceGraph::tryToMergePath (const NodePair lowerBound) const {
     ConstraintEdge *targetParentEdge = *it;
     InstructionNode *targetParent = targetParentEdge->getParent ();
     if (!sourceParent->areInstructionsTheSame (targetParent)
-        || !sourceParentEdge->areConstraintsTheSame (targetParentEdge)) {
+        || !sourceParentEdge->areConstraintEdgesCompatible (targetParentEdge)) {
       continue;
     }
     if (tryToMergePath (make_pair (sourceParent, targetParent))) {

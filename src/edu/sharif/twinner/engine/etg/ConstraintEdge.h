@@ -62,7 +62,7 @@ public:
       const edu::sharif::twinner::engine::etg::encoder
       ::Encoder::AddrToSizeMap &addressToSize, bool bypassConstraint);
 
-  bool areConstraintsTheSame (const ConstraintEdge *edge) const;
+  bool areConstraintEdgesCompatible (const ConstraintEdge *edge) const;
 
   void dumpConstraints (edu::sharif::twinner::util::Logger &logger) const;
   void dumpSubTree (edu::sharif::twinner::util::Logger &logger,

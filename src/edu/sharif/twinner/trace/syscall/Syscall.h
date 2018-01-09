@@ -54,6 +54,8 @@ public:
   virtual bool isProcessTerminatingSyscall () const;
   virtual ADDRINT getExitCodeArgument () const;
 
+  virtual bool operator== (const Syscall &s) const;
+
 protected:
 
   struct SyscallInformation {

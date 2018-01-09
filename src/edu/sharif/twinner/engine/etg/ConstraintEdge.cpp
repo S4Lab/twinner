@@ -15,6 +15,8 @@
 #include "InstructionNode.h"
 
 #include "edu/sharif/twinner/trace/Constraint.h"
+#include "edu/sharif/twinner/trace/TraceSegmentTerminator.h"
+#include "edu/sharif/twinner/trace/ExecutionTraceSegment.h"
 
 #include "edu/sharif/twinner/util/iterationtools.h"
 
@@ -79,7 +81,24 @@ ConstraintEdge::getEncoder (const edu::sharif::twinner::engine::etg::encoder
   return encoder;
 }
 
-bool ConstraintEdge::areConstraintsTheSame (const ConstraintEdge *edge) const {
+bool ConstraintEdge::areConstraintEdgesCompatible (const ConstraintEdge *edge) const {
+  if ((segment == 0) ^ (edge->segment == 0)) {
+    return false;
+  }
+  if (segment && edge->segment) {
+    const edu::sharif::twinner::trace::TraceSegmentTerminator *me =
+        segment->getTerminator ();
+    const edu::sharif::twinner::trace::TraceSegmentTerminator *that =
+        edge->segment->getTerminator ();
+    if ((me == 0) ^ (that == 0)) {
+      return false;
+    }
+    if (me && that) {
+      if ((*me) != (*that)) {
+        return false;
+      }
+    }
+  }
   return (*constraint) == (*edge->constraint);
 }
 

@@ -84,6 +84,25 @@ void FunctionInvocation::replaceTemporarySymbols (const Snapshot *lastSnapshot) 
   }
 }
 
+bool FunctionInvocation::operator== (const TraceSegmentTerminator &t) const {
+  if (!dynamic_cast<const FunctionInvocation *> (&t)) {
+    return false;
+  }
+  const FunctionInvocation &fi = static_cast<const FunctionInvocation &> (t);
+  if (name != fi.name || args.size () != fi.args.size ()) {
+    return false;
+  }
+  for (std::list<FunctionArgumentInfo *>::const_iterator it1 = args.begin (),
+      it2 = fi.args.begin (); it1 != args.end (); ++it1, ++it2) {
+    const FunctionArgumentInfo *arg1 = *it1;
+    const FunctionArgumentInfo *arg2 = *it2;
+    if (!((*arg1->getExpression ()) == (*arg2->getExpression ()))) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void FunctionInvocation::saveToBinaryStream (std::ofstream &out) const {
   const char *terminatorMagicString = "FUN";
   out.write (terminatorMagicString, 3);
