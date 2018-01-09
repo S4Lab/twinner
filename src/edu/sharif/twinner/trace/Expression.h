@@ -112,10 +112,10 @@ public:
   void setOverwriting (bool overwriting);
   bool isOverwritingExpression () const;
 
-  std::string toString () const;
-  std::string toCompactString () const;
-  std::string toDetailedString () const;
-  std::string toDetailedCompactString () const;
+  std::string toString (bool useNonTechnicalNames = false) const;
+  std::string toCompactString (bool useNonTechnicalNames = false) const;
+  std::string toDetailedString (bool useNonTechnicalNames = false) const;
+  std::string toDetailedCompactString (bool useNonTechnicalNames = false) const;
 
   template <typename Result>
   Result visit (edu::sharif::twinner::trace::exptoken

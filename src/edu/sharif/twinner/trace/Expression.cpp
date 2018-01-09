@@ -118,7 +118,14 @@ bool Expression::isOverwritingExpression () const {
 
 class ConvertToInfixExpressionStringVisitor :
 public edu::sharif::twinner::trace::exptoken::ExpressionVisitor<std::string> {
+private:
+  bool useNonTechnicalNames;
+
 public:
+
+  ConvertToInfixExpressionStringVisitor (bool _useNonTechnicalNames) :
+      useNonTechnicalNames (_useNonTechnicalNames) {
+  }
 
   virtual std::string visitTrinary (const Expression::Operator *op,
       std::string &left, std::string &mid, std::string &right) {
@@ -157,38 +164,41 @@ public:
 
   virtual std::string visitOperand (
       const edu::sharif::twinner::trace::exptoken::Operand *operand) {
+    if (useNonTechnicalNames) {
+      return operand->toString ();
+    }
     return operand->getTechnicalName ();
   }
 };
 
-std::string Expression::toString () const {
+std::string Expression::toString (bool useNonTechnicalNames) const {
   if (isTrivial (true)) {
     std::stringstream ss;
     ss << *lastConcreteValue;
     return ss.str ();
   }
-  return toDetailedString ();
+  return toDetailedString (useNonTechnicalNames);
 }
 
-std::string Expression::toCompactString () const {
+std::string Expression::toCompactString (bool useNonTechnicalNames) const {
   if (isTrivial (true)) {
     std::stringstream ss;
     ss << *lastConcreteValue;
     return ss.str ();
   }
-  return toDetailedCompactString ();
+  return toDetailedCompactString (useNonTechnicalNames);
 }
 
-std::string Expression::toDetailedString () const {
+std::string Expression::toDetailedString (bool useNonTechnicalNames) const {
   std::stringstream ss;
-  ConvertToInfixExpressionStringVisitor visitor;
+  ConvertToInfixExpressionStringVisitor visitor (useNonTechnicalNames);
   std::string str = visit (visitor);
   ss << str << " /*" << *lastConcreteValue << "*/";
   return ss.str ();
 }
 
-std::string Expression::toDetailedCompactString () const {
-  ConvertToInfixExpressionStringVisitor visitor;
+std::string Expression::toDetailedCompactString (bool useNonTechnicalNames) const {
+  ConvertToInfixExpressionStringVisitor visitor (useNonTechnicalNames);
   return visit (visitor);
 }
 
