@@ -134,6 +134,16 @@ UINT128 operator<< (const UINT128 u, const int bits) {
   }
 }
 
+UINT128 operator<< (const UINT64 u, const UINT128 bits) {
+  if (bits < 64) {
+    return UINT128 (u >> (64 - bits.low), u << bits.low);
+  } else if (bits < 128) {
+    return UINT128 (u << (bits.low - 64), 0);
+  } else {
+    return UINT128 (0, 0);
+  }
+}
+
 UINT128 operator+ (const UINT128 u, const UINT64 addee) {
 #ifdef TARGET_IA32E
   UINT64 msp, lsp;
@@ -390,6 +400,13 @@ UINT128 logicalShiftToRight (const UINT128 v, const int bits) {
 
 UINT64 logicalShiftToRight (const UINT64 v, const int bits) {
   return v >> bits;
+}
+
+UINT64 logicalShiftToRight (const UINT64 v, const UINT128 bits) {
+  if (bits >= 64) {
+    return 0;
+  }
+  return v >> bits.low;
 }
 
 UINT128 logicalShiftToLeft (const UINT128 v, const int bits) {
