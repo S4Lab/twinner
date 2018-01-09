@@ -52,6 +52,7 @@ private:
 
   uint32_t insId;
   bool aborted;
+  bool unreachable;
   const edu::sharif::twinner::util::MemoryManager *memoryManager;
 
   edu::sharif::twinner::engine::etg::encoder::NodeEncoder *encoder;
@@ -65,6 +66,9 @@ public:
 
   void markAsAborted ();
   bool isAborted () const;
+
+  void markUnreachablePath ();
+  bool isUnreachable () const;
 
   /**
    * Adds constraint as right-most child of this node and returns the newly instantiated

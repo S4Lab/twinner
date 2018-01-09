@@ -322,6 +322,7 @@ bool Twinner::calculateSymbolsValuesForCoveringNextPath (
     if (ok) {
       return true;
     }
+    etg->markUnreachablePath ();
   }
   return false;
 }

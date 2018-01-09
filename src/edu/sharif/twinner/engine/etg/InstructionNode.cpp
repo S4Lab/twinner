@@ -41,6 +41,7 @@ InstructionNode::InstructionNode () :
     debugId (++lastDebugId),
     insId (0),
     aborted (false),
+    unreachable (false),
     memoryManager (0),
     encoder (0),
     snapshot (0) {
@@ -50,6 +51,7 @@ InstructionNode::InstructionNode (ConstraintEdge *p) :
     debugId (++lastDebugId),
     insId (0),
     aborted (false),
+    unreachable (false),
     memoryManager (0),
     encoder (0),
     snapshot (0) {
@@ -72,6 +74,14 @@ void InstructionNode::markAsAborted () {
 
 bool InstructionNode::isAborted () const {
   return aborted;
+}
+
+void InstructionNode::markUnreachablePath () {
+  unreachable = true;
+}
+
+bool InstructionNode::isUnreachable () const {
+  return unreachable;
 }
 
 void delete_edge (ConstraintEdge * const &edge) {

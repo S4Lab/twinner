@@ -59,6 +59,7 @@ public:
       const std::list < TraceCriticalAddressInfo::NodeSnapshotPair > &pairs);
 
   void markAbortedExecution ();
+  void markUnreachablePath ();
   bool getNextConstraintsList (
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
 
