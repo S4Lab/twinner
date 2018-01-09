@@ -365,6 +365,12 @@ Executer::executeSystemCommand (std::string command) {
       calculateHash (tmpfolder + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE);
   unlinkCommunicationFiles ();
   if (replayRecord) {
+    if (wasRecordedExecutionAborted (inputBinaryHash, argsHash, symbolsHash)) {
+      edu::sharif::twinner::util::Logger::loquacious ()
+          << "Recorded execution had been aborted\n";
+      signaled = true;
+      return 0;
+    }
     if (restoreExecutionResult (inputBinaryHash, argsHash, symbolsHash)) {
       return edu::sharif::twinner::trace::Trace::loadFromFile
           (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
@@ -393,13 +399,18 @@ Executer::executeSystemCommand (std::string command) {
     edu::sharif::twinner::util::Logger::loquacious () << "signaled; "
         "signal was " << WTERMSIG (ret) << '\n';
     signaled = true;
-    return 0;
   }
   if (newRecord || replayRecord) {
-    if (!recordExecutionResult (inputBinaryHash, argsHash, symbolsHash, true)) {
+    if (!signaled && !recordExecutionResult
+        (inputBinaryHash, argsHash, symbolsHash, true)) {
       signaled = true;
-      return 0;
     }
+    if (signaled) {
+      recordExecutionAbortion (inputBinaryHash, argsHash, symbolsHash);
+    }
+  }
+  if (signaled) {
+    return 0;
   }
   return edu::sharif::twinner::trace::Trace::loadFromFile
       (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE,
@@ -472,6 +483,12 @@ Executer::executeSingleTraceInInitialStateDetectionMode () const {
       calculateHash (tmpfolder + SYMBOLS_VALUES_COMMUNICATION_TEMP_FILE);
   unlinkCommunicationFiles ();
   if (replayRecord) {
+    if (wasRecordedExecutionAborted (inputBinaryHash, argsHash, symbolsHash)) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "Recorded execution had been aborted"
+          " [in initial-state-detection mode]\n";
+      abort ();
+    }
     if (restoreExecutionResult (inputBinaryHash, argsHash, symbolsHash)) {
       return edu::sharif::twinner::trace::Trace::loadAddressToValueMapFromFile
           (tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE);
@@ -497,10 +514,12 @@ Executer::executeSingleTraceInInitialStateDetectionMode () const {
       "[command: '" << command << "']: "
       << "The system(...) call returns code: " << ret << '\n';
   if (ret != 0) {
+    recordExecutionAbortion (inputBinaryHash, argsHash, symbolsHash);
     abort ();
   }
-  if (newRecord) {
+  if (newRecord || replayRecord) {
     if (!recordExecutionResult (inputBinaryHash, argsHash, symbolsHash, false)) {
+      recordExecutionAbortion (inputBinaryHash, argsHash, symbolsHash);
       abort ();
     }
   }
@@ -607,6 +626,39 @@ bool Executer::recordExecutionResult (std::string inputBinaryHash,
     }
   }
   return true;
+}
+
+bool Executer::recordExecutionAbortion (std::string inputBinaryHash,
+    std::string argsHash, std::string symbolsHash) const {
+  if (createDir ((tmpfolder + "/twinner/record").c_str ()) != 0
+      || createDir ((tmpfolder + "/twinner/record/"
+                     + inputBinaryHash).c_str ()) != 0
+      || createDir ((tmpfolder + "/twinner/record/" + inputBinaryHash
+                     + "/" + argsHash).c_str ()) != 0
+      || createDir ((tmpfolder + "/twinner/record/" + inputBinaryHash
+                     + "/" + argsHash + "/" + symbolsHash).c_str ()) != 0) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error: Cannot create record destination folders.\n";
+    abort ();
+  }
+  std::string path
+      (tmpfolder + "/twinner/record/" + inputBinaryHash
+       + "/" + argsHash + "/" + symbolsHash + "/aborted.status");
+  FILE *statusFile = fopen (path.c_str (), "w");
+  if (statusFile == 0 || fclose (statusFile) != 0) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error: Cannot touch the aborted.status file; path=" << path << '\n';
+    return false;
+  }
+  return true;
+}
+
+bool Executer::wasRecordedExecutionAborted (std::string inputBinaryHash,
+    std::string argsHash, std::string symbolsHash) const {
+  std::string path
+      (tmpfolder + "/twinner/record/" + inputBinaryHash
+       + "/" + argsHash + "/" + symbolsHash + "/aborted.status");
+  return (access (path.c_str (), F_OK) == 0);
 }
 
 bool Executer::restoreExecutionResult (std::string inputBinaryHash,

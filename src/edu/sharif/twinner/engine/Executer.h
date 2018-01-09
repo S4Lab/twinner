@@ -144,6 +144,10 @@ private:
   std::string calculateStringHash (std::string str) const;
   bool recordExecutionResult (std::string inputBinaryHash,
       std::string argsHash, std::string symbolsHash, bool complete) const;
+  bool recordExecutionAbortion (std::string inputBinaryHash,
+      std::string argsHash, std::string symbolsHash) const;
+  bool wasRecordedExecutionAborted (std::string inputBinaryHash,
+      std::string argsHash, std::string symbolsHash) const;
   bool restoreExecutionResult (std::string inputBinaryHash,
       std::string argsHash, std::string symbolsHash) const;
 };
