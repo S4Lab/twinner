@@ -20,6 +20,7 @@
 #include <sstream>
 #include <fstream>
 #include <unistd.h>
+#include <errno.h>
 #include <algorithm>
 #include <sys/stat.h>
 
@@ -32,6 +33,7 @@
 
 #include "edu/sharif/twinner/util/Logger.h"
 #include "edu/sharif/twinner/util/LogStream.h"
+#include "edu/sharif/twinner/util/CommandRunner.h"
 #include "edu/sharif/twinner/util/iterationtools.h"
 #include "edu/sharif/twinner/util/MemoryManager.h"
 
@@ -372,7 +374,13 @@ Executer::executeSystemCommand (std::string command) {
   }
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
-  int ret = system (command.c_str ());
+  int ret;
+  if (!edu::sharif::twinner::util::CommandRunner::getInstance ()
+      ->runCommand (command.c_str (), command.size () + 1, ret)) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error in command execution [command=" << command << "]\n";
+    abort ();
+  }
   edu::sharif::twinner::util::Logger::debug ()
       << "Executer::executeSystemCommand ('" << command << "'): "
       << "The system(...) call returns code: " << ret << '\n';
@@ -477,7 +485,13 @@ Executer::executeSingleTraceInInitialStateDetectionMode () const {
   }
   edu::sharif::twinner::util::Logger::debug ()
       << "Calling system (\"" << command << "\");\n";
-  int ret = system (command.c_str ());
+  int ret;
+  if (!edu::sharif::twinner::util::CommandRunner::getInstance ()
+      ->runCommand (command.c_str (), command.size () + 1, ret)) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error in command execution [command=" << command << "]\n";
+    abort ();
+  }
   edu::sharif::twinner::util::Logger::debug ()
       << "Executer::executeSingleTraceInInitialStateDetectionMode () "
       "[command: '" << command << "']: "
@@ -511,36 +525,28 @@ void Executer::unlinkCommunicationFiles () const {
 }
 
 std::string Executer::calculateHash (std::string file) const {
-  FILE *fp = popen (("md5sum " + file).c_str (), "r");
-  if (fp == NULL) {
-    edu::sharif::twinner::util::Logger::error ()
-        << "Error: Cannot execute the md5sum program.\n";
-    abort ();
-  }
+  const std::string command ("md5sum " + file);
   char md5str[33];
-  if (fgets (md5str, sizeof (md5str), fp) == NULL) {
+  if (!edu::sharif::twinner::util::CommandRunner::getInstance ()
+      ->runCommand (command.c_str (), command.size () + 1,
+                    md5str, sizeof (md5str))) {
     edu::sharif::twinner::util::Logger::error ()
         << "Error: Cannot read output of the md5sum program.\n";
     abort ();
   }
-  pclose (fp);
   return std::string (md5str, 32);
 }
 
 std::string Executer::calculateStringHash (std::string str) const {
-  FILE *fp = popen (("echo " + escapeForShell (str) + " | md5sum").c_str (), "r");
-  if (fp == NULL) {
-    edu::sharif::twinner::util::Logger::error ()
-        << "Error: Cannot execute the md5sum program.\n";
-    abort ();
-  }
+  const std::string command ("echo " + escapeForShell (str) + " | md5sum");
   char md5str[33];
-  if (fgets (md5str, sizeof (md5str), fp) == NULL) {
+  if (!edu::sharif::twinner::util::CommandRunner::getInstance ()
+      ->runCommand (command.c_str (), command.size () + 1,
+                    md5str, sizeof (md5str))) {
     edu::sharif::twinner::util::Logger::error ()
         << "Error: Cannot read output of the md5sum program.\n";
     abort ();
   }
-  pclose (fp);
   return std::string (md5str, 32);
 }
 
@@ -564,19 +570,37 @@ bool Executer::recordExecutionResult (std::string inputBinaryHash,
     abort ();
   }
   if (complete) {
-    if (system (("cp " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
-                 + " " + tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
-                 + " " + tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE
-                 + " " + tmpfolder + "/twinner/record/" + inputBinaryHash
-                 + "/" + argsHash + "/" + symbolsHash + "/").c_str ()) != 0) {
+    int ret;
+    std::string command
+        ("cp " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
+         + " " + tmpfolder + DISASSEMBLED_INSTRUCTIONS_MEMORY_TEMP_FILE
+         + " " + tmpfolder + MAIN_ARGS_COMMUNICATION_TEMP_FILE
+         + " " + tmpfolder + "/twinner/record/" + inputBinaryHash
+         + "/" + argsHash + "/" + symbolsHash + "/");
+    if (!edu::sharif::twinner::util::CommandRunner::getInstance ()
+        ->runCommand (command.c_str (), command.size () + 1, ret)) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "Error in command execution [command=" << command << "]\n";
+      abort ();
+    }
+    if (ret != 0) {
       edu::sharif::twinner::util::Logger::error ()
           << "Error: Cannot copy the execution result files.\n";
       return false;
     }
   } else {
-    if (system (("cp " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
-                 + " " + tmpfolder + "/twinner/record/" + inputBinaryHash
-                 + "/" + argsHash + "/" + symbolsHash + "/").c_str ()) != 0) {
+    int ret;
+    std::string command
+        ("cp " + tmpfolder + EXECUTION_TRACE_COMMUNICATION_TEMP_FILE
+         + " " + tmpfolder + "/twinner/record/" + inputBinaryHash
+         + "/" + argsHash + "/" + symbolsHash + "/");
+    if (!edu::sharif::twinner::util::CommandRunner::getInstance ()
+        ->runCommand (command.c_str (), command.size () + 1, ret)) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "Error in command execution [command=" << command << "]\n";
+      abort ();
+    }
+    if (ret != 0) {
       edu::sharif::twinner::util::Logger::error ()
           << "Error: Cannot copy the execution trace file.\n";
       return false;
@@ -587,9 +611,18 @@ bool Executer::recordExecutionResult (std::string inputBinaryHash,
 
 bool Executer::restoreExecutionResult (std::string inputBinaryHash,
     std::string argsHash, std::string symbolsHash) const {
-  if (system (("cp " + tmpfolder + "/twinner/record/" + inputBinaryHash
-               + "/" + argsHash + "/" + symbolsHash + "/* "
-               + tmpfolder + "/twinner/").c_str ()) != 0) {
+  int ret;
+  std::string command
+      ("cp " + tmpfolder + "/twinner/record/" + inputBinaryHash
+       + "/" + argsHash + "/" + symbolsHash + "/*.dat "
+       + tmpfolder + "/twinner/");
+  if (!edu::sharif::twinner::util::CommandRunner::getInstance ()
+      ->runCommand (command.c_str (), command.size () + 1, ret)) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "Error in command execution [command=" << command << "]\n";
+    abort ();
+  }
+  if (ret != 0) {
     edu::sharif::twinner::util::Logger::error ()
         << "Error: Cannot restore the execution result files.\n";
     return false;

@@ -15,6 +15,7 @@
 #include "edu/sharif/twinner/pin-wrapper.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/CommandRunner.h"
 
 #include <unistd.h>
 #include <sys/wait.h>
@@ -44,13 +45,20 @@ static const char *OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE =
 Measurement measureCurrentState (int ret);
 
 bool executeAndMeasure (std::string command, Measurement &m) {
+  // TODO: remove this fork() and move it to CommandRunner
   pid_t childPid = fork ();
   if (childPid < 0) {
     edu::sharif::twinner::util::Logger::error ()
         << "executeAndMeasure (...): Cannot fork!\n";
     return false;
   } else if (childPid == 0) { // executed in the child process
-    const int ret = system (command.c_str ());
+    int ret;
+    if (!edu::sharif::twinner::util::CommandRunner::getInstance ()
+        ->runCommand (command.c_str (), command.size () + 1, ret)) {
+      edu::sharif::twinner::util::Logger::error ()
+          << "Error in command execution [command=" << command << "]\n";
+      abort ();
+    }
     Measurement measurement = measureCurrentState (ret);
     std::ofstream out;
     const char *path = OVERHEAD_MEASUREMENT_COMMUNICATION_TEMP_FILE;

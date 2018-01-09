@@ -25,6 +25,7 @@
 #include "edu/sharif/twinner/engine/smt/Cvc4SmtSolver.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
+#include "edu/sharif/twinner/util/CommandRunner.h"
 #include "edu/sharif/twinner/util/LogStream.h"
 
 using namespace std;
@@ -80,9 +81,14 @@ int checkTraceFile (string traceFilePath, string memoryFilePath);
 int startTwinner (int argc, char *argv[]);
 
 int main (int argc, char *argv[]) {
+  if (!edu::sharif::twinner::util::CommandRunner::init (argv[0])) {
+    printError (argv[0], "Cannot fork the commands running daemon!");
+    return -5;
+  }
   int res = startTwinner (argc, argv);
   edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()->destroy ();
   edu::sharif::twinner::util::LogStream::destroy ();
+  edu::sharif::twinner::util::CommandRunner::destroy ();
   return res;
 }
 
