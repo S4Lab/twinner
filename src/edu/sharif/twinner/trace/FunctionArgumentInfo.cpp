@@ -122,6 +122,18 @@ FunctionArgumentInfo *FunctionArgumentInfo::loadFromBinaryStream (std::ifstream 
                                    exp, expAsString);
 }
 
+void encodeString (std::stringstream &ss, std::string str);
+
+void FunctionArgumentInfo::writeToStream (std::stringstream &ss,
+    bool useNonTechnicalNames) const {
+  if (!expAsString.empty ()) {
+    ss << "/*";
+    encodeString (ss, expAsString);
+    ss << "*/ ";
+  }
+  ss << '(' << type << ") " << exp->toString (useNonTechnicalNames);
+}
+
 const edu::sharif::twinner::util::Logger &operator<<
 (const edu::sharif::twinner::util::Logger &log,
  const FunctionArgumentInfo *fai) {

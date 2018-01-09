@@ -53,7 +53,7 @@ FunctionInvocation *FunctionInvocation::clone () const {
   return new FunctionInvocation (name, clonedArgs);
 }
 
-std::string FunctionInvocation::getCallingLine () const {
+std::string FunctionInvocation::getCallingLine (bool useNonTechnicalNames) const {
   std::stringstream ss;
   ss << "regs.rax = ";
   ss << name << " (";
@@ -66,14 +66,14 @@ std::string FunctionInvocation::getCallingLine () const {
     } else {
       ss << ", ";
     }
-    ss << arg;
+    arg->writeToStream (ss, useNonTechnicalNames);
   }
   ss << ");";
   return ss.str ();
 }
 
 std::string FunctionInvocation::toString () const {
-  return "FunctionInvocation (calling-line=" + getCallingLine () + ")";
+  return "FunctionInvocation (calling-line=" + getCallingLine (false) + ")";
 }
 
 void FunctionInvocation::replaceTemporarySymbols (const Snapshot *lastSnapshot) {

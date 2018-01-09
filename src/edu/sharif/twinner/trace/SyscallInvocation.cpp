@@ -34,7 +34,7 @@ SyscallInvocation::getSyscall () const {
   return syscall;
 }
 
-std::string SyscallInvocation::getCallingLine () const {
+std::string SyscallInvocation::getCallingLine (bool useNonTechnicalNames) const {
   return "regs = setRegistersValuesAndInvokeSyscall (regs);";
 }
 

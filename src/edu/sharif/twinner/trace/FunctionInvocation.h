@@ -41,7 +41,7 @@ public:
 
   virtual FunctionInvocation *clone () const;
 
-  virtual std::string getCallingLine () const;
+  virtual std::string getCallingLine (bool useNonTechnicalNames) const;
   virtual std::string toString () const;
   virtual void replaceTemporarySymbols (const Snapshot *lastSnapshot);
 

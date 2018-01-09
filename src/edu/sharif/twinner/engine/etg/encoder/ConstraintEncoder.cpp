@@ -101,7 +101,11 @@ bool ConstraintEncoder::encode (IndentedStream &body, IndentedStream &preamble,
   const bool constraintIsEncoded = encodeConstraint (body, preamble, inMain);
   body.incrementDepth ();
   if (segment) {
-    encodeTransformations (body, preamble, segment, index++);
+    Output out = {
+      body,
+      inMain
+    };
+    encodeTransformations (out, preamble, segment, index++);
   }
   if (child->hasAnyChild ()) {
     body.indented ();
@@ -189,13 +193,14 @@ void ConstraintEncoder::gatherNewMemoryVariablesOfSegment (
   }
 }
 
-void ConstraintEncoder::encodeTransformations (IndentedStream &body,
+void ConstraintEncoder::encodeTransformations (Output &out,
     IndentedStream &preamble, const TraceSegment *segment, int index) {
+  IndentedStream &body = out.body;
   body.indented () << "/*Memory Changes*/\n";
   edu::sharif::twinner::util::foreach
       (segment->getMemoryAddressTo64BitsExpression (),
-       &ConstraintEncoder::codeMemoryChanges, this, body);
-  codeRegisterChanges (body, segment);
+       &ConstraintEncoder::codeMemoryChanges, this, out);
+  codeRegisterChanges (out, segment);
   if (!segment->getTerminator ()) { // this must be the last segment
 #ifdef TARGET_IA32E
     body.indented () << "return int (regs.rax);\n";
@@ -204,7 +209,8 @@ void ConstraintEncoder::encodeTransformations (IndentedStream &body,
 #endif
     return;
   }
-  body.indented () << segment->getTerminator ()->getCallingLine () << '\n';
+  body.indented ()
+      << segment->getTerminator ()->getCallingLine (out.inMain) << '\n';
   declareRegisterSymbols (body, index + 1);
   AddrToSizeMap::const_iterator it = addressToSize.find (index + 1);
   if (it != addressToSize.end ()) {
@@ -212,8 +218,9 @@ void ConstraintEncoder::encodeTransformations (IndentedStream &body,
   }
 }
 
-void ConstraintEncoder::codeRegisterChanges (IndentedStream &body,
+void ConstraintEncoder::codeRegisterChanges (Output &out,
     const TraceSegment *segment) {
+  IndentedStream &body = out.body;
 
   struct RegInfo {
     const char *name;
@@ -260,16 +267,18 @@ void ConstraintEncoder::codeRegisterChanges (IndentedStream &body,
     std::map < REG, Expression * >::const_iterator it =
         regToExp.find (regs[i].id);
     if (it != regToExp.end ()) {
+      std::string expStr = it->second->toString (out.inMain);
       body.indented () << "regs." << regs[i].name << " = "
-          << VAR_TYPE " (" << it->second->toString () << ");\n";
+          << VAR_TYPE " (" << expStr << ");\n";
     }
   }
 }
 
-void ConstraintEncoder::codeMemoryChanges (IndentedStream &body,
+void ConstraintEncoder::codeMemoryChanges (Output &out,
     const Address &memoryEa, ExpressionPtr exp) {
-  body.indented () << "*((" VAR_TYPE " *) 0x" << std::hex << memoryEa
-      << ") = " VAR_TYPE " (" << exp->toString () << ");\n";
+  std::string expStr = exp->toString (out.inMain);
+  out.body.indented () << "*((" VAR_TYPE " *) 0x" << std::hex << memoryEa
+      << ") = " VAR_TYPE " (" << expStr << ");\n";
 }
 
 bool ConstraintEncoder::encodeConstraint (IndentedStream &body,

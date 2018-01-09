@@ -73,11 +73,16 @@ private:
   void gatherNewMemoryVariablesOfSegment (
       const std::set < AddrToSize > &addrToSize, int index);
 
-  void encodeTransformations (IndentedStream &body,
+  struct Output {
+    IndentedStream &body;
+    bool inMain;
+  };
+
+  void encodeTransformations (Output &out,
       IndentedStream &preamble, const TraceSegment *segment, int index);
 
-  void codeRegisterChanges (IndentedStream &body, const TraceSegment *segment);
-  void codeMemoryChanges (IndentedStream &body,
+  void codeRegisterChanges (Output &out, const TraceSegment *segment);
+  void codeMemoryChanges (Output &out,
       const Address &memoryEa, ExpressionPtr exp);
 
   /**

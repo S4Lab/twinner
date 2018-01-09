@@ -48,6 +48,8 @@ public:
   virtual void saveToBinaryStream (std::ofstream &out) const;
   static FunctionArgumentInfo *loadFromBinaryStream (std::ifstream &in);
 
+  void writeToStream (std::stringstream &ss, bool useNonTechnicalNames) const;
+
   friend const edu::sharif::twinner::util::Logger &operator<< (
       const edu::sharif::twinner::util::Logger &log,
       const FunctionArgumentInfo *fai);

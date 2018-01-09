@@ -1162,7 +1162,7 @@ void InstructionSymbolicExecuter::registerSafeFunction (const FunctionInfo &fi,
   edu::sharif::twinner::trace::FunctionInvocation *f =
       instantiateFunctionInvocation (fi, trace, context);
   edu::sharif::twinner::util::Logger::loquacious ()
-      << '\t' << f->getCallingLine ();
+      << '\t' << f->getCallingLine (false);
   getTrace ()->terminateTraceSegment (f);
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }

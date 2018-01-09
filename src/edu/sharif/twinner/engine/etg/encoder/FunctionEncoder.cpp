@@ -57,7 +57,7 @@ void FunctionEncoder::finalizeInitialization () {
   functionInvocationLineFromMain = invocationFromMain.str ();
 
   std::stringstream invocationFromFunc;
-  invocationFromMain << functionName.str ()
+  invocationFromFunc << functionName.str ()
       << " (regs" << argumentsFromFunc.str () << ")";
   functionInvocationLineFromFunc = invocationFromFunc.str ();
 }
@@ -77,6 +77,7 @@ void FunctionEncoder::encode (IndentedStream &body, IndentedStream &preamble,
     preamble << funcBody.str ();
     preamble << "}\n";
   }
+  // TODO: encode untouched variables
   if (inMain) {
     body.indented () << functionInvocationLineFromMain << ";\n";
   } else {
