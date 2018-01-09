@@ -132,6 +132,8 @@ public:
 
   edu::sharif::twinner::util::MemoryManager *getTraceMemoryManager () const;
 
+  void touchMainArguments (int argc, char **argv);
+
 private:
   void lazyLoad ();
   void setHook (Hook _hook, REG reg);

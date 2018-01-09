@@ -1594,6 +1594,7 @@ void Instrumenter::reportMainArguments (int argc, char **argv) {
   calledOnce = true;
   std::stringstream ss;
   edu::sharif::twinner::trace::MarInfo (argc, argv).saveToOutputStream (ss);
+  ise->touchMainArguments (argc, argv);
   marCache = ss.str ();
 }
 

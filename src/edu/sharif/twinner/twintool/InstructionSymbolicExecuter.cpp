@@ -157,6 +157,21 @@ InstructionSymbolicExecuter::getTraceMemoryManager () const {
   return memoryManager;
 }
 
+void InstructionSymbolicExecuter::touchMainArguments (int argc, char **argv) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  for (int i = 0; i < argc; ++i) {
+    const char *argvi = argv[i];
+    const int argvilen = strlen (argvi);
+    for (int j = 0; j <= argvilen; ++j) {
+      const ADDRINT addr = ADDRINT (&argvi[j]);
+      edu::sharif::twinner::proxy::MemoryResidentExpressionValueProxy proxy (addr, 1);
+      edu::sharif::twinner::trace::Expression *exp =
+          getExpression (proxy, trace);
+      delete exp;
+    }
+  }
+}
+
 void InstructionSymbolicExecuter::analysisRoutineBeforeCallingSafeFunction (
     ADDRINT retAddress, const FunctionInfo &fi,
     UINT32 insAssembly, const CONTEXT *context) {
