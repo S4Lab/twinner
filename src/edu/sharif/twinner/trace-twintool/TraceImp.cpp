@@ -23,6 +23,7 @@
 
 #include "edu/sharif/twinner/trace/exptoken/Symbol.h"
 
+#include "edu/sharif/twinner/trace/cv/ConcreteValue8Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue32Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 #include "edu/sharif/twinner/trace/cv/ConcreteValue128Bits.h"
@@ -451,7 +452,40 @@ ExecutionTraceSegment *TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream
         edu::sharif::twinner::util::Logger::error ()
             << "TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream"
             " (...): Duplicate symbols are read for one memory address"
-            " from symbols binary stream [argv[i] case)\n";
+            " from symbols binary stream (argv[i] case)\n";
+        abort ();
+      }
+      break;
+    }
+    case edu::sharif::twinner::trace::exptoken::MAIN_ARGV_I_J_TYPE:
+    {
+      const UINT32 i = UINT32 (record.address);
+      const UINT32 j = UINT32 (record.address >> 32);
+      const ADDRINT memoryEa = ADDRINT (MarInfo::getInitialArgv () + i);
+      UINT64 argvi;
+#ifdef TARGET_IA32E
+      if (!edu::sharif::twinner::util::readMemoryContent (argvi, memoryEa, 8)) {
+#else
+      if (!edu::sharif::twinner::util::readMemoryContent (argvi, memoryEa, 4)) {
+#endif
+        edu::sharif::twinner::util::Logger::error ()
+            << "TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream"
+            " (...): Cannot dereference argv[i] pointer (argv[i][j] case)\n";
+        abort ();
+      }
+      const ADDRINT argvij = ADDRINT (argvi + j);
+      exp = new ExpressionImp
+          (argvij,
+           edu::sharif::twinner::trace::cv::ConcreteValue8Bits
+           (record.concreteValueLsb),
+           index, true);
+      std::pair < std::map < ADDRINT, Expression * >::iterator, bool > res =
+          memMap.insert (make_pair (argvij, exp));
+      if (!res.second) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "TraceImp::loadSingleSegmentSymbolsRecordsFromBinaryStream"
+            " (...): Duplicate symbols are read for one memory address"
+            " from symbols binary stream (argv[i][j] case)\n";
         abort ();
       }
       break;

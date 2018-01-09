@@ -30,13 +30,17 @@ private:
   int argc;
   char **argv;
   std::vector<char *> argvis;
+  std::vector<int> argvilens;
+  std::vector<char *> argvicontents;
   bool inspectionMode;
 
   static void *initialArgv;
 
 public:
   MarInfo (int argc, char **argv);
-  MarInfo (int argc, char **argv, std::vector<char *> argvis);
+  MarInfo (int argc, char **argv, std::vector<char *> argvis,
+      std::vector<int> argvilens, std::vector<char *> argvicontents);
+  ~MarInfo ();
 
   bool isConsistent () const;
   void simplifyTrace (Trace *trace) const;

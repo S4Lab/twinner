@@ -24,6 +24,7 @@
 #include "edu/sharif/twinner/trace/exptoken/NamedSymbol.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
+#include "edu/sharif/twinner/trace/cv/ConcreteValue8Bits.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 
@@ -39,14 +40,35 @@ MarInfo::MarInfo (int _argc, char **_argv) :
   if (MarInfo::initialArgv == 0) {
     MarInfo::initialArgv = _argv;
   }
+  for (int i = 0; i < argc; ++i) {
+    char *argvi = argv[i];
+    const int argvilen = strlen (argvi);
+    char *argvicontent = new char[argvilen + 1];
+    memcpy (argvicontent, argvi, argvilen + 1);
+
+    argvis.push_back (argvi);
+    argvilens.push_back (argvilen);
+    argvicontents.push_back (argvicontent);
+  }
 }
 
-MarInfo::MarInfo (int _argc, char **_argv, std::vector<char *> _argvis) :
+MarInfo::MarInfo (int _argc, char **_argv, std::vector<char *> _argvis,
+    std::vector<int> _argvilens, std::vector<char *> _argvicontents) :
     Savable (), argc (_argc), argv (_argv), argvis (_argvis),
+    argvilens (_argvilens), argvicontents (_argvicontents),
     inspectionMode (true) {
   if (MarInfo::initialArgv == 0) {
     MarInfo::initialArgv = _argv;
   }
+}
+
+MarInfo::~MarInfo () {
+  for (std::vector<char *>::const_iterator it = argvicontents.begin ();
+      it != argvicontents.end (); ++it) {
+    const char *argvicontent = *it;
+    delete[] argvicontent;
+  }
+  argvicontents.clear ();
 }
 
 bool MarInfo::isConsistent () const {
@@ -122,7 +144,28 @@ void MarInfo::simplifyExpression (Expression *exp) const {
                    edu::sharif::twinner::trace::cv::ConcreteValue64Bits
                    (UINT64 (argvis.at (i))), 0);
               delete mem;
+              continue;
             }
+          }
+        }
+        if (mem->getValue ().getSize () != 8) {
+          continue;
+        }
+        for (int i = 0; i < argc; ++i) {
+          const ADDRINT argvi0 = ADDRINT (argvis.at (i));
+          const int argvilen = argvilens.at (i);
+          if (argvi0 <= addr && addr <= argvi0 + argvilen) {
+            const int offset = addr - argvi0;
+            const char *argvicontent = argvicontents.at (i);
+            std::stringstream ss, ss2;
+            ss << "argv[" << i << "][" << offset << "]";
+            ss2 << "n_v_argv_" << i << "_" << offset;
+            token = new edu::sharif::twinner::trace::exptoken::NamedSymbol
+                (ss.str (), ss2.str (), false,
+                 edu::sharif::twinner::trace::cv::ConcreteValue8Bits
+                 (UINT8 (argvicontent[offset])), 0);
+            delete mem;
+            break;
           }
         }
       }
@@ -198,8 +241,11 @@ void MarInfo::saveToOutputStream (std::ostream &out) const {
   out.write (reinterpret_cast<const char *> (&argc), sizeof (argc));
   out.write (reinterpret_cast<const char *> (&argv), sizeof (argv));
   for (int i = 0; i < argc; ++i) {
-    char *argvi = argv[i];
+    char *argvi = argvis.at (i);
     out.write (reinterpret_cast<const char *> (&argvi), sizeof (argvi));
+    const int argvilen = argvilens.at (i);
+    out.write (reinterpret_cast<const char *> (&argvilen), sizeof (argvilen));
+    out.write (argvicontents.at (i), argvilen + 1);
   }
 }
 
@@ -234,12 +280,20 @@ MarInfo *MarInfo::loadFromBinaryStream (std::ifstream &in) {
   in.read (reinterpret_cast<char *> (&argc), sizeof (argc));
   in.read (reinterpret_cast<char *> (&argv), sizeof (argv));
   std::vector<char *> argvis;
+  std::vector<int> argvilens;
+  std::vector<char *> argvicontents;
   for (int i = 0; i < argc; ++i) {
     char *argvi;
     in.read (reinterpret_cast<char *> (&argvi), sizeof (argvi));
+    int argvilen;
+    in.read (reinterpret_cast<char *> (&argvilen), sizeof (argvilen));
+    char *argvicontent = new char[argvilen + 1];
+    in.read (argvicontent, argvilen + 1);
     argvis.push_back (argvi);
+    argvilens.push_back (argvilen);
+    argvicontents.push_back (argvicontent);
   }
-  return new MarInfo (argc, argv, argvis);
+  return new MarInfo (argc, argv, argvis, argvilens, argvicontents);
 }
 
 }

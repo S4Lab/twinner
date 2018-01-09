@@ -23,6 +23,7 @@
 #include "edu/sharif/twinner/trace/exptoken/MemoryEmergedSymbol.h"
 #include "edu/sharif/twinner/trace/exptoken/Constant.h"
 #include "edu/sharif/twinner/trace/ExpressionImp.h"
+#include "edu/sharif/twinner/trace/MarInfo.h"
 
 #include "edu/sharif/twinner/trace/cv/ConcreteValue64Bits.h"
 

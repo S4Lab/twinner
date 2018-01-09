@@ -80,6 +80,11 @@ std::pair < int, SymbolRecord > NamedSymbol::toSymbolRecord () const {
       std::stringstream ss2;
       ss2 << rest;
       ss2 >> dummy >> j; // argv[i][j]
+      record.address = UINT32 (i) | (UINT64 (j) << 32);
+      record.type = MAIN_ARGV_I_J_TYPE;
+      record.concreteValueLsb = concreteValue->toUint64 ();
+      record.concreteValueMsb = 0;
+      return make_pair (generationIndex, record);
     }
   }
   edu::sharif::twinner::util::Logger::error ()
@@ -191,8 +196,17 @@ NamedSymbol *NamedSymbol::fromTechnicalName (const std::string &name,
       std::stringstream ss, ss2;
       ss << rest.substr (5);
       int i;
-      ss >> i;
-      ss2 << "argv[" << i << "]";
+      std::string restj;
+      ss >> i >> restj;
+      if (restj.size () == 0) {
+        ss2 << "argv[" << i << "]";
+      } else {
+        std::stringstream ss3;
+        ss3 << restj;
+        int j;
+        ss3 >> dummy >> j;
+        ss2 << "argv[" << i << "][" << j << "]";
+      }
       return new edu::sharif::twinner::trace::exptoken::NamedSymbol
           (ss2.str (), name, false, value, 0);
     }
