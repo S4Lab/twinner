@@ -202,6 +202,12 @@ std::string Expression::toDetailedCompactString (bool useNonTechnicalNames) cons
   return visit (visitor);
 }
 
+int Expression::getMemorySize () const {
+  return sizeof (Expression)
+      + stack.size () * sizeof (edu::sharif::twinner::trace::exptoken
+                                ::ExpressionToken);
+}
+
 void Expression::unaryOperation (Operator *op, const Expression *exp) {
   edu::sharif::twinner::util::Logger::error ()
       << "Expression::unaryOperation: Not yet implemented\n";

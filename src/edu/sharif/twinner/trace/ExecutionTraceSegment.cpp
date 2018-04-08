@@ -255,6 +255,16 @@ void ExecutionTraceSegment::printCompleteState (
   }
 }
 
+int ExecutionTraceSegment::getMemorySize () const {
+  int size = sizeof (ExecutionTraceSegment);
+  for (std::list < Snapshot * >::const_iterator it = snapshots.begin ();
+      it != snapshots.end (); ++it) {
+    const Snapshot *sna = *it;
+    size += sna->getMemorySize ();
+  }
+  return size;
+}
+
 const std::map < REG, Expression * > &
 ExecutionTraceSegment::getFirstRegisterToExpression () const {
   return snapshots.front ()->getRegisterToExpression ();

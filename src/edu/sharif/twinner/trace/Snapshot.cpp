@@ -654,6 +654,37 @@ int Snapshot::getSnapshotIndex () const {
   return snapshotIndex;
 }
 
+int Snapshot::getMemorySize () const {
+  int size = sizeof (Snapshot);
+  for (std::map < REG, Expression * >::const_iterator it =
+      registerToExpression.begin (); it != registerToExpression.end (); ++it) {
+    Expression *exp = it->second;
+    size += (exp ? exp->getMemorySize () : sizeof (exp)) + sizeof (REG);
+  }
+  const std::map < ADDRINT, Expression * > * const memoryToExpressionMaps[] = {
+    &memoryAddressTo128BitsExpression,
+    &memoryAddressTo64BitsExpression,
+    &memoryAddressTo32BitsExpression,
+    &memoryAddressTo16BitsExpression,
+    &memoryAddressTo8BitsExpression,
+    NULL
+  };
+  for (int i = 0; memoryToExpressionMaps[i]; ++i) {
+    const std::map < ADDRINT, Expression * > *ptr = memoryToExpressionMaps[i];
+    for (std::map < ADDRINT, Expression * >::const_iterator it = ptr->begin ();
+        it != ptr->end (); ++it) {
+      Expression *exp = it->second;
+      size += (exp ? exp->getMemorySize () : sizeof (exp)) + sizeof (ADDRINT);
+    }
+  }
+  for (std::list < Constraint * >::const_iterator it = pathConstraints.begin ();
+      it != pathConstraints.end (); ++it) {
+    const Constraint *c = *it;
+    size += c->getMemorySize ();
+  }
+  return size;
+}
+
 void Snapshot::addTemporaryExpressions (const Snapshot *sna,
     REG fullReg, int size) {
   std::map < REG, Expression * >::const_iterator it =

@@ -129,6 +129,8 @@ public:
 
   bool isTrivial (bool requiresValidConcreteValue) const;
 
+  int getMemorySize () const;
+
   static Constraint *instantiateBelowConstraint (bool &below,
       const Expression *mainExp, const Expression *auxExp, uint32_t instruction);
   static Constraint *instantiateBelowOrEqualConstraint (bool &belowOrEqual,

@@ -94,6 +94,8 @@ public:
   virtual void printCompleteState (
       const edu::sharif::twinner::util::Logger &logger) const;
 
+  int getMemorySize () const;
+
   const std::map < REG, Expression * > &getFirstRegisterToExpression () const;
   std::map < REG, Expression * > getRegisterToExpression () const;
   std::map < ADDRINT, Expression * > getMemoryAddressTo64BitsExpression () const;

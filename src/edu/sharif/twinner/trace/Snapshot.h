@@ -116,6 +116,8 @@ public:
   int getSegmentIndex () const;
   int getSnapshotIndex () const;
 
+  int getMemorySize () const;
+
   void addTemporaryExpressions (const Snapshot *sna,
       REG fullReg, int size);
   void addTemporaryExpressions (const Snapshot *sna,

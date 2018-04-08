@@ -222,6 +222,12 @@ bool Constraint::isTrivial (bool requiresValidConcreteValue) const {
       && (auxExp == 0 || auxExp->isTrivial (requiresValidConcreteValue));
 }
 
+int Constraint::getMemorySize () const {
+  return sizeof (Constraint)
+      + (mainExp ? mainExp->getMemorySize () : 0)
+      + (auxExp ? auxExp->getMemorySize () : 0);
+}
+
 Constraint *Constraint::instantiateBelowConstraint (bool &below,
     const Expression *mainExp, const Expression *auxExp, uint32_t instruction) {
   below = mainExp->getLastConcreteValue () < auxExp->getLastConcreteValue ();

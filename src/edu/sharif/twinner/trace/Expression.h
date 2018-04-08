@@ -117,6 +117,8 @@ public:
   std::string toDetailedString (bool useNonTechnicalNames = false) const;
   std::string toDetailedCompactString (bool useNonTechnicalNames = false) const;
 
+  int getMemorySize () const;
+
   template <typename Result>
   Result visit (edu::sharif::twinner::trace::exptoken
       ::ExpressionVisitor<Result> &visitor) const {
