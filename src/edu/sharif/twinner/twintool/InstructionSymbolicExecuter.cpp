@@ -2338,6 +2338,36 @@ void InstructionSymbolicExecuter::pslldqAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::psrldqAnalysisRoutine (
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious ()
+      << "psrldqAnalysisRoutine(...)\n"
+      << "\tgetting src exp...";
+  edu::sharif::twinner::trace::Expression *srcexp =
+      getExpression (src, trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting dst exp...";
+  const edu::sharif::twinner::trace::Expression *dstexpOrig =
+      getExpression (dst, trace);
+  edu::sharif::twinner::trace::Expression *dstexp = dstexpOrig->clone ();
+  edu::sharif::twinner::util::Logger::loquacious () << "\tshifting operation...";
+  if (dynamic_cast<const edu::sharif::twinner::proxy::ConstantExpressionValueProxy *> (&src) == 0) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "\tthe PSRLDQ src is not an immediate value!";
+    abort ();
+  }
+  srcexp->multiply (8); // convert byte to bits
+  edu::sharif::twinner::trace::cv::ConcreteValue *cv =
+      srcexp->getLastConcreteValue ().clone ();
+  dstexp->shiftToRight (cv);
+  setExpression (dst, trace, dstexp);
+  eflags.setFlags
+      (new edu::sharif::twinner::operationgroup::ShiftLeftOperationGroup
+       (dstexpOrig, srcexp));
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::shlAnalysisRoutine (
     const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
     const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
@@ -3871,6 +3901,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::leaAnalysisRoutine;
   case XED_ICLASS_PSLLDQ:
     return &InstructionSymbolicExecuter::pslldqAnalysisRoutine;
+  case XED_ICLASS_PSRLDQ:
+    return &InstructionSymbolicExecuter::psrldqAnalysisRoutine;
   case XED_ICLASS_SHL:
     return &InstructionSymbolicExecuter::shlAnalysisRoutine;
   case XED_ICLASS_SHR:

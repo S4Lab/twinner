@@ -654,6 +654,14 @@ private:
       const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
 
   /**
+   * PSRLDQ is packed shift to right logically for double quadword
+   * which shifts dst to right as many bytes as indicated by src.
+   */
+  void psrldqAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &src);
+
+  /**
    * SHL shifts dst to left as much as indicated by src.
    */
   void shlAnalysisRoutine (
