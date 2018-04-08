@@ -736,6 +736,14 @@ private:
       const edu::sharif::twinner::proxy::ExpressionValueProxy &bitoffset);
 
   /**
+   * BTS is bit test and set instruction. It acts like BT and also
+   * sets the selected bit to one.
+   */
+  void btsAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &bitstring,
+      const edu::sharif::twinner::proxy::ExpressionValueProxy &bitoffset);
+
+  /**
    * PMOVMSKB is a packed-move instruction which moves the mask-byte of
    * the src reg to the dst reg.
    * Mask-byte: read MSB of each byte of a reg and put those bits together.

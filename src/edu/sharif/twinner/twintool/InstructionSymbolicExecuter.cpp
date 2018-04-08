@@ -2599,6 +2599,36 @@ void InstructionSymbolicExecuter::btrAnalysisRoutine (
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
+void InstructionSymbolicExecuter::btsAnalysisRoutine (
+    const edu::sharif::twinner::proxy::MutableExpressionValueProxy &bitstring,
+    const edu::sharif::twinner::proxy::ExpressionValueProxy &offset) {
+  edu::sharif::twinner::trace::Trace *trace = getTrace ();
+  edu::sharif::twinner::util::Logger::loquacious () << "btsAnalysisRoutine(...)\n"
+      << "\tgetting offset exp...";
+  edu::sharif::twinner::trace::Expression *offsetexp =
+      getExpression (offset, trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tgetting bitstring exp...";
+  edu::sharif::twinner::trace::Expression *bitstringexpOrig =
+      getExpression (bitstring, trace);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tfinding requested bit...";
+  edu::sharif::twinner::trace::Expression *bitstringexp =
+      bitstringexpOrig->clone ();
+  offsetexp->bitwiseAnd (bitstring.getSize () - 1);
+  bitstringexp->shiftToRight (offsetexp);
+  bitstringexp->bitwiseAnd (0x1);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting EFLAGS...";
+  eflags.setCarryFlag (bitstringexp);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tsetting selected bit...";
+  edu::sharif::twinner::trace::Expression *mask =
+      new edu::sharif::twinner::trace::ExpressionImp (UINT64 (1));
+  mask->shiftToLeft (offsetexp);
+  delete offsetexp;
+  bitstringexpOrig->bitwiseOr (mask);
+  delete mask;
+  setExpression (bitstring, trace, bitstringexpOrig);
+  edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
+}
+
 void InstructionSymbolicExecuter::pmovmskbAnalysisRoutine (
     const edu::sharif::twinner::proxy::MutableExpressionValueProxy &dst,
     const edu::sharif::twinner::proxy::ExpressionValueProxy &src) {
@@ -3866,6 +3896,8 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
     return &InstructionSymbolicExecuter::btAnalysisRoutine;
   case XED_ICLASS_BTR:
     return &InstructionSymbolicExecuter::btrAnalysisRoutine;
+  case XED_ICLASS_BTS:
+    return &InstructionSymbolicExecuter::btsAnalysisRoutine;
   case XED_ICLASS_PMOVMSKB:
     return &InstructionSymbolicExecuter::pmovmskbAnalysisRoutine;
   case XED_ICLASS_PCMPEQB:

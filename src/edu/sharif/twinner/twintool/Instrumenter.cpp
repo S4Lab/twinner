@@ -189,7 +189,7 @@ void Instrumenter::initialize () {
       (make_pair (XED_ICLASS_LEAVE, LEAVE_INS_MODELS));
   INITIALIZE (SHIFT_INS_MODELS,
               XED_ICLASS_TEST, XED_ICLASS_BT,
-              XED_ICLASS_BTR,
+              XED_ICLASS_BTR, XED_ICLASS_BTS,
               XED_ICLASS_SHL, XED_ICLASS_SHR, XED_ICLASS_SAR,
               XED_ICLASS_ROR, XED_ICLASS_ROL);
   managedInstructions.insert
