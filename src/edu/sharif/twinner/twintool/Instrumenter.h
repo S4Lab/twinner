@@ -184,7 +184,8 @@ private:
 
   bool disabled;
   bool withinSafeFunc;
-  int stackOffset;
+  int argcOffset;
+  int argvOffset;
   bool naive;
   ADDRINT start;
   ADDRINT end;
@@ -193,18 +194,18 @@ private:
 public:
   Instrumenter (std::ifstream &symbolsFileInputStream,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
-      bool disabled, int stackOffset,
+      bool disabled, int argcOffset, int argvOffset,
       ADDRINT start, ADDRINT end,
       std::vector<edu::sharif::twinner::trace::FunctionInfo> safeFunctionsInfo,
       bool naive, bool measureMode);
   Instrumenter (
       const std::set < std::pair < ADDRINT, int > > &candidateAddresses,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
-      bool disabled, int stackOffset,
+      bool disabled, int argcOffset, int argvOffset,
       ADDRINT start, ADDRINT end);
   Instrumenter (const std::string &traceFilePath,
       const std::string &disassemblyFilePath,
-      bool disabled, int stackOffset,
+      bool disabled, int argcOffset, int argvOffset,
       ADDRINT start, ADDRINT end,
       std::vector<edu::sharif::twinner::trace::FunctionInfo> safeFunctionsInfo,
       bool naive);

@@ -73,12 +73,14 @@ KNOB < string > safeFunctions (KNOB_MODE_WRITEONCE, "pintool", "safe-functions",
 KNOB < string > mainArgsReportingOutputFilePath (KNOB_MODE_WRITEONCE,
     "pintool", "mar", "",
     "specify file path for saving main() arguments information"
-    " (in -main and -endpoints modes");
+    " (in -main and -endpoints modes)");
 
-KNOB < int > stackOffset (KNOB_MODE_WRITEONCE,
-    "pintool", "stack-offset", "0",
+KNOB < string > stackOffset (KNOB_MODE_WRITEONCE,
+    "pintool", "stack-offset", "0:1",
     "the stack offset (in terms of the number of arguments) for main() args"
-    " (in -main and -endpoints modes");
+    " (in -main and -endpoints modes)"
+    " either in form of <num1>:<num2> to be used for argc and argv offsets"
+    " or in form of <num> which is equivalent with <num>:<num+1> format.");
 
 KNOB < BOOL > naive (KNOB_MODE_WRITEONCE, "pintool", "naive", "",
     "if presents, just print info about instructions with no instrumentation");
@@ -252,7 +254,25 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
   if (start != end) {
     justAnalyzeMainRoutine = true;
   }
-  const int stackOffsetValue = stackOffset.Value ();
+  int argcOffset, argvOffset;
+  {
+    const string stackOffsetStr = stackOffset.Value ();
+    std::stringstream ss;
+    ss << stackOffsetStr;
+    if (stackOffsetStr.find (':')) {
+      char colon;
+      ss >> argcOffset >> colon >> argvOffset;
+    } else {
+      ss >> argcOffset;
+      argvOffset = argcOffset + 1;
+    }
+    if (!ss.eof ()) {
+      printError ("argc/argv offset format is invalid:"
+                  " expected <num> or <num1>:<num2> but received "
+                  + stackOffset.Value ());
+      return false;
+    }
+  }
   bool measureMode = measure.Value ();
   if (measureMode) {
     edu::sharif::twinner::util::Logger::info () << "Measure mode: "
@@ -269,7 +289,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     switch (mode) {
     case NORMAL_MODE:
       im = new Instrumenter (in, traceFilePath, disassemblyFilePath,
-                             justAnalyzeMainRoutine, stackOffsetValue,
+                             justAnalyzeMainRoutine, argcOffset, argvOffset,
                              start, end, safeFunctionsInfo,
                              naiveMode, measureMode);
       break;
@@ -288,7 +308,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
       }
       im = new Instrumenter (readSetOfAddressesFromBinaryStream (in),
                              traceFilePath, disassemblyFilePath,
-                             justAnalyzeMainRoutine, stackOffsetValue,
+                             justAnalyzeMainRoutine, argcOffset, argvOffset,
                              start, end);
       break;
     default:
@@ -301,7 +321,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     in.close ();
   } else {
     im = new Instrumenter (traceFilePath, disassemblyFilePath,
-                           justAnalyzeMainRoutine, stackOffsetValue,
+                           justAnalyzeMainRoutine, argcOffset, argvOffset,
                            start, end, safeFunctionsInfo, naiveMode);
   }
   if (justAnalyzeMainRoutine) { // this includes  {|| start != end} scenario

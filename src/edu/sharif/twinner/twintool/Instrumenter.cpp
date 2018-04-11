@@ -61,7 +61,7 @@ inline void read_memory_content_and_add_it_to_map (
 
 Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     const string &_traceFilePath, const std::string &_disassemblyFilePath,
-    bool _disabled, int _stackOffset,
+    bool _disabled, int _argcOffset, int _argvOffset,
     ADDRINT _start, ADDRINT _end,
     std::vector<edu::sharif::twinner::trace::FunctionInfo> _safeFunctionsInfo,
     bool _naive, bool measureMode) :
@@ -74,7 +74,7 @@ Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
     isWithinInitialStateDetectionMode (false),
     disabled (_disabled || _naive),
     withinSafeFunc (false),
-    stackOffset (_stackOffset),
+    argcOffset (_argcOffset), argvOffset (_argvOffset),
     naive (_naive),
     start (_start), end (_end),
     safeFunctionsInfo (_safeFunctionsInfo),
@@ -85,7 +85,8 @@ Instrumenter::Instrumenter (std::ifstream &symbolsFileInStream,
 Instrumenter::Instrumenter (
     const std::set < std::pair < ADDRINT, int > > &_candidateAddresses,
     const std::string &_traceFilePath, const std::string &_disassemblyFilePath,
-    bool _disabled, int _stackOffset, ADDRINT _start, ADDRINT _end) :
+    bool _disabled, int _argcOffset, int _argvOffset,
+    ADDRINT _start, ADDRINT _end) :
     traceFilePath (_traceFilePath), disassemblyFilePath (_disassemblyFilePath),
     printStackFlag (false),
     ise (new InstructionSymbolicExecuter (this, _disabled)),
@@ -95,14 +96,15 @@ Instrumenter::Instrumenter (
     isWithinInitialStateDetectionMode (true),
     disabled (_disabled),
     withinSafeFunc (false),
-    stackOffset (_stackOffset),
+    argcOffset (_argcOffset), argvOffset (_argvOffset),
     start (_start), end (_end),
     totalCountOfInstructions (0) {
   initialize ();
 }
 
 Instrumenter::Instrumenter (const string &_traceFilePath,
-    const std::string &_disassemblyFilePath, bool _disabled, int _stackOffset,
+    const std::string &_disassemblyFilePath, bool _disabled,
+    int _argcOffset, int _argvOffset,
     ADDRINT _start, ADDRINT _end,
     std::vector<edu::sharif::twinner::trace::FunctionInfo> _safeFunctionsInfo,
     bool _naive) :
@@ -114,7 +116,7 @@ Instrumenter::Instrumenter (const string &_traceFilePath,
     isWithinInitialStateDetectionMode (false),
     disabled (_disabled || _naive),
     withinSafeFunc (false),
-    stackOffset (_stackOffset),
+    argcOffset (_argcOffset), argvOffset (_argvOffset),
     naive (_naive),
     start (_start), end (_end),
     safeFunctionsInfo (_safeFunctionsInfo),
@@ -1677,8 +1679,8 @@ void Instrumenter::instrumentEndpointInstruction (INS ins, const ADDRINT addr) {
     if (shouldSaveMainArgs) {
       INS_InsertCall (ins, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
                       IARG_PTR, this,
-                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
-                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
+                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, argcOffset,
+                      IARG_FUNCARG_ENTRYPOINT_REFERENCE, argvOffset,
                       IARG_END);
     }
     INS_InsertCall (ins, IPOINT_BEFORE,
@@ -1722,8 +1724,8 @@ void Instrumenter::instrumentImage (IMG img) {
       if (shouldSaveMainArgs) {
         RTN_InsertCall (mainRoutine, IPOINT_BEFORE, (AFUNPTR) reportMainArgs,
                         IARG_PTR, this,
-                        IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0 + stackOffset,
-                        IARG_FUNCARG_ENTRYPOINT_REFERENCE, 1 + stackOffset,
+                        IARG_FUNCARG_ENTRYPOINT_REFERENCE, argcOffset,
+                        IARG_FUNCARG_ENTRYPOINT_REFERENCE, argvOffset,
                         IARG_END);
       }
       RTN_InsertCall (mainRoutine, IPOINT_BEFORE,
