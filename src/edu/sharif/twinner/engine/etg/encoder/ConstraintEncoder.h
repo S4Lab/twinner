@@ -93,6 +93,8 @@ private:
 
   bool simplifyConstraints (std::list < ConstConstraintPtr > constraints,
       std::stringstream &ss);
+  bool encodeConstraints (std::list < ConstConstraintPtr > constraints,
+      std::stringstream &ss);
 
   std::string replaceAll (std::string str,
       std::string part, std::string substitute) const;

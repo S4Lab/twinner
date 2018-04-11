@@ -345,19 +345,31 @@ bool ConstraintEncoder::simplifyConstraints (
   std::list < ConstConstraintPtr > simplifiedConstraints =
       edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
       ->simplifyConstraints (ok, constraints);
+  bool isAnyConstraintEncoded;
   if (!ok) {
-    edu::sharif::twinner::util::Logger::error ()
+    edu::sharif::twinner::util::Logger::warning ()
         << "ConstraintEncoder::simplifyConstraints (...):"
-        " Error in constraints simplification\n";
-    abort ();
+        " Skipping constraints simplification due to errors\n";
+    isAnyConstraintEncoded = encodeConstraints (constraints, ss);
+  } else {
+    isAnyConstraintEncoded = encodeConstraints (simplifiedConstraints, ss);
   }
+  while (!simplifiedConstraints.empty ()) {
+    delete simplifiedConstraints.back ();
+    simplifiedConstraints.pop_back ();
+  }
+  return isAnyConstraintEncoded;
+}
+
+bool ConstraintEncoder::encodeConstraints (
+    std::list < ConstConstraintPtr > simplifiedConstraints,
+    std::stringstream &ss) {
   bool first = true;
   for (std::list < ConstConstraintPtr >
       ::const_reverse_iterator it = simplifiedConstraints.rbegin ();
       it != simplifiedConstraints.rend (); ++it) {
     ConstConstraintPtr simplifiedConstraint = *it;
     if (simplifiedConstraint->isTrivial (false)) {
-      delete simplifiedConstraint;
       continue;
     }
     if (first) {
@@ -368,7 +380,6 @@ bool ConstraintEncoder::simplifyConstraints (
     }
     ss << simplifiedConstraint->toString () << ')';
     extractTypesAndNames (typesAndNames, simplifiedConstraint);
-    delete simplifiedConstraint;
   }
   return !first;
 }
