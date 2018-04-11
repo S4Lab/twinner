@@ -55,7 +55,7 @@ Constant *Constant::clone () const {
 
 void Constant::saveToBinaryStream (std::ofstream &out) const {
   out.write ("C", 1);
-  concreteValue->saveToBinaryStream (out);
+  Operand::saveToBinaryStream (out);
 }
 
 Constant *Constant::loadFromBinaryStream (std::ifstream &in) {

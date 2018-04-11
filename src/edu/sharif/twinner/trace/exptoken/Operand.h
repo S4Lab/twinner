@@ -51,6 +51,10 @@ public:
   const edu::sharif::twinner::trace::cv::ConcreteValue &getValue () const;
 
   virtual bool isConstant () const = 0;
+
+protected:
+  virtual void saveToBinaryStream (std::ofstream &out) const;
+  void loadFromBinaryStream (std::ifstream &in);
 };
 
 }

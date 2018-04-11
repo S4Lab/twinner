@@ -4,7 +4,7 @@
  * Copyright © 2013-2018 Behnam Momeni
  *
  * This program comes with ABSOLUTELY NO WARRANTY.
- * See the COPYING file distributed with this work for information 
+ * See the COPYING file distributed with this work for information
  * regarding copyright ownership.
  *
  * This file is part of Twinner project.
@@ -42,6 +42,16 @@ Operand::~Operand () {
 
 const edu::sharif::twinner::trace::cv::ConcreteValue &Operand::getValue () const {
   return *concreteValue;
+}
+
+void Operand::saveToBinaryStream (std::ofstream &out) const {
+  concreteValue->saveToBinaryStream (out);
+}
+
+void Operand::loadFromBinaryStream (std::ifstream &in) {
+  delete concreteValue;
+  concreteValue = edu::sharif::twinner::trace::cv::ConcreteValue
+      ::loadFromBinaryStream (in);
 }
 
 }

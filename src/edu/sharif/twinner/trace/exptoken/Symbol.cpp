@@ -36,16 +36,15 @@ Symbol::Symbol () :
 }
 
 void Symbol::saveToBinaryStream (std::ofstream &out) const {
-  concreteValue->saveToBinaryStream (out);
   out.write ((const char *) &generationIndex, sizeof (generationIndex));
   out.write ((const char *) &snapshotIndex, sizeof (snapshotIndex));
+  Operand::saveToBinaryStream (out);
 }
 
 void Symbol::loadFromBinaryStream (std::ifstream &in) {
-  delete concreteValue;
-  concreteValue = edu::sharif::twinner::trace::cv::ConcreteValue::loadFromBinaryStream (in);
   in.read ((char *) &generationIndex, sizeof (generationIndex));
   in.read ((char *) &snapshotIndex, sizeof (snapshotIndex));
+  Operand::loadFromBinaryStream (in);
 }
 
 int Symbol::getGenerationIndex () const {
