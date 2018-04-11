@@ -1356,7 +1356,13 @@ void Instrumenter::instrumentMemoryRegisterCorrespondence (
             || model == DST_STK_SRC_MEM) {
           if (op != XED_ICLASS_RET_NEAR
               && op != XED_ICLASS_RET_FAR) {
-            displacement = -STACK_OPERATION_UNIT_SIZE;
+#ifdef TARGET_IA32E
+            if (baseReg == REG_RSP) {
+#else
+            if (baseReg == REG_ESP) {
+#endif
+              displacement = -STACK_OPERATION_UNIT_SIZE;
+            }
           }
         }
         REG indexReg = INS_OperandMemoryIndexReg (ins, i);
