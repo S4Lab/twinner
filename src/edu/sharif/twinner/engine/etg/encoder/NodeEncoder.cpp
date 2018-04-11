@@ -67,12 +67,13 @@ void NodeEncoder::initializeFirstPass (
     solver->clearState ();
     delete c1not;
     if (!valid) {
-      edu::sharif::twinner::util::Logger::error ()
-          << "Encoder::Encoder (...): Assertion failed.\n";
-      abort ();
+      edu::sharif::twinner::util::Logger::warning ()
+          << "Encoder::Encoder (...): Assertion [not-then => else] failed:\n"
+          << "\tleft (then): " << children.front ()->getConstraint () << '\n'
+          << "\tright (else): " << children.back ()->getConstraint () << '\n';
     }
     leftChild = children.front ()->getEncoder (addressToSize, false);
-    rightChild = children.back ()->getEncoder (addressToSize, true);
+    rightChild = children.back ()->getEncoder (addressToSize, valid);
     break;
   }
   default:
