@@ -86,6 +86,9 @@ KNOB < BOOL > naive (KNOB_MODE_WRITEONCE, "pintool", "naive", "",
 KNOB < BOOL > measure (KNOB_MODE_WRITEONCE, "pintool", "measure", "",
     "if presents, trivial instruction counting instrumentation will be used instead of normal behavior");
 
+KNOB < BOOL > printStack (KNOB_MODE_WRITEONCE, "pintool", "printstack", "",
+    "if presents, hexdumps the top of stack contents");
+
 TwinTool::TwinTool () :
     im (0) {
 }
@@ -304,6 +307,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
   if (justAnalyzeMainRoutine) { // this includes  {|| start != end} scenario
     im->setMainArgsReportingFilePath (mainArgsReportingFilePath);
   }
+  im->setPrintStackFlag (printStack.Value ());
   return true;
 }
 

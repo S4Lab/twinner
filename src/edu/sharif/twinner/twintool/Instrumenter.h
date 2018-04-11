@@ -172,6 +172,8 @@ private:
   std::string marFilePath; // save final main() args report into this file
   std::string marCache;
 
+  bool printStackFlag;
+
   InstructionSymbolicExecuter *ise;
 
   bool isStartInstructionInstrumented;
@@ -211,6 +213,7 @@ public:
   void registerInstrumentationRoutines ();
 
   void setMainArgsReportingFilePath (const std::string &marFilePath);
+  void setPrintStackFlag (bool flag);
   void instrumentImage (IMG img);
   bool instrumentSafeFunctions (INS ins, UINT32 insAssembly) const;
 
@@ -223,6 +226,8 @@ public:
   void disable ();
   void enable ();
 
+  void printStack (ADDRINT stackPointer);
+
   void beforeSafeFunction (ADDRINT retAddress,
       const edu::sharif::twinner::trace::FunctionInfo &fi,
       UINT32 insAssembly, const CONTEXT *context);
@@ -232,6 +237,8 @@ public:
   void reportMainArguments (int argc, char **argv);
 
 private:
+  void printHexAscii (ADDRINT memoryEa, char *content, int size) const;
+
   void saveAll ();
 
   void initialize ();
@@ -269,7 +276,7 @@ VOID imageIsLoaded (IMG img, VOID *v);
 VOID beforeSafeFunc (VOID *v, ADDRINT retAddress, VOID *p, UINT32 insAssembly,
     const CONTEXT *context);
 
-VOID startAnalysis (VOID *v);
+VOID startAnalysis (VOID *v, ADDRINT stackPointer);
 VOID reportMainArgs (VOID *v, ADDRINT *arg0, ADDRINT *arg1);
 VOID syscallIsAboutToBeCalled (THREADID threadIndex, CONTEXT *ctxt, SYSCALL_STANDARD std,
     VOID *v);
