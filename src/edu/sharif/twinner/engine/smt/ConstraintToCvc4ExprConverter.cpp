@@ -852,6 +852,37 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp,
     case kind::BITVECTOR_MULT:
       return convertByFoldingList
           (exp, vals, bitvectorMultConverter, "BITVECTOR_MULT");
+    case kind::ITE:
+    {
+      if (exp.getNumChildren () != 3) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
+            << "): ITE needs exactly three children\n";
+        return 0;
+      }
+      Expr::const_iterator it = exp.begin ();
+      Expr constraintExp = *it++;
+      Expr thenExp = *it++;
+      Expr elseExp = *it;
+      edu::sharif::twinner::trace::Constraint *constraint =
+          convertCvc4ExprToConstraint (constraintExp, vals);
+      if (constraint == 0) {
+        return 0;
+      }
+      edu::sharif::twinner::trace::Expression *thenExpression =
+          convertCvc4ExprToExpression (thenExp, vals);
+      if (thenExpression == 0) {
+        return 0;
+      }
+      edu::sharif::twinner::trace::Expression *elseExpression =
+          convertCvc4ExprToExpression (elseExp, vals);
+      if (elseExpression == 0) {
+        return 0;
+      }
+      thenExpression->ifThenElse (elseExpression, constraint);
+      delete elseExpression;
+      return thenExpression;
+    }
       // TODO: Implement following operator types: MINUS, DIVIDE, SHIFT_LEFT, ARITHMETIC_SHIFT_RIGHT, ROTATE_RIGHT, ROTATE_LEFT
     default:
       edu::sharif::twinner::util::Logger::error ()

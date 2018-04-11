@@ -133,6 +133,10 @@ public:
     if (op->getIdentifier () == Expression::Operator::SIGN_EXTEND) {
       ss << op->toString () << '_' << right /* target */
           << '_' << mid /* source */ << " (" << left << ')';
+    } else if (op->getIdentifier () == Expression::Operator::IF_THEN_ELSE) {
+      ss << '(' << right /* constraint */
+          << " ? " << left /* then */
+          << " : " << mid /* else */ << ')';
     } else {
       ss << op->toString () /*function name*/ << '_' << mid /* size */
           << " (" << left << ", " << right /* amount */ << ')';
@@ -357,6 +361,17 @@ void Expression::binaryOperation (Operator *op,
 
 void Expression::binaryOperation (Operator *op, UINT64 cv) {
   binaryOperation (op, new edu::sharif::twinner::trace::cv::ConcreteValue64Bits (cv));
+}
+
+void Expression::trinaryOperation (Operator *op, const Expression *exp,
+    edu::sharif::twinner::trace::exptoken::ExpressionToken *token) {
+  Expression *copy = exp->clone ();
+  stack.insert (stack.end (), copy->stack.begin (), copy->stack.end ());
+  copy->stack.clear ();
+  delete copy;
+  stack.push_back (token);
+  stack.push_back (op);
+  op->apply (*lastConcreteValue, *(exp->lastConcreteValue));
 }
 
 void Expression::trinaryOperation (Operator *op, const Expression *exp) {

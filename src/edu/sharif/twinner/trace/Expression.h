@@ -19,6 +19,8 @@
 
 #include "edu/sharif/twinner/trace/exptoken/Operator.h"
 #include "edu/sharif/twinner/trace/exptoken/ExpressionVisitor.h"
+#include "Constraint.h"
+#include "exptoken/ConstraintOperand.h"
 
 #include <list>
 
@@ -211,6 +213,21 @@ protected:
    * The op operator is assumed to be owned by this expression object.
    * But exp will be kept untouched and its inner expression tokens will
    * be cloned. The exp may or may not be the same as this object.
+   * And token is assumed to be owned by this expression object and is used
+   * as the third operand.
+   *
+   * @param op The owned operator which mediates between this and the exp
+   * expression objects.
+   * @param exp The given expression to be used as the second operand.
+   * @param toekn The owned expression token to be used as the third operand.
+   */
+  void trinaryOperation (Operator *op, const Expression *exp,
+      edu::sharif::twinner::trace::exptoken::ExpressionToken *token);
+
+  /**
+   * The op operator is assumed to be owned by this expression object.
+   * But exp will be kept untouched and its inner expression tokens will
+   * be cloned. The exp may or may not be the same as this object.
    * If exp is a trivial expression, this method tries to simplify and apply
    * it directly.
    * This method is similar to binaryOperation but it uses the size of this
@@ -288,6 +305,19 @@ public:
     trinaryOperation
         (Operator::instantiateOperator (Operator::ARITHMETIC_SHIFT_RIGHT),
         operand);
+  }
+
+  /**
+   * A trinary if-then-else expression using this as "then" and elseExpression
+   * as "else" and the given constraint as "if condition" objects.
+   *
+   * @param elseExpression The else-expression which will be cloned.
+   * @param constraint The if-condition which is owned by this expression.
+   */
+  void ifThenElse (const Expression *elseExpression, Constraint *constraint) {
+    trinaryOperation (Operator::instantiateOperator (Operator::IF_THEN_ELSE),
+        elseExpression,
+        new edu::sharif::twinner::trace::exptoken::ConstraintOperand (constraint));
   }
 
   /**

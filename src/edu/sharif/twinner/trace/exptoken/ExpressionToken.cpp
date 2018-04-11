@@ -16,6 +16,7 @@
 #include "RegisterEmergedSymbol.h"
 #include "Operator.h"
 #include "NamedSymbol.h"
+#include "ConstraintOperand.h"
 
 #include "edu/sharif/twinner/util/Logger.h"
 
@@ -48,6 +49,8 @@ ExpressionToken *ExpressionToken::loadFromBinaryStream (std::ifstream &in) {
     return Operator::loadFromBinaryStream (in);
   case 'N':
     return NamedSymbol::loadFromBinaryStream (in);
+  case 'B':
+    return ConstraintOperand::loadFromBinaryStream (in);
   default:
     edu::sharif::twinner::util::Logger::error ()
         << "Unknown expression token's type: " << type << '\n';

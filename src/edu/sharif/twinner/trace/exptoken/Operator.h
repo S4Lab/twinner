@@ -54,6 +54,7 @@ public:
     SIGN_EXTEND,
     ARITHMETIC_SHIFT_RIGHT,
     ROTATE_RIGHT, ROTATE_LEFT,
+    IF_THEN_ELSE,
   };
 
   enum OperatorType {
