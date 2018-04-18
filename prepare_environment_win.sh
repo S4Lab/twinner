@@ -1,7 +1,7 @@
 fullpreparation=$1
 echo "AAA-$1-AAA"
 echo "Linking to source files from deploy folder..."
-cp -f -l -a -u mem.sh run_twinner_win.sh run_twintool_win.sh run_paused_twintool.sh gdb_for_pintool.sh src/* "deploy/"
+cp -f -l -a -u mem.sh run_*.sh gdb_for_pintool.sh src/* "deploy/"
 cd deploy/
 rm depends.sh
 mv depends_win.sh depends.sh

@@ -13,14 +13,15 @@
 #include "CommandRunner.h"
 #include "Logger.h"
 
+#ifdef TARGET_LINUX
+// requires g++ compiler [use cygwin on windows; check makefile for details]
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <iostream>
-#include <sys/prctl.h>
-
 
 namespace edu {
 namespace sharif {
@@ -221,3 +222,5 @@ void CommandRunner::destroy () {
 }
 }
 }
+
+#endif
