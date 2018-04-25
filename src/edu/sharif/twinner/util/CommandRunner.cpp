@@ -178,8 +178,10 @@ void CommandRunner::waitForCommands () {
 
 bool CommandRunner::executeCommand (ExecType type, const char *command,
     char *response, int responseSize, int &retval) {
+  std::cerr << "CommandsRunner: running command=[" << command << "]\n";
   if (type == SYSTEM) {
     retval = system (command);
+    std::cerr << "\tretval: " << retval << "\n";
     return true;
   }
   FILE *fp = popen (command, "r");
@@ -194,6 +196,7 @@ bool CommandRunner::executeCommand (ExecType type, const char *command,
     return false;
   }
   retval = pclose (fp);
+  std::cerr << "CommandsRunner: retval=" << retval << "\n";
   return true;
 }
 

@@ -1780,8 +1780,15 @@ VOID reportMainArgs (VOID *v, ADDRINT *arg0, ADDRINT *arg1) {
   edu::sharif::twinner::util::Logger::info ()
       << "reportMainArgs (...) function is called\n";
   Instrumenter *im = (Instrumenter *) v;
+  edu::sharif::twinner::util::Logger::debug ()
+      << "argc address: 0x" << std::hex << ADDRINT (arg0) << "\n";
+  edu::sharif::twinner::util::Logger::debug ()
+      << "argv address: 0x" << std::hex << ADDRINT (arg1) << "\n";
   int argc = *reinterpret_cast<int *> (arg0);
   char **argv = *reinterpret_cast<char ***> (arg1);
+  edu::sharif::twinner::util::Logger::debug ()
+      << "argc=0x" << std::hex << ADDRINT (argc) << ", "
+      << "argv=0x" << std::hex << ADDRINT (argv) << "\n";
   im->reportMainArguments (argc, argv);
 }
 
@@ -1808,7 +1815,7 @@ VOID applicationIsAboutToExit (INT32 code, VOID * v) {
   }
   called = true;
   edu::sharif::twinner::util::Logger::info ()
-      << "********** applicationIsAboutToExit(...) **********\n";
+      << "********** applicationIsAboutToExit(ret=" << code << ") **********\n";
   Instrumenter *im = (Instrumenter *) v;
   im->aboutToExit (code);
 }
