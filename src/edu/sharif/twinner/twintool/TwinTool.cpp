@@ -259,7 +259,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     const string stackOffsetStr = stackOffset.Value ();
     std::stringstream ss;
     ss << stackOffsetStr;
-    if (stackOffsetStr.find (':')) {
+    if (stackOffsetStr.find (':') != string::npos) {
       char colon;
       ss >> argcOffset >> colon >> argvOffset;
     } else {
