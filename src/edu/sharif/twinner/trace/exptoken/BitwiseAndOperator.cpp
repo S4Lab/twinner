@@ -121,7 +121,7 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
     propagateDeepSimplificationToSubExpressions
         (stack, *operand, exp->getLastConcreteValue ().getSize ());
     if (stack.size () < 3) {
-      return CAN_NOT_SIMPLIFY;
+      return RESTART_SIMPLIFICATION;
     }
     it = stack.end ();
     secondOp = static_cast<Operator *> (*--it);
