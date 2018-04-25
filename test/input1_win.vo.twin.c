@@ -1,0 +1,473 @@
+
+#include "twincode.h"
+
+int func_1 (struct RegistersSet &regs, UINT64 ebp_0, UINT64 edi_0, UINT64 esi_0, UINT64 esp_0, UINT64 m22cbd0_1_64, UINT32 m22cbd8_1_32, UINT16 m22cbdc_1_16, UINT8 m22cbde_1_8, UINT64 m22cbe0_1_64, UINT32 m22cbe8_1_32, UINT16 m22cbec_1_16, UINT8 m22cbee_1_8, UINT64 m22cbf0_1_64, UINT32 m22cbfc_1_32, UINT64 m22cc00_0_64, UINT32 m22cc08_0_32, UINT64 m22cc10_0_64, UINT32 m22cc2c_1_32, UINT64 m22cc38_0_64, UINT64 m22cc40_0_64, UINT32 m22cc48_0_32, UINT32 m22cc64_0_32, UINT8 m22ccab_0_8, UINT32 m402014_0_32, UINT32 m402018_0_32);
+int func_2 (struct RegistersSet &regs, UINT64 ebp_0, UINT64 edi_0, UINT64 esi_0, UINT64 esp_0, UINT64 m22cbe0_2_64, UINT32 m22cbe8_2_32, UINT16 m22cbec_2_16, UINT8 m22cbee_2_8, UINT64 m22cbf0_2_64, UINT32 m22cbfc_1_32, UINT64 m22cc00_0_64, UINT32 m22cc08_0_32, UINT64 m22cc10_0_64, UINT32 m22cc2c_2_32, UINT64 m22cc38_0_64, UINT64 m22cc40_0_64, UINT32 m22cc48_0_32, UINT32 m22cc64_0_32);
+int func_2 (struct RegistersSet &regs, UINT64 ebp_0, UINT64 edi_0, UINT64 esi_0, UINT64 esp_0, UINT64 m22cbe0_2_64, UINT32 m22cbe8_2_32, UINT16 m22cbec_2_16, UINT8 m22cbee_2_8, UINT64 m22cbf0_2_64, UINT32 m22cbfc_1_32, UINT64 m22cc00_0_64, UINT32 m22cc08_0_32, UINT64 m22cc10_0_64, UINT32 m22cc2c_2_32, UINT64 m22cc38_0_64, UINT64 m22cc40_0_64, UINT32 m22cc48_0_32, UINT32 m22cc64_0_32) {
+{
+		/*Memory Changes*/
+		*((UINT32 *) 0x22cbe0) = UINT32 (m22cbe0_2_64 /*0x611b3fe00022d51c*/);
+		*((UINT32 *) 0x22cbe8) = UINT32 ((((((m22cbee_2_8 | 0x200) << 0x10) | m22cbec_2_16) << 0x20) | m22cbe8_2_32) /*0x4030bc*/);
+		*((UINT32 *) 0x22cbf0) = UINT32 (m22cbf0_2_64 /*0x22cc7c004060de*/);
+		*((UINT32 *) 0x22cbf8) = UINT32 (((m22cbfc_1_32 << 0x20) | ((esp_0 - 0x8) & 0xffffffff)) /*0x22cc28*/);
+		*((UINT32 *) 0x22cc00) = UINT32 (((m22cc00_0_64 & 0xffffffff00000000) | 0x22cc4c) /*0x22cc4c*/);
+		*((UINT32 *) 0x22cc08) = UINT32 (((0xf << 0x20) | m22cc08_0_32) /*0x22cc58*/);
+		*((UINT32 *) 0x22cc10) = UINT32 ((((((logicalShiftToRight (m22cc10_0_64, 0x20) | 0x1000000) & 0x1ff0000) | (logicalShiftToRight (m22cc10_0_64, 0x20) & 0xffff)) << 0x20) & 0xffffffff00000000) /*0x0*/);
+		*((UINT32 *) 0x22cc18) = UINT32 (0x900000035);
+		*((UINT32 *) 0x22cc20) = UINT32 ((((edi_0 << 0x20) & 0xffffffff00000000) | (esi_0 & 0xffffffff)) /*0x611ccfaf0022cca5*/);
+		*((UINT32 *) 0x22cc28) = UINT32 (((m22cc2c_2_32 << 0x20) | (ebp_0 & 0xffffffff)) /*0x22cc58*/);
+		*((UINT32 *) 0x22cc30) = UINT32 (((m22cc64_0_32 << 0x20) | 0x22cc4c) /*0x22cc4c*/);
+		*((UINT32 *) 0x22cc38) = UINT32 (m22cc38_0_64 /*0x22cc5c00000000*/);
+		*((UINT32 *) 0x22cc40) = UINT32 (m22cc40_0_64 /*0x10000002f*/);
+		*((UINT32 *) 0x22cc48) = UINT32 (((0x4060df << 0x20) | m22cc48_0_32) /*0x61300968*/);
+		/*Registers Changes*/
+		regs.eax = UINT32 (0x4060de);
+		regs.edx = UINT32 (0x4060df);
+		regs.esp = UINT32 (((esp_0 - 0x4) & 0xffffffff) /*0x22cc2c*/);
+		regs.ebp = UINT32 (((esp_0 - 0x8) & 0xffffffff) /*0x22cc28*/);
+		return int (regs.eax);
+	}
+}
+int func_1 (struct RegistersSet &regs, UINT64 ebp_0, UINT64 edi_0, UINT64 esi_0, UINT64 esp_0, UINT64 m22cbd0_1_64, UINT32 m22cbd8_1_32, UINT16 m22cbdc_1_16, UINT8 m22cbde_1_8, UINT64 m22cbe0_1_64, UINT32 m22cbe8_1_32, UINT16 m22cbec_1_16, UINT8 m22cbee_1_8, UINT64 m22cbf0_1_64, UINT32 m22cbfc_1_32, UINT64 m22cc00_0_64, UINT32 m22cc08_0_32, UINT64 m22cc10_0_64, UINT32 m22cc2c_1_32, UINT64 m22cc38_0_64, UINT64 m22cc40_0_64, UINT32 m22cc48_0_32, UINT32 m22cc64_0_32, UINT8 m22ccab_0_8, UINT32 m402014_0_32, UINT32 m402018_0_32) {
+if ((/*signed {*/UINT128 (0x0, 0x0, 0x0, 0x35)/*}*/ < /*signed {*/signExtend_0x80_0x8 (m22ccab_0_8) /*UINT128 (0x0, 0x0, 0x0, 0x36)*//*}*/)) {
+		/*Memory Changes*/
+		*((UINT32 *) 0x22cbd0) = UINT32 (m22cbd0_1_64 /*0x611ccfaf0022cca5*/);
+		*((UINT32 *) 0x22cbd8) = UINT32 ((((((m22cbde_1_8 | 0x300) << 0x10) | m22cbdc_1_16) << 0x20) | m22cbd8_1_32) /*0x22cc28*/);
+		*((UINT32 *) 0x22cbe0) = UINT32 (m22cbe0_1_64 /*0x611b3fe00022d51c*/);
+		*((UINT32 *) 0x22cbe8) = UINT32 ((((((m22cbee_1_8 | 0x200) << 0x10) | m22cbec_1_16) << 0x20) | m22cbe8_1_32) /*0x403084*/);
+		*((UINT32 *) 0x22cbf0) = UINT32 (m22cbf0_1_64 /*0x22cc7c004060ac*/);
+		*((UINT32 *) 0x22cbf8) = UINT32 (((m22cbfc_1_32 << 0x20) | ((esp_0 - 0x8) & 0xffffffff)) /*0x22cc28*/);
+		*((UINT32 *) 0x22cc00) = UINT32 (((m22cc00_0_64 & 0xffffffff00000000) | 0x22cc4c) /*0x22cc4c*/);
+		*((UINT32 *) 0x22cc08) = UINT32 (((0xf << 0x20) | m22cc08_0_32) /*0x22cc58*/);
+		*((UINT32 *) 0x22cc10) = UINT32 ((((((logicalShiftToRight (m22cc10_0_64, 0x20) | 0x1000000) & 0x1ff0000) | (logicalShiftToRight (m22cc10_0_64, 0x20) & 0xffff)) << 0x20) & 0xffffffff00000000) /*0x0*/);
+		*((UINT32 *) 0x22cc18) = UINT32 (0x900000033);
+		*((UINT32 *) 0x22cc20) = UINT32 ((((edi_0 << 0x20) & 0xffffffff00000000) | (esi_0 & 0xffffffff)) /*0x611ccfaf0022cca5*/);
+		*((UINT32 *) 0x22cc28) = UINT32 (((m22cc2c_1_32 << 0x20) | (ebp_0 & 0xffffffff)) /*0x22cc58*/);
+		*((UINT32 *) 0x22cc30) = UINT32 (((m22cc64_0_32 << 0x20) | 0x22cc4c) /*0x22cc4c*/);
+		*((UINT32 *) 0x22cc38) = UINT32 (m22cc38_0_64 /*0x22cc5c00000000*/);
+		*((UINT32 *) 0x22cc40) = UINT32 (m22cc40_0_64 /*0x10000002f*/);
+		*((UINT32 *) 0x22cc48) = UINT32 (((0x4060ad << 0x20) | m22cc48_0_32) /*0x61300968*/);
+		/*Registers Changes*/
+		regs.eax = UINT32 (0x4060ac);
+		regs.edx = UINT32 (0x4060ad);
+		regs.esp = UINT32 (((esp_0 - 0x4) & 0xffffffff) /*0x22cc2c*/);
+		regs.ebp = UINT32 (((esp_0 - 0x8) & 0xffffffff) /*0x22cc28*/);
+		regs.rax = printf (/*"second condition; then part\n"*/ (const char *) (((m402014_0_32 & 0xffff) | (m402014_0_32 & 0xffff0000)) & 0xffffffff) /*0x400000*/);
+		const UINT32 eax_2 = regs.eax, ebx_2 = regs.ebx, ecx_2 = regs.ecx, edx_2 = regs.edx, edi_2 = regs.edi, esi_2 = regs.esi, esp_2 = regs.esp, ebp_2 = regs.ebp;
+		const UINT128 xmm0_2 = UINT128 (regs.xmm0), xmm1_2 = UINT128 (regs.xmm1), xmm2_2 = UINT128 (regs.xmm2), xmm3_2 = UINT128 (regs.xmm3), xmm4_2 = UINT128 (regs.xmm4), xmm5_2 = UINT128 (regs.xmm5), xmm6_2 = UINT128 (regs.xmm6), xmm7_2 = UINT128 (regs.xmm7);
+		const UINT64 m22cbe0_2_64 = *((UINT64 *) 0x22cbe0);
+		const UINT32 m22cbe8_2_32 = *((UINT32 *) 0x22cbe8);
+		const UINT16 m22cbec_2_16 = *((UINT16 *) 0x22cbec);
+		const UINT8 m22cbee_2_8 = *((UINT8 *) 0x22cbee);
+		const UINT64 m22cbf0_2_64 = *((UINT64 *) 0x22cbf0);
+		const UINT32 m22cbfc_2_32 = *((UINT32 *) 0x22cbfc);
+		const UINT32 m22cc2c_2_32 = *((UINT32 *) 0x22cc2c);
+				func_2 (regs, ebp_0, edi_0, esi_0, esp_0, m22cbe0_2_64, m22cbe8_2_32, m22cbec_2_16, m22cbee_2_8, m22cbf0_2_64, m22cbfc_1_32, m22cc00_0_64, m22cc08_0_32, m22cc10_0_64, m22cc2c_2_32, m22cc38_0_64, m22cc40_0_64, m22cc48_0_32, m22cc64_0_32);
+	} else {
+		/*Memory Changes*/
+		*((UINT32 *) 0x22cbd0) = UINT32 (m22cbd0_1_64 /*0x611ccfaf0022cca5*/);
+		*((UINT32 *) 0x22cbd8) = UINT32 ((((((m22cbde_1_8 | 0x300) << 0x10) | m22cbdc_1_16) << 0x20) | m22cbd8_1_32) /*0x22cc28*/);
+		*((UINT32 *) 0x22cbe0) = UINT32 (m22cbe0_1_64 /*0x611b3fe00022d51c*/);
+		*((UINT32 *) 0x22cbe8) = UINT32 ((((((m22cbee_1_8 | 0x200) << 0x10) | m22cbec_1_16) << 0x20) | m22cbe8_1_32) /*0x403084*/);
+		*((UINT32 *) 0x22cbf0) = UINT32 (m22cbf0_1_64 /*0x22cc7c004060ac*/);
+		*((UINT32 *) 0x22cbf8) = UINT32 (((m22cbfc_1_32 << 0x20) | ((esp_0 - 0x8) & 0xffffffff)) /*0x22cc28*/);
+		*((UINT32 *) 0x22cc00) = UINT32 (((m22cc00_0_64 & 0xffffffff00000000) | 0x22cc4c) /*0x22cc4c*/);
+		*((UINT32 *) 0x22cc08) = UINT32 (((0xf << 0x20) | m22cc08_0_32) /*0x22cc58*/);
+		*((UINT32 *) 0x22cc10) = UINT32 ((((((logicalShiftToRight (m22cc10_0_64, 0x20) | 0x1000000) & 0x1ff0000) | (logicalShiftToRight (m22cc10_0_64, 0x20) & 0xffff)) << 0x20) & 0xffffffff00000000) /*0x0*/);
+		*((UINT32 *) 0x22cc18) = UINT32 (0x900000033);
+		*((UINT32 *) 0x22cc20) = UINT32 ((((edi_0 << 0x20) & 0xffffffff00000000) | (esi_0 & 0xffffffff)) /*0x611ccfaf0022cca5*/);
+		*((UINT32 *) 0x22cc28) = UINT32 (((m22cc2c_1_32 << 0x20) | (ebp_0 & 0xffffffff)) /*0x22cc58*/);
+		*((UINT32 *) 0x22cc30) = UINT32 (((m22cc64_0_32 << 0x20) | 0x22cc4c) /*0x22cc4c*/);
+		*((UINT32 *) 0x22cc38) = UINT32 (m22cc38_0_64 /*0x22cc5c00000000*/);
+		*((UINT32 *) 0x22cc40) = UINT32 (m22cc40_0_64 /*0x10000002f*/);
+		*((UINT32 *) 0x22cc48) = UINT32 (((0x4060ad << 0x20) | m22cc48_0_32) /*0x61300968*/);
+		/*Registers Changes*/
+		regs.eax = UINT32 (0x4060ac);
+		regs.edx = UINT32 (0x4060ad);
+		regs.esp = UINT32 (((esp_0 - 0x4) & 0xffffffff) /*0x22cc2c*/);
+		regs.ebp = UINT32 (((esp_0 - 0x8) & 0xffffffff) /*0x22cc28*/);
+		regs.rax = printf (/*"second condition; else part\n"*/ (const char *) ((((m402018_0_32 & 0xffff00) | (m402018_0_32 & 0xff)) | ((m402018_0_32 | 0xffffff00000000) & 0xff000000)) & 0xffffffff) /*0x0*/);
+		const UINT32 eax_2 = regs.eax, ebx_2 = regs.ebx, ecx_2 = regs.ecx, edx_2 = regs.edx, edi_2 = regs.edi, esi_2 = regs.esi, esp_2 = regs.esp, ebp_2 = regs.ebp;
+		const UINT128 xmm0_2 = UINT128 (regs.xmm0), xmm1_2 = UINT128 (regs.xmm1), xmm2_2 = UINT128 (regs.xmm2), xmm3_2 = UINT128 (regs.xmm3), xmm4_2 = UINT128 (regs.xmm4), xmm5_2 = UINT128 (regs.xmm5), xmm6_2 = UINT128 (regs.xmm6), xmm7_2 = UINT128 (regs.xmm7);
+		const UINT64 m22cbe0_2_64 = *((UINT64 *) 0x22cbe0);
+		const UINT32 m22cbe8_2_32 = *((UINT32 *) 0x22cbe8);
+		const UINT16 m22cbec_2_16 = *((UINT16 *) 0x22cbec);
+		const UINT8 m22cbee_2_8 = *((UINT8 *) 0x22cbee);
+		const UINT64 m22cbf0_2_64 = *((UINT64 *) 0x22cbf0);
+		const UINT32 m22cbfc_2_32 = *((UINT32 *) 0x22cbfc);
+		const UINT32 m22cc2c_2_32 = *((UINT32 *) 0x22cc2c);
+				func_2 (regs, ebp_0, edi_0, esi_0, esp_0, m22cbe0_2_64, m22cbe8_2_32, m22cbec_2_16, m22cbee_2_8, m22cbf0_2_64, m22cbfc_1_32, m22cc00_0_64, m22cc08_0_32, m22cc10_0_64, m22cc2c_2_32, m22cc38_0_64, m22cc40_0_64, m22cc48_0_32, m22cc64_0_32);
+	}
+}
+int main (int argc, char *argv[]) {
+struct RegistersSet regs;
+SAVE_REGISTERS (regs);
+	const UINT32 eax_0 = regs.eax, ebx_0 = regs.ebx, ecx_0 = regs.ecx, edx_0 = regs.edx, edi_0 = regs.edi, esi_0 = regs.esi, esp_0 = regs.esp, ebp_0 = regs.ebp;
+	const UINT128 xmm0_0 = UINT128 (regs.xmm0), xmm1_0 = UINT128 (regs.xmm1), xmm2_0 = UINT128 (regs.xmm2), xmm3_0 = UINT128 (regs.xmm3), xmm4_0 = UINT128 (regs.xmm4), xmm5_0 = UINT128 (regs.xmm5), xmm6_0 = UINT128 (regs.xmm6), xmm7_0 = UINT128 (regs.xmm7);
+	*((UINT32 *) 0x22cbd8) = 0x0;
+	*((UINT64 *) 0x22cbe0) = 0x611ccfaf00401b70;
+	*((UINT32 *) 0x402010) = 0x4030a0;
+	*((UINT32 *) 0x406044) = 0x0;
+	*((UINT64 *) 0x406048) = 0x0;
+	*((UINT32 *) 0x406054) = 0x0;
+	*((UINT64 *) 0x406058) = 0x0;
+	*((UINT32 *) 0x406064) = 0x0;
+	*((UINT64 *) 0x406068) = 0x0;
+	*((UINT32 *) 0x406074) = 0x0;
+	*((UINT64 *) 0x406078) = 0x0;
+	*((UINT32 *) 0x406084) = 0x0;
+	*((UINT64 *) 0x406088) = 0x0;
+	*((UINT32 *) 0x406094) = 0x0;
+	*((UINT64 *) 0x406098) = 0x0;
+	*((UINT32 *) 0x4060a4) = 0x0;
+	*((UINT64 *) 0x4060a8) = 0x0;
+	*((UINT32 *) 0x4060b4) = 0x0;
+	*((UINT64 *) 0x4060b8) = 0x0;
+	*((UINT32 *) 0x4060c4) = 0x0;
+	*((UINT64 *) 0x4060c8) = 0x0;
+	*((UINT32 *) 0x4060d4) = 0x0;
+	*((UINT64 *) 0x4060d8) = 0x0;
+	*((UINT32 *) 0x4060e4) = 0x0;
+	*((UINT64 *) 0x4060e8) = 0x0;
+	*((UINT32 *) 0x4060f4) = 0x0;
+	*((UINT64 *) 0x4060f8) = 0x0;
+	const UINT64 m22cbd0_0_64 = *((UINT64 *) 0x22cbd0);
+	const UINT32 m22cbd8_0_32 = *((UINT32 *) 0x22cbd8);
+	const UINT16 m22cbdc_0_16 = *((UINT16 *) 0x22cbdc);
+	const UINT8 m22cbde_0_8 = *((UINT8 *) 0x22cbde);
+	const UINT64 m22cbe0_0_64 = *((UINT64 *) 0x22cbe0);
+	const UINT32 m22cbec_0_32 = *((UINT32 *) 0x22cbec);
+	const UINT32 m22cbf4_0_32 = *((UINT32 *) 0x22cbf4);
+	const UINT64 m22cbf8_0_64 = *((UINT64 *) 0x22cbf8);
+	const UINT64 m22cc00_0_64 = *((UINT64 *) 0x22cc00);
+	const UINT32 m22cc08_0_32 = *((UINT32 *) 0x22cc08);
+	const UINT64 m22cc10_0_64 = *((UINT64 *) 0x22cc10);
+	const UINT32 m22cc18_0_32 = *((UINT32 *) 0x22cc18);
+	const UINT64 m22cc20_0_64 = *((UINT64 *) 0x22cc20);
+	const UINT32 m22cc2c_0_32 = *((UINT32 *) 0x22cc2c);
+	const UINT32 m22cc30_0_32 = *((UINT32 *) 0x22cc30);
+	const UINT64 m22cc38_0_64 = *((UINT64 *) 0x22cc38);
+	const UINT64 m22cc40_0_64 = *((UINT64 *) 0x22cc40);
+	const UINT32 m22cc48_0_32 = *((UINT32 *) 0x22cc48);
+	const UINT32 m22cc60_0_32 = *((UINT32 *) 0x22cc60);
+	const UINT32 m22cc64_0_32 = *((UINT32 *) 0x22cc64);
+	const UINT32 m22cc80_0_32 = *((UINT32 *) 0x22cc80);
+	const UINT8 m22cca9_0_8 = *((UINT8 *) 0x22cca9);
+	const UINT8 m22ccaa_0_8 = *((UINT8 *) 0x22ccaa);
+	const UINT8 m22ccab_0_8 = *((UINT8 *) 0x22ccab);
+	const UINT32 m402010_0_32 = *((UINT32 *) 0x402010);
+	const UINT32 m406044_0_32 = *((UINT32 *) 0x406044);
+	const UINT64 m406048_0_64 = *((UINT64 *) 0x406048);
+	const UINT32 m406054_0_32 = *((UINT32 *) 0x406054);
+	const UINT64 m406058_0_64 = *((UINT64 *) 0x406058);
+	const UINT32 m406064_0_32 = *((UINT32 *) 0x406064);
+	const UINT64 m406068_0_64 = *((UINT64 *) 0x406068);
+	const UINT32 m406074_0_32 = *((UINT32 *) 0x406074);
+	const UINT64 m406078_0_64 = *((UINT64 *) 0x406078);
+	const UINT32 m406084_0_32 = *((UINT32 *) 0x406084);
+	const UINT64 m406088_0_64 = *((UINT64 *) 0x406088);
+	const UINT32 m406094_0_32 = *((UINT32 *) 0x406094);
+	const UINT64 m406098_0_64 = *((UINT64 *) 0x406098);
+	const UINT32 m4060a4_0_32 = *((UINT32 *) 0x4060a4);
+	const UINT64 m4060a8_0_64 = *((UINT64 *) 0x4060a8);
+	const UINT32 m4060b4_0_32 = *((UINT32 *) 0x4060b4);
+	const UINT64 m4060b8_0_64 = *((UINT64 *) 0x4060b8);
+	const UINT32 m4060c4_0_32 = *((UINT32 *) 0x4060c4);
+	const UINT64 m4060c8_0_64 = *((UINT64 *) 0x4060c8);
+	const UINT32 m4060d4_0_32 = *((UINT32 *) 0x4060d4);
+	const UINT64 m4060d8_0_64 = *((UINT64 *) 0x4060d8);
+	const UINT32 m4060e4_0_32 = *((UINT32 *) 0x4060e4);
+	const UINT64 m4060e8_0_64 = *((UINT64 *) 0x4060e8);
+	const UINT32 m4060f4_0_32 = *((UINT32 *) 0x4060f4);
+	const UINT64 m4060f8_0_64 = *((UINT64 *) 0x4060f8);
+	if ((((UINT32 (esp_0) + 0xffffffffffdd33d0) & 0xffffffffffffffff) /*0x0*/ == 0)
+		&& (((UINT32 (ebp_0) + 0xffffffffffdd33a8) & 0xffffffffffffffff) /*0x0*/ == 0)) {
+		if ((((UINT32 (m22cc64_0_32) + UINT128 (0xffffffff, 0xffffffff, 0xffffffff, 0xffdd3384)) & 0xffffffffffffffff) /*0x0*/ == 0)) {
+			if ((/*signed {*/signExtend_0x80_0x20 (UINT32 (m22cc60_0_32)) /*UINT128 (0x0, 0x0, 0x0, 0x2)*//*}*/ >= /*signed {*/UINT128 (0x0, 0x0, 0x0, 0x2)/*}*/)) {
+				if (((((((UINT32 (m22cc80_0_32) & 0xff000000) | (UINT32 (m22cc80_0_32) & 0xffffff)) & 0xffffffff) + UINT128 (0xffffffff, 0xffffffff, 0xffffffff, 0xffdd3357)) & 0xffffffffffffffff) /*0x0*/ == 0)) {
+					if ((/*signed {*/UINT128 (0x0, 0x0, 0x0, 0x38)/*}*/ < /*signed {*/signExtend_0x80_0x8 (UINT32 (m22cca9_0_8)) /*UINT128 (0x0, 0x0, 0x0, 0x39)*//*}*/)) {
+						if ((/*signed {*/UINT128 (0x0, 0x0, 0x0, 0x33)/*}*/ >= /*signed {*/signExtend_0x80_0x8 (UINT32 (m22ccaa_0_8)) /*UINT128 (0x0, 0x0, 0x0, 0x31)*//*}*/)) {
+							/*Memory Changes*/
+							*((UINT32 *) 0x22cbd0) = UINT32 (m22cbd0_0_64 /*0x4060f4004015c4*/);
+							*((UINT32 *) 0x22cbd8) = UINT32 ((((((m22cbde_0_8 | 0x100) << 0x10) | m22cbdc_0_16) << 0x20) | m22cbd8_0_32) /*0x0*/);
+							*((UINT32 *) 0x22cbe0) = UINT32 (m22cbe0_0_64 /*0x611ccfaf00401b70*/);
+							*((UINT32 *) 0x22cbe8) = UINT32 (((m22cbec_0_32 << 0x20) | ((esp_0 - 0x8) & 0xffffffff)) /*0x22cc28*/);
+							*((UINT32 *) 0x22cbf0) = UINT32 (((m22cbf4_0_32 << 0x20) | 0x22cc4c) /*0x22cc4c*/);
+							*((UINT32 *) 0x22cbf8) = UINT32 (m22cbf8_0_64 /*0x0*/);
+							*((UINT32 *) 0x22cc00) = UINT32 (m22cc00_0_64 /*0x611ccfaf00401b70*/);
+							*((UINT32 *) 0x22cc08) = UINT32 (((0x15 << 0x20) | m22cc08_0_32) /*0x22cc58*/);
+							*((UINT32 *) 0x22cc10) = UINT32 (m22cc10_0_64 /*0x4961006610*/);
+							*((UINT32 *) 0x22cc18) = UINT32 ((((ebx_0 & 0xffffffff) << 0x20) | m22cc18_0_32) /*0x22cc7c0022fd24*/);
+							*((UINT32 *) 0x22cc20) = UINT32 (m22cc20_0_64 /*0x22cc7c000000c0*/);
+							*((UINT32 *) 0x22cc28) = UINT32 (((m22cc2c_0_32 << 0x20) | (ebp_0 & 0xffffffff)) /*0x22cc58*/);
+							*((UINT32 *) 0x22cc30) = UINT32 (((m22cc64_0_32 << 0x20) | m22cc30_0_32) /*0x612c5280*/);
+							*((UINT32 *) 0x22cc38) = UINT32 (m22cc38_0_64 /*0x22cc5c00000000*/);
+							*((UINT32 *) 0x22cc40) = UINT32 (m22cc40_0_64 /*0x10000002f*/);
+							*((UINT32 *) 0x22cc48) = UINT32 (((0x406040 << 0x20) | m22cc48_0_32) /*0x61300968*/);
+							*((UINT32 *) 0x406040) = UINT32 (((m406044_0_32 << 0x20) | 0xffff0101) /*0xffff0101*/);
+							*((UINT32 *) 0x406048) = UINT32 (m406048_0_64 /*0x0*/);
+							*((UINT32 *) 0x406050) = UINT32 (((m406054_0_32 << 0x20) | 0x2) /*0x2*/);
+							*((UINT32 *) 0x406058) = UINT32 (m406058_0_64 /*0x0*/);
+							*((UINT32 *) 0x406060) = UINT32 (((m406064_0_32 << 0x20) | 0xffffff) /*0xffffff*/);
+							*((UINT32 *) 0x406068) = UINT32 (m406068_0_64 /*0x0*/);
+							*((UINT32 *) 0x406070) = UINT32 (((m406074_0_32 << 0x20) | 0xffffff03) /*0xffffff03*/);
+							*((UINT32 *) 0x406078) = UINT32 (m406078_0_64 /*0x0*/);
+							*((UINT32 *) 0x406080) = UINT32 ((m406084_0_32 << 0x20) /*0x0*/);
+							*((UINT32 *) 0x406088) = UINT32 (m406088_0_64 /*0x0*/);
+							*((UINT32 *) 0x406090) = UINT32 (((m406094_0_32 << 0x20) | 0x2ffffff) /*0x2ffffff*/);
+							*((UINT32 *) 0x406098) = UINT32 (m406098_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060a0) = UINT32 (((m4060a4_0_32 << 0x20) | 0x2000000) /*0x2000000*/);
+							*((UINT32 *) 0x4060a8) = UINT32 (m4060a8_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060b0) = UINT32 (((m4060b4_0_32 << 0x20) | 0xff020000) /*0xff020000*/);
+							*((UINT32 *) 0x4060b8) = UINT32 (m4060b8_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060c0) = UINT32 (((m4060c4_0_32 << 0x20) | 0xffffffff) /*0xffffffff*/);
+							*((UINT32 *) 0x4060c8) = UINT32 (m4060c8_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060d0) = UINT32 (((m4060d4_0_32 << 0x20) | 0xf02) /*0xf02*/);
+							*((UINT32 *) 0x4060d8) = UINT32 (m4060d8_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060e0) = UINT32 (((m4060e4_0_32 << 0x20) | 0x9) /*0x9*/);
+							*((UINT32 *) 0x4060e8) = UINT32 (m4060e8_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060f0) = UINT32 ((m4060f4_0_32 << 0x20) /*0x0*/);
+							*((UINT32 *) 0x4060f8) = UINT32 (m4060f8_0_64 /*0x0*/);
+							/*Registers Changes*/
+							regs.eax = UINT32 (m22cc64_0_32 /*0x22cc7c*/);
+							regs.ebx = UINT32 (0x4030f8);
+							regs.ecx = UINT32 (0x2d);
+							regs.edx = UINT32 (0x406040);
+							regs.edi = UINT32 (edi_0 /*0x611ccfaf*/);
+							regs.esi = UINT32 (esi_0 /*0x22cca5*/);
+							regs.esp = UINT32 (esp_0 /*0x22cc30*/);
+							regs.ebp = UINT32 (ebp_0 /*0x22cc58*/);
+							regs.rax = printf (/*"first condition; then part\n"*/ (const char *) m40200c_0_32 /*0x0*/);
+							const UINT32 eax_1 = regs.eax, ebx_1 = regs.ebx, ecx_1 = regs.ecx, edx_1 = regs.edx, edi_1 = regs.edi, esi_1 = regs.esi, esp_1 = regs.esp, ebp_1 = regs.ebp;
+							const UINT128 xmm0_1 = UINT128 (regs.xmm0), xmm1_1 = UINT128 (regs.xmm1), xmm2_1 = UINT128 (regs.xmm2), xmm3_1 = UINT128 (regs.xmm3), xmm4_1 = UINT128 (regs.xmm4), xmm5_1 = UINT128 (regs.xmm5), xmm6_1 = UINT128 (regs.xmm6), xmm7_1 = UINT128 (regs.xmm7);
+							const UINT64 m22cbd0_1_64 = *((UINT64 *) 0x22cbd0);
+							const UINT32 m22cbd8_1_32 = *((UINT32 *) 0x22cbd8);
+							const UINT16 m22cbdc_1_16 = *((UINT16 *) 0x22cbdc);
+							const UINT8 m22cbde_1_8 = *((UINT8 *) 0x22cbde);
+							const UINT64 m22cbe0_1_64 = *((UINT64 *) 0x22cbe0);
+							const UINT32 m22cbe8_1_32 = *((UINT32 *) 0x22cbe8);
+							const UINT16 m22cbec_1_16 = *((UINT16 *) 0x22cbec);
+							const UINT32 m22cbec_1_32 = *((UINT32 *) 0x22cbec);
+							const UINT8 m22cbee_1_8 = *((UINT8 *) 0x22cbee);
+							const UINT64 m22cbf0_1_64 = *((UINT64 *) 0x22cbf0);
+							const UINT32 m22cbf4_1_32 = *((UINT32 *) 0x22cbf4);
+							const UINT64 m22cbf8_1_64 = *((UINT64 *) 0x22cbf8);
+							const UINT32 m22cbfc_1_32 = *((UINT32 *) 0x22cbfc);
+							const UINT32 m22cc2c_1_32 = *((UINT32 *) 0x22cc2c);
+														func_1 (regs, UINT32 (ebp_0), UINT32 (edi_0), UINT32 (esi_0), UINT32 (esp_0), UINT32 (m22cbd0_1_64), UINT32 (m22cbd8_1_32), UINT32 (m22cbdc_1_16), UINT32 (m22cbde_1_8), UINT32 (m22cbe0_1_64), UINT32 (m22cbe8_1_32), UINT32 (m22cbec_1_16), UINT32 (m22cbee_1_8), UINT32 (m22cbf0_1_64), UINT32 (m22cbfc_1_32), UINT32 (m22cc00_0_64), UINT32 (m22cc08_0_32), UINT32 (m22cc10_0_64), UINT32 (m22cc2c_1_32), UINT32 (m22cc38_0_64), UINT32 (m22cc40_0_64), UINT32 (m22cc48_0_32), UINT32 (m22cc64_0_32), UINT32 (m22ccab_0_8), UINT32 (m402014_0_32), UINT32 (m402018_0_32));
+						} else {
+							/*Memory Changes*/
+							*((UINT32 *) 0x22cbd0) = UINT32 (m22cbd0_0_64 /*0x4060f4004015c4*/);
+							*((UINT32 *) 0x22cbd8) = UINT32 ((((((m22cbde_0_8 | 0x100) << 0x10) | m22cbdc_0_16) << 0x20) | m22cbd8_0_32) /*0x0*/);
+							*((UINT32 *) 0x22cbe0) = UINT32 (m22cbe0_0_64 /*0x611ccfaf00401b70*/);
+							*((UINT32 *) 0x22cbe8) = UINT32 (((m22cbec_0_32 << 0x20) | ((esp_0 - 0x8) & 0xffffffff)) /*0x22cc28*/);
+							*((UINT32 *) 0x22cbf0) = UINT32 (((m22cbf4_0_32 << 0x20) | 0x22cc4c) /*0x22cc4c*/);
+							*((UINT32 *) 0x22cbf8) = UINT32 (m22cbf8_0_64 /*0x0*/);
+							*((UINT32 *) 0x22cc00) = UINT32 (m22cc00_0_64 /*0x611ccfaf00401b70*/);
+							*((UINT32 *) 0x22cc08) = UINT32 (((0x15 << 0x20) | m22cc08_0_32) /*0x22cc58*/);
+							*((UINT32 *) 0x22cc10) = UINT32 (m22cc10_0_64 /*0x4961006610*/);
+							*((UINT32 *) 0x22cc18) = UINT32 ((((ebx_0 & 0xffffffff) << 0x20) | m22cc18_0_32) /*0x22cc7c0022fd24*/);
+							*((UINT32 *) 0x22cc20) = UINT32 (m22cc20_0_64 /*0x22cc7c000000c0*/);
+							*((UINT32 *) 0x22cc28) = UINT32 (((m22cc2c_0_32 << 0x20) | (ebp_0 & 0xffffffff)) /*0x22cc58*/);
+							*((UINT32 *) 0x22cc30) = UINT32 (((m22cc64_0_32 << 0x20) | m22cc30_0_32) /*0x612c5280*/);
+							*((UINT32 *) 0x22cc38) = UINT32 (m22cc38_0_64 /*0x22cc5c00000000*/);
+							*((UINT32 *) 0x22cc40) = UINT32 (m22cc40_0_64 /*0x10000002f*/);
+							*((UINT32 *) 0x22cc48) = UINT32 (((0x406040 << 0x20) | m22cc48_0_32) /*0x61300968*/);
+							*((UINT32 *) 0x406040) = UINT32 (((m406044_0_32 << 0x20) | 0xffff0101) /*0xffff0101*/);
+							*((UINT32 *) 0x406048) = UINT32 (m406048_0_64 /*0x0*/);
+							*((UINT32 *) 0x406050) = UINT32 (((m406054_0_32 << 0x20) | 0x2) /*0x2*/);
+							*((UINT32 *) 0x406058) = UINT32 (m406058_0_64 /*0x0*/);
+							*((UINT32 *) 0x406060) = UINT32 (((m406064_0_32 << 0x20) | 0xffffff) /*0xffffff*/);
+							*((UINT32 *) 0x406068) = UINT32 (m406068_0_64 /*0x0*/);
+							*((UINT32 *) 0x406070) = UINT32 (((m406074_0_32 << 0x20) | 0xffffff03) /*0xffffff03*/);
+							*((UINT32 *) 0x406078) = UINT32 (m406078_0_64 /*0x0*/);
+							*((UINT32 *) 0x406080) = UINT32 ((m406084_0_32 << 0x20) /*0x0*/);
+							*((UINT32 *) 0x406088) = UINT32 (m406088_0_64 /*0x0*/);
+							*((UINT32 *) 0x406090) = UINT32 (((m406094_0_32 << 0x20) | 0x2ffffff) /*0x2ffffff*/);
+							*((UINT32 *) 0x406098) = UINT32 (m406098_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060a0) = UINT32 (((m4060a4_0_32 << 0x20) | 0x2000000) /*0x2000000*/);
+							*((UINT32 *) 0x4060a8) = UINT32 (m4060a8_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060b0) = UINT32 (((m4060b4_0_32 << 0x20) | 0xff020000) /*0xff020000*/);
+							*((UINT32 *) 0x4060b8) = UINT32 (m4060b8_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060c0) = UINT32 (((m4060c4_0_32 << 0x20) | 0xffffffff) /*0xffffffff*/);
+							*((UINT32 *) 0x4060c8) = UINT32 (m4060c8_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060d0) = UINT32 (((m4060d4_0_32 << 0x20) | 0xf02) /*0xf02*/);
+							*((UINT32 *) 0x4060d8) = UINT32 (m4060d8_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060e0) = UINT32 (((m4060e4_0_32 << 0x20) | 0x9) /*0x9*/);
+							*((UINT32 *) 0x4060e8) = UINT32 (m4060e8_0_64 /*0x0*/);
+							*((UINT32 *) 0x4060f0) = UINT32 ((m4060f4_0_32 << 0x20) /*0x0*/);
+							*((UINT32 *) 0x4060f8) = UINT32 (m4060f8_0_64 /*0x0*/);
+							/*Registers Changes*/
+							regs.eax = UINT32 (m22cc64_0_32 /*0x22cc7c*/);
+							regs.ebx = UINT32 (0x4030f8);
+							regs.ecx = UINT32 (0x2d);
+							regs.edx = UINT32 (0x406040);
+							regs.edi = UINT32 (edi_0 /*0x611ccfaf*/);
+							regs.esi = UINT32 (esi_0 /*0x22cca5*/);
+							regs.esp = UINT32 (esp_0 /*0x22cc30*/);
+							regs.ebp = UINT32 (ebp_0 /*0x22cc58*/);
+							regs.rax = printf (/*"first condition; else part\n"*/ (const char *) (((m402010_0_32 & 0xff) | (m402010_0_32 & 0xffffff00)) & 0xffffffff) /*0xa0*/);
+							const UINT32 eax_1 = regs.eax, ebx_1 = regs.ebx, ecx_1 = regs.ecx, edx_1 = regs.edx, edi_1 = regs.edi, esi_1 = regs.esi, esp_1 = regs.esp, ebp_1 = regs.ebp;
+							const UINT128 xmm0_1 = UINT128 (regs.xmm0), xmm1_1 = UINT128 (regs.xmm1), xmm2_1 = UINT128 (regs.xmm2), xmm3_1 = UINT128 (regs.xmm3), xmm4_1 = UINT128 (regs.xmm4), xmm5_1 = UINT128 (regs.xmm5), xmm6_1 = UINT128 (regs.xmm6), xmm7_1 = UINT128 (regs.xmm7);
+							const UINT64 m22cbd0_1_64 = *((UINT64 *) 0x22cbd0);
+							const UINT32 m22cbd8_1_32 = *((UINT32 *) 0x22cbd8);
+							const UINT16 m22cbdc_1_16 = *((UINT16 *) 0x22cbdc);
+							const UINT8 m22cbde_1_8 = *((UINT8 *) 0x22cbde);
+							const UINT64 m22cbe0_1_64 = *((UINT64 *) 0x22cbe0);
+							const UINT32 m22cbe8_1_32 = *((UINT32 *) 0x22cbe8);
+							const UINT16 m22cbec_1_16 = *((UINT16 *) 0x22cbec);
+							const UINT32 m22cbec_1_32 = *((UINT32 *) 0x22cbec);
+							const UINT8 m22cbee_1_8 = *((UINT8 *) 0x22cbee);
+							const UINT64 m22cbf0_1_64 = *((UINT64 *) 0x22cbf0);
+							const UINT32 m22cbf4_1_32 = *((UINT32 *) 0x22cbf4);
+							const UINT64 m22cbf8_1_64 = *((UINT64 *) 0x22cbf8);
+							const UINT32 m22cbfc_1_32 = *((UINT32 *) 0x22cbfc);
+							const UINT32 m22cc2c_1_32 = *((UINT32 *) 0x22cc2c);
+														func_1 (regs, UINT32 (ebp_0), UINT32 (edi_0), UINT32 (esi_0), UINT32 (esp_0), UINT32 (m22cbd0_1_64), UINT32 (m22cbd8_1_32), UINT32 (m22cbdc_1_16), UINT32 (m22cbde_1_8), UINT32 (m22cbe0_1_64), UINT32 (m22cbe8_1_32), UINT32 (m22cbec_1_16), UINT32 (m22cbee_1_8), UINT32 (m22cbf0_1_64), UINT32 (m22cbfc_1_32), UINT32 (m22cc00_0_64), UINT32 (m22cc08_0_32), UINT32 (m22cc10_0_64), UINT32 (m22cc2c_1_32), UINT32 (m22cc38_0_64), UINT32 (m22cc40_0_64), UINT32 (m22cc48_0_32), UINT32 (m22cc64_0_32), UINT32 (m22ccab_0_8), UINT32 (m402014_0_32), UINT32 (m402018_0_32));
+						}
+					} else {
+						/*Memory Changes*/
+						*((UINT32 *) 0x22cbd0) = UINT32 (m22cbd0_0_64 /*0x4060f4004015c4*/);
+						*((UINT32 *) 0x22cbd8) = UINT32 ((((((m22cbde_0_8 | 0x100) << 0x10) | m22cbdc_0_16) << 0x20) | m22cbd8_0_32) /*0x0*/);
+						*((UINT32 *) 0x22cbe0) = UINT32 (m22cbe0_0_64 /*0x611ccfaf00401b70*/);
+						*((UINT32 *) 0x22cbe8) = UINT32 (((m22cbec_0_32 << 0x20) | ((esp_0 - 0x8) & 0xffffffff)) /*0x22cc28*/);
+						*((UINT32 *) 0x22cbf0) = UINT32 (((m22cbf4_0_32 << 0x20) | 0x22cc4c) /*0x22cc4c*/);
+						*((UINT32 *) 0x22cbf8) = UINT32 (m22cbf8_0_64 /*0x0*/);
+						*((UINT32 *) 0x22cc00) = UINT32 (m22cc00_0_64 /*0x611ccfaf00401b70*/);
+						*((UINT32 *) 0x22cc08) = UINT32 (((0x15 << 0x20) | m22cc08_0_32) /*0x22cc58*/);
+						*((UINT32 *) 0x22cc10) = UINT32 (m22cc10_0_64 /*0x4961006610*/);
+						*((UINT32 *) 0x22cc18) = UINT32 ((((ebx_0 & 0xffffffff) << 0x20) | m22cc18_0_32) /*0x22cc7c0022fd24*/);
+						*((UINT32 *) 0x22cc20) = UINT32 (m22cc20_0_64 /*0x22cc7c000000c0*/);
+						*((UINT32 *) 0x22cc28) = UINT32 (((m22cc2c_0_32 << 0x20) | (ebp_0 & 0xffffffff)) /*0x22cc58*/);
+						*((UINT32 *) 0x22cc30) = UINT32 (((m22cc64_0_32 << 0x20) | m22cc30_0_32) /*0x612c5280*/);
+						*((UINT32 *) 0x22cc38) = UINT32 (m22cc38_0_64 /*0x22cc5c00000000*/);
+						*((UINT32 *) 0x22cc40) = UINT32 (m22cc40_0_64 /*0x10000002f*/);
+						*((UINT32 *) 0x22cc48) = UINT32 (((0x406040 << 0x20) | m22cc48_0_32) /*0x61300968*/);
+						*((UINT32 *) 0x406040) = UINT32 (((m406044_0_32 << 0x20) | 0xffff0101) /*0xffff0101*/);
+						*((UINT32 *) 0x406048) = UINT32 (m406048_0_64 /*0x0*/);
+						*((UINT32 *) 0x406050) = UINT32 (((m406054_0_32 << 0x20) | 0x2) /*0x2*/);
+						*((UINT32 *) 0x406058) = UINT32 (m406058_0_64 /*0x0*/);
+						*((UINT32 *) 0x406060) = UINT32 (((m406064_0_32 << 0x20) | 0xffffff) /*0xffffff*/);
+						*((UINT32 *) 0x406068) = UINT32 (m406068_0_64 /*0x0*/);
+						*((UINT32 *) 0x406070) = UINT32 (((m406074_0_32 << 0x20) | 0xffffff03) /*0xffffff03*/);
+						*((UINT32 *) 0x406078) = UINT32 (m406078_0_64 /*0x0*/);
+						*((UINT32 *) 0x406080) = UINT32 ((m406084_0_32 << 0x20) /*0x0*/);
+						*((UINT32 *) 0x406088) = UINT32 (m406088_0_64 /*0x0*/);
+						*((UINT32 *) 0x406090) = UINT32 (((m406094_0_32 << 0x20) | 0x2ffffff) /*0x2ffffff*/);
+						*((UINT32 *) 0x406098) = UINT32 (m406098_0_64 /*0x0*/);
+						*((UINT32 *) 0x4060a0) = UINT32 (((m4060a4_0_32 << 0x20) | 0x2000000) /*0x2000000*/);
+						*((UINT32 *) 0x4060a8) = UINT32 (m4060a8_0_64 /*0x0*/);
+						*((UINT32 *) 0x4060b0) = UINT32 (((m4060b4_0_32 << 0x20) | 0xff020000) /*0xff020000*/);
+						*((UINT32 *) 0x4060b8) = UINT32 (m4060b8_0_64 /*0x0*/);
+						*((UINT32 *) 0x4060c0) = UINT32 (((m4060c4_0_32 << 0x20) | 0xffffffff) /*0xffffffff*/);
+						*((UINT32 *) 0x4060c8) = UINT32 (m4060c8_0_64 /*0x0*/);
+						*((UINT32 *) 0x4060d0) = UINT32 (((m4060d4_0_32 << 0x20) | 0xf02) /*0xf02*/);
+						*((UINT32 *) 0x4060d8) = UINT32 (m4060d8_0_64 /*0x0*/);
+						*((UINT32 *) 0x4060e0) = UINT32 (((m4060e4_0_32 << 0x20) | 0x9) /*0x9*/);
+						*((UINT32 *) 0x4060e8) = UINT32 (m4060e8_0_64 /*0x0*/);
+						*((UINT32 *) 0x4060f0) = UINT32 ((m4060f4_0_32 << 0x20) /*0x0*/);
+						*((UINT32 *) 0x4060f8) = UINT32 (m4060f8_0_64 /*0x0*/);
+						/*Registers Changes*/
+						regs.eax = UINT32 (m22cc64_0_32 /*0x22cc7c*/);
+						regs.ebx = UINT32 (0x4030f8);
+						regs.ecx = UINT32 (0x2d);
+						regs.edx = UINT32 (0x406040);
+						regs.edi = UINT32 (edi_0 /*0x611ccfaf*/);
+						regs.esi = UINT32 (esi_0 /*0x22cca5*/);
+						regs.esp = UINT32 (esp_0 /*0x22cc30*/);
+						regs.ebp = UINT32 (ebp_0 /*0x22cc58*/);
+						regs.rax = printf (/*"first condition; else part\n"*/ (const char *) (((m402010_0_32 & 0xff) | (m402010_0_32 & 0xffffff00)) & 0xffffffff) /*0xa0*/);
+						const UINT32 eax_1 = regs.eax, ebx_1 = regs.ebx, ecx_1 = regs.ecx, edx_1 = regs.edx, edi_1 = regs.edi, esi_1 = regs.esi, esp_1 = regs.esp, ebp_1 = regs.ebp;
+						const UINT128 xmm0_1 = UINT128 (regs.xmm0), xmm1_1 = UINT128 (regs.xmm1), xmm2_1 = UINT128 (regs.xmm2), xmm3_1 = UINT128 (regs.xmm3), xmm4_1 = UINT128 (regs.xmm4), xmm5_1 = UINT128 (regs.xmm5), xmm6_1 = UINT128 (regs.xmm6), xmm7_1 = UINT128 (regs.xmm7);
+						const UINT64 m22cbd0_1_64 = *((UINT64 *) 0x22cbd0);
+						const UINT32 m22cbd8_1_32 = *((UINT32 *) 0x22cbd8);
+						const UINT16 m22cbdc_1_16 = *((UINT16 *) 0x22cbdc);
+						const UINT8 m22cbde_1_8 = *((UINT8 *) 0x22cbde);
+						const UINT64 m22cbe0_1_64 = *((UINT64 *) 0x22cbe0);
+						const UINT32 m22cbe8_1_32 = *((UINT32 *) 0x22cbe8);
+						const UINT16 m22cbec_1_16 = *((UINT16 *) 0x22cbec);
+						const UINT32 m22cbec_1_32 = *((UINT32 *) 0x22cbec);
+						const UINT8 m22cbee_1_8 = *((UINT8 *) 0x22cbee);
+						const UINT64 m22cbf0_1_64 = *((UINT64 *) 0x22cbf0);
+						const UINT32 m22cbf4_1_32 = *((UINT32 *) 0x22cbf4);
+						const UINT64 m22cbf8_1_64 = *((UINT64 *) 0x22cbf8);
+						const UINT32 m22cbfc_1_32 = *((UINT32 *) 0x22cbfc);
+						const UINT32 m22cc2c_1_32 = *((UINT32 *) 0x22cc2c);
+												func_1 (regs, UINT32 (ebp_0), UINT32 (edi_0), UINT32 (esi_0), UINT32 (esp_0), UINT32 (m22cbd0_1_64), UINT32 (m22cbd8_1_32), UINT32 (m22cbdc_1_16), UINT32 (m22cbde_1_8), UINT32 (m22cbe0_1_64), UINT32 (m22cbe8_1_32), UINT32 (m22cbec_1_16), UINT32 (m22cbee_1_8), UINT32 (m22cbf0_1_64), UINT32 (m22cbfc_1_32), UINT32 (m22cc00_0_64), UINT32 (m22cc08_0_32), UINT32 (m22cc10_0_64), UINT32 (m22cc2c_1_32), UINT32 (m22cc38_0_64), UINT32 (m22cc40_0_64), UINT32 (m22cc48_0_32), UINT32 (m22cc64_0_32), UINT32 (m22ccab_0_8), UINT32 (m402014_0_32), UINT32 (m402018_0_32));
+					}
+				} else {
+				}
+			} else {
+				/*Memory Changes*/
+				*((UINT32 *) 0x22cbd0) = UINT32 (m22cbd0_0_64 /*0x4060f4004015c4*/);
+				*((UINT32 *) 0x22cbd8) = UINT32 ((((((m22cbde_0_8 | 0x100) << 0x10) | m22cbdc_0_16) << 0x20) | m22cbd8_0_32) /*0x0*/);
+				*((UINT32 *) 0x22cbe0) = UINT32 (m22cbe0_0_64 /*0x611ccfaf00401b70*/);
+				*((UINT32 *) 0x22cbe8) = UINT32 (((m22cbec_0_32 << 0x20) | ((esp_0 - 0x8) & 0xffffffff)) /*0x22cc28*/);
+				*((UINT32 *) 0x22cbf0) = UINT32 (((m22cbf4_0_32 << 0x20) | 0x22cc4c) /*0x22cc4c*/);
+				*((UINT32 *) 0x22cbf8) = UINT32 (m22cbf8_0_64 /*0x0*/);
+				*((UINT32 *) 0x22cc00) = UINT32 (m22cc00_0_64 /*0x611ccfaf00401b70*/);
+				*((UINT32 *) 0x22cc08) = UINT32 (((0x15 << 0x20) | m22cc08_0_32) /*0x22cc58*/);
+				*((UINT32 *) 0x22cc10) = UINT32 (m22cc10_0_64 /*0x4961006610*/);
+				*((UINT32 *) 0x22cc18) = UINT32 ((((ebx_0 & 0xffffffff) << 0x20) | m22cc18_0_32) /*0x22cc7c0022fd24*/);
+				*((UINT32 *) 0x22cc20) = UINT32 (m22cc20_0_64 /*0x22cc7c000000c0*/);
+				*((UINT32 *) 0x22cc28) = UINT32 (((m22cc2c_0_32 << 0x20) | (ebp_0 & 0xffffffff)) /*0x22cc58*/);
+				*((UINT32 *) 0x22cc30) = UINT32 (((m22cc64_0_32 << 0x20) | m22cc30_0_32) /*0x612c5280*/);
+				*((UINT32 *) 0x22cc38) = UINT32 (m22cc38_0_64 /*0x22cc5c00000000*/);
+				*((UINT32 *) 0x22cc40) = UINT32 (m22cc40_0_64 /*0x10000002f*/);
+				*((UINT32 *) 0x22cc48) = UINT32 (((0x406040 << 0x20) | m22cc48_0_32) /*0x61300968*/);
+				*((UINT32 *) 0x406040) = UINT32 (((m406044_0_32 << 0x20) | 0xffff0101) /*0xffff0101*/);
+				*((UINT32 *) 0x406048) = UINT32 (m406048_0_64 /*0x0*/);
+				*((UINT32 *) 0x406050) = UINT32 (((m406054_0_32 << 0x20) | 0x2) /*0x2*/);
+				*((UINT32 *) 0x406058) = UINT32 (m406058_0_64 /*0x0*/);
+				*((UINT32 *) 0x406060) = UINT32 (((m406064_0_32 << 0x20) | 0xffffff) /*0xffffff*/);
+				*((UINT32 *) 0x406068) = UINT32 (m406068_0_64 /*0x0*/);
+				*((UINT32 *) 0x406070) = UINT32 (((m406074_0_32 << 0x20) | 0xffffff03) /*0xffffff03*/);
+				*((UINT32 *) 0x406078) = UINT32 (m406078_0_64 /*0x0*/);
+				*((UINT32 *) 0x406080) = UINT32 ((m406084_0_32 << 0x20) /*0x0*/);
+				*((UINT32 *) 0x406088) = UINT32 (m406088_0_64 /*0x0*/);
+				*((UINT32 *) 0x406090) = UINT32 (((m406094_0_32 << 0x20) | 0x2ffffff) /*0x2ffffff*/);
+				*((UINT32 *) 0x406098) = UINT32 (m406098_0_64 /*0x0*/);
+				*((UINT32 *) 0x4060a0) = UINT32 (((m4060a4_0_32 << 0x20) | 0x2000000) /*0x2000000*/);
+				*((UINT32 *) 0x4060a8) = UINT32 (m4060a8_0_64 /*0x0*/);
+				*((UINT32 *) 0x4060b0) = UINT32 (((m4060b4_0_32 << 0x20) | 0xff020000) /*0xff020000*/);
+				*((UINT32 *) 0x4060b8) = UINT32 (m4060b8_0_64 /*0x0*/);
+				*((UINT32 *) 0x4060c0) = UINT32 (((m4060c4_0_32 << 0x20) | 0xffffffff) /*0xffffffff*/);
+				*((UINT32 *) 0x4060c8) = UINT32 (m4060c8_0_64 /*0x0*/);
+				*((UINT32 *) 0x4060d0) = UINT32 (((m4060d4_0_32 << 0x20) | 0xf02) /*0xf02*/);
+				*((UINT32 *) 0x4060d8) = UINT32 (m4060d8_0_64 /*0x0*/);
+				*((UINT32 *) 0x4060e0) = UINT32 (((m4060e4_0_32 << 0x20) | 0x9) /*0x9*/);
+				*((UINT32 *) 0x4060e8) = UINT32 (m4060e8_0_64 /*0x0*/);
+				*((UINT32 *) 0x4060f0) = UINT32 ((m4060f4_0_32 << 0x20) /*0x0*/);
+				*((UINT32 *) 0x4060f8) = UINT32 (m4060f8_0_64 /*0x0*/);
+				/*Registers Changes*/
+				regs.eax = UINT32 (m22cc64_0_32 /*0x22cc7c*/);
+				regs.ebx = UINT32 (0x4030f8);
+				regs.ecx = UINT32 (0x2d);
+				regs.edx = UINT32 (0x406040);
+				regs.edi = UINT32 (edi_0 /*0x611ccfaf*/);
+				regs.esi = UINT32 (esi_0 /*0x22cca5*/);
+				regs.esp = UINT32 (esp_0 /*0x22cc30*/);
+				regs.ebp = UINT32 (ebp_0 /*0x22cc58*/);
+				regs.rax = printf (/*"Usage: program <command codes>\n"*/ (const char *) (((m402008_0_32 & 0xff) | (m402008_0_32 & 0xffffff00)) & 0xffffffff) /*0x64*/);
+				const UINT32 eax_1 = regs.eax, ebx_1 = regs.ebx, ecx_1 = regs.ecx, edx_1 = regs.edx, edi_1 = regs.edi, esi_1 = regs.esi, esp_1 = regs.esp, ebp_1 = regs.ebp;
+				const UINT128 xmm0_1 = UINT128 (regs.xmm0), xmm1_1 = UINT128 (regs.xmm1), xmm2_1 = UINT128 (regs.xmm2), xmm3_1 = UINT128 (regs.xmm3), xmm4_1 = UINT128 (regs.xmm4), xmm5_1 = UINT128 (regs.xmm5), xmm6_1 = UINT128 (regs.xmm6), xmm7_1 = UINT128 (regs.xmm7);
+				const UINT64 m22cbd0_1_64 = *((UINT64 *) 0x22cbd0);
+				const UINT32 m22cbd8_1_32 = *((UINT32 *) 0x22cbd8);
+				const UINT16 m22cbdc_1_16 = *((UINT16 *) 0x22cbdc);
+				const UINT8 m22cbde_1_8 = *((UINT8 *) 0x22cbde);
+				const UINT64 m22cbe0_1_64 = *((UINT64 *) 0x22cbe0);
+				const UINT32 m22cbe8_1_32 = *((UINT32 *) 0x22cbe8);
+				const UINT16 m22cbec_1_16 = *((UINT16 *) 0x22cbec);
+				const UINT32 m22cbec_1_32 = *((UINT32 *) 0x22cbec);
+				const UINT8 m22cbee_1_8 = *((UINT8 *) 0x22cbee);
+				const UINT64 m22cbf0_1_64 = *((UINT64 *) 0x22cbf0);
+				const UINT32 m22cbf4_1_32 = *((UINT32 *) 0x22cbf4);
+				const UINT64 m22cbf8_1_64 = *((UINT64 *) 0x22cbf8);
+				const UINT32 m22cbfc_1_32 = *((UINT32 *) 0x22cbfc);
+				const UINT32 m22cc2c_1_32 = *((UINT32 *) 0x22cc2c);
+								func_2 (regs, UINT32 (ebp_0), UINT32 (edi_0), UINT32 (esi_0), UINT32 (esp_0), UINT32 (m22cbe0_2_64), UINT32 (m22cbe8_2_32), UINT32 (m22cbec_2_16), UINT32 (m22cbee_2_8), UINT32 (m22cbf0_2_64), UINT32 (m22cbfc_1_32), UINT32 (m22cc00_0_64), UINT32 (m22cc08_0_32), UINT32 (m22cc10_0_64), UINT32 (m22cc2c_2_32), UINT32 (m22cc38_0_64), UINT32 (m22cc40_0_64), UINT32 (m22cc48_0_32), UINT32 (m22cc64_0_32));
+			}
+		} else {
+		}
+	}
+}
