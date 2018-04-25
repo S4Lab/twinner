@@ -1521,6 +1521,7 @@ void Instrumenter::aboutToExit (INT32 code) {
   printInstructionsStatisticsInfo ();
   saveAll ();
   edu::sharif::twinner::util::LogStream::destroy ();
+  PIN_ExitProcess (code);
 }
 
 void Instrumenter::saveAll () {
