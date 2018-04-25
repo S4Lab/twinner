@@ -506,19 +506,29 @@ bool ConcreteValue128Bits::getNthBit (UINT64 value, int n) const {
 }
 
 ConcreteValue128Bits &ConcreteValue128Bits::operator<<= (const ConcreteValue &bits) {
+  bool overflow;
+  return shiftToLeft (bits, overflow);
+}
+
+ConcreteValue128Bits &ConcreteValue128Bits::shiftToLeft (
+    const ConcreteValue &bits, bool &overflow) {
   if (bits > 128) {
+    overflow = (msb != 0 || lsb != 0);
     msb = lsb = cf = 0;
   } else if (bits == 128) {
+    overflow = (msb != 0 || lsb != 0);
     cf = lsb & 0x1;
     msb = lsb = 0;
   } else {
     int n = bits.toUint64 ();
     if (n > 63) {
       n -= 64;
+      overflow = (msb != 0 || (lsb >> (64 - n)) != 0);
       cf = (lsb >> (64 - n)) & 0x1;
       msb = (lsb << n);
       lsb = 0;
     } else if (n > 0) {
+      overflow = ((msb >> (64 - n)) != 0);
       cf = (msb >> (64 - n)) & 0x1;
       msb = (msb << n) | (lsb >> (64 - n));
       lsb <<= n;

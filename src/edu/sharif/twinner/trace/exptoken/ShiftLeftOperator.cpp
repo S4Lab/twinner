@@ -62,8 +62,10 @@ bool ShiftLeftOperator::apply (edu::sharif::twinner::trace::Expression *exp,
 
 bool ShiftLeftOperator::apply (edu::sharif::twinner::trace::cv::ConcreteValue &dst,
     const edu::sharif::twinner::trace::cv::ConcreteValue &src) const {
-  dst <<= src;
-  return dst.getCarryBit ();
+  bool overflow;
+  dst.shiftToLeft (src, overflow);
+  return overflow;
+  // TODO: check other operators for use of dst.getCarryBit () as overflow bit
 }
 
 void ShiftLeftOperator::initializeSimplificationRules () {

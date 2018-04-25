@@ -199,6 +199,8 @@ public:
 
   virtual ConcreteValue &operator>>= (const ConcreteValue &bits) = 0;
   virtual ConcreteValue &operator<<= (const ConcreteValue &bits) = 0;
+  virtual ConcreteValue &shiftToLeft (const ConcreteValue &bits,
+      bool &overflow) = 0;
 
   virtual ConcreteValue &arithmeticShiftToRight (const ConcreteValue &bits) = 0;
   virtual ConcreteValue &rotateToRight (const ConcreteValue &bits) = 0;
