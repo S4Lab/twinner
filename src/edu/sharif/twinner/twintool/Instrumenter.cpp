@@ -267,6 +267,7 @@ void Instrumenter::initialize () {
               XED_ICLASS_SCASB, XED_ICLASS_SCASW);
   INITIALIZE (STRING_OPERATION_MEM_MEM,
               XED_ICLASS_MOVSQ, XED_ICLASS_MOVSD,
+              XED_ICLASS_MOVSW,
               XED_ICLASS_CMPSB, XED_ICLASS_CMPSW, XED_ICLASS_CMPSD, XED_ICLASS_CMPSQ);
   managedInstructions.insert
       (make_pair (XED_ICLASS_LODSD, DST_REG_SRC_MEM_AUX_RSI));
