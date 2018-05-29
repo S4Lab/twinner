@@ -108,6 +108,7 @@ private:
   UINT32 disassembledInstruction;
 
   bool disabled;
+  std::string searchPattern;
   const bool measureMode;
 
   UINT64 numberOfExecutedInstructions; // used in measure mode
@@ -117,8 +118,11 @@ private:
 
 public:
   InstructionSymbolicExecuter (Instrumenter *im,
-      std::ifstream &symbolsFileInputStream, bool disabled, bool _measureMode);
-  InstructionSymbolicExecuter (Instrumenter *im, bool disabled);
+      std::ifstream &symbolsFileInputStream, bool disabled,
+      const string &searchPattern,
+      bool _measureMode);
+  InstructionSymbolicExecuter (Instrumenter *im, bool disabled,
+      const string &searchPattern);
 
   edu::sharif::twinner::trace::Trace *getTrace ();
   const edu::sharif::twinner::trace::Trace *getTrace () const;
@@ -294,6 +298,8 @@ private:
       edu::sharif::twinner::trace::Trace *trace,
       edu::sharif::twinner::trace::Expression *exp,
       bool shouldDeleteExp = true) const;
+
+  void findPatternInStack (const CONTEXT *context);
 
   /**
    * Run hooks from last instruction (if any) and reset them afterwards.

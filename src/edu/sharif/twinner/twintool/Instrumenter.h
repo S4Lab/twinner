@@ -197,6 +197,7 @@ public:
       bool disabled, int argcOffset, int argvOffset,
       ADDRINT start, ADDRINT end,
       std::vector<edu::sharif::twinner::trace::FunctionInfo> safeFunctionsInfo,
+      const string &searchPattern,
       bool naive, bool measureMode);
   Instrumenter (
       const std::set < std::pair < ADDRINT, int > > &candidateAddresses,
@@ -208,6 +209,7 @@ public:
       bool disabled, int argcOffset, int argvOffset,
       ADDRINT start, ADDRINT end,
       std::vector<edu::sharif::twinner::trace::FunctionInfo> safeFunctionsInfo,
+      const string &searchPattern,
       bool naive);
   ~Instrumenter ();
 

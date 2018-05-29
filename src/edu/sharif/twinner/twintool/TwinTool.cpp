@@ -91,6 +91,11 @@ KNOB < BOOL > measure (KNOB_MODE_WRITEONCE, "pintool", "measure", "",
 KNOB < BOOL > printStack (KNOB_MODE_WRITEONCE, "pintool", "printstack", "",
     "if presents, hexdumps the top of stack contents");
 
+KNOB < string > findPatternInStack (KNOB_MODE_WRITEONCE,
+    "pintool", "findpattern", "",
+    "Looks for the given pattern in stack before every instruction execution"
+    " and prints its offset if found.");
+
 TwinTool::TwinTool () :
     im (0) {
 }
@@ -282,6 +287,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
           << "No symbols input file is given; ignoring the measure mode.\n";
     }
   }
+  const std::string searchPattern = findPatternInStack.Value ();
   if (hasSymbolsInputFile) {
     std::ifstream in;
     openFileForReading (in, symbolsFilePath);
@@ -291,6 +297,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
       im = new Instrumenter (in, traceFilePath, disassemblyFilePath,
                              justAnalyzeMainRoutine, argcOffset, argvOffset,
                              start, end, safeFunctionsInfo,
+                             searchPattern,
                              naiveMode, measureMode);
       break;
     case INITIAL_STATE_DETECTION_MODE:
@@ -322,7 +329,9 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
   } else {
     im = new Instrumenter (traceFilePath, disassemblyFilePath,
                            justAnalyzeMainRoutine, argcOffset, argvOffset,
-                           start, end, safeFunctionsInfo, naiveMode);
+                           start, end, safeFunctionsInfo,
+                           searchPattern,
+                           naiveMode);
   }
   if (justAnalyzeMainRoutine) { // this includes  {|| start != end} scenario
     im->setMainArgsReportingFilePath (mainArgsReportingFilePath);

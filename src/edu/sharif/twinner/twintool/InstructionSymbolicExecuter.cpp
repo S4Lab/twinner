@@ -68,7 +68,9 @@ static const int STACK_OPERATION_UNIT_SIZE = 4; // bytes
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     Instrumenter *_im,
-    std::ifstream &symbolsFileInputStream, bool _disabled, bool _measureMode) :
+    std::ifstream &symbolsFileInputStream, bool _disabled,
+    const string &_searchPattern,
+    bool _measureMode) :
     im (_im),
     bufferForTraceLazyLoad (std::string
     (std::istreambuf_iterator<char> (symbolsFileInputStream),
@@ -76,17 +78,19 @@ InstructionSymbolicExecuter::InstructionSymbolicExecuter (
     memoryManager (edu::sharif::twinner::util::MemoryManager::getInstance ()),
     trackedReg (REG_INVALID_), operandSize (-1), hook (0),
     disabled (_disabled),
+    searchPattern (_searchPattern),
     measureMode (_measureMode), numberOfExecutedInstructions (0),
     endOfSafeFuncRetAddress (0), withinSafeFunc (false) {
 }
 
 InstructionSymbolicExecuter::InstructionSymbolicExecuter (Instrumenter *_im,
-    bool _disabled) :
+    bool _disabled, const string &_searchPattern) :
     im (_im),
     lazyTrace (new edu::sharif::twinner::trace::TraceImp ()),
     memoryManager (lazyTrace->getMemoryManager ()),
     trackedReg (REG_INVALID_), operandSize (-1), hook (0),
     disabled (_disabled),
+    searchPattern (_searchPattern),
     measureMode (false), numberOfExecutedInstructions (0),
     endOfSafeFuncRetAddress (0), withinSafeFunc (false) {
 }
@@ -1143,8 +1147,39 @@ void InstructionSymbolicExecuter::setExpression (
   }
 }
 
+void InstructionSymbolicExecuter::findPatternInStack (
+    const CONTEXT *context) {
+  if (searchPattern.empty ()) {
+    return;
+  }
+  ConcreteValue *value =
+#ifdef TARGET_IA32E
+      edu::sharif::twinner::util::readRegisterContent (context, REG_RSP);
+#else
+      edu::sharif::twinner::util::readRegisterContent (context, REG_ESP);
+#endif
+  const UINT64 stackPointer = value->toUint64 ();
+  delete value;
+  char content[4 * 1024];
+  const size_t size =
+      PIN_SafeCopy (content, (const VOID *) (stackPointer), sizeof (content));
+  const std::string stackContent (content, size);
+
+  std::string::size_type patternPos = stackContent.find (searchPattern);
+  if (patternPos != std::string::npos) {
+    const ADDRINT patternAddress = stackPointer + patternPos;
+    std::stringstream ss;
+    ss << std::setw (16) << std::setfill ('0') << std::hex
+        << "Pattern found in stack at address: 0x" << patternAddress;
+    const int argIndex = patternPos / 4 - 1;
+    edu::sharif::twinner::util::Logger::info () << ss.str ()
+        << ", offset as arg-index: " << std::dec << argIndex;
+  }
+}
+
 bool InstructionSymbolicExecuter::runHooks (const CONTEXT *context,
     CONTEXT &newContext) {
+  findPatternInStack (context);
   bool isContextModified = false;
   if (trackedReg != REG_INVALID_) {
     ConcreteValue *value =
