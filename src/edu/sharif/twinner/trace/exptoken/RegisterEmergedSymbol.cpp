@@ -560,22 +560,36 @@ void RegisterEmergedSymbol::initializeSubRegisters (REG reg,
     return;
   }
 #ifdef TARGET_IA32E
-  snapshot->setSymbolicExpressionByRegister
-      (32, getOverlappingRegisterByIndex (regIndex, 1), &expression)->truncate (32);
-#endif
-  snapshot->setSymbolicExpressionByRegister
-      (16, getOverlappingRegisterByIndex (regIndex, 2), &expression)->truncate (16);
-  if (getOverlappingRegisterByIndex (regIndex, 3) != REG_INVALID_) {
-    edu::sharif::twinner::trace::Expression *temp = expression.clone (16);
-    temp->shiftToRight (8);
+  if (!snapshot->isSymbolicExpressionAvailableInRegister
+      (32, getOverlappingRegisterByIndex (regIndex, 1))) {
     snapshot->setSymbolicExpressionByRegister
-        (8, getOverlappingRegisterByIndex (regIndex, 3), temp)->truncate (8);
-    delete temp;
+        (32, getOverlappingRegisterByIndex (regIndex, 1), &expression)
+        ->truncate (32);
+  }
+#endif
+  if (!snapshot->isSymbolicExpressionAvailableInRegister
+      (16, getOverlappingRegisterByIndex (regIndex, 2))) {
+    snapshot->setSymbolicExpressionByRegister
+        (16, getOverlappingRegisterByIndex (regIndex, 2), &expression)
+        ->truncate (16);
+  }
+  if (getOverlappingRegisterByIndex (regIndex, 3) != REG_INVALID_) {
+    if (!snapshot->isSymbolicExpressionAvailableInRegister
+        (8, getOverlappingRegisterByIndex (regIndex, 3))) {
+      edu::sharif::twinner::trace::Expression *temp = expression.clone (16);
+      temp->shiftToRight (8);
+      snapshot->setSymbolicExpressionByRegister
+          (8, getOverlappingRegisterByIndex (regIndex, 3), temp)->truncate (8);
+      delete temp;
+    }
   }
   const REG lowest8Bits = getOverlappingRegisterByIndex (regIndex, 4);
   if (lowest8Bits != REG_INVALID_) {
-    snapshot->setSymbolicExpressionByRegister
-        (8, lowest8Bits, &expression)->truncate (8);
+    if (!snapshot->isSymbolicExpressionAvailableInRegister
+        (8, getOverlappingRegisterByIndex (regIndex, 4))) {
+      snapshot->setSymbolicExpressionByRegister
+          (8, lowest8Bits, &expression)->truncate (8);
+    }
   }
 }
 

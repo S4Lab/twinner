@@ -201,24 +201,28 @@ void Snapshot::initializeOverlappingMemoryLocationsDownwards (int size,
     ADDRINT memoryEa, const Expression &expression, int shiftAmount) {
   size /= 2;
   if (size >= 8) {
-    Expression *exp = expression.clone ();
-    if (shiftAmount > 0) {
-      exp->shiftToRight (shiftAmount);
+    if (!isSymbolicExpressionAvailableInMemoryAddress (size, memoryEa)) {
+      Expression *exp = expression.clone ();
+      if (shiftAmount > 0) {
+        exp->shiftToRight (shiftAmount);
+      }
+      exp->truncate (size); // LSB (left-side in little-endian)
+      setOverwritingMemoryExpression
+          (size, memoryEa, exp, expression.isOverwritingExpression ());
+      delete exp;
+      initializeOverlappingMemoryLocationsDownwards (size, memoryEa, expression,
+                                                     shiftAmount);
     }
-    exp->truncate (size); // LSB (left-side in little-endian)
-    setOverwritingMemoryExpression
-        (size, memoryEa, exp, expression.isOverwritingExpression ());
-    delete exp;
-    initializeOverlappingMemoryLocationsDownwards (size, memoryEa, expression,
-                                                   shiftAmount);
-    exp = expression.clone ();
-    exp->shiftToRight (shiftAmount + size); // MSB (right-side in little-endian)
-    exp->truncate (size);
-    setOverwritingMemoryExpression
-        (size, memoryEa + size / 8, exp, expression.isOverwritingExpression ());
-    delete exp;
-    initializeOverlappingMemoryLocationsDownwards (size, memoryEa + size / 8, expression,
-                                                   shiftAmount + size);
+    if (!isSymbolicExpressionAvailableInMemoryAddress (size, memoryEa + size / 8)) {
+      Expression *exp = expression.clone ();
+      exp->shiftToRight (shiftAmount + size); // MSB (right-side in little-endian)
+      exp->truncate (size);
+      setOverwritingMemoryExpression
+          (size, memoryEa + size / 8, exp, expression.isOverwritingExpression ());
+      delete exp;
+      initializeOverlappingMemoryLocationsDownwards (size, memoryEa + size / 8, expression,
+                                                     shiftAmount + size);
+    }
   }
 }
 
@@ -237,14 +241,12 @@ void Snapshot::initializeOverlappingMemoryLocationsUpwards (
 Expression *Snapshot::tryToGetSymbolicExpressionByRegister (int size,
     REG reg, const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
     StateSummary &state) {
-  UNUSED_VARIABLE (size);
   return tryToGetSymbolicExpressionImplementation
       (size, registerToExpression, reg, regval, state);
 }
 
 Expression *Snapshot::tryToGetSymbolicExpressionByRegister (int size,
     REG reg) {
-  UNUSED_VARIABLE (size);
   return tryToGetSymbolicExpressionImplementation (size, registerToExpression, reg);
 }
 
