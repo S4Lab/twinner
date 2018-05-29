@@ -21,6 +21,7 @@
 
 #include "edu/sharif/twinner/operationgroup/DummyOperationGroup.h"
 #include "edu/sharif/twinner/operationgroup/SubtractOperationGroup.h"
+#include "edu/sharif/twinner/operationgroup/SubtractWithBorrowOperationGroup.h"
 #include "edu/sharif/twinner/operationgroup/AdditionOperationGroup.h"
 #include "edu/sharif/twinner/operationgroup/AddWithCarryOperationGroup.h"
 #include "edu/sharif/twinner/operationgroup/BitwiseAndOperationGroup.h"
@@ -1762,12 +1763,9 @@ void InstructionSymbolicExecuter::sbbAnalysisRoutine (
   exp->minus (srcexp);
   exp->minus (carryexp);
   setExpression (dst, trace, exp);
-  delete dstexp;
-  delete srcexp;
-  delete carryexp;
   eflags.setFlags
-      (new edu::sharif::twinner::operationgroup::DummyOperationGroup
-       ("SubtractWithBorrowOperationGroup"));
+      (new edu::sharif::twinner::operationgroup::SubtractWithBorrowOperationGroup
+       (dstexp, srcexp, carryexp));
   edu::sharif::twinner::util::Logger::loquacious () << "\tdone\n";
 }
 
