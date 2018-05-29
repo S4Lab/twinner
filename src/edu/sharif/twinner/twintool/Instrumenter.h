@@ -239,9 +239,9 @@ public:
 
   void reportMainArguments (int argc, char **argv);
 
-private:
-  void printHexAscii (ADDRINT memoryEa, char *content, int size) const;
+  static void printHexAscii (ADDRINT memoryEa, char *content, int size);
 
+private:
   void saveAll ();
 
   void initialize ();

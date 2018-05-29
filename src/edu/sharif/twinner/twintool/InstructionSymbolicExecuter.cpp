@@ -1182,6 +1182,9 @@ void InstructionSymbolicExecuter::findPatternInStack (
     std::string::size_type argv1Pos = stackContent.find (patternAddressBytesStr);
     if (argv1Pos != std::string::npos) {
       const ADDRINT argv1Address = stackPointer + argv1Pos;
+      edu::sharif::twinner::util::Logger::debug ()
+          << "Found argv[1] at 0x" << std::hex << argv1Address << '\n';
+      Instrumenter::printHexAscii (stackPointer, content, size);
 
       const char *argv2Value =
           *reinterpret_cast<const char **> (content + argv1Pos + sizeof (patternAddress));

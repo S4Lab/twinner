@@ -1585,8 +1585,7 @@ void Instrumenter::printStack (const ADDRINT stackPointer) {
   printHexAscii (stackPointer, content, size);
 }
 
-void Instrumenter::printHexAscii (ADDRINT memoryEa,
-    char *content, int size) const {
+void Instrumenter::printHexAscii (ADDRINT memoryEa, char *content, int size) {
   std::stringstream ss;
   ss << '\n';
   for (int i = 0; i + 16 < size; i += 16) {
