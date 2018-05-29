@@ -18,6 +18,7 @@
 #include "edu/sharif/twinner/operationgroup/Flags.h"
 
 #include <sstream>
+#include <set>
 
 namespace edu {
 namespace sharif {
@@ -109,6 +110,7 @@ private:
 
   bool disabled;
   std::string searchPattern;
+  std::set<UINT32> searchedInstructions;
   const bool measureMode;
 
   UINT64 numberOfExecutedInstructions; // used in measure mode
@@ -300,6 +302,7 @@ private:
       bool shouldDeleteExp = true) const;
 
   void findPatternInStack (const CONTEXT *context);
+  void findPatternInStack (const UINT64 stackPointer) const;
 
   /**
    * Run hooks from last instruction (if any) and reset them afterwards.

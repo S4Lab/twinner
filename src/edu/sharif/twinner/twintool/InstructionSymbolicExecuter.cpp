@@ -1152,6 +1152,9 @@ void InstructionSymbolicExecuter::findPatternInStack (
   if (searchPattern.empty ()) {
     return;
   }
+  if (!searchedInstructions.insert (disassembledInstruction).second) {
+    return; // this instruction has been already inspected
+  }
   ConcreteValue *value =
 #ifdef TARGET_IA32E
       edu::sharif::twinner::util::readRegisterContent (context, REG_RSP);
@@ -1160,6 +1163,11 @@ void InstructionSymbolicExecuter::findPatternInStack (
 #endif
   const UINT64 stackPointer = value->toUint64 ();
   delete value;
+  findPatternInStack (stackPointer);
+}
+
+void InstructionSymbolicExecuter::findPatternInStack (
+    const UINT64 stackPointer) const {
   char content[4 * 1024];
   const size_t size =
       PIN_SafeCopy (content, (const VOID *) (stackPointer), sizeof (content));
