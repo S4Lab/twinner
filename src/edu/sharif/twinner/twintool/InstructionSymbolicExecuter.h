@@ -979,6 +979,12 @@ private:
       const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
 
   /**
+   * SETS sets opr to 1 iff SF=1 (and sets it to 0 otherwise).
+   */
+  void setsAnalysisRoutine (
+      const edu::sharif::twinner::proxy::MutableExpressionValueProxy &opr);
+
+  /**
    * SETNS sets opr to 1 iff SF=0 (and sets it to 0 otherwise).
    */
   void setnsAnalysisRoutine (
