@@ -127,6 +127,37 @@ public:
       ADDRINT memoryEa) = 0;
 
   /**
+   * This API checks whether a symbolic expression has been already
+   * instantiated and stored in the requested register.
+   * If no value is stored or if null is stored, then false will be returned.
+   * The freshness of the stored value or its existence in older stored states
+   * are not checked.
+   *
+   * @param size The size of the reg in bits.
+   * @param reg The register which its value is checked.
+   *
+   * @return true if and only if a non-null value is stored in reg.
+   */
+  virtual bool isSymbolicExpressionAvailableInRegister (int size,
+      REG reg) const = 0;
+
+  /**
+   * This API checks whether a symbolic expression has been already
+   * instantiated and stored in the requested memory address.
+   * If no value is stored or if null is stored in the requested address, then
+   * false will be returned.
+   * The freshness of the stored value of its existence in older stored states
+   * are not checked.
+   *
+   * @param size The bit-precision of the memory location which its value is being checked.
+   * @param memoryEa The memory effective address which its value is being checked.
+   *
+   * @return true if and only if a non-null value is stored in memoryEa address.
+   */
+  virtual bool isSymbolicExpressionAvailableInMemoryAddress (int size,
+      ADDRINT memoryEa) const = 0;
+
+  /**
    * The getter returns current value stored in one register.
    * Despite tryToGetSymbolicExpressionByRegister, this method may set a new
    * expression (i.e. has side effects) if there was not any kept value. In this case,

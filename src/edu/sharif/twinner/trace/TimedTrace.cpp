@@ -72,6 +72,16 @@ Expression *TimedTrace::tryToGetSymbolicExpressionByMemoryAddress (int size,
   return trace->tryToGetSymbolicExpressionByMemoryAddress (size, memoryEa, it);
 }
 
+bool TimedTrace::isSymbolicExpressionAvailableInRegister (int size,
+    REG reg) const {
+  return trace->isSymbolicExpressionAvailableInRegister (size, reg, it);
+}
+
+bool TimedTrace::isSymbolicExpressionAvailableInMemoryAddress (int size,
+    ADDRINT memoryEa) const {
+  return trace->isSymbolicExpressionAvailableInMemoryAddress (size, memoryEa, it);
+}
+
 Expression *TimedTrace::getSymbolicExpressionByRegister (int size, REG reg,
     const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
     Expression *newExpression, StateSummary &state) {

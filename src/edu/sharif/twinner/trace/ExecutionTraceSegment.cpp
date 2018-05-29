@@ -111,6 +111,20 @@ Expression *ExecutionTraceSegment::tryToGetSymbolicExpressionByMemoryAddress (in
       (size, memoryEa);
 }
 
+bool ExecutionTraceSegment::isSymbolicExpressionAvailableInRegister (int size,
+    REG reg) const {
+  const Snapshot *snapshot = snapshots.back ();
+  return snapshot->isSymbolicExpressionAvailableInRegister
+      (size, reg);
+}
+
+bool ExecutionTraceSegment::isSymbolicExpressionAvailableInMemoryAddress (int size,
+    ADDRINT memoryEa) const {
+  const Snapshot *snapshot = snapshots.back ();
+  return snapshot->isSymbolicExpressionAvailableInMemoryAddress
+      (size, memoryEa);
+}
+
 Expression *ExecutionTraceSegment::getSymbolicExpressionByRegister (int size, REG reg,
     const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
     Expression *newExpression, StateSummary &state) {

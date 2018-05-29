@@ -89,6 +89,10 @@ public:
       StateSummary &state);
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa);
+  virtual bool isSymbolicExpressionAvailableInRegister (int size,
+      REG reg) const;
+  virtual bool isSymbolicExpressionAvailableInMemoryAddress (int size,
+      ADDRINT memoryEa) const;
 
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
@@ -136,6 +140,9 @@ private:
   template < typename KEY >
   Expression *tryToGetSymbolicExpressionImplementation (
       int size, std::map < KEY, Expression * > &map, const KEY key);
+  template < typename KEY >
+  bool isSymbolicExpressionAvailableImplementation (
+      int size, const std::map < KEY, Expression * > &map, const KEY key) const;
   template < typename KEY >
   Expression *getSymbolicExpressionImplementation (int size,
       std::map < KEY, Expression * > &map, const KEY key,

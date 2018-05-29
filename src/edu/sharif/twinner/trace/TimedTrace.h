@@ -53,6 +53,11 @@ public:
   virtual Expression *tryToGetSymbolicExpressionByMemoryAddress (int size,
       ADDRINT memoryEa);
 
+  virtual bool isSymbolicExpressionAvailableInRegister (int size,
+      REG reg) const;
+  virtual bool isSymbolicExpressionAvailableInMemoryAddress (int size,
+      ADDRINT memoryEa) const;
+
   virtual Expression *getSymbolicExpressionByRegister (int size, REG reg,
       const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
       Expression *newExpression, StateSummary &state);

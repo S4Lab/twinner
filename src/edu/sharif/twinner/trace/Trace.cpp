@@ -149,6 +149,33 @@ Expression *Trace::tryToGetSymbolicExpressionByMemoryAddress (int size,
   abort ();
 }
 
+bool Trace::isSymbolicExpressionAvailableInRegister (int size,
+    REG reg) const {
+  return current.isSymbolicExpressionAvailableInRegister (size, reg);
+}
+
+bool Trace::isSymbolicExpressionAvailableInRegister (int size, REG reg,
+    std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator) const {
+  edu::sharif::twinner::util::Logger::error ()
+      << "Trace::isSymbolicExpressionAvailableInRegister (...): "
+      "PIN infrastructure is not available\n";
+  abort ();
+}
+
+bool Trace::isSymbolicExpressionAvailableInMemoryAddress (int size,
+    ADDRINT memoryEa) const {
+  return current.isSymbolicExpressionAvailableInMemoryAddress (size, memoryEa);
+}
+
+bool Trace::isSymbolicExpressionAvailableInMemoryAddress (int size,
+    ADDRINT memoryEa,
+    std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator) const {
+  edu::sharif::twinner::util::Logger::error ()
+      << "Trace::isSymbolicExpressionAvailableInMemoryAddress (...): "
+      "PIN infrastructure is not available\n";
+  abort ();
+}
+
 Expression *Trace::getSymbolicExpressionByRegister (int size, REG reg,
     const edu::sharif::twinner::trace::cv::ConcreteValue &regval,
     Expression *newExpression, StateSummary &state) {

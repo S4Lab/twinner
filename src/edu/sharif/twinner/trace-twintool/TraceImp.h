@@ -65,6 +65,15 @@ public:
       std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator);
 
   /**
+   * Checks availability of stored value without searching backwards.
+   */
+  virtual bool isSymbolicExpressionAvailableInRegister (int size, REG reg,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator) const;
+  virtual bool isSymbolicExpressionAvailableInMemoryAddress (int size,
+      ADDRINT memoryEa,
+      std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator) const;
+
+  /**
    * The getter searches segments backwards to find queried value.
    * ASSERT: The precision of regval must match with precision of reg
    */

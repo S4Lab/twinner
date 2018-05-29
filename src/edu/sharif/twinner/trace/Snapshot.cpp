@@ -305,6 +305,39 @@ Expression *Snapshot::tryToGetSymbolicExpressionByMemoryAddress (int size,
   }
 }
 
+bool Snapshot::isSymbolicExpressionAvailableInRegister (int size,
+    REG reg) const {
+  return isSymbolicExpressionAvailableImplementation (size, registerToExpression, reg);
+}
+
+bool Snapshot::isSymbolicExpressionAvailableInMemoryAddress (int size,
+    ADDRINT memoryEa) const {
+  switch (size) {
+  case 128:
+    return isSymbolicExpressionAvailableImplementation
+        (128, memoryAddressTo128BitsExpression, memoryEa);
+  case 64:
+    return isSymbolicExpressionAvailableImplementation
+        (64, memoryAddressTo64BitsExpression, memoryEa);
+  case 32:
+    return isSymbolicExpressionAvailableImplementation
+        (32, memoryAddressTo32BitsExpression, memoryEa);
+  case 16:
+    return isSymbolicExpressionAvailableImplementation
+        (16, memoryAddressTo16BitsExpression, memoryEa);
+  case 8:
+    return isSymbolicExpressionAvailableImplementation
+        (8, memoryAddressTo8BitsExpression, memoryEa);
+  default:
+    edu::sharif::twinner::util::Logger::error () <<
+        "Snapshot::isSymbolicExpressionAvailableInMemoryAddress"
+        " (size=" << std::dec << size
+        << ", memoryEa=0x" << std::hex << memoryEa
+        << "): Memory read size is not supported\n";
+    abort ();
+  }
+}
+
 template < typename Address >
 void check_concrete_value_for_possible_state_mismatch (Expression *exp,
     Address address, const edu::sharif::twinner::trace::cv::ConcreteValue &val,
@@ -367,6 +400,21 @@ Expression *Snapshot::tryToGetSymbolicExpressionImplementation (
       return lazyLoad (size, map, key);
     }
     return exp;
+  }
+}
+
+template < typename KEY >
+bool Snapshot::isSymbolicExpressionAvailableImplementation (
+    int size, const std::map < KEY, Expression * > &map, const KEY key) const {
+  typename std::map < KEY, Expression * >::const_iterator it = map.find (key);
+  if (it == map.end ()) { // not found!
+    return false;
+  } else {
+    const Expression *exp = it->second;
+    if (exp == NULL) { // expression is lazy-loaded
+      return false;
+    }
+    return true;
   }
 }
 

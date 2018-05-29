@@ -106,6 +106,19 @@ Expression *TraceImp::tryToGetSymbolicExpressionByMemoryAddress (int size,
        currentSegmentIterator);
 }
 
+bool TraceImp::isSymbolicExpressionAvailableInRegister (int size, REG reg,
+    std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator) const {
+  const ExecutionTraceSegment *seg = *currentSegmentIterator;
+  return seg->isSymbolicExpressionAvailableInRegister (size, reg);
+}
+
+bool TraceImp::isSymbolicExpressionAvailableInMemoryAddress (int size,
+    ADDRINT memoryEa,
+    std::list < ExecutionTraceSegment * >::iterator currentSegmentIterator) const {
+  const ExecutionTraceSegment *seg = *currentSegmentIterator;
+  return seg->isSymbolicExpressionAvailableInMemoryAddress (size, memoryEa);
+}
+
 template < typename T >
 Expression *TraceImp::tryToGetSymbolicExpressionImplementation (int size, T address,
     const edu::sharif::twinner::trace::cv::ConcreteValue &val,
