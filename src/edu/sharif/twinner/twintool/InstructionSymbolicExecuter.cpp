@@ -1176,12 +1176,42 @@ void InstructionSymbolicExecuter::findPatternInStack (
   std::string::size_type patternPos = stackContent.find (searchPattern);
   if (patternPos != std::string::npos) {
     const ADDRINT patternAddress = stackPointer + patternPos;
-    std::stringstream ss;
-    ss << std::setw (16) << std::setfill ('0') << std::hex
-        << "Pattern found in stack at address: 0x" << patternAddress;
-    const int argIndex = patternPos / 4 - 1;
-    edu::sharif::twinner::util::Logger::info () << ss.str ()
-        << ", offset as arg-index: " << std::dec << argIndex;
+
+    const std::string patternAddressBytesStr
+        (reinterpret_cast<const char *> (&patternAddress), sizeof (patternAddress));
+    std::string::size_type argv1Pos = stackContent.find (patternAddressBytesStr);
+    if (argv1Pos != std::string::npos) {
+      const ADDRINT argv1Address = stackPointer + argv1Pos;
+
+      const char *argv2Value =
+          *reinterpret_cast<const char **> (content + argv1Pos + sizeof (patternAddress));
+      if (argv2Value == 0 || argv2Value
+          == reinterpret_cast<const char *> (patternAddress) + searchPattern.length () + 1) {
+        const char *argv0Address =
+            reinterpret_cast<const char *> (argv1Address) - sizeof (patternAddress);
+
+        const std::string argv0AddressBytesStr
+            (reinterpret_cast<const char *> (&argv0Address), sizeof (argv0Address));
+        std::string::size_type argvPos = stackContent.find (argv0AddressBytesStr);
+        if (argvPos != std::string::npos) {
+          const ADDRINT argvAddress = stackPointer + argvPos;
+
+          const char *insAssemblyStr =
+              memoryManager->getPointerToAllocatedMemory (disassembledInstruction);
+          std::stringstream ss;
+          ss << std::setw (16) << std::setfill ('0') << std::hex
+              << "Pattern found in stack at address: 0x" << patternAddress
+              << ", argv[1] is stored at address: 0x" << argv1Address
+              << ", argv is stored at address: 0x" << argvAddress
+              << ", disassembly: " << insAssemblyStr;
+          const int argIndex = argvPos / 4 - 1;
+          edu::sharif::twinner::util::Logger::info () << ss.str ()
+              << ", offset in bytes: " << std::dec << argvPos
+              << ", offset as arg-index: " << std::dec << argIndex
+              << (argIndex < 25 ? ", close-pattern\n" : ", far-pattern\n");
+        }
+      }
+    }
   }
 }
 
