@@ -1173,14 +1173,17 @@ void InstructionSymbolicExecuter::findPatternInStack (
       PIN_SafeCopy (content, (const VOID *) (stackPointer), sizeof (content));
   const std::string stackContent (content, size);
 
-  std::string::size_type patternPos = stackContent.find (searchPattern);
-  if (patternPos != std::string::npos) {
+  for (std::string::size_type patternPos = stackContent.find (searchPattern, 16);
+      patternPos != std::string::npos;
+      patternPos = stackContent.find (searchPattern, patternPos + 1)) {
     const ADDRINT patternAddress = stackPointer + patternPos;
 
     const std::string patternAddressBytesStr
         (reinterpret_cast<const char *> (&patternAddress), sizeof (patternAddress));
-    std::string::size_type argv1Pos = stackContent.find (patternAddressBytesStr);
-    if (argv1Pos != std::string::npos) {
+
+    for (std::string::size_type argv1Pos = stackContent.find (patternAddressBytesStr, 8);
+        argv1Pos != std::string::npos;
+        argv1Pos = stackContent.find (patternAddressBytesStr, argv1Pos + 1)) {
       const ADDRINT argv1Address = stackPointer + argv1Pos;
       edu::sharif::twinner::util::Logger::debug ()
           << "Found argv[1] at 0x" << std::hex << argv1Address << '\n';
@@ -1190,13 +1193,14 @@ void InstructionSymbolicExecuter::findPatternInStack (
           *reinterpret_cast<const char **> (content + argv1Pos + sizeof (patternAddress));
       if (argv2Value == 0 || argv2Value
           == reinterpret_cast<const char *> (patternAddress) + searchPattern.length () + 1) {
-        const char *argv0Address =
-            reinterpret_cast<const char *> (argv1Address) - sizeof (patternAddress);
+        const ADDRINT argv0Address = argv1Address - sizeof (patternAddress);
 
         const std::string argv0AddressBytesStr
             (reinterpret_cast<const char *> (&argv0Address), sizeof (argv0Address));
-        std::string::size_type argvPos = stackContent.find (argv0AddressBytesStr);
-        if (argvPos != std::string::npos) {
+
+        for (std::string::size_type argvPos = stackContent.find (argv0AddressBytesStr);
+            argvPos != std::string::npos;
+            argvPos = stackContent.find (argv0AddressBytesStr, argvPos + 1)) {
           const ADDRINT argvAddress = stackPointer + argvPos;
 
           const char *insAssemblyStr =
