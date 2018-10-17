@@ -942,7 +942,12 @@ private:
   void rdtscAnalysisRoutine (const CONTEXT *context);
 
   /**
-   * Clears the direction flags (DF)
+   * Sets the direction flag (DF)
+   */
+  void stdAnalysisRoutine (const CONTEXT *context);
+
+  /**
+   * Clears the direction flag (DF)
    */
   void cldAnalysisRoutine (const CONTEXT *context);
 

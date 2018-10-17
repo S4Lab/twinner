@@ -3448,6 +3448,11 @@ void InstructionSymbolicExecuter::rdtscAnalysisRoutine (const CONTEXT *context) 
   setExpression (eax, trace, eaxNewExp);
 }
 
+void InstructionSymbolicExecuter::stdAnalysisRoutine (const CONTEXT *context) {
+  edu::sharif::twinner::util::Logger::loquacious () << "stdAnalysisRoutine(...)\n";
+  eflags.setDirectionFlag (true);
+}
+
 void InstructionSymbolicExecuter::cldAnalysisRoutine (const CONTEXT *context) {
   edu::sharif::twinner::util::Logger::loquacious () << "cldAnalysisRoutine(...)\n";
   /**
@@ -3455,7 +3460,7 @@ void InstructionSymbolicExecuter::cldAnalysisRoutine (const CONTEXT *context) {
    * operand-less instructions. Anyway, our implementation for CLD works independent of
    * being executed before or after the CLD instruction itself.
    */
-  eflags.setCarryFlag (false);
+  eflags.setDirectionFlag (false);
 }
 
 void InstructionSymbolicExecuter::cpuidAnalysisRoutine (const CONTEXT *context) {
@@ -4242,6 +4247,8 @@ InstructionSymbolicExecuter::convertOpcodeToOperandLessAnalysisRoutine (
   switch (op) {
   case XED_ICLASS_RDTSC:
     return &InstructionSymbolicExecuter::rdtscAnalysisRoutine;
+  case XED_ICLASS_STD:
+    return &InstructionSymbolicExecuter::stdAnalysisRoutine;
   case XED_ICLASS_CLD:
     return &InstructionSymbolicExecuter::cldAnalysisRoutine;
   case XED_ICLASS_CPUID:

@@ -224,6 +224,7 @@ void Instrumenter::initialize () {
               XED_ICLASS_CDQE, XED_ICLASS_CDQ);
   INITIALIZE (OPERAND_LESS,
               XED_ICLASS_RDTSC, // read time-stamp counter
+              XED_ICLASS_STD, // set direction flag (DF)
               XED_ICLASS_CLD, // clear direction flag (DF)
               XED_ICLASS_CPUID);
   managedInstructions.insert
@@ -425,6 +426,7 @@ Instrumenter::InstructionModel Instrumenter::getInstructionModel (OPCODE op,
   case XED_ICLASS_SYSENTER:
     return SYSCALL_INS_MODEL;
   case XED_ICLASS_RDTSC:
+  case XED_ICLASS_STD:
   case XED_ICLASS_CLD:
   case XED_ICLASS_CPUID:
     return OPERAND_LESS;
