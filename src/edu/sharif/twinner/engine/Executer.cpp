@@ -84,10 +84,20 @@ const char *Executer::OVERHEAD_MEASUREMENT_OPTION = " -measure";
 const char *Executer::MAIN_ARGS_COMMUNICATION_TEMP_FILE =
     "/twinner/main-args-reporting.dat";
 
+std::string prepare_option (bool contain, const char *optstr, int arg) {
+  if (!contain) {
+    return "";
+  }
+  std::stringstream ss;
+  ss << optstr << arg;
+  return ss.str ();
+}
+
 Executer::Executer (int uniqueId,
     std::string pinLauncher, std::string pinMemoryRange,
     std::string twintool,
     std::string inputBinary, std::string _inputArguments,
+    int twintoolTimeoutMilliseconds,
     std::string endpoints, bool _newRecord, bool _replayRecord,
     std::string safeFunctions, std::string _tmpfolder,
     bool main, std::string stackOffset, bool naive, bool _overheads) :
@@ -109,6 +119,7 @@ Executer::Executer (int uniqueId,
        + "'" + safeFunctions + "'" : "")
     + (stackOffset != "" ? std::string (" -stack-offset ") + stackOffset : "")
     + (naive ? " -naive" : "")
+    + prepare_option (twintoolTimeoutMilliseconds, " -time-limit ", twintoolTimeoutMilliseconds)
     + " -- " + inputBinary),
     inputBinaryHash (calculateHash (inputBinary)),
     signaled (false),

@@ -101,6 +101,10 @@ void Twinner::setMaxTraces (int maxTraces) {
   this->maxTraces = maxTraces;
 }
 
+void Twinner::setTwintoolTimeLimit (int twintoolTimeoutMilliseconds) {
+  this->twintoolTimeoutMilliseconds = twintoolTimeoutMilliseconds;
+}
+
 void Twinner::setInputBinaryArguments (string arguments) {
   this->arguments = arguments;
 }
@@ -166,6 +170,7 @@ bool Twinner::generateTwinBinary () {
   int i = 1;
   while (somePathsAreNotCovered && i <= maxTraces) {
     Executer ex (i, pin, pinMemoryRange, twintool, input, arguments,
+                 twintoolTimeoutMilliseconds,
                  endpoints, newRecord, replayRecord,
                  safeFunctions, tmpfolder,
                  main, stackOffset, naive, overheads);
@@ -192,6 +197,7 @@ bool Twinner::generateTwinBinary () {
   symbols.clear ();
   {
     Executer ex (i, pin, pinMemoryRange, twintool, input, arguments,
+                 twintoolTimeoutMilliseconds,
                  endpoints, newRecord, replayRecord,
                  safeFunctions, tmpfolder,
                  main, stackOffset, naive, overheads);

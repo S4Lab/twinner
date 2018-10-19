@@ -191,6 +191,9 @@ private:
   ADDRINT end;
   std::vector<edu::sharif::twinner::trace::FunctionInfo> safeFunctionsInfo;
 
+  int timelimit;
+  PIN_SEMAPHORE exitingSemaphore;
+
 public:
   Instrumenter (std::ifstream &symbolsFileInputStream,
       const std::string &traceFilePath, const std::string &disassemblyFilePath,
@@ -214,6 +217,9 @@ public:
   ~Instrumenter ();
 
   void registerInstrumentationRoutines ();
+
+  bool setExecutionTimeLimit (int timelimit);
+  void notifyUponTimeLimit ();
 
   void setMainArgsReportingFilePath (const std::string &marFilePath);
   void setPrintStackFlag (bool flag);

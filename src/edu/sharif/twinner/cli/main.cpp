@@ -54,6 +54,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &pin, string &pinMemoryRange,
     string &twin,
     int &maxTraces,
+    int &twintoolTimeoutMilliseconds,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads);
 ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
@@ -67,6 +68,7 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
     string &twin,
     int &maxTraces,
     int &smtsTimeoutMilliseconds,
+    int &twintoolTimeoutMilliseconds,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads);
 int run (string etgpath, string input, string args, string endpoints,
@@ -76,6 +78,7 @@ int run (string etgpath, string input, string args, string endpoints,
     string pin, string pinMemoryRange,
     string twin,
     int maxTraces,
+    int twintoolTimeoutMilliseconds,
     bool main, string stackOffset, bool naive, bool measureOverheads);
 int checkTraceFile (string traceFilePath, string memoryFilePath);
 
@@ -101,6 +104,7 @@ int startTwinner (int argc, char *argv[]) {
       pin, pinMemoryRange,
       twin;
   int maxTraces;
+  int twintoolTimeoutMilliseconds = 0;
   bool justAnalyzeMainRoutine = false;
   bool newRecord, replayRecord;
   string stackOffset;
@@ -113,6 +117,7 @@ int startTwinner (int argc, char *argv[]) {
                           pin, pinMemoryRange,
                           twin,
                           maxTraces,
+                          twintoolTimeoutMilliseconds,
                           justAnalyzeMainRoutine, stackOffset,
                           naive, measureOverheads)) {
   case CONTINUE_NORMALLY:
@@ -134,6 +139,7 @@ int startTwinner (int argc, char *argv[]) {
                   safeFunctions,
                   tmpfolder, twintool, pin, pinMemoryRange, twin,
                   maxTraces,
+                  twintoolTimeoutMilliseconds,
                   justAnalyzeMainRoutine, stackOffset, naive, measureOverheads);
     }
     return -2;
@@ -163,6 +169,7 @@ int run (string etgpath, string input, string args,
     string pin, string pinMemoryRange,
     string twin,
     int maxTraces,
+    int twintoolTimeoutMilliseconds,
     bool main, string stackOffset, bool naive, bool measureOverheads) {
   edu::sharif::twinner::util::Logger::info ()
       << "[verboseness level: "
@@ -186,6 +193,7 @@ int run (string etgpath, string input, string args,
   tw.setPinMemoryRange (pinMemoryRange);
   tw.setTwinBinaryPath (twin);
   tw.setMaxTraces (maxTraces);
+  tw.setTwintoolTimeLimit (twintoolTimeoutMilliseconds);
   tw.setInputBinaryArguments (args);
   tw.setAnalysisEndpoints (endpoints);
   tw.setRecord (newRecord, replayRecord);
@@ -240,6 +248,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     string &pin, string &pinMemoryRange,
     string &twin,
     int &maxTraces,
+    int &twintoolTimeoutMilliseconds,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads) {
   string verboseStr = "warning", logfileStr = "out";
@@ -252,6 +261,7 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
                       tmpfolder, twintool, pin, pinMemoryRange, twin,
                       maxTraces,
                       smtsTimeoutMilliseconds,
+                      twintoolTimeoutMilliseconds,
                       justAnalyzeMainRoutine, stackOffset,
                       naive, measureOverheads);
   if (status != ERROR_OCCURRED) {
@@ -278,6 +288,7 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
     string &twin,
     int &maxTraces,
     int &smtsTimeoutMilliseconds,
+    int &twintoolTimeoutMilliseconds,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads) {
   const ArgParser::Option options[] = {
@@ -304,6 +315,8 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
     { 'N', "number-of-traces", ArgParser::YES, "Maximum number of traces to be examined"
       " (default: 100)", false, false},
     { 'x', "smts-time-limit", ArgParser::YES, "Time limit of SMTS queries in milliseconds"
+      " (default: 0; unlimited)", false, false},
+    { 'X', "twintool-time-limit", ArgParser::YES, "Time limit of Twintool runs in milliseconds"
       " (default: 0; unlimited)", false, false},
     { 't', "tool", ArgParser::YES, "twintool executable/library file", true, false},
     { 'T', "tmpfolder", ArgParser::YES, "tmp folder (default: /tmp)", false, false},
@@ -400,6 +413,13 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
       std::stringstream ss;
       ss << parser.argument (argind);
       ss >> smtsTimeoutMilliseconds;
+      break;
+    }
+    case 'X':
+    {
+      std::stringstream ss;
+      ss << parser.argument (argind);
+      ss >> twintoolTimeoutMilliseconds;
       break;
     }
     case 't':

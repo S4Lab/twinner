@@ -97,6 +97,7 @@ public:
       std::string pinLauncher, std::string pinMemoryRange,
       std::string twintool,
       std::string inputBinary, std::string inputArguments,
+      int twintoolTimeoutMilliseconds,
       std::string endpoints, bool newRecord, bool replayRecord,
       std::string safeFunctions, std::string tmpfolder,
       bool main, std::string stackOffset, bool naive, bool overheads);

@@ -285,6 +285,7 @@ void Instrumenter::initialize (InstructionModel model, const OPCODE opcodes[]) {
 
 Instrumenter::~Instrumenter () {
   delete ise;
+  PIN_SemaphoreFini (&exitingSemaphore);
 }
 
 void Instrumenter::registerInstrumentationRoutines () {
@@ -312,6 +313,37 @@ void Instrumenter::registerInstrumentationRoutines () {
   PIN_AddSyscallExitFunction (syscallIsReturned, this);
 
   PIN_AddFiniFunction (applicationIsAboutToExit, this);
+}
+
+void notify_upon_time_limit (void *arg) {
+  Instrumenter *im = (Instrumenter *) arg;
+  im->notifyUponTimeLimit ();
+}
+
+bool Instrumenter::setExecutionTimeLimit (int timelimit) {
+  this->timelimit = timelimit;
+  if (!PIN_SemaphoreInit (&exitingSemaphore)) {
+    return false;
+  }
+  PIN_SemaphoreClear (&exitingSemaphore);
+  if (timelimit == 0) {
+    return true;
+  }
+  if (PIN_SpawnInternalThread (notify_upon_time_limit,
+                               this, 0, 0) == INVALID_THREADID) {
+    edu::sharif::twinner::util::Logger::error ()
+        << "PIN_SpawnInternalThread failed!\n";
+    return false;
+  }
+  return true;
+}
+
+void Instrumenter::notifyUponTimeLimit () {
+  if (PIN_SemaphoreTimedWait (&exitingSemaphore, timelimit)) {
+    // application is exiting by itself...
+    return;
+  } // timeout... notify main thread to exit!
+  PIN_ExitApplication (110);
 }
 
 bool Instrumenter::instrumentSafeFunctions (INS ins, UINT32 insAssembly) const {
@@ -1524,6 +1556,7 @@ void read_memory_content_and_add_it_to_map (
 }
 
 void Instrumenter::aboutToExit (INT32 code) {
+  PIN_SemaphoreSet (&exitingSemaphore);
   printInstructionsStatisticsInfo ();
   saveAll ();
   edu::sharif::twinner::util::LogStream::destroy ();

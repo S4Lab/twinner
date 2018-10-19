@@ -85,6 +85,10 @@ KNOB < string > stackOffset (KNOB_MODE_WRITEONCE,
 KNOB < BOOL > naive (KNOB_MODE_WRITEONCE, "pintool", "naive", "",
     "if presents, just print info about instructions with no instrumentation");
 
+KNOB < UINT32 > timeLimit (KNOB_MODE_WRITEONCE,
+    "pintool", "time-limit", "0",
+    "the execution time limit in milliseconds (0 shows unlimited execution time).");
+
 KNOB < BOOL > measure (KNOB_MODE_WRITEONCE, "pintool", "measure", "",
     "if presents, trivial instruction counting instrumentation will be used instead of normal behavior");
 
@@ -337,7 +341,7 @@ bool TwinTool::parseArgumentsAndInitializeTool () {
     im->setMainArgsReportingFilePath (mainArgsReportingFilePath);
   }
   im->setPrintStackFlag (printStack.Value ());
-  return true;
+  return im->setExecutionTimeLimit (timeLimit.Value ());
 }
 
 void TwinTool::openFileForReading (std::ifstream &in, const std::string &path) const {
