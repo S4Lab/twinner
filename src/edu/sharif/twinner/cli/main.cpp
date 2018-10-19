@@ -66,6 +66,7 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
     string &pin, string &pinMemoryRange,
     string &twin,
     int &maxTraces,
+    int &smtsTimeoutMilliseconds,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads);
 int run (string etgpath, string input, string args, string endpoints,
@@ -243,12 +244,14 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
     bool &naive, bool &measureOverheads) {
   string verboseStr = "warning", logfileStr = "out";
   char *progName = argv[0];
+  int smtsTimeoutMilliseconds = 0;
   const ArgumentsParsingStatus status =
       parseArguments (progName, argc, argv, etgpath,
                       input, args, endpoints, newRecord, replayRecord,
                       safeFunctions, verboseStr, logfileStr,
                       tmpfolder, twintool, pin, pinMemoryRange, twin,
                       maxTraces,
+                      smtsTimeoutMilliseconds,
                       justAnalyzeMainRoutine, stackOffset,
                       naive, measureOverheads);
   if (status != ERROR_OCCURRED) {
@@ -258,7 +261,8 @@ ArgumentsParsingStatus parseArguments (int argc, char *argv[],
       return ERROR_OCCURRED;
     }
     edu::sharif::twinner::engine::smt::SmtSolver::init
-        (new edu::sharif::twinner::engine::smt::Cvc4SmtSolver ());
+        (new edu::sharif::twinner::engine::smt::Cvc4SmtSolver
+         (smtsTimeoutMilliseconds));
   }
   return status;
 }
@@ -273,6 +277,7 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
     string &pin, string &pinMemoryRange,
     string &twin,
     int &maxTraces,
+    int &smtsTimeoutMilliseconds,
     bool &justAnalyzeMainRoutine, string &stackOffset,
     bool &naive, bool &measureOverheads) {
   const ArgParser::Option options[] = {
@@ -298,6 +303,8 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
       "do not instrument; just print instructions", false, false},
     { 'N', "number-of-traces", ArgParser::YES, "Maximum number of traces to be examined"
       " (default: 100)", false, false},
+    { 'x', "smts-time-limit", ArgParser::YES, "Time limit of SMTS queries in milliseconds"
+      " (default: 0; unlimited)", false, false},
     { 't', "tool", ArgParser::YES, "twintool executable/library file", true, false},
     { 'T', "tmpfolder", ArgParser::YES, "tmp folder (default: /tmp)", false, false},
     { 'p', "pin-launcher", ArgParser::YES, "path to the pin.sh launcher", true, false},
@@ -386,6 +393,13 @@ ArgumentsParsingStatus parseArguments (char *progName, int argc, char *argv[],
       std::stringstream ss;
       ss << parser.argument (argind);
       ss >> maxTraces;
+      break;
+    }
+    case 'x':
+    {
+      std::stringstream ss;
+      ss << parser.argument (argind);
+      ss >> smtsTimeoutMilliseconds;
       break;
     }
     case 't':

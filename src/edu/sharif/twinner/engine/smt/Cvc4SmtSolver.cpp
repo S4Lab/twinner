@@ -35,8 +35,10 @@ namespace smt {
 void fillSatSolution (SmtEngine &smt, std::map<std::string, Expr> &symbols,
     std::set < const edu::sharif::twinner::trace::exptoken::Symbol * > &satSolution);
 
-Cvc4SmtSolver::Cvc4SmtSolver () :
-    SmtSolver (), state (new Cvc4SmtSolverState ()) {
+Cvc4SmtSolver::Cvc4SmtSolver (int _timeoutMilliseconds) :
+    SmtSolver (),
+    state (new Cvc4SmtSolverState ()),
+    timeoutMilliseconds (_timeoutMilliseconds) {
 }
 
 Cvc4SmtSolver::~Cvc4SmtSolver () {
@@ -56,6 +58,9 @@ bool Cvc4SmtSolver::solveConstraints (
    */
   smt.setLogic ("QF_BV");
   smt.setOption ("produce-models", true);
+  if (timeoutMilliseconds) {
+    smt.setOption ("tlimit", new SExpr (timeoutMilliseconds));
+  }
   //  smt.setOption ("trace", "smt");
 
   std::map<std::string, Expr> symbols;

@@ -26,9 +26,10 @@ class Cvc4SmtSolverState;
 class Cvc4SmtSolver : public SmtSolver {
 private:
   Cvc4SmtSolverState *state;
+  const int timeoutMilliseconds;
 
 public:
-  Cvc4SmtSolver ();
+  Cvc4SmtSolver (int _timeoutMilliseconds);
   virtual ~Cvc4SmtSolver ();
 
   virtual bool solveConstraints (
