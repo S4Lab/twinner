@@ -3,7 +3,7 @@
 
 int main (int argc, char *argv[]) {
   if (argc < 3) {
-    printf ("Usage: program <command codes>\n");
+    printf ("Usage: program <one-option> <its-value>\n");
     return -1;
   }
   if (strcmp (argv[1], "--option") != 0) {

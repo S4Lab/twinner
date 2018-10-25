@@ -21,7 +21,9 @@ using namespace edu::sharif::twinner::util;
 void test1 ();
 
 int main () {
-  Logger::setVerbosenessLevel ("loquacious");
+  if (!LogStream::init ("loquacious", "expression-addition-runtime-simplification")) {
+    return -1;
+  }
   test1 ();
   return 0;
 }

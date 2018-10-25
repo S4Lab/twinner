@@ -1,3 +1,5 @@
+OPTIONS := -g
+BINARIES := input0.out input0.vo.out input1.out input1.vo.out input2.out input2.vo.out input3.out input3.vo.out input4.out input4.vo.out
 
 INCLUDEPATH := -I ../src/res/
 
@@ -6,7 +8,6 @@ TARGETS := simple-condition-test \
 	assembly-mov-sizes \
 	registers-state-manipulation \
 	multi-path-with-printf-leafs-test \
-	upx-test upx-test.upx-packed \
 	overhead-measurement-test \
 	expression-addition-runtime-simplification \
 	mpwpl-manual-virt-obf \
@@ -15,14 +16,25 @@ TARGETS := simple-condition-test \
 TWIN_TARGETS := simple-condition-test \
 	multi-path-with-printf-leafs-test \
 	mpwpl-manual-virt-obf \
+	input0 input0.vo \
+	input1 input1.vo \
+	input2 input2.vo \
+	input3 input3.vo \
+	input4 input4.vo \
 	#upx-test
 
-all: $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
+all: $(BINARIES) $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)
+
+input%.vo.out: input%.vo.o vo-interpreter.o
+	$(CXX) $(OPTIONS) $^ -o $@
+
+%.o: %.c
+	$(CXX) $(OPTIONS) $< -c -o $@
 
 input%.twin.out: input%.twin.c
 	g++ -std=c++11 -g $(INCLUDEPATH) $< -o $@
 
-input%.out: input%.c
+%.out: %.o
 	g++ --std=c++11 $< -o $@
 
 runtime-simplification.out: runtime-simplification.s
@@ -41,8 +53,8 @@ mpwpl-manual-virt-obf.out: mpwpl-manual-virt-obf.c
 %.s: %.c
 	gcc -g $(INCLUDEPATH) -S $<
 
-%.out: %.s
-	gcc -g $< -o $@
+%.o: %.s
+	gcc -g $< -c -o $@
 
 upx-test.out: upx-test.c
 	gcc -g -static -o upx-test.out upx-test.c
@@ -51,28 +63,28 @@ upx-test.upx-packed.out: upx-test.out
 	rm upx-test.upx-packed.out && upx --strip-relocs=0 -o upx-test.upx-packed.out upx-test.out
 
 expression-addition-runtime-simplification.out: expression-addition-runtime-simplification.cpp
-	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o expression-addition-runtime-simplification.o expression-addition-runtime-simplification.cpp
-	g++ -o expression-addition-runtime-simplification.out expression-addition-runtime-simplification.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/cv/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/exptoken/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/search/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o ../deploy/obj-intel64/edu/sharif/twinner/exception/AbstractException.o -lcvc4 -lgmp
+	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../pin-2.14-linux/source/include/pin -I../pin-2.14-linux/source/include/pin/gen -I../pin-2.14-linux/extras/components/include -I../pin-2.14-linux/extras/xed2-intel64/include -I../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o expression-addition-runtime-simplification.o expression-addition-runtime-simplification.cpp
+	g++ -o expression-addition-runtime-simplification.out expression-addition-runtime-simplification.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/cv/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/exptoken/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/syscall/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/etg/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/etg/encoder/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o -lcvc4 -lgmp -lcln
 
 bitwise-and-simplification.out: bitwise-and-simplification.cpp
-	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o bitwise-and-simplification.o bitwise-and-simplification.cpp
+	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../pin-2.14-linux/source/include/pin -I../pin-2.14-linux/source/include/pin/gen -I../pin-2.14-linux/extras/components/include -I../pin-2.14-linux/extras/xed2-intel64/include -I../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o bitwise-and-simplification.o bitwise-and-simplification.cpp
 	g++ -o bitwise-and-simplification.out bitwise-and-simplification.o $(shell find ../deploy/obj-intel64/edu/sharif/twinner/engine/ ../deploy/obj-intel64/edu/sharif/twinner/trace/ ../deploy/obj-intel64/edu/sharif/twinner/util/ -name \*.o) -lcvc4 -lgmp -lcln
 
 expression-operations-concrete-value-test.out: expression-operations-concrete-value-test.cpp
 	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o expression-operations-concrete-value-test.o expression-operations-concrete-value-test.cpp
-	g++ -o expression-operations-concrete-value-test.out expression-operations-concrete-value-test.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/search/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o ../deploy/obj-intel64/edu/sharif/twinner/exception/AbstractException.o -lcvc4 -lgmp
+	g++ -o expression-operations-concrete-value-test.out expression-operations-concrete-value-test.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/etg/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/etg/encoder/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o -lcvc4 -lgmp -lcln
 
 constraint-simplification-with-cvc4-test.out: constraint-simplification-with-cvc4-test.cpp
 	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o constraint-simplification-with-cvc4-test.o constraint-simplification-with-cvc4-test.cpp
-	g++ -o constraint-simplification-with-cvc4-test.out constraint-simplification-with-cvc4-test.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/search/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o ../deploy/obj-intel64/edu/sharif/twinner/exception/AbstractException.o -lcvc4 -lgmp
+	g++ -o constraint-simplification-with-cvc4-test.out constraint-simplification-with-cvc4-test.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/etg/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/etg/encoder/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o -lcvc4 -lgmp -lcln
 
 constraint-validation-with-cvc4-test.out: constraint-validation-with-cvc4-test.cpp
 	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o constraint-validation-with-cvc4-test.o constraint-validation-with-cvc4-test.cpp
-	g++ -o constraint-validation-with-cvc4-test.out constraint-validation-with-cvc4-test.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/cv/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/exptoken/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/search/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o ../deploy/obj-intel64/edu/sharif/twinner/exception/AbstractException.o -lcvc4 -lgmp
+	g++ -o constraint-validation-with-cvc4-test.out constraint-validation-with-cvc4-test.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/cv/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/exptoken/*.o ../deploy/obj-intel64/edu/sharif/twinner/trace/syscall/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/etg/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/etg/encoder/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o -lcvc4 -lgmp -lcln
 
 remainder-having-constraint-test.out: remainder-having-constraint-test.cpp
 	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o remainder-having-constraint-test.o remainder-having-constraint-test.cpp
-	g++ -o remainder-having-constraint-test.out remainder-having-constraint-test.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/search/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o ../deploy/obj-intel64/edu/sharif/twinner/exception/AbstractException.o -lcvc4 -lgmp
+	g++ -o remainder-having-constraint-test.out remainder-having-constraint-test.o ../deploy/obj-intel64/edu/sharif/twinner/trace/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/smt/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/etg/*.o ../deploy/obj-intel64/edu/sharif/twinner/engine/etg/encoder/*.o ../deploy/obj-intel64/edu/sharif/twinner/util/*.o -lcvc4 -lgmp -lcln
 
 shift-left-and-bitwise-and-or-runtime-simplification.out: shift-left-and-bitwise-and-or-runtime-simplification.cpp
 	g++ -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -fno-stack-protector -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -I../../pin-2.14-linux/source/include/pin -I../../pin-2.14-linux/source/include/pin/gen -I../../pin-2.14-linux/extras/components/include -I../../pin-2.14-linux/extras/xed2-intel64/include -I../../pin-2.14-linux/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing -I../deploy -c -o shift-left-and-bitwise-and-or-runtime-simplification.o shift-left-and-bitwise-and-or-runtime-simplification.cpp

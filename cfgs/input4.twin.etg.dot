@@ -1,0 +1,88 @@
+digraph "Execution Trace Graph" {
+	label="Execution Trace Graph";
+
+	Node0 [label = "0"];
+	Node0x703040 [label = "0x703040"];
+	Node0x703230 [label = "0x703230"];
+	Node0x703a20 [label = "0x703a20"];
+	Node0x7082e0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"right-path last diamond\"*/ (const char *) 0x400864);)"];
+	Node0x775ba0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"right-path in the RR diamond\"*/ (const char *) 0x4007e4);)"];
+	Node0x7efee0 [label = "0x7efee0"];
+	Node0x7fbe00 [label = "0x7fbe00"];
+	Node0x806b10 [label = "0x806b10"];
+	Node0x881f30 [label = "0x881f30"];
+	Node0x92dc70 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"left-path in the RR diamond\"*/ (const char *) 0x400801);)"];
+	Node0x98b1d0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"left-path last diamond\"*/ (const char *) 0x40087c);)"];
+	Node0x13267d0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"\tx=R|L first diamond\"*/ (const char *) 0x40072d);)"];
+	Node0x14601a0 [label = "0x14601a0"];
+	Node0x1468980 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"right-path in the L diamond\"*/ (const char *) 0x40082d);)"];
+	Node0x148c2d0 [label = "0x148c2d0"];
+	Node0x14c5c50 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"\t\tyz=RR > u=R|L the RR diamond\"*/ (const char *) 0x400748);)"];
+	Node0x1564310 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"left-path in the L diamond\"*/ (const char *) 0x400849);)"];
+	Node0x162f380 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"right-path first diamond\"*/ (const char *) 0x4007b3);)"];
+	Node0x1693dd0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"left-path first diamond\"*/ (const char *) 0x4007cc);)"];
+	Node0x1694a20 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"\t\t\tw=R|L the last diamond\"*/ (const char *) 0x400799);)"];
+	Node0x170bde0 [label = "0x170bde0"];
+	Node0x173e460 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"\t\ty=L > z=R|L the L diamond\"*/ (const char *) 0x40077d);)"];
+	Node0x1792760 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"the RL scenario\"*/ (const char *) 0x40081d);)"];
+	Node0x18d9f70 [label = "0x18d9f70"];
+	Node0x18dcbc0 [label = "0x18dcbc0"];
+	Node0x18de7d0 [label = "0x18de7d0"];
+	Node0x1933540 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Usage: program xyzuw\"*/ (const char *) 0x400718);)"];
+	Node0x1a415d0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"\t\tyz=RL > RL scenario\"*/ (const char *) 0x400767);)"];
+	Node0 -> Node0x703230 [label = "(rdi_0 & 0xffffffff)
+	 == 0x2"];
+	Node0 -> Node0x1933540 [label = "(rdi_0 & 0xffffffff)
+	 != 0x2"];
+	Node0x1933540 -> Node0x148c2d0 [label = ""];
+	Node0x703230 -> Node0x162f380 [label = "n_v_argv_1_0
+	 == 0x52"];
+	Node0x162f380 -> Node0x7fbe00 [label = ""];
+	Node0x703230 -> Node0x1693dd0 [label = "n_v_argv_1_0
+	 != 0x52"];
+	Node0x1693dd0 -> Node0x7fbe00 [label = ""];
+	Node0x148c2d0 -> Node0x13267d0 [label = "0x0
+	 == 0"];
+	Node0x13267d0 -> Node0x18de7d0 [label = ""];
+	Node0x7fbe00 -> Node0x806b10 [label = "n_v_argv_1_1
+	 == 0x52"];
+	Node0x7fbe00 -> Node0x7efee0 [label = "n_v_argv_1_1
+	 != 0x52"];
+	Node0x18de7d0 -> Node0x14c5c50 [label = "0x0
+	 == 0"];
+	Node0x14c5c50 -> Node0x18d9f70 [label = ""];
+	Node0x806b10 -> Node0x703a20 [label = "n_v_argv_1_2
+	 == 0x52"];
+	Node0x806b10 -> Node0x1792760 [label = "n_v_argv_1_2
+	 != 0x52"];
+	Node0x1792760 -> Node0x881f30 [label = ""];
+	Node0x7efee0 -> Node0x1468980 [label = "n_v_argv_1_2
+	 == 0x52"];
+	Node0x1468980 -> Node0x881f30 [label = ""];
+	Node0x7efee0 -> Node0x1564310 [label = "n_v_argv_1_2
+	 != 0x52"];
+	Node0x1564310 -> Node0x881f30 [label = ""];
+	Node0x18d9f70 -> Node0x1a415d0 [label = "0x0
+	 == 0"];
+	Node0x1a415d0 -> Node0x18dcbc0 [label = ""];
+	Node0x703a20 -> Node0x775ba0 [label = "((n_v_argv_1_3 | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x10))) & 0xff)
+	 == 0x52"];
+	Node0x775ba0 -> Node0x881f30 [label = ""];
+	Node0x703a20 -> Node0x92dc70 [label = "((n_v_argv_1_3 | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x10))) & 0xff)
+	 != 0x52"];
+	Node0x92dc70 -> Node0x881f30 [label = ""];
+	Node0x881f30 -> Node0x7082e0 [label = "n_v_argv_1_4
+	 == 0x52"];
+	Node0x7082e0 -> Node0x170bde0 [label = ""];
+	Node0x881f30 -> Node0x98b1d0 [label = "n_v_argv_1_4
+	 != 0x52"];
+	Node0x98b1d0 -> Node0x170bde0 [label = ""];
+	Node0x18dcbc0 -> Node0x173e460 [label = "0x0
+	 == 0"];
+	Node0x173e460 -> Node0x14601a0 [label = ""];
+	Node0x170bde0 -> Node0x703040 [label = "0x0
+	 == 0"];
+	Node0x14601a0 -> Node0x1694a20 [label = "0x0
+	 == 0"];
+	Node0x1694a20 -> Node0x170bde0 [label = ""];
+}

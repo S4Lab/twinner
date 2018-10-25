@@ -2,46 +2,34 @@ digraph "Execution Trace Graph" {
 	label="Execution Trace Graph";
 
 	Node0 [label = "0"];
-	Node0x6ea250 [label = "0x6ea250"];
-	Node0x6ec320 [label = "0x6ec320"];
-	Node0x6f7100 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"unknown option!\"*/ (const char *) 0x4006c0);)"];
-	Node0x7b7f70 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"--wrongopt\"*/ (const char *) n_v_argv_1 /*0x7fffffffe564*/, /*\"--option\"*/ (const char *) 0x4006b7);)"];
-	Node0x7f6620 [label = "0x7f6620"];
-	Node0x7fdd30 [label = "0x7fdd30"];
-	Node0x7fe0f0 [label = "0x7fe0f0"];
-	Node0x889bd0 [label = "0x889bd0"];
-	Node0x95bf10 [label = "0x95bf10; Aborted"];
-	Node0x140b540 [label = "0x140b540; Aborted"];
-	Node0x16a2f50 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"invalid value!\"*/ (const char *) 0x4006d9);)"];
-	Node0x1824d40 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"correct option/value pair is given!\"*/ (const char *) 0x4006e8);)"];
-	Node0x1917450 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"wrongvalue\"*/ (const char *) m7fffffffe338_1_64 /*0x7fffffffe56f*/, /*\"optvalue\"*/ (const char *) 0x4006d0);)"];
-	Node0x196aa00 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Usage: program <command codes>\"*/ (const char *) 0x400698);)"];
-	Node0 -> Node0x7fe0f0 [label = "((rsp_0 - 0x7fffffffe248) & 0xffffffffffffffff)
-	 == 0"];
-	Node0 -> Node0x140b540 [label = "((rsp_0 - 0x7fffffffe248) & 0xffffffffffffffff)
-	 != 0"];
-	Node0x7fe0f0 -> Node0x6ea250 [label = "signExtend_0x80_0x20 ((rdi_0 & 0xffffffff))
+	Node0x6e92a0 [label = "0x6e92a0"];
+	Node0x6e94c0 [label = "0x6e94c0"];
+	Node0x6f4d60 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"unknown option!\"*/ (const char *) 0x4006c9);)"];
+	Node0x73dc00 [label = "0x73dc00"];
+	Node0x7c36d0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Usage: program <one-option> <its-value>\"*/ (const char *) 0x400698);)"];
+	Node0x80c500 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"invalid value!\"*/ (const char *) 0x4006e2);)"];
+	Node0x82b400 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"--wrongopt\"*/ (const char *) m7fffffffe330_0_64 /*0x7fffffffe567*/, /*\"--option\"*/ (const char *) 0x4006c0);)"];
+	Node0x8c7570 [label = "0x8c7570"];
+	Node0x90c300 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"correct option/value pair is given!\"*/ (const char *) 0x4006f8);)"];
+	Node0x17b8930 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"wrongvalue\"*/ (const char *) m7fffffffe338_1_64 /*0x7fffffffe572*/, /*\"optvalue\"*/ (const char *) 0x4006d9);)"];
+	Node0 -> Node0x82b400 [label = "signExtend_0x80_0x20 ((rdi_0 & 0xffffffff))
 	 > UINT128 (0x0, 0x0, 0x0, 0x2)"];
-	Node0x7fe0f0 -> Node0x196aa00 [label = "signExtend_0x80_0x20 ((rdi_0 & 0xffffffff))
+	Node0x82b400 -> Node0x6e92a0 [label = ""];
+	Node0 -> Node0x7c36d0 [label = "signExtend_0x80_0x20 ((rdi_0 & 0xffffffff))
 	 <= UINT128 (0x0, 0x0, 0x0, 0x2)"];
-	Node0x196aa00 -> Node0x889bd0 [label = ""];
-	Node0x6ea250 -> Node0x7b7f70 [label = "((rsi_0 - 0x7fffffffe328) & 0xffffffffffffffff)
-	 == 0"];
-	Node0x7b7f70 -> Node0x7fdd30 [label = ""];
-	Node0x6ea250 -> Node0x95bf10 [label = "((rsi_0 - 0x7fffffffe328) & 0xffffffffffffffff)
+	Node0x7c36d0 -> Node0x6e94c0 [label = ""];
+	Node0x6e92a0 -> Node0x6f4d60 [label = "((rax_1 & 0xffffffff) & (rax_1 & 0xffffffff))
 	 != 0"];
-	Node0x889bd0 -> Node0x6ec320 [label = "0x0
+	Node0x6f4d60 -> Node0x6e94c0 [label = ""];
+	Node0x6e92a0 -> Node0x17b8930 [label = "((rax_1 & 0xffffffff) & (rax_1 & 0xffffffff))
 	 == 0"];
-	Node0x7fdd30 -> Node0x6f7100 [label = "((rax_1 & 0xffffffff) & (rax_1 & 0xffffffff))
+	Node0x17b8930 -> Node0x73dc00 [label = ""];
+	Node0x6e94c0 -> Node0x8c7570 [label = "0x0
+	 == 0"];
+	Node0x73dc00 -> Node0x80c500 [label = "((rax_2 & 0xffffffff) & (rax_2 & 0xffffffff))
 	 != 0"];
-	Node0x6f7100 -> Node0x889bd0 [label = ""];
-	Node0x7fdd30 -> Node0x1917450 [label = "((rax_1 & 0xffffffff) & (rax_1 & 0xffffffff))
+	Node0x80c500 -> Node0x6e94c0 [label = ""];
+	Node0x73dc00 -> Node0x90c300 [label = "((rax_2 & 0xffffffff) & (rax_2 & 0xffffffff))
 	 == 0"];
-	Node0x1917450 -> Node0x7f6620 [label = ""];
-	Node0x7f6620 -> Node0x16a2f50 [label = "((rax_2 & 0xffffffff) & (rax_2 & 0xffffffff))
-	 != 0"];
-	Node0x16a2f50 -> Node0x889bd0 [label = ""];
-	Node0x7f6620 -> Node0x1824d40 [label = "((rax_2 & 0xffffffff) & (rax_2 & 0xffffffff))
-	 == 0"];
-	Node0x1824d40 -> Node0x889bd0 [label = ""];
+	Node0x90c300 -> Node0x6e94c0 [label = ""];
 }
