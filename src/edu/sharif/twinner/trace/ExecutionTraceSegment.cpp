@@ -183,6 +183,9 @@ void ExecutionTraceSegment::addPathConstraints (
       lastConstraint = c;
     }
   }
+  if (effectiveConstraints.empty ()) {
+    return;
+  }
   Snapshot *snapshot = snapshots.back ();
   snapshot->addPathConstraints (effectiveConstraints);
   Snapshot *nextSnapshot = Snapshot::instantiateNexSnapshot (*snapshot);
