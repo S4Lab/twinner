@@ -529,6 +529,17 @@ public:
 
   bool isTrivial (bool requiresValidConcreteValue) const;
 
+  /**
+   * If this expression is the same as the given simpleExp expression
+   * with the maximum difference of being bitwise-ANDed with a constant bitmask,
+   * it is called simple in comparison to the given expression.
+   * Otherwise, it is called complex relatively.
+   *
+   * @param simpleExp The simple reference expression.
+   * @return true iff this expression is complex in comparison to the simpleExp.
+   */
+  bool isComplexInComparisonTo (const Expression &simpleExp) const;
+
 private:
   bool makeConcreteValueValid () const;
   std::pair<Stack::const_iterator, Stack::const_iterator> compareTo (

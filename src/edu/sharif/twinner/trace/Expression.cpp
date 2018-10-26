@@ -590,6 +590,33 @@ bool Expression::isTrivial (bool requiresValidConcreteValue) const {
   return !requiresValidConcreteValue || makeConcreteValueValid ();
 }
 
+bool Expression::isComplexInComparisonTo (const Expression &simpleExp) const {
+  const Stack &targetExpStack = this->getStack ();
+  const Stack &simpleExpStack = simpleExp.getStack ();
+  Stack::const_iterator tIt = targetExpStack.begin ();
+  Stack::const_iterator tEnd = targetExpStack.end ();
+  Stack::const_iterator sIt = simpleExpStack.begin ();
+  Stack::const_iterator sEnd = simpleExpStack.end ();
+  for (; sIt != sEnd && tIt != tEnd && (**sIt) == (**tIt); ++sIt, ++tIt)
+    continue;
+  if (sIt != sEnd) {
+    return true; // complex
+  }
+  if (tIt == tEnd) {
+    return false; // simple
+  }
+  const edu::sharif::twinner::trace::exptoken::ExpressionToken *mask = *tIt++;
+  if (tIt != tEnd && dynamic_cast<const edu::sharif::twinner::trace::exptoken::Constant *> (mask)) {
+    const edu::sharif::twinner::trace::exptoken::ExpressionToken *op = *tIt++;
+    if (tIt == tEnd && dynamic_cast<const Operator *> (op)) {
+      if (static_cast<const Operator *> (op)->getIdentifier () == Operator::BITWISE_AND) {
+        return false; // simple
+      }
+    }
+  }
+  return true; // complex
+}
+
 class CalculateConcreteValueVisitor :
 public edu::sharif::twinner::trace::exptoken::ExpressionVisitor
 <edu::sharif::twinner::trace::cv::ConcreteValue128Bits> {

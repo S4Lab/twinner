@@ -71,6 +71,11 @@ public:
       ADDRINT address, int size, int level,
       const std::map < ADDRINT, Expression * > * const *memoryToExpressionMaps,
       int segmentIndex, int snapshotIndex);
+
+private:
+  static Expression *cloneOrInstantiateTemporarySymbolExpression (
+      ADDRINT address, const Expression *exp,
+      int segmentIndex, int snapshotIndex);
 };
 
 }

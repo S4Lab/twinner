@@ -625,13 +625,24 @@ std::map < REG, Expression * > RegisterEmergedSymbol::instantiateTemporarySymbol
         registerToExpression.find (fullRegs[i]);
     if (it != registerToExpression.end ()) {
       const Expression *exp = it->second;
-      Expression *tmpExp = new ExpressionImp
-          (fullRegs[i], exp->getLastConcreteValue (),
-           segmentIndex, snapshotIndex);
+      Expression *tmpExp = cloneOrInstantiateTemporarySymbolExpression
+          (fullRegs[i], exp, segmentIndex, snapshotIndex);
       tempExpressions.insert (make_pair (fullRegs[i], tmpExp));
     }
   }
   return tempExpressions;
+}
+
+Expression *RegisterEmergedSymbol::cloneOrInstantiateTemporarySymbolExpression (
+    REG address, const Expression *exp, int segmentIndex, int snapshotIndex) {
+  ExpressionImp simpleExp
+      (address, exp->getLastConcreteValue (), segmentIndex, snapshotIndex - 1);
+  if (exp->isComplexInComparisonTo (simpleExp)) {
+    return new ExpressionImp
+        (address, exp->getLastConcreteValue (), segmentIndex, snapshotIndex);
+  } else {
+    return exp->clone ();
+  }
 }
 
 }

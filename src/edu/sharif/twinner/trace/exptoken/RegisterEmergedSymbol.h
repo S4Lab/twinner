@@ -130,6 +130,10 @@ public:
   static std::map < REG, Expression * > instantiateTemporarySymbols (
       const std::map < REG, Expression * > &registerToExpression,
       int segmentIndex, int snapshotIndex);
+
+private:
+  static Expression *cloneOrInstantiateTemporarySymbolExpression (
+      REG address, const Expression *exp, int segmentIndex, int snapshotIndex);
 };
 
 }

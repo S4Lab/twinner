@@ -171,13 +171,26 @@ std::map < ADDRINT, Expression * > MemoryEmergedSymbol::instantiateTemporarySymb
           (tempExpressions, address + size / 2, size / 2, 1,
            memoryToExpressionMaps, segmentIndex, snapshotIndex);
     } else {
-      Expression *tmpExp = new ExpressionImp
-          (address, exp->getLastConcreteValue (), segmentIndex,
-           exp->isOverwritingExpression (), snapshotIndex);
+      Expression *tmpExp = cloneOrInstantiateTemporarySymbolExpression
+          (address, exp, segmentIndex, snapshotIndex);
       tempExpressions.insert (make_pair (address, tmpExp));
     }
   }
   return tempExpressions;
+}
+
+Expression *MemoryEmergedSymbol::cloneOrInstantiateTemporarySymbolExpression (
+    ADDRINT address, const Expression *exp, int segmentIndex, int snapshotIndex) {
+  ExpressionImp simpleExp
+      (address, exp->getLastConcreteValue (), segmentIndex,
+       exp->isOverwritingExpression (), snapshotIndex - 1);
+  if (exp->isComplexInComparisonTo (simpleExp)) {
+    return new ExpressionImp
+        (address, exp->getLastConcreteValue (), segmentIndex,
+         exp->isOverwritingExpression (), snapshotIndex);
+  } else {
+    return exp->clone ();
+  }
 }
 
 void MemoryEmergedSymbol::instantiateTemporarySymbols (
@@ -199,9 +212,8 @@ void MemoryEmergedSymbol::instantiateTemporarySymbols (
         (tempExpressions, address + size / 2, size / 2, level + 1,
          memoryToExpressionMaps, segmentIndex, snapshotIndex);
   } else {
-    Expression *tmpExp = new ExpressionImp
-        (address, exp->getLastConcreteValue (), segmentIndex,
-         exp->isOverwritingExpression (), snapshotIndex);
+    Expression *tmpExp = cloneOrInstantiateTemporarySymbolExpression
+        (address, exp, segmentIndex, snapshotIndex);
     tempExpressions.insert (make_pair (address, tmpExp));
   }
 }
