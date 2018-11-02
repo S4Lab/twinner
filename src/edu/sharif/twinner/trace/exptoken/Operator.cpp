@@ -204,10 +204,14 @@ bool Operator::apply (edu::sharif::twinner::trace::Expression *exp,
       alternatingNegatableOperators = (sop->getIdentifier () == Operator::MINUS);
       delete sop;
     } else {
-      cv = lastConstant->getValue ().clone
-          (exp->getLastConcreteValue ().getSize ());
+      const int minSize = exp->getLastConcreteValue ().getSize ();
+      cv = lastConstant->getValue ().clone (minSize);
+      edu::sharif::twinner::trace::cv::ConcreteValue *clonedOperand =
+          operand->clone (minSize);
       overflow = lastConstant->getValue () != (*cv)
+          || (*clonedOperand) != (*operand)
           || lop->apply (*cv, *operand);
+      delete clonedOperand;
     }
     if (overflow) {
       if (alternatingNegatableOperators) {
