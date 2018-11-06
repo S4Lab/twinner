@@ -1,5 +1,5 @@
 OPTIONS := -g
-BINARIES := input0.out input0.vo.out input1.out input1.vo.out input2.out input2.vo.out input3.out input3.vo.out input4.out input4.vo.out
+BINARIES := input0.out input0.vo.out input1.out input1.vo.out input2.out input2.vo.out input3.out input3.vo.out input4.out input4.vo.out input5.out input5.vo.out input6.out input6.vo.out input7.out input7.vo.out input8.out input8.vo.out input9.out input9.vo.out input10.out input10.vo.out input11.out input11.vo.out input12.out input12.vo.out input13.out input13.vo.out input14.out input14.vo.out input15.out input15.vo.out input16.out input16.vo.out input17.out input17.vo.out input18.out input18.vo.out input19.out input19.vo.out
 
 INCLUDEPATH := -I ../src/res/
 
