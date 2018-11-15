@@ -21,6 +21,21 @@ TWIN_TARGETS := simple-condition-test \
 	input2 input2.vo \
 	input3 input3.vo \
 	input4 input4.vo \
+	input5 input5.vo \
+	input6 input6.vo \
+	input7 input7.vo \
+	input8 input8.vo \
+	input9 input9.vo \
+	input10 input10.vo \
+	input11 input11.vo \
+	input12 input12.vo \
+	input13 input13.vo \
+	input14 input14.vo \
+	input15 input15.vo \
+	input16 input16.vo \
+	input17 input17.vo \
+	input18 input18.vo \
+	input19 input19.vo \
 	#upx-test
 
 all: $(BINARIES) $(TARGETS:=.out) $(TWIN_TARGETS:=.twin.out)

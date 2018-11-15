@@ -1,0 +1,1 @@
+sudo su sandbox -c "./obj-intel64/Twinner --input ./obj-intel64/input11.out --args '12 34 5' --number-of-traces 15 --pin-launcher ../../../pin.sh --tool ./obj-intel64/TwinTool.so -o ./tmp/twinner/input11.twin.c --tmpfolder ./tmp --safe-functions 'puts@0x400410#auto' --generate-etg ./tmp/twinner/input11.twin.etg.dot --main --verbose $@"

@@ -1,0 +1,104 @@
+digraph "Execution Trace Graph" {
+	label="Execution Trace Graph";
+
+	Node0 [label = "0"];
+	Node0x6ef240 [label = "0x6ef240"];
+	Node0x6f6e20 [label = "0x6f6e20"];
+	Node0x6f78c0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"We are at top of a plane right now!\"*/ (const char *) 0x400840);)"];
+	Node0x707370 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Three coordinates indicate a 3D position\"*/ (const char *) 0x400810);)"];
+	Node0x7ede70 [label = "0x7ede70"];
+	Node0x840040 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"_quiet output_\"*/ (const char *) 0x400864);)"];
+	Node0x846d70 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"verbose\"*/ (const char *) n_v_argv_4 /*0x7fffffffe598*/, /*\"verbose\"*/ (const char *) 0x400801);)"];
+	Node0x858a70 [label = "0x858a70"];
+	Node0x8706f0 [label = "0x8706f0"];
+	Node0x8d5f70 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Up/Right/Forth\"*/ (const char *) 0x4007e4);)"];
+	Node0x8feeb0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Up/Left/Forth\"*/ (const char *) 0x4007c9);)"];
+	Node0xa03570 [label = "0xa03570"];
+	Node0xf17340 [label = "0xf17340"];
+	Node0xf2c850 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Down/Right/Back\"*/ (const char *) 0x4008a3);)"];
+	Node0x1113b70 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Down/Left/Back\"*/ (const char *) 0x400883);)"];
+	Node0x11b0b20 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Usage: program (U|D) (L|R) (F|B) (verbose|quiet)\"*/ (const char *) 0x400798);)"];
+	Node0x13378e0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Up/Right/Back\"*/ (const char *) 0x4007f3);)"];
+	Node0x137dd50 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Up/Left/Back\"*/ (const char *) 0x4007d7);)"];
+	Node0x13963c0 [label = "0x13963c0"];
+	Node0x140f860 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"We are exploring the downwards plane!\"*/ (const char *) 0x4008b8);)"];
+	Node0x14c4fa0 [label = "0x14c4fa0"];
+	Node0x171eb30 [label = "0x171eb30"];
+	Node0x171ed20 [label = "0x171ed20"];
+	Node0x17beab0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Down/Left/Forth\"*/ (const char *) 0x400873);)"];
+	Node0x17f4f90 [label = "0x17f4f90"];
+	Node0x1c71390 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Down/Right/Forth\"*/ (const char *) 0x400892);)"];
+	Node0x1c85f50 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"Three coordinates indicate a 3D position\"*/ (const char *) 0x400810);)"];
+	Node0x1c86110 [label = "0x1c86110"];
+	Node0x1c8b7e0 [label = "0x1c8b7e0"];
+	Node0x1d14f40 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"_quiet output_\"*/ (const char *) 0x400864);)"];
+	Node0x1d2f3e0 [label = "0x1d2f3e0"];
+	Node0x1d710e0 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"verbose\"*/ (const char *) n_v_argv_4 /*0x7fffffffe598*/, /*\"verbose\"*/ (const char *) 0x400801);)"];
+	Node0 -> Node0x858a70 [label = "(rdi_0 & 0xffffffff)
+	 == 0x5"];
+	Node0 -> Node0x11b0b20 [label = "(rdi_0 & 0xffffffff)
+	 != 0x5"];
+	Node0x11b0b20 -> Node0x17f4f90 [label = ""];
+	Node0x858a70 -> Node0xa03570 [label = "n_v_argv_1_0
+	 == 0x55"];
+	Node0x858a70 -> Node0x13963c0 [label = "n_v_argv_1_0
+	 != 0x55"];
+	Node0x17f4f90 -> Node0x8706f0 [label = "0x0
+	 == 0"];
+	Node0xa03570 -> Node0x6ef240 [label = "n_v_argv_2_0
+	 != 0x4c"];
+	Node0xa03570 -> Node0x7ede70 [label = "n_v_argv_2_0
+	 == 0x4c"];
+	Node0x13963c0 -> Node0x1d2f3e0 [label = "n_v_argv_2_0
+	 != 0x4c"];
+	Node0x13963c0 -> Node0xf17340 [label = "n_v_argv_2_0
+	 == 0x4c"];
+	Node0x6ef240 -> Node0x8d5f70 [label = "n_v_argv_3_0
+	 == 0x46"];
+	Node0x8d5f70 -> Node0x6f6e20 [label = ""];
+	Node0x6ef240 -> Node0x13378e0 [label = "n_v_argv_3_0
+	 != 0x46"];
+	Node0x13378e0 -> Node0x6f6e20 [label = ""];
+	Node0x7ede70 -> Node0x8feeb0 [label = "n_v_argv_3_0
+	 == 0x46"];
+	Node0x8feeb0 -> Node0x6f6e20 [label = ""];
+	Node0x7ede70 -> Node0x137dd50 [label = "n_v_argv_3_0
+	 != 0x46"];
+	Node0x137dd50 -> Node0x6f6e20 [label = ""];
+	Node0x1d2f3e0 -> Node0x1c71390 [label = "n_v_argv_3_0
+	 == 0x46"];
+	Node0x1c71390 -> Node0x14c4fa0 [label = ""];
+	Node0x1d2f3e0 -> Node0xf2c850 [label = "n_v_argv_3_0
+	 != 0x46"];
+	Node0xf2c850 -> Node0x14c4fa0 [label = ""];
+	Node0xf17340 -> Node0x17beab0 [label = "n_v_argv_3_0
+	 == 0x46"];
+	Node0x17beab0 -> Node0x14c4fa0 [label = ""];
+	Node0xf17340 -> Node0x1113b70 [label = "n_v_argv_3_0
+	 != 0x46"];
+	Node0x1113b70 -> Node0x14c4fa0 [label = ""];
+	Node0x6f6e20 -> Node0x846d70 [label = "0x0
+	 == 0"];
+	Node0x846d70 -> Node0x171ed20 [label = ""];
+	Node0x14c4fa0 -> Node0x1d710e0 [label = "0x0
+	 == 0"];
+	Node0x1d710e0 -> Node0x1c86110 [label = ""];
+	Node0x171ed20 -> Node0x707370 [label = "(rax_2 & 0xffffffff)
+	 == 0"];
+	Node0x707370 -> Node0x171eb30 [label = ""];
+	Node0x171ed20 -> Node0x840040 [label = "(rax_2 & 0xffffffff)
+	 != 0"];
+	Node0x840040 -> Node0x17f4f90 [label = ""];
+	Node0x1c86110 -> Node0x1c85f50 [label = "(rax_2 & 0xffffffff)
+	 == 0"];
+	Node0x1c85f50 -> Node0x1c8b7e0 [label = ""];
+	Node0x1c86110 -> Node0x1d14f40 [label = "(rax_2 & 0xffffffff)
+	 != 0"];
+	Node0x1d14f40 -> Node0x17f4f90 [label = ""];
+	Node0x171eb30 -> Node0x6f78c0 [label = "0x0
+	 == 0"];
+	Node0x6f78c0 -> Node0x17f4f90 [label = ""];
+	Node0x1c8b7e0 -> Node0x140f860 [label = "0x0
+	 == 0"];
+	Node0x140f860 -> Node0x17f4f90 [label = ""];
+}

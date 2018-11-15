@@ -1,0 +1,1 @@
+sudo su sandbox -c "./obj-intel64/Twinner --input ./obj-intel64/input19.vo.out --args 'multiplied ULF slow' --number-of-traces 25 --pin-launcher ../../../pin.sh --tool ./obj-intel64/TwinTool.so -o ./tmp/twinner/input19.vo.twin.c --tmpfolder ./tmp --safe-functions 'printf@0x400820#auto,strcmp@0x400880#auto' --generate-etg ./tmp/twinner/input19.vo.twin.etg.dot --main --verbose $@"

@@ -20,7 +20,7 @@ if ((/*unsigned {*/UINT128 (0x0, 0x0, 0x0, 0x52)/*}*/ == /*unsigned {*/n_v_argv_
 		/*Memory Changes*/
 		*((UINT64 *) 0x7fffffffe280) = UINT64 (rsi_0 /*0x7fffffffe388*/);
 		*((UINT64 *) 0x7fffffffe290) = UINT64 (m7fffffffe290_0_64 /*0x7fffffffe380*/);
-		*((UINT64 *) 0x7fffffffe298) = UINT64 (((((((n_v_argv_1_4 << 0x8) | ((((logicalShiftToRight (m7fffffffe29c_0_32, UINT128 (0x0, 0x0, 0x0, 0x10)) | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x18))) | logicalShiftToRight (n_v_argv_1_3, UINT128 (0x0, 0x0, 0x0, 0x8))) | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x18))) & 0xff)) << 0x10) | ((((n_v_argv_1_3 << 0x8) | n_v_argv_1_2) | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x8))) & 0xffff)) << 0x20) | (((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16) & 0xffffffff)) /*0x0*/);
+		*((UINT64 *) 0x7fffffffe298) = UINT64 (((((((n_v_argv_1_4 << 0x8) | (logicalShiftToRight (m7fffffffe29c_0_32, UINT128 (0x0, 0x0, 0x0, 0x10)) & 0xff)) << 0x10) | (((n_v_argv_1_3 << 0x8) | n_v_argv_1_2) & 0xffff)) << 0x20) | (((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16) & 0xffffffff)) /*0x0*/);
 		*((UINT64 *) 0x7fffffffe2a0) = UINT64 (rbp_0 /*0x0*/);
 		*((UINT64 *) 0x7fffffffe390) = UINT64 (n_v_argv_1 /*0x7fffffffe5b7*/);
 		/*Registers Changes*/
@@ -36,7 +36,7 @@ if ((/*unsigned {*/UINT128 (0x0, 0x0, 0x0, 0x52)/*}*/ == /*unsigned {*/n_v_argv_
 		/*Memory Changes*/
 		*((UINT64 *) 0x7fffffffe280) = UINT64 (rsi_0 /*0x7fffffffe388*/);
 		*((UINT64 *) 0x7fffffffe290) = UINT64 (m7fffffffe290_0_64 /*0x7fffffffe380*/);
-		*((UINT64 *) 0x7fffffffe298) = UINT64 (((((((n_v_argv_1_4 << 0x8) | ((((logicalShiftToRight (m7fffffffe29c_0_32, UINT128 (0x0, 0x0, 0x0, 0x10)) | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x18))) | logicalShiftToRight (n_v_argv_1_3, UINT128 (0x0, 0x0, 0x0, 0x8))) | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x18))) & 0xff)) << 0x10) | ((((n_v_argv_1_3 << 0x8) | n_v_argv_1_2) | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x8))) & 0xffff)) << 0x20) | (((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16) & 0xffffffff)) /*0x0*/);
+		*((UINT64 *) 0x7fffffffe298) = UINT64 (((((((n_v_argv_1_4 << 0x8) | (logicalShiftToRight (m7fffffffe29c_0_32, UINT128 (0x0, 0x0, 0x0, 0x10)) & 0xff)) << 0x10) | (((n_v_argv_1_3 << 0x8) | n_v_argv_1_2) & 0xffff)) << 0x20) | (((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16) & 0xffffffff)) /*0x0*/);
 		*((UINT64 *) 0x7fffffffe2a0) = UINT64 (rbp_0 /*0x0*/);
 		*((UINT64 *) 0x7fffffffe390) = UINT64 (n_v_argv_1 /*0x7fffffffe5b7*/);
 		/*Registers Changes*/
@@ -53,11 +53,11 @@ if ((/*unsigned {*/UINT128 (0x0, 0x0, 0x0, 0x52)/*}*/ == /*unsigned {*/n_v_argv_
 int func_1 (struct RegistersSet &regs, UINT64 m7fffffffe290_0_64, UINT16 m7fffffffe298_0_16, UINT32 m7fffffffe29c_0_32, UINT64 n_v_argv_1, UINT8 n_v_argv_1_0, UINT8 n_v_argv_1_1, UINT8 n_v_argv_1_2, UINT8 n_v_argv_1_3, UINT8 n_v_argv_1_4, UINT64 rbp_0, UINT64 rsi_0, UINT64 rsp_0) {
 if ((/*unsigned {*/UINT128 (0x0, 0x0, 0x0, 0x52)/*}*/ == /*unsigned {*/n_v_argv_1_1 /*0x52*//*}*/)) {
 		if ((/*unsigned {*/UINT128 (0x0, 0x0, 0x0, 0x52)/*}*/ == /*unsigned {*/n_v_argv_1_2 /*0x52*//*}*/)) {
-			if ((/*unsigned {*/n_v_argv_1_3 /*0x52*//*}*/ == /*unsigned {*/UINT128 (0x0, 0x0, 0x0, 0x52)/*}*/)) {
+			if ((/*unsigned {*/UINT128 (0x0, 0x0, 0x0, 0x52)/*}*/ == /*unsigned {*/n_v_argv_1_3 /*0x52*//*}*/)) {
 				/*Memory Changes*/
 				*((UINT64 *) 0x7fffffffe280) = UINT64 (rsi_0 /*0x7fffffffe388*/);
 				*((UINT64 *) 0x7fffffffe290) = UINT64 (m7fffffffe290_0_64 /*0x7fffffffe380*/);
-				*((UINT64 *) 0x7fffffffe298) = UINT64 (((((((logicalShiftToRight (m7fffffffe29c_0_32, UINT128 (0x0, 0x0, 0x0, 0x10)) | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x18))) & 0xffff) << 0x10) | ((n_v_argv_1_3 << 0x8) | n_v_argv_1_2)) << 0x20) | ((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
+				*((UINT64 *) 0x7fffffffe298) = UINT64 (((((m7fffffffe29c_0_32 & 0xffff0000) | ((n_v_argv_1_3 << 0x8) | n_v_argv_1_2)) << 0x20) | ((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
 				*((UINT64 *) 0x7fffffffe2a0) = UINT64 (rbp_0 /*0x0*/);
 				*((UINT64 *) 0x7fffffffe390) = UINT64 (n_v_argv_1 /*0x7fffffffe5b7*/);
 				/*Registers Changes*/
@@ -73,7 +73,7 @@ if ((/*unsigned {*/UINT128 (0x0, 0x0, 0x0, 0x52)/*}*/ == /*unsigned {*/n_v_argv_
 				/*Memory Changes*/
 				*((UINT64 *) 0x7fffffffe280) = UINT64 (rsi_0 /*0x7fffffffe388*/);
 				*((UINT64 *) 0x7fffffffe290) = UINT64 (m7fffffffe290_0_64 /*0x7fffffffe380*/);
-				*((UINT64 *) 0x7fffffffe298) = UINT64 (((((((logicalShiftToRight (m7fffffffe29c_0_32, UINT128 (0x0, 0x0, 0x0, 0x10)) | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x18))) & 0xffff) << 0x10) | ((n_v_argv_1_3 << 0x8) | n_v_argv_1_2)) << 0x20) | ((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
+				*((UINT64 *) 0x7fffffffe298) = UINT64 (((((m7fffffffe29c_0_32 & 0xffff0000) | ((n_v_argv_1_3 << 0x8) | n_v_argv_1_2)) << 0x20) | ((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
 				*((UINT64 *) 0x7fffffffe2a0) = UINT64 (rbp_0 /*0x0*/);
 				*((UINT64 *) 0x7fffffffe390) = UINT64 (n_v_argv_1 /*0x7fffffffe5b7*/);
 				/*Registers Changes*/
@@ -90,7 +90,7 @@ if ((/*unsigned {*/UINT128 (0x0, 0x0, 0x0, 0x52)/*}*/ == /*unsigned {*/n_v_argv_
 			/*Memory Changes*/
 			*((UINT64 *) 0x7fffffffe280) = UINT64 (rsi_0 /*0x7fffffffe388*/);
 			*((UINT64 *) 0x7fffffffe290) = UINT64 (m7fffffffe290_0_64 /*0x7fffffffe380*/);
-			*((UINT64 *) 0x7fffffffe298) = UINT64 (((((((logicalShiftToRight (m7fffffffe29c_0_32, UINT128 (0x0, 0x0, 0x0, 0x10)) | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x18))) & 0xffff) << 0x10) | ((n_v_argv_1_3 << 0x8) | n_v_argv_1_2)) << 0x20) | ((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
+			*((UINT64 *) 0x7fffffffe298) = UINT64 (((((m7fffffffe29c_0_32 & 0xffff0000) | ((n_v_argv_1_3 << 0x8) | n_v_argv_1_2)) << 0x20) | ((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
 			*((UINT64 *) 0x7fffffffe2a0) = UINT64 (rbp_0 /*0x0*/);
 			*((UINT64 *) 0x7fffffffe390) = UINT64 (n_v_argv_1 /*0x7fffffffe5b7*/);
 			/*Registers Changes*/
@@ -108,7 +108,7 @@ if ((/*unsigned {*/UINT128 (0x0, 0x0, 0x0, 0x52)/*}*/ == /*unsigned {*/n_v_argv_
 			/*Memory Changes*/
 			*((UINT64 *) 0x7fffffffe280) = UINT64 (rsi_0 /*0x7fffffffe388*/);
 			*((UINT64 *) 0x7fffffffe290) = UINT64 (m7fffffffe290_0_64 /*0x7fffffffe380*/);
-			*((UINT64 *) 0x7fffffffe298) = UINT64 (((((((((logicalShiftToRight (m7fffffffe29c_0_32, UINT128 (0x0, 0x0, 0x0, 0x18)) | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x20))) & 0xff) << 0x8) | n_v_argv_1_2) << 0x10) | ((m7fffffffe29c_0_32 | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x8))) & 0xffff)) << 0x20) | ((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
+			*((UINT64 *) 0x7fffffffe298) = UINT64 (((((((logicalShiftToRight (m7fffffffe29c_0_32, UINT128 (0x0, 0x0, 0x0, 0x10)) & 0xff00) | n_v_argv_1_2) << 0x10) | (m7fffffffe29c_0_32 & 0xffff)) << 0x20) | ((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
 			*((UINT64 *) 0x7fffffffe2a0) = UINT64 (rbp_0 /*0x0*/);
 			*((UINT64 *) 0x7fffffffe390) = UINT64 (n_v_argv_1 /*0x7fffffffe5b7*/);
 			/*Registers Changes*/
@@ -124,7 +124,7 @@ if ((/*unsigned {*/UINT128 (0x0, 0x0, 0x0, 0x52)/*}*/ == /*unsigned {*/n_v_argv_
 			/*Memory Changes*/
 			*((UINT64 *) 0x7fffffffe280) = UINT64 (rsi_0 /*0x7fffffffe388*/);
 			*((UINT64 *) 0x7fffffffe290) = UINT64 (m7fffffffe290_0_64 /*0x7fffffffe380*/);
-			*((UINT64 *) 0x7fffffffe298) = UINT64 (((((((((logicalShiftToRight (m7fffffffe29c_0_32, UINT128 (0x0, 0x0, 0x0, 0x18)) | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x20))) & 0xff) << 0x8) | n_v_argv_1_2) << 0x10) | ((m7fffffffe29c_0_32 | logicalShiftToRight (n_v_argv_1_1, UINT128 (0x0, 0x0, 0x0, 0x8))) & 0xffff)) << 0x20) | ((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
+			*((UINT64 *) 0x7fffffffe298) = UINT64 (((((((logicalShiftToRight (m7fffffffe29c_0_32, UINT128 (0x0, 0x0, 0x0, 0x10)) & 0xff00) | n_v_argv_1_2) << 0x10) | (m7fffffffe29c_0_32 & 0xffff)) << 0x20) | ((((n_v_argv_1_1 << 0x8) | n_v_argv_1_0) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
 			*((UINT64 *) 0x7fffffffe2a0) = UINT64 (rbp_0 /*0x0*/);
 			*((UINT64 *) 0x7fffffffe390) = UINT64 (n_v_argv_1 /*0x7fffffffe5b7*/);
 			/*Registers Changes*/
@@ -157,7 +157,7 @@ SAVE_REGISTERS (regs);
 			*((UINT64 *) 0x7fffffffe290) = UINT64 (m7fffffffe290_0_64 /*0x7fffffffe380*/);
 			*((UINT64 *) 0x7fffffffe298) = UINT64 (((m7fffffffe29c_0_32 << 0x20) | ((((argv[1][1] << 0x8) | argv[1][0]) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
 			*((UINT64 *) 0x7fffffffe2a0) = UINT64 (rbp_0 /*0x0*/);
-			*((UINT64 *) 0x7fffffffe2a8) = UINT64 (m7fffffffe2a8_0_64 /*0x7ffff5fe7f45*/);
+			*((UINT64 *) 0x7fffffffe2a8) = UINT64 (m7fffffffe2a8_0_64 /*0x7ffff5feaf45*/);
 			*((UINT64 *) 0x7fffffffe390) = UINT64 (argv[1] /*0x7fffffffe5b7*/);
 			/*Registers Changes*/
 			regs.rax = UINT64 (argv[1][1] /*0x52*/);
@@ -176,7 +176,7 @@ SAVE_REGISTERS (regs);
 			*((UINT64 *) 0x7fffffffe290) = UINT64 (m7fffffffe290_0_64 /*0x7fffffffe380*/);
 			*((UINT64 *) 0x7fffffffe298) = UINT64 (((m7fffffffe29c_0_32 << 0x20) | ((((argv[1][1] << 0x8) | argv[1][0]) << 0x10) | m7fffffffe298_0_16)) /*0x0*/);
 			*((UINT64 *) 0x7fffffffe2a0) = UINT64 (rbp_0 /*0x0*/);
-			*((UINT64 *) 0x7fffffffe2a8) = UINT64 (m7fffffffe2a8_0_64 /*0x7ffff5fe7f45*/);
+			*((UINT64 *) 0x7fffffffe2a8) = UINT64 (m7fffffffe2a8_0_64 /*0x7ffff5feaf45*/);
 			*((UINT64 *) 0x7fffffffe390) = UINT64 (argv[1] /*0x7fffffffe5b7*/);
 			/*Registers Changes*/
 			regs.rax = UINT64 (argv[1][1] /*0x52*/);
@@ -194,7 +194,7 @@ SAVE_REGISTERS (regs);
 		*((UINT64 *) 0x7fffffffe280) = UINT64 (rsi_0 /*0x7fffffffe388*/);
 		*((UINT64 *) 0x7fffffffe288) = UINT64 ((((rdi_0 & 0xffffffff) << 0x20) | m7fffffffe288_0_32) /*0x400440*/);
 		*((UINT64 *) 0x7fffffffe2a0) = UINT64 (rbp_0 /*0x0*/);
-		*((UINT64 *) 0x7fffffffe2a8) = UINT64 (m7fffffffe2a8_0_64 /*0x7ffff5fe7f45*/);
+		*((UINT64 *) 0x7fffffffe2a8) = UINT64 (m7fffffffe2a8_0_64 /*0x7ffff5feaf45*/);
 		/*Registers Changes*/
 		regs.rdi = UINT64 (rdi_0 /*0x0*/);
 		regs.rsi = UINT64 (rsi_0 /*0x7fffffffe388*/);

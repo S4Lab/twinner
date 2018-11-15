@@ -1,0 +1,79 @@
+digraph "Execution Trace Graph" {
+	label="Execution Trace Graph";
+
+	Node0 [label = "0"];
+	Node0x6ee300 [label = "0x6ee300"];
+	Node0x6ef2b0 [label = "0x6ef2b0"];
+	Node0x6f3a10 [label = "0x6f3a10"];
+	Node0x71feb0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"At most five arguments are allowed\"*/ (const char *) 0x400790);)"];
+	Node0x7366c0 [label = "0x7366c0"];
+	Node0x750c40 [label = "0x750c40"];
+	Node0x75cab0 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"left\"*/ (const char *) m7fffffffe330_1_64 /*0x7fffffffe57a*/, /*\"left\"*/ (const char *) 0x4007e9);)"];
+	Node0x791b60 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"fourth and fifth arguments are the same\"*/ (const char *) 0x400860);)"];
+	Node0x7e6d10 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"At least three arguments are required\"*/ (const char *) 0x400768);)"];
+	Node0x8273f0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"You are not allowed to run this program!\"*/ (const char *) 0x4007c0);)"];
+	Node0x8aa870 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"left-path of R scenario\"*/ (const char *) 0x4007ee);)"];
+	Node0x8ceb40 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"left-path of LL scenario\"*/ (const char *) 0x40082b);)"];
+	Node0x8fc570 [label = "0x8fc570"];
+	Node0xe25890 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"right-path of R scenario\"*/ (const char *) 0x400806);)"];
+	Node0xf55f30 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"random\"*/ (const char *) m7fffffffe320_0_64 /*0x7fffffffe570*/, /*\"magicvalue\"*/ (const char *) 0x4007b3);)"];
+	Node0x11cd910 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"first\"*/ (const char *) m7fffffffe338_3_64 /*0x7fffffffe57f*/, /*\"second\"*/ (const char *) m7fffffffe340_3_64 /*0x7fffffffe585*/);)"];
+	Node0x11db740 [label = "0x11db740"];
+	Node0x126d0a0 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"left\"*/ (const char *) m7fffffffe330_1_64 /*0x7fffffffe57a*/, /*\"left\"*/ (const char *) 0x4007e9);)"];
+	Node0x1527110 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"LR scenario\"*/ (const char *) 0x40081f);)"];
+	Node0x1646fe0 [label = "0x1646fe0"];
+	Node0x16a08f0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"right-path of LL scenario\"*/ (const char *) 0x400844);)"];
+	Node0x1708b50 [label = "0x1708b50"];
+	Node0x1747900 [label = "0x1747900"];
+	Node0x1764670 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"last args are different\"*/ (const char *) 0x400888);)"];
+	Node0 -> Node0x6ef2b0 [label = "signExtend_0x80_0x20 ((rdi_0 & 0xffffffff))
+	 > UINT128 (0x0, 0x0, 0x0, 0x3)"];
+	Node0 -> Node0x7e6d10 [label = "signExtend_0x80_0x20 ((rdi_0 & 0xffffffff))
+	 <= UINT128 (0x0, 0x0, 0x0, 0x3)"];
+	Node0x7e6d10 -> Node0x6ee300 [label = ""];
+	Node0x6ef2b0 -> Node0x71feb0 [label = "signExtend_0x80_0x20 ((rdi_0 & 0xffffffff))
+	 > UINT128 (0x0, 0x0, 0x0, 0x6)"];
+	Node0x71feb0 -> Node0x6ee300 [label = ""];
+	Node0x6ef2b0 -> Node0xf55f30 [label = "signExtend_0x80_0x20 ((rdi_0 & 0xffffffff))
+	 <= UINT128 (0x0, 0x0, 0x0, 0x6)"];
+	Node0xf55f30 -> Node0x750c40 [label = ""];
+	Node0x6ee300 -> Node0x6f3a10 [label = "0x0
+	 == 0"];
+	Node0x750c40 -> Node0x8273f0 [label = "(rax_1 & 0xffffffff)
+	 != 0"];
+	Node0x8273f0 -> Node0x6ee300 [label = ""];
+	Node0x750c40 -> Node0x8fc570 [label = "(rax_1 & 0xffffffff)
+	 == 0"];
+	Node0x8fc570 -> Node0x1708b50 [label = "n_v_argv_2_0
+	 != 0x52"];
+	Node0x8fc570 -> Node0x126d0a0 [label = "n_v_argv_2_0
+	 == 0x52"];
+	Node0x126d0a0 -> Node0x7366c0 [label = ""];
+	Node0x1708b50 -> Node0x75cab0 [label = "n_v_argv_2_1
+	 != 0x52"];
+	Node0x75cab0 -> Node0x1646fe0 [label = ""];
+	Node0x1708b50 -> Node0x1527110 [label = "n_v_argv_2_1
+	 == 0x52"];
+	Node0x1527110 -> Node0x6ee300 [label = ""];
+	Node0x7366c0 -> Node0xe25890 [label = "(rax_2 & 0xffffffff)
+	 == 0"];
+	Node0xe25890 -> Node0x6ee300 [label = ""];
+	Node0x7366c0 -> Node0x8aa870 [label = "(rax_2 & 0xffffffff)
+	 != 0"];
+	Node0x8aa870 -> Node0x6ee300 [label = ""];
+	Node0x1646fe0 -> Node0x8ceb40 [label = "(rax_2 & 0xffffffff)
+	 == 0"];
+	Node0x8ceb40 -> Node0x11db740 [label = ""];
+	Node0x1646fe0 -> Node0x16a08f0 [label = "(rax_2 & 0xffffffff)
+	 != 0"];
+	Node0x16a08f0 -> Node0x11db740 [label = ""];
+	Node0x11db740 -> Node0x11cd910 [label = "0x0
+	 == 0"];
+	Node0x11cd910 -> Node0x1747900 [label = ""];
+	Node0x1747900 -> Node0x1764670 [label = "(rax_4 & 0xffffffff)
+	 != 0"];
+	Node0x1764670 -> Node0x6ee300 [label = ""];
+	Node0x1747900 -> Node0x791b60 [label = "(rax_4 & 0xffffffff)
+	 == 0"];
+	Node0x791b60 -> Node0x6ee300 [label = ""];
+}

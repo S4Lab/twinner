@@ -1,0 +1,147 @@
+digraph "Execution Trace Graph" {
+	label="Execution Trace Graph";
+
+	Node0 [label = "0"];
+	Node0x101f4d0 [label = "0x101f4d0"];
+	Node0x1c57710 [label = "0x1c57710"];
+	Node0x1c584b0 [label = "0x1c584b0"];
+	Node0x1d27f30 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"there were unused arguments\n\"*/ (const char *) 0x401df0);)"];
+	Node0x1f2b820 [label = "0x1f2b820"];
+	Node0x5e78400 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"not too many args\n\"*/ (const char *) 0x401e0d);)"];
+	Node0x8583e50 [label = "0x8583e50"];
+	Node0xbf632a0 [label = "0xbf632a0"];
+	Node0xc496950 [label = "0xc496950"];
+	Node0xdbde890 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"y > 2\n\"*/ (const char *) 0x401de1);)"];
+	Node0x107bfe10 [label = "0x107bfe10"];
+	Node0x13fa3d30 [label = "0x13fa3d30"];
+	Node0x1a54d0f0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"R/D/B\n\"*/ (const char *) 0x401dbc);)"];
+	Node0x1e1b0140 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path\n\"*/ (const char *) 0x401d90);)"];
+	Node0x1e7d1710 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"R/U/F\n\"*/ (const char *) 0x401da7);)"];
+	Node0x2345b220 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"y <= 2\n\"*/ (const char *) 0x401de8);)"];
+	Node0x32998b30 [label = "0x32998b30"];
+	Node0x3eb62b70 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"y < 8\n\"*/ (const char *) 0x401dd2);)"];
+	Node0x440aedb0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"y > 2\n\"*/ (const char *) 0x401de1);)"];
+	Node0x47fd2cb0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path\n\"*/ (const char *) 0x401d90);)"];
+	Node0x48cb04e0 [label = "0x48cb04e0"];
+	Node0x52559960 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"y >= 8\n\"*/ (const char *) 0x401dd9);)"];
+	Node0x59724930 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path\n\"*/ (const char *) 0x401d9b);)"];
+	Node0x5c0ff100 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"R/D/F\n\"*/ (const char *) 0x401db5);)"];
+	Node0x67efd060 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"y >= 4\n\"*/ (const char *) 0x401dca);)"];
+	Node0x6f1580a0 [label = "0x6f1580a0"];
+	Node0x71edbb60 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"right\"*/ (const char *) m7fffffffe348_1_64 /*0x7fffffffe57e*/, /*\"left\"*/ (const char *) 0x401d8b);)"];
+	Node0x7259a580 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"y < 4\n\"*/ (const char *) 0x401dc3);)"];
+	Node0x7af81eb0 [label = "0x7af81eb0"];
+	Node0x96193550 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path\n\"*/ (const char *) 0x401d9b);)"];
+	Node0x9fc59630 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"R/U/B\n\"*/ (const char *) 0x401dae);)"];
+	Node0xa017bcd0 [label = "0xa017bcd0"];
+	Node0xa10d9470 [label = "0xa10d9470"];
+	Node0xb2f36b90 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"L/D/F\n\"*/ (const char *) 0x401d6e);)"];
+	Node0xb7f66b20 [label = "0xb7f66b20"];
+	Node0xb971c150 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"right\"*/ (const char *) m7fffffffe348_2_64 /*0x7fffffffe57e*/, /*\"left\"*/ (const char *) 0x401d8b);)"];
+	Node0xbb7dec80 [label = "0xbb7dec80"];
+	Node0xbbc5e220 [label = "0xbbc5e220"];
+	Node0xc7445ca0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"x > 5\n\"*/ (const char *) 0x401d7c);)"];
+	Node0xd88730d0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"x <= 5\n\"*/ (const char *) 0x401d83);)"];
+	Node0xe263ea00 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"L/D/B\n\"*/ (const char *) 0x401d75);)"];
+	Node0xfd39e5e0 [label = "0xfd39e5e0"];
+	Node0xfd84df10 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"right\"*/ (const char *) m7fffffffe348_1_64 /*0x7fffffffe57e*/, /*\"left\"*/ (const char *) 0x401d8b);)"];
+	Node0xffe96520 [label = "0xffe96520"];
+	Node0x10335cd80 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"L/U/B\n\"*/ (const char *) 0x401d67);)"];
+	Node0x1037dfe80 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"L/U/F\n\"*/ (const char *) 0x401d60);)"];
+	Node0 -> Node0x1c584b0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_0) & 0xff)) & 0xffffffffffffffff)
+	 != 0x4c"];
+	Node0 -> Node0x7af81eb0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_0) & 0xff)) & 0xffffffffffffffff)
+	 == 0x4c"];
+	Node0x1c584b0 -> Node0x1c57710 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_1) & 0xff)) & 0xffffffffffffffff)
+	 != 0x55"];
+	Node0x1c584b0 -> Node0x6f1580a0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_1) & 0xff)) & 0xffffffffffffffff)
+	 == 0x55"];
+	Node0x7af81eb0 -> Node0xbbc5e220 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_1) & 0xff)) & 0xffffffffffffffff)
+	 != 0x55"];
+	Node0x7af81eb0 -> Node0xa10d9470 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_1) & 0xff)) & 0xffffffffffffffff)
+	 == 0x55"];
+	Node0x1c57710 -> Node0x5c0ff100 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	 == 0x46"];
+	Node0x5c0ff100 -> Node0x1f2b820 [label = ""];
+	Node0x1c57710 -> Node0x1a54d0f0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	 != 0x46"];
+	Node0x1a54d0f0 -> Node0x1f2b820 [label = ""];
+	Node0x6f1580a0 -> Node0x1e7d1710 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	 == 0x46"];
+	Node0x1e7d1710 -> Node0x1f2b820 [label = ""];
+	Node0x6f1580a0 -> Node0x9fc59630 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	 != 0x46"];
+	Node0x9fc59630 -> Node0x1f2b820 [label = ""];
+	Node0xbbc5e220 -> Node0xb2f36b90 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	 == 0x46"];
+	Node0xb2f36b90 -> Node0xb7f66b20 [label = ""];
+	Node0xbbc5e220 -> Node0xe263ea00 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	 != 0x46"];
+	Node0xe263ea00 -> Node0xb7f66b20 [label = ""];
+	Node0xa10d9470 -> Node0x1037dfe80 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	 == 0x46"];
+	Node0x1037dfe80 -> Node0xfd39e5e0 [label = ""];
+	Node0xa10d9470 -> Node0x10335cd80 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	 != 0x46"];
+	Node0x10335cd80 -> Node0xfd39e5e0 [label = ""];
+	Node0x1f2b820 -> Node0x71edbb60 [label = "0x0
+	 == 0"];
+	Node0x71edbb60 -> Node0x8583e50 [label = ""];
+	Node0xb7f66b20 -> Node0xc7445ca0 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 (((signExtend_0x40_0x8 (n_v_argv_1_3) - 0x30) & 0xffffffff)) & 0xffffffffffffffff))
+	 > UINT128 (0x0, 0x0, 0x0, 0x5)"];
+	Node0xc7445ca0 -> Node0xbb7dec80 [label = ""];
+	Node0xb7f66b20 -> Node0xd88730d0 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 (((signExtend_0x40_0x8 (n_v_argv_1_3) - 0x30) & 0xffffffff)) & 0xffffffffffffffff))
+	 <= UINT128 (0x0, 0x0, 0x0, 0x5)"];
+	Node0xd88730d0 -> Node0xbb7dec80 [label = ""];
+	Node0xfd39e5e0 -> Node0xfd84df10 [label = "0x0
+	 == 0"];
+	Node0xfd84df10 -> Node0xffe96520 [label = ""];
+	Node0x8583e50 -> Node0xc496950 [label = "(signExtend_0x40_0x20 ((rax_2 & 0xffffffff)) & 0xffffffffffffffff)
+	 != 0x0"];
+	Node0x8583e50 -> Node0x48cb04e0 [label = "(signExtend_0x40_0x20 ((rax_2 & 0xffffffff)) & 0xffffffffffffffff)
+	 == 0x0"];
+	Node0xbb7dec80 -> Node0xb971c150 [label = "0x0
+	 == 0"];
+	Node0xb971c150 -> Node0xa017bcd0 [label = ""];
+	Node0xffe96520 -> Node0x96193550 [label = "(signExtend_0x40_0x20 ((rax_2 & 0xffffffff)) & 0xffffffffffffffff)
+	 != 0x0"];
+	Node0x96193550 -> Node0x13fa3d30 [label = ""];
+	Node0xffe96520 -> Node0x47fd2cb0 [label = "(signExtend_0x40_0x20 ((rax_2 & 0xffffffff)) & 0xffffffffffffffff)
+	 == 0x0"];
+	Node0x47fd2cb0 -> Node0x13fa3d30 [label = ""];
+	Node0xc496950 -> Node0x3eb62b70 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 (((((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xff) | ((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xffffff00)) & 0xffffffff)) & 0xffffffffffffffff))
+	 < UINT128 (0x0, 0x0, 0x0, 0x8)"];
+	Node0x3eb62b70 -> Node0xbf632a0 [label = ""];
+	Node0xc496950 -> Node0x52559960 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 (((((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xff) | ((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xffffff00)) & 0xffffffff)) & 0xffffffffffffffff))
+	 >= UINT128 (0x0, 0x0, 0x0, 0x8)"];
+	Node0x52559960 -> Node0x32998b30 [label = ""];
+	Node0x48cb04e0 -> Node0x67efd060 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 (((((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xff) | ((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xffffff00)) & 0xffffffff)) & 0xffffffffffffffff))
+	 >= UINT128 (0x0, 0x0, 0x0, 0x4)"];
+	Node0x67efd060 -> Node0x13fa3d30 [label = ""];
+	Node0x48cb04e0 -> Node0x7259a580 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 (((((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xff) | ((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xffffff00)) & 0xffffffff)) & 0xffffffffffffffff))
+	 < UINT128 (0x0, 0x0, 0x0, 0x4)"];
+	Node0x7259a580 -> Node0x13fa3d30 [label = ""];
+	Node0xa017bcd0 -> Node0x59724930 [label = "(signExtend_0x40_0x20 ((rax_3 & 0xffffffff)) & 0xffffffffffffffff)
+	 != 0x0"];
+	Node0x59724930 -> Node0x13fa3d30 [label = ""];
+	Node0xa017bcd0 -> Node0x1e1b0140 [label = "(signExtend_0x40_0x20 ((rax_3 & 0xffffffff)) & 0xffffffffffffffff)
+	 == 0x0"];
+	Node0x1e1b0140 -> Node0x13fa3d30 [label = ""];
+	Node0x13fa3d30 -> Node0x1d27f30 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 ((rdi_0 & 0xffffffff)) & 0xffffffffffffffff))
+	 > UINT128 (0x0, 0x0, 0x0, 0x3)"];
+	Node0x1d27f30 -> Node0x107bfe10 [label = ""];
+	Node0x13fa3d30 -> Node0x5e78400 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 ((rdi_0 & 0xffffffff)) & 0xffffffffffffffff))
+	 <= UINT128 (0x0, 0x0, 0x0, 0x3)"];
+	Node0x5e78400 -> Node0x107bfe10 [label = ""];
+	Node0xbf632a0 -> Node0xdbde890 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 (((((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xff) | ((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xffffff00)) & 0xffffffff)) & 0xffffffffffffffff))
+	 > UINT128 (0x0, 0x0, 0x0, 0x2)"];
+	Node0xdbde890 -> Node0x13fa3d30 [label = ""];
+	Node0xbf632a0 -> Node0x2345b220 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 (((((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xff) | ((signExtend_0x40_0x8 (n_v_argv_1_4) - 0x30) & 0xffffff00)) & 0xffffffff)) & 0xffffffffffffffff))
+	 <= UINT128 (0x0, 0x0, 0x0, 0x2)"];
+	Node0x2345b220 -> Node0x13fa3d30 [label = ""];
+	Node0x32998b30 -> Node0x440aedb0 [label = "0x0
+	 == 0"];
+	Node0x440aedb0 -> Node0x13fa3d30 [label = ""];
+	Node0x107bfe10 -> Node0x101f4d0 [label = "0x0
+	 == 0"];
+}

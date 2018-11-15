@@ -1,0 +1,88 @@
+digraph "Execution Trace Graph" {
+	label="Execution Trace Graph";
+
+	Node0 [label = "0"];
+	Node0x6edc00 [label = "0x6edc00"];
+	Node0x6ef200 [label = "0x6ef200"];
+	Node0x71ac80 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"UL\"*/ (const char *) 0x40077c);)"];
+	Node0x877b90 [label = "0x877b90"];
+	Node0x892aa0 [label = "0x892aa0"];
+	Node0x893310 [label = "0x893310"];
+	Node0x9f4cf0 [label = "0x9f4cf0"];
+	Node0x9f6a70 [label = "0x9f6a70"];
+	Node0x9facc0 [label = "0x9facc0"];
+	Node0xa108f0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"UR\"*/ (const char *) 0x40077f);)"];
+	Node0xa1aca0 [label = "0xa1aca0"];
+	Node0xa26810 [label = "0xa26810"];
+	Node0xa4af70 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"up/right\"*/ (const char *) 0x40074c);)"];
+	Node0xfb52b0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"down/right\"*/ (const char *) 0x40075f);)"];
+	Node0x108c150 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"fast\"*/ (const char *) 0x40076f);)"];
+	Node0x109cb60 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"_quiet mode_\"*/ (const char *) 0x400788);)"];
+	Node0x11f93d0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"up/left\"*/ (const char *) 0x400744);)"];
+	Node0x12ccf20 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"down/left\"*/ (const char *) 0x400755);)"];
+	Node0x136cbc0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"DL\"*/ (const char *) 0x400782);)"];
+	Node0x1595150 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"DR\"*/ (const char *) 0x400785);)"];
+	Node0x15a2480 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"up\"*/ (const char *) 0x400774);)"];
+	Node0x15c8b10 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"slow\"*/ (const char *) 0x40076a);)"];
+	Node0x16ffd30 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"down\"*/ (const char *) 0x400777);)"];
+	Node0x172aa80 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"up\"*/ (const char *) 0x400774);)"];
+	Node0x172f4a0 [label = "0x172f4a0"];
+	Node0x1bdf4a0 [label = "FunctionInvocation (calling-line=regs.rax = puts (/*\"down\"*/ (const char *) 0x400777);)"];
+	Node0 -> Node0x6ef200 [label = "n_v_argv_1_0
+	 == 0x55"];
+	Node0 -> Node0x9facc0 [label = "n_v_argv_1_0
+	 != 0x55"];
+	Node0x6ef200 -> Node0x11f93d0 [label = "n_v_argv_1_1
+	 == 0x4c"];
+	Node0x11f93d0 -> Node0x6edc00 [label = ""];
+	Node0x6ef200 -> Node0xa4af70 [label = "n_v_argv_1_1
+	 != 0x4c"];
+	Node0xa4af70 -> Node0x6edc00 [label = ""];
+	Node0x9facc0 -> Node0x12ccf20 [label = "n_v_argv_1_1
+	 == 0x4c"];
+	Node0x12ccf20 -> Node0x6edc00 [label = ""];
+	Node0x9facc0 -> Node0xfb52b0 [label = "n_v_argv_1_1
+	 != 0x4c"];
+	Node0xfb52b0 -> Node0x6edc00 [label = ""];
+	Node0x6edc00 -> Node0x15c8b10 [label = "n_v_argv_1_2
+	 == 0x53"];
+	Node0x15c8b10 -> Node0x892aa0 [label = ""];
+	Node0x6edc00 -> Node0x108c150 [label = "n_v_argv_1_2
+	 != 0x53"];
+	Node0x108c150 -> Node0x892aa0 [label = ""];
+	Node0x892aa0 -> Node0x893310 [label = "n_v_argv_2_0
+	 == 0x56"];
+	Node0x892aa0 -> Node0x109cb60 [label = "n_v_argv_2_0
+	 != 0x56"];
+	Node0x109cb60 -> Node0x9f6a70 [label = ""];
+	Node0x893310 -> Node0x172aa80 [label = "n_v_argv_3_0
+	 == 0x55"];
+	Node0x172aa80 -> Node0x172f4a0 [label = ""];
+	Node0x893310 -> Node0x16ffd30 [label = "n_v_argv_3_0
+	 != 0x55"];
+	Node0x16ffd30 -> Node0x172f4a0 [label = ""];
+	Node0x9f6a70 -> Node0x9f4cf0 [label = "0x0
+	 == 0"];
+	Node0x172f4a0 -> Node0x15a2480 [label = "n_v_argv_3_1
+	 == 0x55"];
+	Node0x15a2480 -> Node0xa1aca0 [label = ""];
+	Node0x172f4a0 -> Node0x1bdf4a0 [label = "n_v_argv_3_1
+	 != 0x55"];
+	Node0x1bdf4a0 -> Node0xa1aca0 [label = ""];
+	Node0xa1aca0 -> Node0xa26810 [label = "n_v_argv_3_2
+	 == 0x55"];
+	Node0xa1aca0 -> Node0x877b90 [label = "n_v_argv_3_2
+	 != 0x55"];
+	Node0xa26810 -> Node0x71ac80 [label = "n_v_argv_3_3
+	 == 0x4c"];
+	Node0x71ac80 -> Node0x9f6a70 [label = ""];
+	Node0xa26810 -> Node0xa108f0 [label = "n_v_argv_3_3
+	 != 0x4c"];
+	Node0xa108f0 -> Node0x9f6a70 [label = ""];
+	Node0x877b90 -> Node0x136cbc0 [label = "n_v_argv_3_3
+	 == 0x4c"];
+	Node0x136cbc0 -> Node0x9f6a70 [label = ""];
+	Node0x877b90 -> Node0x1595150 [label = "n_v_argv_3_3
+	 != 0x4c"];
+	Node0x1595150 -> Node0x9f6a70 [label = ""];
+}

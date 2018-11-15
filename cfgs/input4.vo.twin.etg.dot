@@ -2,87 +2,87 @@ digraph "Execution Trace Graph" {
 	label="Execution Trace Graph";
 
 	Node0 [label = "0"];
-	Node0x638d7a0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path last diamond\n\"*/ (const char *) 0x401cb7);)"];
-	Node0x960a050 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path last diamond\n\"*/ (const char *) 0x401cd0);)"];
-	Node0xc7c8530 [label = "0xc7c8530"];
-	Node0xebb93a0 [label = "0xebb93a0"];
-	Node0x127db4b0 [label = "0x127db4b0"];
-	Node0x151ebd90 [label = "0x151ebd90"];
-	Node0x18599060 [label = "0x18599060"];
-	Node0x22e22590 [label = "0x22e22590"];
-	Node0x23372400 [label = "0x23372400"];
-	Node0x28209150 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"\t\tyz=RR > u=R|L the RR diamond\n\"*/ (const char *) 0x401b90);)"];
-	Node0x29263900 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path first diamond\n\"*/ (const char *) 0x401c19);)"];
-	Node0x2f674f70 [label = "0x2f674f70"];
-	Node0x3b3c38f0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path in the RR diamond\n\"*/ (const char *) 0x401c32);)"];
-	Node0x4a322e90 [label = "0x4a322e90"];
-	Node0x553b7d60 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path in the RR diamond\n\"*/ (const char *) 0x401c50);)"];
-	Node0x5ad01ff0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"\t\tyz=RL > RL scenario\n\"*/ (const char *) 0x401bb0);)"];
-	Node0x68ba9e20 [label = "0x68ba9e20"];
-	Node0x6e732a90 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"the RL scenario\n\"*/ (const char *) 0x401c6d);)"];
-	Node0x82207650 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path first diamond\n\"*/ (const char *) 0x401bff);)"];
-	Node0x82dc0f00 [label = "0x82dc0f00"];
-	Node0x83690170 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"\t\t\tw=R|L the last diamond\n\"*/ (const char *) 0x401be4);)"];
-	Node0x8563a6c0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"\t\ty=L > z=R|L the L diamond\n\"*/ (const char *) 0x401bc7);)"];
-	Node0x9153b170 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"\tx=R|L first diamond\n\"*/ (const char *) 0x401b76);)"];
-	Node0x931093f0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"Usage: program xyzuw\n\"*/ (const char *) 0x401b60);)"];
-	Node0x95627db0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path in the L diamond\n\"*/ (const char *) 0x401c7e);)"];
-	Node0xa569c250 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path in the L diamond\n\"*/ (const char *) 0x401c9b);)"];
-	Node0xaa2f1110 [label = "0xaa2f1110"];
-	Node0xb3d5b960 [label = "0xb3d5b960"];
-	Node0 -> Node0x127db4b0 [label = "(signExtend_0x40_0x20 ((rdi_0 & 0xffffffff)) & 0xffffffffffffffff)
+	Node0x66c7c50 [label = "0x66c7c50"];
+	Node0x66c8590 [label = "0x66c8590"];
+	Node0x6774ff0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path last diamond\n\"*/ (const char *) 0x401e37);)"];
+	Node0xa7eb100 [label = "0xa7eb100"];
+	Node0xe0b7780 [label = "0xe0b7780"];
+	Node0x1535ea30 [label = "0x1535ea30"];
+	Node0x18e6d480 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path last diamond\n\"*/ (const char *) 0x401e50);)"];
+	Node0x1dae4850 [label = "0x1dae4850"];
+	Node0x1fd27260 [label = "0x1fd27260"];
+	Node0x2d113680 [label = "0x2d113680"];
+	Node0x30e704a0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path first diamond\n\"*/ (const char *) 0x401d99);)"];
+	Node0x36029200 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path in the L diamond\n\"*/ (const char *) 0x401e1b);)"];
+	Node0x381eecf0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"Usage: program xyzuw\n\"*/ (const char *) 0x401ce0);)"];
+	Node0x3b27e470 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"\t\tyz=RL > RL scenario\n\"*/ (const char *) 0x401d30);)"];
+	Node0x47481e50 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path in the RR diamond\n\"*/ (const char *) 0x401db2);)"];
+	Node0x4c651960 [label = "0x4c651960"];
+	Node0x4c67c800 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"\tx=R|L first diamond\n\"*/ (const char *) 0x401cf6);)"];
+	Node0x58ef01e0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path in the RR diamond\n\"*/ (const char *) 0x401dd0);)"];
+	Node0x5d2c5640 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"\t\tyz=RR > u=R|L the RR diamond\n\"*/ (const char *) 0x401d10);)"];
+	Node0x6d7783f0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path first diamond\n\"*/ (const char *) 0x401d7f);)"];
+	Node0x70ded940 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"the RL scenario\n\"*/ (const char *) 0x401ded);)"];
+	Node0x8562a000 [label = "0x8562a000"];
+	Node0x8c918600 [label = "0x8c918600"];
+	Node0x8ef097b0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"\t\ty=L > z=R|L the L diamond\n\"*/ (const char *) 0x401d47);)"];
+	Node0x8f972d30 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path in the L diamond\n\"*/ (const char *) 0x401dfe);)"];
+	Node0x9140f5d0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"\t\t\tw=R|L the last diamond\n\"*/ (const char *) 0x401d64);)"];
+	Node0xae2ab950 [label = "0xae2ab950"];
+	Node0xb501aad0 [label = "0xb501aad0"];
+	Node0 -> Node0x66c8590 [label = "(signExtend_0x40_0x20 ((rdi_0 & 0xffffffff)) & 0xffffffffffffffff)
 	 == 0x2"];
-	Node0 -> Node0x931093f0 [label = "(signExtend_0x40_0x20 ((rdi_0 & 0xffffffff)) & 0xffffffffffffffff)
+	Node0 -> Node0x381eecf0 [label = "(signExtend_0x40_0x20 ((rdi_0 & 0xffffffff)) & 0xffffffffffffffff)
 	 != 0x2"];
-	Node0x931093f0 -> Node0x68ba9e20 [label = ""];
-	Node0x127db4b0 -> Node0x82207650 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_0) & 0xff)) & 0xffffffffffffffff)
+	Node0x381eecf0 -> Node0x8c918600 [label = ""];
+	Node0x66c8590 -> Node0x6d7783f0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_0) & 0xff)) & 0xffffffffffffffff)
 	 == 0x52"];
-	Node0x82207650 -> Node0x18599060 [label = ""];
-	Node0x127db4b0 -> Node0x29263900 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_0) & 0xff)) & 0xffffffffffffffff)
+	Node0x6d7783f0 -> Node0x66c7c50 [label = ""];
+	Node0x66c8590 -> Node0x30e704a0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_0) & 0xff)) & 0xffffffffffffffff)
 	 != 0x52"];
-	Node0x29263900 -> Node0x18599060 [label = ""];
-	Node0x68ba9e20 -> Node0x9153b170 [label = "0x0
+	Node0x30e704a0 -> Node0x66c7c50 [label = ""];
+	Node0x8c918600 -> Node0x4c67c800 [label = "0x0
 	 == 0"];
-	Node0x9153b170 -> Node0x82dc0f00 [label = ""];
-	Node0x18599060 -> Node0x151ebd90 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_1) & 0xff)) & 0xffffffffffffffff)
+	Node0x4c67c800 -> Node0x2d113680 [label = ""];
+	Node0x66c7c50 -> Node0xe0b7780 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_1) & 0xff)) & 0xffffffffffffffff)
 	 == 0x52"];
-	Node0x18599060 -> Node0x4a322e90 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_1) & 0xff)) & 0xffffffffffffffff)
+	Node0x66c7c50 -> Node0x4c651960 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_1) & 0xff)) & 0xffffffffffffffff)
 	 != 0x52"];
-	Node0x82dc0f00 -> Node0x28209150 [label = "0x0
+	Node0x2d113680 -> Node0x5d2c5640 [label = "0x0
 	 == 0"];
-	Node0x28209150 -> Node0x2f674f70 [label = ""];
-	Node0x151ebd90 -> Node0xebb93a0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	Node0x5d2c5640 -> Node0xae2ab950 [label = ""];
+	Node0xe0b7780 -> Node0xa7eb100 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
 	 == 0x52"];
-	Node0x151ebd90 -> Node0x6e732a90 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	Node0xe0b7780 -> Node0x70ded940 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
 	 != 0x52"];
-	Node0x6e732a90 -> Node0xc7c8530 [label = ""];
-	Node0x4a322e90 -> Node0x95627db0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	Node0x70ded940 -> Node0x1fd27260 [label = ""];
+	Node0x4c651960 -> Node0x8f972d30 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
 	 == 0x52"];
-	Node0x95627db0 -> Node0xc7c8530 [label = ""];
-	Node0x4a322e90 -> Node0xa569c250 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
+	Node0x8f972d30 -> Node0x1fd27260 [label = ""];
+	Node0x4c651960 -> Node0x36029200 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_2) & 0xff)) & 0xffffffffffffffff)
 	 != 0x52"];
-	Node0xa569c250 -> Node0xc7c8530 [label = ""];
-	Node0x2f674f70 -> Node0x5ad01ff0 [label = "0x0
+	Node0x36029200 -> Node0x1fd27260 [label = ""];
+	Node0xae2ab950 -> Node0x3b27e470 [label = "0x0
 	 == 0"];
-	Node0x5ad01ff0 -> Node0xaa2f1110 [label = ""];
-	Node0xebb93a0 -> Node0x3b3c38f0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_3) & 0xff)) & 0xffffffffffffffff)
+	Node0x3b27e470 -> Node0x8562a000 [label = ""];
+	Node0xa7eb100 -> Node0x47481e50 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_3) & 0xff)) & 0xffffffffffffffff)
 	 == 0x52"];
-	Node0x3b3c38f0 -> Node0xc7c8530 [label = ""];
-	Node0xebb93a0 -> Node0x553b7d60 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_3) & 0xff)) & 0xffffffffffffffff)
+	Node0x47481e50 -> Node0x1fd27260 [label = ""];
+	Node0xa7eb100 -> Node0x58ef01e0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_3) & 0xff)) & 0xffffffffffffffff)
 	 != 0x52"];
-	Node0x553b7d60 -> Node0xc7c8530 [label = ""];
-	Node0xc7c8530 -> Node0x638d7a0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_4) & 0xff)) & 0xffffffffffffffff)
+	Node0x58ef01e0 -> Node0x1fd27260 [label = ""];
+	Node0x1fd27260 -> Node0x6774ff0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_4) & 0xff)) & 0xffffffffffffffff)
 	 == 0x52"];
-	Node0x638d7a0 -> Node0x23372400 [label = ""];
-	Node0xc7c8530 -> Node0x960a050 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_4) & 0xff)) & 0xffffffffffffffff)
+	Node0x6774ff0 -> Node0x1dae4850 [label = ""];
+	Node0x1fd27260 -> Node0x18e6d480 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_1_4) & 0xff)) & 0xffffffffffffffff)
 	 != 0x52"];
-	Node0x960a050 -> Node0x23372400 [label = ""];
-	Node0xaa2f1110 -> Node0x8563a6c0 [label = "0x0
+	Node0x18e6d480 -> Node0x1dae4850 [label = ""];
+	Node0x8562a000 -> Node0x8ef097b0 [label = "0x0
 	 == 0"];
-	Node0x8563a6c0 -> Node0xb3d5b960 [label = ""];
-	Node0x23372400 -> Node0x22e22590 [label = "0x0
+	Node0x8ef097b0 -> Node0xb501aad0 [label = ""];
+	Node0x1dae4850 -> Node0x1535ea30 [label = "0x0
 	 == 0"];
-	Node0xb3d5b960 -> Node0x83690170 [label = "0x0
+	Node0xb501aad0 -> Node0x9140f5d0 [label = "0x0
 	 == 0"];
-	Node0x83690170 -> Node0x23372400 [label = ""];
+	Node0x9140f5d0 -> Node0x1dae4850 [label = ""];
 }

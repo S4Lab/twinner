@@ -1,0 +1,79 @@
+digraph "Execution Trace Graph" {
+	label="Execution Trace Graph";
+
+	Node0 [label = "0"];
+	Node0x190c590 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"You are not allowed to run this program!\n\"*/ (const char *) 0x401d18);)"];
+	Node0x2f24c90 [label = "0x2f24c90"];
+	Node0x36b6090 [label = "0x36b6090"];
+	Node0x4483b80 [label = "0x4483b80"];
+	Node0x44e93e0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"At most five arguments are allowed\n\"*/ (const char *) 0x401ce8);)"];
+	Node0x8306710 [label = "0x8306710"];
+	Node0x83093c0 [label = "0x83093c0"];
+	Node0xb25ed50 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"last args are different\n\"*/ (const char *) 0x401de9);)"];
+	Node0xe1413e0 [label = "0xe1413e0"];
+	Node0x12625090 [label = "0x12625090"];
+	Node0x136ae8d0 [label = "0x136ae8d0"];
+	Node0x1504b9b0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path of R scenario\n\"*/ (const char *) 0x401d60);)"];
+	Node0x195a40a0 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"first\"*/ (const char *) m7fffffffe328_3_64 /*0x7fffffffe571*/, /*\"second\"*/ (const char *) m7fffffffe330_3_64 /*0x7fffffffe577*/);)"];
+	Node0x1d4e7cd0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path of LL scenario\n\"*/ (const char *) 0x401d87);)"];
+	Node0x1ea3fc90 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"fourth and fifth arguments are the same\n\"*/ (const char *) 0x401dc0);)"];
+	Node0x2200ef10 [label = "0x2200ef10"];
+	Node0x25d0cc40 [label = "0x25d0cc40"];
+	Node0x288a3120 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"right-path of LL scenario\n\"*/ (const char *) 0x401da1);)"];
+	Node0x480fbc20 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"left\"*/ (const char *) m7fffffffe320_1_64 /*0x7fffffffe56c*/, /*\"left\"*/ (const char *) 0x401d42);)"];
+	Node0x66038e30 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"random\"*/ (const char *) n_v_argv_1 /*0x7fffffffe562*/, /*\"magicvalue\"*/ (const char *) 0x401d0c);)"];
+	Node0x6a8b3640 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"At least three arguments are required\n\"*/ (const char *) 0x401cc0);)"];
+	Node0x6c801ed0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"LR scenario\n\"*/ (const char *) 0x401d7a);)"];
+	Node0x6e2fe3c0 [label = "FunctionInvocation (calling-line=regs.rax = printf (/*\"left-path of R scenario\n\"*/ (const char *) 0x401d47);)"];
+	Node0x7b216170 [label = "FunctionInvocation (calling-line=regs.rax = strcmp (/*\"left\"*/ (const char *) m7fffffffe320_1_64 /*0x7fffffffe56c*/, /*\"left\"*/ (const char *) 0x401d42);)"];
+	Node0 -> Node0x83093c0 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 ((rdi_0 & 0xffffffff)) & 0xffffffffffffffff))
+	 > UINT128 (0x0, 0x0, 0x0, 0x3)"];
+	Node0 -> Node0x6a8b3640 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 ((rdi_0 & 0xffffffff)) & 0xffffffffffffffff))
+	 <= UINT128 (0x0, 0x0, 0x0, 0x3)"];
+	Node0x6a8b3640 -> Node0x4483b80 [label = ""];
+	Node0x83093c0 -> Node0x44e93e0 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 ((rdi_0 & 0xffffffff)) & 0xffffffffffffffff))
+	 > UINT128 (0x0, 0x0, 0x0, 0x6)"];
+	Node0x44e93e0 -> Node0x4483b80 [label = ""];
+	Node0x83093c0 -> Node0x66038e30 [label = "signExtend_0x80_0x40 ((signExtend_0x40_0x20 ((rdi_0 & 0xffffffff)) & 0xffffffffffffffff))
+	 <= UINT128 (0x0, 0x0, 0x0, 0x6)"];
+	Node0x66038e30 -> Node0x8306710 [label = ""];
+	Node0x4483b80 -> Node0x2f24c90 [label = "0x0
+	 == 0"];
+	Node0x8306710 -> Node0x190c590 [label = "(signExtend_0x40_0x20 ((rax_1 & 0xffffffff)) & 0xffffffffffffffff)
+	 != 0x0"];
+	Node0x190c590 -> Node0x4483b80 [label = ""];
+	Node0x8306710 -> Node0x36b6090 [label = "(signExtend_0x40_0x20 ((rax_1 & 0xffffffff)) & 0xffffffffffffffff)
+	 == 0x0"];
+	Node0x36b6090 -> Node0xe1413e0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_2_0) & 0xff)) & 0xffffffffffffffff)
+	 != 0x52"];
+	Node0x36b6090 -> Node0x7b216170 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_2_0) & 0xff)) & 0xffffffffffffffff)
+	 == 0x52"];
+	Node0x7b216170 -> Node0x2200ef10 [label = ""];
+	Node0xe1413e0 -> Node0x480fbc20 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_2_1) & 0xff)) & 0xffffffffffffffff)
+	 != 0x52"];
+	Node0x480fbc20 -> Node0x136ae8d0 [label = ""];
+	Node0xe1413e0 -> Node0x6c801ed0 [label = "(signExtend_0x40_0x8 ((signExtend_0x40_0x8 (n_v_argv_2_1) & 0xff)) & 0xffffffffffffffff)
+	 == 0x52"];
+	Node0x6c801ed0 -> Node0x4483b80 [label = ""];
+	Node0x2200ef10 -> Node0x1504b9b0 [label = "(signExtend_0x40_0x20 ((rax_2 & 0xffffffff)) & 0xffffffffffffffff)
+	 == 0"];
+	Node0x1504b9b0 -> Node0x4483b80 [label = ""];
+	Node0x2200ef10 -> Node0x6e2fe3c0 [label = "(signExtend_0x40_0x20 ((rax_2 & 0xffffffff)) & 0xffffffffffffffff)
+	 != 0"];
+	Node0x6e2fe3c0 -> Node0x4483b80 [label = ""];
+	Node0x136ae8d0 -> Node0x1d4e7cd0 [label = "(signExtend_0x40_0x20 ((rax_2 & 0xffffffff)) & 0xffffffffffffffff)
+	 == 0x0"];
+	Node0x1d4e7cd0 -> Node0x12625090 [label = ""];
+	Node0x136ae8d0 -> Node0x288a3120 [label = "(signExtend_0x40_0x20 ((rax_2 & 0xffffffff)) & 0xffffffffffffffff)
+	 != 0x0"];
+	Node0x288a3120 -> Node0x12625090 [label = ""];
+	Node0x12625090 -> Node0x195a40a0 [label = "0x0
+	 == 0"];
+	Node0x195a40a0 -> Node0x25d0cc40 [label = ""];
+	Node0x25d0cc40 -> Node0xb25ed50 [label = "(signExtend_0x40_0x20 ((rax_4 & 0xffffffff)) & 0xffffffffffffffff)
+	 != 0x0"];
+	Node0xb25ed50 -> Node0x4483b80 [label = ""];
+	Node0x25d0cc40 -> Node0x1ea3fc90 [label = "(signExtend_0x40_0x20 ((rax_4 & 0xffffffff)) & 0xffffffffffffffff)
+	 == 0x0"];
+	Node0x1ea3fc90 -> Node0x4483b80 [label = ""];
+}
