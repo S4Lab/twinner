@@ -1312,6 +1312,14 @@ InstructionSymbolicExecuter::instantiateFunctionInvocation (
     return new edu::sharif::twinner::trace::FunctionInvocation
         (name, args);
 
+  } else if (name == "strcmp") {
+    args.push_back (edu::sharif::twinner::trace::FunctionArgumentInfoImp
+                    ("const char *", true).resolve (0, trace, context));
+    args.push_back (edu::sharif::twinner::trace::FunctionArgumentInfoImp
+                    ("const char *", true).resolve (1, trace, context));
+    return new edu::sharif::twinner::trace::FunctionInvocation
+        (name, args);
+
   } else {
     edu::sharif::twinner::util::Logger::warning () << "argsNo=auto but "
         << name << " function is not supported by auto yet";
