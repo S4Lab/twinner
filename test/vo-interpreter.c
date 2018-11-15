@@ -322,6 +322,18 @@ int64 get_argument (const char *&ptr) {
     const int64 right = get_argument (ptr);
     last_accessed_pointer = 0;
     return left + right;
+  } else if (type == 0x13) {
+    debug ("get_argument: 0x13 -> multiply");
+    const int64 left = get_argument (ptr);
+    const int64 right = get_argument (ptr);
+    last_accessed_pointer = 0;
+    return left * right;
+  } else if (type == 0x14) {
+    debug ("get_argument: 0x14 -> divide");
+    const int64 left = get_argument (ptr);
+    const int64 right = get_argument (ptr);
+    last_accessed_pointer = 0;
+    return left / right;
   } else {
     debug ("get_argument: unknown-type", type);
     throw "wrong type";
