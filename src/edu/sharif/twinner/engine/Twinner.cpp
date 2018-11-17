@@ -320,9 +320,10 @@ void Twinner::addExecutionTrace (edu::sharif::twinner::trace::Trace *trace) {
 bool Twinner::calculateSymbolsValuesForCoveringNextPath (
     set < const edu::sharif::twinner::trace::exptoken::Symbol * > &symbols) {
   //TODO: Refactor these codes out of this class (to a search strategy class)
+  std::list < edu::sharif::twinner::engine::etg::InstructionNode * > nlist;
   std::list < const edu::sharif::twinner::trace::Constraint * > clist;
   etg->dumpTree ();
-  while (etg->getNextConstraintsList (clist)) {
+  while (etg->getNextConstraintsList (nlist, clist)) {
     const bool ok = edu::sharif::twinner::engine::smt::SmtSolver::getInstance ()
         ->solveConstraints (clist, symbols);
     if (ok) {

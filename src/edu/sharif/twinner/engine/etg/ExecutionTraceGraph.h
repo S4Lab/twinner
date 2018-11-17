@@ -61,6 +61,7 @@ public:
   void markAbortedExecution ();
   void markUnreachablePath ();
   bool getNextConstraintsList (
+      std::list < InstructionNode * > &nlist,
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
 
   void dumpTree () const;

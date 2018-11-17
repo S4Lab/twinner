@@ -88,10 +88,12 @@ public:
   /**
    * Moves downward, traversing right-most children until a leaf is visited. During this
    * traversing, visited constraints are added to the given list.
+   * @param nlist List of instruction nodes which are visited during the traversal.
    * @param clist List of constraints which are visited during the requested traversal.
    * @return A pointer to the right-most and deepest grandchild of this node.
    */
   InstructionNode *getRightMostDeepestGrandChild (
+      std::list < InstructionNode * > &nlist,
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
 
   /**
@@ -102,10 +104,12 @@ public:
    * Constraints are removed upon moving upward and added upon moving downward.
    * If it isn't possible to instantiate a negated node (reaching the root node), null is
    * returned.
+   * @param nlist InstructionNode instances which are in correspondence to root-to-returned-node path.
    * @param clist Constraints which are in correspondence to root-to-returned-node path.
    * @return The next node which should be visited or null if there was no such node.
    */
   InstructionNode *getNextNode (
+      std::list < InstructionNode * > &nlist,
       std::list < const edu::sharif::twinner::trace::Constraint * > &clist);
 
   const edu::sharif::twinner::util::MemoryManager *getMemoryManager () const;

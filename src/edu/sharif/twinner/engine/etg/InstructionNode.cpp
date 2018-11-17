@@ -197,26 +197,31 @@ InstructionNode *InstructionNode::addConstraint (
 }
 
 InstructionNode *InstructionNode::getRightMostDeepestGrandChild (
+    std::list < InstructionNode * > &nlist,
     std::list < const edu::sharif::twinner::trace::Constraint * > &clist) {
   if (children.empty ()) {
     return this;
   }
   ConstraintEdge *edge = children.back ();
+  nlist.push_back (this);
   clist.push_back (edge->getConstraint ());
-  return edge->getChild ()->getRightMostDeepestGrandChild (clist);
+  return edge->getChild ()->getRightMostDeepestGrandChild (nlist, clist);
 }
 
 InstructionNode *InstructionNode::getNextNode (
+    std::list < InstructionNode * > &nlist,
     std::list < const edu::sharif::twinner::trace::Constraint * > &clist) {
   if (parents.empty ()) {
     return 0;
   }
-  InstructionNode *node = getRightMostParent ()->getParent ();
+  InstructionNode *node = nlist.back ();
+  nlist.pop_back ();
   while (node->children.size () > 1) {
     if (node->parents.empty ()) {
       return 0;
     }
-    node = node->getRightMostParent ()->getParent ();
+    node = nlist.back ();
+    nlist.pop_back ();
     clist.pop_back ();
   }
   const edu::sharif::twinner::trace::Constraint *negatedConstraint =
@@ -226,6 +231,7 @@ InstructionNode *InstructionNode::getNextNode (
   node->children.push_back (edge);
   InstructionNode *n = new InstructionNode (edge);
   edge->setChild (n);
+  nlist.push_back (node);
   clist.push_back (negatedConstraint);
   return n;
 }
@@ -328,6 +334,7 @@ std::string InstructionNode::toString () const {
     ss << "; " << memoryManager->getPointerToAllocatedMemory (insId);
   }
   ss << "}";
+  ss << " [" << ADDRINT (this) << "]";
   return ss.str ();
 }
 

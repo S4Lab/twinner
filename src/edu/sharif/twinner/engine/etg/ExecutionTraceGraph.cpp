@@ -188,12 +188,13 @@ void ExecutionTraceGraph::markUnreachablePath () {
 }
 
 bool ExecutionTraceGraph::getNextConstraintsList (
+    std::list < InstructionNode * > &nlist,
     std::list < const edu::sharif::twinner::trace::Constraint * > &clist) {
   //PRE-CONDITION: clist is in sync with iterator
   if (iterator == root) {
-    iterator = iterator->getRightMostDeepestGrandChild (clist);
+    iterator = iterator->getRightMostDeepestGrandChild (nlist, clist);
   }
-  iterator = iterator->getNextNode (clist);
+  iterator = iterator->getNextNode (nlist, clist);
   if (!iterator) {
     iterator = root;
     return false;
