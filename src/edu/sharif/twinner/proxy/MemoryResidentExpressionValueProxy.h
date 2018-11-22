@@ -112,9 +112,10 @@ private:
   mutable AddrSizeToExpMap expCache;
 
   const edu::sharif::twinner::trace::Expression *getNeighborExpression (
-      int size, ADDRINT address, edu::sharif::twinner::trace::Trace *trace,
-      bool &readFromCache,
-      edu::sharif::twinner::trace::StateSummary &state) const;
+      const int size, const ADDRINT address,
+      edu::sharif::twinner::trace::Trace *trace,
+      edu::sharif::twinner::trace::StateSummary &state,
+      bool onlyFromCache) const;
 };
 
 }

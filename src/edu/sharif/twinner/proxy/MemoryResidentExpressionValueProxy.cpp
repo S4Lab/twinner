@@ -450,14 +450,10 @@ void MemoryResidentExpressionValueProxy::propagateChangeUpwards (int size,
       memoryEa -= size / 8;
       neighborEa = memoryEa;
     }
-    bool visited = false;
     const edu::sharif::twinner::trace::Expression *neighbor =
-        getNeighborExpression (size, neighborEa, trace, visited, state);
+        getNeighborExpression (size, neighborEa, trace, state, false);
     if (neighbor == 0) {
       return;
-    }
-    if (!visited) {
-      propagateChangeDownwards (size, neighborEa, trace, *neighbor, false);
     }
     edu::sharif::twinner::trace::Expression *exp;
     if (twoSizeBitsAligned) {
@@ -483,6 +479,7 @@ void MemoryResidentExpressionValueProxy::propagateChangeUpwards (int size,
       p.first = exp;
       p.second = true;
       // exp is now owned by the expCache and will be deleted by it later
+      return; // upper expressions are already handled
     }
     propagateChangeUpwards (size, memoryEa, trace, *exp, state);
   }
@@ -500,14 +497,37 @@ int MemoryResidentExpressionValueProxy::getSize () const {
 }
 
 const edu::sharif::twinner::trace::Expression *
-MemoryResidentExpressionValueProxy::getNeighborExpression (int size,
-    ADDRINT address, edu::sharif::twinner::trace::Trace *trace,
-    bool &readFromCache,
-    edu::sharif::twinner::trace::StateSummary &state) const {
+MemoryResidentExpressionValueProxy::getNeighborExpression (const int size,
+    const ADDRINT address,
+    edu::sharif::twinner::trace::Trace *trace,
+    edu::sharif::twinner::trace::StateSummary &state,
+    bool onlyFromCache) const {
   AddrSizeToExpMap::const_iterator it = expCache.find (make_pair (address, size));
   if (it != expCache.end ()) {
-    readFromCache = true;
     return it->second.first;
+  }
+  const edu::sharif::twinner::trace::Expression *left = 0;
+  const edu::sharif::twinner::trace::Expression *right = 0;
+  if (size > 8) {
+    left = getNeighborExpression (size / 2, address, trace, state, true);
+    right = getNeighborExpression (size / 2, address + size / 16, trace, state, true);
+  }
+  if (left == 0 && right == 0) {
+    if (onlyFromCache) {
+      return 0;
+    }
+  } else {
+    if (left == 0) {
+      left = getNeighborExpression (size / 2, address, trace, state, false);
+    } else if (right == 0) {
+      right = getNeighborExpression (size / 2, address + size / 16, trace, state, false);
+    }
+    edu::sharif::twinner::trace::Expression *exp = right->clone (size);
+    exp->shiftToLeft (size / 2);
+    exp->bitwiseOr (left); // left will be cloned internally
+    expCache.insert (make_pair (make_pair (address, size),
+                                make_pair (exp, true)));
+    return exp;
   }
   UINT64 cv;
   if (!edu::sharif::twinner::util::readMemoryContent (cv, address, size / 8)) {
@@ -522,7 +542,7 @@ MemoryResidentExpressionValueProxy::getNeighborExpression (int size,
       trace->getSymbolicExpressionByMemoryAddress
       (size, address, *cvObj, 0, state);
   delete cvObj;
-  readFromCache = false;
+  propagateChangeDownwards (size, address, trace, *neighbor, false);
   return neighbor;
 }
 
