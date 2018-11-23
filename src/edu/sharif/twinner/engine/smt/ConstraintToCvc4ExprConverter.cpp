@@ -380,7 +380,11 @@ public:
         ok = false;
         return Expr ();
       }
-      res = super->em.mkExpr (k, srcExp, target);
+      const Expr targetExp =
+          super->em.mkExpr (kind::BITVECTOR_EXTRACT,
+                            super->em.mkConst (BitVectorExtract (sv - 1, 0)),
+                            target);
+      res = super->em.mkExpr (k, srcExp, targetExp);
       size = sv;
     }
     if (size == 128) {
