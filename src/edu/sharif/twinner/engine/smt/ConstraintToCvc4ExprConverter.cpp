@@ -412,6 +412,8 @@ public:
     const edu::sharif::twinner::trace::exptoken::Operator::OperatorIdentifier opid =
         op->getIdentifier ();
     if (opid == edu::sharif::twinner::trace::exptoken::Operator::REMAINDER
+        || opid == edu::sharif::twinner::trace::exptoken::Operator::SIGNED_REMAINDER
+        || opid == edu::sharif::twinner::trace::exptoken::Operator::SIGNED_DIVIDE
         || opid == edu::sharif::twinner::trace::exptoken::Operator::DIVIDE) {
       // Adding (divisor!=zero) constraint
       super->addConstraint
@@ -504,8 +506,12 @@ private:
       return kind::BITVECTOR_MULT;
     case edu::sharif::twinner::trace::exptoken::Operator::DIVIDE:
       return kind::BITVECTOR_UDIV;
+    case edu::sharif::twinner::trace::exptoken::Operator::SIGNED_DIVIDE:
+      return kind::BITVECTOR_SDIV;
     case edu::sharif::twinner::trace::exptoken::Operator::REMAINDER:
       return kind::BITVECTOR_UREM_TOTAL;
+    case edu::sharif::twinner::trace::exptoken::Operator::SIGNED_REMAINDER:
+      return kind::BITVECTOR_SREM;
     case edu::sharif::twinner::trace::exptoken::Operator::BITWISE_NEGATE:
       return kind::BITVECTOR_NOT;
     case edu::sharif::twinner::trace::exptoken::Operator::XOR:
@@ -814,6 +820,31 @@ ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (Expr &exp,
         return 0;
       }
       leftExp->remainder (rightExp);
+      delete rightExp;
+      return leftExp;
+    }
+    case kind::BITVECTOR_SREM:
+    {
+      if (exp.getNumChildren () != 2) {
+        edu::sharif::twinner::util::Logger::error ()
+            << "ConstraintToCvc4ExprConverter::convertCvc4ExprToExpression (" << exp
+            << "): CVC4 BITVECTOR_SREM needs exactly two children\n";
+        return 0;
+      }
+      Expr::const_iterator it = exp.begin ();
+      Expr left = *it++;
+      Expr right = *it;
+      edu::sharif::twinner::trace::Expression *leftExp =
+          convertCvc4ExprToExpression (left, vals);
+      if (leftExp == 0) {
+        return 0;
+      }
+      edu::sharif::twinner::trace::Expression *rightExp =
+          convertCvc4ExprToExpression (right, vals);
+      if (rightExp == 0) {
+        return 0;
+      }
+      leftExp->signedRemainder (rightExp);
       delete rightExp;
       return leftExp;
     }
