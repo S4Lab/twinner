@@ -268,6 +268,10 @@ protected:
 private:
   bool checkForTrivialExpression (Operator *op, const Expression *exp);
   bool checkForCancelingOperation (Operator *op, const Expression *exp);
+  bool checkForNonTrivialBitwiseOperations (const Operator *op, const Expression *exp);
+  bool checkForNonTrivialBitwiseOperations (const Operator *op,
+      Stack::const_reverse_iterator me, Stack::const_reverse_iterator that,
+      Stack::const_reverse_iterator myEnd, Stack::const_reverse_iterator thatEnd);
   bool checkForNonTrivialAddition (Operator *op, const Expression *exp);
   UINT64 checkForNonTrivialAddition (Stack::const_iterator me, Stack::const_iterator that,
       Stack::const_iterator myEnd, Stack::const_iterator thatEnd);

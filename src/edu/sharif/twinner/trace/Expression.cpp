@@ -221,6 +221,7 @@ void Expression::unaryOperation (Operator *op, const Expression *exp) {
 void Expression::binaryOperation (Operator *op, const Expression *exp) {
   if (!(checkForTrivialExpression (op, exp)
         || checkForCancelingOperation (op, exp)
+        || checkForNonTrivialBitwiseOperations (op, exp)
         || checkForNonTrivialAddition (op, exp))) {
     /**
      * It's possible that this object and given constant expression object be the same.
@@ -265,7 +266,52 @@ bool Expression::checkForCancelingOperation (Operator *op, const Expression *exp
     const int v = ((op->getIdentifier () == Operator::DIVIDE) ? 1 : 0);
     stack.push_back (new edu::sharif::twinner::trace::exptoken::Constant (v));
     *lastConcreteValue = v;
+    delete op;
     return true;
+  }
+  return false;
+}
+
+bool Expression::checkForNonTrivialBitwiseOperations (const Operator *op,
+    const Expression *exp) {
+  if (op->getIdentifier () == Operator::BITWISE_AND
+      || op->getIdentifier () == Operator::BITWISE_OR) {
+    Stack::const_reverse_iterator it1 = stack.rbegin (), end1 = stack.rend (),
+        it2 = exp->stack.rbegin (), end2 = exp->stack.rend ();
+    if (stack.size () == exp->stack.size ()) {
+      if ((*this) == (*exp)) {
+        delete op;
+        return true;
+      }
+    } else if (stack.size () > exp->stack.size ()) {
+      if (checkForNonTrivialBitwiseOperations (op, it1, it2, end1, end2)) {
+        delete op;
+        return true;
+      }
+    } else {
+      if (checkForNonTrivialBitwiseOperations (op, it2, it1, end2, end1)) {
+        (*this) = (*exp);
+        delete op;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool Expression::checkForNonTrivialBitwiseOperations (const Operator *op,
+    Stack::const_reverse_iterator me, Stack::const_reverse_iterator that,
+    Stack::const_reverse_iterator myEnd, Stack::const_reverse_iterator thatEnd) {
+  // <me> == Z <that> <op>
+  if (me != myEnd) {
+    Operator *myOp = dynamic_cast<Operator *> (*me++);
+    if (myOp && (*myOp) == (*op)) {
+      for (; me != myEnd && that != thatEnd && (**me) == (**that); ++me, ++that)
+        continue;
+      if (that == thatEnd) {
+        return true;
+      }
+    }
   }
   return false;
 }
