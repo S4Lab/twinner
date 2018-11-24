@@ -3998,6 +3998,7 @@ InstructionSymbolicExecuter::convertOpcodeToAnalysisRoutine (OPCODE op) const {
   case XED_ICLASS_MOVSXD:
     return &InstructionSymbolicExecuter::movsxAnalysisRoutine;
   case XED_ICLASS_CDQ:
+  case XED_ICLASS_CQO:
     return &InstructionSymbolicExecuter::cdqAnalysisRoutine;
   case XED_ICLASS_ADD:
     return &InstructionSymbolicExecuter::addAnalysisRoutine;
