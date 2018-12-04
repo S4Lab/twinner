@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+import networkx as nx
+from networkx.drawing.nx_pydot import read_dot
+from networkx.algorithms.similarity import graph_edit_distance
+from networkx.algorithms.similarity import optimize_graph_edit_distance
+import sys
+import re
+
+
+def main():
+    print("Graph Similarity Measure Calculator")
+    G1, G2 = load_graphs()
+    sm = approx_sim_measure(G1, G2, 12)
+    print("Final sim measure: %f" % sm)
+
+def approx_sim_measure(G1, G2, timeout):
+    import signal
+    class TimeoutError(Exception):
+        pass
+    def handler(signum, frame):
+        raise TimeoutError()
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(timeout)
+    best_sm = 0
+    try:
+        for sm in sim_measure(G1, G2):
+            print("Candidate sim measure: %f" % sm)
+            best_sm = max(best_sm, sm)
+    except TimeoutError:
+        pass
+    finally:
+        signal.alarm(0)
+
+    return best_sm
+
+def load_graphs():
+    G1 = load_graph(sys.argv[1])
+    G2 = load_graph(sys.argv[2])
+    return G1, G2
+
+def load_graph(path):
+    G = nx.DiGraph(read_dot(path))
+    for n in G.nodes:
+        G.nodes[n]["name"] = n
+        G.nodes[n]["out_degree"] = len([v for (u, v) in G.edges if u == n])
+        G.nodes[n]["in_degree"] = len([u for (u, v) in G.edges if v == n])
+    for e in G.edges:
+        u, v = e
+        G.edges[e]["src"] = G.nodes[u]
+        G.edges[e]["dst"] = G.nodes[v]
+    return G
+
+def sim_measure(G1, G2):
+    for distance in optimize_graph_edit_distance(G1, G2,
+            node_subst_cost=node_subst_cost,
+            node_del_cost=lambda e: 2,
+            node_ins_cost=lambda e: 2,
+            edge_subst_cost=edge_subst_cost,
+            edge_del_cost=lambda e: 2,
+            edge_ins_cost=lambda e: 2):
+        max_distance = 8*(max(len(G1.nodes),len(G2.nodes)) + max(len(G1.edges),len(G2.edges)) + 1)
+        yield 1 - (distance / max_distance)
+
+def funcdebug(func):
+    def wrapper(*args, **kwargs):
+        ret = func(*args, **kwargs)
+        if True: #ret > 2:
+            print("calling %s(%s) -> %s" % (func.__name__, str(args) + str(kwargs), ret))
+        return ret
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+@funcdebug
+def node_subst_cost(n1, n2):
+    l1 = n1["label"];
+    l2 = n2["label"];
+    prog = re.compile('"FunctionInvocation \(calling-line=regs\.rax = (?P<funcname>[^(]+) \(')
+    r1 = prog.match(l1)
+    r2 = prog.match(l2)
+    if r1 is None and r2 is None:
+        cost = 0
+    elif r1 is None or r2 is None:
+        cost = 1
+    else:
+        cost = funcname_matching(r1.group("funcname"), r2.group("funcname"))
+    return cost + degrees_matching_cost(n1, n2)
+
+def degrees_matching_cost(n1, n2):
+    cout = abs(n1["out_degree"] - n2["out_degree"]) + 1
+    cin = abs(n1["in_degree"] - n2["in_degree"]) + 1
+    return cout * cin - 1
+
+def funcname_matching(n1, n2):
+    if n1 == "puts":
+        n1 = "printf"
+    if n2 == "puts":
+        n2 = "printf"
+    if n1 == n2:
+        return 0
+    else:
+        return 1
+
+@funcdebug
+def edge_subst_cost(e1, e2):
+    l1 = e1["label"];
+    l2 = e2["label"];
+    prog = re.compile('.*(?P<operator>!=|==)', re.DOTALL)
+    r1 = prog.match(l1)
+    r2 = prog.match(l2)
+    if r1 is None and r2 is None:
+        cost = operands_set_cost(l1, l2)
+    elif r1 is None or r2 is None:
+        cost = 1
+    elif r1.group("operator") == r2.group("operator"):
+        cost = operands_set_cost(l1, l2)
+    else:
+        cost = 1
+    return cost + src_dst_matching_cost(e1, e2)
+
+def src_dst_matching_cost(e1, e2):
+    c1 = node_subst_cost(e1["src"], e2["src"]) + 1
+    c2 = node_subst_cost(e1["dst"], e2["dst"]) + 1
+    return c1 * c2 - 1
+
+def operands_set_cost(l1, l2):
+    prog = re.compile(r'(?<!\w)([renm]\w*|cs|ss|ds|es|fs|gs)(?!\w)')
+    vars1 = set(m.group(0) for m in prog.finditer(l1))
+    vars2 = set(m.group(0) for m in prog.finditer(l2))
+    common_vars = vars1.intersection(vars2)
+    if len(vars1) == 0 and len(vars2) == 0:
+        return 0
+    return (len(vars1) + len(vars2) - 2*len(common_vars)) / (len(vars1) + len(vars2) - len(common_vars))
+
+
+
+if __name__ == "__main__":
+    main()
