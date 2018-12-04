@@ -189,7 +189,9 @@ Expression *MemoryEmergedSymbol::cloneOrInstantiateTemporarySymbolExpression (
         (address, exp->getLastConcreteValue (), segmentIndex,
          exp->isOverwritingExpression (), snapshotIndex);
   } else {
-    return exp->clone ();
+    Expression *res = exp->clone ();
+    res->setOverwriting (exp->isOverwritingExpression ());
+    return res;
   }
 }
 
