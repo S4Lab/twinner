@@ -9,9 +9,33 @@ import re
 
 def main():
     print("Graph Similarity Measure Calculator")
-    G1, G2 = load_graphs()
-    sm = approx_sim_measure(G1, G2, 12)
-    print("Final sim measure: %f" % sm)
+    if len(sys.argv) != 3:
+        print("Usage: calc-sim-measure.py column-dot-files.txt row-dot-files.txt")
+        return
+    clist, rlist = load_graphs(sys.argv[1], sys.argv[2])
+    if len(clist) != len(rlist):
+        print("Number of rows and columns do not match")
+        return
+    print("%d graphs are loaded." % (len(clist)*2))
+    print("Filling the {0}x{0} similarity matrix...".format(len(clist)))
+    sim_matrix = {}
+    for cname, G1 in clist:
+        for rname, G2 in rlist:
+            print("\tComparing %s with %s" % (rname, cname))
+            sm = approx_sim_measure(G1, G2, 12)
+            print("\t\tFinal sim measure: %f" % sm)
+            sim_matrix[(rname, cname)] = sm
+    print_matrix(sim_matrix,
+            [name for name, G in rlist],
+            [name for name, G in clist])
+
+def print_matrix(mat, rows, cols):
+    print("after/before & " + " & ".join(cols) + r"\\")
+    for r in rows:
+        print(r + " & ")
+        print("\t" +
+                " & ".join([str(mat[(r, c)]) for c in cols]) +
+                r"\\")
 
 def approx_sim_measure(G1, G2, timeout):
     import signal
@@ -33,10 +57,16 @@ def approx_sim_measure(G1, G2, timeout):
 
     return best_sm
 
-def load_graphs():
-    G1 = load_graph(sys.argv[1])
-    G2 = load_graph(sys.argv[2])
-    return G1, G2
+def load_graphs(columns, rows):
+    print("Reading column labels from %s" % columns)
+    clist = load_graphs_list(columns)
+    print("Reading row labels from %s" % rows)
+    rlist = load_graphs_list(rows)
+    return clist, rlist
+
+def load_graphs_list(listpath):
+    paths = [gpath.strip() for gpath in open(listpath, 'r')]
+    return [(p.split('/')[-1], load_graph(p)) for p in paths]
 
 def load_graph(path):
     G = nx.DiGraph(read_dot(path))
@@ -64,7 +94,7 @@ def sim_measure(G1, G2):
 def funcdebug(func):
     def wrapper(*args, **kwargs):
         ret = func(*args, **kwargs)
-        if True: #ret > 2:
+        if False: #ret > 2:
             print("calling %s(%s) -> %s" % (func.__name__, str(args) + str(kwargs), ret))
         return ret
     wrapper.__name__ = func.__name__
