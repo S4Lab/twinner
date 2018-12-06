@@ -130,15 +130,16 @@ void NodeEncoder::encodeMain (IndentedStream &body, IndentedStream &preamble,
   body << "struct RegistersSet regs;\n";
   body << "SAVE_REGISTERS (regs);\n";
 
-  declareRegisterSymbols (body, 0);
+  VariableContainer vc;
+  declareRegisterSymbols (body, 0, vc);
   initializeMemory (body, initialValues);
   if (hasAnyChild ()) {
     AddrToSizeMap::const_iterator it = addressToSize.find (0);
     if (it != addressToSize.end ()) {
-      declareMemorySymbols (body, it->second, 0);
+      declareMemorySymbols (body, it->second, 0, vc);
     }
     body.indented ();
-    encode (body, preamble, 0, true); // depth=1, index=0, inMain=true
+    encode (body, preamble, 0, true, vc); // depth=1, index=0, inMain=true
   }
   body.decrementDepth ();
   body << "}\n";
@@ -161,12 +162,12 @@ void NodeEncoder::initializeMemory (IndentedStream &body,
 }
 
 void NodeEncoder::encode (IndentedStream &body, IndentedStream &preamble,
-    int index, bool inMain) {
+    int index, bool inMain, const VariableContainer &vc) {
   const bool hasEncodedConstraint =
-      leftChild->encode (body, preamble, index, inMain);
+      leftChild->encode (body, preamble, index, inMain, vc);
   if (rightChild && hasEncodedConstraint) {
     body << " else ";
-    rightChild->encode (body, preamble, index, inMain);
+    rightChild->encode (body, preamble, index, inMain, vc);
   }
   body << '\n';
 }

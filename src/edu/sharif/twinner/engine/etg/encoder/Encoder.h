@@ -41,6 +41,8 @@ class InstructionNode;
 
 namespace encoder {
 
+class VariableContainer;
+
 class Encoder {
 protected:
   typedef edu::sharif::twinner::trace::Expression Expression;
@@ -80,8 +82,10 @@ public:
 
 protected:
   void declareMemorySymbols (IndentedStream &body,
-      const std::set < AddrToSize > &addrToSize, int index);
-  void declareRegisterSymbols (IndentedStream &body, int index);
+      const std::set < AddrToSize > &addrToSize, int index,
+      VariableContainer &vc);
+  void declareRegisterSymbols (IndentedStream &body, int index,
+      VariableContainer &vc);
 };
 
 }

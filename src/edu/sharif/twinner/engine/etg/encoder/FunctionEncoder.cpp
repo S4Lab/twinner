@@ -39,31 +39,19 @@ FunctionEncoder::~FunctionEncoder () {
 void FunctionEncoder::finalizeInitialization () {
   std::stringstream functionName;
   functionName << "func_" << functionIndex;
-  std::stringstream typedArguments, argumentsFromMain, argumentsFromFunc;
+  std::stringstream typedArguments;
   for (std::set< Variable >::const_iterator it = aggregatedVariables.begin ();
       it != aggregatedVariables.end (); ++it) {
     typedArguments << ", " << it->type << ' ' << it->technicalName;
-    argumentsFromMain << ", " << VAR_TYPE " (" << it->name << ")";
-    argumentsFromFunc << ", " << it->technicalName;
   }
   std::stringstream signature;
   signature << "int " << functionName.str ()
       << " (struct RegistersSet &regs" << typedArguments.str () << ")";
   functionSignatureLine = signature.str ();
-
-  std::stringstream invocationFromMain;
-  invocationFromMain << functionName.str ()
-      << " (regs" << argumentsFromMain.str () << ")";
-  functionInvocationLineFromMain = invocationFromMain.str ();
-
-  std::stringstream invocationFromFunc;
-  invocationFromFunc << functionName.str ()
-      << " (regs" << argumentsFromFunc.str () << ")";
-  functionInvocationLineFromFunc = invocationFromFunc.str ();
 }
 
 void FunctionEncoder::encode (IndentedStream &body, IndentedStream &preamble,
-    int index, bool inMain) {
+    int index, bool inMain, const VariableContainer &vc) {
   if (firstVisit) {
     firstVisit = false;
 
@@ -71,18 +59,46 @@ void FunctionEncoder::encode (IndentedStream &body, IndentedStream &preamble,
 
     IndentedStream funcBody;
     funcBody.incrementDepth ();
-    NodeEncoder::encode (funcBody, preamble, index, false);
+    VariableContainer subVc (aggregatedVariables);
+    NodeEncoder::encode (funcBody, preamble, index, false, subVc);
 
     preamble << functionSignatureLine << " {\n";
     preamble << funcBody.str ();
     preamble << "}\n";
   }
   // TODO: encode untouched variables
+  std::stringstream functionName;
+  functionName << "func_" << functionIndex;
+  std::stringstream arguments;
+  std::stringstream definedVars;
   if (inMain) {
-    body.indented () << functionInvocationLineFromMain << ";\n";
+    for (std::set< Variable >::const_iterator it = aggregatedVariables.begin ();
+        it != aggregatedVariables.end (); ++it) {
+      bool shouldDefine;
+      arguments << ", " << VAR_TYPE " ("
+          << vc.provideVariable (*it, shouldDefine).name << ")";
+      if (shouldDefine) {
+        const std::string hexAddress = it->name.substr (1, it->name.find ("_") - 1);
+        definedVars << "const " << it->type << " " << it->name
+            << " = *((" << it->type << " *) 0x" << hexAddress << ");\n";
+      }
+    }
   } else {
-    body.indented () << functionInvocationLineFromFunc << ";\n";
+    for (std::set< Variable >::const_iterator it = aggregatedVariables.begin ();
+        it != aggregatedVariables.end (); ++it) {
+      bool shouldDefine;
+      arguments << ", " << vc.provideVariable (*it, shouldDefine).technicalName;
+      if (shouldDefine) {
+        const std::string hexAddress = it->name.substr (1, it->name.find ("_") - 1);
+        definedVars << "const " << it->type << " " << it->name
+            << " = *((" << it->type << " *) 0x" << hexAddress << ");\n";
+      }
+    }
   }
+  std::stringstream invocation;
+  invocation << functionName.str () << " (regs" << arguments.str () << ");\n";
+
+  body.indented () << definedVars.str () << invocation.str ();
 }
 
 

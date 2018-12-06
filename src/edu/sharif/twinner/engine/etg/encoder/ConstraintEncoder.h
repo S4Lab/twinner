@@ -54,7 +54,7 @@ public:
    * @return true iff the subgraph is encoded under an if-construct
    */
   virtual bool encode (IndentedStream &body, IndentedStream &preamble,
-      int index, bool inMain);
+      int index, bool inMain, VariableContainer vc);
 
 private:
   void gatherOldVariablesOfSegment ();
@@ -79,7 +79,8 @@ private:
   };
 
   void encodeTransformations (Output &out,
-      IndentedStream &preamble, const TraceSegment *segment, int index);
+      IndentedStream &preamble, const TraceSegment *segment, int index,
+      VariableContainer &vc);
 
   void codeRegisterChanges (Output &out, const TraceSegment *segment);
   void codeMemoryChanges (Output &out,

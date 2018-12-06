@@ -27,9 +27,6 @@ private:
   const int functionIndex;
 
   bool firstVisit;
-
-  std::string functionInvocationLineFromMain;
-  std::string functionInvocationLineFromFunc;
   std::string functionSignatureLine;
 
 public:
@@ -39,7 +36,7 @@ public:
   virtual void finalizeInitialization ();
 
   virtual void encode (IndentedStream &body, IndentedStream &preamble,
-      int index, bool inMain);
+      int index, bool inMain, const VariableContainer &vc);
 };
 
 }

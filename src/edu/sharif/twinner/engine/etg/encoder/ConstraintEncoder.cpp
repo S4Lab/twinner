@@ -97,7 +97,7 @@ std::set< Variable > ConstraintEncoder::getAggregatedVariables () const {
 }
 
 bool ConstraintEncoder::encode (IndentedStream &body, IndentedStream &preamble,
-    int index, bool inMain) {
+    int index, bool inMain, VariableContainer vc) {
   const bool constraintIsEncoded = encodeConstraint (body, preamble, inMain);
   body.incrementDepth ();
   if (segment) {
@@ -105,11 +105,11 @@ bool ConstraintEncoder::encode (IndentedStream &body, IndentedStream &preamble,
       body,
       inMain
     };
-    encodeTransformations (out, preamble, segment, index++);
+    encodeTransformations (out, preamble, segment, index++, vc);
   }
   if (child->hasAnyChild ()) {
     body.indented ();
-    child->encode (body, preamble, index, inMain);
+    child->encode (body, preamble, index, inMain, vc);
   }
   body.decrementDepth ();
   body.indented () << '}';
@@ -168,13 +168,13 @@ void ConstraintEncoder::gatherNewRegisterVariablesOfSegment (int index) {
       std::stringstream ss;
       ss << registersNames[i] << "_" << index;
       newVariablesCreatedInSegment.insert
-          (Variable (VAR_TYPE, ss.str (), ss.str ()));
+          (Variable (VAR_TYPE, ss.str (), ss.str (), index));
     }
     {
       std::stringstream ss;
       ss << "xmm" << i << "_" << index;
       newVariablesCreatedInSegment.insert
-          (Variable ("UINT128", ss.str (), ss.str ()));
+          (Variable ("UINT128", ss.str (), ss.str (), index));
     }
   }
 }
@@ -189,12 +189,13 @@ void ConstraintEncoder::gatherNewMemoryVariablesOfSegment (
     name << "m" << std::hex << it->first << "_" << index
         << "_" << std::dec << it->second;
     newVariablesCreatedInSegment.insert
-        (Variable (type.str (), name.str (), name.str ()));
+        (Variable (type.str (), name.str (), name.str (), index));
   }
 }
 
 void ConstraintEncoder::encodeTransformations (Output &out,
-    IndentedStream &preamble, const TraceSegment *segment, int index) {
+    IndentedStream &preamble, const TraceSegment *segment, int index,
+    VariableContainer &vc) {
   IndentedStream &body = out.body;
   body.indented () << "/*Memory Changes*/\n";
   edu::sharif::twinner::util::foreach
@@ -211,10 +212,10 @@ void ConstraintEncoder::encodeTransformations (Output &out,
   }
   body.indented ()
       << segment->getTerminator ()->getCallingLine (out.inMain) << '\n';
-  declareRegisterSymbols (body, index + 1);
+  declareRegisterSymbols (body, index + 1, vc);
   AddrToSizeMap::const_iterator it = addressToSize.find (index + 1);
   if (it != addressToSize.end ()) {
-    declareMemorySymbols (body, it->second, index + 1);
+    declareMemorySymbols (body, it->second, index + 1, vc);
   }
 }
 
@@ -403,7 +404,8 @@ void extract_type_and_name (std::set< Variable > &typesAndNames,
     ss << "UINT" << std::dec << symbol->getValue ().getSize ();
     typesAndNames.insert (Variable (ss.str (),
                                     symbol->getTechnicalName (),
-                                    symbol->toString ()));
+                                    symbol->toString (),
+                                    symbol->getGenerationIndex ()));
   }
 }
 

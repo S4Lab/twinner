@@ -15,6 +15,8 @@
 
 #include "Encoder.h"
 
+#include "Variable.h"
+
 namespace edu {
 namespace sharif {
 namespace twinner {
@@ -26,20 +28,6 @@ class InstructionNode;
 namespace encoder {
 
 class ConstraintEncoder;
-
-struct Variable {
-  std::string type;
-  std::string technicalName;
-  std::string name;
-
-  Variable (std::string _type, std::string _technicalName, std::string _name)
-  : type (_type), technicalName (_technicalName), name (_name) {
-  }
-
-  bool operator< (const Variable &v) const {
-    return technicalName < v.technicalName;
-  }
-};
 
 class NodeEncoder : public Encoder {
 private:
@@ -66,7 +54,7 @@ public:
   bool hasAnyChild () const;
 
   virtual void encode (IndentedStream &body, IndentedStream &preamble,
-      int index, bool inMain);
+      int index, bool inMain, const VariableContainer &vc);
 
 protected:
   virtual void finalizeInitialization ();
