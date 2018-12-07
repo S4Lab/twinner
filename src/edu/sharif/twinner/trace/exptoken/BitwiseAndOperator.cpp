@@ -165,32 +165,23 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
           return COMPLETED;
         }
       }
-      switch (stack.size ()) {
-      case 3: // exp == first <secondOp> second
-      {
-        Constant *first = dynamic_cast<Constant *> (*--it);
-        if (first) {
-          const edu::sharif::twinner::trace::cv::ConcreteValue *secondCv =
-              second->getValue ().clone
-              (edu::sharif::twinner::util::max
-               (second->getValue ().getSize (), operand->getSize ()));
-          edu::sharif::twinner::trace::cv::ConcreteValue *firstCv =
-              first->getValue ().clone
-              (edu::sharif::twinner::util::max
-               (first->getValue ().getSize (), operand->getSize ()));
-          // bitwise-and cancels any possible overflow
-          secondOp->apply (*firstCv, *secondCv);
-          delete secondCv;
-          (*firstCv) &= (*operand);
-          delete operand;
-          (*exp) = edu::sharif::twinner::trace::ExpressionImp (firstCv);
-          return COMPLETED;
-        }
-      }
-      case 4:
-        return CAN_NOT_SIMPLIFY;
-      default: // >= 5
-        break;
+      Constant *first = dynamic_cast<Constant *> (*--it);
+      if (first) {
+        const edu::sharif::twinner::trace::cv::ConcreteValue *secondCv =
+            second->getValue ().clone
+            (edu::sharif::twinner::util::max
+             (second->getValue ().getSize (), operand->getSize ()));
+        edu::sharif::twinner::trace::cv::ConcreteValue *firstCv =
+            first->getValue ().clone
+            (edu::sharif::twinner::util::max
+             (first->getValue ().getSize (), operand->getSize ()));
+        // bitwise-and cancels any possible overflow
+        secondOp->apply (*firstCv, *secondCv);
+        delete secondCv;
+        (*firstCv) &= (*operand);
+        delete operand;
+        (*exp) = edu::sharif::twinner::trace::ExpressionImp (firstCv);
+        return COMPLETED;
       }
       if (secondOp->getIdentifier () == Operator::SHIFT_LEFT
           || secondOp->getIdentifier () == Operator::SHIFT_RIGHT) {
@@ -250,7 +241,10 @@ Operator::SimplificationStatus BitwiseAndOperator::deepSimplify (
         delete second;
         return CAN_NOT_SIMPLIFY;
       }
-      Operator *firstOp = dynamic_cast<Operator *> (*--it);
+      if (stack.size () < 5) {
+        return CAN_NOT_SIMPLIFY;
+      }
+      Operator *firstOp = static_cast<Operator *> (*it);
       if (firstOp->getIdentifier () == Operator::BITWISE_AND) {
         Constant *first = dynamic_cast<Constant *> (*--it);
         if (first) {
