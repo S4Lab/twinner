@@ -72,12 +72,8 @@ def load_graph(path):
     G = nx.DiGraph(read_dot(path))
     for n in G.nodes:
         G.nodes[n]["name"] = n
-        G.nodes[n]["out_degree_eq"] = len([v for (u, v) in G.edges if u == n and edge_label_operator(G.edges[(u, v)]) == "=="])
-        G.nodes[n]["out_degree_neq"] = len([v for (u, v) in G.edges if u == n and edge_label_operator(G.edges[(u, v)]) == "!="])
-        G.nodes[n]["out_degree_oth"] = len([v for (u, v) in G.edges if u == n and edge_label_operator(G.edges[(u, v)]) == "other"])
-        G.nodes[n]["in_degree_eq"] = len([u for (u, v) in G.edges if v == n and edge_label_operator(G.edges[(u, v)]) == "=="])
-        G.nodes[n]["in_degree_neq"] = len([u for (u, v) in G.edges if v == n and edge_label_operator(G.edges[(u, v)]) == "!="])
-        G.nodes[n]["in_degree_oth"] = len([u for (u, v) in G.edges if v == n and edge_label_operator(G.edges[(u, v)]) == "other"])
+        G.nodes[n]["out_edges"] = [edge_operator_operands(G.edges[e]) for e in G.edges if e[0] == n]
+        G.nodes[n]["in_edges"] = [edge_operator_operands(G.edges[e]) for e in G.edges if e[1] == n]
     for e in G.edges:
         u, v = e
         G.edges[e]["src"] = G.nodes[u]
@@ -117,16 +113,60 @@ def node_subst_cost(n1, n2):
         cost = 1
     else:
         cost = funcname_matching(r1.group("funcname"), r2.group("funcname"))
-    return cost + degrees_matching_cost(n1, n2)
+    return cost + edges_matching_cost(n1, n2)
 
-def degrees_matching_cost(n1, n2):
-    cout_eq = abs(n1["out_degree_eq"] - n2["out_degree_eq"]) + 1
-    cout_neq = abs(n1["out_degree_neq"] - n2["out_degree_neq"]) + 1
-    cout_oth = abs(n1["out_degree_oth"] - n2["out_degree_oth"]) + 1
-    cin_eq = abs(n1["in_degree_eq"] - n2["in_degree_eq"]) + 1
-    cin_neq = abs(n1["in_degree_neq"] - n2["in_degree_neq"]) + 1
-    cin_oth = abs(n1["in_degree_oth"] - n2["in_degree_oth"]) + 1
-    return cout_eq * cout_neq * cout_oth * cin_eq * cin_neq * cin_oth - 1
+def edges_matching_cost(n1, n2):
+    if len(n1["out_edges"]) <= len(n2["out_edges"]):
+        cout = greedy_edges_matching_cost(n1["out_edges"], n2["out_edges"])
+    else:
+        cout = greedy_edges_matching_cost(n2["out_edges"], n1["out_edges"])
+    if len(n1["in_edges"]) <= len(n2["in_edges"]):
+        cin = greedy_edges_matching_cost(n1["in_edges"], n2["in_edges"])
+    else:
+        cin = greedy_edges_matching_cost(n2["in_edges"], n1["in_edges"])
+    return (cout+1) * (cin+1) - 1
+
+def greedy_edges_matching_cost(el1, el2):
+    """
+    The el1 and el2 are two lists with [(operator:str, operands:set)]
+    format and el1 does not have more items than el2.
+    Starting from first item in el1, summing the minimum cost which
+    can map that item to some item in el2 (and removing the
+    corresponding minimum cost item from el2) while adding 1 for the
+    cost of missing edges in the el1 (since len(el1)<=len(el2)), the
+    resulting cost is returned as a greedy similarity measure among
+    the two lists.
+    """
+    def find_and_extract_min_cost_match(op1, vars1, remaining_edges):
+        min_cost = None
+        min_e = None
+        next_remaining_edges = []
+        for cur_e in remaining_edges:
+            op2, vars2 = cur_e
+            if op1 == "other" and op2 == "other":
+                cost = vars_cost(vars1, vars2)
+            elif op1 == "other" or op2 == "other":
+                cost = 1
+            elif op1 == op2:
+                cost = vars_cost(vars1, vars2)
+            else:
+                cost = 1
+            if min_cost is None or cost < min_cost:
+                min_cost = cost
+                if min_e is not None:
+                    next_remaining_edges.append(min_e)
+                min_e = (op2, vars2)
+            else:
+                next_remaining_edges.append(cur_e)
+        return min_cost, next_remaining_edges
+    cost = 0
+    remaining_edges = el2
+    for op1, vars1 in el1:
+        min_cost, remaining_edges = \
+                find_and_extract_min_cost_match(op1, vars1, remaining_edges)
+        cost = cost + min_cost
+    cost = cost + len(remaining_edges)
+    return cost
 
 def funcname_matching(n1, n2):
     if n1 == "puts":
@@ -155,13 +195,13 @@ def edge_subst_cost(e1, e2):
         cost = 1
     return cost + src_dst_matching_cost(e1, e2)
 
-def edge_label_operator(e):
+def edge_operator_operands(e):
     l = e["label"];
-    prog = re.compile('.*(?P<operator>!=|==)', re.DOTALL)
-    op = prog.match(l)
-    if op is None:
-        return "other"
-    return op.group("operator")
+    prog = re.compile(r'(?<!\w)([renm]\w*|cs|ss|ds|es|fs|gs)(?!\w)')
+    variables = set(m.group(0) for m in prog.finditer(l))
+    m2 = re.match('.*(?P<operator>!=|==)', l, re.DOTALL)
+    operator = "other" if m2 is None else m2.group("operator")
+    return operator, variables
 
 def src_dst_matching_cost(e1, e2):
     c1 = node_subst_cost(e1["src"], e2["src"]) + 1
@@ -172,11 +212,13 @@ def operands_set_cost(l1, l2):
     prog = re.compile(r'(?<!\w)([renm]\w*|cs|ss|ds|es|fs|gs)(?!\w)')
     vars1 = set(m.group(0) for m in prog.finditer(l1))
     vars2 = set(m.group(0) for m in prog.finditer(l2))
+    return vars_cost(vars1, vars2)
+
+def vars_cost(vars1, vars2):
     common_vars = vars1.intersection(vars2)
     if len(vars1) == 0 and len(vars2) == 0:
         return 0
     return (len(vars1) + len(vars2) - 2*len(common_vars)) / (len(vars1) + len(vars2) - len(common_vars))
-
 
 
 if __name__ == "__main__":
