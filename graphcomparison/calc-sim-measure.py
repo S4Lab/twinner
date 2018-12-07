@@ -72,8 +72,12 @@ def load_graph(path):
     G = nx.DiGraph(read_dot(path))
     for n in G.nodes:
         G.nodes[n]["name"] = n
-        G.nodes[n]["out_degree"] = len([v for (u, v) in G.edges if u == n])
-        G.nodes[n]["in_degree"] = len([u for (u, v) in G.edges if v == n])
+        G.nodes[n]["out_degree_eq"] = len([v for (u, v) in G.edges if u == n and edge_label_operator(G.edges[(u, v)]) == "=="])
+        G.nodes[n]["out_degree_neq"] = len([v for (u, v) in G.edges if u == n and edge_label_operator(G.edges[(u, v)]) == "!="])
+        G.nodes[n]["out_degree_oth"] = len([v for (u, v) in G.edges if u == n and edge_label_operator(G.edges[(u, v)]) == "other"])
+        G.nodes[n]["in_degree_eq"] = len([u for (u, v) in G.edges if v == n and edge_label_operator(G.edges[(u, v)]) == "=="])
+        G.nodes[n]["in_degree_neq"] = len([u for (u, v) in G.edges if v == n and edge_label_operator(G.edges[(u, v)]) == "!="])
+        G.nodes[n]["in_degree_oth"] = len([u for (u, v) in G.edges if v == n and edge_label_operator(G.edges[(u, v)]) == "other"])
     for e in G.edges:
         u, v = e
         G.edges[e]["src"] = G.nodes[u]
@@ -116,9 +120,13 @@ def node_subst_cost(n1, n2):
     return cost + degrees_matching_cost(n1, n2)
 
 def degrees_matching_cost(n1, n2):
-    cout = abs(n1["out_degree"] - n2["out_degree"]) + 1
-    cin = abs(n1["in_degree"] - n2["in_degree"]) + 1
-    return cout * cin - 1
+    cout_eq = abs(n1["out_degree_eq"] - n2["out_degree_eq"]) + 1
+    cout_neq = abs(n1["out_degree_neq"] - n2["out_degree_neq"]) + 1
+    cout_oth = abs(n1["out_degree_oth"] - n2["out_degree_oth"]) + 1
+    cin_eq = abs(n1["in_degree_eq"] - n2["in_degree_eq"]) + 1
+    cin_neq = abs(n1["in_degree_neq"] - n2["in_degree_neq"]) + 1
+    cin_oth = abs(n1["in_degree_oth"] - n2["in_degree_oth"]) + 1
+    return cout_eq * cout_neq * cout_oth * cin_eq * cin_neq * cin_oth - 1
 
 def funcname_matching(n1, n2):
     if n1 == "puts":
@@ -146,6 +154,14 @@ def edge_subst_cost(e1, e2):
     else:
         cost = 1
     return cost + src_dst_matching_cost(e1, e2)
+
+def edge_label_operator(e):
+    l = e["label"];
+    prog = re.compile('.*(?P<operator>!=|==)', re.DOTALL)
+    op = prog.match(l)
+    if op is None:
+        return "other"
+    return op.group("operator")
 
 def src_dst_matching_cost(e1, e2):
     c1 = node_subst_cost(e1["src"], e2["src"]) + 1
